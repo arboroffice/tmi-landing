@@ -29,7 +29,7 @@
   body {
     font-family: var(--sans); color: var(--ink); background: var(--bg);
     -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-    line-height: 1.55; overflow-x: hidden;
+    line-height: 1.55; overflow-x: hidden; padding-left: 220px;
   }
   a { color: inherit; text-decoration: none; }
   img { display: block; max-width: 100%; }
@@ -50,43 +50,47 @@
   h3 { font-size: clamp(22px, 2.2vw, 30px); font-weight: 400; }
   p { margin: 0; }
 
-  /* NAV */
-  .nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
-    transition: background 0.3s, border-color 0.3s, color 0.3s;
-    border-bottom: 1px solid transparent;
+  /* SIDE NAV */
+  .side-nav {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
+    background: var(--bg); border-right: 1px solid var(--line);
+    display: flex; flex-direction: column; padding: 36px 24px;
+    z-index: 100;
   }
-  .nav.scrolled {
-    background: rgba(244,241,234,0.85);
-    backdrop-filter: blur(14px) saturate(140%);
-    border-bottom-color: var(--line);
+  .side-brand {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--serif); font-size: 20px; font-weight: 400;
+    letter-spacing: -0.01em; color: var(--ink); margin-bottom: 48px;
   }
-  .nav-inner {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 22px 32px; max-width: 1320px; margin: 0 auto;
-  }
-  .brand { display: flex; align-items: center; gap: 14px; font-family: var(--serif); font-size: 22px; font-weight: 400; letter-spacing: -0.01em; color: var(--ink); }
-  .brand .mark {
-    width: 26px; height: 26px; position: relative; flex: none;
+  .side-brand .mark {
+    width: 24px; height: 24px; position: relative; flex: none;
     background: currentColor; border-radius: 3px; opacity: 0.95;
   }
-  .brand .mark::before {
-    content: ""; position: absolute; left: 4px; right: 4px; top: 4px; height: 2px;
-    background: var(--bg);
+  .side-brand .mark::before { content: ""; position: absolute; left: 3px; right: 3px; top: 3px; height: 2px; background: var(--bg); }
+  .side-brand .mark::after { content: ""; position: absolute; left: 3px; right: 3px; top: 8px; bottom: 3px; background: var(--accent); }
+  .side-nav-links { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .side-nav-links a { font-size: 14px; padding: 10px 12px; border-radius: 6px; color: var(--ink-2); transition: background 0.15s, color 0.15s; }
+  .side-nav-links a:hover { background: var(--bg-alt); color: var(--ink); }
+  .side-nav-links a.active { color: var(--accent); }
+  .side-nav-cta {
+    display: block; text-align: center; padding: 12px 18px; border-radius: 999px;
+    background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 500;
+    transition: background 0.2s; margin-top: 24px;
   }
-  .brand .mark::after {
-    content: ""; position: absolute; left: 4px; right: 4px; top: 9px; bottom: 4px;
-    background: var(--accent);
+  .side-nav-cta:hover { background: var(--accent); color: var(--bg); }
+  .nav-toggle {
+    display: none; position: fixed; top: 16px; left: 16px; z-index: 101;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px; cursor: pointer; flex-direction: column; gap: 5px;
   }
-  .nav-links { display: flex; gap: 36px; font-size: 13px; font-weight: 400; opacity: 0.85; }
-  .nav-links a { transition: opacity 0.2s, color 0.2s; }
-  .nav-links a:hover, .nav-links a.active { opacity: 1; color: var(--accent); }
-  .nav-cta {
-    font-size: 13px; padding: 10px 18px; border-radius: 999px;
-    border: 1px solid currentColor;
-    transition: background 0.2s, color 0.2s;
-  }
-  .nav-cta:hover { background: var(--ink); color: var(--bg); }
+  .nav-toggle span { display: block; width: 20px; height: 2px; background: var(--ink); transition: transform 0.2s, opacity 0.2s; }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--serif); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; color: var(--ink); }
+  .brand .mark { width: 24px; height: 24px; position: relative; flex: none; background: currentColor; border-radius: 3px; opacity: 0.95; }
+  .brand .mark::before { content: ""; position: absolute; left: 3px; right: 3px; top: 3px; height: 2px; background: var(--bg-alt); }
+  .brand .mark::after { content: ""; position: absolute; left: 3px; right: 3px; top: 8px; bottom: 3px; background: var(--accent); }
 
   /* HERO */
   .news-hero {
@@ -341,8 +345,11 @@
     .featured-photo { min-height: 320px; }
     .stories-grid { grid-template-columns: repeat(2, 1fr); gap: 36px 24px; }
     .newsletter-grid { grid-template-columns: 1fr; gap: 40px; align-items: start; }
-    .foot-grid { grid-template-columns: 1fr 1fr; }
-    .nav-links { display: none; }
+    .foot-grid { grid-template-columns: 1fr; }
+    body { padding-left: 0; }
+    .side-nav { transform: translateX(-100%); transition: transform 0.3s ease; }
+    .side-nav.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
+    .nav-toggle { display: flex; }
   }
   @media (max-width: 640px) {
     .news-hero { padding: 140px 0 56px; }
@@ -354,23 +361,22 @@
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="nav" id="nav">
-  <div class="nav-inner">
-    <a href="stratum.html" class="brand">
-      <span class="mark"></span>
-      <span>TMI</span>
-    </a>
-    <div class="nav-links">
-      <a href="stratum.html#essay">The work</a>
-      <a href="stratum.html#problem">The problem</a>
-      <a href="stratum.html#what">What we do</a>
-      <a href="stratum.html#built">Built for</a>
-      <a href="news.html" class="active">News</a>
-    </div>
-    <a href="stratum.html#cta" class="nav-cta">Talk to us →</a>
+<!-- SIDE NAV -->
+<nav class="side-nav" id="side-nav">
+  <a href="stratum.html" class="side-brand">
+    <span class="mark"></span>
+    <span>TMI</span>
+  </a>
+  <div class="side-nav-links">
+    <a href="stratum.html">Home</a>
+    <a href="news.html" class="active">News</a>
+    <a href="stratum.html#cta">Contact</a>
   </div>
+  <a href="stratum.html#cta" class="side-nav-cta">Talk to us →</a>
 </nav>
+<button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+  <span></span><span></span><span></span>
+</button>
 
 <!-- HERO -->
 <section class="news-hero" data-screen-label="01 News Hero">
@@ -439,7 +445,7 @@
     </div>
     <div class="stories-grid">
 
-      <a class="story reveal" href="#">
+      <a class="story reveal" href="article-oil-gas-software.html">
         <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1582711012124-a56cf82307a0?auto=format&fit=crop&w=1400&q=80')"></div>
         <div class="meta"><span class="cat">Oil &amp; Gas</span><span>8 min</span></div>
         <h3>Why the next decade of oil &amp; gas <em>will be won in software</em>.</h3>
@@ -447,7 +453,7 @@
         <span class="read">Read <span>→</span></span>
       </a>
 
-      <a class="story reveal delay-1" href="#">
+      <a class="story reveal delay-1" href="article-foreman.html">
         <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1400&q=80')"></div>
         <div class="meta"><span class="cat">The Trades</span><span>6 min</span></div>
         <h3>The foreman is still the system.</h3>
@@ -455,7 +461,7 @@
         <span class="read">Read <span>→</span></span>
       </a>
 
-      <a class="story reveal delay-2" href="#">
+      <a class="story reveal delay-2" href="article-predictive-maintenance.html">
         <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=1400&q=80')"></div>
         <div class="meta"><span class="cat">Oil &amp; Gas</span><span>10 min</span></div>
         <h3>Predictive maintenance was always a lie. Until now.</h3>
@@ -463,7 +469,7 @@
         <span class="read">Read <span>→</span></span>
       </a>
 
-      <a class="story reveal" href="#">
+      <a class="story reveal" href="article-electrician.html">
         <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&w=1400&q=80')"></div>
         <div class="meta"><span class="cat">The Trades</span><span>5 min</span></div>
         <h3>What an electrician actually needs from software.</h3>
@@ -471,7 +477,7 @@
         <span class="read">Read <span>→</span></span>
       </a>
 
-      <a class="story reveal delay-1" href="#">
+      <a class="story reveal delay-1" href="article-15-billion.html">
         <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1400&q=80')"></div>
         <div class="meta"><span class="cat">Oil &amp; Gas</span><span>9 min</span></div>
         <h3>$15 billion, and the window is closing.</h3>
@@ -479,7 +485,7 @@
         <span class="read">Read <span>→</span></span>
       </a>
 
-      <a class="story reveal delay-2" href="#">
+      <a class="story reveal delay-2" href="article-estimators.html">
         <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1581092335397-9583eb92d232?auto=format&fit=crop&w=1400&q=80')"></div>
         <div class="meta"><span class="cat">The Trades</span><span>7 min</span></div>
         <h3>Stop hiring estimators. Start hiring operators.</h3>
@@ -523,23 +529,10 @@
         <div class="foot-tagline">AI infrastructure for oil &amp; gas and the trades.</div>
       </div>
       <div class="foot-col">
-        <h5>Product</h5>
-        <a href="stratum.html#essay">The work</a>
-        <a href="stratum.html#what">What we do &amp; how it works</a>
-        <a href="stratum.html#shifts">What changes</a>
-        <a href="stratum.html#built">Built for</a>
-      </div>
-      <div class="foot-col">
-        <h5>Company</h5>
-        <a href="stratum.html#problem">The shift</a>
+        <h5>Pages</h5>
+        <a href="stratum.html">Home</a>
         <a href="news.html">News &amp; media</a>
         <a href="stratum.html#cta">Contact</a>
-      </div>
-      <div class="foot-col">
-        <h5>Posture</h5>
-        <a href="#">SOC 2-aligned</a>
-        <a href="#">Audit-ready</a>
-        <a href="#">Privacy</a>
       </div>
     </div>
     <div class="foot-bottom">
@@ -550,17 +543,23 @@
 </footer>
 
 <script>
-  // Reveal on scroll
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-  // Nav scroll state
-  const nav = document.getElementById('nav');
-  function updateNav() { nav.classList.toggle('scrolled', window.scrollY > 24); }
-  window.addEventListener('scroll', updateNav, { passive: true });
-  updateNav();
+  const navToggle = document.getElementById('nav-toggle');
+  const sideNav = document.getElementById('side-nav');
+  navToggle.addEventListener('click', () => {
+    navToggle.classList.toggle('open');
+    sideNav.classList.toggle('open');
+  });
+  sideNav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      navToggle.classList.remove('open');
+      sideNav.classList.remove('open');
+    });
+  });
 </script>
 
 </body>

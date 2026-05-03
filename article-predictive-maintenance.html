@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Predictive maintenance was always a lie. Until now. — TMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f4f1ea; --bg-alt: #ebe7dc; --bg-deep: #0a0a0a;
+    --ink: #111111; --ink-2: #2a2a2a; --muted: #6b6b66;
+    --line: #d8d3c5; --line-strong: #b9b3a3;
+    --accent: #c87533; --accent-2: #8e3b13;
+    --serif: "Fraunces","Times New Roman",serif;
+    --sans: "Inter",system-ui,sans-serif;
+    --mono: "JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;} html,body{margin:0;padding:0;} html{scroll-behavior:smooth;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;line-height:1.55;overflow-x:hidden;padding-left:220px;}
+  a{color:inherit;text-decoration:none;} img{display:block;max-width:100%;}
+  ::selection{background:var(--ink);color:var(--bg);}
+  h1,h2,h3,h4{font-family:var(--serif);font-weight:400;letter-spacing:-0.02em;line-height:1.05;margin:0;}
+  p{margin:0;}
+  /* SIDE NAV */
+  .side-nav {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
+    background: var(--bg); border-right: 1px solid var(--line);
+    display: flex; flex-direction: column; padding: 36px 24px; z-index: 100;
+  }
+  .side-brand {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--serif); font-size: 20px; font-weight: 400;
+    letter-spacing: -0.01em; color: var(--ink); margin-bottom: 48px;
+  }
+  .side-brand .mark { width: 24px; height: 24px; position: relative; flex: none; background: currentColor; border-radius: 3px; opacity: 0.95; }
+  .side-brand .mark::before { content: ""; position: absolute; left: 3px; right: 3px; top: 3px; height: 2px; background: var(--bg); }
+  .side-brand .mark::after { content: ""; position: absolute; left: 3px; right: 3px; top: 8px; bottom: 3px; background: var(--accent); }
+  .side-nav-links { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .side-nav-links a { font-size: 14px; padding: 10px 12px; border-radius: 6px; color: var(--ink-2); transition: background 0.15s, color 0.15s; }
+  .side-nav-links a:hover { background: var(--bg-alt); color: var(--ink); }
+  .side-nav-links a.active { color: var(--accent); }
+  .side-nav-cta { display: block; text-align: center; padding: 12px 18px; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 500; transition: background 0.2s; margin-top: 24px; }
+  .side-nav-cta:hover { background: var(--accent); color: var(--bg); }
+  .nav-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 101; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; cursor: pointer; flex-direction: column; gap: 5px; }
+  .nav-toggle span { display: block; width: 20px; height: 2px; background: var(--ink); transition: transform 0.2s, opacity 0.2s; }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--serif); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; color: var(--ink); }
+  .brand .mark { width: 24px; height: 24px; position: relative; flex: none; background: currentColor; border-radius: 3px; opacity: 0.95; }
+  .brand .mark::before { content: ""; position: absolute; left: 3px; right: 3px; top: 3px; height: 2px; background: var(--bg-alt); }
+  .brand .mark::after { content: ""; position: absolute; left: 3px; right: 3px; top: 8px; bottom: 3px; background: var(--accent); }
+  .article-hero{padding:180px 0 72px;border-bottom:1px solid var(--line);}
+  .article-back{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:36px;display:inline-flex;align-items:center;gap:8px;transition:color 0.2s,gap 0.2s;}
+  .article-back:hover{color:var(--accent);gap:12px;}
+  .article-meta{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);display:flex;gap:20px;align-items:center;margin-bottom:28px;}
+  .article-meta .cat{color:var(--accent);}
+  .article-title{font-family:var(--serif);font-size:clamp(40px,5vw,76px);font-weight:350;line-height:1.05;letter-spacing:-0.02em;max-width:20ch;margin:0 0 32px;}
+  .article-title em{font-style:italic;color:var(--accent-2);}
+  .article-deck{font-family:var(--serif);font-size:clamp(18px,1.5vw,22px);font-weight:350;line-height:1.5;color:var(--ink-2);max-width:56ch;}
+  .container-article{max-width:760px;margin:0 auto;padding:0 32px;}
+  .container{max-width:1320px;margin:0 auto;padding:0 32px;}
+  .article-cover{width:100%;height:clamp(320px,45vw,560px);background-size:cover;background-position:center;margin:64px 0;border-radius:2px;}
+  .article-body{font-family:var(--serif);font-size:19px;font-weight:350;line-height:1.75;color:var(--ink-2);}
+  .article-body p{margin-bottom:1.6em;}
+  .article-body h2{font-family:var(--serif);font-size:clamp(24px,2.2vw,34px);font-weight:400;letter-spacing:-0.02em;line-height:1.15;color:var(--ink);margin:2.8em 0 0.8em;}
+  .article-body blockquote{border-left:3px solid var(--accent);margin:2.5em 0;padding:0 0 0 28px;font-size:clamp(22px,2vw,28px);font-style:italic;color:var(--ink);font-weight:350;line-height:1.35;}
+  .article-body .callout{background:var(--bg-alt);border-radius:4px;padding:28px 32px;margin:2.5em 0;font-family:var(--sans);font-size:15px;line-height:1.6;color:var(--ink-2);}
+  .article-body .callout strong{font-weight:600;color:var(--ink);}
+  .article-end{padding:56px 0;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-top:48px;}
+  .article-end .byline{font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+  .article-end .back-link{font-size:13px;padding:10px 20px;border:1px solid var(--line-strong);border-radius:999px;font-family:var(--sans);color:var(--ink);transition:background 0.2s,color 0.2s,border-color 0.2s;}
+  .article-end .back-link:hover{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+  .read-next{background:var(--bg-alt);padding:80px 0;border-top:1px solid var(--line);}
+  .read-next h3{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:36px;}
+  .read-next-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:32px;}
+  .next-card{display:flex;flex-direction:column;gap:12px;}
+  .next-card .photo{height:200px;background-size:cover;background-position:center;border-radius:2px;}
+  .next-card .meta{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);display:flex;gap:14px;}
+  .next-card .meta .cat{color:var(--accent);}
+  .next-card h4{font-family:var(--serif);font-size:22px;font-weight:400;letter-spacing:-0.01em;line-height:1.2;}
+  .next-card .read{font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink);display:inline-flex;align-items:center;gap:8px;transition:gap 0.2s,color 0.2s;}
+  .next-card:hover .read{gap:12px;color:var(--accent);}
+  footer{background:var(--bg-alt);padding:96px 0 40px;}
+  .foot-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:48px;border-bottom:1px solid var(--line);padding-bottom:56px;margin-bottom:28px;}
+  .foot-tagline{font-family:var(--serif);font-size:18px;font-weight:350;margin-top:16px;color:var(--ink-2);max-width:28ch;}
+  .foot-col h5{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0 0 18px;}
+  .foot-col a{display:block;padding:6px 0;font-size:14px;transition:color 0.2s;}
+  .foot-col a:hover{color:var(--accent);}
+  .foot-bottom{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.8s ease,transform 0.8s cubic-bezier(.2,.7,.2,1);}
+  .reveal.in{opacity:1;transform:translateY(0);}
+  @media(max-width:1024px){.read-next-grid{grid-template-columns:1fr;}.foot-grid{grid-template-columns:1fr;} body{padding-left:0;} .side-nav{transform:translateX(-100%);transition:transform 0.3s ease;} .side-nav.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,0.1);} .nav-toggle{display:flex;}}
+  @media(max-width:640px){.article-hero{padding:140px 0 56px;}}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="stratum.html" class="brand"><span class="mark"></span><span>TMI</span></a>
+    <div class="nav-links">
+      <a href="stratum.html#essay">The work</a>
+      <a href="stratum.html#problem">The problem</a>
+      <a href="stratum.html#what">What we do</a>
+      <a href="stratum.html#built">Built for</a>
+      <a href="news.html" class="active">News</a>
+    </div>
+    <a href="stratum.html#cta" class="nav-cta">Talk to us →</a>
+  </div>
+</nav>
+
+<section class="article-hero">
+  <div class="container-article">
+    <a href="news.html" class="article-back">← Back to Field Notes</a>
+    <div class="article-meta">
+      <span class="cat">Oil &amp; Gas</span>
+      <span>10 min read</span>
+      <span>Mar 04, 2026</span>
+    </div>
+    <h1 class="article-title">Predictive maintenance was always a lie. <em>Until now.</em></h1>
+    <p class="article-deck">A decade of dashboards trained operators to ignore alerts. Agentic systems don't ask anyone to look — they act, and tell you what they did.</p>
+  </div>
+</section>
+
+<div class="container-article">
+  <div class="article-cover" style="background-image:url('https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=2000&q=80')"></div>
+
+  <div class="article-body reveal">
+
+    <p>For over a decade, "predictive maintenance" was the most oversold phrase in industrial operations. Not because the idea was wrong — the idea was right. Because the execution was fundamentally broken in a way that nobody wanted to admit: the systems generated information but didn't generate decisions.</p>
+
+    <p>Sensors on rotating equipment, vibration signatures fed into dashboards, alerts sent to whoever was on shift. In theory, you'd catch the failure before it happened. In practice, you'd get so many alerts that the crew learned, rationally and correctly, to stop treating them as urgent.</p>
+
+    <p>The problem wasn't the data. The problem was the gap between the data and the action — a gap that required a human to close, on a timeline that rarely matched the urgency of what the data was actually saying.</p>
+
+    <h2>The alert fatigue problem</h2>
+
+    <p>A mid-size Permian operator with 150 producing wells can generate thousands of alerts per day from production monitoring, pressure sensors, and rod pump controllers. The production technician on duty can meaningfully investigate maybe thirty of them. The rest get triaged, downgraded, or ignored based on who's watching the board and what else is happening on the shift.</p>
+
+    <p>When a real precursor event arrives — a well approaching failure, a compressor developing the early signature of a catastrophic bearing fault — it looks exactly like the other 2,000 items in the queue. The system predicted the problem. Nobody had the bandwidth to catch it in time.</p>
+
+    <blockquote>"We had all the data. We still lost the unit. The data just didn't tell us anything we could actually act on by the time it mattered."</blockquote>
+
+    <p>This is not an operations failure. It's an architecture failure. Predictive maintenance systems were designed by software engineers who assumed operators could consume unlimited alerts. The operators adapted, reasonably, by building their own informal filter — a mental model of which alerts usually meant something and which ones didn't. That mental model was almost always wrong about the edge cases, which is exactly where the expensive failures live.</p>
+
+    <h2>The difference agentic systems make</h2>
+
+    <p>Agentic AI doesn't alert you to a problem. It investigates one. When a compressor's vibration pattern begins to shift, an agent can cross-reference the pattern against historical failures on that unit, check whether scheduled maintenance has been deferred, pull weather data to evaluate ambient temperature contribution, assess production impact if the unit goes down, and draft a prioritized work order — all before the technician has finished their coffee.</p>
+
+    <p>That's not a dashboard improvement. That's a new tier in the operations architecture: an analyst that works in the background, never sleeps, never gets distracted, and has read every maintenance log, every repair ticket, every failure report the company has ever generated.</p>
+
+    <div class="callout">
+      <strong>What changes operationally:</strong> The technician's job shifts from "review alerts and decide which ones to investigate" to "review agent-generated recommendations and decide which ones to act on." The cognitive load is the same, but the quality of information is radically different. The agent has already done the investigation; the human is reviewing conclusions, not raw signals.
+    </div>
+
+    <p>The agents that are deployed well don't just flag problems — they close loops. Work order created, scheduled, completed, outcome logged, model updated. Each repair cycle makes the system better at predicting the next one. The compounding effect is real: a system that's been running on your assets for two years is categorically better than one running for six months, because it's seen failure modes that only occur that often.</p>
+
+    <h2>What actually changes in operations</h2>
+
+    <p>The units that benefit most from agentic maintenance aren't the ones you're already watching closely. They're the ones that have never made anyone nervous — the wells producing steadily for six years, the compressor that hasn't failed in three. The ones where there's no institutional memory of anything going wrong, so there's no mental flag on them in the morning meeting.</p>
+
+    <p>Agentic surveillance watches everything with equal attention. It catches the quiet failures that nobody was worried about, because the pattern that precedes them is subtle and only visible across a dataset larger than any human maintains.</p>
+
+    <p>The result is a maintenance program that operates at a different level than either reactive or predictive. Not "we fixed it after it broke." Not "we got an alert and decided whether to act." But proactive: "the system detected a drift pattern two weeks before it would have presented as an anomaly, scheduled the inspection, and the crew found the problem during a planned window."</p>
+
+    <h2>The traceability requirement</h2>
+
+    <p>Every action an AI system recommends on a producing asset must be traceable. Which data triggered the recommendation. What reasoning the system applied. What alternatives were considered. This isn't just good engineering practice — it's a regulatory trajectory in production environments, and operators who build traceability in from the start will not have to retrofit it when it becomes required.</p>
+
+    <p>When the system recommends pulling a rod string and it turns out to be the right call, you want to know why — not to celebrate, but to validate the reasoning chain and strengthen it. When it turns out to be wrong, you need the same information, but the stakes are higher. The audit trail is how you improve the model, how you satisfy the regulator, and how you maintain the operator's trust in the system over time.</p>
+
+    <p>Predictive maintenance was a lie when it was just data with no action layer. It stops being a lie when the action layer can reason about the data the same way your best engineer would — at 3am, on every well simultaneously, with a full memory of everything that's ever happened on that equipment.</p>
+
+    <div class="article-end">
+      <div class="byline">TMI Field Notes · Oil &amp; Gas</div>
+      <a href="news.html" class="back-link">← All stories</a>
+    </div>
+  </div>
+</div>
+
+<div class="read-next">
+  <div class="container">
+    <h3>Read next</h3>
+    <div class="read-next-grid">
+      <a class="next-card" href="article-oil-gas-software.html">
+        <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1582711012124-a56cf82307a0?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="meta"><span class="cat">Oil &amp; Gas</span><span>8 min</span></div>
+        <h4>Why the next decade of oil &amp; gas will be won in software.</h4>
+        <span class="read">Read <span>→</span></span>
+      </a>
+      <a class="next-card" href="article-15-billion.html">
+        <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="meta"><span class="cat">Oil &amp; Gas</span><span>9 min</span></div>
+        <h4>$15 billion, and the window is closing.</h4>
+        <span class="read">Read <span>→</span></span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a href="stratum.html" class="brand" style="color:var(--ink);"><span class="mark"></span><span>TMI</span></a>
+        <div class="foot-tagline">AI infrastructure for oil &amp; gas and the trades.</div>
+      </div>
+      <div class="foot-col">
+        <h5>Pages</h5>
+        <a href="stratum.html">Home</a>
+        <a href="news.html">News &amp; media</a>
+        <a href="stratum.html#cta">Contact</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&#x00A9; 2026 TMI.</span>
+      <span>Built for the field</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  const navToggle = document.getElementById('nav-toggle');
+  const sideNav = document.getElementById('side-nav');
+  navToggle.addEventListener('click', () => {
+    navToggle.classList.toggle('open');
+    sideNav.classList.toggle('open');
+  });
+  sideNav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      navToggle.classList.remove('open');
+      sideNav.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>
