@@ -992,6 +992,33 @@
     font-weight: 500;
   }
 
+  .phase-caps { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .phase-caps .pc {
+    font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.45;
+    padding-left: 16px; position: relative;
+  }
+  .phase-caps .pc::before { content: "—"; position: absolute; left: 0; color: var(--accent); }
+
+  /* CTA FORM */
+  .cta-form { display: flex; flex-direction: column; gap: 14px; }
+  .cta-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cta-form input, .cta-form textarea {
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px; color: #fff; font-family: var(--sans); font-size: 15px;
+    padding: 14px 18px; width: 100%; transition: border-color 0.2s, background 0.2s;
+  }
+  .cta-form input:focus, .cta-form textarea:focus {
+    outline: none; border-color: var(--accent); background: rgba(255,255,255,0.1);
+  }
+  .cta-form input::placeholder, .cta-form textarea::placeholder { color: rgba(255,255,255,0.38); }
+  .cta-form textarea { min-height: 110px; resize: vertical; }
+  .cta-form button {
+    background: var(--accent); color: #fff; border: 0; padding: 14px 28px; border-radius: 999px;
+    font-family: var(--sans); font-size: 14px; font-weight: 500; cursor: pointer;
+    transition: background 0.2s; align-self: flex-start; margin-top: 4px;
+  }
+  .cta-form button:hover { background: #fff; color: var(--ink); }
+
   /* FOOTER */
   footer { background: var(--bg-alt); padding: 96px 0 40px; }
   .foot-grid {
@@ -1079,7 +1106,7 @@
 <!-- SIDE NAV -->
 <nav class="side-nav" id="side-nav">
   <a href="stratum.html" class="side-brand">
-    <span class="mark"></span>
+    <svg width="28" height="28" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex:none"><circle cx="100" cy="100" r="90" stroke="currentColor" stroke-width="5" fill="none" stroke-dasharray="489 566" stroke-dashoffset="-38" stroke-linecap="round"/><g fill="currentColor"><rect x="30" y="65" width="15" height="93"/><rect x="20" y="150" width="35" height="11"/><polygon points="45,65 59,65 108,109 94,109"/><polygon points="141,65 155,65 106,109 92,109"/><rect x="141" y="65" width="15" height="93"/><rect x="131" y="150" width="35" height="11"/><rect x="147" y="65" width="28" height="10"/><rect x="153" y="75" width="13" height="83"/><rect x="147" y="150" width="28" height="11"/><rect x="22" y="43" width="156" height="21"/><rect x="16" y="38" width="32" height="31"/><rect x="152" y="38" width="32" height="31"/><rect x="87" y="43" width="26" height="125"/><rect x="74" y="157" width="52" height="12"/></g></svg>
     <span>TMI</span>
   </a>
   <div class="side-nav-links">
@@ -1231,37 +1258,16 @@
       </div>
     </div>
 
-    <div class="eyebrow reveal" style="color: rgba(255,255,255,0.55); margin-bottom: 22px;">The capabilities</div>
-    <div class="cap-row reveal">
-      <div class="cap">
-        <div class="n">01</div>
-        <h4>Connect your systems.</h4>
-        <p>Existing tools stay in place. We build the connective layer underneath so your data — field to office — flows to one place for the first time.</p>
-      </div>
-      <div class="cap">
-        <div class="n">02</div>
-        <h4>Agentic systems that never sleep.</h4>
-        <p>A dispatcher that schedules itself. A maintenance system that reads your equipment before your crew does. A reporter that closes its own loop. The operational work runs in the background; your people handle the decisions that matter.</p>
-      </div>
-      <div class="cap">
-        <div class="n">03</div>
-        <h4>Monitor in real time.</h4>
-        <p>Continuous visibility across every asset, every site, every crew. Anomalies surface instantly. Problems get caught early, not after the fact.</p>
-      </div>
-      <div class="cap">
-        <div class="n">04</div>
-        <h4>Grow without limits.</h4>
-        <p>A connected operation can take on more work, reduce waste, and unlock revenue streams that fragmented systems simply cannot capture.</p>
-      </div>
-    </div>
-
-    <div class="eyebrow reveal" style="color: rgba(255,255,255,0.55); margin-bottom: 22px;">The three phases</div>
     <div class="phases reveal">
       <div class="phase">
         <div class="label">Phase 01 · Deploy</div>
         <div class="num">01</div>
         <h3>Your systems stop being separate things.</h3>
-        <p>Connect what's already there. Structure the data underneath. Automate the work that nobody should be doing twice. </p>
+        <p>Connect what’s already there. Structure the data underneath. Automate the work that nobody should be doing twice.</p>
+        <div class="phase-caps">
+          <div class="pc">Existing tools stay in place — we build the connective layer underneath</div>
+          <div class="pc">Field-to-office data flows to one place for the first time</div>
+        </div>
         <div class="pill">
           <div class="v">+15%</div>
           <div class="l">Productivity · immediate</div>
@@ -1271,7 +1277,11 @@
         <div class="label">Phase 02 · Reshape</div>
         <div class="num">02</div>
         <h3>Agentic systems take the operational load.</h3>
-        <p>Agentic systems take over scheduling, maintenance planning, safety monitoring, and field coordination. Downtime drops. Incident response improves dramatically. Days compress into hours.</p>
+        <p>Scheduling, maintenance planning, safety monitoring, field coordination. Downtime drops. Incident response improves. Days compress into hours.</p>
+        <div class="phase-caps">
+          <div class="pc">A maintenance system that reads your equipment before your crew does</div>
+          <div class="pc">Continuous visibility across every asset — anomalies surface instantly</div>
+        </div>
         <div class="pill">
           <div class="v">Days → Hours</div>
           <div class="l">Process compression</div>
@@ -1281,7 +1291,11 @@
         <div class="label">Phase 03 · Invent</div>
         <div class="num">03</div>
         <h3>The shape of the work changes.</h3>
-        <p>New revenue streams, predictive operational tools, areas running autonomously with human oversight. </p>
+        <p>New revenue streams, predictive operational tools, areas running autonomously with human oversight. The operation gets smarter the longer it runs.</p>
+        <div class="phase-caps">
+          <div class="pc">Unlock revenue streams fragmented stacks can’t capture</div>
+          <div class="pc">Open APIs, no lock-in — your team extends the system, not just operates it</div>
+        </div>
         <div class="pill">
           <div class="v">30–70%</div>
           <div class="l">Profit uplift · 5 yr horizon</div>
@@ -1767,16 +1781,20 @@
         <p class="lede">
           Bring us your stack and the bottleneck slowing you down. We'll show you exactly how TMI connects your operation, protects your people, and sets you up to grow without limits.
         </p>
-        <div class="cta-actions">
-          <a href="mailto:hello@stratum.energy" class="btn btn-light">Book a working session <span class="arrow">→</span></a>
-          <a href="#what" class="btn btn-ghost-light">See what we do</a>
-        </div>
       </div>
       <div class="cta-side reveal delay-1">
-        <div class="label">The thesis</div>
-        The trades run the world. The people doing that work still manage operations on software that was never built for them — disconnected, manual, one failure away from a serious incident.
-        <br/><br/>
-        TMI is the connective layer underneath. Built for the 80% of work that doesn't happen at a desk.
+        <form class="cta-form" action="https://formsubmit.co/mialouviere@gmail.com" method="POST">
+          <input type="hidden" name="_subject" value="New inquiry from TMI website">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_template" value="table">
+          <div class="form-row">
+            <input type="text" name="name" placeholder="Your name" required>
+            <input type="text" name="company" placeholder="Company">
+          </div>
+          <input type="email" name="email" placeholder="Email address" required>
+          <textarea name="message" placeholder="Tell us what you're running and what's slowing you down."></textarea>
+          <button type="submit">Send it →</button>
+        </form>
       </div>
     </div>
   </div>
