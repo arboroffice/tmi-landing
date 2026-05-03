@@ -124,7 +124,7 @@
   }
   .hero-photo {
     position: absolute; inset: 0;
-    background-image: url('https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=2400&q=80');
+    background-image: url('https://images.pexels.com/photos/10407689/pexels-photo-10407689.jpeg?auto=compress&cs=tinysrgb&w=2400&q=80');
     background-size: cover; background-position: center;
     transform: scale(1.05);
     transition: transform 1.4s cubic-bezier(.2,.7,.2,1);
@@ -304,19 +304,25 @@
   /* PROBLEM grid (2x2) */
   .problem-bg { background: var(--bg-alt); }
   .pressures {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 0;
+    display: flex; flex-direction: column;
     border-top: 1px solid var(--line-strong);
-    border-left: 1px solid var(--line-strong);
   }
   .pressure {
-    padding: 48px 40px 56px;
-    border-right: 1px solid var(--line-strong);
-    border-bottom: 1px solid var(--line-strong);
-    background: var(--bg-alt);
-    position: relative;
-    transition: background 0.3s;
+    display: grid; grid-template-columns: 42% 1fr;
+    min-height: 400px; border-bottom: 1px solid var(--line-strong);
+    overflow: hidden;
   }
-  .pressure:hover { background: #fff; }
+  .pressure:nth-child(even) { grid-template-columns: 1fr 42%; }
+  .pressure:nth-child(even) .pressure-img { order: 2; }
+  .pressure-img {
+    background-size: cover; background-position: center;
+  }
+  .pressure-text {
+    padding: 56px 64px; background: var(--bg-alt);
+    transition: background 0.3s; display: flex;
+    flex-direction: column; justify-content: center;
+  }
+  .pressure:hover .pressure-text { background: #fff; }
   .pressure .num {
     font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
     color: var(--accent-2); margin-bottom: 28px;
@@ -964,7 +970,7 @@
   }
   .cta-bg {
     position: absolute; inset: 0;
-    background-image: url('https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=2400&q=80');
+    background-image: url('https://images.pexels.com/photos/35072831/pexels-photo-35072831.jpeg?auto=compress&cs=tinysrgb&w=2400&q=80');
     background-size: cover; background-position: center;
     opacity: 0.18;
   }
@@ -1066,7 +1072,10 @@
     .t-6 { grid-column: span 12; grid-row: span 3; }
     .t-7 { grid-column: span 6; grid-row: span 3; }
     .t-8 { grid-column: span 6; grid-row: span 3; }
-    .pressures { grid-template-columns: 1fr; }
+    .pressure { grid-template-columns: 1fr !important; min-height: auto; }
+    .pressure-img { min-height: 240px; }
+    .pressure:nth-child(even) .pressure-img { order: 0; }
+    .pressure-text { padding: 40px 28px; }
     .uc-grid { grid-template-columns: repeat(2, 1fr); }
     .shifts { grid-template-columns: 1fr; }
     .shift { padding: 36px 28px 40px; }
@@ -1160,19 +1169,19 @@
   <div class="container">
     <div class="essay-gallery reveal">
       <div class="essay-tile t-1">
-        <div class="img" style="background-image:url('https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=2000&q=80')"></div>
+        <div class="img" style="background-image:url('https://images.pexels.com/photos/10407689/pexels-photo-10407689.jpeg?auto=compress&cs=tinysrgb&w=2000&q=80')"></div>
         <div class="meta"><div class="trade">Oil &amp; Gas</div><div class="cap">Refinery, night shift. The work doesn't stop for a meeting.</div></div>
       </div>
       <div class="essay-tile t-2">
-        <div class="img" style="background-image:url('https://images.unsplash.com/photo-1485531865381-286666aa80a9?auto=format&fit=crop&w=1600&q=80')"></div>
+        <div class="img" style="background-image:url('https://images.pexels.com/photos/29976478/pexels-photo-29976478.jpeg?auto=compress&cs=tinysrgb&w=1600&q=80')"></div>
         <div class="meta"><div class="trade">Welding &amp; Fabrication</div><div class="cap">Sparks fly while the spec sheet sits on a desk three counties away.</div></div>
       </div>
       <div class="essay-tile t-3">
-        <div class="img" style="background-image:url('https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=1600&q=80')"></div>
+        <div class="img" style="background-image:url('https://images.pexels.com/photos/35072831/pexels-photo-35072831.jpeg?auto=compress&cs=tinysrgb&w=1600&q=80')"></div>
         <div class="meta"><div class="trade">Heavy Equipment</div><div class="cap">The fault code was almost always there. Nobody was looking at it.</div></div>
       </div>
       <div class="essay-tile t-4">
-        <div class="img" style="background-image:url('https://images.unsplash.com/photo-1581094288338-2314dddb7ece?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="img" style="background-image:url('https://images.pexels.com/photos/28950842/pexels-photo-28950842.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
         <div class="meta"><div class="trade">Electrical</div><div class="cap">One panel. Fifty decisions a minute. No signal.</div></div>
       </div>
       <div class="essay-tile t-5">
@@ -1222,25 +1231,112 @@
 
     <div class="pressures reveal">
       <div class="pressure">
-        <div class="num">01 / Data</div>
-        <h3>Scattered.</h3>
-        <p>Field logs, dispatch, billing, maintenance - all siloed. Your team hunts for information that should take seconds to find.</p>
+        <div class="pressure-img" style="background-image:url('https://images.pexels.com/photos/10376021/pexels-photo-10376021.jpeg?auto=compress&cs=tinysrgb&w=1200&q=80')"></div>
+        <div class="pressure-text">
+          <div class="num">01 / Data</div>
+          <h3>Scattered.</h3>
+          <p>Field logs, dispatch, billing, maintenance - all siloed. Your team hunts for information that should take seconds to find.</p>
+        </div>
       </div>
       <div class="pressure">
-        <div class="num">02 / People</div>
-        <h3>Your best workers buried in paperwork.</h3>
-        <p>They lose hours a day to manual entry. That's not what you hired them for. It's pulling attention from what keeps people safe.</p>
+        <div class="pressure-img" style="background-image:url('https://images.pexels.com/photos/8293666/pexels-photo-8293666.jpeg?auto=compress&cs=tinysrgb&w=1200&q=80')"></div>
+        <div class="pressure-text">
+          <div class="num">02 / People</div>
+          <h3>Your best workers buried in paperwork.</h3>
+          <p>They lose hours a day to manual entry. That's not what you hired them for. It's pulling attention from what keeps people safe.</p>
+        </div>
       </div>
       <div class="pressure">
-        <div class="num">03 / Risk</div>
-        <h3>Incidents that should never happen.</h3>
-        <p>The warning signs were almost always in the data. They just weren't connected.</p>
+        <div class="pressure-img" style="background-image:url('https://images.pexels.com/photos/2760241/pexels-photo-2760241.jpeg?auto=compress&cs=tinysrgb&w=1200&q=80')"></div>
+        <div class="pressure-text">
+          <div class="num">03 / Risk</div>
+          <h3>Incidents that should never happen.</h3>
+          <p>The warning signs were almost always in the data. They just weren't connected.</p>
+        </div>
       </div>
       <div class="pressure">
-        <div class="num">04 / Software</div>
-        <h3>Legacy systems holding your data hostage.</h3>
-        <p>Every new tool gets bolted on. The stack gets messier every year and replacing it feels impossible.</p>
+        <div class="pressure-img" style="background-image:url('https://images.pexels.com/photos/8720260/pexels-photo-8720260.jpeg?auto=compress&cs=tinysrgb&w=1200&q=80')"></div>
+        <div class="pressure-text">
+          <div class="num">04 / Software</div>
+          <h3>Legacy systems holding your data hostage.</h3>
+          <p>Every new tool gets bolted on. The stack gets messier every year and replacing it feels impossible.</p>
+        </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKFORCE SHIFT -->
+<section class="std" id="workforce" data-screen-label="08 Workforce shift">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="left">
+        <div class="eyebrow"><span class="dot"></span>The workforce shift</div>
+        <div class="num">05</div>
+      </div>
+      <div>
+        <h2>AI takes the desk work. <em class="serif">The field stays yours</em>.</h2>
+        <p class="sub">Every productivity revolution in the trades redistributed work, it didn't end it. AI handles the admin layer around the field. The field itself gets fewer people, higher skill, and better tools.</p>
+      </div>
+    </div>
+
+    <div class="workforce-split reveal">
+      <div class="wf-col wf-automated">
+        <div class="wf-header">
+          <span class="wf-tag">AI handles this</span>
+          <p>The work that sits around the field, not in it</p>
+        </div>
+        <ul class="wf-list">
+          <li class="wf-item">
+            <span class="wf-role">Field-ticket admin &amp; invoicing</span>
+            <span class="wf-desc">Auto-reading tickets, matching POs and codes, pushing entries into ERP, before the crew drives back.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Junior scheduling &amp; crew planning</span>
+            <span class="wf-desc">Optimal schedules based on weather, downtime, and crew availability. Especially for large-fleet and rig operations.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Procurement &amp; supply chain clerking</span>
+            <span class="wf-desc">Invoice-to-pay, supplier risk scoring, and contract term extraction, a known, proven AI wedge in oil and gas.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Production dashboard analysis</span>
+            <span class="wf-desc">"Which well is down?" and "What's trending?" are handled by AI. The "what do we do about it?" stays human.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Repetitive QA &amp; compliance reporting</span>
+            <span class="wf-desc">Auto-extracting findings from checklists and photos, flagging gaps, before the human signs off.</span>
+          </li>
+        </ul>
+      </div>
+      <div class="wf-col wf-human">
+        <div class="wf-header">
+          <span class="wf-tag">Humans own this</span>
+          <p>AI-assisted, not AI-replaced</p>
+        </div>
+        <ul class="wf-list">
+          <li class="wf-item">
+            <span class="wf-role">Field operators &amp; roughnecks</span>
+            <span class="wf-desc">Fewer headcount, more tech-savvy. AI-driven rigs and geosteering cut numbers, but humans still supervise, intervene, and handle anomalies on site.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Instrumentation, automation &amp; SCADA techs</span>
+            <span class="wf-desc">Automation technician and PLC jobs are growing, not shrinking, as operations get smarter. This is where displaced workers go.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Safety-critical field roles</span>
+            <span class="wf-desc">Rig captains, well-site supervisors, HSE inspectors. AI can warn; humans decide when to stop the job and who to trust in a life-threatening situation.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Deep-craft trades</span>
+            <span class="wf-desc">Welding, precision mechanical work, crane ops, measurement. AI assists with pre-planning and documentation. The physical precision and improvisation stay with the tradesperson.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="wf-pivot reveal delay-1">
+      <p>The field worker who grows into agentic systems, SCADA, and data interpretation is the <em>most valuable person on site in 2030</em>. That transition is what we're built to support.</p>
     </div>
   </div>
 </section>
@@ -1449,81 +1545,6 @@
         <h3>Hierarchies flatten. <em>Specialists and agents do the work</em>.</h3>
         <p>Back-office processes run on agentic systems with human oversight. Skepticism gives way to embrace once the speed becomes obvious. AI takes the toil out of work - high performers ship more and enjoy it more.</p>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- WORKFORCE SHIFT -->
-<section class="std" id="workforce" data-screen-label="08 Workforce shift">
-  <div class="container">
-    <div class="section-head reveal">
-      <div class="left">
-        <div class="eyebrow"><span class="dot"></span>The workforce shift</div>
-        <div class="num">05</div>
-      </div>
-      <div>
-        <h2>AI takes the desk work. <em class="serif">The field stays yours</em>.</h2>
-        <p class="sub">Every productivity revolution in the trades redistributed work, it didn't end it. AI handles the admin layer around the field. The field itself gets fewer people, higher skill, and better tools.</p>
-      </div>
-    </div>
-
-    <div class="workforce-split reveal">
-      <div class="wf-col wf-automated">
-        <div class="wf-header">
-          <span class="wf-tag">AI handles this</span>
-          <p>The work that sits around the field, not in it</p>
-        </div>
-        <ul class="wf-list">
-          <li class="wf-item">
-            <span class="wf-role">Field-ticket admin &amp; invoicing</span>
-            <span class="wf-desc">Auto-reading tickets, matching POs and codes, pushing entries into ERP, before the crew drives back.</span>
-          </li>
-          <li class="wf-item">
-            <span class="wf-role">Junior scheduling &amp; crew planning</span>
-            <span class="wf-desc">Optimal schedules based on weather, downtime, and crew availability. Especially for large-fleet and rig operations.</span>
-          </li>
-          <li class="wf-item">
-            <span class="wf-role">Procurement &amp; supply chain clerking</span>
-            <span class="wf-desc">Invoice-to-pay, supplier risk scoring, and contract term extraction, a known, proven AI wedge in oil and gas.</span>
-          </li>
-          <li class="wf-item">
-            <span class="wf-role">Production dashboard analysis</span>
-            <span class="wf-desc">"Which well is down?" and "What's trending?" are handled by AI. The "what do we do about it?" stays human.</span>
-          </li>
-          <li class="wf-item">
-            <span class="wf-role">Repetitive QA &amp; compliance reporting</span>
-            <span class="wf-desc">Auto-extracting findings from checklists and photos, flagging gaps, before the human signs off.</span>
-          </li>
-        </ul>
-      </div>
-      <div class="wf-col wf-human">
-        <div class="wf-header">
-          <span class="wf-tag">Humans own this</span>
-          <p>AI-assisted, not AI-replaced</p>
-        </div>
-        <ul class="wf-list">
-          <li class="wf-item">
-            <span class="wf-role">Field operators &amp; roughnecks</span>
-            <span class="wf-desc">Fewer headcount, more tech-savvy. AI-driven rigs and geosteering cut numbers, but humans still supervise, intervene, and handle anomalies on site.</span>
-          </li>
-          <li class="wf-item">
-            <span class="wf-role">Instrumentation, automation &amp; SCADA techs</span>
-            <span class="wf-desc">Automation technician and PLC jobs are growing, not shrinking, as operations get smarter. This is where displaced workers go.</span>
-          </li>
-          <li class="wf-item">
-            <span class="wf-role">Safety-critical field roles</span>
-            <span class="wf-desc">Rig captains, well-site supervisors, HSE inspectors. AI can warn; humans decide when to stop the job and who to trust in a life-threatening situation.</span>
-          </li>
-          <li class="wf-item">
-            <span class="wf-role">Deep-craft trades</span>
-            <span class="wf-desc">Welding, precision mechanical work, crane ops, measurement. AI assists with pre-planning and documentation. The physical precision and improvisation stay with the tradesperson.</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="wf-pivot reveal delay-1">
-      <p>The field worker who grows into agentic systems, SCADA, and data interpretation is the <em>most valuable person on site in 2030</em>. That transition is what we're built to support.</p>
     </div>
   </div>
 </section>
