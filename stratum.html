@@ -573,6 +573,33 @@
     to { transform: translateX(-50%); }
   }
 
+  /* USE CASES */
+  .uc-bg { background: var(--bg-alt); }
+  .uc-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    border-top: 1px solid var(--line-strong);
+    border-left: 1px solid var(--line-strong);
+  }
+  .uc {
+    border-right: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+    padding: 40px 36px 44px;
+    background: var(--bg-alt);
+    transition: background 0.25s;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .uc:hover { background: #fff; }
+  .uc-cat {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .uc h4 {
+    font-size: clamp(18px, 1.4vw, 22px); line-height: 1.22;
+    font-weight: 450; letter-spacing: -0.01em; margin: 0;
+    color: var(--ink);
+  }
+  .uc p { font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+
   /* SHIFTS — what changes for your business */
   .shifts {
     display: grid; grid-template-columns: repeat(2, 1fr);
@@ -949,6 +976,7 @@
     .t-7 { grid-column: span 6; grid-row: span 3; }
     .t-8 { grid-column: span 6; grid-row: span 3; }
     .pressures { grid-template-columns: 1fr; }
+    .uc-grid { grid-template-columns: repeat(2, 1fr); }
     .shifts { grid-template-columns: 1fr; }
     .shift { padding: 36px 28px 40px; }
     .g-body { grid-template-columns: 1fr; min-height: 0; }
@@ -973,6 +1001,7 @@
     section.std { padding: 96px 0; }
   }
   @media (max-width: 640px) {
+    .uc-grid { grid-template-columns: 1fr; }
     .cap-row { grid-template-columns: 1fr; }
     .container, .container-sm, .container-narrow { padding: 0 20px; }
     .hero-inner { padding: 100px 20px 56px; }
@@ -993,6 +1022,7 @@
       <a href="#essay">The work</a>
       <a href="#problem">The shift</a>
       <a href="#what">What we do</a>
+      <a href="#usecases">Use cases</a>
       <a href="#shifts">What changes</a>
       <a href="#commitments">Commitments</a>
       <a href="#built">Built for</a>
@@ -1214,13 +1244,77 @@
   </div>
 </section>
 
+<!-- USE CASES -->
+<section class="std uc-bg" id="usecases" data-screen-label="06 Use cases">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="left">
+        <div class="eyebrow"><span class="dot"></span>In practice</div>
+        <div class="num">03</div>
+      </div>
+      <div>
+        <h2>The specific work <em class="serif">we automate first</em>.</h2>
+        <p class="sub">The highest-value AI applications in oil and gas and the trades are not theoretical. They are the same workflows your teams do every day — manually. Here is where we start.</p>
+      </div>
+    </div>
+
+    <div class="uc-grid reveal">
+      <div class="uc">
+        <div class="uc-cat">Field Operations</div>
+        <h4>Field data, captured at the source.</h4>
+        <p>Handwritten tickets, voice memos, photos — structured and synced to your ERP before the crew drives back. No duplicate entry. No cleanup. No two sources of truth.</p>
+      </div>
+      <div class="uc">
+        <div class="uc-cat">Asset Management</div>
+        <h4>Maintenance ranked by what's actually at risk.</h4>
+        <p>Sensor alerts, work orders, and technician notes combined into one prioritised list of what to fix next. Not every alert is urgent. This one knows the difference.</p>
+      </div>
+      <div class="uc">
+        <div class="uc-cat">Compliance</div>
+        <h4>Compliance reports that write themselves.</h4>
+        <p>Environmental, safety, and operational filings drafted from the data you're already generating. Missing fields flagged. Audit trails built. Deadline drama eliminated.</p>
+      </div>
+      <div class="uc">
+        <div class="uc-cat">Safety</div>
+        <h4>Safety inspections that don't end at the form.</h4>
+        <p>Field photos and notes turned into corrective-action tasks, routed to the right person, tracked to close. Near-miss reporting in thirty seconds. Patterns surface before incidents do.</p>
+      </div>
+      <div class="uc">
+        <div class="uc-cat">Upstream</div>
+        <h4>Anomalies caught before they become downtime.</h4>
+        <p>Production, pressure, flow, and downtime patterns watched continuously — alerting teams before small deviations become expensive problems. Not another dashboard. An attention system.</p>
+      </div>
+      <div class="uc">
+        <div class="uc-cat">Knowledge</div>
+        <h4>Every engineering doc, instantly searchable.</h4>
+        <p>SOPs, well logs, simulation outputs, lessons learned — searchable in plain language. Ask the question; get the answer with the source. Institutional knowledge stops walking out the door.</p>
+      </div>
+      <div class="uc">
+        <div class="uc-cat">Emissions</div>
+        <h4>Emissions data, closed-loop.</h4>
+        <p>Sensor readings, manual entries, and field logs consolidated, gaps flagged, and filings pre-populated. Traceable records for regulators and investors — without a dedicated reporting team.</p>
+      </div>
+      <div class="uc">
+        <div class="uc-cat">Drilling</div>
+        <h4>"What if?" for drilling engineers, in minutes.</h4>
+        <p>Wells with similar mud weights, NPT history, and out-of-band parameters compared and summarised on demand. Scenario analysis without a consultant on retainer.</p>
+      </div>
+      <div class="uc">
+        <div class="uc-cat">Field Billing</div>
+        <h4>Invoice the moment the job closes.</h4>
+        <p>Field tickets, POs, and time logs auto-assembled into invoices and GL entries in your ERP. The step that used to take days happens before the crew is back on site.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- WHAT CHANGES FOR YOUR BUSINESS -->
-<section class="std" id="shifts" data-screen-label="06 What changes">
+<section class="std" id="shifts" data-screen-label="07 What changes">
   <div class="container">
     <div class="section-head reveal">
       <div class="left">
         <div class="eyebrow"><span class="dot"></span>What changes</div>
-        <div class="num">03</div>
+        <div class="num">04</div>
       </div>
       <div>
         <h2>The advantages that mattered yesterday <em class="serif">don't matter tomorrow</em>.</h2>
@@ -1263,7 +1357,7 @@
     <div class="section-head reveal">
       <div class="left">
         <div class="eyebrow"><span class="dot"></span>In the field</div>
-        <div class="num">04</div>
+        <div class="num">05</div>
       </div>
       <div>
         <h2>What an operator sees at <em class="serif">3 a.m. on a Tuesday</em>.</h2>
@@ -1367,7 +1461,7 @@
     <div class="section-head reveal">
       <div class="left">
         <div class="eyebrow"><span class="dot"></span>Built for</div>
-        <div class="num">05</div>
+        <div class="num">06</div>
       </div>
       <div>
         <h2>Built for the 80% of work that <em class="serif">doesn't happen at a desk</em>.</h2>
@@ -1425,7 +1519,7 @@
     <div class="section-head reveal">
       <div class="left">
         <div class="eyebrow"><span class="dot"></span>What we commit to</div>
-        <div class="num">06</div>
+        <div class="num">07</div>
       </div>
       <div>
         <h2>Traceability is the spine. <em class="serif">Everything else hangs from it</em>.</h2>
@@ -1541,6 +1635,7 @@
         <h5>Product</h5>
         <a href="#essay">The work</a>
         <a href="#what">What we do &amp; how it works</a>
+        <a href="#usecases">Use cases</a>
         <a href="#shifts">What changes</a>
         <a href="#built">Built for</a>
       </div>
