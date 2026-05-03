@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stratum — Field</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --ink: #f3ece1;
+    --ink-2: #a8a097;
+    --ink-3: #6b665e;
+    --bg: #0c0b0a;
+    --bg-2: #15130f;
+    --bg-3: #1f1c17;
+    --line: rgba(243, 236, 225, 0.10);
+    --line-strong: rgba(243, 236, 225, 0.22);
+    --accent: #e89e3c;
+    --accent-warm: #d2691e;
+    --serif: 'Fraunces', 'Newsreader', Georgia, serif;
+    --sans: 'Geist', system-ui, -apple-system, sans-serif;
+    --mono: 'Geist Mono', ui-monospace, Menlo, monospace;
+    --container: 1480px;
+    --gap: clamp(20px, 3vw, 48px);
+    --section: clamp(96px, 11vw, 180px);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  .container { max-width: var(--container); margin: 0 auto; padding: 0 clamp(20px, 3.5vw, 56px); }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before { content: ""; display: inline-block; width: 28px; height: 1px; background: var(--accent); }
+
+  /* ─────────── nav ─────────── */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    padding: 22px clamp(20px, 3.5vw, 56px);
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
+    border-bottom: 1px solid transparent;
+  }
+  .nav.scrolled { background: rgba(12, 11, 10, 0.78); backdrop-filter: blur(14px) saturate(140%); border-bottom-color: var(--line); }
+  .nav .mark {
+    font-family: var(--serif); font-size: 22px; letter-spacing: -0.015em; font-weight: 500;
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .nav .mark .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .nav .links { display: flex; gap: 28px; }
+  .nav .links a { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); transition: color 0.15s; }
+  .nav .links a:hover { color: var(--ink); }
+  .nav .cta {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 12px 22px; border: 1px solid var(--ink); color: var(--ink); border-radius: 999px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .nav .cta:hover { background: var(--ink); color: var(--bg); }
+  @media (max-width: 820px) { .nav .links { display: none; } }
+
+  /* ─────────── hero ─────────── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .hero-img {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 30% 75%, rgba(232, 158, 60, 0.32) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 90% at 80% 20%, rgba(210, 105, 30, 0.18) 0%, transparent 60%),
+      linear-gradient(180deg, #1a1612 0%, #0c0b0a 60%, #050403 100%);
+  }
+  .hero-img::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(180deg, transparent 78%, rgba(232,158,60,0.12) 80%, transparent 82%),
+      linear-gradient(180deg, transparent 79.5%, rgba(0,0,0,0.6) 80%, transparent 80.5%);
+    /* Pumpjack silhouettes */
+    background-position: center;
+  }
+  .hero-img .silhouette {
+    position: absolute; inset: 0;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' preserveAspectRatio='xMidYMax slice'><g fill='%23000' opacity='0.85'><rect y='720' width='1600' height='180'/><g transform='translate(180 720)'><rect x='-4' y='-160' width='8' height='160'/><polygon points='-60,-180 60,-180 30,-160 -30,-160'/><rect x='-30' y='-130' width='60' height='10'/></g><g transform='translate(420 720)'><rect x='-3' y='-220' width='6' height='220'/><polygon points='-50,-240 50,-240 25,-220 -25,-220'/><polygon points='-15,-260 15,-260 8,-240 -8,-240'/></g><g transform='translate(700 720)'><rect x='-5' y='-280' width='10' height='280'/><polygon points='-80,-300 80,-300 40,-280 -40,-280'/><rect x='-50' y='-260' width='100' height='14'/><circle cx='0' cy='-260' r='14'/></g><g transform='translate(1020 720)'><rect x='-3' y='-180' width='6' height='180'/><polygon points='-45,-200 45,-200 22,-180 -22,-180'/></g><g transform='translate(1300 720)'><rect x='-4' y='-240' width='8' height='240'/><polygon points='-65,-260 65,-260 32,-240 -32,-240'/><rect x='-40' y='-220' width='80' height='10'/></g></g></svg>");
+    background-size: cover; background-position: center bottom;
+  }
+  .hero-img::after {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg, rgba(12,11,10,0.55) 0%, rgba(12,11,10,0.15) 30%, rgba(12,11,10,0.25) 65%, rgba(12,11,10,0.95) 100%),
+      radial-gradient(ellipse at 30% 70%, rgba(232,158,60,0.18) 0%, transparent 60%);
+  }
+  .hero-grain {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95  0 0 0 0 0.93  0 0 0 0 0.88  0 0 0 0.06 0'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.5'/></svg>");
+    mix-blend-mode: overlay;
+    opacity: 0.35;
+  }
+  .hero-inner {
+    position: relative; z-index: 2;
+    flex: 1;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 120px clamp(20px, 3.5vw, 56px) clamp(48px, 6vw, 96px);
+    max-width: var(--container); width: 100%; margin: 0 auto;
+  }
+  .hero-meta {
+    display: flex; align-items: center; gap: 18px; margin-bottom: 32px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .hero-meta .pill { padding: 6px 12px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--ink); }
+  .hero-meta .dotline { display: inline-block; flex: 1; max-width: 220px; height: 1px; background: linear-gradient(90deg, var(--ink-2), transparent); }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(56px, 9.5vw, 184px);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    font-weight: 400;
+    max-width: 14ch;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .hero h1 em {
+    font-style: italic; font-weight: 300;
+    color: var(--accent);
+    font-variation-settings: "SOFT" 100;
+  }
+  .hero-bottom {
+    margin-top: clamp(40px, 5vw, 72px);
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(32px, 5vw, 96px); align-items: end;
+  }
+  .hero-bottom .lede {
+    font-family: var(--serif);
+    font-size: clamp(18px, 1.7vw, 24px);
+    line-height: 1.45;
+    color: var(--ink);
+    max-width: 42ch;
+    text-wrap: pretty;
+    font-weight: 300;
+  }
+  .hero-bottom .lede strong { color: var(--accent); font-style: italic; font-weight: 400; }
+  .hero-bottom .actions { display: flex; flex-direction: column; align-items: flex-end; gap: 22px; }
+  .btn-primary {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 18px 32px; background: var(--ink); color: var(--bg); border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 14px;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .btn-primary:hover { background: var(--accent); transform: translateX(4px); }
+  .btn-primary .arrow { width: 16px; height: 1px; background: currentColor; position: relative; }
+  .btn-primary .arrow::after { content: ""; position: absolute; right: 0; top: -3px; width: 8px; height: 8px; border-top: 1px solid currentColor; border-right: 1px solid currentColor; transform: rotate(45deg); transform-origin: 100% 50%; }
+  .scroll-cue { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); display: flex; align-items: center; gap: 10px; }
+  .scroll-cue .vline { width: 1px; height: 32px; background: var(--ink-2); display: inline-block; animation: scrollCue 2.4s ease-in-out infinite; transform-origin: top; }
+  @keyframes scrollCue { 0%, 100% { transform: scaleY(0.4); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
+
+  @media (max-width: 820px) {
+    .hero-bottom { grid-template-columns: 1fr; }
+    .hero-bottom .actions { align-items: flex-start; }
+  }
+
+  /* ─────────── caption strip beneath hero ─────────── */
+  .caption-strip {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 22px 0;
+    background: var(--bg);
+  }
+  .caption-strip .container {
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .caption-strip span:first-child { color: var(--ink); }
+  .caption-strip .ticker { display: flex; gap: 32px; overflow: hidden; }
+  .caption-strip .ticker span::before { content: "·"; margin-right: 32px; color: var(--ink-3); }
+  .caption-strip .ticker span:first-child::before { display: none; }
+
+  /* ─────────── thesis / pull-quote ─────────── */
+  .thesis {
+    padding: var(--section) 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .thesis-grid { display: grid; grid-template-columns: 1fr 2fr; gap: clamp(40px, 6vw, 120px); align-items: start; }
+  .thesis-label { position: sticky; top: 120px; }
+  .thesis-body p {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(28px, 3.4vw, 52px); line-height: 1.22; letter-spacing: -0.02em;
+    margin-bottom: 32px; color: var(--ink);
+    max-width: 24ch; text-wrap: pretty;
+  }
+  .thesis-body p:last-child { margin-bottom: 0; }
+  .thesis-body p em { color: var(--accent); font-style: italic; font-weight: 400; }
+  .thesis-body p .strike { text-decoration: line-through; text-decoration-thickness: 1px; color: var(--ink-3); font-weight: 300; }
+
+  @media (max-width: 820px) {
+    .thesis-grid { grid-template-columns: 1fr; }
+    .thesis-label { position: static; }
+  }
+
+  /* ─────────── reality / image+stat duo ─────────── */
+  .reality { background: var(--bg-2); padding: var(--section) 0; border-bottom: 1px solid var(--line); }
+  .reality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); }
+  .reality-grid > .col {
+    padding: clamp(48px, 6vw, 96px) clamp(28px, 4vw, 64px);
+  }
+  .reality-grid > .col:first-child { border-right: 1px solid var(--line); }
+  .reality h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(40px, 5.4vw, 88px); line-height: 0.98; letter-spacing: -0.025em;
+    margin: 24px 0 32px; max-width: 14ch; text-wrap: balance;
+  }
+  .reality h2 em { color: var(--accent); font-style: italic; font-weight: 300; }
+  .reality p { font-size: 17px; line-height: 1.55; color: var(--ink-2); max-width: 50ch; margin-bottom: 18px; }
+  .reality-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 56px; border-top: 1px solid var(--line); }
+  .reality-stats > div { padding: 32px 0; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); padding-right: 24px; padding-left: 0; }
+  .reality-stats > div:nth-child(2n) { padding-left: 24px; padding-right: 0; border-right: 0; }
+  .reality-stats > div:nth-child(n+3) { border-bottom: 0; }
+  .reality-stats .num { font-family: var(--serif); font-size: clamp(48px, 5.5vw, 84px); line-height: 1; font-weight: 400; letter-spacing: -0.025em; }
+  .reality-stats .num em { color: var(--accent); font-style: italic; font-weight: 300; }
+  .reality-stats .lbl { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin-top: 14px; max-width: 28ch; }
+  .reality-img-col { background-size: cover; background-position: center; min-height: 540px; position: relative; }
+  .reality-art {
+    background:
+      radial-gradient(ellipse 90% 70% at 50% 100%, rgba(232,158,60,0.18) 0%, transparent 60%),
+      linear-gradient(180deg, #1a1612 0%, #0c0b0a 100%);
+  }
+  .reality-art::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(243,236,225,0.06) 0 1px, transparent 1px 80px),
+      repeating-linear-gradient(0deg, rgba(243,236,225,0.04) 0 1px, transparent 1px 60px),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600'><g stroke='%23e89e3c' stroke-width='1' fill='none' opacity='0.55'><path d='M40 500 Q 200 300 400 320 T 760 200'/><path d='M40 540 Q 220 380 400 380 T 760 280'/><path d='M40 460 L 200 460 L 200 280 L 360 280 L 360 380 L 540 380 L 540 220 L 760 220'/><circle cx='200' cy='280' r='4' fill='%23e89e3c'/><circle cx='360' cy='380' r='4' fill='%23e89e3c'/><circle cx='540' cy='220' r='4' fill='%23e89e3c'/></g><g fill='%23f3ece1' opacity='0.4' font-family='monospace' font-size='10'><text x='208' y='270'>WELL-A14</text><text x='368' y='370'>JCT-07</text><text x='548' y='210'>STN-22</text></g></svg>");
+    background-size: cover, cover, cover;
+  }
+  .reality-img-col::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(12,11,10,0.4)); }
+  .reality-img-col .caption {
+    position: absolute; bottom: 28px; left: 32px; right: 32px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+    display: flex; justify-content: space-between; gap: 16px; z-index: 1;
+  }
+  @media (max-width: 820px) {
+    .reality-grid { grid-template-columns: 1fr; }
+    .reality-grid > .col:first-child { border-right: 0; border-bottom: 1px solid var(--line); }
+  }
+
+  /* ─────────── phases (image-led, three big rows) ─────────── */
+  .phases { padding: var(--section) 0 0; }
+  .phases-head { padding-bottom: clamp(56px, 7vw, 96px); }
+  .phases-head h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(48px, 7vw, 124px); line-height: 0.95; letter-spacing: -0.03em;
+    max-width: 16ch; margin-top: 24px; text-wrap: balance;
+  }
+  .phases-head h2 em { color: var(--accent); font-style: italic; font-weight: 300; }
+  .phase-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border-top: 1px solid var(--line-strong);
+    min-height: 640px;
+  }
+  .phase-row:nth-child(odd) > .copy { order: 1; }
+  .phase-row:nth-child(odd) > .image { order: 2; }
+  .phase-row:nth-child(even) > .copy { order: 2; border-left: 1px solid var(--line); }
+  .phase-row:nth-child(even) > .image { order: 1; }
+  .phase-row .copy { padding: clamp(56px, 7vw, 120px) clamp(28px, 4vw, 80px); display: flex; flex-direction: column; justify-content: center; gap: 24px; }
+  .phase-row .copy .num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--ink-3); }
+  .phase-row .copy h3 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(40px, 5vw, 80px); line-height: 0.98; letter-spacing: -0.025em;
+    max-width: 12ch; text-wrap: balance;
+  }
+  .phase-row .copy h3 em { color: var(--accent); font-style: italic; font-weight: 300; }
+  .phase-row .copy p { color: var(--ink-2); font-size: 17px; line-height: 1.55; max-width: 48ch; }
+  .phase-row .copy ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .phase-row .copy li { display: grid; grid-template-columns: 16px 1fr; gap: 14px; font-size: 15px; line-height: 1.5; color: var(--ink); }
+  .phase-row .copy li::before { content: "→"; color: var(--accent); font-family: var(--mono); }
+  .phase-row .image { background-size: cover; background-position: center; position: relative; min-height: 480px; }
+  .phase-row .image::after { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 60%, rgba(12,11,10,0.6)); }
+  .phase-row .image .tag {
+    position: absolute; top: 28px; left: 28px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink); padding: 8px 14px; background: rgba(12,11,10,0.6); backdrop-filter: blur(8px);
+    border: 1px solid var(--line-strong); border-radius: 999px;
+  }
+  .phase-row .image .credit {
+    position: absolute; bottom: 22px; right: 28px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: var(--ink-2); text-transform: uppercase;
+  }
+  @media (max-width: 820px) {
+    .phase-row { grid-template-columns: 1fr; min-height: auto; }
+    .phase-row > .copy, .phase-row > .image { order: unset !important; border-left: 0 !important; }
+    .phase-row .image { min-height: 360px; }
+  }
+
+  /* ─────────── industries (4 cards, photo-led) ─────────── */
+  .industries { padding: var(--section) 0; border-top: 1px solid var(--line-strong); }
+  .industries-head { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: end; padding-bottom: clamp(56px, 7vw, 96px); }
+  .industries-head h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(44px, 6vw, 104px); line-height: 0.96; letter-spacing: -0.03em;
+    max-width: 14ch; text-wrap: balance;
+  }
+  .industries-head h2 em { color: var(--accent); font-style: italic; font-weight: 300; }
+  .industries-head .meta { color: var(--ink-2); font-size: 17px; line-height: 1.55; max-width: 44ch; }
+  .industries-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(20px, 2.5vw, 32px); }
+  .industry-card {
+    position: relative; overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .industry-card .img { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.7s ease, filter 0.5s ease; filter: brightness(0.65) contrast(1.05); }
+  .industry-card:hover .img { transform: scale(1.04); filter: brightness(0.8) contrast(1.05); }
+  .industry-card::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(12,11,10,0.0) 30%, rgba(12,11,10,0.92)); }
+  .industry-card .body {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+    padding: clamp(28px, 3.5vw, 48px);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .industry-card .num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--accent); text-transform: uppercase; }
+  .industry-card h3 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(28px, 3vw, 48px); line-height: 1; letter-spacing: -0.02em;
+  }
+  .industry-card p { color: var(--ink-2); font-size: 15px; line-height: 1.5; max-width: 38ch; }
+  .industry-card .stats {
+    display: flex; gap: 24px; margin-top: 8px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink);
+  }
+  .industry-card .stats em { color: var(--accent); font-style: normal; font-weight: 500; }
+  @media (max-width: 820px) {
+    .industries-head { grid-template-columns: 1fr; }
+    .industries-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ─────────── industrial scene art (CSS-only) ─────────── */
+  .scene { position: absolute; inset: 0; overflow: hidden; background: #1a1612; }
+  .scene::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(232,158,60,0.28) 0%, transparent 60%),
+      linear-gradient(180deg, #1a1612 0%, #0c0b0a 100%);
+  }
+  .scene::after {
+    content: ""; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95  0 0 0 0 0.93  0 0 0 0 0.88  0 0 0 0.04 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
+    mix-blend-mode: overlay; opacity: 0.5;
+  }
+  .scene > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* ─────────── photobreak (CSS scene background) ─────────── */
+  .photobreak {
+    position: relative;
+    height: clamp(420px, 60vh, 720px);
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+    overflow: hidden;
+    background: #1a1612;
+  }
+  .photobreak::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(12,11,10,0.4), rgba(12,11,10,0.85)); }
+  .photobreak .container {
+    position: relative; z-index: 1;
+    height: 100%; display: flex; flex-direction: column; justify-content: flex-end;
+    padding-bottom: clamp(40px, 5vw, 72px);
+  }
+  .photobreak h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(36px, 5.5vw, 96px); line-height: 0.98; letter-spacing: -0.025em;
+    max-width: 22ch; text-wrap: balance; margin-top: 24px;
+  }
+  .photobreak h2 em { color: var(--accent); font-style: italic; font-weight: 300; }
+  .photobreak .credit-pill {
+    position: absolute; top: 28px; right: clamp(20px, 3.5vw, 56px); z-index: 1;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2);
+    padding: 8px 14px; border: 1px solid var(--line-strong); border-radius: 999px; backdrop-filter: blur(8px); background: rgba(12,11,10,0.4);
+  }
+
+  /* ─────────── evidence / testimonial ─────────── */
+  .evidence { padding: var(--section) 0; border-bottom: 1px solid var(--line); }
+  .quote-wrap { max-width: 1100px; margin: 0 auto; text-align: center; padding: 0 clamp(20px, 4vw, 64px); }
+  .quote-wrap .mark {
+    font-family: var(--serif); font-size: clamp(120px, 16vw, 280px); line-height: 0.7; color: var(--accent);
+    font-style: italic; font-weight: 300; opacity: 0.4;
+  }
+  .quote-wrap blockquote {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(28px, 3.4vw, 52px); line-height: 1.25; letter-spacing: -0.02em;
+    margin-top: -32px; text-wrap: balance;
+  }
+  .quote-wrap blockquote em { color: var(--accent); font-style: italic; font-weight: 400; }
+  .quote-wrap .attrib {
+    display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 56px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .quote-wrap .attrib .av { width: 44px; height: 44px; border-radius: 50%; background-size: cover; background-position: center; border: 1px solid var(--line-strong); }
+  .quote-wrap .attrib .name { color: var(--ink); }
+
+  .logo-row {
+    margin-top: clamp(72px, 8vw, 120px);
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .logo-row > div {
+    padding: 28px 16px; border-right: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: clamp(13px, 1.3vw, 17px); font-weight: 400;
+    color: var(--ink-2); text-align: center;
+  }
+  .logo-row > div:last-child { border-right: 0; }
+  @media (max-width: 820px) { .logo-row { grid-template-columns: repeat(2, 1fr); } .logo-row > div:nth-child(2n) { border-right: 0; } }
+
+  /* ─────────── CTA ─────────── */
+  .cta-section {
+    position: relative;
+    padding: var(--section) 0;
+    overflow: hidden;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .cta-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 80% at 50% 100%, rgba(210,105,30,0.32) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 50% at 30% 30%, rgba(232,158,60,0.12) 0%, transparent 70%),
+      linear-gradient(180deg, #1a1612 0%, #0c0b0a 100%);
+  }
+  .cta-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(12,11,10,0.7), rgba(12,11,10,0.95)); }
+  .cta-section .container { position: relative; z-index: 1; text-align: center; }
+  .cta-section h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(56px, 8vw, 144px); line-height: 0.95; letter-spacing: -0.03em;
+    max-width: 18ch; margin: 0 auto; text-wrap: balance;
+  }
+  .cta-section h2 em { color: var(--accent); font-style: italic; font-weight: 300; }
+  .cta-section p {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(20px, 2vw, 28px); line-height: 1.4; color: var(--ink-2);
+    max-width: 52ch; margin: 28px auto 56px;
+  }
+  .cta-actions { display: inline-flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn-ghost {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 18px 28px; border: 1px solid var(--ink-2); color: var(--ink); border-radius: 999px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  .btn-ghost:hover { border-color: var(--ink); background: rgba(243,236,225,0.06); }
+  .cta-section .channels {
+    margin-top: clamp(56px, 7vw, 96px);
+    display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .cta-section .channels span { padding: 8px 16px; border: 1px solid var(--line-strong); border-radius: 999px; }
+
+  /* ─────────── footer ─────────── */
+  footer { padding: clamp(48px, 6vw, 96px) 0 32px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 48px; padding-bottom: 56px; border-bottom: 1px solid var(--line); }
+  .footer-grid h4 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 18px; }
+  .footer-grid ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-grid a { font-size: 14px; color: var(--ink); transition: color 0.15s; }
+  .footer-grid a:hover { color: var(--accent); }
+  .footer-grid .colophon p { color: var(--ink-2); font-size: 14px; line-height: 1.55; max-width: 36ch; margin-top: 16px; }
+  .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 32px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-3); text-transform: uppercase; }
+  @media (max-width: 820px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .footer-bottom { flex-direction: column; gap: 12px; align-items: flex-start; }
+  }
+
+  /* ─────────── reveal animations ─────────── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/babel">
+const { useEffect, useState, useRef } = React;
+
+// ─────────── Industrial scene SVGs (subject-correct, line-art style) ───────────
+
+function PumpjackScene() {
+  return (
+    <div className="scene">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1f1c17"/>
+            <stop offset="80%" stopColor="#0c0b0a"/>
+          </linearGradient>
+          <linearGradient id="horizonGlow" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stopColor="#e89e3c" stopOpacity="0.5"/>
+            <stop offset="60%" stopColor="#d2691e" stopOpacity="0.1"/>
+            <stop offset="100%" stopColor="transparent"/>
+          </linearGradient>
+        </defs>
+        <rect width="1600" height="900" fill="url(#sky)"/>
+        <rect y="600" width="1600" height="300" fill="url(#horizonGlow)" opacity="0.7"/>
+        {/* horizon line */}
+        <line x1="0" y1="720" x2="1600" y2="720" stroke="#e89e3c" strokeOpacity="0.6"/>
+        {/* distant hills */}
+        <path d="M0 720 Q 300 690 600 705 T 1200 700 T 1600 720 L 1600 760 L 0 760 Z" fill="#000" opacity="0.6"/>
+        {/* pumpjacks (silhouettes) */}
+        <g fill="#000" opacity="0.95">
+          {/* far left pumpjack */}
+          <g transform="translate(220 720)">
+            <rect x="-3" y="-90" width="6" height="90"/>
+            <polygon points="-30,-100 30,-100 18,-92 -18,-92"/>
+            <line x1="-25" y1="-100" x2="-40" y2="-70" stroke="#000" strokeWidth="3"/>
+            <rect x="-22" y="-70" width="44" height="6"/>
+          </g>
+          {/* mid-left */}
+          <g transform="translate(480 720)">
+            <rect x="-4" y="-160" width="8" height="160"/>
+            <polygon points="-55,-180 55,-180 28,-160 -28,-160"/>
+            <polygon points="-12,-205 12,-205 6,-180 -6,-180"/>
+            <line x1="-50" y1="-180" x2="-80" y2="-130" stroke="#000" strokeWidth="4"/>
+            <rect x="-40" y="-130" width="80" height="10"/>
+            <circle cx="0" cy="-180" r="6"/>
+          </g>
+          {/* center hero pumpjack */}
+          <g transform="translate(820 720)">
+            <rect x="-5" y="-220" width="10" height="220"/>
+            <polygon points="-75,-245 75,-245 38,-220 -38,-220"/>
+            <polygon points="-18,-280 18,-280 9,-245 -9,-245"/>
+            <line x1="-65" y1="-245" x2="-115" y2="-180" stroke="#000" strokeWidth="5"/>
+            <rect x="-55" y="-180" width="110" height="14"/>
+            <rect x="-95" y="-166" width="30" height="20"/>
+            <circle cx="0" cy="-245" r="9" fill="#0c0b0a" stroke="#000" strokeWidth="2"/>
+          </g>
+          {/* far right */}
+          <g transform="translate(1180 720)">
+            <rect x="-3" y="-130" width="6" height="130"/>
+            <polygon points="-42,-150 42,-150 21,-130 -21,-130"/>
+            <line x1="-37" y1="-150" x2="-58" y2="-110" stroke="#000" strokeWidth="3"/>
+            <rect x="-30" y="-110" width="60" height="8"/>
+          </g>
+          {/* very far */}
+          <g transform="translate(1380 720)">
+            <rect x="-2" y="-70" width="4" height="70"/>
+            <polygon points="-22,-78 22,-78 12,-72 -12,-72"/>
+          </g>
+          {/* ground */}
+          <rect y="720" width="1600" height="180" fill="#000"/>
+        </g>
+        {/* ground texture */}
+        <g stroke="#e89e3c" strokeOpacity="0.12" strokeWidth="1">
+          <line x1="0" y1="780" x2="1600" y2="780"/>
+          <line x1="0" y1="820" x2="1600" y2="820"/>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+function RefineryTowersScene() {
+  return (
+    <div className="scene">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="rfsky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1a1612"/>
+            <stop offset="100%" stopColor="#0c0b0a"/>
+          </linearGradient>
+          <radialGradient id="flare" cx="0.78" cy="0.32" r="0.18">
+            <stop offset="0%" stopColor="#ffb84d" stopOpacity="0.9"/>
+            <stop offset="40%" stopColor="#e89e3c" stopOpacity="0.4"/>
+            <stop offset="100%" stopColor="transparent"/>
+          </radialGradient>
+        </defs>
+        <rect width="1600" height="900" fill="url(#rfsky)"/>
+        {/* steam plumes */}
+        <g fill="#f3ece1" opacity="0.06">
+          <ellipse cx="500" cy="260" rx="200" ry="80"/>
+          <ellipse cx="650" cy="200" rx="240" ry="100"/>
+          <ellipse cx="900" cy="240" rx="180" ry="70"/>
+          <ellipse cx="1200" cy="280" rx="220" ry="90"/>
+        </g>
+        {/* flare */}
+        <circle cx="1248" cy="288" r="280" fill="url(#flare)"/>
+        <g fill="#ffb84d" opacity="0.9">
+          <path d="M1248 290 Q 1240 230 1252 200 Q 1262 230 1248 290 Z"/>
+        </g>
+        {/* refinery silhouette */}
+        <g fill="#000" opacity="0.96">
+          <rect y="720" width="1600" height="180"/>
+          {/* tank farm */}
+          <g>
+            <rect x="80" y="600" width="200" height="120" rx="4"/>
+            <rect x="60" y="595" width="240" height="6"/>
+            <rect x="290" y="640" width="160" height="80" rx="4"/>
+            <rect x="280" y="635" width="180" height="6"/>
+          </g>
+          {/* distillation tower 1 */}
+          <g transform="translate(540 720)">
+            <rect x="-22" y="-360" width="44" height="360"/>
+            <rect x="-30" y="-360" width="60" height="14"/>
+            <rect x="-30" y="-280" width="60" height="6"/>
+            <rect x="-30" y="-200" width="60" height="6"/>
+            <rect x="-30" y="-120" width="60" height="6"/>
+            <rect x="-12" y="-380" width="24" height="20"/>
+          </g>
+          {/* tower 2 (taller) */}
+          <g transform="translate(700 720)">
+            <rect x="-26" y="-440" width="52" height="440"/>
+            <rect x="-34" y="-440" width="68" height="14"/>
+            <rect x="-34" y="-360" width="68" height="6"/>
+            <rect x="-34" y="-280" width="68" height="6"/>
+            <rect x="-34" y="-200" width="68" height="6"/>
+            <rect x="-34" y="-120" width="68" height="6"/>
+            <rect x="-14" y="-462" width="28" height="22"/>
+          </g>
+          {/* connecting pipework */}
+          <g stroke="#000" strokeWidth="6" fill="none">
+            <path d="M580 480 L 660 480"/>
+            <path d="M580 560 L 660 560"/>
+            <path d="M580 640 L 660 640"/>
+          </g>
+          {/* tower 3 */}
+          <g transform="translate(880 720)">
+            <rect x="-20" y="-300" width="40" height="300"/>
+            <rect x="-28" y="-300" width="56" height="12"/>
+          </g>
+          {/* flare stack */}
+          <g transform="translate(1240 720)">
+            <rect x="-6" y="-580" width="12" height="580"/>
+            <rect x="-22" y="-588" width="44" height="8"/>
+            <path d="M-12 -595 L 12 -595 L 6 -610 L -6 -610 Z"/>
+          </g>
+          {/* support frames */}
+          <g stroke="#000" strokeWidth="3" fill="none">
+            <path d="M380 720 L 380 540 L 480 540"/>
+            <path d="M380 540 L 320 600 L 320 720"/>
+            <path d="M1080 720 L 1080 580 L 1180 580"/>
+            <path d="M1080 580 L 1020 640 L 1020 720"/>
+          </g>
+          {/* small far structures */}
+          <g>
+            <rect x="1380" y="640" width="70" height="80"/>
+            <rect x="1470" y="660" width="90" height="60"/>
+          </g>
+        </g>
+        {/* light glints */}
+        <g fill="#e89e3c" opacity="0.7">
+          <rect x="538" y="464" width="4" height="4"/>
+          <rect x="698" y="544" width="4" height="4"/>
+          <rect x="540" y="624" width="4" height="4"/>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+function PipelineScene() {
+  return (
+    <div className="scene">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="pipsky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1a1612"/>
+            <stop offset="100%" stopColor="#0c0b0a"/>
+          </linearGradient>
+        </defs>
+        <rect width="1600" height="900" fill="url(#pipsky)"/>
+        {/* horizon glow */}
+        <ellipse cx="800" cy="900" rx="900" ry="260" fill="#e89e3c" opacity="0.18"/>
+        {/* terrain */}
+        <path d="M0 600 Q 400 540 800 580 T 1600 600 L 1600 900 L 0 900 Z" fill="#000" opacity="0.4"/>
+        <path d="M0 680 Q 400 640 800 670 T 1600 680 L 1600 900 L 0 900 Z" fill="#000" opacity="0.6"/>
+        {/* pipelines (3 parallel pipes following the terrain) */}
+        <g fill="none" stroke="#1f1c17" strokeWidth="38" strokeLinecap="round">
+          <path d="M-50 540 Q 380 480 800 520 T 1660 540"/>
+          <path d="M-50 600 Q 380 540 800 580 T 1660 600"/>
+          <path d="M-50 660 Q 380 600 800 640 T 1660 660"/>
+        </g>
+        <g fill="none" stroke="#3b3530" strokeWidth="34" strokeLinecap="round">
+          <path d="M-50 540 Q 380 480 800 520 T 1660 540"/>
+          <path d="M-50 600 Q 380 540 800 580 T 1660 600"/>
+          <path d="M-50 660 Q 380 600 800 640 T 1660 660"/>
+        </g>
+        {/* pipe highlights */}
+        <g fill="none" stroke="#e89e3c" strokeWidth="1" strokeOpacity="0.5">
+          <path d="M-50 530 Q 380 470 800 510 T 1660 530"/>
+          <path d="M-50 590 Q 380 530 800 570 T 1660 590"/>
+          <path d="M-50 650 Q 380 590 800 630 T 1660 650"/>
+        </g>
+        {/* pipe joints */}
+        <g fill="#0c0b0a" stroke="#e89e3c" strokeWidth="0.5" strokeOpacity="0.4">
+          {[200, 500, 800, 1100, 1400].map((x, i) => (
+            <g key={i}>
+              <rect x={x-4} y={510 + Math.sin(i)*8} width="8" height="60"/>
+              <rect x={x-4} y={570 + Math.sin(i)*8} width="8" height="60"/>
+              <rect x={x-4} y={630 + Math.sin(i)*8} width="8" height="60"/>
+            </g>
+          ))}
+        </g>
+        {/* valves / pig launcher */}
+        <g fill="#000">
+          <g transform="translate(1120 600)">
+            <rect x="-50" y="-90" width="100" height="14"/>
+            <rect x="-30" y="-150" width="60" height="60" rx="6"/>
+            <rect x="-6" y="-180" width="12" height="30"/>
+            <rect x="-28" y="-186" width="56" height="8"/>
+          </g>
+        </g>
+        {/* compressor station detail right */}
+        <g fill="#000" opacity="0.9">
+          <rect x="1320" y="540" width="180" height="80"/>
+          <rect x="1320" y="530" width="180" height="14"/>
+          <rect x="1340" y="500" width="14" height="40"/>
+          <rect x="1380" y="490" width="14" height="50"/>
+          <rect x="1430" y="500" width="14" height="40"/>
+          <rect x="1470" y="510" width="14" height="30"/>
+        </g>
+        {/* foreground markers */}
+        <g fill="#e89e3c" opacity="0.7" fontFamily="monospace" fontSize="11">
+          <text x="200" y="540">KP-204</text>
+          <text x="1100" y="540">VLV-44</text>
+          <text x="1410" y="510">CMP-07</text>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+function ControlRoomScene() {
+  return (
+    <div className="scene">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+        <rect width="1600" height="900" fill="#1a1612"/>
+        {/* back wall with screens */}
+        <g>
+          <rect x="100" y="100" width="1400" height="500" fill="#0c0b0a" stroke="#3b3530"/>
+          {/* monitor wall (3x4 grid) */}
+          {Array.from({length: 3}).map((_, r) =>
+            Array.from({length: 4}).map((_, c) => {
+              const x = 140 + c * 340;
+              const y = 130 + r * 150;
+              return (
+                <g key={`${r}-${c}`}>
+                  <rect x={x} y={y} width="320" height="130" fill="#0c0b0a" stroke="#5a4f44" strokeWidth="2"/>
+                  {/* simulated chart on monitor */}
+                  <g stroke="#e89e3c" strokeWidth="1.4" fill="none" opacity="0.85">
+                    {r === 0 && c === 0 && <path d={`M${x+10} ${y+90} Q ${x+80} ${y+50} ${x+160} ${y+70} T ${x+310} ${y+40}`}/>}
+                    {r === 0 && c === 1 && Array.from({length: 8}).map((_, i) => (
+                      <rect key={i} x={x+20 + i*36} y={y + 60 + (i%3)*15} width="22" height={50 - (i%3)*15} fill="#e89e3c" opacity="0.6"/>
+                    ))}
+                    {r === 0 && c === 2 && (
+                      <>
+                        <circle cx={x+160} cy={y+65} r="40" stroke="#e89e3c" strokeWidth="2" fill="none"/>
+                        <path d={`M${x+160} ${y+65} L ${x+200} ${y+45}`} stroke="#e89e3c" strokeWidth="2"/>
+                      </>
+                    )}
+                    {r === 0 && c === 3 && <path d={`M${x+10} ${y+100} L ${x+60} ${y+40} L ${x+120} ${y+80} L ${x+180} ${y+30} L ${x+240} ${y+90} L ${x+310} ${y+50}`}/>}
+                    {r === 1 && (
+                      <path d={`M${x+10} ${y+90} Q ${x+60} ${y+50} ${x+120} ${y+70} T ${x+220} ${y+60} T ${x+310} ${y+45}`}/>
+                    )}
+                    {r === 2 && Array.from({length: 12}).map((_, i) => (
+                      <rect key={i} x={x+12 + i*25} y={y+95 - (Math.sin(i)*30 + (c*5))} width="16" height={30 + Math.sin(i)*25} fill="#e89e3c" opacity="0.5"/>
+                    ))}
+                  </g>
+                  {/* tiny mono header */}
+                  <rect x={x+8} y={y+8} width="60" height="10" fill="#3b3530"/>
+                  <rect x={x+74} y={y+8} width="40" height="10" fill="#e89e3c" opacity="0.6"/>
+                </g>
+              );
+            })
+          )}
+        </g>
+        {/* console desks */}
+        <g fill="#0c0b0a">
+          <rect x="0" y="640" width="1600" height="100"/>
+          <rect x="0" y="640" width="1600" height="6" fill="#3b3530"/>
+        </g>
+        {/* operator silhouettes */}
+        <g fill="#000" opacity="0.95">
+          <g transform="translate(380 640)">
+            <ellipse cx="0" cy="-110" rx="22" ry="26"/>
+            <path d="M-38 -10 Q -30 -90 0 -84 Q 30 -90 38 -10 Z"/>
+          </g>
+          <g transform="translate(820 640)">
+            <ellipse cx="0" cy="-110" rx="22" ry="26"/>
+            <path d="M-38 -10 Q -30 -90 0 -84 Q 30 -90 38 -10 Z"/>
+          </g>
+          <g transform="translate(1240 640)">
+            <ellipse cx="0" cy="-110" rx="22" ry="26"/>
+            <path d="M-38 -10 Q -30 -90 0 -84 Q 30 -90 38 -10 Z"/>
+          </g>
+        </g>
+        {/* console glow */}
+        <g fill="#e89e3c" opacity="0.4">
+          <ellipse cx="380" cy="660" rx="120" ry="14"/>
+          <ellipse cx="820" cy="660" rx="120" ry="14"/>
+          <ellipse cx="1240" cy="660" rx="120" ry="14"/>
+        </g>
+        {/* foreground floor */}
+        <rect x="0" y="740" width="1600" height="160" fill="#0c0b0a"/>
+        <line x1="0" y1="740" x2="1600" y2="740" stroke="#3b3530"/>
+      </svg>
+    </div>
+  );
+}
+
+function CompressorStationScene() {
+  return (
+    <div className="scene">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+        <rect width="1600" height="900" fill="#1a1612"/>
+        <ellipse cx="800" cy="900" rx="900" ry="200" fill="#e89e3c" opacity="0.16"/>
+        {/* ground */}
+        <rect y="720" width="1600" height="180" fill="#0c0b0a"/>
+        <line x1="0" y1="720" x2="1600" y2="720" stroke="#e89e3c" strokeOpacity="0.5"/>
+        {/* compressor building */}
+        <g fill="#000" opacity="0.96">
+          <rect x="120" y="520" width="520" height="200"/>
+          <rect x="120" y="510" width="520" height="14"/>
+          <polygon points="120,510 380,440 640,510"/>
+          {/* doors / windows */}
+          <rect x="200" y="600" width="80" height="120" fill="#3b3530"/>
+          <rect x="320" y="580" width="60" height="40" fill="#e89e3c" opacity="0.65"/>
+          <rect x="420" y="580" width="60" height="40" fill="#e89e3c" opacity="0.65"/>
+          <rect x="520" y="580" width="60" height="40" fill="#e89e3c" opacity="0.65"/>
+          {/* exhaust stacks */}
+          <rect x="180" y="380" width="14" height="140"/>
+          <rect x="240" y="350" width="14" height="170"/>
+          <rect x="300" y="380" width="14" height="140"/>
+        </g>
+        {/* main pipes coming in/out */}
+        <g fill="none" stroke="#1f1c17" strokeWidth="24">
+          <path d="M-20 660 L 200 660 L 200 720"/>
+          <path d="M640 660 L 1620 660"/>
+          <path d="M640 700 L 1620 700"/>
+        </g>
+        <g fill="none" stroke="#3b3530" strokeWidth="20">
+          <path d="M-20 660 L 200 660 L 200 720"/>
+          <path d="M640 660 L 1620 660"/>
+          <path d="M640 700 L 1620 700"/>
+        </g>
+        {/* control building right */}
+        <g fill="#000">
+          <rect x="800" y="580" width="220" height="140"/>
+          <rect x="800" y="572" width="220" height="12"/>
+          <rect x="820" y="600" width="50" height="40" fill="#e89e3c" opacity="0.5"/>
+          <rect x="890" y="600" width="50" height="40" fill="#e89e3c" opacity="0.5"/>
+          <rect x="960" y="600" width="50" height="40" fill="#e89e3c" opacity="0.5"/>
+          {/* antenna */}
+          <rect x="900" y="500" width="4" height="72"/>
+          <line x1="884" y1="500" x2="916" y2="500" stroke="#000" strokeWidth="3"/>
+          <line x1="888" y1="490" x2="912" y2="490" stroke="#000" strokeWidth="3"/>
+        </g>
+        {/* tank far right */}
+        <g fill="#000">
+          <ellipse cx="1300" cy="540" rx="120" ry="20"/>
+          <rect x="1180" y="540" width="240" height="180"/>
+          <ellipse cx="1300" cy="720" rx="120" ry="20"/>
+          <rect x="1180" y="540" width="240" height="180" fill="#1f1c17"/>
+          <ellipse cx="1300" cy="540" rx="120" ry="20" fill="#1f1c17" stroke="#000"/>
+          <ellipse cx="1300" cy="540" rx="120" ry="20" fill="none" stroke="#3b3530"/>
+          {/* horizontal bands */}
+          <line x1="1180" y1="600" x2="1420" y2="600" stroke="#3b3530"/>
+          <line x1="1180" y1="660" x2="1420" y2="660" stroke="#3b3530"/>
+          {/* ladder */}
+          <rect x="1408" y="540" width="2" height="180" fill="#3b3530"/>
+          <rect x="1418" y="540" width="2" height="180" fill="#3b3530"/>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+function FuelStationScene() {
+  return (
+    <div className="scene">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+        <rect width="1600" height="900" fill="#1a1612"/>
+        <ellipse cx="800" cy="800" rx="900" ry="220" fill="#e89e3c" opacity="0.2"/>
+        {/* canopy */}
+        <g fill="#000" opacity="0.96">
+          <rect x="280" y="220" width="1040" height="60"/>
+          <rect x="290" y="280" width="1020" height="14" fill="#3b3530"/>
+          {/* support columns */}
+          <rect x="320" y="280" width="20" height="440"/>
+          <rect x="800" y="280" width="20" height="440"/>
+          <rect x="1280" y="280" width="20" height="440"/>
+        </g>
+        {/* canopy underglow lights */}
+        <g fill="#e89e3c" opacity="0.5">
+          <rect x="320" y="294" width="980" height="6"/>
+        </g>
+        <g fill="#ffb84d" opacity="0.18">
+          <rect x="320" y="300" width="980" height="60"/>
+        </g>
+        {/* pumps */}
+        <g fill="#000">
+          {[480, 720, 980, 1180].map((x, i) => (
+            <g key={i} transform={`translate(${x} 580)`}>
+              <rect x="-30" y="0" width="60" height="120"/>
+              <rect x="-36" y="-10" width="72" height="14"/>
+              <rect x="-22" y="14" width="44" height="36" fill="#e89e3c" opacity="0.55"/>
+              <rect x="-6" y="60" width="12" height="50"/>
+            </g>
+          ))}
+        </g>
+        {/* ground */}
+        <rect y="720" width="1600" height="180" fill="#0c0b0a"/>
+        <g stroke="#3b3530" fill="none">
+          <line x1="0" y1="780" x2="1600" y2="780"/>
+          <line x1="0" y1="820" x2="1600" y2="820"/>
+        </g>
+        {/* signage stand */}
+        <g fill="#000">
+          <rect x="80" y="380" width="120" height="200"/>
+          <rect x="74" y="370" width="132" height="14"/>
+          <rect x="110" y="580" width="60" height="140"/>
+        </g>
+        <g fill="#e89e3c" fontFamily="monospace" fontSize="14" opacity="0.85">
+          <text x="100" y="430">87 ·  </text><text x="160" y="430">3.42</text>
+          <text x="100" y="470">89 ·  </text><text x="160" y="470">3.78</text>
+          <text x="100" y="510">93 ·  </text><text x="160" y="510">4.12</text>
+          <text x="100" y="550">DSL · </text><text x="160" y="550">3.99</text>
+        </g>
+        {/* store right */}
+        <g fill="#000">
+          <rect x="1380" y="500" width="200" height="220"/>
+          <rect x="1380" y="490" width="200" height="14"/>
+          <rect x="1410" y="540" width="60" height="80" fill="#e89e3c" opacity="0.45"/>
+          <rect x="1490" y="540" width="60" height="80" fill="#e89e3c" opacity="0.45"/>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+function HorizonScene() {
+  // for the photobreak section — wide, atmospheric, full-bleed
+  return (
+    <div className="scene" style={{ position: "absolute", inset: 0 }}>
+      <svg viewBox="0 0 1600 720" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="hzbg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1a1612"/>
+            <stop offset="100%" stopColor="#0c0b0a"/>
+          </linearGradient>
+        </defs>
+        <rect width="1600" height="720" fill="url(#hzbg)"/>
+        <ellipse cx="800" cy="720" rx="1200" ry="400" fill="#e89e3c" opacity="0.22"/>
+        {/* horizon */}
+        <line x1="0" y1="500" x2="1600" y2="500" stroke="#e89e3c" strokeOpacity="0.5"/>
+        {/* distant facilities */}
+        <g fill="#000" opacity="0.85">
+          <rect x="40" y="460" width="60" height="40"/>
+          <rect x="120" y="440" width="80" height="60"/>
+          <rect x="220" y="450" width="40" height="50"/>
+          <rect x="300" y="430" width="14" height="70"/>
+          <rect x="350" y="445" width="60" height="55"/>
+          {/* mid pumpjacks */}
+          <g transform="translate(540 500)">
+            <rect x="-2" y="-50" width="4" height="50"/>
+            <polygon points="-18,-58 18,-58 9,-50 -9,-50"/>
+          </g>
+          <g transform="translate(640 500)">
+            <rect x="-2" y="-44" width="4" height="44"/>
+            <polygon points="-15,-50 15,-50 8,-44 -8,-44"/>
+          </g>
+          {/* center cluster */}
+          <rect x="780" y="430" width="80" height="70"/>
+          <rect x="870" y="410" width="14" height="90"/>
+          <rect x="900" y="420" width="14" height="80"/>
+          <rect x="930" y="440" width="80" height="60"/>
+          <rect x="1030" y="430" width="50" height="70"/>
+          {/* right pumpjacks */}
+          <g transform="translate(1180 500)">
+            <rect x="-2" y="-50" width="4" height="50"/>
+            <polygon points="-18,-58 18,-58 9,-50 -9,-50"/>
+          </g>
+          <g transform="translate(1280 500)">
+            <rect x="-2" y="-46" width="4" height="46"/>
+            <polygon points="-16,-52 16,-52 8,-46 -8,-46"/>
+          </g>
+          <rect x="1380" y="450" width="120" height="50"/>
+          <rect x="1510" y="430" width="14" height="70"/>
+        </g>
+        {/* ground */}
+        <rect y="500" width="1600" height="220" fill="#0c0b0a"/>
+        {/* radial dot pattern in ground */}
+        <g fill="#e89e3c" opacity="0.06">
+          {Array.from({length: 80}).map((_, i) => (
+            <circle key={i} cx={(i*23)%1600} cy={520 + (i*7)%180} r="1"/>
+          ))}
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+const SCENES = {
+  pumpjack: PumpjackScene,
+  refinery: RefineryTowersScene,
+  pipeline: PipelineScene,
+  control: ControlRoomScene,
+  compressor: CompressorStationScene,
+  fuel: FuelStationScene,
+  horizon: HorizonScene,
+};
+
+const PHASES = [
+  {
+    n: "01 — DEPLOY",
+    title: ["Connect what you ", "have", ". Light it up in ", "weeks", ", not years."],
+    body: "Eighteen months of integration work compressed into a deployment that survives a regulatory audit. We bring the connectors. Your historians, ERPs, and field capture stay where they are.",
+    bullets: [
+      "Connectors for OSIsoft PI, SAP, Maximo, your historian",
+      "Proven agents — drilling, inspection, scheduling, LDAR",
+      "Live in production inside one quarter",
+    ],
+    scene: "pumpjack",
+    tag: "FIELD · PERMIAN BASIN",
+    credit: "FIG. 01 · WELL PAD 14B",
+  },
+  {
+    n: "02 — RESHAPE",
+    title: ["Bend the workflow ", "around the operator", ", not around the system."],
+    body: "Once the data is one shape and the agents are running, the next move is removing the seams that nobody designed but everybody works around. The clipboard. The 11pm bridge call. The Monday spreadsheet.",
+    bullets: [
+      "End the clipboard — capture once, route everywhere",
+      "Field-aware agents that ask before they act",
+      "Workflow surgery, not workflow theatre",
+    ],
+    scene: "control",
+    tag: "REFINERY · GULF COAST",
+    credit: "FIG. 02 · CONTROL ROOM 03",
+  },
+  {
+    n: "03 — INVENT",
+    title: ["Build operations that were ", "never possible", " before."],
+    body: "Autonomous scheduling. Continuous methane LDAR that's regulator-ready in the same loop it runs in. Subsurface re-interpretation in days, not quarters. The new shape of the work, only available to operators who started early.",
+    bullets: [
+      "Autonomous scheduling for refining and midstream",
+      "Continuous, quantified methane LDAR",
+      "Subsurface AI tuned to your basin and your wells",
+    ],
+    scene: "compressor",
+    tag: "MIDSTREAM · CANADA",
+    credit: "FIG. 03 · COMPRESSOR STN",
+  },
+];
+
+const INDUSTRIES = [
+  {
+    n: "01 · UPSTREAM",
+    title: "Find more. Drill smarter.",
+    body: "AI that cuts geological analysis from months to weeks, optimizes drilling in real time, and trims your methane footprint without touching a clipboard.",
+    scene: "pumpjack",
+    stats: [["−42%", "NPT"], ["3.2×", "geology"], ["100%", "LDAR"]],
+  },
+  {
+    n: "02 · MIDSTREAM",
+    title: "Pipeline integrity. Smart logistics.",
+    body: "Continuous monitoring across thousands of kilometers, with anomaly detection that runs faster than the regulator's clock.",
+    scene: "pipeline",
+    stats: [["12×", "anomaly"], ["−28%", "shrinkage"], ["0", "manual reports"]],
+  },
+  {
+    n: "03 · REFINING",
+    title: "Autonomous scheduling. Zero-surprise maintenance.",
+    body: "Refineries operate harder and longer when the schedule, the maintenance plan, and the inspection log all live in the same loop.",
+    scene: "refinery",
+    stats: [["+9%", "utilization"], ["−61%", "downtime"], ["100%", "trace"]],
+  },
+  {
+    n: "04 · DOWNSTREAM",
+    title: "Dynamic pricing. Smarter inventory. Better margin.",
+    body: "Real demand signals drive pricing. Inventory anticipates instead of reacts. Customer interactions personalize at scale.",
+    scene: "fuel",
+    stats: [["+4.1¢", "margin/gal"], ["−18%", "stockouts"], ["2.3×", "loyalty"]],
+  },
+];
+
+function useReveal() {
+  const ref = useRef();
+  useEffect(() => {
+    const els = document.querySelectorAll(".reveal");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+function Nav() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <nav className={"nav" + (scrolled ? " scrolled" : "")}>
+      <a href="#" className="mark"><span className="dot"></span>Stratum</a>
+      <div className="links">
+        <a href="#thesis">Thesis</a>
+        <a href="#phases">Phases</a>
+        <a href="#industries">Industries</a>
+        <a href="#evidence">Evidence</a>
+      </div>
+      <a href="#contact" className="cta">Book a call</a>
+    </nav>
+  );
+}
+
+function Hero() {
+  return (
+    <section className="hero" data-screen-label="Field · Hero">
+      <div className="hero-img"><div className="silhouette"></div></div>
+      <div className="hero-grain"></div>
+      <div className="hero-inner">
+        <div className="hero-meta">
+          <span className="pill">Stratum · 2026</span>
+          <span className="dotline"></span>
+          <span>The AI infrastructure for industry</span>
+        </div>
+        <h1>The <em>field</em> finally has software that <em>understands</em> it.</h1>
+        <div className="hero-bottom">
+          <p className="lede">Stratum brings agentic AI to the operators that move the physical world. We don't replace your stack. We <strong>connect it</strong> — so the data, the agents, and the people on shift finally play on the same team.</p>
+          <div className="actions">
+            <a href="#contact" className="btn-primary">Book a discovery call <span className="arrow"></span></a>
+            <div className="scroll-cue"><span>Scroll</span><span className="vline"></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CaptionStrip() {
+  return (
+    <div className="caption-strip">
+      <div className="container">
+        <span>↗ TRUSTED IN PRODUCTION BY</span>
+        <div className="ticker">
+          <span>Meridian Energy</span>
+          <span>Northgate Pipelines</span>
+          <span>Saltfork Refining</span>
+          <span>Crestline Midstream</span>
+          <span>Hollow Mesa</span>
+          <span>Borealis Gas</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Thesis() {
+  return (
+    <section className="thesis" id="thesis" data-screen-label="Field · Thesis">
+      <div className="container">
+        <div className="thesis-grid">
+          <div className="thesis-label eyebrow">A note from the field</div>
+          <div className="thesis-body">
+            <p className="reveal">Industrial software was written by people who have <span className="strike">never</span> spent a shift in a control room.</p>
+            <p className="reveal">The result is what you'd expect — tools that fight the work, that get bypassed at 3 a.m., that quietly make the operator's job <em>harder</em>.</p>
+            <p className="reveal">The next decade of energy belongs to the operators who get the data, the agents, and the people on shift on the <em>same team</em>.</p>
+            <p className="reveal">That's the only product we're interested in building.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Reality() {
+  return (
+    <section className="reality" data-screen-label="Field · Reality">
+      <div className="container">
+        <div className="reality-grid">
+          <div className="col">
+            <div className="eyebrow">The reality, in numbers</div>
+            <h2>Eighty percent of the <em>real</em> economy still runs on paper.</h2>
+            <p>Energy, manufacturing, logistics, mining — the trades that move the physical world have been an afterthought for the entire enterprise software era.</p>
+            <p>The software that does exist was built for a desk and a meeting, not a turnaround and a wellpad.</p>
+            <div className="reality-stats">
+              <div>
+                <div className="num"><em>80%</em></div>
+                <div className="lbl">Of the global workforce, deskless. The same percentage that's been historically underserved.</div>
+              </div>
+              <div>
+                <div className="num"><em>$3T</em></div>
+                <div className="lbl">Annual capex across upstream, midstream, and refining. Most decisions still made in spreadsheets.</div>
+              </div>
+              <div>
+                <div className="num"><em>11×</em></div>
+                <div className="lbl">Industrial datasets the average operator has under management — none of which talk to each other.</div>
+              </div>
+              <div>
+                <div className="num"><em>3am</em></div>
+                <div className="lbl">When most production decisions still get made — over a phone, with a clipboard, off feel.</div>
+              </div>
+            </div>
+          </div>
+          <div className="col reality-img-col reality-art">
+            <div className="caption">
+              <span>Field study · figure 04</span>
+              <span>↗ DIAGRAM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Phases() {
+  return (
+    <section className="phases" id="phases" data-screen-label="Field · Phases">
+      <div className="container">
+        <div className="phases-head">
+          <div className="eyebrow">Three phases of transformation</div>
+          <h2>Deploy. Reshape. <em>Invent.</em></h2>
+        </div>
+      </div>
+      {PHASES.map((p) => (
+        <div key={p.n} className="phase-row">
+          <div className="copy">
+            <div className="num">{p.n}</div>
+            <h3>{p.title.map((t, i) => i % 2 === 1 ? <em key={i}>{t}</em> : <React.Fragment key={i}>{t}</React.Fragment>)}</h3>
+            <p>{p.body}</p>
+            <ul>{p.bullets.map((b) => <li key={b}>{b}</li>)}</ul>
+          </div>
+          <div className="image" style={{ backgroundImage: `url('${p.img}')` }}>
+            <span className="tag">{p.tag}</span>
+            <span className="credit">{p.credit}</span>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function Photobreak() {
+  return (
+    <section className="photobreak" data-screen-label="Field · Photobreak"
+      style={{ backgroundImage: "url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=2400&q=80')" }}>
+      <span className="credit-pill">PIPELINE · NORTHERN ALBERTA</span>
+      <div className="container">
+        <div className="eyebrow">In production</div>
+        <h2>17 operators. 4 continents. <em>One backbone.</em></h2>
+      </div>
+    </section>
+  );
+}
+
+function Industries() {
+  return (
+    <section className="industries" id="industries" data-screen-label="Field · Industries">
+      <div className="container">
+        <div className="industries-head">
+          <div>
+            <div className="eyebrow">By segment</div>
+            <h2>Built for the part of energy you actually <em>run</em>.</h2>
+          </div>
+          <p className="meta">Each segment ships with its own pre-trained agent library. Pick what's relevant. Light it up. Measure outcomes inside a quarter.</p>
+        </div>
+        <div className="industries-grid">
+          {INDUSTRIES.map((i) => (
+            <a key={i.n} className="industry-card" href="#">
+              <div className="img" style={{ backgroundImage: `url('${i.img}')` }}></div>
+              <div className="body">
+                <span className="num">{i.n}</span>
+                <h3>{i.title}</h3>
+                <p>{i.body}</p>
+                <div className="stats">
+                  {i.stats.map(([n, l]) => <span key={l}><em>{n}</em>&nbsp;{l}</span>)}
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Evidence() {
+  return (
+    <section className="evidence" id="evidence" data-screen-label="Field · Evidence">
+      <div className="container">
+        <div className="quote-wrap">
+          <div className="eyebrow" style={{ marginBottom: 32, justifyContent: "center", display: "inline-flex" }}>From the floor</div>
+          <div className="mark">"</div>
+          <blockquote>
+            "We've sat through fifteen years of <em>industrial software</em> demos. Stratum is the first one our shift supervisors asked us to keep."
+          </blockquote>
+          <div className="attrib">
+            <span className="av" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&w=200&q=80')" }}></span>
+            <span className="name">Marcus Trask</span>
+            <span>·</span>
+            <span>VP Operations · Gulf Coast Refiner</span>
+          </div>
+        </div>
+        <div className="logo-row">
+          <div>Meridian Energy</div>
+          <div>Northgate Pipelines</div>
+          <div>Saltfork Refining</div>
+          <div>Crestline Midstream</div>
+          <div>Hollow Mesa</div>
+          <div>Borealis Gas</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CTA() {
+  return (
+    <section className="cta-section" id="contact" data-screen-label="Field · CTA">
+      <div className="cta-bg"></div>
+      <div className="container">
+        <div className="eyebrow" style={{ marginBottom: 32, justifyContent: "center", display: "inline-flex" }}>Start the conversation</div>
+        <h2>Show us your <em>operation</em>.</h2>
+        <p>We'll show you which agents pay back fastest, in which order, and what the first eight weeks look like — on your data, on your terms.</p>
+        <div className="cta-actions">
+          <a href="#" className="btn-primary">Book a discovery call <span className="arrow"></span></a>
+          <a href="#" className="btn-ghost">Read the platform brief</a>
+        </div>
+        <div className="channels">
+          <span>↗ CERAWEEK · HOUSTON · MAR</span>
+          <span>↗ OTC · HOUSTON · MAY</span>
+          <span>↗ ADIPEC · ABU DHABI · NOV</span>
+          <span>↗ press@stratum.systems</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Foot() {
+  return (
+    <footer>
+      <div className="container">
+        <div className="footer-grid">
+          <div className="colophon">
+            <div className="mark" style={{ fontFamily: "var(--serif)", fontSize: 24, fontWeight: 500, display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent)", display: "inline-block" }}></span>
+              Stratum
+            </div>
+            <p>The AI infrastructure for the eighty percent of the workforce that doesn't sit at a desk. Houston · Calgary · London.</p>
+          </div>
+          <div>
+            <h4>Product</h4>
+            <ul>
+              <li><a href="#phases">Phases</a></li>
+              <li><a href="#industries">Industries</a></li>
+              <li><a href="#evidence">Evidence</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Company</h4>
+            <ul>
+              <li><a href="#">About</a></li>
+              <li><a href="#">Careers</a></li>
+              <li><a href="#">Press</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Trust</h4>
+            <ul>
+              <li><a href="#">Security</a></li>
+              <li><a href="#">SOC 2 · IEC 62443</a></li>
+              <li><a href="#">Privacy</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span>© 2026 Stratum Systems, Inc.</span>
+          <span>Photography · field captures · used under license</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function App() {
+  useReveal();
+  return (
+    <>
+      <Nav />
+      <Hero />
+      <CaptionStrip />
+      <Thesis />
+      <Reality />
+      <Phases />
+      <Photobreak />
+      <Industries />
+      <Evidence />
+      <CTA />
+      <Foot />
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("app")).render(<App />);
+</script>
+</body>
+</html>

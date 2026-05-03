@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Industries — Stratum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  .ind-hero { padding: clamp(80px, 8vw, 140px) 0 clamp(40px, 5vw, 72px); border-bottom: 1px solid var(--ink); }
+  .ind-hero h1 { font-family: var(--font-display); font-size: clamp(56px, 8vw, 144px); line-height: 0.95; margin: 0 0 28px; letter-spacing: -0.03em; font-weight: 500; max-width: 14ch; text-wrap: balance; }
+  .ind-hero p { color: var(--ink-2); max-width: 60ch; font-size: 18px; line-height: 1.5; }
+
+  .ind-rail { display: grid; grid-template-columns: 280px 1fr; gap: 0; min-height: 70vh; }
+  .ind-rail-list { border-right: 1px solid var(--line); }
+  .ind-rail-list button {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 18px 24px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--ink-2);
+    cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    letter-spacing: -0.005em;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .ind-rail-list button:hover { color: var(--ink); background: var(--bg-2); }
+  .ind-rail-list button.active { color: var(--ink); background: var(--bg-2); }
+  .ind-rail-list button.active::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .ind-rail-list button .num { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-2); margin-right: 14px; }
+
+  .ind-pane { padding: 56px clamp(20px, 4vw, 64px); display: flex; flex-direction: column; gap: 36px; }
+  .ind-pane .eyebrow { margin-bottom: 8px; }
+  .ind-pane h2 { font-family: var(--font-display); font-size: clamp(40px, 5vw, 72px); line-height: 0.98; margin: 0; letter-spacing: -0.025em; font-weight: 500; max-width: 18ch; text-wrap: balance; }
+  .ind-pane .lede { color: var(--ink-2); font-size: 18px; line-height: 1.5; max-width: 60ch; }
+  .ind-feature { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--ink); }
+  .ind-feature > div { padding: 24px 24px 32px; border-right: 1px solid var(--line); }
+  .ind-feature > div:last-child { border-right: 0; }
+  .ind-feature .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; }
+  .ind-feature h3 { font-family: var(--font-display); font-size: 20px; line-height: 1.2; letter-spacing: -0.01em; font-weight: 500; margin: 14px 0 8px; }
+  .ind-feature p { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin: 0; }
+
+  .ind-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+  .ind-stat-row > div { padding: 24px; border-right: 1px solid var(--line); }
+  .ind-stat-row > div:last-child { border-right: 0; }
+  .ind-stat-row .num { font-family: var(--font-display); font-size: clamp(40px, 5vw, 72px); letter-spacing: -0.03em; line-height: 0.9; font-weight: 400; }
+  .ind-stat-row .lbl { font-size: 13px; color: var(--ink-2); margin-top: 8px; max-width: 26ch; }
+
+  .ind-diagram { padding: 24px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--bg-2); }
+  .ind-diagram svg { width: 100%; height: auto; }
+
+  @media (max-width: 980px) {
+    .ind-rail { grid-template-columns: 1fr; }
+    .ind-rail-list { border-right: 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: repeat(2, 1fr); }
+    .ind-rail-list button { border-right: 1px solid var(--line); }
+    .ind-feature { grid-template-columns: 1fr; }
+    .ind-feature > div { border-right: 0; border-bottom: 1px solid var(--line); }
+    .ind-stat-row { grid-template-columns: 1fr; }
+    .ind-stat-row > div { border-right: 0; border-bottom: 1px solid var(--line); }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="tweaks.jsx"></script>
+<script type="text/babel" src="industries-data.jsx"></script>
+<script type="text/babel">
+const { useState: useS } = React;
+
+// INDUSTRIES is loaded from industries-data.jsx
+
+function StackDiagram() {
+  return (
+    <svg viewBox="0 0 600 240" fill="none" stroke="currentColor" strokeWidth="1">
+      <text x="0" y="14" fontFamily="var(--font-mono)" fontSize="10" fill="var(--ink-2)" letterSpacing="1">YOUR EXISTING STACK</text>
+      <rect x="0" y="24" width="120" height="40" />
+      <rect x="130" y="24" width="120" height="40" />
+      <rect x="260" y="24" width="120" height="40" />
+      <rect x="390" y="24" width="120" height="40" />
+      <text x="60" y="48" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="10" fill="var(--ink)">SCADA</text>
+      <text x="190" y="48" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="10" fill="var(--ink)">ERP</text>
+      <text x="320" y="48" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="10" fill="var(--ink)">MAINT.</text>
+      <text x="450" y="48" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="10" fill="var(--ink)">FIELD LOG</text>
+      <line x1="60" y1="64" x2="60" y2="100" />
+      <line x1="190" y1="64" x2="190" y2="100" />
+      <line x1="320" y1="64" x2="320" y2="100" />
+      <line x1="450" y1="64" x2="450" y2="100" />
+      <rect x="0" y="100" width="510" height="48" fill="var(--bg)" />
+      <text x="255" y="124" textAnchor="middle" fontFamily="var(--font-display)" fontSize="14" fill="var(--ink)">STRATUM · CONNECTIVE LAYER</text>
+      <text x="255" y="138" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="9" fill="var(--ink-2)">DATA · CONTEXT · GOVERNANCE</text>
+      <line x1="60" y1="148" x2="60" y2="180" strokeDasharray="2 3" />
+      <line x1="190" y1="148" x2="190" y2="180" strokeDasharray="2 3" />
+      <line x1="320" y1="148" x2="320" y2="180" strokeDasharray="2 3" />
+      <line x1="450" y1="148" x2="450" y2="180" strokeDasharray="2 3" />
+      <rect x="0" y="180" width="120" height="40" />
+      <rect x="130" y="180" width="120" height="40" />
+      <rect x="260" y="180" width="120" height="40" />
+      <rect x="390" y="180" width="120" height="40" />
+      <text x="60" y="204" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="10" fill="var(--ink)">RISK</text>
+      <text x="190" y="204" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="10" fill="var(--ink)">SCHEDULE</text>
+      <text x="320" y="204" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="10" fill="var(--ink)">COMPLIANCE</text>
+      <text x="450" y="204" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="10" fill="var(--ink)">DISPATCH</text>
+      <text x="0" y="234" fontFamily="var(--font-mono)" fontSize="10" fill="var(--accent)" letterSpacing="1">AI AGENTS · ON TOP</text>
+    </svg>
+  );
+}
+
+function IndustriesPage() {
+  const [active, setActive] = useS("upstream");
+  const ind = INDUSTRIES.find(i => i.id === active);
+  const primary = INDUSTRIES.filter(i => i.primary);
+  const adjacent = INDUSTRIES.filter(i => !i.primary);
+
+  return (
+    <>
+      <Nav active="industries" />
+      <section className="ind-hero" data-screen-label="Industries · Hero">
+        <div className="container">
+          <div className="eyebrow" style={{ marginBottom: 28 }}>By industry</div>
+          <h1>One platform. <span style={{ color: "var(--accent)", fontStyle: "italic", fontWeight: 400 }}>Every</span> shape.</h1>
+          <p>Stratum is one connective layer with one data backbone. The shape it takes — and the agents that run on top — depend on the work in front of you.</p>
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingTop: 0 }} data-screen-label="Industries · Rail">
+        <div className="ind-rail">
+          <div className="ind-rail-list">
+            <div style={{ padding: "12px 24px", borderBottom: "1px solid var(--ink)", fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: "0.08em", color: "var(--ink-2)", textTransform: "uppercase" }}>Oil &amp; gas</div>
+            {primary.map((i, idx) => (
+              <button key={i.id} onClick={() => setActive(i.id)} className={i.id === active ? "active" : ""}>
+                <span><span className="num">{String(idx+1).padStart(2,"0")}</span>{i.name}</span>
+                <span></span>
+              </button>
+            ))}
+            <div style={{ padding: "12px 24px", borderBottom: "1px solid var(--ink)", borderTop: "1px solid var(--ink)", fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: "0.08em", color: "var(--ink-2)", textTransform: "uppercase" }}>Adjacent trades</div>
+            {adjacent.map((i, idx) => (
+              <button key={i.id} onClick={() => setActive(i.id)} className={i.id === active ? "active" : ""}>
+                <span><span className="num">{String(idx+5).padStart(2,"0")}</span>{i.name}</span>
+                <span></span>
+              </button>
+            ))}
+          </div>
+          <div className="ind-pane">
+            <div>
+              <div className="eyebrow">{ind.primary ? "Oil & gas segment" : "Adjacent trade"}</div>
+              <h2>{ind.headline}</h2>
+              <p className="lede" style={{ marginTop: 24 }}>{ind.lede}</p>
+            </div>
+            {ind.narrative && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 18, maxWidth: "70ch" }}>
+                {ind.narrative.map((n, i) => (
+                  <p key={i} style={{ margin: 0, fontSize: 16, lineHeight: 1.6, color: "var(--ink)" }}>{n}</p>
+                ))}
+              </div>
+            )}
+            <div className="ind-feature">
+              {ind.features.map((f) => (
+                <div key={f.k}>
+                  <div className="k">{f.k}</div>
+                  <h3>{f.t}</h3>
+                  <p>{f.b}</p>
+                </div>
+              ))}
+            </div>
+            <div className="ind-stat-row">
+              {ind.stats.map((s) => (
+                <div key={s.lbl}>
+                  <div className="num">{s.num}</div>
+                  <div className="lbl">{s.lbl}</div>
+                </div>
+              ))}
+            </div>
+            {ind.day && (
+              <div>
+                <div className="eyebrow" style={{ marginBottom: 14 }}>{ind.day.label}</div>
+                <div style={{ border: "1px solid var(--line-strong)", borderRadius: 6, overflow: "hidden" }}>
+                  {ind.day.steps.map((s, i) => (
+                    <div key={i} style={{
+                      display: "grid",
+                      gridTemplateColumns: "100px 1fr",
+                      gap: 20,
+                      padding: "16px 20px",
+                      borderBottom: i < ind.day.steps.length - 1 ? "1px solid var(--line)" : "0",
+                      alignItems: "start",
+                    }}>
+                      <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent)", letterSpacing: "0.04em" }}>{s.time}</div>
+                      <div style={{ fontSize: 15, lineHeight: 1.5 }}>{s.what}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {ind.stack && (
+              <div>
+                <div className="eyebrow" style={{ marginBottom: 14 }}>Typical stack we connect</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {ind.stack.map((s) => (
+                    <span key={s} className="ind-chip" style={{
+                      fontFamily: "var(--font-mono)", fontSize: 11, padding: "8px 12px",
+                      border: "1px solid var(--line-strong)", borderRadius: 999, color: "var(--ink-2)",
+                    }}>{s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 14 }}>Stack shape</div>
+              <div className="ind-diagram"><StackDiagram /></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="cta" data-screen-label="Industries · CTA">
+        <div className="container">
+          <h2>Show us your operation.</h2>
+          <p>We'll show you which agents pay back fastest, in which order, and what the first eight weeks look like.</p>
+          <div className="actions">
+            <a className="btn btn--accent" href="#">Book a discovery call <span className="arrow"></span></a>
+            <a className="btn btn--ghost" href="index.html">Back to platform</a>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+      <StratumTweaks />
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("app")).render(<IndustriesPage />);
+</script>
+</body>
+</html>

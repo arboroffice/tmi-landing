@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Company — Stratum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  .co-hero { padding: clamp(80px, 8vw, 140px) 0 clamp(40px, 5vw, 72px); border-bottom: 1px solid var(--ink); }
+  .co-hero h1 { font-family: var(--font-display); font-size: clamp(60px, 8.5vw, 152px); line-height: 0.94; margin: 0 0 28px; letter-spacing: -0.03em; font-weight: 500; max-width: 14ch; text-wrap: balance; }
+  .co-hero .lede { color: var(--ink-2); max-width: 60ch; font-size: 19px; line-height: 1.5; }
+
+  .manifesto { padding: clamp(72px, 8vw, 140px) 0; border-bottom: 1px solid var(--ink); }
+  .manifesto-grid { display: grid; grid-template-columns: 1fr 2fr; gap: clamp(40px, 6vw, 96px); align-items: start; }
+  .manifesto-grid .label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); position: sticky; top: 100px; }
+  .manifesto-grid .body p { font-family: var(--font-serif, Newsreader), serif; font-size: clamp(22px, 2.6vw, 32px); line-height: 1.4; margin: 0 0 28px; color: var(--ink); max-width: 32ch; text-wrap: balance; letter-spacing: -0.005em; }
+  .manifesto-grid .body p:last-child { margin: 0; }
+  .manifesto-grid .body p em { color: var(--accent); font-style: italic; }
+
+  .principles { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+  .principles > div { padding: 48px 32px; border-right: 1px solid var(--line); }
+  .principles > div:last-child { border-right: 0; }
+  .principles .num { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.06em; margin-bottom: 32px; }
+  .principles h3 { font-family: var(--font-display); font-size: 26px; font-weight: 500; letter-spacing: -0.015em; margin: 0 0 14px; }
+  .principles p { color: var(--ink-2); font-size: 15px; line-height: 1.55; margin: 0; }
+
+  .timeline { display: grid; grid-template-columns: 180px 1fr; gap: 0; border-top: 1px solid var(--ink); }
+  .timeline-row { display: contents; }
+  .timeline-row .year { padding: 32px 24px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); font-family: var(--font-mono); font-size: 13px; color: var(--accent); letter-spacing: 0.04em; }
+  .timeline-row .body { padding: 32px 36px; border-bottom: 1px solid var(--line); }
+  .timeline-row .body h4 { font-family: var(--font-display); font-size: 22px; font-weight: 500; letter-spacing: -0.01em; margin: 0 0 8px; }
+  .timeline-row .body p { color: var(--ink-2); font-size: 15px; line-height: 1.55; margin: 0; max-width: 60ch; }
+
+  .leaders { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid var(--ink); }
+  .leader { padding: 40px 36px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 96px 1fr; gap: 24px; align-items: start; }
+  .leader:nth-child(2n) { border-right: 0; }
+  .leader .avatar { width: 96px; height: 96px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 50%; font-family: var(--font-mono); font-size: 22px; color: var(--ink); display: flex; align-items: center; justify-content: center; letter-spacing: 0.04em; }
+  .leader h4 { font-family: var(--font-display); font-size: 22px; font-weight: 500; letter-spacing: -0.01em; margin: 0 0 4px; }
+  .leader .role { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .leader p { color: var(--ink-2); font-size: 14.5px; line-height: 1.55; margin: 0; }
+
+  .stats-band { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); background: var(--ink); color: var(--bg); }
+  .stats-band > div { padding: 56px 32px; border-right: 1px solid rgba(255,255,255,0.12); }
+  .stats-band > div:last-child { border-right: 0; }
+  .stats-band .num { font-family: var(--font-display); font-size: clamp(48px, 5.5vw, 88px); line-height: 1; letter-spacing: -0.025em; font-weight: 500; }
+  .stats-band .lbl { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-top: 18px; }
+
+  .investors { display: grid; grid-template-columns: repeat(6, 1fr); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+  .investors > div { padding: 36px 18px; border-right: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: clamp(14px, 1.4vw, 18px); font-weight: 500; letter-spacing: -0.005em; color: var(--ink); text-align: center; min-height: 100px; }
+  .investors > div:last-child { border-right: 0; }
+
+  .careers { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--ink); }
+  .careers .left { padding: clamp(48px, 6vw, 96px) clamp(20px, 4vw, 64px); border-right: 1px solid var(--line); }
+  .careers .right { padding: clamp(48px, 6vw, 96px) clamp(20px, 4vw, 64px); }
+  .careers h2 { font-family: var(--font-display); font-size: clamp(40px, 5vw, 72px); line-height: 0.98; margin: 0 0 24px; letter-spacing: -0.025em; font-weight: 500; max-width: 12ch; text-wrap: balance; }
+  .careers p { color: var(--ink-2); font-size: 17px; line-height: 1.55; max-width: 50ch; margin: 0 0 28px; }
+  .role-list { display: flex; flex-direction: column; }
+  .role-list a { display: grid; grid-template-columns: 1fr 160px 30px; gap: 12px; padding: 24px 0; border-bottom: 1px solid var(--line); align-items: baseline; transition: padding 0.2s ease; }
+  .role-list a:first-child { border-top: 1px solid var(--line-strong); }
+  .role-list a:hover { padding-left: 8px; }
+  .role-list h4 { font-family: var(--font-display); font-size: 18px; font-weight: 500; margin: 0; letter-spacing: -0.005em; }
+  .role-list .where { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); letter-spacing: 0.04em; }
+
+  @media (max-width: 980px) {
+    .manifesto-grid { grid-template-columns: 1fr; }
+    .manifesto-grid .label { position: static; }
+    .principles { grid-template-columns: 1fr; }
+    .principles > div { border-right: 0; border-bottom: 1px solid var(--line); }
+    .leaders { grid-template-columns: 1fr; }
+    .leader { border-right: 0; }
+    .stats-band { grid-template-columns: repeat(2, 1fr); }
+    .investors { grid-template-columns: repeat(3, 1fr); }
+    .careers { grid-template-columns: 1fr; }
+    .careers .left { border-right: 0; border-bottom: 1px solid var(--line); }
+    .timeline { grid-template-columns: 1fr; }
+    .timeline-row .year { border-right: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="tweaks.jsx"></script>
+<script type="text/babel">
+function CompanyPage() {
+  return (
+    <>
+      <Nav active="company" />
+
+      <section className="co-hero" data-screen-label="Company · Hero">
+        <div className="container">
+          <div className="eyebrow" style={{ marginBottom: 28 }}>Company</div>
+          <h1>The companies that <span style={{ color: "var(--accent)", fontStyle: "italic", fontWeight: 400 }}>move</span> the physical world deserve software that does too.</h1>
+          <p className="lede">Stratum is a team of operators, engineers, and applied researchers building the AI infrastructure for the eighty percent of the workforce that doesn't sit at a desk.</p>
+        </div>
+      </section>
+
+      <section className="manifesto" data-screen-label="Company · Manifesto">
+        <div className="container">
+          <div className="manifesto-grid">
+            <div className="label">A note<br/>from the founders</div>
+            <div className="body">
+              <p>Industrial software has been written by people who have never spent a shift in a control room.</p>
+              <p>The result is what you'd expect — tools that fight the work, that get bypassed at 3 a.m., that quietly make the operator's job <em>harder</em>.</p>
+              <p>We started Stratum because the next decade of energy, manufacturing, and logistics will be defined by the operators that get the data, the agents, and the people on the same team.</p>
+              <p>That's the only product we're interested in building.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-screen-label="Company · Principles">
+        <div className="container" style={{ paddingTop: "clamp(72px, 8vw, 120px)", paddingBottom: 0 }}>
+          <div className="section-head" style={{ marginBottom: 0 }}>
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 18 }}>What we believe</div>
+              <h2>Three principles, repeated until they're boring.</h2>
+            </div>
+            <p>They show up in our hiring, our roadmaps, our customer agreements, and the things we say no to.</p>
+          </div>
+        </div>
+        <div className="principles" style={{ marginTop: "clamp(40px, 5vw, 72px)" }}>
+          <div>
+            <div className="num">01 · OPERATORS FIRST</div>
+            <h3>The shift is the only test that matters.</h3>
+            <p>If a feature doesn't survive a Tuesday night turnaround, it doesn't ship. We pilot in the field before we sell from the deck.</p>
+          </div>
+          <div>
+            <div className="num">02 · CONNECT, DON'T REPLACE</div>
+            <h3>Your stack stays. We make it work.</h3>
+            <p>Rip-and-replace is how decade-long IT projects die. We connect to the OSIsoft, the SAP, the historians you already trust — and make them legible to AI.</p>
+          </div>
+          <div>
+            <div className="num">03 · EVIDENCE, NOT ADJECTIVES</div>
+            <h3>We measure or we don't claim it.</h3>
+            <p>Every agent ships with a measurement plan. Every quarter we publish customer-verified outcomes. Adjectives are cheap; the receipts are not.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" data-screen-label="Company · Timeline">
+        <div className="container">
+          <div className="section-head">
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 18 }}>The story so far</div>
+              <h2>Five years, one thesis.</h2>
+            </div>
+            <p>The bet hasn't moved. The shape of the product has gotten sharper because the field has taught us where to push.</p>
+          </div>
+          <div className="timeline">
+            <div className="timeline-row">
+              <div className="year">2021</div>
+              <div className="body">
+                <h4>Founded inside a refinery turnaround.</h4>
+                <p>Stratum's founding team meets while embedded with a Gulf Coast refiner during a $40M turnaround. The first prototype is a tablet app that replaces eleven different inspection clipboards.</p>
+              </div>
+            </div>
+            <div className="timeline-row">
+              <div className="year">2022</div>
+              <div className="body">
+                <h4>Seed round, first paying operator.</h4>
+                <p>$8M from Founders Fund and a strategic refining partner. First paid deployment goes live across two cracking units. The "connect, don't replace" thesis lands.</p>
+              </div>
+            </div>
+            <div className="timeline-row">
+              <div className="year">2023</div>
+              <div className="body">
+                <h4>The platform takes shape.</h4>
+                <p>Stratum Core ships — the data layer that makes historians, ERPs, and field capture legible to a single agent runtime. First upstream pilots begin.</p>
+              </div>
+            </div>
+            <div className="timeline-row">
+              <div className="year">2024</div>
+              <div className="body">
+                <h4>Series A, agent library v1.</h4>
+                <p>$22M Series A led by Sequoia. The first eight production agents — drilling, inspection, scheduling, LDAR — go live with named operators. SOC 2 Type I.</p>
+              </div>
+            </div>
+            <div className="timeline-row">
+              <div className="year">2026</div>
+              <div className="body">
+                <h4>Series B. Industrial-grade compliance. Refining at scale.</h4>
+                <p>$48M Series B. SOC 2 Type II and IEC 62443-3-3. Three majors live across refining and midstream. The next chapter is invention — agents that re-imagine workflows that were never possible before.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="stats-band" data-screen-label="Company · Stats">
+        <div>
+          <div className="num">82</div>
+          <div className="lbl">People</div>
+        </div>
+        <div>
+          <div className="num">17</div>
+          <div className="lbl">Operators in production</div>
+        </div>
+        <div>
+          <div className="num">$78M</div>
+          <div className="lbl">Capital raised</div>
+        </div>
+        <div>
+          <div className="num">3</div>
+          <div className="lbl">Continents covered</div>
+        </div>
+      </section>
+
+      <section className="section" data-screen-label="Company · Leadership">
+        <div className="container">
+          <div className="section-head">
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 18 }}>Leadership</div>
+              <h2>The people answering the phone.</h2>
+            </div>
+            <p>Operators, engineers, and applied researchers. Most of us have run a shift, a P&amp;L, or a research lab — usually two of three.</p>
+          </div>
+          <div className="leaders">
+            <div className="leader">
+              <div className="avatar">EM</div>
+              <div>
+                <h4>Elena Marsh</h4>
+                <div className="role">CO-FOUNDER &amp; CEO</div>
+                <p>Former operations lead at a Gulf Coast refiner. Spent ten years between control rooms and the C-suite. Co-founded Stratum the week after her last turnaround.</p>
+              </div>
+            </div>
+            <div className="leader">
+              <div className="avatar">DK</div>
+              <div>
+                <h4>Daniel Koh</h4>
+                <div className="role">CO-FOUNDER &amp; CTO</div>
+                <p>Distributed systems, then applied ML. Built large-scale telemetry pipelines at Stripe before deciding the more interesting telemetry was coming off pipelines.</p>
+              </div>
+            </div>
+            <div className="leader">
+              <div className="avatar">NA</div>
+              <div>
+                <h4>Nadia Abadi</h4>
+                <div className="role">HEAD OF UPSTREAM</div>
+                <p>Former Schlumberger digital chief. Twenty-two years in the field, four basins, three languages. The customer's customer's advocate.</p>
+              </div>
+            </div>
+            <div className="leader">
+              <div className="avatar">JT</div>
+              <div>
+                <h4>Jacob Tremaine</h4>
+                <div className="role">HEAD OF SECURITY</div>
+                <p>OT security since before it had a name. Wrote one of the early IEC 62443 implementation guides. Owns the line between "it works" and "it's safe to deploy."</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-screen-label="Company · Investors">
+        <div className="container" style={{ paddingTop: "clamp(72px, 8vw, 120px)", paddingBottom: 0 }}>
+          <div className="section-head" style={{ marginBottom: 0 }}>
+            <div>
+              <div className="eyebrow" style={{ marginBottom: 18 }}>Backed by</div>
+              <h2>Long-term capital, operator partners.</h2>
+            </div>
+            <p>Investors who've been through industrial software cycles before. Strategics who use the product on shift.</p>
+          </div>
+        </div>
+        <div className="investors" style={{ marginTop: "clamp(40px, 5vw, 72px)" }}>
+          <div>Founders Fund</div>
+          <div>Sequoia Capital</div>
+          <div>Lux Capital</div>
+          <div>Energize Ventures</div>
+          <div>Tiger Global</div>
+          <div>+3 strategic operators</div>
+        </div>
+      </section>
+
+      <section className="careers" data-screen-label="Company · Careers">
+        <div className="left">
+          <div className="eyebrow" style={{ marginBottom: 24 }}>Careers</div>
+          <h2>Build it in the field.</h2>
+          <p>We hire people who like shipping software that gets used by people in steel-toes. Most roles include time on-site with customers — that's a feature, not a tax.</p>
+          <p>We're a remote-first team with hubs in Houston, Calgary, and London, and we travel to where the work is.</p>
+          <a className="btn btn--accent" href="#">See all 14 open roles <span className="arrow"></span></a>
+        </div>
+        <div className="right">
+          <div className="eyebrow" style={{ marginBottom: 24 }}>Open roles</div>
+          <div className="role-list">
+            <a href="#"><h4>Senior Forward Deployed Engineer</h4><span className="where">HOUSTON / REMOTE</span><span className="arrow"></span></a>
+            <a href="#"><h4>ML Engineer, Subsurface</h4><span className="where">REMOTE / CALGARY</span><span className="arrow"></span></a>
+            <a href="#"><h4>Designer, Field Ops</h4><span className="where">REMOTE</span><span className="arrow"></span></a>
+            <a href="#"><h4>Solutions Architect, Refining</h4><span className="where">HOUSTON</span><span className="arrow"></span></a>
+            <a href="#"><h4>OT Security Engineer</h4><span className="where">REMOTE / LONDON</span><span className="arrow"></span></a>
+            <a href="#"><h4>Account Executive, Midstream</h4><span className="where">CALGARY</span><span className="arrow"></span></a>
+          </div>
+        </div>
+      </section>
+
+      <section className="cta" data-screen-label="Company · CTA">
+        <div className="container">
+          <h2>Two ways to start a conversation.</h2>
+          <p>Tell us where the operation is, and we'll tell you which agents pay back fastest. Or just come say hi at one of the conferences below.</p>
+          <div className="actions">
+            <a className="btn btn--accent" href="#">Book a discovery call <span className="arrow"></span></a>
+            <a className="btn btn--ghost" href="news.html">Read the latest</a>
+          </div>
+          <div style={{ marginTop: 56, display: "flex", flexWrap: "wrap", gap: 24, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--ink-2)" }}>
+            <span>↗ ARC INDUSTRY · ORLANDO · FEB</span>
+            <span>↗ CERAWEEK · HOUSTON · MAR</span>
+            <span>↗ OTC · HOUSTON · MAY</span>
+            <span>↗ ADIPEC · ABU DHABI · NOV</span>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+      <StratumTweaks />
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("app")).render(<CompanyPage />);
+</script>
+</body>
+</html>

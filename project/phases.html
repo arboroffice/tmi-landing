@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Phases — Stratum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  .phase-page-hero { padding: clamp(80px, 8vw, 140px) 0 clamp(60px, 6vw, 96px); border-bottom: 1px solid var(--ink); }
+  .phase-page-hero h1 { font-family: var(--font-display); font-size: clamp(56px, 8vw, 144px); line-height: 0.95; margin: 0 0 28px; letter-spacing: -0.03em; font-weight: 500; max-width: 14ch; text-wrap: balance; }
+  .phase-page-hero p { color: var(--ink-2); max-width: 60ch; font-size: 18px; line-height: 1.5; }
+  .phase-detail { display: grid; grid-template-columns: 240px 1fr; gap: var(--gap); padding: clamp(56px, 6vw, 96px) 0; border-bottom: 1px solid var(--line); }
+  .phase-detail:last-child { border-bottom: 0; }
+  .phase-detail-tag { position: sticky; top: 80px; align-self: start; }
+  .phase-detail-tag .tag-mono { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; }
+  .phase-detail-tag h2 { font-family: var(--font-display); font-size: clamp(48px, 6vw, 80px); line-height: 0.95; letter-spacing: -0.025em; font-weight: 500; margin: 12px 0 0; }
+  .phase-detail-body p { font-size: 17px; line-height: 1.55; color: var(--ink); margin: 0 0 24px; max-width: 64ch; }
+  .phase-detail-body p.lead { font-family: var(--font-display); font-size: clamp(22px, 2.4vw, 30px); line-height: 1.25; letter-spacing: -0.015em; color: var(--ink); margin-bottom: 32px; max-width: 28ch; text-wrap: balance; }
+  .phase-deliverables { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 32px; border-top: 1px solid var(--ink); }
+  .phase-deliverables > div { padding: 18px 20px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
+  .phase-deliverables > div:nth-child(2n) { border-right: 0; }
+  .phase-deliverables .k { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
+  .phase-deliverables .v { font-family: var(--font-display); font-size: 18px; letter-spacing: -0.01em; line-height: 1.25; }
+  .timeline { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); margin-top: 80px; }
+  .timeline > div { padding: 24px; border-right: 1px solid var(--line); position: relative; }
+  .timeline > div:last-child { border-right: 0; }
+  .timeline .when { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.08em; }
+  .timeline .what { font-family: var(--font-display); font-size: 22px; line-height: 1.2; margin-top: 8px; letter-spacing: -0.01em; font-weight: 500; }
+  .timeline .meter-bar { margin-top: 18px; height: 4px; background: var(--line); position: relative; overflow: hidden; }
+  .timeline .meter-bar span { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); }
+  @media (max-width: 980px) {
+    .phase-detail { grid-template-columns: 1fr; }
+    .phase-detail-tag { position: static; }
+    .timeline { grid-template-columns: 1fr; }
+    .timeline > div { border-right: 0; border-bottom: 1px solid var(--line); }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="tweaks.jsx"></script>
+<script type="text/babel">
+  function PhasePage() {
+    const phases = [
+      {
+        n: "01", k: "Deploy",
+        lead: "Connect what you have. Automate what's repetitive. Show value in weeks.",
+        body: [
+          "Phase 01 is about momentum. We meet your operation where it is — SCADA, ERP, field logs, maintenance records, the spreadsheets that nobody admits exist — and we build the connective layer underneath. Nothing gets ripped out.",
+          "Within the first weeks, the most repetitive work your team does today starts to disappear. Inspection logs assemble themselves. Shift handoffs carry context. Reports stop being a Friday afternoon problem.",
+        ],
+        deliverables: [
+          { k: "Duration", v: "4–8 weeks" },
+          { k: "Outcome", v: "+15% productivity" },
+          { k: "Footprint", v: "Connective layer + 3 agents" },
+          { k: "Risk", v: "Zero rip & replace" },
+        ],
+      },
+      {
+        n: "02", k: "Reshape",
+        lead: "Agents take the operational work. People take the decisions.",
+        body: [
+          "Once the data is connected, agents start running the work. Scheduling, maintenance planning, safety monitoring, field coordination — all of it moves from inbox to autopilot, with humans approving the calls that actually matter.",
+          "The shape of the day changes. Engineers stop reconciling spreadsheets. Field supervisors stop chasing approvals. Incident response collapses from days to hours because the signal and the action are now in the same loop.",
+        ],
+        deliverables: [
+          { k: "Duration", v: "2–4 quarters" },
+          { k: "Outcome", v: "Days → hours response" },
+          { k: "Footprint", v: "12+ agents · 3 disciplines" },
+          { k: "Risk", v: "Phased, reversible" },
+        ],
+      },
+      {
+        n: "03", k: "Invent",
+        lead: "Operate autonomously where it's safe. Build new revenue where it's possible.",
+        body: [
+          "Phase 03 is where the gap opens permanently. Operational areas that make sense to run autonomously do — with human oversight where it counts. Predictive exploration tools start surfacing value the geology team would have taken months to find.",
+          "And the data backbone you built in Phase 01 starts to pay a different way: new revenue streams, real-time pricing, margin recovery in places fragmented stacks couldn't see. The companies that get here don't get caught.",
+        ],
+        deliverables: [
+          { k: "Duration", v: "12–24 months" },
+          { k: "Outcome", v: "30–70% profit uplift" },
+          { k: "Footprint", v: "Autonomous ops + new revenue" },
+          { k: "Risk", v: "Strategic, not operational" },
+        ],
+      },
+    ];
+
+    return (
+      <>
+        <Nav active="phases" />
+        <section className="phase-page-hero" data-screen-label="Phases · Hero">
+          <div className="container">
+            <div className="eyebrow" style={{ marginBottom: 28 }}>The phase plan</div>
+            <h1>Three phases. <span style={{ color: "var(--accent)", fontStyle: "italic", fontWeight: 400 }}>One direction.</span></h1>
+            <p>You don't need a five-year transformation program. You need three steps, in order, that each pay for the next. Here's what happens in each.</p>
+          </div>
+        </section>
+
+        <section className="container" style={{ paddingTop: 0 }} data-screen-label="Phases · Detail">
+          {phases.map((p) => (
+            <div className="phase-detail" key={p.n}>
+              <div className="phase-detail-tag">
+                <div className="tag-mono">PHASE {p.n}</div>
+                <h2>{p.k}.</h2>
+              </div>
+              <div className="phase-detail-body">
+                <p className="lead">{p.lead}</p>
+                {p.body.map((b, i) => <p key={i}>{b}</p>)}
+                <div className="phase-deliverables">
+                  {p.deliverables.map((d) => (
+                    <div key={d.k}>
+                      <div className="k">{d.k}</div>
+                      <div className="v">{d.v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        <section className="section" data-screen-label="Phases · Timeline">
+          <div className="container">
+            <div className="section-head">
+              <div>
+                <div className="eyebrow" style={{ marginBottom: 18 }}>What it looks like in time</div>
+                <h2>From kickoff to autonomy.</h2>
+              </div>
+              <p>An indicative path. Real timelines depend on your stack and appetite, but the shape is consistent.</p>
+            </div>
+            <div className="timeline">
+              <div>
+                <div className="when">WEEKS 0–8</div>
+                <div className="what">Connect &amp; automate the obvious.</div>
+                <div className="meter-bar"><span style={{ width: "20%" }}></span></div>
+              </div>
+              <div>
+                <div className="when">QUARTERS 1–4</div>
+                <div className="what">Agents reshape the operating day.</div>
+                <div className="meter-bar"><span style={{ width: "55%" }}></span></div>
+              </div>
+              <div>
+                <div className="when">YEARS 1–2+</div>
+                <div className="what">New revenue. Autonomous areas.</div>
+                <div className="meter-bar"><span style={{ width: "100%", background: "var(--accent)" }}></span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="cta" data-screen-label="Phases · CTA">
+          <div className="container">
+            <h2>Where would <em style={{ color: "var(--accent)", fontStyle: "italic", fontWeight: 400 }}>your</em> Phase 01 start?</h2>
+            <p>Bring us the operation. We'll bring you the map.</p>
+            <div className="actions">
+              <a className="btn btn--accent" href="#">Book a discovery call <span className="arrow"></span></a>
+              <a className="btn btn--ghost" href="index.html">Back to platform</a>
+            </div>
+          </div>
+        </section>
+
+        <Footer />
+        <StratumTweaks />
+      </>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("app")).render(<PhasePage />);
+</script>
+</body>
+</html>
