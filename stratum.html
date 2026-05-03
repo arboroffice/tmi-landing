@@ -631,6 +631,53 @@
     font-size: 15px; line-height: 1.55; color: var(--text-soft);
   }
 
+  /* WORKFORCE SHIFT */
+  .workforce-split {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid var(--line-strong); border-radius: 4px;
+    overflow: hidden;
+  }
+  .wf-col { padding: 48px 44px; }
+  .wf-automated { background: var(--bg-alt); border-right: 1px solid var(--line-strong); }
+  .wf-human { background: #fff; }
+  .wf-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 32px; padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .wf-tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+    text-transform: uppercase; padding: 5px 12px; border-radius: 999px;
+  }
+  .wf-automated .wf-tag { background: rgba(0,0,0,0.06); color: var(--muted); }
+  .wf-human .wf-tag { background: var(--ink); color: var(--bg); }
+  .wf-header p {
+    font-family: var(--serif); font-size: 18px; font-weight: 350;
+    color: var(--ink-2); margin: 0; line-height: 1.3;
+  }
+  .wf-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 24px; }
+  .wf-item { display: flex; flex-direction: column; gap: 5px; }
+  .wf-role { font-weight: 500; font-size: 15px; }
+  .wf-automated .wf-role { color: var(--ink-2); }
+  .wf-human .wf-role { color: var(--ink); }
+  .wf-desc { font-size: 14px; line-height: 1.55; color: var(--muted); }
+  .wf-pivot {
+    margin-top: 48px; padding: 52px 64px;
+    background: var(--bg-deep); color: #fff; border-radius: 4px;
+    text-align: center;
+  }
+  .wf-pivot p {
+    font-family: var(--serif); font-weight: 350;
+    font-size: clamp(20px, 1.8vw, 28px); line-height: 1.4;
+    max-width: 54ch; margin: 0 auto; letter-spacing: -0.01em;
+  }
+  .wf-pivot em { color: var(--accent); font-style: italic; }
+  @media (max-width: 1024px) {
+    .workforce-split { grid-template-columns: 1fr; }
+    .wf-automated { border-right: none; border-bottom: 1px solid var(--line-strong); }
+    .wf-pivot { padding: 36px 28px; }
+  }
+
   /* PRODUCT GLIMPSE */
   .glimpse { background: var(--bg-alt); }
   .glimpse-frame {
@@ -1024,6 +1071,7 @@
       <a href="#what">What we do</a>
       <a href="#usecases">Use cases</a>
       <a href="#shifts">What changes</a>
+      <a href="#workforce">Workforce</a>
       <a href="#commitments">Commitments</a>
       <a href="#built">Built for</a>
     </div>
@@ -1351,13 +1399,88 @@
   </div>
 </section>
 
+<!-- WORKFORCE SHIFT -->
+<section class="std" id="workforce" data-screen-label="08 Workforce shift">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="left">
+        <div class="eyebrow"><span class="dot"></span>The workforce shift</div>
+        <div class="num">05</div>
+      </div>
+      <div>
+        <h2>AI takes the desk work. <em class="serif">The field stays yours</em>.</h2>
+        <p class="sub">Every productivity revolution in the trades redistributed work — it didn't end it. AI handles the admin layer around the field. The field itself gets fewer people, higher skill, and better tools.</p>
+      </div>
+    </div>
+
+    <div class="workforce-split reveal">
+      <div class="wf-col wf-automated">
+        <div class="wf-header">
+          <span class="wf-tag">AI handles this</span>
+          <p>The work that sits around the field, not in it</p>
+        </div>
+        <ul class="wf-list">
+          <li class="wf-item">
+            <span class="wf-role">Field-ticket admin &amp; invoicing</span>
+            <span class="wf-desc">Auto-reading tickets, matching POs and codes, pushing entries into ERP — before the crew drives back.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Junior scheduling &amp; crew planning</span>
+            <span class="wf-desc">Optimal schedules based on weather, downtime, and crew availability. Especially for large-fleet and rig operations.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Procurement &amp; supply chain clerking</span>
+            <span class="wf-desc">Invoice-to-pay, supplier risk scoring, and contract term extraction — a known, proven AI wedge in oil and gas.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Production dashboard analysis</span>
+            <span class="wf-desc">"Which well is down?" and "What's trending?" are handled by AI. The "what do we do about it?" stays human.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Repetitive QA &amp; compliance reporting</span>
+            <span class="wf-desc">Auto-extracting findings from checklists and photos, flagging gaps — before the human signs off.</span>
+          </li>
+        </ul>
+      </div>
+      <div class="wf-col wf-human">
+        <div class="wf-header">
+          <span class="wf-tag">Humans own this</span>
+          <p>AI-assisted, not AI-replaced</p>
+        </div>
+        <ul class="wf-list">
+          <li class="wf-item">
+            <span class="wf-role">Field operators &amp; roughnecks</span>
+            <span class="wf-desc">Fewer headcount, more tech-savvy. AI-driven rigs and geosteering cut numbers — but humans still supervise, intervene, and handle anomalies on site.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Instrumentation, automation &amp; SCADA techs</span>
+            <span class="wf-desc">Automation technician and PLC jobs are growing, not shrinking, as operations get smarter. This is where displaced workers go.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Safety-critical field roles</span>
+            <span class="wf-desc">Rig captains, well-site supervisors, HSE inspectors. AI can warn; humans decide when to stop the job and who to trust in a life-threatening situation.</span>
+          </li>
+          <li class="wf-item">
+            <span class="wf-role">Deep-craft trades</span>
+            <span class="wf-desc">Welding, precision mechanical work, crane ops, measurement. AI assists with pre-planning and documentation. The physical precision and improvisation stay with the tradesperson.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="wf-pivot reveal delay-1">
+      <p>The field worker who grows into agentic systems, SCADA, and data interpretation is the <em>most valuable person on site in 2030</em>. That transition is what we're built to support.</p>
+    </div>
+  </div>
+</section>
+
 <!-- PRODUCT GLIMPSE -->
-<section class="std glimpse" data-screen-label="07 In the field">
+<section class="std glimpse" data-screen-label="09 In the field">
   <div class="container">
     <div class="section-head reveal">
       <div class="left">
         <div class="eyebrow"><span class="dot"></span>In the field</div>
-        <div class="num">05</div>
+        <div class="num">06</div>
       </div>
       <div>
         <h2>What an operator sees at <em class="serif">3 a.m. on a Tuesday</em>.</h2>
@@ -1461,7 +1584,7 @@
     <div class="section-head reveal">
       <div class="left">
         <div class="eyebrow"><span class="dot"></span>Built for</div>
-        <div class="num">06</div>
+        <div class="num">07</div>
       </div>
       <div>
         <h2>Built for the 80% of work that <em class="serif">doesn't happen at a desk</em>.</h2>
@@ -1519,7 +1642,7 @@
     <div class="section-head reveal">
       <div class="left">
         <div class="eyebrow"><span class="dot"></span>What we commit to</div>
-        <div class="num">07</div>
+        <div class="num">08</div>
       </div>
       <div>
         <h2>Traceability is the spine. <em class="serif">Everything else hangs from it</em>.</h2>
