@@ -446,6 +446,27 @@
     transition: background 0.2s; align-self: flex-start; margin-top: 4px;
   }
   .cta-form button:hover { background: #fff; color: var(--ink); }
+  .cta-success { display: flex; flex-direction: column; gap: 18px; }
+  .success-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(200,117,51,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--accent); flex: none;
+  }
+  .success-msg {
+    font-family: var(--serif); font-size: clamp(20px, 1.8vw, 26px);
+    font-weight: 350; color: #fff; line-height: 1.25; letter-spacing: -0.01em;
+  }
+  .success-sub { font-size: 15px; color: rgba(255,255,255,0.62); line-height: 1.6; }
+  .btn-book-call {
+    margin-top: 6px; display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 24px; border-radius: 999px;
+    background: var(--accent); color: #fff; border: 0;
+    font-family: var(--sans); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background 0.2s, color 0.2s;
+    align-self: flex-start;
+  }
+  .btn-book-call:hover { background: #fff; color: var(--ink); }
 
   /* FOOTER */
   footer { background: var(--bg-alt); padding: 96px 0 40px; }
@@ -885,7 +906,7 @@
         </p>
       </div>
       <div class="cta-side reveal delay-1">
-        <form class="cta-form" action="https://formsubmit.co/mialouviere@gmail.com" method="POST">
+        <form class="cta-form" id="cta-form" action="https://formsubmit.co/mialouviere@gmail.com" method="POST">
           <input type="hidden" name="_subject" value="New inquiry from TMI website">
           <input type="hidden" name="_captcha" value="false">
           <input type="hidden" name="_template" value="table">
@@ -933,6 +954,17 @@
   </div>
 </footer>
 
+<!-- Cal.com embed -->
+<script type="text/javascript">
+  (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; typeof namespace === "string" ? (cal.ns[namespace] = api) && p(api, ar) : p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+  Cal("init", "30min", {origin: "https://cal.com"});
+  Cal.ns["30min"]("ui", {
+    "styles": {"branding": {"brandColor": "#c87533"}},
+    "hideEventTypeDetails": false,
+    "layout": "month_view"
+  });
+</script>
+
 <script>
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
@@ -954,6 +986,44 @@
       navToggle.classList.remove('open');
       sideNav.classList.remove('open');
     });
+  });
+
+  // Contact form — AJAX submit, reveal Cal booking on success
+  const ctaForm = document.getElementById('cta-form');
+  ctaForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = ctaForm.querySelector('button[type="submit"]');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/mialouviere@gmail.com', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(ctaForm)
+      });
+
+      if (res.ok) {
+        ctaForm.closest('.cta-side').innerHTML = `
+          <div class="cta-success">
+            <div class="success-icon">✓</div>
+            <p class="success-msg">Got it. We'll be in touch within 24 hours.</p>
+            <p class="success-sub">Want to get on the calendar now? Book a 30-minute discovery call and we'll come prepared with your operation in mind.</p>
+            <button class="btn-book-call"
+              data-cal-link="mia-elianaa-a4n2hk/30min"
+              data-cal-namespace="30min"
+              data-cal-config='{"layout":"month_view"}'>
+              Book a discovery call →
+            </button>
+          </div>`;
+      } else {
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+      }
+    } catch (_) {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
   });
 </script>
 
