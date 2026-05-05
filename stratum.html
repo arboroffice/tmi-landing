@@ -765,6 +765,72 @@
     max-width: 32ch; margin-top: 18px; font-weight: 350;
   }
 
+  /* SYSTEMS PREVIEW */
+  .sp-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    border-top: 1px solid var(--line-strong); border-left: 1px solid var(--line-strong);
+    margin-top: 64px;
+  }
+  .sp-card {
+    border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong);
+    padding: 44px 40px 52px; background: var(--bg); transition: background 0.2s;
+    display: flex; flex-direction: column;
+  }
+  .sp-card:hover { background: #fff; }
+  .sp-num {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
+    color: var(--accent); margin-bottom: 22px;
+  }
+  .sp-card h4 {
+    font-size: clamp(20px, 1.6vw, 26px); font-weight: 400; line-height: 1.2;
+    letter-spacing: -0.01em; margin-bottom: 14px;
+  }
+  .sp-card > p { font-size: 14px; color: var(--ink-2); line-height: 1.6; flex: 1; }
+  .sp-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 64px; padding-top: 40px; border-top: 1px solid var(--line);
+  }
+  .sp-footer-stat { display: flex; flex-direction: column; gap: 0; }
+  .sp-footer-stat .v {
+    font-family: var(--serif); font-style: italic; font-weight: 350;
+    font-size: clamp(32px, 2.8vw, 44px); color: var(--accent); line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .sp-footer-stat .l {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted); margin-top: 8px;
+  }
+
+  /* INSIGHTS TEASER */
+  .insights-bg { background: var(--bg-alt); }
+  .art-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 0;
+    border-top: 1px solid var(--line-strong); border-left: 1px solid var(--line-strong);
+    margin-top: 56px;
+  }
+  .art-card {
+    border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong);
+    padding: 44px 40px 52px; display: block; transition: background 0.2s;
+    background: var(--bg-alt);
+  }
+  .art-card:hover { background: #fff; }
+  .art-meta {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 22px;
+  }
+  .art-card h4 {
+    font-family: var(--serif); font-weight: 400; font-size: clamp(20px, 1.6vw, 26px);
+    line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 16px;
+    max-width: 28ch; color: var(--ink);
+  }
+  .art-card > p { font-size: 14px; color: var(--ink-2); line-height: 1.6; max-width: 44ch; }
+  .art-read-more {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--accent-2); font-weight: 500;
+    margin-top: 28px; transition: gap 0.2s;
+  }
+  .art-card:hover .art-read-more { gap: 12px; }
+
   /* REVEAL */
   .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s ease, transform 0.9s cubic-bezier(.2,.7,.2,1); }
   .reveal.in { opacity: 1; transform: translateY(0); }
@@ -803,6 +869,8 @@
     .start-step { padding: 16px 0; border-top: 1px solid var(--line); }
     .start-step .dot { margin-top: 16px; }
     .ps-grid { grid-template-columns: 1fr; }
+    .sp-grid { grid-template-columns: 1fr; }
+    .art-grid { grid-template-columns: 1fr; }
     .section-head { grid-template-columns: 1fr; gap: 24px; }
     .cta-grid { grid-template-columns: 1fr; gap: 56px; }
     .cta-side { border-left: none; border-top: 1px solid rgba(255,255,255,0.18); padding: 40px 0 0; }
@@ -847,6 +915,7 @@
   </a>
   <div class="side-nav-links">
     <a href="stratum.html" class="active">Home</a>
+    <a href="systems.html">Systems</a>
     <a href="news.html">News</a>
     <a href="#cta">Contact</a>
   </div>
@@ -986,6 +1055,48 @@
 
 
 
+<!-- SYSTEMS PREVIEW -->
+<section class="std" id="systems" data-screen-label="06 Systems">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="left">
+        <div class="eyebrow"><span class="dot"></span>Systems we build</div>
+        <div class="num">06</div>
+      </div>
+      <div>
+        <h2>45 systems built for the field. <em class="serif">Ready to deploy.</em></h2>
+        <p class="sub">From rental tracking to autonomous dispatch agents — purpose-built digital infrastructure for the operations office software was never designed for.</p>
+      </div>
+    </div>
+
+    <div class="sp-grid">
+      <div class="sp-card reveal">
+        <div class="sp-num">01</div>
+        <h4>Equipment Rental Tracker</h4>
+        <p>Know exactly what's out, who has it, when it's due back, and what's available right now. Eliminate double-bookings and the phone calls to find out where the lift went.</p>
+      </div>
+      <div class="sp-card reveal delay-1">
+        <div class="sp-num">AI-01</div>
+        <h4>Autonomous Dispatch Agent</h4>
+        <p>An agent that handles dispatch end-to-end: reads live job priority, crew location, certifications, and conditions, assigns the optimal crew, and reroutes automatically when things change.</p>
+      </div>
+      <div class="sp-card reveal delay-2">
+        <div class="sp-num">AI-02</div>
+        <h4>Predictive Failure Engine</h4>
+        <p>A continuously running model that watches sensor streams, work order history, and usage patterns to surface equipment failure risk before failure happens. Pattern recognition across the full fleet.</p>
+      </div>
+    </div>
+
+    <div class="sp-footer reveal">
+      <div class="sp-footer-stat">
+        <div class="v">45</div>
+        <div class="l">Systems built and deployed</div>
+      </div>
+      <a href="systems.html" class="btn btn-dark">View all systems <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
 <!-- BUILT FOR -->
 <section class="std built-bg" id="built" data-screen-label="07 Built For">
   <div class="container">
@@ -1009,9 +1120,9 @@
   <!-- Marquee strip -->
   <div class="marquee" aria-hidden="true">
     <div class="marquee-track">
-      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/6419128/pexels-photo-6419128.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Plumbing</div></div>
+      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3721272/pexels-photo-3721272.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Plumbing</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Electrical</div></div>
-      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3862132/pexels-photo-3862132.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">HVAC</div></div>
+      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3964736/pexels-photo-3964736.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">HVAC</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Construction</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1078884/pexels-photo-1078884.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Heavy Equipment</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3785927/pexels-photo-3785927.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Maintenance</div></div>
@@ -1025,9 +1136,9 @@
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/2101137/pexels-photo-2101137.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Mining</div></div>
       <div class="marquee-img" style="background-image:url('https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=900&q=80')"><div class="marquee-label">Utilities</div></div>
       <!-- duplicate for seamless loop -->
-      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/6419128/pexels-photo-6419128.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Plumbing</div></div>
+      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3721272/pexels-photo-3721272.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Plumbing</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Electrical</div></div>
-      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3862132/pexels-photo-3862132.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">HVAC</div></div>
+      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3964736/pexels-photo-3964736.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">HVAC</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Construction</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1078884/pexels-photo-1078884.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Heavy Equipment</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3785927/pexels-photo-3785927.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Maintenance</div></div>
@@ -1039,8 +1150,8 @@
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/15085029/pexels-photo-15085029.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Oilfield Services</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1078884/pexels-photo-1078884.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Heavy Equipment</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Electrical</div></div>
-      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3822843/pexels-photo-3822843.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">HVAC</div></div>
-      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/6419128/pexels-photo-6419128.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Plumbing</div></div>
+      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3964736/pexels-photo-3964736.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">HVAC</div></div>
+      <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3721272/pexels-photo-3721272.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Plumbing</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Manufacturing</div></div>
       <div class="marquee-img" style="background-image:url('https://images.pexels.com/photos/2101137/pexels-photo-2101137.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Mining</div></div>
       <div class="marquee-img" style="background-image:url('https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=900&q=80')"><div class="marquee-label">Utilities</div></div>
@@ -1048,8 +1159,43 @@
   </div>
 </section>
 
+<!-- INSIGHTS -->
+<section class="std insights-bg" id="insights" data-screen-label="08 Insights">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="left">
+        <div class="eyebrow"><span class="dot"></span>Field intelligence</div>
+        <div class="num">08</div>
+      </div>
+      <div>
+        <h2>Thinking on operations, AI, <em class="serif">and the trades.</em></h2>
+        <p class="sub">We publish what we're learning in the field: what works, what doesn't, and what the next five years of AI in heavy industry actually looks like.</p>
+      </div>
+    </div>
+
+    <div class="art-grid">
+      <a href="news.html" class="art-card reveal">
+        <div class="art-meta">Oil &amp; Gas &nbsp;·&nbsp; May 2026</div>
+        <h4>What autonomous dispatch actually looks like in the field</h4>
+        <p>The dispatch agent is not replacing the dispatcher. It is turning the dispatcher into an exception handler. Here is what that shift looks like from the inside of a live operation.</p>
+        <span class="art-read-more">Read more →</span>
+      </a>
+      <a href="news.html" class="art-card reveal delay-1">
+        <div class="art-meta">Trades &nbsp;·&nbsp; April 2026</div>
+        <h4>Why every plumber, electrician, and HVAC tech needs a digital trail</h4>
+        <p>The paper job ticket is the single biggest liability in the skilled trades. Here is what replacing it actually takes, and what operations that have done it are seeing on the other side.</p>
+        <span class="art-read-more">Read more →</span>
+      </a>
+    </div>
+
+    <div style="margin-top: 40px; padding-top: 40px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end;">
+      <a href="news.html" class="btn btn-ghost">All articles <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
 <!-- CTA -->
-<section class="cta" id="cta" data-screen-label="08 CTA">
+<section class="cta" id="cta" data-screen-label="09 CTA">
   <div class="cta-bg"></div>
   <div class="cta-inner container">
     <div class="cta-grid">
