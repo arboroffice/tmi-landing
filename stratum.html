@@ -198,20 +198,6 @@
   .btn-ghost:hover { border-color: var(--ink); }
 
   /* scroll cue */
-  .scroll-cue {
-    position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%);
-    z-index: 3;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
-    color: rgba(255,255,255,0.6); text-transform: uppercase;
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
-  }
-  .scroll-cue .line {
-    width: 1px; height: 40px; background: rgba(255,255,255,0.4);
-    animation: drop 2s ease-in-out infinite;
-    transform-origin: top;
-  }
-  @keyframes drop {
-    0% { transform: scaleY(0); }
     50% { transform: scaleY(1); }
     100% { transform: scaleY(0); transform-origin: bottom; }
   }
@@ -927,8 +913,26 @@
   @media (max-width: 640px) {
     .uc-grid { grid-template-columns: 1fr; }
     .cap-row { grid-template-columns: 1fr; }
-    .container, .container-sm, .container-narrow { padding: 0 20px; }
-    .hero-inner { padding: 100px 20px 56px; }
+    .container, .container-sm, .container-narrow { padding: 0 16px; }
+    .hero-inner { padding: 88px 16px 48px; }
+    h1 { font-size: clamp(36px, 10vw, 56px); }
+    .hero-actions { flex-direction: column; width: 100%; }
+    .hero-actions .btn { width: 100%; justify-content: center; }
+    .ps-grid { grid-template-columns: 1fr; gap: 0; }
+    .ps-item { padding: 32px 0; border-bottom: 1px solid var(--line); }
+    .ps-item:last-child { border-bottom: none; }
+    .section-head { grid-template-columns: 1fr; gap: 20px; }
+    .section-head .num { font-size: 48px; }
+    .workforce-shift { grid-template-columns: 1fr; }
+    .ws-side { padding: 36px 24px; }
+    .ws-side--before { border-right: none; border-bottom: 1px solid var(--line-strong); }
+    .sys-cards { grid-template-columns: 1fr; }
+    .marquee-track { animation-duration: 20s; }
+    .art-grid { grid-template-columns: 1fr; }
+    section.std { padding: 72px 0; }
+    .cta-grid { gap: 40px; }
+    .foot-grid { grid-template-columns: 1fr; }
+    .foot-grid > div:first-child { display: none; }
   }
 </style>
 <script type="application/ld+json">
@@ -980,7 +984,7 @@
       "@type": "OfferCatalog",
       "name": "Systems We Build",
       "itemListElement": [
-        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Equipment Rental Tracker", "description": "Track every piece of rental equipment — what is out, who has it, and when it is due back."}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Equipment Rental Tracker", "description": "Track every piece of rental equipment, what is out, who has it, and when it is due back."}},
         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Autonomous Dispatch Agent", "description": "AI agent that handles field service dispatch end-to-end based on crew skills, location, certification, and live conditions."}},
         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Predictive Failure Engine", "description": "Continuously running model that watches sensor streams and work order history to surface equipment failure risk before it happens."}},
         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Work Order Management System", "description": "Create, assign, prioritize, and close work orders digitally with full audit trails from the field."}},
@@ -1006,7 +1010,7 @@
         "name": "What does TMI build?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "TMI builds custom AI systems and digital infrastructure for oil and gas operators and the skilled trades. We design, build, and run operational systems — from work order management and dispatch automation to predictive maintenance engines and autonomous reporting agents — specific to how each company operates."
+          "text": "TMI builds custom AI systems and digital infrastructure for oil and gas operators and the skilled trades. We design, build, and run operational systems, from work order management and dispatch automation to predictive maintenance engines and autonomous reporting agents, specific to how each company operates."
         }
       },
       {
@@ -1038,7 +1042,7 @@
         "name": "How is TMI different from field service software like ServiceTitan or Jobber?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "ServiceTitan, Jobber, and similar platforms are packaged SaaS products built around a generic workflow. TMI builds custom AI infrastructure specific to your operation — your pricing logic, your dispatch rules, your compliance requirements, your equipment types. We also deploy agentic systems that take autonomous action (dispatching, reporting, flagging risk) rather than just organizing data for a human to act on."
+          "text": "ServiceTitan, Jobber, and similar platforms are packaged SaaS products built around a generic workflow. TMI builds custom AI infrastructure specific to your operation, your pricing logic, your dispatch rules, your compliance requirements, your equipment types. We also deploy agentic systems that take autonomous action (dispatching, reporting, flagging risk) rather than just organizing data for a human to act on."
         }
       },
       {
@@ -1088,20 +1092,16 @@
     </h1>
     <div class="hero-bottom">
       <p class="lede">
-        TMI builds custom AI systems and digital infrastructure for oil and gas operators and the skilled trades. We digitize your operation end-to-end, built to how your crews actually work, so you do more with less and stay ahead.
+        TMI installs systems and digital infrastructure for oil and gas operators and the skilled trades. We digitize your operation end-to-end, built to how your crews actually work, so you do more with less and stay ahead.
       </p>
       <p class="lede lede-sub">
-        We help you grow, adapt, and restructure with AI — so you stop hiring for volume and start building for leverage. The companies that move first aren't just more efficient. They're structurally different.
+        We help you grow, adapt, and restructure with AI, so you stop hiring for volume and start building for leverage. The companies that move first aren't just more efficient. They're structurally different.
       </p>
       <div class="hero-actions">
         <a href="#cta" class="btn btn-light">Start a conversation <span class="arrow">→</span></a>
         <a href="#what" class="btn btn-ghost-light">How we work</a>
       </div>
     </div>
-  </div>
-  <div class="scroll-cue">
-    <span>Scroll</span>
-    <span class="line"></span>
   </div>
 </header>
 
@@ -1118,7 +1118,7 @@
       <div class="ps-item reveal delay-1">
         <div class="ps-num">02</div>
         <h3>Off-the-shelf software wasn't built for the field.</h3>
-        <p>Enterprise platforms are designed for offices, not drill sites, job trailers, and equipment yards. So your team ignores them, workarounds multiply, and the data you need never makes it into the system.</p>
+        <p>Enterprise platforms are designed for offices, not job sites, service trucks, and equipment yards. So your team ignores them, workarounds multiply, and the data you need never makes it into the system.</p>
       </div>
       <div class="ps-item reveal delay-2">
         <div class="ps-num">03</div>
@@ -1217,7 +1217,7 @@
       </div>
       <div>
         <h2>You don't need ten people. <em class="serif">You need the right two.</em></h2>
-        <p class="sub">We help you grow, adapt, and restructure around AI — not to shrink headcount, but to stop hiring for volume and start hiring for capability. One operator who knows how to work with AI out-executes a team of five who don't.</p>
+        <p class="sub">We help you grow, adapt, and restructure around AI, not to shrink headcount, but to stop hiring for volume and start hiring for capability. One operator who knows how to work with AI out-executes a team of five who don't.</p>
       </div>
     </div>
 
@@ -1290,7 +1290,7 @@
       </div>
       <div>
         <h2>45 systems built for the field. <em class="serif">Ready to deploy.</em></h2>
-        <p class="sub">From rental tracking to autonomous dispatch agents — purpose-built digital infrastructure for the operations office software was never designed for.</p>
+        <p class="sub">From rental tracking to autonomous dispatch agents, purpose-built digital infrastructure for the operations office software was never designed for.</p>
       </div>
     </div>
 
