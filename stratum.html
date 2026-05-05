@@ -765,6 +765,46 @@
     max-width: 32ch; margin-top: 18px; font-weight: 350;
   }
 
+  /* WORKFORCE RESTRUCTURE */
+  .workforce-bg { background: var(--bg-alt); }
+  .workforce-shift {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid var(--line-strong); margin-top: 64px;
+  }
+  .ws-side {
+    padding: 56px 48px; display: flex; flex-direction: column; gap: 24px;
+  }
+  .ws-side--before { border-right: 1px solid var(--line-strong); background: var(--bg-alt); }
+  .ws-side--after { background: var(--bg-deep); }
+  .ws-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .ws-side--after .ws-label { color: rgba(255,255,255,0.4); }
+  .ws-side h3 { font-size: clamp(20px, 1.8vw, 28px); font-weight: 400; line-height: 1.2; max-width: 20ch; }
+  .ws-side--after h3 { color: #fff; }
+  .ws-role-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .ws-role {
+    font-size: 14px; color: var(--ink-2); padding: 10px 14px;
+    background: rgba(0,0,0,0.04); border-radius: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ws-role--after {
+    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.75);
+  }
+  .ws-role .badge {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 999px; flex: none;
+  }
+  .ws-role .badge--cut { background: rgba(0,0,0,0.08); color: var(--muted); }
+  .ws-role .badge--ai { background: rgba(200,117,51,0.15); color: var(--accent); }
+  .ws-role .badge--human { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
+  .ws-note {
+    font-size: 13px; line-height: 1.6; margin-top: 8px;
+  }
+  .ws-note--before { color: var(--muted); }
+  .ws-note--after { color: rgba(255,255,255,0.5); }
+
   /* SYSTEMS PREVIEW */
   .sp-grid {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
@@ -871,6 +911,8 @@
     .ps-grid { grid-template-columns: 1fr; }
     .sp-grid { grid-template-columns: 1fr; }
     .art-grid { grid-template-columns: 1fr; }
+    .workforce-shift { grid-template-columns: 1fr; }
+    .ws-side--before { border-right: none; border-bottom: 1px solid var(--line-strong); }
     .section-head { grid-template-columns: 1fr; gap: 24px; }
     .cta-grid { grid-template-columns: 1fr; gap: 56px; }
     .cta-side { border-left: none; border-top: 1px solid rgba(255,255,255,0.18); padding: 40px 0 0; }
@@ -1161,8 +1203,81 @@
 
 
 
+<!-- WORKFORCE RESTRUCTURE -->
+<section class="std workforce-bg" id="team" data-screen-label="06 Team">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="left">
+        <div class="eyebrow"><span class="dot"></span>Built around leverage</div>
+        <div class="num">03</div>
+      </div>
+      <div>
+        <h2>You don't need ten people. <em class="serif">You need the right two.</em></h2>
+        <p class="sub">We help you grow, adapt, and restructure around AI — not to shrink headcount, but to stop hiring for volume and start hiring for capability. One operator who knows how to work with AI out-executes a team of five who don't.</p>
+      </div>
+    </div>
+
+    <div class="workforce-shift reveal">
+      <div class="ws-side ws-side--before">
+        <div class="ws-label">The old model</div>
+        <h3>Ten medium-skilled people doing the same repetitive work.</h3>
+        <div class="ws-role-list">
+          <div class="ws-role">
+            <span class="badge badge--cut">Replaced</span>
+            3 dispatch coordinators scheduling jobs by phone
+          </div>
+          <div class="ws-role">
+            <span class="badge badge--cut">Replaced</span>
+            2 billing clerks assembling invoices from field tickets
+          </div>
+          <div class="ws-role">
+            <span class="badge badge--cut">Replaced</span>
+            2 admins filing compliance reports manually
+          </div>
+          <div class="ws-role">
+            <span class="badge badge--cut">Replaced</span>
+            1 estimator re-typing costs from catalog every time
+          </div>
+          <div class="ws-role">
+            <span class="badge badge--cut">Replaced</span>
+            2 coordinators chasing subcontractor paperwork
+          </div>
+        </div>
+        <p class="ws-note ws-note--before">Scaling means adding more people. One person leaving is a crisis. The work is never quite right and always a little late.</p>
+      </div>
+      <div class="ws-side ws-side--after">
+        <div class="ws-label">The new model</div>
+        <h3>Two high-leverage operators who run the machine.</h3>
+        <div class="ws-role-list">
+          <div class="ws-role ws-role--after">
+            <span class="badge badge--ai">AI</span>
+            Dispatch agent assigns jobs, reroutes, handles exceptions
+          </div>
+          <div class="ws-role ws-role--after">
+            <span class="badge badge--ai">AI</span>
+            Billing system invoices on job close, syncs to accounting
+          </div>
+          <div class="ws-role ws-role--after">
+            <span class="badge badge--ai">AI</span>
+            Compliance agent files reports from operational data
+          </div>
+          <div class="ws-role ws-role--after">
+            <span class="badge badge--ai">AI</span>
+            Estimating system prices from your own historical data
+          </div>
+          <div class="ws-role ws-role--after">
+            <span class="badge badge--human">Human</span>
+            One operations lead handles judgment, relationships, growth
+          </div>
+        </div>
+        <p class="ws-note ws-note--after">Scaling means expanding AI coverage, not headcount. The team that runs this operation is smaller, sharper, and harder to disrupt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- SYSTEMS PREVIEW -->
-<section class="std" id="systems" data-screen-label="06 Systems">
+<section class="std" id="systems" data-screen-label="07 Systems">
   <div class="container">
     <div class="section-head reveal">
       <div class="left">
