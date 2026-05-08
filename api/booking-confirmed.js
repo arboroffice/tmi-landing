@@ -13,11 +13,6 @@ function formatPhone(phone) {
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  // Verify webhook secret passed as query param
-  if (req.query.secret !== process.env.WEBHOOK_SECRET) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   const body = req.body || {};
   const attendees = body?.payload?.attendees || [];
   const email = attendees[0]?.email;
