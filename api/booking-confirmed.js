@@ -3,6 +3,7 @@ const twilio = require('twilio');
 
 const FROM_NUMBER = '+18557171044';
 const ALERT_NUMBER = '+13373809059';
+const SITE = 'https://www.tmi-technology.com';
 
 function formatPhone(phone) {
   const digits = String(phone).replace(/\D/g, '');
