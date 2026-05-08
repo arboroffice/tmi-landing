@@ -3,431 +3,258 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
-  <link rel="apple-touch-icon" href="favicon.svg"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
 <meta name="description" content="Industry analysis, field intelligence, and original reporting from TMI. Written for the operators, engineers, and crews running the physical world."/>
-<meta property="og:title" content="News & Media | TMI"/>
-<meta property="og:description" content="Industry analysis, field intelligence, and original reporting from TMI. Written for the operators, engineers, and crews running the physical world."/>
+<meta property="og:title" content="Field Notes | TMI"/>
+<meta property="og:description" content="Industry analysis, field intelligence, and original reporting from TMI."/>
 <meta property="og:type" content="website"/>
-<meta property="og:url" content="https://tmi.ai/news.html"/>
-<meta property="og:image" content="https://images.pexels.com/photos/10407689/pexels-photo-10407689.jpeg?auto=compress&cs=tinysrgb&w=1200&q=80"/>
+<meta property="og:url" content="https://tmi-technology.com/news.html"/>
 <meta property="og:site_name" content="TMI"/>
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="News & Media | TMI"/>
-<meta name="twitter:description" content="Industry analysis, field intelligence, and original reporting from TMI. Written for the operators, engineers, and crews running the physical world."/>
-<meta name="twitter:image" content="https://images.pexels.com/photos/10407689/pexels-photo-10407689.jpeg?auto=compress&cs=tinysrgb&w=1200&q=80"/>
-<link rel="canonical" href="https://tmi.ai/news.html"/>
-<title>News &amp; Media | TMI</title>
+<link rel="canonical" href="https://tmi-technology.com/news.html"/>
+<title>Field Notes | TMI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
 <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #f4f1ea;
-    --bg-alt: #ebe7dc;
-    --bg-deep: #0a0a0a;
-    --ink: #111111;
-    --ink-2: #2a2a2a;
-    --muted: #6b6b66;
-    --line: #d8d3c5;
-    --line-strong: #b9b3a3;
-    --accent: #c87533;
-    --accent-2: #8e3b13;
-    --serif: "Fraunces", "Times New Roman", serif;
-    --sans: "Inter", system-ui, sans-serif;
-    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --bg: #ffffff; --bg-alt: #f5f5f7; --bg-deep: #0d0e1a;
+    --ink: #0a0b14; --ink-2: #505060; --muted: #86868b;
+    --line: #e8e8ed; --accent: #1a1a1a; --accent-dark: #000;
+    --accent-light: rgba(0,0,0,0.05); --chart: #E4FF97;
+    --serif: 'Barlow', system-ui, sans-serif;
+    --sans: 'Neue Haas Grotesk Display', 'Neue Haas Grotesk', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
   }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body {
-    font-family: var(--sans); color: var(--ink); background: var(--bg);
-    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-    line-height: 1.55; overflow-x: hidden;
-  }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   a { color: inherit; text-decoration: none; }
   img { display: block; max-width: 100%; }
-  ::selection { background: var(--ink); color: var(--bg); }
+  ::selection { background: var(--accent); color: #fff; }
 
-  .container { max-width: 1320px; margin: 0 auto; padding: 0 32px; }
-  .container-narrow { max-width: 760px; margin: 0 auto; padding: 0 32px; }
-
-  .eyebrow {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--muted);
-    display: inline-flex; align-items: center; gap: 10px;
-  }
-  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
-  h1, h2, h3, h4 { font-family: var(--serif); font-weight: 400; letter-spacing: -0.02em; line-height: 1.05; margin: 0; }
-  h1 { font-size: clamp(48px, 7vw, 112px); font-weight: 300; }
-  h2 { font-size: clamp(32px, 4vw, 56px); font-weight: 350; }
-  h3 { font-size: clamp(22px, 2.2vw, 30px); font-weight: 400; }
-  p { margin: 0; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 8px; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-primary { background: var(--chart); color: #0a0b14; }
+  .btn-primary:hover { background: var(--accent-dark); }
 
   /* SIDE NAV */
+  .nav-btn {
+    position: fixed; top: 20px; left: 20px; z-index: 201;
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    cursor: pointer; padding: 0;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .nav-btn:hover { background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .nav-btn span {
+    display: block; width: 18px; height: 1.5px;
+    background: var(--ink); border-radius: 2px;
+    transition: transform 0.25s, opacity 0.25s;
+  }
+  .nav-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .nav-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+  .side-overlay {
+    position: fixed; inset: 0; z-index: 198;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .side-overlay.open { opacity: 1; pointer-events: auto; }
   .side-nav {
-    position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
-    background: var(--bg); border-right: 1px solid var(--line);
-    display: flex; flex-direction: column; padding: 36px 24px;
-    z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease;
+    position: fixed; left: 0; top: 0; bottom: 0; z-index: 200;
+    width: 280px; background: #fff;
+    border-right: 1px solid var(--line);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    display: flex; flex-direction: column;
+    padding: 28px 0 40px;
+    overflow-y: auto;
   }
-  .side-nav.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
-  .side-brand {
-    display: flex; align-items: center; gap: 12px;
-    font-family: var(--serif); font-size: 20px; font-weight: 400;
-    letter-spacing: -0.01em; color: var(--ink); margin-bottom: 48px;
+  .side-nav.open { transform: translateX(0); box-shadow: 8px 0 48px rgba(0,0,0,0.15); }
+  .side-nav-top {
+    display: flex; align-items: center;
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 12px;
   }
-  .side-brand .mark {
-    width: 24px; height: 24px; position: relative; flex: none;
-    background: currentColor; border-radius: 3px; opacity: 0.95;
+  .side-nav-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink); text-decoration: none;
   }
-  .side-brand .mark::before { content: ""; position: absolute; left: 3px; right: 3px; top: 3px; height: 2px; background: var(--bg); }
-  .side-brand .mark::after { content: ""; position: absolute; left: 3px; right: 3px; top: 8px; bottom: 3px; background: var(--accent); }
-  .side-nav-links { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-  .side-nav-links a { font-size: 14px; padding: 10px 12px; border-radius: 6px; color: var(--ink-2); transition: background 0.15s, color 0.15s; }
-  .side-nav-links a:hover { background: var(--bg-alt); color: var(--ink); }
-  .side-nav-links a.active { color: var(--accent); }
+  .side-nav-brand img { height: 28px; }
+  .side-nav-links { display: flex; flex-direction: column; padding: 0 12px; flex: 1; }
+  .side-nav-section {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 20px 12px 6px;
+  }
+  .side-nav-links a {
+    font-size: 14px; font-weight: 500; color: var(--ink-2);
+    padding: 10px 12px; border-radius: 8px;
+    transition: color 0.15s, background 0.15s; display: block;
+  }
+  .side-nav-links a:hover { color: var(--ink); background: var(--bg-alt); }
   .side-nav-cta {
-    display: block; text-align: center; padding: 12px 18px; border-radius: 999px;
-    background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 500;
-    transition: background 0.2s; margin-top: 24px;
+    padding: 24px 24px 0; border-top: 1px solid var(--line); margin-top: 16px;
   }
-  .side-nav-cta:hover { background: var(--accent); color: var(--bg); }
-  .nav-toggle {
-    display: flex; position: fixed; top: 16px; left: 16px; z-index: 101;
-    background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
-    padding: 10px 12px; cursor: pointer; flex-direction: column; gap: 5px;
-  }
-  .nav-toggle span { display: block; width: 20px; height: 2px; background: var(--ink); transition: transform 0.2s, opacity 0.2s; }
-  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-  .nav-toggle.open span:nth-child(2) { opacity: 0; }
-  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--serif); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; color: var(--ink); }
-  .brand .mark { width: 24px; height: 24px; position: relative; flex: none; background: currentColor; border-radius: 3px; opacity: 0.95; }
-  .brand .mark::before { content: ""; position: absolute; left: 3px; right: 3px; top: 3px; height: 2px; background: var(--bg-alt); }
-  .brand .mark::after { content: ""; position: absolute; left: 3px; right: 3px; top: 8px; bottom: 3px; background: var(--accent); }
+  .side-nav-cta .btn { width: 100%; justify-content: center; }
+
+  /* LAYOUT */
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+  .eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 8px; }
+  .eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
 
   /* HERO */
-  .news-hero {
-    padding: 200px 0 80px;
-    border-bottom: 1px solid var(--line);
-  }
-  .news-hero-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: end;
-  }
-  .news-hero h1 {
-    max-width: 14ch;
-    margin-top: 24px;
-  }
-  .news-hero h1 .ital { font-style: italic; color: var(--accent-2); font-weight: 300; }
-  .news-hero p {
-    font-family: var(--serif); font-weight: 350;
-    font-size: clamp(20px, 1.6vw, 26px);
-    line-height: 1.45;
-    color: var(--ink-2);
-    max-width: 44ch;
-    letter-spacing: -0.005em;
-  }
-  .news-meta-row {
-    display: flex; align-items: center; gap: 16px;
-    margin-top: 32px;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--muted);
-  }
-  .news-meta-row .line { flex: 1; height: 1px; background: var(--line-strong); max-width: 220px; }
+  .news-hero { padding: 120px 0 80px; border-bottom: 1px solid var(--line); }
+  .news-hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: end; }
+  .news-hero h1 { font-family: var(--serif); font-size: clamp(64px, 9vw, 120px); font-weight: 400; line-height: 1.0; color: var(--ink); margin-top: 20px; }
+  .news-hero h1 em { color: var(--accent); font-style: italic; }
+  .news-hero-right p { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 24px); line-height: 1.5; color: var(--ink-2); max-width: 44ch; }
+  .news-meta-row { display: flex; align-items: center; gap: 16px; margin-top: 36px; font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .news-meta-row .line { flex: 1; height: 1px; background: var(--line); max-width: 180px; }
 
   /* FILTER BAR */
-  .filter-bar {
-    border-bottom: 1px solid var(--line);
-    background: var(--bg);
-  }
-  .filter-inner {
-    display: flex; gap: 28px; padding: 24px 32px;
-    max-width: 1320px; margin: 0 auto;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
-    text-transform: uppercase;
-  }
-  .filter-inner a {
-    color: var(--muted); transition: color 0.2s;
-    padding-bottom: 6px; border-bottom: 1px solid transparent;
-  }
+  .filter-bar { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .filter-inner { display: flex; gap: 0; padding: 0 40px; max-width: 1280px; margin: 0 auto; overflow-x: auto; }
+  .filter-inner a { font-family: var(--sans); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); padding: 18px 20px; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
   .filter-inner a:hover { color: var(--ink); }
   .filter-inner a.active { color: var(--ink); border-bottom-color: var(--accent); }
 
   /* FEATURED */
-  .featured {
-    padding: 80px 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .featured-grid {
-    display: grid; grid-template-columns: 1.4fr 1fr; gap: 64px; align-items: stretch;
-  }
-  .featured-photo {
-    height: 100%;
-    min-height: 480px;
-    background-size: cover; background-position: center;
-    background-image: url('https://images.pexels.com/photos/10407689/pexels-photo-10407689.jpeg?auto=compress&cs=tinysrgb&w=2000&q=80');
-    border-radius: 2px;
-    position: relative;
-    overflow: hidden;
-  }
-  .featured-photo::after {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.5) 100%);
-  }
-  .featured-photo .badge {
-    position: absolute; top: 24px; left: 24px;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
-    text-transform: uppercase;
-    background: rgba(255,255,255,0.95); color: var(--ink);
-    padding: 8px 14px; border-radius: 999px;
-    z-index: 2;
-  }
-  .featured-text {
-    display: flex; flex-direction: column; justify-content: space-between;
-    padding: 16px 0;
-  }
-  .featured-text .meta {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: 18px;
-    display: flex; gap: 20px; align-items: center;
-  }
-  .featured-text .meta .cat { color: var(--accent); }
-  .featured-text h2 {
-    font-size: clamp(34px, 3.6vw, 56px);
-    line-height: 1.05;
-    font-weight: 350;
-    max-width: 18ch;
-  }
-  .featured-text h2 em { font-style: italic; color: var(--accent-2); font-weight: 350; }
-  .featured-text .excerpt {
-    font-family: var(--serif); font-weight: 350;
-    font-size: 19px; line-height: 1.5;
-    color: var(--ink-2);
-    margin-top: 28px;
-    max-width: 44ch;
-  }
-  .featured-text .by-line {
-    margin-top: 36px;
-    display: flex; align-items: center; gap: 14px;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--muted);
-  }
-  .featured-text .by-line .read {
-    color: var(--ink); display: inline-flex; align-items: center; gap: 8px;
-    transition: color 0.2s, gap 0.2s;
-  }
-  .featured-text .by-line .read:hover { color: var(--accent); gap: 12px; }
+  .featured { padding: 72px 0; border-bottom: 1px solid var(--line); }
+  .featured-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; align-items: stretch; }
+  .featured-photo { min-height: 440px; background-size: cover; background-position: center; border-radius: 16px; position: relative; overflow: hidden; background-image: url('https://images.pexels.com/photos/10407689/pexels-photo-10407689.jpeg?auto=compress&cs=tinysrgb&w=2000&q=80'); }
+  .featured-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(10,11,20,0.6) 100%); }
+  .featured-badge { position: absolute; top: 20px; left: 20px; font-family: var(--sans); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; background: var(--accent); color: #fff; padding: 6px 14px; border-radius: 100px; z-index: 2; }
+  .featured-text { display: flex; flex-direction: column; justify-content: space-between; padding: 8px 0; }
+  .featured-meta { font-family: var(--sans); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; display: flex; gap: 20px; align-items: center; }
+  .featured-meta .cat { color: var(--accent); }
+  .featured-text h2 { font-family: var(--serif); font-size: clamp(30px, 3.2vw, 48px); line-height: 1.1; font-weight: 400; margin-bottom: 20px; }
+  .featured-text h2 em { color: var(--accent); font-style: italic; }
+  .featured-excerpt { font-size: 16px; color: var(--ink-2); line-height: 1.65; max-width: 44ch; }
+  .featured-link { margin-top: 32px; display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); transition: gap 0.2s; }
+  .featured-link:hover { gap: 12px; }
 
-  /* GRID */
-  .stories {
-    padding: 100px 0 140px;
-  }
-  .stories-head {
-    display: flex; align-items: end; justify-content: space-between;
-    margin-bottom: 56px;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 24px;
-  }
-  .stories-head h2 { font-weight: 350; }
-  .stories-head .count {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--muted);
-  }
-  .stories-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px 36px;
-  }
-  .story {
-    display: flex; flex-direction: column;
-    cursor: pointer;
-    transition: transform 0.4s ease;
-  }
+  /* STORIES GRID */
+  .stories { padding: 80px 0 120px; }
+  .stories-head { display: flex; align-items: end; justify-content: space-between; margin-bottom: 48px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+  .stories-head h2 { font-family: var(--serif); font-size: clamp(28px, 3vw, 40px); font-weight: 400; }
+  .stories-count { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+  .stories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px 32px; }
+  .story { display: flex; flex-direction: column; cursor: pointer; transition: transform 0.3s ease; }
   .story:hover { transform: translateY(-4px); }
-  .story .photo {
-    height: 240px;
-    background-size: cover; background-position: center;
-    border-radius: 2px;
-    margin-bottom: 22px;
-    transition: filter 0.4s ease;
-  }
-  .story:hover .photo { filter: brightness(0.92); }
-  .story .meta {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--muted);
-    display: flex; gap: 18px; align-items: center;
-    margin-bottom: 14px;
-  }
-  .story .meta .cat { color: var(--accent); }
-  .story h3 {
-    font-size: 24px; line-height: 1.18;
-    font-weight: 400;
-    margin-bottom: 12px;
-  }
-  .story h3 em { font-style: italic; color: var(--accent-2); font-weight: 350; }
-  .story p {
-    font-size: 14px; line-height: 1.55; color: var(--muted);
-  }
-  .story .read {
-    margin-top: 18px;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--ink);
-    display: inline-flex; align-items: center; gap: 8px;
-    transition: gap 0.2s, color 0.2s;
-  }
-  .story:hover .read { gap: 12px; color: var(--accent); }
+  .story-photo { height: 220px; background-size: cover; background-position: center; border-radius: 12px; margin-bottom: 20px; transition: filter 0.3s ease; }
+  .story:hover .story-photo { filter: brightness(0.9); }
+  .story-meta { font-family: var(--sans); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); display: flex; gap: 16px; margin-bottom: 12px; }
+  .story-meta .cat { color: var(--accent); }
+  .story h3 { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 22px); font-weight: 400; line-height: 1.2; margin-bottom: 10px; }
+  .story h3 em { font-style: italic; color: var(--accent); }
+  .story p { font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+  .story-read { margin-top: 16px; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 6px; transition: gap 0.2s; }
+  .story:hover .story-read { gap: 10px; }
 
-  /* NEWSLETTER STRIP */
-  .newsletter {
-    background: var(--bg-deep);
-    color: #fff;
-    padding: 120px 0;
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-  .newsletter-grid {
-    display: grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: end;
-  }
-  .newsletter h2 {
-    font-weight: 350;
-    max-width: 16ch;
-  }
-  .newsletter h2 em { font-style: italic; color: var(--accent); font-weight: 350; }
-  .newsletter p {
-    color: rgba(255,255,255,0.7);
-    font-family: var(--serif); font-weight: 350;
-    font-size: 19px; line-height: 1.5;
-    max-width: 42ch;
-    margin-top: 24px;
-  }
-  .newsletter-form {
-    display: flex; gap: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.25);
-    padding-bottom: 12px;
-  }
-  .newsletter-form input {
-    background: transparent; border: 0; color: #fff;
-    flex: 1; font-family: var(--sans); font-size: 16px; padding: 8px 0;
-  }
-  .newsletter-form input:focus { outline: none; }
-  .newsletter-form input::placeholder { color: rgba(255,255,255,0.4); }
-  .newsletter-form button {
-    background: var(--accent); color: #fff; border: 0;
-    padding: 10px 22px; border-radius: 999px;
-    font-family: var(--sans); font-size: 13px; font-weight: 500;
-    cursor: pointer; transition: background 0.2s;
-  }
-  .newsletter-form button:hover { background: #fff; color: var(--ink); }
-  .newsletter-meta {
-    margin-top: 14px;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: rgba(255,255,255,0.45);
-  }
+  /* NEWSLETTER */
+  .newsletter { background: var(--bg-deep); padding: 100px 0; }
+  .newsletter-inner { display: grid; grid-template-columns: 1.2fr 1fr; gap: 64px; align-items: end; }
+  .newsletter .eyebrow { color: rgba(255,255,255,0.4); }
+  .newsletter .eyebrow .dot { background: var(--chart); }
+  .newsletter h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 400; color: #fff; margin-top: 20px; }
+  .newsletter h2 em { color: var(--chart); font-style: italic; }
+  .newsletter p { color: rgba(255,255,255,0.55); font-size: 17px; line-height: 1.65; max-width: 42ch; margin-top: 20px; }
+  .newsletter-form { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 12px; }
+  .newsletter-form input { background: transparent; border: 0; color: #fff; flex: 1; font-family: var(--sans); font-size: 16px; padding: 8px 0; outline: none; }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.35); }
+  .newsletter-form button { background: var(--accent); color: #fff; border: 0; padding: 10px 20px; border-radius: 8px; font-family: var(--sans); font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+  .newsletter-form button:hover { background: var(--accent-dark); }
+  .newsletter-note { margin-top: 12px; font-family: var(--sans); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
 
   /* FOOTER */
-  footer { background: var(--bg-alt); padding: 96px 0 40px; }
-  .foot-grid {
-    display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 48px;
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 56px; margin-bottom: 28px;
-  }
-  .foot-tagline {
-    font-family: var(--serif); font-size: 18px; font-weight: 350;
-    margin-top: 16px; color: var(--ink-2); max-width: 28ch;
-  }
-  .foot-col h5 {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--muted); font-weight: 500;
-    margin: 0 0 18px;
-  }
-  .foot-col a {
-    display: block; padding: 6px 0; font-size: 14px;
-    transition: color 0.2s;
-  }
-  .foot-col a:hover { color: var(--accent); }
-  .foot-bottom {
-    display: flex; justify-content: space-between; font-family: var(--mono);
-    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--muted);
-  }
+  footer { background: var(--bg-deep); color: rgba(255,255,255,0.6); padding: 64px 0 32px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 64px; margin-bottom: 48px; }
+  .footer-brand-name { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-weight: 700; font-size: 16px; color: #fff; margin-bottom: 16px; }
+  .footer-brand-name img { height: 28px; filter: brightness(0) invert(1); }
+  .footer-desc { font-size: 14px; line-height: 1.65; color: rgba(255,255,255,0.45); max-width: 320px; margin-bottom: 20px; }
+  .footer-contact a { font-size: 14px; color: rgba(255,255,255,0.5); transition: color 0.15s; }
+  .footer-contact a:hover { color: #fff; }
+  .footer-right { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  .footer-col h5 { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.55); margin-bottom: 10px; transition: color 0.15s; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; display: flex; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.3); }
 
-  /* REVEAL */
-  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.2,.7,.2,1); }
-  .reveal.in { opacity: 1; transform: translateY(0); }
-
+  /* RESPONSIVE */
   @media (max-width: 1024px) {
-    .news-hero-grid { grid-template-columns: 1fr; gap: 32px; align-items: start; }
-    .featured-grid { grid-template-columns: 1fr; gap: 32px; }
+    .news-hero-inner { grid-template-columns: 1fr; gap: 32px; }
+    .featured-grid { grid-template-columns: 1fr; gap: 36px; }
     .featured-photo { min-height: 320px; }
-    .stories-grid { grid-template-columns: repeat(2, 1fr); gap: 36px 24px; }
-    .newsletter-grid { grid-template-columns: 1fr; gap: 40px; align-items: start; }
-    .foot-grid { grid-template-columns: 1fr; }
-    body { padding-left: 0; }
-    .side-nav { transform: translateX(-100%); transition: transform 0.3s ease; }
-    .side-nav.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
-    .nav-toggle { display: flex; }
+    .stories-grid { grid-template-columns: repeat(2, 1fr); }
+    .newsletter-inner { grid-template-columns: 1fr; gap: 40px; }
+    .footer-grid { grid-template-columns: 1fr; gap: 48px; }
   }
-  @media (max-width: 640px) {
-    .news-hero { padding: 140px 0 56px; }
+  @media (max-width: 768px) {
+    .container { padding: 0 20px; }
+    .filter-inner { padding: 0 20px; }
     .stories-grid { grid-template-columns: 1fr; }
-    .filter-inner { gap: 18px; overflow-x: auto; padding: 18px 32px; white-space: nowrap; }
-    .stories-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .footer-right { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
   }
 </style>
-<script type="application/ld+json">
-[
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "TMI",
-    "alternateName": "TMI: Oilfield | Trades | Solutions",
-    "description": "TMI builds custom AI systems and digital infrastructure for oil and gas operators and the skilled trades.",
-    "url": "https://tmi.ai",
-    "logo": "https://tmi.ai/logo.svg",
-    "knowsAbout": [
-      "AI for oil and gas companies","AI for the skilled trades","Predictive maintenance",
-      "Field operations automation","SCADA integration","Construction technology",
-      "Electrical contractor software","HVAC software","Agentic AI","Industrial AI"
-    ]
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    "name": "TMI News & Field Intelligence",
-    "description": "Industry analysis, field intelligence, and original reporting on AI for the trades and oil and gas. Written for operators, engineers, and crews running the physical world.",
-    "url": "https://tmi.ai/news.html",
-    "publisher": {"@type": "Organization", "name": "TMI", "url": "https://tmi.ai"}
-  }
-]
-</script>
 </head>
 <body>
 
-<!-- SIDE NAV -->
-<nav class="side-nav" id="side-nav">
-  <a href="stratum.html" class="side-brand">
-    <img src="logo.svg" alt="TMI" width="36" height="36" style="flex:none;filter:var(--logo-filter,none)">
-    <span>TMI</span>
-  </a>
-  <div class="side-nav-links">
-    <a href="stratum.html">Home</a>
-    <a href="news.html" class="active">News</a>
-    <a href="stratum.html#cta">Contact</a>
-  </div>
-  <a href="stratum.html#cta" class="side-nav-cta">Talk to us →</a>
-</nav>
-<button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+<!-- HAMBURGER BUTTON -->
+<button class="nav-btn" id="nav-btn" aria-label="Open menu">
   <span></span><span></span><span></span>
 </button>
 
+<!-- SIDE OVERLAY -->
+<div class="side-overlay" id="side-overlay"></div>
+
+<!-- SIDE NAV -->
+<div class="side-nav" id="side-nav" aria-hidden="true">
+  <div class="side-nav-top">
+    <a class="side-nav-brand" href="stratum.html">
+      <img src="logo.svg" alt="TMI"/> TMI
+    </a>
+  </div>
+  <div class="side-nav-links">
+    <div class="side-nav-section">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="news.html">Field Notes</a>
+    <a href="about.html">About</a>
+    <a href="partners.html">Partners</a>
+    <div class="side-nav-section">Industries</div>
+    <a href="trades.html">Trades &amp; Field Service</a>
+    <a href="construction.html">Construction</a>
+    <a href="oil-gas.html">Oil, Gas &amp; Energy</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="fleet.html">Fleet &amp; Logistics</a>
+    <a href="home-service.html">Home Service</a>
+  </div>
+  <div class="side-nav-cta">
+    <a href="stratum.html#cta" class="btn btn-primary">Book a Strategy Call &#8594;</a>
+  </div>
+</div>
+
 <!-- HERO -->
-<section class="news-hero" data-screen-label="01 News Hero">
+<section class="news-hero">
   <div class="container">
-    <div class="news-hero-grid">
+    <div class="news-hero-inner">
       <div class="reveal">
-        <div class="eyebrow"><span class="dot"></span>News &amp; media</div>
-        <h1>Field <span class="ital">notes</span>.</h1>
+        <div class="eyebrow"><span class="dot"></span>News &amp; Media</div>
+        <h1>Field <em>notes</em>.</h1>
       </div>
-      <div class="reveal delay-1">
+      <div class="news-hero-right reveal">
         <p>Stories from the operators, engineers, and crews who keep the physical world running, and what changes when AI finally meets the work.</p>
         <div class="news-meta-row">
           <span>Issue 01</span>
@@ -454,198 +281,251 @@
 </div>
 
 <!-- FEATURED -->
-<section class="featured" data-screen-label="02 Featured">
+<section class="featured">
   <div class="container">
     <div class="featured-grid reveal">
       <div class="featured-photo">
-        <span class="badge">Featured</span>
+        <span class="featured-badge">Featured</span>
       </div>
       <div class="featured-text">
         <div>
-          <div class="meta">
+          <div class="featured-meta">
             <span class="cat">Oil &amp; Gas</span>
-            <span>Long read · 12 min</span>
+            <span>Long read &middot; 12 min</span>
             <span>Mar 04, 2026</span>
           </div>
           <h2>The control room <em>finally has a teammate</em>.</h2>
-          <p class="excerpt">Inside a Permian operator's first 90 days running agentic systems alongside SCADA, what they automated first, what they wouldn't, and how the night shift changed.</p>
+          <p class="featured-excerpt">Inside a Permian operator's first 90 days running agentic systems alongside SCADA, what they automated first, what they wouldn't, and how the night shift changed.</p>
         </div>
-        <div class="by-line">
-          <span>Field report</span>
-          <a class="read" href="#">Read the story <span>→</span></a>
-        </div>
+        <a class="featured-link" href="ai-for-oil-gas-companies.html">Read the story &#8594;</a>
       </div>
     </div>
   </div>
 </section>
 
 <!-- STORIES -->
-<section class="stories" data-screen-label="03 Stories">
+<section class="stories">
   <div class="container">
     <div class="stories-head reveal">
       <h2>Latest stories</h2>
-      <div class="count">19 articles · updated weekly</div>
+      <div class="stories-count">38 articles &middot; updated weekly</div>
     </div>
     <div class="stories-grid">
 
       <a class="story reveal" href="article-oil-gas-software.html" data-cat="Oil &amp; Gas">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/15085029/pexels-photo-15085029.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">Oil &amp; Gas</span><span>8 min</span></div>
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/15085029/pexels-photo-15085029.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Oil &amp; Gas</span><span>8 min</span></div>
         <h3>Why the next decade of oil &amp; gas <em>will be won in software</em>.</h3>
         <p>The supermajors are quietly rebuilding their stacks. The operators that move first will set the cost curve for the next twenty years.</p>
-        <span class="read">Read <span>→</span></span>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-1" href="article-foreman.html" data-cat="The Trades">
-        <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">The Trades</span><span>6 min</span></div>
+      <a class="story reveal" href="article-foreman.html" data-cat="The Trades">
+        <div class="story-photo" style="background-image:url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>6 min</span></div>
         <h3>The foreman is still the system.</h3>
-        <p>A third of the work in any construction site lives in one person's head. Why every productivity tool of the last twenty years failed to fix it, and what finally can.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>A third of the work in any construction site lives in one person's head. Why every productivity tool of the last twenty years failed to fix it.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-2" href="article-predictive-maintenance.html" data-cat="Oil &amp; Gas">
-        <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">Oil &amp; Gas</span><span>10 min</span></div>
+      <a class="story reveal" href="article-predictive-maintenance.html" data-cat="Oil &amp; Gas">
+        <div class="story-photo" style="background-image:url('https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Oil &amp; Gas</span><span>10 min</span></div>
         <h3>Predictive maintenance was always a lie. Until now.</h3>
-        <p>A decade of dashboards trained operators to ignore alerts. Agentic systems don't ask anyone to look, they act, and tell you what they did.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>A decade of dashboards trained operators to ignore alerts. Agentic systems don't ask anyone to look, they act.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
       <a class="story reveal" href="article-electrician.html" data-cat="The Trades">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/28950842/pexels-photo-28950842.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">The Trades</span><span>5 min</span></div>
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/28950842/pexels-photo-28950842.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>5 min</span></div>
         <h3>What an electrician actually needs from software.</h3>
         <p>A licensed journeyman doesn't need another app. They need the last twelve job photos and the spec, on a glove-sized screen, with no signal.</p>
-        <span class="read">Read <span>→</span></span>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-1" href="article-15-billion.html" data-cat="Oil &amp; Gas">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/3229014/pexels-photo-3229014.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">Oil &amp; Gas</span><span>9 min</span></div>
+      <a class="story reveal" href="article-15-billion.html" data-cat="Oil &amp; Gas">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/3229014/pexels-photo-3229014.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Oil &amp; Gas</span><span>9 min</span></div>
         <h3>$15 billion, and the window is closing.</h3>
-        <p>The AI-in-oil-and-gas market is on a trajectory to triple by 2029. The operators that wait for the case studies will be priced out of the talent market first.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>The AI-in-oil-and-gas market is on a trajectory to triple by 2029. The operators that wait for the case studies will be priced out first.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-2" href="article-estimators.html" data-cat="The Trades">
-        <div class="photo" style="background-image:url('https://images.unsplash.com/photo-1581092335397-9583eb92d232?auto=format&fit=crop&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">The Trades</span><span>7 min</span></div>
+      <a class="story reveal" href="article-estimators.html" data-cat="The Trades">
+        <div class="story-photo" style="background-image:url('https://images.unsplash.com/photo-1581092335397-9583eb92d232?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>7 min</span></div>
         <h3>Stop hiring estimators. Start hiring operators.</h3>
-        <p>Agentic systems are eating the back-office faster than anyone expected. The HVAC, plumbing, and mechanical contractors that win will rebuild around the work, not the paperwork.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>Agentic systems are eating the back-office faster than anyone expected. The contractors that win will rebuild around the work, not the paperwork.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
       <a class="story reveal" href="article-one-molly.html" data-cat="Operations">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">Operations</span><span>6 min</span></div>
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Operations</span><span>6 min</span></div>
         <h3>You don't need five Mollys. You need one.</h3>
-        <p>The office coordinator running on spreadsheets and phone calls is not a people problem. It's a systems problem, and fixing the system changes the staffing math permanently.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>The office coordinator running on spreadsheets and phone calls is not a people problem. It's a systems problem.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-1" href="article-hvac.html" data-cat="The Trades">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/3964736/pexels-photo-3964736.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">The Trades</span><span>6 min</span></div>
+      <a class="story reveal" href="article-hvac.html" data-cat="The Trades">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/3964736/pexels-photo-3964736.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>6 min</span></div>
         <h3>The HVAC call is already profitable. You're just not capturing it.</h3>
-        <p>HVAC service techs leave revenue on the table every day. Not through incompetence, but because the systems behind them were never built to capture what they actually do.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>HVAC service techs leave revenue on the table every day because the systems behind them were never built to capture what they actually do.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-2" href="article-construction.html" data-cat="Construction">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">Construction</span><span>7 min</span></div>
+      <a class="story reveal" href="article-construction.html" data-cat="Construction">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Construction</span><span>7 min</span></div>
         <h3>Construction doesn't have a labor problem. It has an information problem.</h3>
         <p>Half the inefficiency on every job site comes from information that exists somewhere but is never where the work is happening.</p>
-        <span class="read">Read <span>→</span></span>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
       <a class="story reveal" href="article-plumbing.html" data-cat="The Trades">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/3721272/pexels-photo-3721272.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">The Trades</span><span>5 min</span></div>
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/3721272/pexels-photo-3721272.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>5 min</span></div>
         <h3>Most plumbing companies bill for what they remember, not what they did.</h3>
-        <p>The gap between work performed and work invoiced is costing service plumbers 10-15% of revenue. It's not a pricing problem. It's a capture problem.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>The gap between work performed and work invoiced is costing service plumbers 10–15% of revenue. It's a capture problem.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-1" href="article-heavy-equipment.html" data-cat="Heavy Equipment">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/1078884/pexels-photo-1078884.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">Heavy Equipment</span><span>6 min</span></div>
+      <a class="story reveal" href="article-heavy-equipment.html" data-cat="Heavy Equipment">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/1078884/pexels-photo-1078884.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Heavy Equipment</span><span>6 min</span></div>
         <h3>Heavy equipment doesn't break suddenly. It warns you first.</h3>
         <p>Every machine in your fleet generates failure signals weeks before it breaks. Most operators never see them until it's already a breakdown.</p>
-        <span class="read">Read <span>→</span></span>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-2" href="article-mining.html" data-cat="Mining">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/2101137/pexels-photo-2101137.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">Mining</span><span>7 min</span></div>
+      <a class="story reveal" href="article-mining.html" data-cat="Mining">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/2101137/pexels-photo-2101137.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Mining</span><span>7 min</span></div>
         <h3>Mining runs on cycles. The ones who win run shorter ones.</h3>
         <p>Every phase of mining is a cycle with lag built in. The operators compressing that lag are setting cost curves their competitors cannot match.</p>
-        <span class="read">Read <span>→</span></span>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
       <a class="story reveal" href="article-manufacturing.html" data-cat="Manufacturing">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">Manufacturing</span><span>6 min</span></div>
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Manufacturing</span><span>6 min</span></div>
         <h3>The factory floor's data problem isn't volume. It's visibility.</h3>
         <p>Most manufacturing operations are drowning in sensor data and starving for operational intelligence. More dashboards are not the answer.</p>
-        <span class="read">Read <span>→</span></span>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-1" href="article-pipeline.html" data-cat="Oil &amp; Gas">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/247763/pexels-photo-247763.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">Oil &amp; Gas</span><span>8 min</span></div>
+      <a class="story reveal" href="article-pipeline.html" data-cat="Oil &amp; Gas">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/247763/pexels-photo-247763.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Oil &amp; Gas</span><span>8 min</span></div>
         <h3>Pipeline integrity management is still mostly calendar-driven. It shouldn't be.</h3>
-        <p>Midstream operators spend billions on inspection programs built around schedules rather than risk signals. The pipeline is telling you where to look.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>Midstream operators spend billions on inspection programs built around schedules rather than risk signals.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-2" href="article-trades-and-ai.html" data-cat="The Trades">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/8961004/pexels-photo-8961004.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">The Trades</span><span>7 min</span></div>
+      <a class="story reveal" href="article-trades-and-ai.html" data-cat="The Trades">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/8961004/pexels-photo-8961004.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>7 min</span></div>
         <h3>The trades don't have a technology problem. They have an adoption problem.</h3>
-        <p>Twenty years of field service software failed because it was built for offices. Why the AI era is different, and what trades operators need to understand to take advantage of it.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>Twenty years of field service software failed because it was built for offices. Why the AI era is different.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
       <a class="story reveal" href="article-roofing.html" data-cat="The Trades">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/1249611/pexels-photo-1249611.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">The Trades</span><span>6 min</span></div>
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/1249611/pexels-photo-1249611.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>6 min</span></div>
         <h3>Roofing runs on weather windows. Most crews waste half of them.</h3>
         <p>A roofing company's biggest enemy isn't rain. It's the three days of scrambled scheduling after the rain clears.</p>
-        <span class="read">Read <span>→</span></span>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-1" href="article-welding.html" data-cat="The Trades">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/3862633/pexels-photo-3862633.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">The Trades</span><span>5 min</span></div>
+      <a class="story reveal" href="article-welding.html" data-cat="The Trades">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/3862633/pexels-photo-3862633.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>5 min</span></div>
         <h3>The weld cert expires Friday. Does anyone know?</h3>
-        <p>Fabrication shops and welding contractors run on certifications. One lapsed cert on the wrong job is a stoppage, a rework, or a liability.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>Fabrication shops run on certifications. One lapsed cert on the wrong job is a stoppage, a rework, or a liability.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-2" href="article-landscaping.html" data-cat="The Trades">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/1301856/pexels-photo-1301856.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">The Trades</span><span>5 min</span></div>
+      <a class="story reveal" href="article-landscaping.html" data-cat="The Trades">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/1301856/pexels-photo-1301856.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>5 min</span></div>
         <h3>Landscaping profit doesn't disappear on the job. It disappears in the routing.</h3>
         <p>A landscaping crew spending 40 minutes driving between jobs that are two miles apart is a routing problem disguised as a labor problem.</p>
-        <span class="read">Read <span>→</span></span>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
       <a class="story reveal" href="article-painting.html" data-cat="The Trades">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/1669754/pexels-photo-1669754.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">The Trades</span><span>5 min</span></div>
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/1669754/pexels-photo-1669754.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>5 min</span></div>
         <h3>Painting contractors lose jobs before the first brush stroke.</h3>
-        <p>Estimating accuracy, materials ordering, and crew scheduling determine the margin on a painting job before the crew arrives. Most contractors are guessing on all three.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>Estimating accuracy, materials ordering, and crew scheduling determine the margin before the crew arrives.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
-      <a class="story reveal delay-1" href="article-concrete.html" data-cat="Construction">
-        <div class="photo" style="background-image:url('https://images.pexels.com/photos/2058471/pexels-photo-2058471.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
-        <div class="meta"><span class="cat">Construction</span><span>6 min</span></div>
+      <a class="story reveal" href="article-concrete.html" data-cat="Construction">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/2058471/pexels-photo-2058471.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Construction</span><span>6 min</span></div>
         <h3>Concrete is unforgiving. The scheduling that surrounds it doesn't have to be.</h3>
-        <p>A missed concrete pour window costs more than the concrete itself. It costs the crew day, the form rental, the inspector rescheduling, and the GC relationship.</p>
-        <span class="read">Read <span>→</span></span>
+        <p>A missed concrete pour window costs more than the concrete itself. It costs the crew day, the form rental, the inspector rescheduling.</p>
+        <span class="story-read">Read &#8594;</span>
+      </a>
+
+      <a class="story reveal" href="article-admin-burden.html" data-cat="Operations">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Operations</span><span>6 min</span></div>
+        <h3>The admin burden is eating your best people.</h3>
+        <p>The most expensive operational cost isn't equipment or labor. It's the time your best people spend on work that shouldn't require people.</p>
+        <span class="story-read">Read &#8594;</span>
+      </a>
+
+      <a class="story reveal" href="article-ai-dispatch.html" data-cat="Operations">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/9822732/pexels-photo-9822732.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Operations</span><span>7 min</span></div>
+        <h3>AI dispatch isn't about replacing your dispatcher. It's about replacing the system.</h3>
+        <p>The dispatcher isn't the bottleneck. The process is. What AI dispatch actually changes in a field service operation.</p>
+        <span class="story-read">Read &#8594;</span>
+      </a>
+
+      <a class="story reveal" href="article-best-guy-quit.html" data-cat="Operations">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/8961065/pexels-photo-8961065.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Operations</span><span>5 min</span></div>
+        <h3>Your best guy quit. Now what?</h3>
+        <p>When the person who knew everything walks out the door, what leaves with them, and how to make sure that never happens again.</p>
+        <span class="story-read">Read &#8594;</span>
+      </a>
+
+      <a class="story reveal" href="article-scaling-trap.html" data-cat="Operations">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/3786126/pexels-photo-3786126.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Operations</span><span>8 min</span></div>
+        <h3>The scaling trap every trade contractor walks into.</h3>
+        <p>More jobs creates more coordination overhead. At some point, growth makes the business harder to run, not easier. There's a way out.</p>
+        <span class="story-read">Read &#8594;</span>
+      </a>
+
+      <a class="story reveal" href="article-labor-shortage.html" data-cat="The Trades">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/2219024/pexels-photo-2219024.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">The Trades</span><span>6 min</span></div>
+        <h3>The labor shortage is real. But it's being solved in the wrong direction.</h3>
+        <p>Hiring more people is not the answer when every person you hire creates more coordination overhead. Operational leverage is.</p>
+        <span class="story-read">Read &#8594;</span>
+      </a>
+
+      <a class="story reveal" href="article-revenue-leakage.html" data-cat="Operations">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/6693661/pexels-photo-6693661.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Operations</span><span>7 min</span></div>
+        <h3>Revenue leakage is silent. That's why it's so expensive.</h3>
+        <p>Most field service companies are losing 10–20% of their revenue to things they did but didn't bill for. It's invisible until you look.</p>
+        <span class="story-read">Read &#8594;</span>
+      </a>
+
+      <a class="story reveal" href="article-job-costing.html" data-cat="Operations">
+        <div class="story-photo" style="background-image:url('https://images.pexels.com/photos/3760067/pexels-photo-3760067.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')"></div>
+        <div class="story-meta"><span class="cat">Operations</span><span>6 min</span></div>
+        <h3>You can't improve what you can't see. Job costing is where that starts.</h3>
+        <p>Profitable-looking jobs are often losers in disguise. Real-time job costing makes the invisible visible before it's too late.</p>
+        <span class="story-read">Read &#8594;</span>
       </a>
 
     </div>
@@ -653,20 +533,20 @@
 </section>
 
 <!-- NEWSLETTER -->
-<section class="newsletter" data-screen-label="04 Newsletter">
+<section class="newsletter">
   <div class="container">
-    <div class="newsletter-grid reveal">
+    <div class="newsletter-inner reveal">
       <div>
-        <div class="eyebrow" style="color: rgba(255,255,255,0.6);"><span class="dot"></span>Subscribe</div>
-        <h2 style="margin-top: 22px;">Field notes, <em>once a month</em>.</h2>
+        <div class="eyebrow"><span class="dot"></span>Subscribe</div>
+        <h2>Field notes, <em>once a month.</em></h2>
         <p>One long read, three short ones, zero AI hype. Written for the people running real operations, not the ones writing about them.</p>
       </div>
       <div>
         <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('input').value=''; this.nextElementSibling.textContent='Subscribed.';">
-          <input type="email" placeholder="you@operator.com" required/>
-          <button type="submit">Subscribe →</button>
+          <input type="email" placeholder="you@yourcompany.com" required/>
+          <button type="submit">Subscribe &#8594;</button>
         </form>
-        <div class="newsletter-meta">No spam · unsubscribe anytime</div>
+        <div class="newsletter-note">No spam &middot; unsubscribe anytime</div>
       </div>
     </div>
   </div>
@@ -675,72 +555,73 @@
 <!-- FOOTER -->
 <footer>
   <div class="container">
-    <div class="foot-grid">
+    <div class="footer-grid">
       <div>
-        <a href="stratum.html" class="brand" style="color: var(--ink);">
-          <span class="mark"></span>
-          <span>TMI</span>
-        </a>
-        <div class="foot-tagline">Powering the companies that keep the world moving.</div>
+        <div class="footer-brand-name">
+          <img src="logo.svg" alt="TMI"/> TMI
+        </div>
+        <p class="footer-desc">TMI builds custom AI systems and digital infrastructure for the trades. We digitize your operation so you run smarter, leaner, and structurally ahead.</p>
+        <div class="footer-contact">
+          <a href="mailto:hello@tmi-technology.com">hello@tmi-technology.com</a>
+        </div>
       </div>
-      <div class="foot-col">
-        <h5>Pages</h5>
-        <a href="stratum.html">Home</a>
-        <a href="news.html">News &amp; media</a>
-        <a href="stratum.html#cta">Contact</a>
-      </div>
-      <div class="foot-col">
-        <h5>Open web</h5>
-        <a href="/robots.txt">robots.txt</a>
-        <a href="/llms.txt">llms.txt</a>
-        <a href="/sitemap.xml">sitemap.xml</a>
+      <div class="footer-right">
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="about.html">About</a>
+          <a href="partners.html">Partners</a>
+          <a href="news.html">Field Notes</a>
+          <a href="stratum.html#cta">Contact</a>
+        </div>
+        <div class="footer-col">
+          <h5>Industries</h5>
+          <a href="trades.html">Trades &amp; Field Service</a>
+          <a href="construction.html">Construction</a>
+          <a href="oil-gas.html">Oil, Gas &amp; Energy</a>
+          <a href="manufacturing.html">Manufacturing</a>
+          <a href="fleet.html">Fleet &amp; Logistics</a>
+          <a href="home-service.html">Home Service</a>
+        </div>
       </div>
     </div>
-    <div class="foot-bottom">
-      <span>© 2026 TMI.</span>
-      <span>Built for the field</span>
+    <div class="footer-bottom">
+      <span>&copy; 2025 TMI Technology. All rights reserved.</span>
+      <span>Built for the companies that power the world.</span>
     </div>
   </div>
 </footer>
 
 <script>
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
-  }, { threshold: 0.12 });
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+// Intersection observer for reveal animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-  const navToggle = document.getElementById('nav-toggle');
-  const sideNav = document.getElementById('side-nav');
-  navToggle.addEventListener('click', () => {
-    navToggle.classList.toggle('open');
-    sideNav.classList.toggle('open');
-  });
-  sideNav.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => {
-      navToggle.classList.remove('open');
-      sideNav.classList.remove('open');
+// Article filter
+const filterLinks = document.querySelectorAll('.filter-inner a[data-filter]');
+const stories = document.querySelectorAll('.story[data-cat]');
+filterLinks.forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    filterLinks.forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+    const filter = link.getAttribute('data-filter');
+    stories.forEach(story => {
+      const cat = story.getAttribute('data-cat');
+      story.style.display = (filter === 'all' || cat === filter) ? '' : 'none';
     });
   });
+});
 
-  // Filter logic
-  const filterLinks = document.querySelectorAll('.filter-inner a[data-filter]');
-  const stories = document.querySelectorAll('.story[data-cat]');
-
-  filterLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      filterLinks.forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
-      const filter = link.getAttribute('data-filter');
-      stories.forEach(story => {
-        const cat = story.getAttribute('data-cat');
-        const show = filter === 'all' || cat === filter;
-        story.style.display = show ? '' : 'none';
-        story.style.opacity = show ? '' : '0';
-      });
-    });
-  });
+// Side nav
+const navBtn = document.getElementById('nav-btn');
+const sideNav = document.getElementById('side-nav');
+const sideOverlay = document.getElementById('side-overlay');
+function openSideNav() { sideNav.classList.add('open'); sideOverlay.classList.add('open'); navBtn.classList.add('open'); sideNav.setAttribute('aria-hidden','false'); }
+function closeSideNav() { sideNav.classList.remove('open'); sideOverlay.classList.remove('open'); navBtn.classList.remove('open'); sideNav.setAttribute('aria-hidden','true'); }
+navBtn.addEventListener('click', () => sideNav.classList.contains('open') ? closeSideNav() : openSideNav());
+sideOverlay.addEventListener('click', closeSideNav);
 </script>
-
 </body>
 </html>
