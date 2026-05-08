@@ -57,9 +57,21 @@ async function handler(req, res) {
     .eq('id', leadId)
     .single();
 
-  // Skip if booked or unsubscribed
-  if (!lead || lead.status === 'booked' || lead.status === 'unsubscribed') {
-    return res.status(200).json({ skipped: true, reason: lead?.status });
+  const preCallSteps = ['pre_call_24h', 'pre_call_2h'];
+
+  // Always skip unsubscribed
+  if (!lead || lead.status === 'unsubscribed') {
+    return res.status(200).json({ skipped: true, reason: 'unsubscribed' });
+  }
+
+  // Booked leads only get pre-call steps - skip all cold follow-ups
+  if (lead.status === 'booked' && !preCallSteps.includes(step)) {
+    return res.status(200).json({ skipped: true, reason: 'booked - cold sequence suppressed' });
+  }
+
+  // New leads only get cold follow-ups, not pre-call steps
+  if (lead.status === 'new' && preCallSteps.includes(step)) {
+    return res.status(200).json({ skipped: true, reason: 'not booked' });
   }
 
   const firstName = lead.name.split(' ')[0];
@@ -130,6 +142,34 @@ async function handler(req, res) {
 <p style="margin:0 0 24px;">One last thing worth reading: <a href="${SITE}/article-scaling-trap" style="color:#5a9e00;">Why Growth Usually Makes the Problem Worse</a></p>
 <p style="margin:0;">TMI<br><span style="color:#888;font-size:13px;">tmi-technology.com</span></p>
 `, unsubUrl),
+    });
+  }
+
+  // --- BOOKED SEQUENCE ---
+
+  if (step === 'pre_call_24h') {
+    // From Mia — day before the call
+    await resend.emails.send({
+      from: 'Mia at TMI <hello@tmi-technology.com>',
+      to: lead.email,
+      subject: "We're talking tomorrow",
+      html: emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">Just a heads up - we're on tomorrow. Looking forward to it.</p>
+<p style="margin:0 0 16px;">One thing that'll make the call more useful: if you haven't already, submit your operations audit before we get on. Takes about 5 minutes and means we can go deep from the start instead of spending the whole call on basics.</p>
+<p style="margin:0 0 24px;"><a href="${SITE}/audit" style="color:#5a9e00;font-weight:600;">Submit your audit here</a></p>
+<p style="margin:0 0 16px;">See you then.</p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - AI Infrastructure for Field Operations</span></p>
+`, unsubUrl),
+    });
+  }
+
+  if (step === 'pre_call_2h' && lead.phone) {
+    // SMS only — 2 hours before
+    await sms.messages.create({
+      body: `Hey ${firstName} - we're on in 2 hours. See you then.`,
+      from: FROM_NUMBER,
+      to: formatPhone(lead.phone),
     });
   }
 
