@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TMI — AI Operating System for Field Operations</title>
+<title>Apply — TMI AI Operating System</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,98 +14,91 @@
   :root {
     --bg-dark: #0a0b14;
     --bg-deep: #0d0e1a;
-    --ink: #1a1a1a;
-    --ink-2: #505060;
-    --muted: #86868b;
+    --bg-card: #111220;
     --chart: #E4FF97;
     --chart-dark: #D0FF6A;
     --serif: "Barlow", sans-serif;
   }
 
-  html, body {
-    height: 100%;
+  html { background: var(--bg-dark); scroll-behavior: smooth; }
+
+  body {
     background: var(--bg-dark);
     color: #fff;
     font-family: var(--serif);
     -webkit-font-smoothing: antialiased;
-  }
-
-  .page {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 24px 64px;
-    position: relative;
   }
 
-  /* subtle radial glow behind video */
-  .page::before {
+  /* glow */
+  body::before {
     content: '';
     position: fixed;
     top: 0; left: 50%;
     transform: translateX(-50%);
-    width: 900px;
-    height: 600px;
-    background: radial-gradient(ellipse at center top, rgba(228,255,151,0.06) 0%, transparent 70%);
+    width: 1000px; height: 560px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(228,255,151,0.07) 0%, transparent 65%);
     pointer-events: none;
     z-index: 0;
   }
 
-  .inner {
+  .page {
     position: relative;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 56px 24px 80px;
+  }
+
+  .inner {
     width: 100%;
-    max-width: 760px;
+    max-width: 720px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 0;
   }
 
+  /* ─── header ─── */
   .wordmark {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.35);
-    margin-bottom: 40px;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 36px;
   }
-
-  .wordmark span {
-    color: var(--chart);
-  }
+  .wordmark em { color: var(--chart); font-style: normal; }
 
   h1 {
-    font-size: clamp(28px, 5vw, 48px);
+    font-size: clamp(30px, 5vw, 50px);
     font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    color: #fff;
-    margin-bottom: 16px;
-    max-width: 640px;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    margin-bottom: 14px;
+    max-width: 620px;
   }
 
   .sub {
     font-size: 17px;
-    line-height: 1.6;
-    color: rgba(255,255,255,0.5);
-    max-width: 500px;
-    margin-bottom: 40px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.48);
+    max-width: 480px;
+    margin-bottom: 44px;
   }
 
+  /* ─── video ─── */
   .video-wrap {
     width: 100%;
     position: relative;
-    padding-bottom: 56.25%; /* 16:9 */
-    background: #0d0e1a;
-    border-radius: 12px;
+    padding-bottom: 56.25%;
+    background: var(--bg-deep);
+    border-radius: 14px;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,0.07);
-    margin-bottom: 40px;
-    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    margin-bottom: 56px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.55);
   }
 
   .video-wrap iframe,
@@ -117,7 +110,6 @@
     border: none;
   }
 
-  /* placeholder shown until video URL is set */
   .video-placeholder {
     position: absolute;
     inset: 0;
@@ -125,54 +117,195 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    color: rgba(255,255,255,0.2);
-    font-size: 14px;
+    gap: 14px;
+    color: rgba(255,255,255,0.18);
+    font-size: 13px;
+    letter-spacing: 0.05em;
   }
 
-  .video-placeholder svg {
-    opacity: 0.15;
-  }
-
-  .cta-btn {
-    display: inline-flex;
+  /* ─── divider ─── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.28);
+    margin-bottom: 28px;
+    display: flex;
     align-items: center;
+    gap: 14px;
+    width: 100%;
+  }
+  .section-label::before,
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+  }
+
+  /* ─── form card ─── */
+  #apply-section {
+    width: 100%;
+    text-align: left;
+  }
+
+  .form-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 40px;
+    width: 100%;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  input, select, textarea {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-family: var(--serif);
+    font-size: 15px;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.22); }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: rgba(228,255,151,0.4);
+    background: rgba(228,255,151,0.03);
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+
+  select option { background: #1a1b2e; color: #fff; }
+
+  textarea { resize: vertical; min-height: 100px; line-height: 1.5; }
+
+  .submit-btn {
+    width: 100%;
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 10px;
     background: var(--chart);
     color: #0a0b14;
     font-family: var(--serif);
     font-size: 16px;
     font-weight: 700;
-    letter-spacing: 0.01em;
-    padding: 18px 40px;
+    padding: 17px 32px;
     border-radius: 8px;
     border: none;
     cursor: pointer;
-    text-decoration: none;
-    transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
-    box-shadow: 0 0 40px rgba(228,255,151,0.2);
+    transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+    box-shadow: 0 0 40px rgba(228,255,151,0.18);
   }
 
-  .cta-btn:hover {
+  .submit-btn:hover {
     background: var(--chart-dark);
     transform: translateY(-1px);
-    box-shadow: 0 0 60px rgba(228,255,151,0.3);
+    box-shadow: 0 0 60px rgba(228,255,151,0.28);
   }
 
-  .cta-btn:active {
-    transform: translateY(0);
+  .submit-btn:active { transform: translateY(0); }
+
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
   }
 
-  .trust {
-    margin-top: 24px;
-    font-size: 13px;
-    color: rgba(255,255,255,0.25);
+  .trust-line {
+    margin-top: 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.22);
+    text-align: center;
     letter-spacing: 0.02em;
   }
 
+  /* ─── success / cal ─── */
+  #cal-section {
+    display: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  .success-msg {
+    margin-bottom: 40px;
+  }
+
+  .success-msg .check {
+    width: 56px;
+    height: 56px;
+    background: rgba(228,255,151,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+
+  .success-msg h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .success-msg p {
+    color: rgba(255,255,255,0.48);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  #cal-embed {
+    width: 100%;
+    min-height: 600px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: var(--bg-card);
+  }
+
   @media (max-width: 600px) {
-    .page { padding: 40px 16px 56px; }
-    .cta-btn { width: 100%; justify-content: center; font-size: 15px; padding: 16px 24px; }
+    .page { padding: 40px 16px 64px; }
+    .form-card { padding: 28px 20px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .field.full { grid-column: 1; }
   }
 </style>
 </head>
@@ -181,60 +314,192 @@
 <div class="page">
   <div class="inner">
 
-    <div class="wordmark">TMI &mdash; <span>AI Infrastructure</span> for Field Operations</div>
+    <div class="wordmark">TMI &mdash; <em>AI Infrastructure</em> for Field Operations</div>
 
-    <h1>Replace the chaos with one AI system built for your crews.</h1>
+    <h1>One AI system for your entire field operation.</h1>
 
-    <p class="sub">Watch how field teams cut admin time, recover lost revenue, and run tighter operations — without changing how they work.</p>
+    <p class="sub">Watch the overview, then apply below. We work with a small number of teams each quarter.</p>
 
-    <!-- VIDEO: swap the placeholder below with your VSL embed -->
+    <!-- ── VIDEO ─────────────────────────────────────────────── -->
     <div class="video-wrap">
 
-      <!-- OPTION A: YouTube embed (uncomment and replace VIDEO_ID)
+      <!-- YouTube: replace VIDEO_ID below and remove the placeholder div
       <iframe
-        src="https://www.youtube.com/embed/VIDEO_ID?autoplay=0&rel=0&modestbranding=1"
-        title="TMI — AI Operating System for Field Operations"
+        src="https://www.youtube.com/embed/VIDEO_ID?autoplay=0&rel=0&modestbranding=1&color=white"
+        title="TMI — AI Operating System Overview"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen>
       </iframe>
       -->
 
-      <!-- OPTION B: Vimeo embed (uncomment and replace VIDEO_ID)
+      <!-- Vimeo: replace VIDEO_ID below and remove the placeholder div
       <iframe
         src="https://player.vimeo.com/video/VIDEO_ID?color=E4FF97&title=0&byline=0&portrait=0"
-        title="TMI VSL"
         allow="autoplay; fullscreen; picture-in-picture"
         allowfullscreen>
       </iframe>
       -->
 
-      <!-- OPTION C: Self-hosted MP4 (uncomment and replace URL)
-      <video controls playsinline poster="">
-        <source src="YOUR_VIDEO_URL.mp4" type="video/mp4">
-      </video>
-      -->
-
-      <!-- placeholder — remove this div once video is added -->
+      <!-- placeholder — delete once video embed is added above -->
       <div class="video-placeholder">
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-          <circle cx="32" cy="32" r="31" stroke="white" stroke-width="2"/>
-          <polygon points="26,20 48,32 26,44" fill="white"/>
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <circle cx="28" cy="28" r="27" stroke="white" stroke-width="1.5" stroke-opacity="0.3"/>
+          <polygon points="22,17 42,28 22,39" fill="white" fill-opacity="0.3"/>
         </svg>
-        Video coming soon
+        <span>Video coming soon</span>
+      </div>
+    </div>
+    <!-- ── END VIDEO ──────────────────────────────────────────── -->
+
+    <!-- ── APPLICATION FORM ──────────────────────────────────── -->
+    <div id="apply-section">
+      <div class="section-label">Apply for Access</div>
+
+      <div class="form-card">
+        <form id="apply-form">
+          <!-- formsubmit config -->
+          <input type="hidden" name="_subject" value="New TMI Application">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="false">
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="Name" placeholder="Your name" required>
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="Email" placeholder="you@company.com" required>
+            </div>
+            <div class="field">
+              <label for="company">Company</label>
+              <input type="text" id="company" name="Company" placeholder="Business name" required>
+            </div>
+            <div class="field">
+              <label for="industry">Industry</label>
+              <select id="industry" name="Industry" required>
+                <option value="" disabled selected>Select one</option>
+                <option>Construction</option>
+                <option>Electrical / Trades</option>
+                <option>HVAC / Plumbing</option>
+                <option>Oil &amp; Gas</option>
+                <option>Manufacturing</option>
+                <option>Fleet / Logistics</option>
+                <option>Other Field Services</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="challenge">Biggest operational challenge</label>
+              <textarea id="challenge" name="Biggest Challenge" placeholder="What's breaking down in your operation right now?" required></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submit-btn">
+            Submit Application
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+
+          <p class="trust-line">We review every application and follow up within 1 business day.</p>
+        </form>
+      </div>
+    </div>
+    <!-- ── END FORM ───────────────────────────────────────────── -->
+
+    <!-- ── CAL BOOKING (shown after form submit) ─────────────── -->
+    <div id="cal-section">
+      <div class="success-msg">
+        <div class="check">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#E4FF97" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2>Application received.</h2>
+        <p>Pick a time below and we'll walk through your operation and show you exactly what TMI can do for your team.</p>
       </div>
 
+      <!-- Cal.com inline embed -->
+      <!-- TO SET UP: replace YOUR-CAL-LINK below with your cal.com/username/meeting-type -->
+      <div id="cal-embed"></div>
     </div>
-    <!-- END VIDEO -->
-
-    <a href="contact.html" class="cta-btn">
-      Apply for Access
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
-
-    <p class="trust">Used across construction, oil &amp; gas, trades, and manufacturing</p>
+    <!-- ── END CAL ─────────────────────────────────────────────── -->
 
   </div>
 </div>
+
+<script>
+  // ── Form submission via formsubmit.co AJAX ──────────────────
+  const form = document.getElementById('apply-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const applySection = document.getElementById('apply-section');
+  const calSection = document.getElementById('cal-section');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    const data = new FormData(form);
+
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/mialouviere@yahoo.com', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: data
+      });
+
+      if (res.ok) {
+        applySection.style.display = 'none';
+        calSection.style.display = 'block';
+        calSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        initCal();
+      } else {
+        throw new Error('submission failed');
+      }
+    } catch {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Try Again';
+      alert('Something went wrong — please email us at hello@tmi-technology.com');
+    }
+  });
+
+  // ── Cal.com embed (loaded after successful submission) ───────
+  function initCal() {
+    // Replace YOUR-CAL-LINK with your actual cal.com link, e.g. "mia/30min"
+    const CAL_LINK = 'YOUR-CAL-LINK';
+
+    (function (C, A, L) {
+      let p = function (a, ar) { a.q.push(ar); };
+      let d = C.document;
+      C.Cal = C.Cal || function () {
+        let cal = C.Cal; let ar = arguments;
+        if (!cal.loaded) {
+          cal.ns = {}; cal.q = cal.q || [];
+          d.head.appendChild(d.createElement('script')).src = A;
+          cal.loaded = true;
+        }
+        if (ar[0] === L) {
+          const api = function () { p(api, arguments); };
+          const ns = ar[1]; api.q = api.q || [];
+          typeof ns === 'string' ? (cal.ns[ns] = api) && p(api, ar) : p(cal, ar);
+          return;
+        }
+        p(cal, ar);
+      };
+    })(window, 'https://app.cal.com/embed/embed.js', 'init');
+
+    Cal('init', { origin: 'https://cal.com' });
+
+    Cal('inline', {
+      elementOrSelector: '#cal-embed',
+      calLink: CAL_LINK,
+      layout: 'month_view'
+    });
+
+    Cal('ui', {
+      styles: { branding: { brandColor: '#E4FF97' } },
+      hideEventTypeDetails: false,
+      layout: 'month_view'
+    });
+  }
+</script>
 
 </body>
 </html>
