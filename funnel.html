@@ -123,6 +123,52 @@
     letter-spacing: 0.05em;
   }
 
+  /* ─── proof row ─── */
+  .proof-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    margin-bottom: 52px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 28px 32px;
+  }
+
+  .proof-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .proof-num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--chart);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .proof-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.38);
+    line-height: 1.4;
+    max-width: 120px;
+  }
+
+  .proof-div {
+    width: 1px;
+    height: 40px;
+    background: rgba(255,255,255,0.08);
+    margin: 0 24px;
+    flex-shrink: 0;
+  }
+
   /* ─── divider ─── */
   .section-label {
     font-size: 11px;
@@ -306,6 +352,10 @@
     .form-card { padding: 28px 20px; }
     .form-grid { grid-template-columns: 1fr; }
     .field.full { grid-column: 1; }
+    .proof-row { padding: 20px 16px; gap: 0; }
+    .proof-div { margin: 0 12px; }
+    .proof-num { font-size: 22px; }
+    .proof-label { font-size: 11px; }
   }
 </style>
 </head>
@@ -316,9 +366,9 @@
 
     <div class="wordmark">TMI &mdash; <em>AI Infrastructure</em> for Field Operations</div>
 
-    <h1>One AI system for your entire field operation.</h1>
+    <h1>Your crews are in the field.<br>Your revenue is leaking through the cracks.</h1>
 
-    <p class="sub">Watch the overview, then apply below. We work with a small number of teams each quarter.</p>
+    <p class="sub">Dispatch delays. Invoices that never go out. Compliance gaps. Crew you can't see. Watch how TMI closes every leak — then tell us about your operation.</p>
 
     <!-- ── VIDEO ─────────────────────────────────────────────── -->
     <div class="video-wrap">
@@ -351,9 +401,27 @@
     </div>
     <!-- ── END VIDEO ──────────────────────────────────────────── -->
 
+    <!-- ── PROOF POINTS ──────────────────────────────────────── -->
+    <div class="proof-row">
+      <div class="proof-item">
+        <span class="proof-num">6–8</span>
+        <span class="proof-label">tools replaced by one system</span>
+      </div>
+      <div class="proof-div"></div>
+      <div class="proof-item">
+        <span class="proof-num">&lt;2 wks</span>
+        <span class="proof-label">to go live, no migration required</span>
+      </div>
+      <div class="proof-div"></div>
+      <div class="proof-item">
+        <span class="proof-num">10</span>
+        <span class="proof-label">new teams onboarded per quarter</span>
+      </div>
+    </div>
+
     <!-- ── APPLICATION FORM ──────────────────────────────────── -->
     <div id="apply-section">
-      <div class="section-label">Apply for Access</div>
+      <div class="section-label">Tell us about your operation</div>
 
       <div class="form-card">
         <form id="apply-form" action="https://formsubmit.co/mialouviere@gmail.com" method="POST">
@@ -391,16 +459,16 @@
             </div>
             <div class="field full">
               <label for="challenge">Biggest operational challenge</label>
-              <textarea id="challenge" name="Biggest Challenge" placeholder="What's breaking down in your operation right now?" required></textarea>
+              <textarea id="challenge" name="Biggest Challenge" placeholder="Where's the biggest leak — dispatch, billing, compliance, crew visibility?" required></textarea>
             </div>
           </div>
 
           <button type="submit" class="submit-btn" id="submit-btn">
-            Submit Application
+            Request My Custom Demo
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
 
-          <p class="trust-line">We review every application and follow up within 1 business day.</p>
+          <p class="trust-line">Every application is reviewed personally. If it's a fit, you'll hear back within 24 hours.</p>
         </form>
       </div>
     </div>
