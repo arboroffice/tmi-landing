@@ -427,6 +427,12 @@
   .how-section .sec-sub { color: rgba(255,255,255,0.55); }
   .how-section .sec-eyebrow { color: rgba(255,255,255,0.45); border-color: rgba(255,255,255,0.12); }
   .how-section .dot { background: rgba(255,255,255,0.3); }
+  .how-prose { display: grid; grid-template-columns: 1fr 1.4fr; gap: 80px; align-items: start; }
+  .how-left h2 { font-size: clamp(28px, 4vw, 44px); line-height: 1.15; margin-top: 20px; }
+  .how-right p { font-size: 17px; line-height: 1.75; color: rgba(255,255,255,0.6); margin-bottom: 20px; }
+  .how-closer { color: rgba(255,255,255,0.75) !important; }
+  .how-closer strong { color: #fff; font-weight: 600; }
+  @media (max-width: 860px) { .how-prose { grid-template-columns: 1fr; gap: 40px; } }
   .phases {
     display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 16px; margin-top: 64px;
@@ -686,7 +692,7 @@
     <a href="home-service.html">Home Service</a>
   </div>
   <div class="side-nav-cta">
-    <a href="#cta" class="btn btn-primary" onclick="closeSideNav()">Book a Strategy Call &#8594;</a>
+    <a href="funnel.html" class="btn btn-primary" onclick="closeSideNav()">Apply to Work with TMI &#8594;</a>
   </div>
 </div>
 
@@ -694,10 +700,10 @@
 <section class="hero" id="hero">
   <div class="hero-bg-full"><img src="hero-bg.png" alt="" fetchpriority="high"/></div>
   <div class="hero-content">
-    <h1>AI Infrastructure for the Industries <em>That Power the World</em></h1>
-    <p class="lede">We build the operational systems and AI agents that run your back office, close your loops, and eliminate the manual work keeping your operation from scaling.</p>
+    <h1>Most businesses run on people.<br><em>Ours run on systems.</em></h1>
+    <p class="lede">TMI installs agentic AI infrastructure inside your operation. Not a tool. Not a subscription. Not a consultant who shows up on Zoom. A system that does the work while you run the business.</p>
     <div class="hero-actions">
-      <a href="#cta" class="btn btn-primary">Book a Strategy Call <span class="arrow">&#8594;</span></a>
+      <a href="funnel.html" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
       <a href="systems.html" class="btn btn-white-outline">See Our Systems</a>
     </div>
   </div>
@@ -910,108 +916,23 @@
   </div>
 </section>
 
-<!-- MAS ARCHITECTURE -->
-<section class="mas-section">
-  <div class="container">
-    <div class="mas-top reveal">
-      <div class="mas-headline">
-        <div class="eyebrow"><span class="dot"></span>Architecture</div>
-        <h2>Single-agent is <em>legacy.</em><br/>We run a swarm.</h2>
-      </div>
-      <div class="mas-body">
-        <p>Single-agent AI hits a ceiling fast. One model handling dispatch, compliance, billing, and scheduling creates bottlenecks — and when it fails, everything stops. That's a fragile architecture.</p>
-        <p>Modern backends use <strong style="color:#fff;">Multi-Agent Systems (MAS)</strong> — a coordinated swarm of specialized units, each owning a defined domain. They run in parallel, hand off to each other, and escalate to humans only when decisions exceed their authority. The operation doesn't wait on any single thread.</p>
-      </div>
-    </div>
-
-    <div class="mas-compare reveal">
-      <div class="mas-col mas-col-old">
-        <div class="mas-col-label">Legacy Architecture</div>
-        <h4>One agent. Every task.</h4>
-        <div class="mas-single-node">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
-        </div>
-        <p class="mas-single-desc">Serial processing. Single point of failure. Overloaded context. No specialization.</p>
-      </div>
-      <div class="mas-arrow">&#8594;</div>
-      <div class="mas-col mas-col-new">
-        <div class="mas-col-label">TMI MAS Architecture</div>
-        <h4>Specialized units. Parallel execution.</h4>
-        <div class="mas-swarm">
-          <div class="mas-swarm-node">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4"/></svg>
-            <span>Dispatch</span>
-          </div>
-          <div class="mas-swarm-node">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span>Compliance</span>
-          </div>
-          <div class="mas-swarm-node">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-            <span>Billing</span>
-          </div>
-          <div class="mas-swarm-node">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            <span>Intelligence</span>
-          </div>
-          <div class="mas-swarm-node">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 005.07 19.07"/><path d="M4.93 4.93A10 10 0 0019.07 19.07"/></svg>
-            <span>Assets</span>
-          </div>
-          <div class="mas-swarm-node">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            <span>Safety</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="mas-principles">
-      <div class="mas-principle reveal">
-        <div class="mas-principle-num">01 — Specialization</div>
-        <h4>Each agent owns one domain.</h4>
-        <p>Dispatch agents know crews, certs, and routes. Compliance agents know regulations and filing windows. Billing agents know rates, contracts, and approval chains. Specialization means depth — not breadth spread thin.</p>
-      </div>
-      <div class="mas-principle reveal">
-        <div class="mas-principle-num">02 — Parallel Execution</div>
-        <h4>No waiting. No bottlenecks.</h4>
-        <p>While one agent closes a work order, another drafts the invoice, a third checks the compliance log, and a fourth queues the next dispatch. The operation runs all threads simultaneously — not one at a time.</p>
-      </div>
-      <div class="mas-principle reveal">
-        <div class="mas-principle-num">03 — Orchestrated Handoff</div>
-        <h4>Agents coordinate. Humans decide what matters.</h4>
-        <p>When an agent reaches a decision that exceeds its authority — a large spend, a regulatory exception, a novel situation — it escalates. Everything else closes without a human touching it.</p>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- HOW WE WORK -->
 <section class="how-section section-pad" id="how-it-works">
   <div class="container">
-    <div class="sec-head reveal">
-      <div class="eyebrow sec-eyebrow"><span class="dot"></span>Process</div>
-      <h2>How We Work</h2>
-      <p class="sec-sub">A structured engagement that maps your operation, builds the systems, and grows with you.</p>
-    </div>
-    <div class="phases">
-      <div class="phase reveal" data-num="01">
-        <div class="phase-num">Phase 01</div>
-        <h3>Audit &amp; Map</h3>
-        <p>We map your entire operation: workflows, systems, team structure, and where time gets lost. We identify every point where AI can eliminate work or create leverage before a single line of code is written.</p>
-        <div class="phase-duration">Duration: 1 call</div>
+    <div class="how-prose">
+      <div class="how-left reveal">
+        <div class="eyebrow sec-eyebrow"><span class="dot"></span>How We Work</div>
+        <h2>We do not have packages on this page.</h2>
       </div>
-      <div class="phase reveal reveal-d2" data-num="02">
-        <div class="phase-num">Phase 02</div>
-        <h3>Build &amp; Deploy</h3>
-        <p>We build custom AI agents and digital systems tailored to your exact operation. Every system is integrated with your existing tools and tested in production alongside your team before full rollout.</p>
-        <div class="phase-duration">Duration: 4&ndash;6 weeks</div>
-      </div>
-      <div class="phase reveal reveal-d3" data-num="03">
-        <div class="phase-num">Phase 03</div>
-        <h3>Partner &amp; Grow</h3>
-        <p>We stay on as your AI infrastructure partner. As your operation scales, we iterate on systems, add new automations, and ensure your technology stack keeps pace with your growth.</p>
-        <div class="phase-duration">Ongoing partnership</div>
+      <div class="how-right reveal reveal-d1">
+        <p>Every business we work with is different. The size is different. The leaks are different. The goals are different. Showing you a menu of options and a price list would be the wrong way to start.</p>
+        <p>What we do is this. We come in and look at how your business actually runs. Where the time goes. Where the money leaks. Where the gaps are between what you have now and what your operation could look like on a fully agentic system.</p>
+        <p>Then we build it. Custom. For you. And we install it.</p>
+        <p>Some clients need one thing fixed fast. Some need the whole operation rebuilt from the ground up. Some want to own the infrastructure forever. Some want to license what we build to others in their industry.</p>
+        <p>We figure all of that out on a call.</p>
+        <p class="how-closer">When TMI is done, your business does not need you to be everywhere anymore. Calls get answered. Leads get followed up. Jobs get dispatched. Reports get filed. Compliance gets tracked. Revenue gets collected. <strong>Without you touching any of it.</strong></p>
+        <a href="funnel.html" class="btn btn-primary" style="margin-top:32px;display:inline-flex;align-items:center;gap:10px;">Apply to Work With TMI <span class="arrow">&#8594;</span></a>
       </div>
     </div>
   </div>
@@ -1023,18 +944,9 @@
   <div class="container">
     <div class="cta-inner reveal">
       <div class="eyebrow sec-eyebrow"><span class="dot"></span>Get Started</div>
-      <h2>Ready to restructure your operation?</h2>
-      <p class="lede">Tell us about your operation. We'll send over next steps and a link to book a call.</p>
-      <div id="form-success" style="display:none; padding: 32px 0;">
-        <p style="color:#4ade80;font-size:16px;margin-bottom:24px;">&#10003;&nbsp; Got it — we'll be in touch shortly.</p>
-        <a href="https://cal.com/mia-elianaa-a4n2hk/30min" target="_blank" class="btn btn-primary" style="font-size:16px;padding:16px 36px;">Book Your Strategy Call &#8599;</a>
-      </div>
-      <form class="cta-form" id="cta-form">
-        <input type="text" name="name" placeholder="Your name" required autocomplete="name"/>
-        <input type="email" name="email" placeholder="Work email" required autocomplete="email"/>
-        <input type="text" name="company" placeholder="Company &amp; industry"/>
-        <button type="submit" class="btn btn-primary">Send <span class="arrow">&#8594;</span></button>
-      </form>
+      <h2>We work with a small number of teams each quarter.</h2>
+      <p class="lede">If you are ready to stop running your operation manually, apply below. We review every application personally.</p>
+      <a href="funnel.html" class="btn btn-primary" style="font-size:17px;padding:18px 44px;">Apply to Work With TMI <span class="arrow">&#8594;</span></a>
     </div>
   </div>
 </section>
