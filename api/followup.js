@@ -69,50 +69,48 @@ async function handler(req, res) {
 
   if (step === 'day1_sms' && lead.phone) {
     await sms.messages.create({
-      body: `Hey ${firstName} - just checking in. Did you get a chance to look at what we sent? Happy to walk through it: ${SITE}/booking`,
+      body: `Hey ${firstName} - did you get a chance to look at what we sent? Worth going through before we build anything. ${SITE}/booking if you want to talk it through.`,
       from: FROM_NUMBER,
       to: formatPhone(lead.phone),
     });
   }
 
   if (step === 'day3_email') {
+    // From Tyler
     await resend.emails.send({
-      from: 'Mia from TMI <hello@tmi-technology.com>',
+      from: 'Tyler at TMI <hello@tmi-technology.com>',
       to: lead.email,
-      subject: 'Quick question about your operation',
+      subject: 'Something I keep seeing',
       html: emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">Still working on your audit. Quick thing - most operations we look at are bleeding the most through one of these three:</p>
-<ul style="margin:0 0 16px;padding-left:20px;color:#333;">
-  <li>Crew accountability and time tracking</li>
-  <li>Dispatch and scheduling gaps</li>
-  <li>Job costing that's off until it's too late</li>
-</ul>
-<p style="margin:0 0 16px;">We wrote about how it usually plays out: <a href="${SITE}/article-revenue-leakage" style="color:#5a9e00;">Where the Revenue Actually Goes</a></p>
-<p style="margin:0 0 24px;">If any of that sounds familiar, worth a 20-minute call: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
-<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI</span></p>
+<p style="margin:0 0 16px;">I look at a lot of operations.</p>
+<p style="margin:0 0 16px;">The ones losing the most aren't usually doing anything wrong. They're just running on people instead of systems. Every dispatch call, every schedule change, every job update - someone has to catch it or it falls through.</p>
+<p style="margin:0 0 16px;">Here's how it usually adds up: <a href="${SITE}/article-revenue-leakage" style="color:#5a9e00;">Where the Revenue Actually Goes</a></p>
+<p style="margin:0 0 24px;">Worth 20 minutes if that sounds like your operation: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
+<p style="margin:0;">Tyler<br><span style="color:#888;font-size:13px;">TMI - AI Infrastructure for Field Operations</span></p>
 `, unsubUrl),
     });
   }
 
   if (step === 'day7_email_sms') {
+    // From Mia
     await resend.emails.send({
-      from: 'Mia from TMI <hello@tmi-technology.com>',
+      from: 'Mia at TMI <hello@tmi-technology.com>',
       to: lead.email,
-      subject: 'Still here if you want to talk',
+      subject: 'Straight question',
       html: emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">I know you're running an operation. You don't have time to chase things down.</p>
-<p style="margin:0 0 16px;">So I'll keep this short: most tools built for field operations don't fix anything. They just give you something to look at.</p>
-<p style="margin:0 0 16px;">What we do is different. If it's a fit for your business, you'll know in 20 minutes.</p>
-<p style="margin:0 0 24px;"><a href="${SITE}/booking" style="color:#5a9e00;">Grab a time here.</a></p>
+<p style="margin:0 0 16px;">Is now just a bad time?</p>
+<p style="margin:0 0 16px;">Real question, not a guilt trip. If you're mid-season, buried on a job, dealing with staffing - I get it. We can come back to this.</p>
+<p style="margin:0 0 16px;">If it's something else, just reply and tell me. I'd rather know.</p>
+<p style="margin:0 0 24px;">Calendar's here whenever: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI</span></p>
 `, unsubUrl),
     });
 
     if (lead.phone) {
       await sms.messages.create({
-        body: `Hey ${firstName} - Mia from TMI. One more follow-up. If you want to talk through your operation: ${SITE}/booking`,
+        body: `Hey ${firstName} - is now just a bad time? Real question. Happy to circle back whenever: ${SITE}/booking`,
         from: FROM_NUMBER,
         to: formatPhone(lead.phone),
       });
@@ -120,17 +118,17 @@ async function handler(req, res) {
   }
 
   if (step === 'day14_email') {
+    // No name — just TMI
     await resend.emails.send({
-      from: 'Mia from TMI <hello@tmi-technology.com>',
+      from: 'TMI <hello@tmi-technology.com>',
       to: lead.email,
-      subject: 'Last one from me',
+      subject: "I'm going to stop here",
       html: emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">I'm not going to keep filling your inbox.</p>
-<p style="margin:0 0 16px;">If the timing isn't right, it isn't right. No hard feelings.</p>
-<p style="margin:0 0 16px;">If it ever is - you know where to find us: <a href="${SITE}/booking" style="color:#5a9e00;">calendar</a></p>
-<p style="margin:0 0 24px;">One more thing worth reading in the meantime: <a href="${SITE}/article-scaling-trap" style="color:#5a9e00;">Why Growth Usually Makes the Problem Worse</a></p>
-<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI</span></p>
+<p style="margin:0 0 16px;">I don't want to be another email you're ignoring.</p>
+<p style="margin:0 0 16px;">If the operation's in a good place - genuinely good. If it's not and the timing just hasn't been right, the calendar's here whenever: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
+<p style="margin:0 0 24px;">One last thing worth reading: <a href="${SITE}/article-scaling-trap" style="color:#5a9e00;">Why Growth Usually Makes the Problem Worse</a></p>
+<p style="margin:0;">TMI<br><span style="color:#888;font-size:13px;">tmi-technology.com</span></p>
 `, unsubUrl),
     });
   }

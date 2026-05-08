@@ -22,15 +22,10 @@ ${body}
 function buildInitialEmail(firstName, unsubUrl) {
   return emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">Got your application. We're putting your audit together now.</p>
-<p style="margin:0 0 12px;">Here's what you'll get back from us:</p>
-<ul style="margin:0 0 16px;padding-left:20px;color:#333;">
-  <li>A full map of where your operation is losing time and money</li>
-  <li>Every gap an AI system can close in your workflow</li>
-  <li>What your operation looks like running on automated infrastructure</li>
-</ul>
-<p style="margin:0 0 16px;">This isn't a generic deck. It's specific to your business.</p>
-<p style="margin:0 0 24px;">If you want to talk before we send it over, grab a time: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
+<p style="margin:0 0 16px;">Got it.</p>
+<p style="margin:0 0 16px;">We're going through your operation now. What we're building is a picture of where things are leaking - time, money, accountability gaps. Most owners are surprised by what comes back.</p>
+<p style="margin:0 0 16px;">We'll be in touch.</p>
+<p style="margin:0 0 24px;">If you'd rather just talk now: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - AI Infrastructure for Field Operations</span></p>
 `, unsubUrl);
 }
@@ -100,29 +95,36 @@ module.exports = async function handler(req, res) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-  // Initial email
+  // Initial email — from Mia
   resend.emails.send({
-    from: 'Mia from TMI <hello@tmi-technology.com>',
+    from: 'Mia at TMI <hello@tmi-technology.com>',
     to: email,
-    subject: "Got your info - here's what happens next",
+    subject: "You applied. Here's what happens next.",
     html: buildInitialEmail(firstName, unsubUrl),
   }).catch(e => console.error('Resend error:', e));
 
-  // SMS to lead
+  // SMS to lead — no name, just TMI
   if (phone) {
     sms.messages.create({
-      body: `Hey ${firstName} - Mia from TMI. Got your info, on it now. If you want to talk: ${SITE}/booking`,
+      body: `Hey ${firstName} - got your application. Going through your operation now, we'll be in touch. Talk sooner: ${SITE}/booking`,
       from: FROM_NUMBER,
       to: formatPhone(phone),
     }).catch(e => console.error('Lead SMS error:', e));
   }
 
-  // Internal alert
+  // Internal alert — two texts: contact + pitch brief
+  const domain = email.split('@')[1] || '';
   sms.messages.create({
-    body: `New TMI lead: ${name} | ${email} | ${phone || 'no phone'}`,
+    body: `New lead: ${name}\n${email}\n${phone || 'no phone'}\nCo: ${domain}`,
     from: FROM_NUMBER,
     to: ALERT_NUMBER,
-  }).catch(e => console.error('Alert SMS error:', e));
+  }).catch(e => console.error('Alert SMS 1 error:', e));
+
+  sms.messages.create({
+    body: `PITCH: Free ops audit (no pitch, no pressure) -> $25K+ system build -> we install and walk away. Optional: stay on as their fractional AI dept.\n\nSell on: revenue leaks, crew accountability, dispatch gaps, job costing off until too late.\n\nBook: ${SITE}/booking`,
+    from: FROM_NUMBER,
+    to: ALERT_NUMBER,
+  }).catch(e => console.error('Alert SMS 2 error:', e));
 
   // Schedule follow-up chain
   const qstash = new QStashClient({ token: process.env.QSTASH_TOKEN });
