@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Call — TMI</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg-dark: #0a0b14; --bg-card: #111220; --chart: #E4FF97; --serif: "Barlow", sans-serif; }
+  html, body { background: var(--bg-dark); color: #fff; font-family: var(--serif); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    width: 900px; height: 500px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(228,255,151,0.07) 0%, transparent 65%);
+    pointer-events: none; z-index: 0;
+  }
+  .page {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 56px 24px 80px;
+  }
+  .inner { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .wordmark {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.3); margin-bottom: 40px;
+  }
+  .wordmark em { color: var(--chart); font-style: normal; }
+  .check-wrap {
+    width: 64px; height: 64px;
+    background: rgba(228,255,151,0.08); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+  }
+  h1 { font-size: clamp(26px, 4vw, 40px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+  .sub { font-size: 16px; line-height: 1.65; color: rgba(255,255,255,0.45); max-width: 440px; margin-bottom: 48px; }
+  #cal-embed {
+    width: 100%; min-height: 620px;
+    border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: var(--bg-card);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="inner">
+    <div class="wordmark">TMI &mdash; <em>AI Infrastructure</em> for Field Operations</div>
+    <div class="check-wrap">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M5 14l7 7L23 7" stroke="#E4FF97" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h1>Application received.</h1>
+    <p class="sub">Pick a time below and we'll walk through your operation and show you exactly what TMI can do for your team.</p>
+    <div id="cal-embed"></div>
+  </div>
+</div>
+
+<script>
+(function (C, A, L) {
+  let p = function (a, ar) { a.q.push(ar); };
+  let d = C.document;
+  C.Cal = C.Cal || function () {
+    let cal = C.Cal; let ar = arguments;
+    if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement('script')).src = A; cal.loaded = true; }
+    if (ar[0] === L) { const api = function () { p(api, arguments); }; const ns = ar[1]; api.q = api.q || []; typeof ns === 'string' ? (cal.ns[ns] = api) && p(api, ar) : p(cal, ar); return; }
+    p(cal, ar);
+  };
+})(window, 'https://app.cal.com/embed/embed.js', 'init');
+
+Cal('init', { origin: 'https://cal.com' });
+Cal('inline', { elementOrSelector: '#cal-embed', calLink: 'mia-elianaa-a4n2hk/30min', layout: 'month_view' });
+Cal('ui', { styles: { branding: { brandColor: '#E4FF97' } }, hideEventTypeDetails: false, layout: 'month_view' });
+</script>
+</body>
+</html>

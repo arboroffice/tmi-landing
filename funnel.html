@@ -356,11 +356,12 @@
       <div class="section-label">Apply for Access</div>
 
       <div class="form-card">
-        <form id="apply-form">
+        <form id="apply-form" action="https://formsubmit.co/mialouviere@gmail.com" method="POST">
           <!-- formsubmit config -->
           <input type="hidden" name="_subject" value="New TMI Application">
           <input type="hidden" name="_template" value="table">
           <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_next" value="https://www.tmi-technology.com/booking">
 
           <div class="form-grid">
             <div class="field">
@@ -405,100 +406,16 @@
     </div>
     <!-- ── END FORM ───────────────────────────────────────────── -->
 
-    <!-- ── CAL BOOKING (shown after form submit) ─────────────── -->
-    <div id="cal-section">
-      <div class="success-msg">
-        <div class="check">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#E4FF97" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <h2>Application received.</h2>
-        <p>Pick a time below and we'll walk through your operation and show you exactly what TMI can do for your team.</p>
-      </div>
-
-      <!-- Cal.com inline embed -->
-      <!-- TO SET UP: replace YOUR-CAL-LINK below with your cal.com/username/meeting-type -->
-      <div id="cal-embed"></div>
-    </div>
-    <!-- ── END CAL ─────────────────────────────────────────────── -->
 
   </div>
 </div>
 
 <script>
-  // ── Form submission via formsubmit.co AJAX ──────────────────
-  const form = document.getElementById('apply-form');
   const submitBtn = document.getElementById('submit-btn');
-  const applySection = document.getElementById('apply-section');
-  const calSection = document.getElementById('cal-section');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  document.getElementById('apply-form').addEventListener('submit', () => {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending…';
-
-    const data = new FormData(form);
-
-    try {
-      const res = await fetch('https://formsubmit.co/ajax/mialouviere@gmail.com', {
-        method: 'POST',
-        headers: { 'Accept': 'application/json' },
-        body: data
-      });
-
-      if (res.ok) {
-        applySection.style.display = 'none';
-        calSection.style.display = 'block';
-        calSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        initCal();
-      } else {
-        throw new Error('submission failed');
-      }
-    } catch {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = 'Try Again';
-      alert('Something went wrong — please email us at hello@tmi-technology.com');
-    }
   });
-
-  // ── Cal.com embed (loaded after successful submission) ───────
-  function initCal() {
-    // Replace YOUR-CAL-LINK with your actual cal.com link, e.g. "mia/30min"
-    const CAL_LINK = 'mia-elianaa-a4n2hk/30min';
-
-    (function (C, A, L) {
-      let p = function (a, ar) { a.q.push(ar); };
-      let d = C.document;
-      C.Cal = C.Cal || function () {
-        let cal = C.Cal; let ar = arguments;
-        if (!cal.loaded) {
-          cal.ns = {}; cal.q = cal.q || [];
-          d.head.appendChild(d.createElement('script')).src = A;
-          cal.loaded = true;
-        }
-        if (ar[0] === L) {
-          const api = function () { p(api, arguments); };
-          const ns = ar[1]; api.q = api.q || [];
-          typeof ns === 'string' ? (cal.ns[ns] = api) && p(api, ar) : p(cal, ar);
-          return;
-        }
-        p(cal, ar);
-      };
-    })(window, 'https://app.cal.com/embed/embed.js', 'init');
-
-    Cal('init', { origin: 'https://cal.com' });
-
-    Cal('inline', {
-      elementOrSelector: '#cal-embed',
-      calLink: CAL_LINK,
-      layout: 'month_view'
-    });
-
-    Cal('ui', {
-      styles: { branding: { brandColor: '#E4FF97' } },
-      hideEventTypeDetails: false,
-      layout: 'month_view'
-    });
-  }
 </script>
 
 </body>
