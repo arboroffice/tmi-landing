@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<meta name="description" content="Tell us how your operation runs today. TMI will map where AI creates the most leverage and build a custom plan. No pitch, no pressure."/>
+<meta property="og:title" content="Talk to TMI | Custom AI Infrastructure for Field Operations"/>
+<meta property="og:description" content="Tell us how your operation runs today. We'll map where AI creates the most leverage and build a plan."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://tmi-technology.com/contact.html"/>
+<meta property="og:site_name" content="TMI"/>
+<link rel="canonical" href="https://tmi-technology.com/contact.html"/>
+<title>Talk to TMI | Strategy Call</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #ffffff; --bg-alt: #f5f5f7; --bg-deep: #0d0e1a; --bg-dark: #0a0b14;
+    --ink: #1a1a1a; --ink-2: #505060; --muted: #86868b;
+    --line: rgba(0,0,0,0.07); --line-strong: rgba(0,0,0,0.12);
+    --accent: #1a1a1a;
+    --serif: "Barlow", system-ui, sans-serif;
+    --sans: "Neue Haas Grotesk Display", "Neue Haas Grotesk", system-ui, -apple-system, sans-serif;
+    --chart: #E4FF97; --chart-dark: #D0FF6A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg-dark); -webkit-font-smoothing: antialiased; line-height: 1.55; overflow-x: hidden; min-height: 100vh; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  h1, h2, h3, h4 { margin: 0; }
+  p { margin: 0; }
+
+  /* LAYOUT */
+  .page-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+  }
+
+  /* LEFT PANEL */
+  .left-panel {
+    background: var(--bg-dark);
+    padding: 56px 64px 56px 56px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .panel-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 64px;
+  }
+  .panel-logo img { height: 28px; filter: brightness(0) invert(1); }
+  .panel-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--chart);
+    margin-bottom: 20px;
+  }
+  .left-panel h1 {
+    font-family: var(--serif);
+    font-size: clamp(36px, 3.5vw, 52px);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    color: #fff;
+    margin-bottom: 24px;
+  }
+  .left-panel h1 em { color: rgba(255,255,255,0.55); font-style: italic; }
+  .left-panel .lede {
+    font-size: 16px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.65;
+    max-width: 42ch;
+    margin-bottom: 48px;
+  }
+
+  /* WHAT HAPPENS NEXT */
+  .next-steps { margin-bottom: 48px; }
+  .next-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 20px;
+  }
+  .step {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.4);
+    flex: none;
+    margin-top: 2px;
+  }
+  .step-content h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .step-content p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.55;
+  }
+
+  /* STATS ROW */
+  .panel-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: auto;
+    padding-top: 40px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .pstat-val {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--chart);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .pstat-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* RIGHT PANEL — FORM */
+  .right-panel {
+    background: var(--bg);
+    padding: 56px 56px 56px 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .form-header { margin-bottom: 36px; }
+  .form-header h2 {
+    font-family: var(--serif);
+    font-size: clamp(26px, 2.5vw, 36px);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .form-header p { font-size: 15px; color: var(--ink-2); line-height: 1.6; }
+
+  /* FORM */
+  .contact-form { display: flex; flex-direction: column; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 10px;
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+  }
+  .field input::placeholder,
+  .field textarea::placeholder { color: var(--muted); }
+  .field textarea { resize: vertical; min-height: 100px; line-height: 1.5; }
+  .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2386868b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; cursor: pointer; }
+  .field select option { color: var(--ink); }
+
+  /* CHECKBOX GROUP */
+  .check-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    font-size: 13px;
+    color: var(--ink-2);
+    user-select: none;
+  }
+  .check-item:has(input:checked) {
+    border-color: var(--ink);
+    background: rgba(0,0,0,0.03);
+    color: var(--ink);
+  }
+  .check-item input[type="checkbox"] { display: none; }
+  .check-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid var(--line-strong);
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .check-item:has(input:checked) .check-dot {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .check-dot::after {
+    content: "";
+    display: block;
+    width: 8px;
+    height: 5px;
+    border-left: 1.5px solid #fff;
+    border-bottom: 1.5px solid #fff;
+    transform: rotate(-45deg) translateY(-1px);
+    opacity: 0;
+  }
+  .check-item:has(input:checked) .check-dot::after { opacity: 1; }
+
+  .submit-row { margin-top: 8px; }
+  .btn-submit {
+    width: 100%;
+    padding: 16px 24px;
+    background: var(--chart);
+    color: var(--bg-dark);
+    border: none;
+    border-radius: 12px;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-submit:hover {
+    background: var(--chart-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(200,255,0,0.22);
+  }
+  .form-note {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+
+  /* DIVIDER */
+  .or-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .or-divider::before,
+  .or-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line-strong);
+  }
+
+  /* CAL OPTION */
+  .cal-option {
+    border: 1.5px solid var(--line-strong);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .cal-option:hover {
+    border-color: var(--ink);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .cal-option-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .cal-option-text p { font-size: 13px; color: var(--ink-2); }
+  .cal-arrow { font-size: 18px; color: var(--muted); flex: none; }
+
+  /* SUCCESS */
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 48px 32px;
+  }
+  .success-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(74,222,128,0.1);
+    border: 1px solid rgba(74,222,128,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 22px;
+  }
+  .form-success h3 {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .form-success p { font-size: 15px; color: var(--ink-2); line-height: 1.6; max-width: 40ch; margin: 0 auto; }
+
+  /* TRUST STRIP */
+  .trust-strip {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .trust-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    flex: none;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .page-wrap { grid-template-columns: 1fr; }
+    .left-panel {
+      position: relative;
+      height: auto;
+      padding: 48px 40px;
+    }
+    .panel-stats { margin-top: 40px; }
+    .right-panel { padding: 48px 40px; }
+  }
+  @media (max-width: 640px) {
+    .left-panel { padding: 36px 24px; }
+    .right-panel { padding: 36px 24px; }
+    .form-row { grid-template-columns: 1fr; }
+    .check-group { grid-template-columns: 1fr; }
+    .panel-stats { flex-wrap: wrap; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HAMBURGER BUTTON -->
+<button class="nav-btn" id="nav-btn" aria-label="Open menu">
+  <span></span><span></span><span></span>
+</button>
+<!-- SIDE OVERLAY -->
+<div class="side-overlay" id="side-overlay"></div>
+<!-- SIDE NAV -->
+<div class="side-nav" id="side-nav" aria-hidden="true">
+  <div class="side-nav-top">
+    <a class="side-nav-brand" href="stratum.html"><img src="logo.svg" alt="TMI"/> TMI</a>
+  </div>
+  <div class="side-nav-links">
+    <div class="side-nav-section">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="systems.html">Systems</a>
+    <a href="news.html">Field Notes</a>
+    <a href="about.html">About</a>
+    <a href="partners.html">Partners</a>
+    <div class="side-nav-section">Industries</div>
+    <a href="trades.html">Trades &amp; Field Service</a>
+    <a href="construction.html">Construction</a>
+    <a href="oil-gas.html">Oil, Gas &amp; Energy</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="fleet.html">Fleet &amp; Logistics</a>
+    <a href="home-service.html">Home Service</a>
+    <div class="side-nav-section">Systems</div>
+    <a href="system-dispatch.html">AI Dispatch</a>
+    <a href="system-predictive-maintenance.html">Predictive Maintenance</a>
+    <a href="system-compliance.html">Compliance</a>
+    <a href="system-invoicing.html">Invoice &amp; Payment</a>
+    <a href="system-estimating.html">Job Costing</a>
+    <a href="system-revenue-leakage.html">Revenue Recovery</a>
+    <a href="system-llm.html">Operational LLM</a>
+    <a href="system-ops-twin.html">Operations Twin</a>
+    <a href="systems.html">All Systems &rarr;</a>
+  </div>
+  <div class="side-nav-cta">
+    <a href="contact.html" class="btn btn-primary">Book a Strategy Call &#8594;</a>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <a class="panel-logo" href="stratum.html">
+      <img src="logo.svg" alt="TMI"/> TMI
+    </a>
+
+    <div class="panel-eyebrow">Strategy Call</div>
+    <h1>Tell us how your<br/>operation runs. <em>We'll<br/>find where AI fits.</em></h1>
+    <p class="lede">No pitch. No demo of software you don't need. A real conversation about your operation — where the friction is, what it costs, and what a custom system could change.</p>
+
+    <div class="next-steps">
+      <div class="next-label">What happens next</div>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>We review your submission</h4>
+          <p>Someone on the TMI team reads what you send — usually within one business day.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>30-minute strategy call</h4>
+          <p>We map your current operation, find the highest-leverage friction points, and talk through what systems make sense for your scale.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Custom build plan</h4>
+          <p>If it's a fit, we deliver a scoped plan — which systems, what order, what it takes. You decide if you want to move forward.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Live in 8 weeks</h4>
+          <p>Average deployment timeline from signed agreement to operational system is 8 weeks. We move fast.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-stats">
+      <div>
+        <div class="pstat-val">8 wks</div>
+        <div class="pstat-label">Average time<br/>to live</div>
+      </div>
+      <div>
+        <div class="pstat-val">25+</div>
+        <div class="pstat-label">Systems built<br/>and deployed</div>
+      </div>
+      <div>
+        <div class="pstat-val">11</div>
+        <div class="pstat-label">Industries<br/>served</div>
+      </div>
+      <div>
+        <div class="pstat-val">60%</div>
+        <div class="pstat-label">Average admin<br/>reduction</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div id="form-wrap">
+      <div class="form-header">
+        <h2>Tell us about your operation</h2>
+        <p>Takes about 2 minutes. The more detail you give us, the better the conversation.</p>
+      </div>
+
+      <form class="contact-form" id="contact-form" action="https://formsubmit.co/ajax/hello@tmi-technology.com" method="POST">
+        <input type="hidden" name="_subject" value="New strategy call request — TMI"/>
+        <input type="hidden" name="_captcha" value="false"/>
+        <input type="hidden" name="_template" value="table"/>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="fname">First name</label>
+            <input type="text" id="fname" name="first_name" placeholder="Alex" required/>
+          </div>
+          <div class="field">
+            <label for="lname">Last name</label>
+            <input type="text" id="lname" name="last_name" placeholder="Torres" required/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Work email</label>
+          <input type="email" id="email" name="email" placeholder="alex@yourcompany.com" required/>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="company">Company name</label>
+            <input type="text" id="company" name="company" placeholder="Your company" required/>
+          </div>
+          <div class="field">
+            <label for="team_size">Team size</label>
+            <select id="team_size" name="team_size">
+              <option value="" disabled selected>Select range</option>
+              <option>1–10 people</option>
+              <option>11–50 people</option>
+              <option>51–200 people</option>
+              <option>201–500 people</option>
+              <option>500+ people</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="industry">Industry</label>
+          <select id="industry" name="industry">
+            <option value="" disabled selected>Select your industry</option>
+            <option>Oil &amp; Gas</option>
+            <option>Construction</option>
+            <option>Trades &amp; Field Service (HVAC, Electrical, Plumbing)</option>
+            <option>Manufacturing</option>
+            <option>Fleet &amp; Logistics</option>
+            <option>Mining</option>
+            <option>Utilities</option>
+            <option>Home Service</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>What areas are you trying to fix? <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
+          <div class="check-group">
+            <label class="check-item"><input type="checkbox" name="areas" value="Dispatch & Scheduling"/><span class="check-dot"></span> Dispatch &amp; Scheduling</label>
+            <label class="check-item"><input type="checkbox" name="areas" value="Invoicing & Billing"/><span class="check-dot"></span> Invoicing &amp; Billing</label>
+            <label class="check-item"><input type="checkbox" name="areas" value="Compliance & Safety"/><span class="check-dot"></span> Compliance &amp; Safety</label>
+            <label class="check-item"><input type="checkbox" name="areas" value="Crew Management"/><span class="check-dot"></span> Crew Management</label>
+            <label class="check-item"><input type="checkbox" name="areas" value="Reporting & Analytics"/><span class="check-dot"></span> Reporting &amp; Analytics</label>
+            <label class="check-item"><input type="checkbox" name="areas" value="Asset & Equipment Tracking"/><span class="check-dot"></span> Asset &amp; Equipment Tracking</label>
+            <label class="check-item"><input type="checkbox" name="areas" value="Inventory & Parts"/><span class="check-dot"></span> Inventory &amp; Parts</label>
+            <label class="check-item"><input type="checkbox" name="areas" value="Field Data & Forms"/><span class="check-dot"></span> Field Data &amp; Forms</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="problem">What's the biggest operational problem you're dealing with right now?</label>
+          <textarea id="problem" name="biggest_problem" placeholder="E.g. Our dispatcher is overwhelmed, jobs fall through the cracks, we can't see what's happening on site in real time..."></textarea>
+        </div>
+
+        <div class="submit-row">
+          <button type="submit" class="btn-submit" id="submit-btn">
+            <span id="btn-text">Send — let's talk &#8594;</span>
+          </button>
+          <p class="form-note">No spam. No sales sequence. A real person reads this.</p>
+        </div>
+
+        <div class="or-divider">or</div>
+
+        <a href="https://cal.com/tmi" target="_blank" class="cal-option">
+          <div class="cal-option-text">
+            <h4>Book directly on the calendar</h4>
+            <p>Pick a time that works — 30-minute strategy call</p>
+          </div>
+          <div class="cal-arrow">&#8599;</div>
+        </a>
+      </form>
+
+      <div class="trust-strip">
+        <div class="trust-item"><span class="trust-dot"></span> Responds within 1 business day</div>
+        <div class="trust-item"><span class="trust-dot"></span> No commitment required</div>
+        <div class="trust-item"><span class="trust-dot"></span> 100% custom to your operation</div>
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="form-success" id="form-success">
+      <div class="success-icon">&#10003;</div>
+      <h3>You're on our radar.</h3>
+      <p>We'll review what you sent and reach out within one business day. In the meantime, take a look at <a href="systems.html" style="color:var(--ink);text-decoration:underline">the systems we've built</a> — there may already be something built for your exact problem.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('contact-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const btnText = document.getElementById('btn-text');
+  btn.disabled = true;
+  btnText.textContent = 'Sending...';
+  try {
+    const formData = new FormData(this);
+    const res = await fetch(this.action, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: formData
+    });
+    if (res.ok) {
+      document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('form-success').style.display = 'block';
+    } else {
+      btnText.textContent = 'Send — let\'s talk →';
+      btn.disabled = false;
+    }
+  } catch(err) {
+    btnText.textContent = 'Send — let\'s talk →';
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

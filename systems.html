@@ -1,755 +1,477 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="apple-touch-icon" href="favicon.svg"/>
-<meta name="description" content="Systems TMI has built for the trades and oil and gas, rental tracking, work order management, dispatch, compliance, and more. Purpose-built, transferable across every industry."/>
+<meta name="description" content="Systems TMI has built for the trades, rental tracking, work order management, dispatch, compliance, and more. Purpose-built, transferable across every industry."/>
 <meta property="og:title" content="Systems We've Built | TMI"/>
 <meta property="og:description" content="Operational systems built for the field. Transferable across every trade."/>
 <meta property="og:type" content="website"/>
-<meta property="og:url" content="https://tmi.ai/systems.html"/>
-<link rel="canonical" href="https://tmi.ai/systems.html"/>
+<meta property="og:url" content="https://tmi-technology.com/systems.html"/>
+<link rel="canonical" href="https://tmi-technology.com/systems.html"/>
 <title>Systems We've Built | TMI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --bg: #f4f1ea;
-    --bg-alt: #ebe7dc;
-    --bg-deep: #0a0a0a;
-    --ink: #111111;
-    --ink-2: #2a2a2a;
-    --muted: #6b6b66;
-    --line: #d8d3c5;
-    --line-strong: #b9b3a3;
-    --accent: #c87533;
-    --accent-2: #8e3b13;
-    --serif: "Fraunces", "Times New Roman", serif;
-    --sans: "Inter", system-ui, sans-serif;
+    --bg: #ffffff; --bg-alt: #f5f5f7; --bg-deep: #0d0e1a; --bg-dark: #0a0b14;
+    --ink: #1a1a1a; --ink-2: #505060; --muted: #86868b;
+    --line: rgba(0,0,0,0.07); --line-strong: rgba(0,0,0,0.12);
+    --accent: #1a1a1a; --accent-dark: #000;
+    --accent-light: rgba(0,0,0,0.05); --accent-glow: rgba(0,0,0,0.09);
+    --serif: "Barlow", system-ui, sans-serif;
+    --sans: "Neue Haas Grotesk Display", "Neue Haas Grotesk", system-ui, -apple-system, sans-serif;
     --mono: "JetBrains Mono", ui-monospace, monospace;
+    --chart: #E4FF97; --chart-dark: #D0FF6A;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body {
-    font-family: var(--sans); color: var(--ink); background: var(--bg);
-    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-    line-height: 1.55; overflow-x: hidden;
-  }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.55; overflow-x: hidden; }
   a { color: inherit; text-decoration: none; }
   img { display: block; max-width: 100%; }
-  ::selection { background: var(--ink); color: var(--bg); }
-
-  .container { max-width: 1320px; margin: 0 auto; padding: 0 32px; }
-
-  .eyebrow {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--muted);
-    display: inline-flex; align-items: center; gap: 10px;
-  }
-  .eyebrow .dot {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
-    display: inline-block;
-  }
-  h1, h2, h3, h4 { font-family: var(--serif); font-weight: 400; letter-spacing: -0.02em; line-height: 1.02; margin: 0; }
-  h1 { font-size: clamp(48px, 7vw, 112px); font-weight: 300; }
-  h2 { font-size: clamp(36px, 4.5vw, 68px); font-weight: 350; }
+  ::selection { background: var(--accent); color: #fff; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+  h1, h2, h3, h4 { margin: 0; }
+  h1 { font-family: var(--serif); font-size: clamp(48px, 6.5vw, 88px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.04; }
+  h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 56px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.08; }
+  h3 { font-family: var(--sans); font-size: clamp(17px, 1.6vw, 20px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; }
   p { margin: 0; }
-  em.serif { font-style: italic; color: var(--accent-2); }
+  em { font-style: italic; }
+  .eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 8px; }
+  .eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: #7C6CF2; flex: none; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; border-radius: 999px; font-size: 14px; font-weight: 500; font-family: var(--sans); transition: all 0.2s; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+  .btn-primary { background: var(--chart); color: #0a0b14; }
+  .btn-primary:hover { background: var(--chart-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(200,255,0,0.22); }
+  .btn-white { background: #fff; color: var(--ink); }
+  .btn-white:hover { background: var(--bg-alt); }
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  .delay-1 { transition-delay: 0.1s; } .delay-2 { transition-delay: 0.2s; }
 
-  /* SIDE NAV */
-  .side-nav {
-    position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
-    background: var(--bg); border-right: 1px solid var(--line);
-    display: flex; flex-direction: column; padding: 36px 24px;
-    z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease;
-  }
-  .side-nav.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
-  .side-brand {
-    display: flex; align-items: center; gap: 12px;
-    font-family: var(--serif); font-size: 20px; font-weight: 400;
-    letter-spacing: -0.01em; color: var(--ink); margin-bottom: 48px;
-  }
-  .side-nav-links { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-  .side-nav-links a {
-    font-size: 14px; padding: 10px 12px; border-radius: 6px;
-    color: var(--ink-2); transition: background 0.15s, color 0.15s;
-  }
-  .side-nav-links a:hover { background: var(--bg-alt); color: var(--ink); }
-  .side-nav-links a.active { color: var(--accent); }
-  .side-nav-cta {
-    display: block; text-align: center; padding: 12px 18px; border-radius: 999px;
-    background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 500;
-    transition: background 0.2s; margin-top: 24px;
-  }
-  .side-nav-cta:hover { background: var(--accent); }
-  .nav-toggle {
-    display: flex; position: fixed; top: 16px; left: 16px; z-index: 101;
-    background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
-    padding: 10px 12px; cursor: pointer; flex-direction: column; gap: 5px;
-  }
-  .nav-toggle span { display: block; width: 20px; height: 2px; background: var(--ink); transition: transform 0.2s, opacity 0.2s; }
-  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-  .nav-toggle.open span:nth-child(2) { opacity: 0; }
-  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-  .brand { display: flex; align-items: center; gap: 14px; font-family: var(--serif); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; }
-  .brand .mark {
-    width: 24px; height: 24px; position: relative; flex: none;
-    background: currentColor; border-radius: 3px; opacity: 0.95;
-  }
-  .brand .mark::before { content: ""; position: absolute; left: 3px; right: 3px; top: 3px; height: 2px; background: var(--bg-alt); }
-  .brand .mark::after { content: ""; position: absolute; left: 3px; right: 3px; top: 8px; bottom: 3px; background: var(--accent); }
+  /* TOP NAV */
+  .topnav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 68px; background: rgba(255,255,255,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--line); display: flex; align-items: center; }
+  .topnav-inner { max-width: 1280px; margin: 0 auto; padding: 0 40px; width: 100%; display: flex; align-items: center; gap: 40px; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink); }
+  .nav-brand img { height: 32px; width: auto; }
+  .nav-links { display: flex; align-items: center; gap: 4px; flex: 1; justify-content: center; }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-2); padding: 8px 16px; border-radius: 8px; transition: color 0.2s, background 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--ink); background: var(--bg-alt); }
+  .nav-right { flex: none; }
+  @media (max-width: 768px) { .nav-links { display: none; } .topnav-inner { padding: 0 20px; } }
 
   /* PAGE HEADER */
-  .page-header {
-    padding: 160px 0 96px;
-    border-bottom: 1px solid var(--line);
-    background: var(--bg);
-  }
-  .page-header .eyebrow { margin-bottom: 32px; }
-  .page-header h1 { max-width: 18ch; margin-bottom: 36px; }
-  .page-header .intro {
-    font-family: var(--serif); font-size: clamp(19px, 1.7vw, 26px);
-    color: var(--ink-2); line-height: 1.4; max-width: 60ch;
-    font-weight: 350; letter-spacing: -0.01em;
-  }
-  .header-meta {
-    display: flex; align-items: center; gap: 48px; margin-top: 56px;
-    padding-top: 40px; border-top: 1px solid var(--line);
-  }
-  .header-meta .stat-item .v {
-    font-family: var(--serif); font-style: italic; font-weight: 350;
-    font-size: clamp(32px, 3vw, 48px); color: var(--accent);
-    line-height: 1; letter-spacing: -0.02em;
-  }
-  .header-meta .stat-item .l {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--muted); margin-top: 8px;
-  }
+  .page-header { padding: 168px 0 96px; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .page-header .eyebrow { margin-bottom: 24px; }
+  .page-header h1 { max-width: 18ch; margin-bottom: 28px; }
+  .page-header h1 em { color: var(--accent); }
+  .page-header .intro { font-size: clamp(17px, 1.4vw, 20px); color: var(--ink-2); line-height: 1.6; max-width: 60ch; }
+  .header-stats { display: flex; gap: 56px; margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+  .hstat-val { font-family: var(--serif); font-size: clamp(32px, 3.5vw, 48px); color: var(--accent); letter-spacing: -0.03em; line-height: 1; }
+  .hstat-label { font-family: var(--sans); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
 
   /* SYSTEMS GRID */
-  .systems-section { padding: 96px 0 140px; }
+  .systems-section { padding: 96px 0 120px; }
+  .section-label { margin-bottom: 56px; }
   .systems-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-    border-top: 1px solid var(--line-strong);
-    border-left: 1px solid var(--line-strong);
-    margin-top: 56px;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0; border-top: 1px solid var(--line-strong); border-left: 1px solid var(--line-strong);
   }
   .sys-card {
-    border-right: 1px solid var(--line-strong);
-    border-bottom: 1px solid var(--line-strong);
-    padding: 44px 40px 52px;
-    background: var(--bg);
-    transition: background 0.2s;
-    display: flex; flex-direction: column; gap: 0;
+    border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong);
+    padding: 36px 32px 44px; background: var(--bg);
+    transition: background 0.2s; display: flex; flex-direction: column;
   }
-  .sys-card:hover { background: #fff; }
-  .sys-num {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
-    color: var(--accent); margin-bottom: 28px;
-  }
-  .sys-card h3 {
-    font-family: var(--serif); font-size: clamp(20px, 1.6vw, 26px);
-    font-weight: 400; line-height: 1.15; letter-spacing: -0.01em;
-    margin-bottom: 16px; max-width: 22ch;
-  }
-  .sys-card p {
-    font-size: 14px; line-height: 1.65; color: var(--ink-2);
-    max-width: 40ch; flex: 1;
-  }
-  .sys-tags {
-    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 28px;
-  }
-  .sys-tag {
-    font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--muted);
-    padding: 4px 10px; border: 1px solid var(--line-strong);
-    border-radius: 999px;
-  }
+  .sys-card:hover { background: #fafafa; }
+  .sys-num { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 20px; }
+  .sys-card h3 { margin-bottom: 12px; max-width: 24ch; }
+  .sys-card p { font-size: 14px; line-height: 1.65; color: var(--ink-2); flex: 1; }
+  .sys-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; }
+  .sys-tag { font-family: var(--sans); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: 999px; }
 
-  /* AI GRID dark variant */
-  .ai-grid {
-    border-color: rgba(255,255,255,0.12);
-  }
-  .ai-card {
-    background: rgba(255,255,255,0.03);
-    border-color: rgba(255,255,255,0.12);
-  }
+  /* AI SYSTEMS */
+  .ai-section { background: var(--bg-deep); padding: 96px 0 120px; }
+  .ai-header { padding-bottom: 56px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 56px; }
+  .ai-header .eyebrow { color: rgba(255,255,255,0.45); }
+  .ai-header .eyebrow .dot { background: rgba(255,255,255,0.4); }
+  .ai-header h2 { color: #fff; margin-top: 20px; max-width: 22ch; }
+  .ai-header p { font-size: clamp(16px, 1.3vw, 19px); color: rgba(255,255,255,0.6); line-height: 1.6; max-width: 58ch; margin-top: 16px; }
+  .ai-grid { border-color: rgba(255,255,255,0.1); border-top-color: rgba(255,255,255,0.1); border-left-color: rgba(255,255,255,0.1); }
+  .ai-card { background: rgba(255,255,255,0.03); border-right-color: rgba(255,255,255,0.1); border-bottom-color: rgba(255,255,255,0.1); }
   .ai-card:hover { background: rgba(255,255,255,0.06); }
   .ai-card h3 { color: #fff; }
   .ai-card p { color: rgba(255,255,255,0.6); }
-  .ai-card .sys-num { color: var(--accent); }
-  .ai-card .sys-tag {
-    color: rgba(255,255,255,0.45);
-    border-color: rgba(255,255,255,0.15);
-  }
+  .ai-card .sys-num { color: rgba(255,255,255,0.4); }
+  .ai-card .sys-tag { color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.12); }
 
   /* CTA STRIP */
-  .cta-strip {
-    background: var(--bg-deep); color: #fff;
-    padding: 96px 0;
-    position: relative; overflow: hidden;
-  }
-  .cta-strip::before {
-    content: ""; position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 20% 50%, rgba(200,117,51,0.15), transparent 60%);
-    pointer-events: none;
-  }
-  .cta-strip-inner {
-    position: relative; z-index: 2;
-    display: flex; align-items: center; justify-content: space-between; gap: 64px;
-  }
-  .cta-strip h2 {
-    color: #fff; font-size: clamp(32px, 3.5vw, 52px);
-    max-width: 20ch; line-height: 1.1;
-  }
-  .cta-strip h2 em { color: var(--accent); font-style: italic; font-weight: 350; }
-  .cta-strip p {
-    color: rgba(255,255,255,0.65); font-size: 16px; line-height: 1.6;
-    max-width: 42ch; margin-top: 18px;
-    font-family: var(--serif); font-weight: 350;
-  }
-  .btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 16px 28px; border-radius: 999px;
-    font-size: 14px; font-weight: 500;
-    transition: all 0.2s ease; cursor: pointer; border: 1px solid transparent;
-    white-space: nowrap; flex: none;
-  }
-  .btn-light { background: #fff; color: var(--ink); }
-  .btn-light:hover { background: var(--accent); color: #fff; }
+  .cta-strip { background: var(--accent); padding: 80px 0; }
+  .cta-strip-inner { display: flex; align-items: center; justify-content: space-between; gap: 64px; }
+  .cta-strip h2 { color: #fff; font-size: clamp(28px, 3.5vw, 48px); max-width: 22ch; line-height: 1.1; }
+  .cta-strip h2 em { opacity: 0.75; }
+  .cta-strip p { color: rgba(255,255,255,0.75); font-size: 16px; line-height: 1.6; max-width: 44ch; margin-top: 14px; }
 
   /* FOOTER */
-  footer { background: var(--bg-alt); padding: 96px 0 40px; }
-  .foot-grid {
-    display: grid; grid-template-columns: 1.6fr 1fr; gap: 48px;
-    padding-bottom: 56px; border-bottom: 1px solid var(--line-strong);
-  }
-  .foot-col h5 {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--muted); margin: 0 0 20px;
-    font-weight: 500;
-  }
-  .foot-col a { display: block; font-size: 14px; color: var(--ink-2); padding: 7px 0; }
-  .foot-col a:hover { color: var(--accent-2); }
-  .foot-bottom {
-    display: flex; justify-content: space-between; align-items: center;
-    padding-top: 32px;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--muted);
-  }
-  .foot-tagline {
-    font-family: var(--serif); font-size: 20px; line-height: 1.4; color: var(--ink-2);
-    max-width: 32ch; margin-top: 18px; font-weight: 350;
-  }
+  footer { background: var(--bg-alt); border-top: 1px solid var(--line); padding: 72px 0 36px; }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 80px; margin-bottom: 56px; }
+  .footer-brand { font-family: var(--serif); font-size: 22px; color: var(--ink); display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .footer-brand img { height: 28px; width: auto; }
+  .footer-desc { font-size: 14px; color: var(--ink-2); line-height: 1.65; max-width: 34ch; margin-bottom: 20px; }
+  .footer-contact a { font-size: 14px; color: var(--ink-2); }
+  .footer-right { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; }
+  .footer-col h5 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 14px; }
+  .footer-col a { display: block; font-size: 14px; color: var(--ink-2); padding: 3px 0; transition: color 0.15s; }
+  .footer-col a:hover { color: var(--ink); }
+  .footer-bottom { padding-top: 28px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
 
-  /* REVEAL */
-  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.2,.7,.2,1); }
-  .reveal.in { opacity: 1; transform: translateY(0); }
-  .reveal.delay-1 { transition-delay: 0.08s; }
-  .reveal.delay-2 { transition-delay: 0.16s; }
+  @media (max-width: 1024px) { .systems-grid { grid-template-columns: repeat(2, 1fr); } .cta-strip-inner { flex-direction: column; gap: 32px; align-items: flex-start; } .footer-grid { grid-template-columns: 1fr; gap: 40px; } }
+  @media (max-width: 640px) { .systems-grid { grid-template-columns: 1fr; } .container { padding: 0 20px; } .page-header { padding: 120px 0 64px; } .header-stats { gap: 32px; } }
 
-  @media (max-width: 1024px) {
-    .systems-grid { grid-template-columns: repeat(2, 1fr); }
-    .cta-strip-inner { flex-direction: column; gap: 40px; align-items: flex-start; }
-    .header-meta { flex-direction: column; align-items: flex-start; gap: 28px; }
-    .foot-grid { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 640px) {
-    .systems-grid { grid-template-columns: 1fr; }
-    .container { padding: 0 20px; }
-    .page-header { padding: 120px 0 72px; }
-  }
+  /* THE SHIFT */
+  .section-pad { padding: 96px 0; }
+  .sec-head { text-align: center; max-width: 680px; margin: 0 auto; }
+  .sec-eyebrow { margin-bottom: 16px; }
+  .sec-sub { font-size: clamp(15px,1.2vw,17px); color: rgba(255,255,255,0.55); margin-top: 16px; line-height: 1.65; }
+  .old-vs-new { background: var(--bg-dark); color: #fff; }
+  .ovn-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch; margin-top: 64px; }
+  .ovn-side { padding: 48px 44px; border-radius: 20px; }
+  .ovn-old { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); }
+  .ovn-new { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); }
+  .ovn-label { font-family: var(--sans); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 20px; }
+  .ovn-old .ovn-label { color: var(--muted); }
+  .ovn-new .ovn-label { color: var(--accent); }
+  .ovn-side h3 { font-family: var(--sans); font-weight: 600; font-size: clamp(18px,1.8vw,22px); color: #fff; margin-bottom: 28px; }
+  .ovn-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+  .ovn-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; line-height: 1.45; }
+  .ovn-old .ovn-list li { color: rgba(255,255,255,0.5); }
+  .ovn-new .ovn-list li { color: rgba(255,255,255,0.85); }
+  .ovn-x, .ovn-check { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; font-size: 11px; margin-top: 1px; }
+  .ovn-x { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .ovn-check { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .ovn-divider { display: flex; align-items: center; justify-content: center; padding: 0 32px; }
+  .ovn-vs { width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); }
+  .ovn-new .ovn-metrics { margin-top: 28px; display: flex; flex-direction: column; gap: 10px; }
+  .ovn-metric-bar { display: flex; flex-direction: column; gap: 4px; }
+  .ovn-metric-row { display: flex; justify-content: space-between; align-items: center; }
+  .ovn-metric-label { font-size: 12px; color: rgba(255,255,255,0.5); }
+  .ovn-metric-val { font-size: 12px; color: var(--accent); }
+  .ovn-bar-bg { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; }
+  .ovn-bar-fill { height: 4px; background: var(--accent); border-radius: 2px; }
+  @media (max-width: 768px) { .ovn-grid { grid-template-columns: 1fr; } .ovn-divider { padding: 16px 0; } .ovn-side { padding: 32px 24px; } }
+  /* SIDE NAV */
+  .nav-btn { position: fixed; top: 20px; left: 20px; z-index: 201; width: 44px; height: 44px; background: rgba(255,255,255,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; padding: 0; transition: background 0.2s, box-shadow 0.2s; }
+  .nav-btn:hover { background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .nav-btn span { display: block; width: 18px; height: 1.5px; background: var(--ink); border-radius: 2px; transition: transform 0.25s, opacity 0.25s; }
+  .nav-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .nav-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+  .side-overlay { position: fixed; inset: 0; z-index: 198; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: auto; }
+  .side-nav { position: fixed; left: 0; top: 0; bottom: 0; z-index: 200; width: 280px; background: #fff; border-right: 1px solid var(--line); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 28px 0 40px; overflow-y: auto; }
+  .side-nav.open { transform: translateX(0); box-shadow: 8px 0 48px rgba(0,0,0,0.15); }
+  .side-nav-top { display: flex; align-items: center; padding: 0 24px 28px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+  .side-nav-brand { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink); text-decoration: none; }
+  .side-nav-brand img { height: 28px; }
+  .side-nav-links { display: flex; flex-direction: column; padding: 0 12px; flex: 1; }
+  .side-nav-section { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 20px 12px 6px; }
+  .side-nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-2); padding: 10px 12px; border-radius: 8px; transition: color 0.15s, background 0.15s; display: block; }
+  .side-nav-links a:hover { color: var(--ink); background: var(--bg-alt); }
+  .side-nav-cta { padding: 24px 24px 0; border-top: 1px solid var(--line); margin-top: 16px; }
+  .side-nav-cta .btn { width: 100%; justify-content: center; }
 </style>
 <script type="application/ld+json">
-[
-  {
-    "@context": "https://schema.org",
-    "@type": ["Organization", "ProfessionalService"],
-    "name": "TMI",
-    "description": "TMI builds custom AI systems and digital infrastructure for oil and gas operators and the skilled trades.",
-    "url": "https://tmi.ai",
-    "logo": "https://tmi.ai/logo.svg",
-    "slogan": "Powering the companies that keep the world moving",
-    "areaServed": {"@type": "Country", "name": "United States"},
-    "serviceType": [
-      "Custom AI system development",
-      "Digital infrastructure for field operations",
-      "Agentic systems for oil and gas",
-      "AI automation for the trades"
-    ]
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "Systems We've Built",
-    "description": "45 custom AI systems and operational tools built for oil and gas operators and the skilled trades, from equipment rental tracking and work order management to autonomous dispatch agents and predictive failure engines.",
-    "url": "https://tmi.ai/systems.html",
-    "publisher": {"@type": "Organization", "name": "TMI", "url": "https://tmi.ai"}
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What AI systems does TMI build for oil and gas?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "TMI builds 15 AI and agentic infrastructure systems for oil and gas operators including: Autonomous Dispatch Agent (handles dispatch end-to-end without human intervention), Predictive Failure Engine (surface equipment failure risk before it happens), Multi-Agent Coordination Platform (orchestrates parallel specialist agents), Operational LLM Layer (company data queryable in plain language), Anomaly Detection Network (real-time monitoring across the full operational data stream), Agentic Safety Monitor (continuous compliance and safety surveillance), Digital Operations Twin (real-time operational model for scenario analysis), and Regulatory Intelligence Agent (monitors regulatory updates and maps changes to operations)."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What operational systems does TMI build for trades companies?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "TMI builds 30 operational systems for trades companies including: Work Order Management, Dispatch and Route Optimization, Invoice and Billing Automation, Customer and Service CRM, Estimating and Job Costing, Crew and Labor Management, Parts and Inventory Management, Safety Inspection and Incident Reporting, Time and Attendance Tracking, Field Data Capture, Preventive Maintenance Scheduler, and Revenue Leakage and Unbilled Work Detector. Every system is built custom to the company's specific workflows rather than sold as a packaged SaaS product."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How long does it take to deploy a custom system?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "First systems are typically live within 4 to 8 weeks depending on integration complexity. The deployment follows three phases: Map and Connect (connect existing tools, structure the data layer), Build and Deploy (build the custom system or agent), and Partner and Grow (ongoing expansion). Most operations see measurable ROI within the first 60 to 90 days of a system going live."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does TMI sell software licenses or build custom systems?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "TMI builds custom systems. We do not sell SaaS licenses. Every system is designed around how a specific company operates, its dispatch logic, pricing rules, compliance requirements, equipment types, and field workflows. After deployment, TMI stays in as a partner: expanding coverage, adding agents, and refining what runs. The relationship is an ongoing partnership, not a one-time sale."
-        }
-      }
-    ]
-  }
-]
+[{"@context":"https://schema.org","@type":["Organization","ProfessionalService"],"name":"TMI","description":"TMI builds custom AI systems and digital infrastructure for the trades.","url":"https://tmi-technology.com","serviceType":["Custom AI system development","Digital infrastructure for field operations","Agentic systems for oil and gas","AI automation for the trades"]},{"@context":"https://schema.org","@type":"CollectionPage","name":"Systems We've Built","description":"45 custom AI systems and operational tools built for the trades.","url":"https://tmi-technology.com/systems.html","publisher":{"@type":"Organization","name":"TMI","url":"https://tmi-technology.com"}}]
 </script>
 </head>
 <body>
 
-<!-- SIDE NAV -->
-<nav class="side-nav" id="side-nav">
-  <a href="stratum.html" class="side-brand">
-    <img src="logo.svg" alt="TMI" width="36" height="36" style="flex:none;filter:var(--logo-filter,none)">
-    <span>TMI</span>
-  </a>
-  <div class="side-nav-links">
-    <a href="stratum.html">Home</a>
-    <a href="news.html">News</a>
-    <a href="systems.html" class="active">Systems</a>
-    <a href="stratum.html#cta">Contact</a>
-  </div>
-  <a href="stratum.html#cta" class="side-nav-cta">Talk to us →</a>
-</nav>
-<button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+<!-- HAMBURGER BUTTON -->
+<button class="nav-btn" id="nav-btn" aria-label="Open menu">
   <span></span><span></span><span></span>
 </button>
-
-<!-- PAGE HEADER -->
+<!-- SIDE OVERLAY -->
+<div class="side-overlay" id="side-overlay"></div>
+<!-- SIDE NAV -->
+<div class="side-nav" id="side-nav" aria-hidden="true">
+  <div class="side-nav-top">
+    <a class="side-nav-brand" href="stratum.html">
+      <img src="logo.svg" alt="TMI"/> TMI
+    </a>
+  </div>
+  <div class="side-nav-links">
+    <div class="side-nav-section">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="systems.html">Systems</a>
+    <a href="news.html">Field Notes</a>
+    <a href="about.html">About</a>
+    <a href="partners.html">Partners</a>
+    <div class="side-nav-section">Industries</div>
+    <a href="trades.html">Trades &amp; Field Service</a>
+    <a href="construction.html">Construction</a>
+    <a href="oil-gas.html">Oil, Gas &amp; Energy</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="fleet.html">Fleet &amp; Logistics</a>
+    <a href="home-service.html">Home Service</a>
+    <div class="side-nav-section">Systems</div>
+    <a href="system-dispatch.html">AI Dispatch</a>
+    <a href="system-predictive-maintenance.html">Predictive Maintenance</a>
+    <a href="system-compliance.html">Compliance</a>
+    <a href="system-invoicing.html">Invoice &amp; Payment</a>
+    <a href="system-estimating.html">Job Costing</a>
+    <a href="system-revenue-leakage.html">Revenue Recovery</a>
+    <a href="system-llm.html">Operational LLM</a>
+    <a href="system-ops-twin.html">Operations Twin</a>
+    <a href="systems.html">All Systems &rarr;</a>
+  </div>
+  <div class="side-nav-cta">
+    <a href="stratum.html#cta" class="btn btn-primary">Book a Strategy Call &#8594;</a>
+  </div>
+</div>
 <header class="page-header">
   <div class="container">
     <div class="eyebrow reveal"><span class="dot"></span>Systems we've built</div>
-    <h1 class="reveal">
-      Real problems.<br/>
-      <em class="serif">Built to last.</em>
-    </h1>
-    <p class="intro reveal">
-      Every trade runs into the same operational walls. Rentals that go missing. Crews dispatched blind. Compliance filed late. Invoices that take a week to generate. These are the systems we build to fix them, purpose-built for how the field actually works, transferable across every industry that runs one.
-    </p>
-    <div class="header-meta reveal">
-      <div class="stat-item">
-        <div class="v">15+</div>
-        <div class="l">System types deployed</div>
-      </div>
-      <div class="stat-item">
-        <div class="v">11</div>
-        <div class="l">Industries served</div>
-      </div>
-      <div class="stat-item">
-        <div class="v">100%</div>
-        <div class="l">Custom to your operation</div>
-      </div>
+    <h1 class="reveal">Real problems.<br/><em>Built to last.</em></h1>
+    <p class="intro reveal">Every trade runs into the same operational walls. Rentals that go missing. Crews dispatched blind. Compliance filed late. Invoices that take a week to generate. These are the systems we build to fix them — purpose-built for how the field actually works, transferable across every industry that runs one.</p>
+    <div class="header-stats reveal">
+      <div><div class="hstat-val">45+</div><div class="hstat-label">Systems deployed</div></div>
+      <div><div class="hstat-val">11</div><div class="hstat-label">Industries served</div></div>
+      <div><div class="hstat-val">100%</div><div class="hstat-label">Custom to your operation</div></div>
     </div>
   </div>
 </header>
 
-<!-- SYSTEMS GRID -->
+<!-- OPERATIONAL SYSTEMS -->
 <section class="systems-section">
   <div class="container">
-    <div class="eyebrow reveal"><span class="dot"></span>The systems</div>
+    <div class="section-label">
+      <div class="eyebrow reveal"><span class="dot"></span>Operational systems</div>
+    </div>
     <div class="systems-grid">
 
       <div class="sys-card reveal">
         <div class="sys-num">01</div>
         <h3>Equipment Rental Tracker</h3>
         <p>Know exactly what's out, who has it, when it's due back, and what's available right now. Eliminate double-bookings, lost tools, and the phone calls to find out where the lift went.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Heavy Equipment</span>
-          <span class="sys-tag">Utilities</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Heavy Equipment</span><span class="sys-tag">Utilities</span></div>
       </div>
 
       <div class="sys-card reveal delay-1">
         <div class="sys-num">02</div>
         <h3>Work Order Management</h3>
         <p>Create, assign, prioritize, and close work orders digitally. Field crews complete them on a phone, attach photos, and log notes. Every job has a full audit trail without a clipboard in sight.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">All Industries</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">All Industries</span></div>
       </div>
 
       <div class="sys-card reveal delay-2">
         <div class="sys-num">03</div>
         <h3>Preventive Maintenance Scheduler</h3>
         <p>Set maintenance intervals by runtime hours, mileage, or calendar date. The system schedules the work, notifies the crew, and closes the loop when it's done. Equipment stops failing by surprise.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Heavy Equipment</span>
-          <span class="sys-tag">Manufacturing</span>
-          <span class="sys-tag">Mining</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Heavy Equipment</span><span class="sys-tag">Manufacturing</span><span class="sys-tag">Mining</span></div>
       </div>
 
       <div class="sys-card reveal">
         <div class="sys-num">04</div>
         <h3>Fleet and Asset Tracking</h3>
         <p>Every vehicle, machine, and piece of equipment accounted for. Location, current status, utilization rate, maintenance history, and cost per asset. One view of everything you own or operate.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Utilities</span>
-          <span class="sys-tag">Field Services</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Utilities</span><span class="sys-tag">Field Services</span></div>
       </div>
 
       <div class="sys-card reveal delay-1">
         <div class="sys-num">05</div>
         <h3>Crew and Labor Management</h3>
         <p>Certifications, availability, hours, and dispatch history for every person on your roster. Know who's qualified before you assign them. Schedule smarter, reduce overtime, stay compliant.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">HVAC</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Electrical</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">HVAC</span></div>
       </div>
 
       <div class="sys-card reveal delay-2">
         <div class="sys-num">06</div>
         <h3>Parts and Inventory Management</h3>
         <p>Track parts, materials, and consumables across every job site and warehouse. Auto-reorder alerts before you run out. Direct tie-in to job costing so you know what every job actually consumed.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Manufacturing</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Plumbing</span>
-          <span class="sys-tag">HVAC</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Manufacturing</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Plumbing</span><span class="sys-tag">HVAC</span></div>
       </div>
 
       <div class="sys-card reveal">
         <div class="sys-num">07</div>
         <h3>Safety Inspection and Incident Reporting</h3>
         <p>Digital field forms replace paper. Near-miss reports filed in under a minute. Corrective actions auto-routed to the right person and tracked to closure. Patterns visible before they become incidents.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">All Industries</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">All Industries</span></div>
       </div>
 
       <div class="sys-card reveal delay-1">
         <div class="sys-num">08</div>
         <h3>Subcontractor and Vendor Management</h3>
         <p>Insurance certificates, licenses, safety records, and payment history in one place. Expiring credentials flagged automatically. Know who's compliant before they set foot on your site.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Utilities</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Utilities</span></div>
       </div>
 
       <div class="sys-card reveal delay-2">
         <div class="sys-num">09</div>
         <h3>Document and Permit Tracker</h3>
         <p>Every permit, drawing, spec sheet, and compliance document organized, version-controlled, and searchable. Expiry alerts before renewals lapse. No more missed deadlines buried in an inbox.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Plumbing</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Construction</span><span class="sys-tag">Electrical</span><span class="sys-tag">Plumbing</span></div>
       </div>
 
       <div class="sys-card reveal">
         <div class="sys-num">10</div>
         <h3>Estimating and Job Costing</h3>
         <p>Build estimates from your own historical data, not guesswork. Track actual vs. estimated costs in real time as the job runs. Know your margin before the invoice goes out, not after.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Plumbing</span>
-          <span class="sys-tag">HVAC</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Electrical</span><span class="sys-tag">Plumbing</span><span class="sys-tag">HVAC</span></div>
       </div>
 
       <div class="sys-card reveal delay-1">
         <div class="sys-num">11</div>
         <h3>Field Data Capture</h3>
         <p>Mobile forms, voice memos, and photos captured on-site and automatically structured into your systems. No re-entry. No end-of-day reconciliation. Data in the office before the crew drives back.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">All Industries</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">All Industries</span></div>
       </div>
 
       <div class="sys-card reveal delay-2">
         <div class="sys-num">12</div>
         <h3>Invoice and Billing Automation</h3>
         <p>Invoices triggered by job completion events. Field tickets, purchase orders, and time logs auto-assembled and pushed to your accounting system. The step that used to take three days takes three minutes.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Field Services</span>
-          <span class="sys-tag">Plumbing</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Field Services</span><span class="sys-tag">Plumbing</span></div>
       </div>
 
       <div class="sys-card reveal">
         <div class="sys-num">13</div>
         <h3>Dispatch and Route Optimization</h3>
         <p>Assign the right crew to the right job based on skills, location, certifications, and live availability. Schedules recalculate when conditions change. No dispatcher hunting through spreadsheets at 5am.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Field Services</span>
-          <span class="sys-tag">HVAC</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Electrical</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Field Services</span><span class="sys-tag">HVAC</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Electrical</span></div>
       </div>
 
       <div class="sys-card reveal delay-1">
         <div class="sys-num">14</div>
         <h3>Customer and Service CRM</h3>
         <p>Recurring customers, service agreements, renewal reminders, and full job history in one place. Never lose a follow-up. Know exactly what every customer has had done and when it's due again.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">HVAC</span>
-          <span class="sys-tag">Plumbing</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Roofing</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">HVAC</span><span class="sys-tag">Plumbing</span><span class="sys-tag">Electrical</span><span class="sys-tag">Roofing</span></div>
       </div>
 
       <div class="sys-card reveal delay-2">
         <div class="sys-num">15</div>
         <h3>Compliance and Regulatory Reporting</h3>
         <p>Automate the data collection and report generation for your regulatory obligations. Environmental filings, safety records, and operational reports drafted from the data you're already generating.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Mining</span>
-          <span class="sys-tag">Utilities</span>
-          <span class="sys-tag">Manufacturing</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Mining</span><span class="sys-tag">Utilities</span><span class="sys-tag">Manufacturing</span></div>
       </div>
 
       <div class="sys-card reveal">
         <div class="sys-num">16</div>
         <h3>Knowledge Base and SOP Search</h3>
         <p>Your procedures, field notes, training decks, and lessons learned made searchable in plain language. New hires ask questions and get answers grounded in your actual systems, not generic manuals.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Manufacturing</span>
-          <span class="sys-tag">Mining</span>
-          <span class="sys-tag">Utilities</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Manufacturing</span><span class="sys-tag">Mining</span><span class="sys-tag">Utilities</span></div>
       </div>
 
       <div class="sys-card reveal delay-1">
         <div class="sys-num">17</div>
         <h3>Inspection and Quality Control</h3>
         <p>Structured inspection workflows for equipment, installations, and completed work. Pass/fail criteria enforced in the field. Deficiencies logged, assigned, and tracked to resolution before the job closes.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Manufacturing</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Manufacturing</span></div>
       </div>
 
       <div class="sys-card reveal delay-2">
         <div class="sys-num">18</div>
         <h3>Time and Attendance Tracking</h3>
         <p>Geo-verified clock-in and clock-out from any phone, tied directly to jobs and cost codes. Overtime flags, certification reminders, and payroll export. No buddy punching, no manual timesheets.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">HVAC</span>
-          <span class="sys-tag">Plumbing</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Electrical</span><span class="sys-tag">HVAC</span><span class="sys-tag">Plumbing</span></div>
       </div>
 
       <div class="sys-card reveal">
         <div class="sys-num">19</div>
         <h3>Job Site Photo and Progress Documentation</h3>
-        <p>Field crews capture photos that are automatically tagged to the job, location, and date. Before-and-after records, milestone documentation, and dispute-proof visual histories built without any extra effort.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Roofing</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Plumbing</span>
-        </div>
+        <p>Field crews capture photos automatically tagged to the job, location, and date. Before-and-after records, milestone documentation, and dispute-proof visual histories built without any extra effort.</p>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Roofing</span><span class="sys-tag">Electrical</span><span class="sys-tag">Plumbing</span></div>
       </div>
 
       <div class="sys-card reveal delay-1">
         <div class="sys-num">20</div>
         <h3>Warranty and Service History Tracker</h3>
         <p>Every piece of equipment and every install has a full service record attached. Warranty windows tracked automatically. When something breaks, the full history is one search away instead of three filing cabinets.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">HVAC</span>
-          <span class="sys-tag">Plumbing</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Heavy Equipment</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">HVAC</span><span class="sys-tag">Plumbing</span><span class="sys-tag">Electrical</span><span class="sys-tag">Heavy Equipment</span></div>
       </div>
 
       <div class="sys-card reveal delay-2">
         <div class="sys-num">21</div>
         <h3>Bid and Proposal Management</h3>
         <p>Build, track, and follow up on bids from one place. Win-rate analysis by job type, customer, and season. Proposals generated from templates and historical pricing so estimators stop starting from scratch every time.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">HVAC</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">HVAC</span><span class="sys-tag">Electrical</span><span class="sys-tag">Oil &amp; Gas</span></div>
       </div>
 
       <div class="sys-card reveal">
         <div class="sys-num">22</div>
         <h3>Emissions and Environmental Monitoring</h3>
         <p>Continuous sensor data, manual readings, and field logs consolidated into a single compliance record. Gaps flagged before they become violations. Regulatory filings pre-populated from data already being collected.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Mining</span>
-          <span class="sys-tag">Utilities</span>
-          <span class="sys-tag">Manufacturing</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Mining</span><span class="sys-tag">Utilities</span><span class="sys-tag">Manufacturing</span></div>
       </div>
 
       <div class="sys-card reveal delay-1">
         <div class="sys-num">23</div>
         <h3>On-Call and Overtime Scheduler</h3>
         <p>Rotate on-call coverage fairly across your crew, track overtime accumulation in real time, and auto-notify technicians when they're up. Labor cost visibility before the shift ends, not after payroll runs.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">HVAC</span>
-          <span class="sys-tag">Utilities</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Plumbing</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">HVAC</span><span class="sys-tag">Utilities</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Plumbing</span></div>
       </div>
 
       <div class="sys-card reveal delay-2">
         <div class="sys-num">24</div>
         <h3>Purchase Order and Accounts Payable Automation</h3>
         <p>POs generated from approved job budgets, matched to incoming invoices, and routed for approval without manual entry. Duplicate payments caught automatically. AP backlog that used to take days closes in hours.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Manufacturing</span>
-          <span class="sys-tag">Mining</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Manufacturing</span><span class="sys-tag">Mining</span></div>
       </div>
 
       <div class="sys-card reveal">
         <div class="sys-num">25</div>
         <h3>Daily Briefing and Shift Handoff Report</h3>
-        <p>Outgoing crew documents what was done, what's in progress, and what the incoming crew needs to know. Auto-assembled from work orders, sensor readings, and field notes into a structured report delivered before the shift starts. No more verbal handoffs that lose half the information.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Utilities</span>
-          <span class="sys-tag">Manufacturing</span>
-          <span class="sys-tag">Mining</span>
-        </div>
+        <p>Outgoing crew documents what was done, what's in progress, and what the incoming crew needs to know — auto-assembled from work orders, sensor readings, and field notes into a structured report delivered before the shift starts.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Utilities</span><span class="sys-tag">Manufacturing</span><span class="sys-tag">Mining</span></div>
       </div>
 
       <div class="sys-card reveal delay-1">
         <div class="sys-num">26</div>
         <h3>Customer Self-Service Portal</h3>
         <p>Customers log in to see job status, service history, upcoming appointments, open invoices, and warranty records. Reduces inbound calls by giving customers the visibility they want without requiring your team to provide it manually.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">HVAC</span>
-          <span class="sys-tag">Plumbing</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Field Services</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">HVAC</span><span class="sys-tag">Plumbing</span><span class="sys-tag">Electrical</span><span class="sys-tag">Field Services</span></div>
       </div>
 
       <div class="sys-card reveal delay-2">
         <div class="sys-num">27</div>
         <h3>Revenue Leakage and Unbilled Work Detector</h3>
-        <p>Scans completed work orders, field tickets, and time logs against what was actually invoiced. Surfaces billable work that was missed, hours that weren't captured, and materials that weren't charged. Most operations find 5 to 15 percent of recoverable revenue sitting in this gap.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">HVAC</span>
-          <span class="sys-tag">Field Services</span>
-        </div>
+        <p>Scans completed work orders, field tickets, and time logs against what was actually invoiced. Surfaces billable work that was missed, hours that weren't captured, and materials that weren't charged. Most operations find 5 to 15 percent of recoverable revenue in this gap.</p>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">HVAC</span><span class="sys-tag">Field Services</span></div>
       </div>
 
       <div class="sys-card reveal">
         <div class="sys-num">28</div>
         <h3>Training and Certification Manager</h3>
-        <p>Every certification, training record, and license in one place with expiry tracking and auto-renewal reminders. Assign required training by role, track completion rates, and ensure crews aren't sent to jobs they aren't certified for. Compliance visible before anyone leaves the yard.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Mining</span>
-        </div>
+        <p>Every certification, training record, and license in one place with expiry tracking and auto-renewal reminders. Assign required training by role, track completion rates, and ensure crews aren't sent to jobs they aren't certified for.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Construction</span><span class="sys-tag">Electrical</span><span class="sys-tag">Mining</span></div>
       </div>
 
       <div class="sys-card reveal delay-1">
         <div class="sys-num">29</div>
         <h3>Change Order and Scope Tracker</h3>
-        <p>Every change request documented, priced, approved, and tied to the original contract in real time. No more scope creep absorbed silently. Change orders issued in the field, reviewed in the office, and signed before the work continues. Every dollar accounted for.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Plumbing</span>
-        </div>
+        <p>Every change request documented, priced, approved, and tied to the original contract in real time. No more scope creep absorbed silently. Change orders issued in the field, reviewed in the office, and signed before the work continues.</p>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Electrical</span><span class="sys-tag">Plumbing</span></div>
       </div>
 
       <div class="sys-card reveal delay-2">
         <div class="sys-num">30</div>
         <h3>Remote Site and Substation Monitoring</h3>
-        <p>Sensor feeds, camera status, access logs, and equipment health from every remote location consolidated into a single view. Alerts triggered by deviation from normal. Field response dispatched automatically when thresholds are breached. Sites watched continuously without a person on-site.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Utilities</span>
-          <span class="sys-tag">Mining</span>
-          <span class="sys-tag">Pipeline Operations</span>
-        </div>
+        <p>Sensor feeds, camera status, access logs, and equipment health from every remote location consolidated into a single view. Alerts triggered by deviation from normal. Field response dispatched automatically when thresholds are breached.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Utilities</span><span class="sys-tag">Mining</span><span class="sys-tag">Pipeline Operations</span></div>
       </div>
 
     </div>
   </div>
 </section>
 
-<!-- AI SYSTEMS SECTION -->
-<section class="systems-section" style="background: var(--bg-deep); padding-top: 0;">
+<!-- AI SYSTEMS -->
+<section class="ai-section">
   <div class="container">
-    <div style="padding-top: 96px; padding-bottom: 56px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-      <div class="eyebrow reveal" style="color: rgba(255,255,255,0.5);"><span class="dot"></span>Agentic infrastructure</div>
-      <h2 class="reveal" style="color: #fff; margin-top: 28px; max-width: 22ch;">AI systems and operating layers we deploy.</h2>
-      <p class="reveal" style="font-family: var(--serif); font-size: clamp(18px, 1.6vw, 24px); color: rgba(255,255,255,0.65); line-height: 1.45; max-width: 58ch; margin-top: 20px; font-weight: 350;">
-        These are not dashboards or reporting tools. They are autonomous systems that take action, make decisions, and run continuously on your operation. Built on top of the data layer. Always on.
-      </p>
+    <div class="ai-header reveal">
+      <div class="eyebrow"><span class="dot"></span>Agentic infrastructure</div>
+      <h2>AI systems and operating layers we deploy.</h2>
+      <p>These are not dashboards or reporting tools. They are autonomous systems that take action, make decisions, and run continuously on your operation. Built on top of the data layer. Always on.</p>
     </div>
     <div class="systems-grid ai-grid">
 
@@ -757,229 +479,293 @@
         <div class="sys-num">AI-01</div>
         <h3>Autonomous Dispatch Agent</h3>
         <p>An agent that handles dispatch end-to-end without a human in the loop. It reads live job priority, crew location, certifications, weather, and traffic, assigns the optimal crew, and reroutes automatically when conditions change. The dispatcher becomes an exception handler, not a scheduler.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Field Services</span>
-          <span class="sys-tag">HVAC</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Utilities</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Field Services</span><span class="sys-tag">HVAC</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Utilities</span></div>
       </div>
 
       <div class="sys-card ai-card reveal delay-1">
         <div class="sys-num">AI-02</div>
         <h3>Predictive Failure Engine</h3>
         <p>A continuously running model that watches sensor streams, work order history, and usage patterns to surface equipment failure risk before failure happens. Not threshold alerts. Pattern recognition across the entire asset fleet, ranked by consequence, not just probability.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Manufacturing</span>
-          <span class="sys-tag">Mining</span>
-          <span class="sys-tag">Utilities</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Manufacturing</span><span class="sys-tag">Mining</span><span class="sys-tag">Utilities</span></div>
       </div>
 
       <div class="sys-card ai-card reveal delay-2">
         <div class="sys-num">AI-03</div>
         <h3>Multi-Agent Coordination Platform</h3>
-        <p>The orchestration layer that lets multiple specialized agents, maintenance, dispatch, compliance, reporting, run in parallel and hand off to each other. Each agent has a defined scope. The platform manages priority, conflict resolution, and human escalation when decisions exceed agent authority.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Mining</span>
-          <span class="sys-tag">Utilities</span>
-        </div>
+        <p>The orchestration layer that lets multiple specialized agents — maintenance, dispatch, compliance, reporting — run in parallel and hand off to each other. Each agent has a defined scope. The platform manages priority, conflict resolution, and human escalation when decisions exceed agent authority.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Construction</span><span class="sys-tag">Mining</span><span class="sys-tag">Utilities</span></div>
       </div>
 
       <div class="sys-card ai-card reveal">
         <div class="sys-num">AI-04</div>
         <h3>Operational LLM Layer</h3>
         <p>A large language model fine-tuned on your company's data: procedures, field notes, equipment manuals, incident reports, and contract terms. Field crews and managers ask questions in plain language and get answers sourced from your actual operation. Institutional knowledge made queryable.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">All Industries</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">All Industries</span></div>
       </div>
 
       <div class="sys-card ai-card reveal delay-1">
         <div class="sys-num">AI-05</div>
         <h3>Anomaly Detection Network</h3>
         <p>A real-time monitoring system across your full operational data stream. Production rates, pressure readings, crew movement, cost burn, and safety events watched simultaneously. Anomalies ranked by severity and routed to the right person before they compound into incidents.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Utilities</span>
-          <span class="sys-tag">Manufacturing</span>
-          <span class="sys-tag">Mining</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Utilities</span><span class="sys-tag">Manufacturing</span><span class="sys-tag">Mining</span></div>
       </div>
 
       <div class="sys-card ai-card reveal delay-2">
         <div class="sys-num">AI-06</div>
         <h3>Automated Reporting Agent</h3>
         <p>An agent that pulls from every connected data source, composes daily operations summaries, weekly performance reports, and regulatory filings, and delivers them on schedule. Reports that used to take a coordinator three hours are ready before the standup starts.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">All Industries</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">All Industries</span></div>
       </div>
 
       <div class="sys-card ai-card reveal">
         <div class="sys-num">AI-07</div>
         <h3>Contract Intelligence Agent</h3>
-        <p>An agent that reads every contract, lease, and service agreement you have, extracts key obligations, deadlines, rates, and penalty clauses, and monitors them continuously. Renewal windows flagged 90 days out. Billing discrepancies surfaced before payment. Buried terms brought to the surface.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Utilities</span>
-        </div>
+        <p>An agent that reads every contract, lease, and service agreement you have, extracts key obligations, deadlines, rates, and penalty clauses, and monitors them continuously. Renewal windows flagged 90 days out. Billing discrepancies surfaced before payment.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Construction</span><span class="sys-tag">Utilities</span></div>
       </div>
 
       <div class="sys-card ai-card reveal delay-1">
         <div class="sys-num">AI-08</div>
         <h3>Agentic Safety Monitor</h3>
         <p>A compliance agent that watches field activity, permit status, crew certifications, weather conditions, and incident reports in real time. It flags developing risk before anyone gets hurt, auto-generates corrective action tasks, and builds a continuous audit trail for regulators.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Mining</span>
-          <span class="sys-tag">Utilities</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Construction</span><span class="sys-tag">Mining</span><span class="sys-tag">Utilities</span></div>
       </div>
 
       <div class="sys-card ai-card reveal delay-2">
         <div class="sys-num">AI-09</div>
         <h3>Predictive Procurement Agent</h3>
         <p>An agent that forecasts parts and material demand based on scheduled jobs, historical consumption, and equipment health data. Purchase orders drafted before stock runs out. Vendor lead times factored in automatically. No more mid-job supply emergencies or overstock tying up capital.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Manufacturing</span>
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">HVAC</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Manufacturing</span><span class="sys-tag">Construction</span><span class="sys-tag">HVAC</span></div>
       </div>
 
       <div class="sys-card ai-card reveal">
         <div class="sys-num">AI-10</div>
         <h3>Digital Operations Twin</h3>
         <p>A real-time digital model of your operation that mirrors every asset, crew, job, and data stream. Run scenario analysis before committing resources. Simulate the impact of a shutdown, a crew shortage, or a weather event. Decisions informed by a live model of the real operation.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Utilities</span>
-          <span class="sys-tag">Manufacturing</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Utilities</span><span class="sys-tag">Manufacturing</span></div>
       </div>
 
       <div class="sys-card ai-card reveal delay-1">
         <div class="sys-num">AI-11</div>
         <h3>Regulatory Intelligence Agent</h3>
         <p>An agent that monitors regulatory updates across relevant jurisdictions, maps changes to your specific operations, and flags compliance gaps before inspections. New rules don't catch you off guard. Your compliance posture updates as regulations update.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Mining</span>
-          <span class="sys-tag">Utilities</span>
-          <span class="sys-tag">Manufacturing</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Mining</span><span class="sys-tag">Utilities</span><span class="sys-tag">Manufacturing</span></div>
       </div>
 
       <div class="sys-card ai-card reveal delay-2">
         <div class="sys-num">AI-12</div>
         <h3>Real-Time Cost Intelligence</h3>
         <p>Live job costing that updates as work happens. Labor, materials, equipment, and subcontractor spend tracked against budget in real time. Overruns surfaced while the job is still running, not after the invoice goes out. Margin visibility that actually changes decisions.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Field Services</span>
-          <span class="sys-tag">Mining</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Field Services</span><span class="sys-tag">Mining</span></div>
       </div>
 
       <div class="sys-card ai-card reveal">
         <div class="sys-num">AI-13</div>
         <h3>Site Intelligence and Visual Monitoring</h3>
-        <p>An AI-powered camera network across job sites and facilities that detects safety violations, unauthorized access, equipment left running, and operational anomalies in real time. Not passive recording. Active detection with immediate alerts and automatic incident documentation before the footage is needed.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-          <span class="sys-tag">Mining</span>
-          <span class="sys-tag">Manufacturing</span>
-        </div>
+        <p>An AI-powered camera network across job sites and facilities that detects safety violations, unauthorized access, equipment left running, and operational anomalies in real time. Not passive recording. Active detection with immediate alerts and automatic incident documentation.</p>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Mining</span><span class="sys-tag">Manufacturing</span></div>
       </div>
 
       <div class="sys-card ai-card reveal delay-1">
         <div class="sys-num">AI-14</div>
         <h3>Voice-to-Work-Order Pipeline</h3>
-        <p>Field technicians describe the job, the parts needed, and the work completed by speaking into their phone. The system transcribes, structures, and creates or closes the work order automatically. No screen time in the field. No re-entry in the office. The data exists the moment it's spoken.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">All Industries</span>
-        </div>
+        <p>Field technicians describe the job, the parts needed, and the work completed by speaking into their phone. The system transcribes, structures, and creates or closes the work order automatically. No screen time in the field. No re-entry in the office.</p>
+        <div class="sys-tags"><span class="sys-tag">All Industries</span></div>
       </div>
 
       <div class="sys-card ai-card reveal delay-2">
         <div class="sys-num">AI-15</div>
         <h3>Adaptive Pricing and Margin Intelligence</h3>
         <p>An agent that monitors material costs, labor market rates, competitor signals, and your historical margin data to recommend real-time pricing adjustments. Estimates based on what jobs actually cost today, not what they cost last year. Margins protected as input costs move.</p>
-        <div class="sys-tags">
-          <span class="sys-tag">Construction</span>
-          <span class="sys-tag">HVAC</span>
-          <span class="sys-tag">Electrical</span>
-          <span class="sys-tag">Oil &amp; Gas</span>
-        </div>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">HVAC</span><span class="sys-tag">Electrical</span><span class="sys-tag">Oil &amp; Gas</span></div>
+      </div>
+
+      <div class="sys-card ai-card reveal">
+        <div class="sys-num">AI-16</div>
+        <h3>Emissions Compliance Guard</h3>
+        <p>Monitors sensor feeds, satellite data, and active flare permits simultaneously. When an anomaly is detected, the agent cross-references applicable exemptions, determines the required response, dispatches the nearest qualified technician, and files the regulatory notification — all before a human is aware the event occurred. Compliance executed, not just tracked.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Mining</span><span class="sys-tag">Utilities</span><span class="sys-tag">Manufacturing</span></div>
+      </div>
+
+      <div class="sys-card ai-card reveal delay-1">
+        <div class="sys-num">AI-17</div>
+        <h3>Self-Healing Dispatch Agent</h3>
+        <p>When a crew is delayed, unavailable, or missing a required certification, the agent doesn't notify and wait. It scans every active crew for location, hours, and qualifications, identifies the optimal replacement, verifies compliance, and re-assigns the job — before the next client expects contact. The operation heals itself in real time.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Field Services</span><span class="sys-tag">Utilities</span><span class="sys-tag">Construction</span></div>
+      </div>
+
+      <div class="sys-card ai-card reveal delay-2">
+        <div class="sys-num">AI-18</div>
+        <h3>Contractor Compliance Agent</h3>
+        <p>When a vendor submits a safety manual, insurance certificate, or compliance document, the agent reviews it against current regulatory requirements and your site-specific protocols. Deficiencies identified, the vendor notified with the exact gap and correction needed, and the record tracked to resolution. Onboarding that took three months completes in days.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Construction</span><span class="sys-tag">Utilities</span><span class="sys-tag">Mining</span></div>
+      </div>
+
+      <div class="sys-card ai-card reveal">
+        <div class="sys-num">AI-19</div>
+        <h3>Revenue Recovery Agent</h3>
+        <p>Cross-references every vendor invoice against the master service agreement before payment is processed. Overcharges caught automatically — the agent flags or denies the invoice, sends the vendor the specific contract clause that was violated, and requests a corrected version. Most operations recover 2 to 5 percent of gross spend sitting in administrative leakage.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Construction</span><span class="sys-tag">Manufacturing</span><span class="sys-tag">Field Services</span></div>
+      </div>
+
+      <div class="sys-card ai-card reveal delay-1">
+        <div class="sys-num">AI-20</div>
+        <h3>Lease Obligation Monitor</h3>
+        <p>Watches every active lease for development deadlines, continuous operation requirements, and shut-in time limits. When an obligation window approaches, the agent drafts the extension request, locates the current mineral owner contact, and queues the associated payment for approval — before the clock expires. Lease protection that doesn't depend on someone remembering to check.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Mining</span><span class="sys-tag">Utilities</span></div>
+      </div>
+
+      <div class="sys-card ai-card reveal delay-2">
+        <div class="sys-num">AI-21</div>
+        <h3>Production Optimization Agent</h3>
+        <p>Monitors well production rates and equipment telemetry in real time. When it detects a pump-off condition or deviation from expected flow curves, the agent adjusts connected control systems automatically, dispatches a technician with the specific parts likely needed, and logs the event before the well goes offline. Production protected before the operator's phone rings.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Utilities</span><span class="sys-tag">Mining</span></div>
+      </div>
+
+      <div class="sys-card ai-card reveal">
+        <div class="sys-num">AI-22</div>
+        <h3>Certification Gatekeeper</h3>
+        <p>Before a technician clocks into any high-risk task — trenching, confined space, equipment operation — the agent verifies their credentials in real time. Expired or missing certifications block access to the job automatically. The system enrolls the tech in the required refresher, tracks completion, and clears access once the training is logged. Nobody gets waved through on a workaround.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Construction</span><span class="sys-tag">Electrical</span><span class="sys-tag">Mining</span></div>
       </div>
 
     </div>
   </div>
 </section>
+
+<!-- THE SHIFT -->
+<section class="old-vs-new section-pad" id="the-shift">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow sec-eyebrow"><span class="dot"></span>The Shift</div>
+      <h2>The Old Model <em>vs.</em> The New</h2>
+      <p class="sec-sub">Companies still running on spreadsheets, group texts, and gut instinct are being left behind. Here's what that gap looks like.</p>
+    </div>
+    <div class="ovn-grid">
+      <div class="ovn-side ovn-old">
+        <div class="ovn-label">The Old Way</div>
+        <h3>Fragmented, manual, and reactive</h3>
+        <ul class="ovn-list">
+          <li><span class="ovn-x">&#10005;</span>Jobs dispatched by text and phone calls</li>
+          <li><span class="ovn-x">&#10005;</span>Scheduling built in spreadsheets nobody trusts</li>
+          <li><span class="ovn-x">&#10005;</span>Invoices sent days after work completes</li>
+          <li><span class="ovn-x">&#10005;</span>No visibility into crew utilization or job cost</li>
+          <li><span class="ovn-x">&#10005;</span>Compliance tracked on paper, filed by hand</li>
+          <li><span class="ovn-x">&#10005;</span>Every admin task done by a human, every time</li>
+        </ul>
+      </div>
+      <div class="ovn-divider">
+        <div class="ovn-vs">VS</div>
+      </div>
+      <div class="ovn-side ovn-new">
+        <div class="ovn-label">The TMI Model</div>
+        <h3>Connected, automated, and data-driven</h3>
+        <ul class="ovn-list">
+          <li><span class="ovn-check">&#10003;</span>AI dispatches and routes jobs automatically</li>
+          <li><span class="ovn-check">&#10003;</span>Live scheduling adapts in real time</li>
+          <li><span class="ovn-check">&#10003;</span>Invoices generated and sent on job completion</li>
+          <li><span class="ovn-check">&#10003;</span>Real-time profitability and utilization dashboards</li>
+          <li><span class="ovn-check">&#10003;</span>Compliance documented and audit-ready</li>
+          <li><span class="ovn-check">&#10003;</span>AI agents handle the repeatable work at scale</li>
+        </ul>
+        <div class="ovn-metrics">
+          <div class="ovn-metric-bar">
+            <div class="ovn-metric-row">
+              <span class="ovn-metric-label">Admin Load Reduction</span>
+              <span class="ovn-metric-val">&#8595; 60%</span>
+            </div>
+            <div class="ovn-bar-bg"><div class="ovn-bar-fill" style="width:60%"></div></div>
+          </div>
+          <div class="ovn-metric-bar">
+            <div class="ovn-metric-row">
+              <span class="ovn-metric-label">Crew Utilization</span>
+              <span class="ovn-metric-val">&#8593; 91%</span>
+            </div>
+            <div class="ovn-bar-bg"><div class="ovn-bar-fill" style="width:91%"></div></div>
+          </div>
+          <div class="ovn-metric-bar">
+            <div class="ovn-metric-row">
+              <span class="ovn-metric-label">Reporting Time</span>
+              <span class="ovn-metric-val">Days &#8594; Hours</span>
+            </div>
+            <div class="ovn-bar-bg"><div class="ovn-bar-fill" style="width:85%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <div class="cta-strip">
   <div class="container cta-strip-inner">
     <div>
-      <h2>Don't see what<br/>your operation <em>needs?</em></h2>
+      <h2>Don't see what your operation <em>needs?</em></h2>
       <p>Every system we build is custom. If the problem exists in your operation, we'll design and build the system to solve it. Bring us the friction and we'll get to work.</p>
     </div>
-    <a href="stratum.html#cta" class="btn btn-light">Talk to us →</a>
+    <a href="stratum.html#cta" class="btn btn-white">Talk to us &#8594;</a>
   </div>
 </div>
 
-<!-- FOOTER -->
 <footer>
   <div class="container">
-    <div class="foot-grid">
+    <div class="footer-grid">
       <div>
-        <a href="stratum.html" class="brand" style="color: var(--ink);">
-          <img src="logo.svg" alt="TMI" width="36" height="36" style="flex:none;filter:var(--logo-filter,none)">
-          <span>TMI</span>
-        </a>
-        <div class="foot-tagline">The AI partner for trades and oil &amp; gas companies that run the world.</div>
+        <div class="footer-brand"><img src="logo.svg" alt="TMI"/> TMI</div>
+        <p class="footer-desc">AI infrastructure for the trades. We digitize your operation so you run smarter, leaner, and ahead.</p>
+        <div class="footer-contact"><a href="mailto:hello@tmi-technology.com">hello@tmi-technology.com</a></div>
       </div>
-      <div class="foot-col">
-        <h5>Pages</h5>
-        <a href="stratum.html">Home</a>
-        <a href="systems.html">Systems we've built</a>
-        <a href="news.html">News &amp; media</a>
-        <a href="stratum.html#cta">Contact</a>
+      <div class="footer-right">
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="stratum.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="news.html">Field Notes</a>
+          <a href="partners.html">Partners</a>
+          <a href="stratum.html#cta">Contact</a>
+        </div>
+        <div class="footer-col">
+          <h5>Industries</h5>
+          <a href="trades.html">Trades &amp; Field Service</a>
+          <a href="construction.html">Construction</a>
+          <a href="oil-gas.html">Oil, Gas &amp; Energy</a>
+          <a href="manufacturing.html">Manufacturing</a>
+          <a href="fleet.html">Fleet &amp; Logistics</a>
+          <a href="home-service.html">Home Service</a>
+        </div>
+        <div class="footer-col">
+          <h5>Systems</h5>
+          <a href="system-dispatch.html">AI Dispatch &amp; Scheduling</a>
+          <a href="system-predictive-maintenance.html">Predictive Maintenance</a>
+          <a href="system-compliance.html">Compliance Management</a>
+          <a href="system-invoicing.html">Invoice &amp; Payment</a>
+          <a href="system-estimating.html">Estimating &amp; Job Costing</a>
+          <a href="system-revenue-leakage.html">Revenue Recovery</a>
+          <a href="system-llm.html">Operational LLM</a>
+          <a href="system-ops-twin.html">Digital Operations Twin</a>
+          <a href="systems.html">View all 25 systems &rarr;</a>
+        </div>
       </div>
     </div>
-    <div class="foot-bottom">
-      <span>© 2026 TMI.</span>
-      <span>Built for the field</span>
+    <div class="footer-bottom">
+      <span>&copy; 2025 TMI Technology. All rights reserved.</span>
+      <span>Built for the companies that power the world.</span>
     </div>
   </div>
 </footer>
 
 <script>
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-  }, { threshold: 0.1 });
-  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
-
-  const navToggle = document.getElementById('nav-toggle');
-  const sideNav = document.getElementById('side-nav');
-  navToggle.addEventListener('click', () => {
-    navToggle.classList.toggle('open');
-    sideNav.classList.toggle('open');
-  });
-  sideNav.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => {
-      navToggle.classList.remove('open');
-      sideNav.classList.remove('open');
-    });
-  });
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+// Side nav
+const navBtn = document.getElementById('nav-btn');
+const sideNav = document.getElementById('side-nav');
+const sideOverlay = document.getElementById('side-overlay');
+function openSideNav() { sideNav.classList.add('open'); sideOverlay.classList.add('open'); navBtn.classList.add('open'); sideNav.setAttribute('aria-hidden','false'); }
+function closeSideNav() { sideNav.classList.remove('open'); sideOverlay.classList.remove('open'); navBtn.classList.remove('open'); sideNav.setAttribute('aria-hidden','true'); }
+navBtn.addEventListener('click', () => sideNav.classList.contains('open') ? closeSideNav() : openSideNav());
+sideOverlay.addEventListener('click', closeSideNav);
 </script>
-
 </body>
 </html>

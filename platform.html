@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<meta name="description" content="The TMI AI Operating System — one integrated platform connecting field to office, crew to client, job to invoice. Multi-agent architecture built for real operations."/>
+<meta property="og:title" content="The Platform | TMI AI Operating System"/>
+<meta property="og:description" content="Single-agent is legacy. We run a swarm. Specialized AI agents that run in parallel, hand off to each other, and escalate only when decisions exceed their authority."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://tmi-technology.com/platform.html"/>
+<meta property="og:site_name" content="TMI"/>
+<link rel="canonical" href="https://tmi-technology.com/platform.html"/>
+<title>The Platform | TMI AI Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #ffffff; --bg-alt: #f5f5f7; --bg-deep: #0d0e1a; --bg-dark: #0a0b14;
+    --ink: #1a1a1a; --ink-2: #505060; --muted: #86868b;
+    --line: rgba(0,0,0,0.07); --line-strong: rgba(0,0,0,0.12);
+    --accent: #1a1a1a; --accent-light: rgba(0,0,0,0.05);
+    --serif: "Barlow", system-ui, sans-serif;
+    --sans: "Neue Haas Grotesk Display", "Neue Haas Grotesk", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --chart: #E4FF97; --chart-dark: #D0FF6A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.55; overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  h1, h2, h3, h4 { margin: 0; }
+  p { margin: 0; }
+  ::selection { background: var(--accent); color: #fff; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+  h1 { font-family: var(--serif); font-size: clamp(48px, 6.5vw, 88px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.04; }
+  h2 { font-family: var(--serif); font-size: clamp(36px, 4vw, 58px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.08; }
+  h3 { font-family: var(--sans); font-size: clamp(18px, 1.8vw, 22px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; }
+  h4 { font-family: var(--sans); font-size: 15px; font-weight: 600; }
+  .eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 8px; }
+  .eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: #7C6CF2; flex: none; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; border-radius: 999px; font-size: 14px; font-weight: 500; font-family: var(--sans); transition: all 0.2s; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+  .btn-primary { background: var(--chart); color: #0a0b14; }
+  .btn-primary:hover { background: var(--chart-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(200,255,0,0.22); }
+  .btn-white-outline { background: transparent; color: #fff; border-color: rgba(255,255,255,0.35); }
+  .btn-white-outline:hover { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); }
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-d1 { transition-delay: 0.1s; } .reveal-d2 { transition-delay: 0.2s; } .reveal-d3 { transition-delay: 0.3s; }
+
+  /* SIDE NAV */
+  .nav-btn { position: fixed; top: 20px; left: 20px; z-index: 201; width: 44px; height: 44px; background: rgba(255,255,255,0.12); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.18); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; padding: 0; transition: background 0.2s; }
+  .nav-btn:hover { background: rgba(255,255,255,0.2); }
+  .nav-btn span { display: block; width: 18px; height: 1.5px; background: #fff; border-radius: 2px; transition: transform 0.25s, opacity 0.25s; }
+  .nav-btn.open span { background: var(--ink); }
+  .nav-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .nav-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+  .side-overlay { position: fixed; inset: 0; z-index: 198; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: auto; }
+  .side-nav { position: fixed; left: 0; top: 0; bottom: 0; z-index: 200; width: 280px; background: #fff; border-right: 1px solid var(--line); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 28px 0 40px; overflow-y: auto; }
+  .side-nav.open { transform: translateX(0); box-shadow: 8px 0 48px rgba(0,0,0,0.15); }
+  .side-nav-top { display: flex; align-items: center; padding: 0 24px 28px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+  .side-nav-brand { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink); text-decoration: none; }
+  .side-nav-brand img { height: 28px; }
+  .side-nav-links { display: flex; flex-direction: column; padding: 0 12px; flex: 1; }
+  .side-nav-section { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 20px 12px 6px; }
+  .side-nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-2); padding: 10px 12px; border-radius: 8px; transition: color 0.15s, background 0.15s; display: block; }
+  .side-nav-links a:hover { color: var(--ink); background: var(--bg-alt); }
+  .side-nav-cta { padding: 24px 24px 0; border-top: 1px solid var(--line); margin-top: 16px; }
+  .side-nav-cta .btn { width: 100%; justify-content: center; }
+
+  /* HERO */
+  .hero { background: var(--bg-dark); padding: 160px 0 120px; position: relative; overflow: hidden; }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(228,255,151,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; z-index: 2; }
+  .hero-eyebrow { display: flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 28px; }
+  .hero-eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--chart); }
+  .hero h1 { color: #fff; max-width: 20ch; margin-bottom: 28px; }
+  .hero h1 em { color: rgba(255,255,255,0.5); font-style: italic; }
+  .hero .lede { font-size: clamp(17px, 1.4vw, 20px); color: rgba(255,255,255,0.6); line-height: 1.65; max-width: 54ch; margin-bottom: 48px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* PLATFORM RING DIAGRAM */
+  .platform-ring { margin-top: 96px; padding: 80px 0; background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .ring-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); text-align: center; margin-bottom: 48px; }
+  .ring-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,0.07); }
+  .ring-item { background: var(--bg-dark); padding: 32px 28px; display: flex; flex-direction: column; gap: 10px; transition: background 0.2s; }
+  .ring-item:hover { background: rgba(255,255,255,0.04); }
+  .ring-item-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--chart); }
+  .ring-item h4 { font-family: var(--sans); font-size: 14px; font-weight: 600; color: #fff; }
+  .ring-item p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6; }
+  @media (max-width: 1024px) { .ring-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .ring-grid { grid-template-columns: 1fr; } }
+
+  /* ARCHITECTURE SECTION */
+  .arch-intro { padding: 120px 0 80px; background: var(--bg); }
+  .arch-intro-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 96px; align-items: start; }
+  .arch-left .eyebrow { margin-bottom: 20px; }
+  .arch-left h2 { margin-bottom: 20px; }
+  .arch-left p { font-size: 17px; color: var(--ink-2); line-height: 1.7; }
+  .arch-left p + p { margin-top: 16px; }
+  .arch-right { padding-top: 8px; }
+  .arch-quote {
+    border-left: 3px solid var(--chart);
+    padding: 24px 32px;
+    background: var(--bg-alt);
+    border-radius: 0 12px 12px 0;
+  }
+  .arch-quote p { font-family: var(--serif); font-size: 20px; color: var(--ink); line-height: 1.5; font-style: italic; font-weight: 400; }
+  .arch-quote cite { display: block; font-size: 12px; color: var(--muted); margin-top: 14px; font-style: normal; letter-spacing: 0.08em; text-transform: uppercase; }
+  @media (max-width: 1024px) { .arch-intro-inner { grid-template-columns: 1fr; gap: 48px; } }
+
+  /* COMPARISON */
+  .comparison { padding: 0 0 120px; background: var(--bg); }
+  .comp-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch; }
+  .comp-side { padding: 48px 44px; border-radius: 20px; border: 1px solid; }
+  .comp-old { background: var(--bg-alt); border-color: var(--line-strong); }
+  .comp-new { background: var(--bg-dark); border-color: rgba(255,255,255,0.1); }
+  .comp-label { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px; }
+  .comp-old .comp-label { color: var(--muted); }
+  .comp-new .comp-label { color: var(--chart); }
+  .comp-old h3 { font-size: 18px; font-weight: 600; color: var(--ink-2); margin-bottom: 8px; }
+  .comp-new h3 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+  .comp-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+  .comp-new .comp-sub { color: rgba(255,255,255,0.4); }
+  .comp-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .comp-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.5; }
+  .comp-old .comp-list li { color: var(--ink-2); }
+  .comp-new .comp-list li { color: rgba(255,255,255,0.75); }
+  .comp-x { width: 18px; height: 18px; border-radius: 50%; background: rgba(239,68,68,0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 10px; flex: none; margin-top: 1px; }
+  .comp-check { width: 18px; height: 18px; border-radius: 50%; background: rgba(228,255,151,0.12); color: var(--chart); display: flex; align-items: center; justify-content: center; font-size: 10px; flex: none; margin-top: 1px; }
+  .comp-divider { display: flex; align-items: center; justify-content: center; padding: 0 28px; }
+  .comp-vs { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line-strong); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); font-weight: 600; }
+  /* Agent tags in comp-new */
+  .agent-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; }
+  .agent-tag { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--chart); padding: 5px 12px; border: 1px solid rgba(228,255,151,0.25); border-radius: 999px; background: rgba(228,255,151,0.06); }
+  @media (max-width: 900px) { .comp-grid { grid-template-columns: 1fr; } .comp-divider { padding: 20px 0; } .comp-side { padding: 32px 28px; } }
+
+  /* PRINCIPLES */
+  .principles { background: var(--bg-deep); padding: 120px 0; }
+  .principles-head { text-align: center; max-width: 680px; margin: 0 auto 80px; }
+  .principles-head .eyebrow { color: rgba(255,255,255,0.4); justify-content: center; }
+  .principles-head .eyebrow .dot { background: var(--chart); }
+  .principles-head h2 { color: #fff; margin-top: 20px; }
+  .principles-head p { color: rgba(255,255,255,0.5); font-size: 17px; margin-top: 16px; line-height: 1.65; }
+  .principles-list { display: flex; flex-direction: column; gap: 0; border-top: 1px solid rgba(255,255,255,0.08); }
+  .principle { display: grid; grid-template-columns: 120px 1fr 1fr; gap: 0; padding: 56px 0; border-bottom: 1px solid rgba(255,255,255,0.08); align-items: start; }
+  .principle-num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--chart); padding-top: 4px; }
+  .principle-left { padding-right: 64px; }
+  .principle-left h3 { color: #fff; font-size: clamp(22px, 2.2vw, 28px); margin-bottom: 4px; }
+  .principle-left .p-sub { font-size: 13px; color: rgba(255,255,255,0.35); letter-spacing: 0.04em; text-transform: uppercase; }
+  .principle-right p { font-size: 16px; color: rgba(255,255,255,0.55); line-height: 1.75; }
+  @media (max-width: 900px) {
+    .principle { grid-template-columns: 60px 1fr; }
+    .principle-left { grid-column: 2; padding-right: 0; margin-bottom: 16px; }
+    .principle-right { grid-column: 2; }
+  }
+  @media (max-width: 640px) { .principle { grid-template-columns: 1fr; } .principle-num { margin-bottom: 8px; } }
+
+  /* CTA */
+  .cta-strip { background: var(--bg-dark); border-top: 1px solid rgba(255,255,255,0.06); padding: 100px 0; text-align: center; }
+  .cta-strip-inner { max-width: 640px; margin: 0 auto; }
+  .cta-strip .eyebrow { color: rgba(255,255,255,0.35); justify-content: center; }
+  .cta-strip .eyebrow .dot { background: var(--chart); }
+  .cta-strip h2 { color: #fff; margin: 20px 0 16px; }
+  .cta-strip p { color: rgba(255,255,255,0.55); font-size: 17px; margin-bottom: 40px; line-height: 1.65; }
+  .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* FOOTER */
+  footer { background: var(--bg-alt); border-top: 1px solid var(--line); padding: 72px 0 36px; }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 80px; margin-bottom: 56px; }
+  .footer-brand { font-family: var(--serif); font-size: 22px; color: var(--ink); display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .footer-brand img { height: 28px; width: auto; }
+  .footer-desc { font-size: 14px; color: var(--ink-2); line-height: 1.65; max-width: 34ch; margin-bottom: 20px; }
+  .footer-contact a { font-size: 14px; color: var(--ink-2); }
+  .footer-right { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; }
+  .footer-col h5 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 14px; }
+  .footer-col a { display: block; font-size: 14px; color: var(--ink-2); padding: 3px 0; transition: color 0.15s; }
+  .footer-col a:hover { color: var(--ink); }
+  .footer-bottom { padding-top: 28px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  @media (max-width: 1024px) { .footer-grid { grid-template-columns: 1fr; gap: 48px; } .footer-right { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px) { .footer-right { grid-template-columns: 1fr; } .container { padding: 0 20px; } .footer-bottom { flex-direction: column; gap: 8px; } }
+</style>
+</head>
+<body>
+
+<!-- HAMBURGER BUTTON -->
+<button class="nav-btn" id="nav-btn" aria-label="Open menu">
+  <span></span><span></span><span></span>
+</button>
+<!-- SIDE OVERLAY -->
+<div class="side-overlay" id="side-overlay"></div>
+<!-- SIDE NAV -->
+<div class="side-nav" id="side-nav" aria-hidden="true">
+  <div class="side-nav-top">
+    <a class="side-nav-brand" href="stratum.html"><img src="logo.svg" alt="TMI"/> TMI</a>
+  </div>
+  <div class="side-nav-links">
+    <div class="side-nav-section">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="platform.html" style="color:var(--ink);background:var(--bg-alt)">The Platform</a>
+    <a href="systems.html">Systems</a>
+    <a href="news.html">Field Notes</a>
+    <a href="about.html">About</a>
+    <a href="partners.html">Partners</a>
+    <div class="side-nav-section">Industries</div>
+    <a href="trades.html">Trades &amp; Field Service</a>
+    <a href="construction.html">Construction</a>
+    <a href="oil-gas.html">Oil, Gas &amp; Energy</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="fleet.html">Fleet &amp; Logistics</a>
+    <a href="home-service.html">Home Service</a>
+    <div class="side-nav-section">Systems</div>
+    <a href="system-dispatch.html">AI Dispatch</a>
+    <a href="system-predictive-maintenance.html">Predictive Maintenance</a>
+    <a href="system-compliance.html">Compliance</a>
+    <a href="system-invoicing.html">Invoice &amp; Payment</a>
+    <a href="system-estimating.html">Job Costing</a>
+    <a href="system-revenue-leakage.html">Revenue Recovery</a>
+    <a href="system-llm.html">Operational LLM</a>
+    <a href="system-ops-twin.html">Operations Twin</a>
+    <a href="systems.html">All Systems &rarr;</a>
+  </div>
+  <div class="side-nav-cta">
+    <a href="contact.html" class="btn btn-primary">Book a Strategy Call &#8594;</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-eyebrow"><span class="dot"></span>The Platform</div>
+    <h1>The TMI<br/><em>AI Operating System.</em></h1>
+    <p class="lede">One integrated platform that connects every part of your operation: field to office, crew to client, job to invoice. Not a dashboard. Not a SaaS product. A custom-built AI operating layer running underneath your business.</p>
+    <div class="hero-actions">
+      <a href="contact.html" class="btn btn-primary">Book a Strategy Call &#8594;</a>
+      <a href="systems.html" class="btn btn-white-outline">See all 25 systems</a>
+    </div>
+  </div>
+
+  <!-- PLATFORM CAPABILITIES GRID -->
+  <div class="platform-ring">
+    <div class="container">
+      <div class="ring-label">Platform capabilities</div>
+      <div class="ring-grid">
+        <div class="ring-item reveal">
+          <div class="ring-item-num">01</div>
+          <h4>AI Dispatch Systems</h4>
+          <p>Smart job routing and crew assignment, optimized in real time. Right tech, right job — no dispatcher required.</p>
+        </div>
+        <div class="ring-item reveal reveal-d1">
+          <div class="ring-item-num">02</div>
+          <h4>Scheduling Automation</h4>
+          <p>Live schedules that adapt to cancellations, delays, and capacity changes. The schedule manages itself.</p>
+        </div>
+        <div class="ring-item reveal reveal-d2">
+          <div class="ring-item-num">03</div>
+          <h4>Billing &amp; Reporting Flows</h4>
+          <p>Invoices generated and sent automatically when work is marked complete — connected to your accounting system.</p>
+        </div>
+        <div class="ring-item reveal reveal-d3">
+          <div class="ring-item-num">04</div>
+          <h4>Compliance Infrastructure</h4>
+          <p>Automated documentation, audit-ready records, and regulatory filings drafted from data you're already generating.</p>
+        </div>
+        <div class="ring-item reveal">
+          <div class="ring-item-num">05</div>
+          <h4>Asset Visibility</h4>
+          <p>Real-time tracking of equipment, materials, and field assets. Location, utilization, maintenance history — one view.</p>
+        </div>
+        <div class="ring-item reveal reveal-d1">
+          <div class="ring-item-num">06</div>
+          <h4>Crew Communication</h4>
+          <p>Automated updates to crews, clients, and managers across every job. Zero manual follow-up.</p>
+        </div>
+        <div class="ring-item reveal reveal-d2">
+          <div class="ring-item-num">07</div>
+          <h4>Operational Intelligence</h4>
+          <p>Live dashboards showing profitability, utilization, and trend data — before end of month, not after.</p>
+        </div>
+        <div class="ring-item reveal reveal-d3">
+          <div class="ring-item-num">08</div>
+          <h4>Maintenance Coordination</h4>
+          <p>Predictive maintenance triggers and work order automation. Equipment stops failing by surprise.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE INTRO -->
+<section class="arch-intro">
+  <div class="container">
+    <div class="arch-intro-inner">
+      <div class="arch-left reveal">
+        <div class="eyebrow"><span class="dot"></span>Architecture</div>
+        <h2>Single-agent is legacy.<br/>We run a swarm.</h2>
+        <p>Single-agent AI hits a ceiling fast. One model handling dispatch, compliance, billing, and scheduling creates bottlenecks — and when it fails, everything stops. That's a fragile architecture.</p>
+        <p>Modern backends use Multi-Agent Systems — a coordinated swarm of specialized units, each owning a defined domain. They run in parallel, hand off to each other, and escalate to humans only when decisions exceed their authority. The operation doesn't wait on any single thread.</p>
+      </div>
+      <div class="arch-right reveal reveal-d1">
+        <div class="arch-quote">
+          <p>"Every agent has a defined scope. The platform manages priority, conflict resolution, and human escalation when decisions exceed agent authority."</p>
+          <cite>TMI Multi-Agent Architecture</cite>
+        </div>
+        <div style="margin-top:28px; padding:28px 32px; background:var(--bg-alt); border-radius:12px;">
+          <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">TMI MAS Architecture</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <span style="font-size:12px;font-weight:600;padding:6px 14px;background:#fff;border:1px solid var(--line-strong);border-radius:999px;color:var(--ink)">Dispatch</span>
+            <span style="font-size:12px;font-weight:600;padding:6px 14px;background:#fff;border:1px solid var(--line-strong);border-radius:999px;color:var(--ink)">Compliance</span>
+            <span style="font-size:12px;font-weight:600;padding:6px 14px;background:#fff;border:1px solid var(--line-strong);border-radius:999px;color:var(--ink)">Billing</span>
+            <span style="font-size:12px;font-weight:600;padding:6px 14px;background:#fff;border:1px solid var(--line-strong);border-radius:999px;color:var(--ink)">Intelligence</span>
+            <span style="font-size:12px;font-weight:600;padding:6px 14px;background:#fff;border:1px solid var(--line-strong);border-radius:999px;color:var(--ink)">Assets</span>
+            <span style="font-size:12px;font-weight:600;padding:6px 14px;background:#fff;border:1px solid var(--line-strong);border-radius:999px;color:var(--ink)">Safety</span>
+          </div>
+          <div style="margin-top:20px;font-size:13px;color:var(--ink-2);line-height:1.6;">Specialized units running in parallel. No bottlenecks. No single point of failure.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="comparison">
+  <div class="container">
+    <div class="comp-grid">
+      <div class="comp-side comp-old reveal">
+        <div class="comp-label">Legacy Architecture</div>
+        <h3>One agent. Every task.</h3>
+        <p class="comp-sub">Serial processing. Single point of failure.</p>
+        <ul class="comp-list">
+          <li><span class="comp-x">&#10005;</span>Overloaded context — one model handles everything</li>
+          <li><span class="comp-x">&#10005;</span>Serial processing — tasks queue behind each other</li>
+          <li><span class="comp-x">&#10005;</span>No specialization — breadth over depth</li>
+          <li><span class="comp-x">&#10005;</span>Single point of failure — one failure stops all threads</li>
+          <li><span class="comp-x">&#10005;</span>Humans fill every gap the model can't handle</li>
+        </ul>
+      </div>
+      <div class="comp-divider reveal">
+        <div class="comp-vs">&#8594;</div>
+      </div>
+      <div class="comp-side comp-new reveal reveal-d1">
+        <div class="comp-label">TMI MAS Architecture</div>
+        <h3>Specialized units. Parallel execution.</h3>
+        <p class="comp-sub">Each agent owns one domain.</p>
+        <ul class="comp-list">
+          <li><span class="comp-check">&#10003;</span>Deep specialization — each agent owns its domain fully</li>
+          <li><span class="comp-check">&#10003;</span>Parallel execution — all threads run simultaneously</li>
+          <li><span class="comp-check">&#10003;</span>Structured handoffs — agents coordinate via protocol</li>
+          <li><span class="comp-check">&#10003;</span>Resilient — failure of one agent doesn't halt others</li>
+          <li><span class="comp-check">&#10003;</span>Human escalation only when decisions exceed authority</li>
+        </ul>
+        <div class="agent-tags">
+          <span class="agent-tag">Dispatch</span>
+          <span class="agent-tag">Compliance</span>
+          <span class="agent-tag">Billing</span>
+          <span class="agent-tag">Intelligence</span>
+          <span class="agent-tag">Assets</span>
+          <span class="agent-tag">Safety</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRINCIPLES -->
+<section class="principles">
+  <div class="container">
+    <div class="principles-head reveal">
+      <div class="eyebrow"><span class="dot"></span>How it works</div>
+      <h2>Three principles.<br/>One architecture.</h2>
+      <p>The design decisions that separate an AI operating system from a collection of AI tools.</p>
+    </div>
+    <div class="principles-list">
+      <div class="principle reveal">
+        <div class="principle-num">01</div>
+        <div class="principle-left">
+          <h3>Specialization</h3>
+          <div class="p-sub">Each agent owns one domain.</div>
+        </div>
+        <div class="principle-right">
+          <p>Dispatch agents know crews, certifications, and routes. Compliance agents know regulations and filing windows. Billing agents know rates, contracts, and approval chains. Specialization means depth — not breadth spread thin across a single overloaded model that forgets context as tasks pile up.</p>
+        </div>
+      </div>
+      <div class="principle reveal">
+        <div class="principle-num">02</div>
+        <div class="principle-left">
+          <h3>Parallel Execution</h3>
+          <div class="p-sub">No waiting. No bottlenecks.</div>
+        </div>
+        <div class="principle-right">
+          <p>While one agent closes a work order, another drafts the invoice, a third checks the compliance log, and a fourth queues the next dispatch. The operation runs all threads simultaneously — not one at a time. Sequential AI is just a faster human. Parallel AI is a different kind of infrastructure.</p>
+        </div>
+      </div>
+      <div class="principle reveal">
+        <div class="principle-num">03</div>
+        <div class="principle-left">
+          <h3>Orchestrated Handoff</h3>
+          <div class="p-sub">Agents coordinate. Humans decide what matters.</div>
+        </div>
+        <div class="principle-right">
+          <p>When an agent reaches a decision that exceeds its authority — a large spend approval, a regulatory exception, a novel situation with no precedent — it escalates with full context. Everything else closes without a human touching it. The operation doesn't ask for permission on routine work. It asks for judgment on the things that actually need it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-strip">
+  <div class="container cta-strip-inner">
+    <div class="eyebrow"><span class="dot"></span>Get started</div>
+    <h2>Ready to run on a real AI architecture?</h2>
+    <p>Tell us how your operation runs today. We'll map which agents make sense for your scale, your industry, and your friction points — and build a plan.</p>
+    <div class="cta-actions">
+      <a href="contact.html" class="btn btn-primary">Book a Strategy Call &#8594;</a>
+      <a href="system-multi-agent.html" class="btn btn-white-outline">Multi-Agent Platform &#8594;</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><img src="logo.svg" alt="TMI"/> TMI</div>
+        <p class="footer-desc">AI infrastructure for the trades. We digitize your operation so you run smarter, leaner, and ahead.</p>
+        <div class="footer-contact"><a href="mailto:hello@tmi-technology.com">hello@tmi-technology.com</a></div>
+      </div>
+      <div class="footer-right">
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="stratum.html">Home</a>
+          <a href="platform.html">The Platform</a>
+          <a href="about.html">About</a>
+          <a href="news.html">Field Notes</a>
+          <a href="partners.html">Partners</a>
+          <a href="contact.html">Contact</a>
+        </div>
+        <div class="footer-col">
+          <h5>Industries</h5>
+          <a href="trades.html">Trades &amp; Field Service</a>
+          <a href="construction.html">Construction</a>
+          <a href="oil-gas.html">Oil, Gas &amp; Energy</a>
+          <a href="manufacturing.html">Manufacturing</a>
+          <a href="fleet.html">Fleet &amp; Logistics</a>
+          <a href="home-service.html">Home Service</a>
+        </div>
+        <div class="footer-col">
+          <h5>Systems</h5>
+          <a href="system-dispatch.html">AI Dispatch &amp; Scheduling</a>
+          <a href="system-predictive-maintenance.html">Predictive Maintenance</a>
+          <a href="system-compliance.html">Compliance Management</a>
+          <a href="system-invoicing.html">Invoice &amp; Payment</a>
+          <a href="system-estimating.html">Estimating &amp; Job Costing</a>
+          <a href="system-revenue-leakage.html">Revenue Recovery</a>
+          <a href="system-llm.html">Operational LLM</a>
+          <a href="system-ops-twin.html">Digital Operations Twin</a>
+          <a href="systems.html">View all 25 systems &rarr;</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 TMI Technology. All rights reserved.</span>
+      <span>Built for the companies that power the world.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const io = new IntersectionObserver((e) => { e.forEach(el => { if (el.isIntersecting) { el.target.classList.add('visible'); io.unobserve(el.target); } }); }, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+const navBtn = document.getElementById('nav-btn');
+const sideNav = document.getElementById('side-nav');
+const sideOverlay = document.getElementById('side-overlay');
+function openSideNav() { sideNav.classList.add('open'); sideOverlay.classList.add('open'); navBtn.classList.add('open'); sideNav.setAttribute('aria-hidden','false'); }
+function closeSideNav() { sideNav.classList.remove('open'); sideOverlay.classList.remove('open'); navBtn.classList.remove('open'); sideNav.setAttribute('aria-hidden','true'); }
+navBtn.addEventListener('click', () => sideNav.classList.contains('open') ? closeSideNav() : openSideNav());
+sideOverlay.addEventListener('click', closeSideNav);
+</script>
+</body>
+</html>

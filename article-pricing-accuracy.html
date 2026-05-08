@@ -1,0 +1,226 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
+<meta name="description" content="Job costs vary not because the work varies - but because estimating is inconsistent. AI pricing pulls from actual historical data, and the difference shows up in margin."/>
+<meta property="og:title" content="Most trades companies price from memory. That's why margins vary. | TMI"/>
+<meta property="og:description" content="Job costs vary not because the work varies - but because estimating is inconsistent. AI pricing pulls from actual historical data, and the difference shows up in margin."/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://tmi-technology.com/article-pricing-accuracy.html"/>
+<meta property="og:image" content="https://images.pexels.com/photos/3862130/pexels-photo-3862130.jpeg?auto=compress&cs=tinysrgb&w=900&q=80"/>
+<meta property="og:site_name" content="TMI"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Most trades companies price from memory. That's why margins vary. | TMI"/>
+<meta name="twitter:description" content="Job costs vary not because the work varies - but because estimating is inconsistent. AI pricing pulls from actual historical data."/>
+<meta name="twitter:image" content="https://images.pexels.com/photos/3862130/pexels-photo-3862130.jpeg?auto=compress&cs=tinysrgb&w=900&q=80"/>
+<link rel="canonical" href="https://tmi-technology.com/article-pricing-accuracy.html"/>
+<title>Most trades companies price from memory. That's why margins vary. | TMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #ffffff; --bg-alt: #f5f5f7; --bg-deep: #0a0b14;
+    --ink: #1a1a1a; --ink-2: #505060; --muted: #86868b;
+    --line: rgba(0,0,0,0.08); --line-strong: rgba(0,0,0,0.13);
+    --accent: #1a1a1a; --accent-2: #000;
+    --serif: "Barlow", system-ui, sans-serif;
+    --sans: "Neue Haas Grotesk Display", "Neue Haas Grotesk", system-ui, -apple-system, sans-serif;
+    --chart: #E4FF97; --chart-dark: #D0FF6A;
+  }
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}html{scroll-behavior:smooth;}body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.55;overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}img{display:block;max-width:100%;}::selection{background:var(--ink);color:var(--bg);}
+  h1,h2,h3,h4{font-family:var(--serif);font-weight:400;letter-spacing:-0.02em;line-height:1.05;margin:0;}p{margin:0;}
+  .side-nav{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--bg);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:36px 24px;z-index:100;transform:translateX(-100%);transition:transform 0.3s ease;}
+  .side-nav.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,0.1);}
+  .side-brand{display:flex;align-items:center;gap:12px;font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:-0.01em;color:var(--ink);margin-bottom:48px;}
+  .side-brand .mark,.brand .mark{width:24px;height:24px;position:relative;flex:none;background:currentColor;border-radius:3px;opacity:0.95;}
+  .side-brand .mark::before,.brand .mark::before{content:"";position:absolute;left:3px;right:3px;top:3px;height:2px;background:var(--bg);}
+  .side-brand .mark::after,.brand .mark::after{content:"";position:absolute;left:3px;right:3px;top:8px;bottom:3px;background:var(--accent);}
+  .side-nav-links{display:flex;flex-direction:column;gap:2px;flex:1;}
+  .side-nav-links a{font-size:14px;padding:10px 12px;border-radius:6px;color:var(--ink-2);transition:background 0.15s,color 0.15s;}
+  .side-nav-links a:hover{background:var(--bg-alt);color:var(--ink);}
+  .side-nav-links a.active{color:var(--accent);}
+  .side-nav-cta{display:block;text-align:center;padding:12px 18px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:13px;font-weight:500;transition:background 0.2s;margin-top:24px;}
+  .side-nav-cta:hover{background:var(--accent);}
+  .nav-toggle{display:flex;position:fixed;top:16px;left:16px;z-index:101;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer;flex-direction:column;gap:5px;}
+  .nav-toggle span{display:block;width:20px;height:2px;background:var(--ink);transition:transform 0.2s,opacity 0.2s;}
+  .nav-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+  .nav-toggle.open span:nth-child(2){opacity:0;}
+  .nav-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+  .brand{display:flex;align-items:center;gap:12px;font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:-0.01em;color:var(--ink);}
+  /* ARTICLE HEADER */
+  .article-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 56px; background: rgba(255,255,255,0.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); display: flex; align-items: center; }
+  .article-header-inner { max-width: 1320px; margin: 0 auto; padding: 0 32px; width: 100%; display: flex; align-items: center; gap: 20px; }
+  .ah-brand { display: flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 15px; font-weight: 700; color: var(--ink); flex: 1; }
+  .ah-brand img { height: 22px; width: auto; }
+  .ah-nav { display: flex; align-items: center; gap: 2px; }
+  .ah-nav a { font-family: var(--sans); font-size: 13px; color: var(--ink-2); padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; }
+  .ah-nav a:hover { color: var(--ink); background: var(--bg-alt); }
+  .ah-cta { font-family: var(--sans); font-size: 12px; font-weight: 600; background: var(--chart); color: #0a0b14; padding: 8px 16px; border-radius: 999px; transition: background 0.15s; white-space: nowrap; flex: none; }
+  .ah-cta:hover { background: var(--chart-dark); }
+  @media (max-width: 640px) { .ah-nav { display: none; } .ah-cta { font-size: 11px; padding: 7px 14px; } .article-header-inner { padding: 0 16px; } }
+  .article-hero{padding:104px 0 72px;border-bottom:1px solid var(--line);}
+  .article-back{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:36px;display:inline-flex;align-items:center;gap:8px;transition:color 0.2s,gap 0.2s;}
+  .article-back:hover{color:var(--accent);gap:12px;}
+  .article-meta{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);display:flex;gap:20px;align-items:center;margin-bottom:28px;}
+  .article-meta .cat{color:var(--accent);}
+  .article-title{font-family:var(--serif);font-size:clamp(40px,5vw,76px);font-weight:400;line-height:1.05;letter-spacing:-0.02em;max-width:20ch;margin:0 0 32px;}
+  .article-title em{font-style:italic;color:var(--accent-2);}
+  .article-deck{font-family:var(--serif);font-size:clamp(18px,1.5vw,22px);font-weight:400;line-height:1.5;color:var(--ink-2);max-width:56ch;}
+  .container-article{max-width:760px;margin:0 auto;padding:0 32px;}
+  .container{max-width:1320px;margin:0 auto;padding:0 32px;}
+  .article-cover{width:100%;height:clamp(320px,45vw,560px);background-size:cover;background-position:center;margin:64px 0;border-radius:2px;}
+  .article-body{font-family:var(--serif);font-size:19px;font-weight:400;line-height:1.75;color:var(--ink-2);}
+  .article-body p{margin-bottom:1.6em;}
+  .article-body h2{font-family:var(--serif);font-size:clamp(24px,2.2vw,34px);font-weight:400;letter-spacing:-0.02em;line-height:1.15;color:var(--ink);margin:2.8em 0 0.8em;}
+  .article-body blockquote{border-left:3px solid var(--accent);margin:2.5em 0;padding:0 0 0 28px;font-size:clamp(22px,2vw,28px);font-style:italic;color:var(--ink);font-weight:400;line-height:1.35;}
+  .article-body .callout{background:var(--bg-alt);border-radius:4px;padding:28px 32px;margin:2.5em 0;font-family:var(--sans);font-size:15px;line-height:1.6;color:var(--ink-2);}
+  .article-body .callout strong{font-weight:600;color:var(--ink);}
+  .article-end{padding:56px 0;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-top:48px;}
+  .article-end .byline{font-family:var(--sans);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+  .article-end .back-link{font-size:13px;padding:10px 20px;border:1px solid var(--line-strong);border-radius:999px;font-family:var(--sans);color:var(--ink);transition:background 0.2s,color 0.2s,border-color 0.2s;}
+  .article-end .back-link:hover{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+  .read-next{background:var(--bg-alt);padding:80px 0;border-top:1px solid var(--line);}
+  .read-next h3{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:36px;}
+  .read-next-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:32px;}
+  .next-card{display:flex;flex-direction:column;gap:12px;}
+  .next-card .photo{height:200px;background-size:cover;background-position:center;border-radius:2px;}
+  .next-card .meta{font-family:var(--sans);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);display:flex;gap:14px;}
+  .next-card .meta .cat{color:var(--accent);}
+  .next-card h4{font-family:var(--serif);font-size:22px;font-weight:400;letter-spacing:-0.01em;line-height:1.2;}
+  .next-card .read{font-family:var(--sans);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink);display:inline-flex;align-items:center;gap:8px;transition:gap 0.2s,color 0.2s;}
+  .next-card:hover .read{gap:12px;color:var(--accent);}
+  footer{background:var(--bg-alt);padding:96px 0 40px;}
+  .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:48px;border-bottom:1px solid var(--line);padding-bottom:56px;margin-bottom:28px;}
+  .foot-tagline{font-family:var(--serif);font-size:18px;font-weight:400;margin-top:16px;color:var(--ink-2);max-width:28ch;}
+  .foot-col h5{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0 0 18px;}
+  .foot-col a{display:block;padding:6px 0;font-size:14px;transition:color 0.2s;}
+  .foot-col a:hover{color:var(--accent);}
+  .foot-bottom{display:flex;justify-content:space-between;font-family:var(--sans);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.8s ease,transform 0.8s cubic-bezier(.2,.7,.2,1);}
+  .reveal.in{opacity:1;transform:translateY(0);}
+  @media(max-width:1024px){.read-next-grid{grid-template-columns:1fr;}.foot-grid{grid-template-columns:1fr;}}
+  @media(max-width:640px){.article-hero{padding:120px 0 48px;}.container-article{padding:0 20px;}.article-body{font-size:17px;}}
+</style>
+<script type="application/ld+json">
+[
+  {"@context":"https://schema.org","@type":"Organization","name":"TMI","url":"https://tmi-technology.com"},
+  {"@context":"https://schema.org","@type":"Article","headline":"Most trades companies price from memory. That's why margins vary.","description":"Job costs vary not because the work varies - but because estimating is inconsistent. AI pricing pulls from actual historical data, and the difference shows up in margin.","url":"https://tmi-technology.com/article-pricing-accuracy.html","image":"https://images.pexels.com/photos/3862130/pexels-photo-3862130.jpeg?auto=compress&cs=tinysrgb&w=900&q=80","datePublished":"2026-05-06","dateModified":"2026-05-06","articleSection":"The Trades","keywords":["contractor estimating","trades pricing","job costing accuracy","AI estimating","margin consistency"],"author":{"@type":"Organization","name":"TMI","url":"https://tmi-technology.com"},"publisher":{"@type":"Organization","name":"TMI","url":"https://tmi-technology.com"}}
+]
+</script>
+</head>
+<body>
+
+<header class="article-header">
+  <div class="article-header-inner">
+    <a href="stratum.html" class="ah-brand"><img src="logo.svg" alt="TMI"/> TMI</a>
+    <nav class="ah-nav">
+      <a href="news.html">Field Notes</a>
+      <a href="systems.html">Systems</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a href="stratum.html#cta" class="ah-cta">Book a Call &rarr;</a>
+  </div>
+</header>
+
+<section class="article-hero">
+  <div class="container-article">
+    <a href="news.html" class="article-back">← Back to Field Notes</a>
+    <div class="article-meta"><span class="cat">The Trades</span><span>6 min read</span><span>May 6, 2026</span></div>
+    <h1 class="article-title">Most trades companies price from memory. <em>That's why margins vary.</em></h1>
+    <p class="article-deck">Job costs vary not because the work varies - but because estimating is inconsistent. AI pricing pulls from actual historical data, and the difference shows up in margin.</p>
+  </div>
+</section>
+
+<div class="container-article">
+  <div class="article-cover" style="background-image:url('https://images.pexels.com/photos/3862130/pexels-photo-3862130.jpeg?auto=compress&cs=tinysrgb&w=900&q=80');background-position:center;"></div>
+  <div class="article-body reveal">
+
+    <p>If you pull the last 50 similar jobs out of your accounting system and compare the estimated margin to the actual margin, you'll find a range. Maybe the job type is a panel upgrade - you've done 40 of them this year. Some came in at 32% gross margin. Some came in at 18%. A few were flat. The work didn't vary that much. The materials didn't swing that wildly. What varied was the estimate.</p>
+
+    <p>This is what gut-feel estimating produces at scale: not consistent underbidding or overbidding, but margin variance. Some jobs are priced well. Some are left money on the table. Some are underpriced relative to what they actually cost. The pattern isn't predictable, which means the problem doesn't announce itself - it averages out into a margin number that seems acceptable until you look at the underlying distribution.</p>
+
+    <h2>How the same job gets priced differently</h2>
+
+    <p>Estimating inconsistency has several causes, and most of them are invisible when you're inside the operation. The same estimator prices differently on different days - a morning estimate after a smooth prior week will often be more aggressive than a Friday estimate after a job that ran over. A second estimator on your team may have a different mental model of how long certain tasks take, developed from different prior jobs, and your estimates will diverge systematically without either of you knowing it. Seasonal pressure shifts estimates - when the pipeline is full, estimators get selective and sometimes careless; when the pipeline is thin, they get aggressive and sometimes undercut margins.</p>
+
+    <p>None of these are character flaws. They're the natural outputs of a process that relies on human recall rather than data. The human recall is inevitably influenced by recency, mood, context, and the last job that went sideways. Data is not.</p>
+
+    <blockquote>"Profit is made or lost in the estimate, before a single hour is worked on the job."</blockquote>
+
+    <h2>What historical job data actually reveals</h2>
+
+    <p>When you systematically track actual hours against estimated hours by job type, patterns emerge quickly. Certain job types consistently run over estimate - not because the estimators are bad, but because the estimate was built on an assumption about crew efficiency that doesn't match reality on that job type. Material overruns cluster around specific categories - certain materials are consistently over-ordered due to waste assumptions that were set years ago and never updated. Change order frequency is predictable by job type: some work categories almost always generate change orders, which should be priced into the estimate structure as a risk premium.</p>
+
+    <p>This data exists in most operations - it's sitting in the accounting system, the job management system, and the timesheet records. What's usually missing is the discipline to pull it together and route it back into the estimating process. When it's routed back, the estimate for a panel upgrade isn't "what I remember it taking" - it's "the average actual hours on the last 40 panel upgrades, adjusted for this specific site complexity factor." That estimate is both more accurate and more consistent across estimators.</p>
+
+    <h2>Knowing your true cost floor</h2>
+
+    <p>The competitive benefit of consistent, data-driven estimating isn't just margin protection - it's knowing with confidence what your floor is. When a customer pushes back on a price, a gut-feel estimator faces an uncomfortable question: is there genuinely room to move, or are they giving up margin they can't afford? A data-driven estimator knows their floor. They know what the job actually costs to execute at their labor cost and current material prices. They can make a deliberate decision to take a lower margin on a strategic job, or hold the line on a commodity job, rather than guessing.</p>
+
+    <p>That knowledge also changes how you respond to competitive pressure. If your competitor is consistently winning jobs at prices that seem below what the work should cost, you have two hypotheses: they're operating more efficiently than you, or they're not making money on those jobs. Historical data on your own cost structure lets you evaluate that question rather than assuming the answer.</p>
+
+    <div class="callout"><strong>The data that should feed every estimate:</strong> Actual labor hours from the last 20+ comparable jobs (filtered by crew size, site type, and complexity). Material actuals vs takeoff quantities for this job type - what the average overage or underage has been. Change order frequency and average dollar value for this job category - which should inform a risk reserve in the estimate. Seasonal labor cost adjustments - if you're estimating summer work in winter, current cost assumptions may be stale. Don't estimate from memory when you have a hundred completed jobs that tell you what it actually costs.</div>
+
+    <div class="article-end">
+      <div class="byline">TMI Field Notes · The Trades</div>
+      <a href="news.html" class="back-link">← All stories</a>
+    </div>
+  </div>
+</div>
+
+<div class="read-next">
+  <div class="container">
+    <h3>Read next</h3>
+    <div class="read-next-grid">
+      <a class="next-card" href="article-job-costing.html">
+        <div class="photo" style="background-image:url('https://images.pexels.com/photos/247763/pexels-photo-247763.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"></div>
+        <div class="meta"><span class="cat">Operations</span><span>6 min</span></div>
+        <h4>You won't know the job lost money until you invoice it.</h4>
+        <span class="read">Read <span>→</span></span>
+      </a>
+      <a class="next-card" href="article-revenue-leakage.html">
+        <div class="photo" style="background-image:url('https://images.pexels.com/photos/3862130/pexels-photo-3862130.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"></div>
+        <div class="meta"><span class="cat">Operations</span><span>6 min</span></div>
+        <h4>The revenue you never invoiced is the hardest loss to see.</h4>
+        <span class="read">Read <span>→</span></span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a href="stratum.html" class="brand" style="color:var(--ink);"><img src="logo.svg" alt="TMI" style="height:28px;width:auto;flex:none;"/><span>TMI</span></a>
+        <div class="foot-tagline">Powering the companies that keep the world moving.</div>
+      </div>
+      <div class="foot-col">
+        <h5>Pages</h5>
+        <a href="stratum.html">Home</a>
+        <a href="systems.html">Systems</a>
+        <a href="news.html">News &amp; media</a>
+        <a href="stratum.html#cta">Contact</a>
+      </div>
+      <div class="foot-col">
+        <h5>Open web</h5>
+        <a href="/robots.txt">robots.txt</a>
+        <a href="/llms.txt">llms.txt</a>
+        <a href="/sitemap.xml">sitemap.xml</a>
+      </div>
+    </div>
+    <div class="foot-bottom"><span>&#x00A9; 2026 TMI.</span><span>Built for the field</span></div>
+  </div>
+</footer>
+
+<script>
+  const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in');});},{threshold:0.08});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

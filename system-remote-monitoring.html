@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
+<meta name="description" content="Live sensor data from equipment, sites, and infrastructure. Anomaly detection and AI-powered visual monitoring that alerts before failures compound."/>
+<meta property="og:title" content="Remote Monitoring &amp; IoT Integration | TMI"/>
+<meta property="og:description" content="Sensor feeds, camera networks, access logs, and equipment telemetry from every remote location — consolidated, monitored, and acted on automatically when thresholds break."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://tmi-technology.com/system-remote-monitoring.html"/>
+<link rel="canonical" href="https://tmi-technology.com/system-remote-monitoring.html"/>
+<title>Remote Monitoring &amp; IoT Integration | TMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #ffffff; --bg-alt: #f5f5f7; --bg-deep: #0d0e1a; --bg-dark: #0a0b14;
+    --ink: #1a1a1a; --ink-2: #505060; --muted: #86868b;
+    --line: rgba(0,0,0,0.07); --line-strong: rgba(0,0,0,0.12);
+    --accent: #1a1a1a; --accent-light: rgba(0,0,0,0.05);
+    --serif: "Barlow", system-ui, sans-serif;
+    --sans: "Neue Haas Grotesk Display", "Neue Haas Grotesk", system-ui, -apple-system, sans-serif;
+    --chart: #E4FF97; --chart-dark: #D0FF6A;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.55; overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  ::selection { background: var(--accent); color: #fff; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+  h1, h2, h3, h4 { margin: 0; }
+  h1 { font-family: var(--serif); font-size: clamp(44px, 6vw, 80px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.05; }
+  h2 { font-family: var(--serif); font-size: clamp(30px, 3.5vw, 48px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; }
+  h3 { font-family: var(--sans); font-size: clamp(17px, 1.6vw, 20px); font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; }
+  p { margin: 0; }
+  em { font-style: italic; }
+  .eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 8px; }
+  .eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: #7C6CF2; flex: none; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; border-radius: 999px; font-size: 14px; font-weight: 500; font-family: var(--sans); transition: all 0.2s; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+  .btn-primary { background: var(--chart); color: #0a0b14; }
+  .btn-primary:hover { background: var(--chart-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(200,255,0,0.22); }
+  .btn-white-outline { background: transparent; color: #fff; border-color: rgba(255,255,255,0.35); }
+  .btn-white-outline:hover { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); }
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-d1 { transition-delay: 0.1s; } .reveal-d2 { transition-delay: 0.2s; }
+
+  .nav-btn { position: fixed; top: 20px; left: 20px; z-index: 201; width: 44px; height: 44px; background: rgba(255,255,255,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; padding: 0; transition: background 0.2s; }
+  .nav-btn span { display: block; width: 18px; height: 1.5px; background: var(--ink); border-radius: 2px; transition: transform 0.25s, opacity 0.25s; }
+  .nav-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .nav-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+  .side-overlay { position: fixed; inset: 0; z-index: 198; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: auto; }
+  .side-nav { position: fixed; left: 0; top: 0; bottom: 0; z-index: 200; width: 280px; background: #fff; border-right: 1px solid var(--line); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 28px 0 40px; overflow-y: auto; }
+  .side-nav.open { transform: translateX(0); box-shadow: 8px 0 48px rgba(0,0,0,0.15); }
+  .side-nav-top { display: flex; align-items: center; padding: 0 24px 28px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+  .side-nav-brand { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink); text-decoration: none; }
+  .side-nav-brand img { height: 28px; }
+  .side-nav-links { display: flex; flex-direction: column; padding: 0 12px; flex: 1; }
+  .side-nav-section { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 20px 12px 6px; }
+  .side-nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-2); padding: 10px 12px; border-radius: 8px; transition: color 0.15s, background 0.15s; display: block; }
+  .side-nav-links a:hover { color: var(--ink); background: var(--bg-alt); }
+  .side-nav-cta { padding: 24px 24px 0; border-top: 1px solid var(--line); margin-top: 16px; }
+  .side-nav-cta .btn { width: 100%; justify-content: center; }
+
+  .hero { position: relative; height: 90vh; min-height: 560px; display: flex; align-items: flex-end; overflow: hidden; }
+  .hero-photo { position: absolute; inset: 0; background-image: url('https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1600'); background-size: cover; background-position: center; }
+  .hero-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,11,20,0.35) 0%, rgba(10,11,20,0.88) 100%); }
+  .hero-inner { position: relative; z-index: 2; padding: 0 40px 80px; max-width: 1280px; margin: 0 auto; width: 100%; }
+  .hero-inner .eyebrow { color: rgba(255,255,255,0.55); margin-bottom: 20px; }
+  .hero-inner .eyebrow .dot { background: rgba(255,255,255,0.4); }
+  .hero-inner h1 { color: #fff; max-width: 18ch; margin-bottom: 20px; }
+  .hero-inner h1 em { color: rgba(255,255,255,0.65); font-style: italic; }
+  .hero-inner p { font-size: clamp(16px, 1.3vw, 19px); color: rgba(255,255,255,0.7); max-width: 52ch; margin-bottom: 36px; line-height: 1.6; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .what-section { padding: 100px 0; background: var(--bg); }
+  .what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .what-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  .what-desc { font-size: clamp(16px, 1.3vw, 19px); color: var(--ink-2); line-height: 1.7; }
+  .what-desc p + p { margin-top: 18px; }
+  .stat-boxes { display: flex; flex-direction: column; gap: 2px; }
+  .stat-box { background: var(--bg-alt); border: 1px solid var(--line); border-radius: 16px; padding: 28px 32px; }
+  .stat-val { font-family: var(--serif); font-size: clamp(28px, 3vw, 40px); color: var(--ink); letter-spacing: -0.03em; line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+
+  .how-section { background: var(--bg-deep); padding: 100px 0; }
+  .how-head { margin-bottom: 64px; }
+  .how-head .eyebrow { color: rgba(255,255,255,0.45); }
+  .how-head .eyebrow .dot { background: rgba(255,255,255,0.3); }
+  .how-head h2 { color: #fff; margin-top: 16px; }
+  .steps-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid rgba(255,255,255,0.08); border-left: 1px solid rgba(255,255,255,0.08); }
+  .step { border-right: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 44px 36px; }
+  .step-num { font-size: 11px; letter-spacing: 0.2em; color: rgba(255,255,255,0.3); margin-bottom: 20px; }
+  .step h3 { color: #fff; margin-bottom: 14px; }
+  .step p { font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.65; }
+
+  .systems-section { padding: 100px 0; background: var(--bg); }
+  .sec-head { margin-bottom: 56px; }
+  .sec-head .eyebrow { margin-bottom: 14px; }
+  .sec-head h2 { margin-top: 12px; }
+  .sec-sub { font-size: clamp(16px, 1.2vw, 18px); color: var(--ink-2); margin-top: 14px; max-width: 54ch; line-height: 1.6; }
+  .systems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--line-strong); border-left: 1px solid var(--line-strong); }
+  .sys-card { border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); padding: 36px 32px 44px; background: var(--bg); transition: background 0.2s; display: flex; flex-direction: column; }
+  .sys-card:hover { background: #fafafa; }
+  .sys-num { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 20px; }
+  .sys-card h3 { margin-bottom: 12px; }
+  .sys-card p { font-size: 14px; line-height: 1.65; color: var(--ink-2); flex: 1; }
+  .sys-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; }
+  .sys-tag { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: 999px; }
+
+  .who-section { background: var(--bg-alt); padding: 100px 0; }
+  .who-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
+  .who-card { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 36px 32px; }
+  .who-industry { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .who-card h3 { margin-bottom: 14px; font-size: clamp(17px, 1.5vw, 20px); }
+  .who-card p { font-size: 15px; color: var(--ink-2); line-height: 1.65; }
+
+  .ba-section { background: var(--bg-dark); padding: 100px 0; }
+  .ba-head { margin-bottom: 64px; }
+  .ba-head .eyebrow { color: rgba(255,255,255,0.4); }
+  .ba-head .eyebrow .dot { background: rgba(255,255,255,0.3); }
+  .ba-head h2 { color: #fff; margin-top: 16px; }
+  .ba-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch; }
+  .ba-side { padding: 48px 44px; border-radius: 20px; }
+  .ba-before { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); }
+  .ba-after { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); }
+  .ba-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 20px; }
+  .ba-before .ba-label { color: var(--muted); }
+  .ba-after .ba-label { color: #22c55e; }
+  .ba-side h3 { font-weight: 600; font-size: clamp(18px, 1.8vw, 22px); color: #fff; margin-bottom: 28px; }
+  .ba-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+  .ba-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; line-height: 1.45; }
+  .ba-before .ba-list li { color: rgba(255,255,255,0.5); }
+  .ba-after .ba-list li { color: rgba(255,255,255,0.85); }
+  .icon-x { width: 20px; height: 20px; border-radius: 50%; background: rgba(239,68,68,0.15); color: #ef4444; display: flex; align-items: center; justify-content: center; flex: none; font-size: 11px; margin-top: 1px; }
+  .icon-check { width: 20px; height: 20px; border-radius: 50%; background: rgba(34,197,94,0.15); color: #22c55e; display: flex; align-items: center; justify-content: center; flex: none; font-size: 11px; margin-top: 1px; }
+  .ba-divider { display: flex; align-items: center; justify-content: center; padding: 0 32px; }
+  .ba-vs { width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); }
+
+  .related-section { padding: 100px 0; background: var(--bg); }
+  .related-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
+  .related-card { border: 1px solid var(--line-strong); border-radius: 20px; padding: 36px 32px; transition: border-color 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+  .related-card:hover { border-color: var(--ink); box-shadow: 0 8px 32px rgba(0,0,0,0.06); }
+  .related-tag { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .related-card h3 { margin-bottom: 12px; }
+  .related-card p { font-size: 14px; color: var(--ink-2); line-height: 1.65; flex: 1; }
+  .related-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--ink); margin-top: 24px; }
+
+  .cta-strip { background: var(--bg-deep); padding: 80px 0; }
+  .cta-strip-inner { display: flex; align-items: center; justify-content: space-between; gap: 64px; }
+  .cta-strip h2 { color: #fff; max-width: 22ch; }
+  .cta-strip h2 em { color: rgba(255,255,255,0.6); }
+  .cta-strip p { color: rgba(255,255,255,0.6); font-size: 16px; line-height: 1.6; max-width: 44ch; margin-top: 14px; }
+
+  footer { background: var(--bg-alt); border-top: 1px solid var(--line); padding: 72px 0 36px; }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 80px; margin-bottom: 56px; }
+  .footer-brand { font-family: var(--serif); font-size: 22px; color: var(--ink); display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .footer-brand img { height: 28px; width: auto; }
+  .footer-desc { font-size: 14px; color: var(--ink-2); line-height: 1.65; max-width: 34ch; margin-bottom: 20px; }
+  .footer-contact a { font-size: 14px; color: var(--ink-2); }
+  .footer-right { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; }
+  .footer-col h5 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 14px; }
+  .footer-col a { display: block; font-size: 14px; color: var(--ink-2); padding: 3px 0; transition: color 0.15s; }
+  .footer-col a:hover { color: var(--ink); }
+  .footer-bottom { padding-top: 28px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+
+  @media (max-width: 1024px) {
+    .what-grid { grid-template-columns: 1fr; gap: 48px; }
+    .systems-grid { grid-template-columns: repeat(2, 1fr); }
+    .who-grid { grid-template-columns: repeat(2, 1fr); }
+    .steps-strip { grid-template-columns: 1fr; }
+    .ba-grid { grid-template-columns: 1fr; }
+    .ba-divider { padding: 16px 0; }
+    .ba-side { padding: 32px 24px; }
+    .related-grid { grid-template-columns: repeat(2, 1fr); }
+    .cta-strip-inner { flex-direction: column; gap: 32px; align-items: flex-start; }
+    .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+    .footer-right { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    .container { padding: 0 20px; }
+    .hero-inner { padding: 0 20px 60px; }
+    .systems-grid { grid-template-columns: 1fr; }
+    .who-grid { grid-template-columns: 1fr; }
+    .related-grid { grid-template-columns: 1fr; }
+    .footer-right { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<button class="nav-btn" id="nav-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+<div class="side-overlay" id="side-overlay"></div>
+<div class="side-nav" id="side-nav" aria-hidden="true">
+  <div class="side-nav-top"><a class="side-nav-brand" href="stratum.html"><img src="logo.svg" alt="TMI"/> TMI</a></div>
+  <div class="side-nav-links">
+    <div class="side-nav-section">Navigation</div>
+    <a href="stratum.html">Home</a><a href="systems.html">Systems</a><a href="news.html">Field Notes</a><a href="about.html">About</a><a href="partners.html">Partners</a>
+    <div class="side-nav-section">Industries</div>
+    <a href="trades.html">Trades &amp; Field Service</a><a href="construction.html">Construction</a><a href="oil-gas.html">Oil, Gas &amp; Energy</a><a href="manufacturing.html">Manufacturing</a><a href="fleet.html">Fleet &amp; Logistics</a><a href="home-service.html">Home Service</a>
+    <div class="side-nav-section">Systems</div>
+    <a href="system-dispatch.html">AI Dispatch</a><a href="system-predictive-maintenance.html">Predictive Maintenance</a><a href="system-compliance.html">Compliance</a><a href="system-invoicing.html">Invoice &amp; Payment</a><a href="system-estimating.html">Job Costing</a><a href="system-revenue-leakage.html">Revenue Recovery</a><a href="system-llm.html">Operational LLM</a><a href="system-ops-twin.html">Operations Twin</a><a href="systems.html">All Systems &rarr;</a>
+  </div>
+  <div class="side-nav-cta"><a href="stratum.html#cta" class="btn btn-primary">Book a Strategy Call &#8594;</a></div>
+</div>
+
+<section class="hero">
+  <div class="hero-photo"></div>
+  <div class="hero-inner">
+    <div class="eyebrow reveal"><span class="dot"></span>System</div>
+    <h1 class="reveal">Every site. Every sensor. <em>Live.</em></h1>
+    <p class="reveal">Sensor feeds, camera networks, access logs, and equipment telemetry from every remote location — consolidated, monitored, and acted on automatically when thresholds break.</p>
+    <div class="hero-actions reveal">
+      <a href="stratum.html#cta" class="btn btn-primary">Book a Strategy Call &#8594;</a>
+      <a href="systems.html" class="btn btn-white-outline">View All Systems</a>
+    </div>
+  </div>
+</section>
+
+<section class="what-section">
+  <div class="container">
+    <div class="what-grid">
+      <div>
+        <div class="what-label reveal">What it is</div>
+        <div class="what-desc reveal">
+          <p>Remote sites don't manage themselves. But most operations treat them as if they do — checking on a schedule, discovering anomalies after damage is done, reviewing camera footage only after an incident has already been reported. The gap between something going wrong and someone knowing about it is where problems compound into incidents.</p>
+          <p>TMI's Remote Monitoring system closes that gap permanently. Sensor feeds, equipment telemetry, access logs, and camera networks consolidated into a single operational view. Anomalies detected and ranked by severity the moment they deviate from normal — not flagged by a scheduled check-in.</p>
+          <p>Three layers working simultaneously: Site monitoring for infrastructure and access. Anomaly detection across the full operational data stream. AI-powered visual monitoring on the camera network — not passive recording, but active detection. When thresholds break, field response is dispatched automatically. The problem is handled before the phone rings.</p>
+        </div>
+      </div>
+      <div class="stat-boxes">
+        <div class="stat-box reveal">
+          <div class="stat-val">Real-time</div>
+          <div class="stat-label">Sensor data across all sites</div>
+        </div>
+        <div class="stat-box reveal reveal-d1">
+          <div class="stat-val">Auto</div>
+          <div class="stat-label">Dispatch triggered on threshold breach</div>
+        </div>
+        <div class="stat-box reveal reveal-d2">
+          <div class="stat-val">24/7</div>
+          <div class="stat-label">Visual monitoring, no operator required</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how-section">
+  <div class="container">
+    <div class="how-head">
+      <div class="eyebrow reveal"><span class="dot"></span>How it works</div>
+      <h2 class="reveal">Detect, rank, and respond — before damage compounds.</h2>
+    </div>
+    <div class="steps-strip">
+      <div class="step reveal">
+        <div class="step-num">Step 01</div>
+        <h3>Consolidate all site data into one view</h3>
+        <p>Every sensor feed, camera stream, access log, and equipment health signal from every location integrated into a single operational dashboard. Remote substations, well pads, manufacturing floors, mine sites — all visible from one place, updated in real time. No switching between systems. No blind spots between check-ins.</p>
+      </div>
+      <div class="step reveal reveal-d1">
+        <div class="step-num">Step 02</div>
+        <h3>AI detects anomalies and ranks them by severity</h3>
+        <p>The anomaly detection layer watches the full data stream simultaneously — pressure readings, production rates, crew movement, cost burn, equipment health, and safety events. When something deviates from normal, the system flags it, ranks it by consequence, and routes it to the right person. Not a raw alert — a prioritized action item with context.</p>
+      </div>
+      <div class="step reveal reveal-d2">
+        <div class="step-num">Step 03</div>
+        <h3>Visual AI monitors cameras actively, not passively</h3>
+        <p>The camera network isn't just recording. AI monitors every feed for safety violations, unauthorized access, equipment left running, and operational anomalies. When something is detected, an alert fires immediately and the event is documented automatically. Incidents aren't discovered by reviewing footage after the fact — they're caught while they're still preventable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="systems-section">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow reveal"><span class="dot"></span>Systems included</div>
+      <h2 class="reveal">Three monitoring layers. One integrated picture.</h2>
+      <p class="sec-sub reveal">Infrastructure, data streams, and visual feeds — each monitored by a dedicated system, working together to close every blind spot.</p>
+    </div>
+    <div class="systems-grid">
+      <div class="sys-card reveal">
+        <div class="sys-num">30</div>
+        <h3>Remote Site and Substation Monitoring</h3>
+        <p>Sensor feeds, camera status, access logs, and equipment health from every remote location consolidated into a single view. Alerts triggered by deviation from normal. Field response dispatched automatically when thresholds are breached.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Utilities</span><span class="sys-tag">Mining</span><span class="sys-tag">Pipeline</span></div>
+      </div>
+      <div class="sys-card reveal reveal-d1">
+        <div class="sys-num">AI-05</div>
+        <h3>Anomaly Detection Network</h3>
+        <p>A real-time monitoring system across your full operational data stream. Production rates, pressure readings, crew movement, cost burn, and safety events watched simultaneously. Anomalies ranked by severity and routed to the right person before they compound into incidents.</p>
+        <div class="sys-tags"><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Utilities</span><span class="sys-tag">Manufacturing</span><span class="sys-tag">Mining</span></div>
+      </div>
+      <div class="sys-card reveal reveal-d2">
+        <div class="sys-num">AI-13</div>
+        <h3>Site Intelligence and Visual Monitoring</h3>
+        <p>An AI-powered camera network across job sites and facilities that detects safety violations, unauthorized access, equipment left running, and operational anomalies in real time. Not passive recording. Active detection with immediate alerts and automatic incident documentation.</p>
+        <div class="sys-tags"><span class="sys-tag">Construction</span><span class="sys-tag">Oil &amp; Gas</span><span class="sys-tag">Mining</span><span class="sys-tag">Manufacturing</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="who-section">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow reveal"><span class="dot"></span>Who benefits</div>
+      <h2 class="reveal">Built for operations where distance creates blind spots.</h2>
+    </div>
+    <div class="who-grid">
+      <div class="who-card reveal">
+        <div class="who-industry">Oil &amp; Gas</div>
+        <h3>Upstream operators and pipeline companies</h3>
+        <p>Well pads, compressor stations, and pipeline facilities scattered across remote geography. Each site a potential failure point. Continuous sensor monitoring with auto-dispatch when readings deviate — before a pump-off condition becomes a production loss or a pressure event becomes a safety incident.</p>
+      </div>
+      <div class="who-card reveal reveal-d1">
+        <div class="who-industry">Utilities &amp; Mining</div>
+        <h3>Substation and remote facility operators</h3>
+        <p>Substations and remote mining facilities can't be staffed around the clock at every location. AI monitoring provides 24/7 coverage across the network — anomalies flagged and ranked the moment they emerge, field response dispatched before the situation compounds into an outage or an incident report.</p>
+      </div>
+      <div class="who-card reveal reveal-d2">
+        <div class="who-industry">Manufacturing</div>
+        <h3>Multi-facility production operations</h3>
+        <p>Production floors where equipment anomalies can halt entire lines. Visual AI monitors for safety violations, unauthorized zone access, and process deviations in real time. Every event documented automatically — not reconstructed from memory after the fact when someone files a report or an auditor asks questions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ba-section">
+  <div class="container">
+    <div class="ba-head">
+      <div class="eyebrow reveal"><span class="dot"></span>The shift</div>
+      <h2 class="reveal">From scheduled check-ins to continuous intelligence.</h2>
+    </div>
+    <div class="ba-grid">
+      <div class="ba-side ba-before reveal">
+        <div class="ba-label">Before TMI</div>
+        <h3>Checked on a schedule. Problems found after damage.</h3>
+        <ul class="ba-list">
+          <li><span class="icon-x">&#10005;</span>Remote sites visited or checked on a schedule — not continuously monitored</li>
+          <li><span class="icon-x">&#10005;</span>Anomalies discovered after equipment fails or an incident is reported</li>
+          <li><span class="icon-x">&#10005;</span>Camera footage reviewed after incidents — passive recording, reactive response</li>
+          <li><span class="icon-x">&#10005;</span>Sensor data siloed by system — no unified operational picture</li>
+          <li><span class="icon-x">&#10005;</span>Field response dispatched by phone, delayed, and without context</li>
+        </ul>
+      </div>
+      <div class="ba-divider reveal">
+        <div class="ba-vs">VS</div>
+      </div>
+      <div class="ba-side ba-after reveal">
+        <div class="ba-label">With TMI</div>
+        <h3>Every site monitored. Every anomaly caught early.</h3>
+        <ul class="ba-list">
+          <li><span class="icon-check">&#10003;</span>Continuous monitoring across all sites — no gap between check-ins</li>
+          <li><span class="icon-check">&#10003;</span>Anomalies flagged and ranked by severity the moment they emerge</li>
+          <li><span class="icon-check">&#10003;</span>AI camera network detects issues in real time — not after the footage is reviewed</li>
+          <li><span class="icon-check">&#10003;</span>All sensor streams unified in a single operational view</li>
+          <li><span class="icon-check">&#10003;</span>Field response dispatched automatically with the right context attached</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="related-section">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow reveal"><span class="dot"></span>Related systems</div>
+      <h2 class="reveal">Often deployed alongside remote monitoring.</h2>
+    </div>
+    <div class="related-grid">
+      <a href="system-predictive-maintenance.html" class="related-card reveal">
+        <div class="related-tag">System</div>
+        <h3>Predictive Maintenance</h3>
+        <p>Remote monitoring feeds the maintenance prediction model. When sensor data shows a deviation, the predictive failure engine determines whether it's a leading indicator of equipment breakdown — and schedules maintenance before the failure happens.</p>
+        <span class="related-link">View system &#8594;</span>
+      </a>
+      <a href="system-compliance.html" class="related-card reveal reveal-d1">
+        <div class="related-tag">System</div>
+        <h3>Compliance Management</h3>
+        <p>Sensor data, incident events, and visual monitoring logs form the compliance record. When a reportable event occurs, the documentation is already built from the data the monitoring system captured — no reconstruction from memory required.</p>
+        <span class="related-link">View system &#8594;</span>
+      </a>
+      <a href="system-ops-twin.html" class="related-card reveal reveal-d2">
+        <div class="related-tag">System</div>
+        <h3>Digital Operations Twin</h3>
+        <p>The live sensor and telemetry feed from remote monitoring populates the operations twin — a real-time digital model of the operation. Run scenario analysis against live site data before committing field resources.</p>
+        <span class="related-link">View system &#8594;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="cta-strip">
+  <div class="container cta-strip-inner">
+    <div>
+      <h2 class="reveal">Stop finding problems <em>after they've already happened.</em></h2>
+      <p class="reveal">Continuous monitoring, ranked anomaly detection, and AI-powered visual coverage — the infrastructure that catches incidents before they become reports. Let's map it to your sites.</p>
+    </div>
+    <a href="stratum.html#cta" class="btn btn-primary reveal">Book a Strategy Call &#8594;</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><img src="logo.svg" alt="TMI"/> TMI</div>
+        <p class="footer-desc">AI infrastructure for the trades. We digitize your operation so you run smarter, leaner, and ahead.</p>
+        <div class="footer-contact"><a href="mailto:hello@tmi-technology.com">hello@tmi-technology.com</a></div>
+      </div>
+      <div class="footer-right">
+        <div class="footer-col"><h5>Company</h5><a href="stratum.html">Home</a><a href="about.html">About</a><a href="news.html">Field Notes</a><a href="partners.html">Partners</a><a href="stratum.html#cta">Contact</a></div>
+        <div class="footer-col"><h5>Industries</h5><a href="trades.html">Trades &amp; Field Service</a><a href="construction.html">Construction</a><a href="oil-gas.html">Oil, Gas &amp; Energy</a><a href="manufacturing.html">Manufacturing</a><a href="fleet.html">Fleet &amp; Logistics</a><a href="home-service.html">Home Service</a></div>
+        <div class="footer-col"><h5>Systems</h5><a href="system-dispatch.html">AI Dispatch &amp; Scheduling</a><a href="system-predictive-maintenance.html">Predictive Maintenance</a><a href="system-compliance.html">Compliance Management</a><a href="system-invoicing.html">Invoice &amp; Payment</a><a href="system-estimating.html">Estimating &amp; Job Costing</a><a href="system-revenue-leakage.html">Revenue Recovery</a><a href="system-llm.html">Operational LLM</a><a href="system-ops-twin.html">Digital Operations Twin</a><a href="systems.html">View all 25 systems &rarr;</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom"><span>&copy; 2025 TMI Technology. All rights reserved.</span><span>Built for the companies that power the world.</span></div>
+  </div>
+</footer>
+
+<script>
+const io = new IntersectionObserver((e) => { e.forEach(el => { if (el.isIntersecting) { el.target.classList.add('visible'); io.unobserve(el.target); } }); }, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+const navBtn = document.getElementById('nav-btn');
+const sideNav = document.getElementById('side-nav');
+const sideOverlay = document.getElementById('side-overlay');
+function openSideNav() { sideNav.classList.add('open'); sideOverlay.classList.add('open'); navBtn.classList.add('open'); sideNav.setAttribute('aria-hidden','false'); }
+function closeSideNav() { sideNav.classList.remove('open'); sideOverlay.classList.remove('open'); navBtn.classList.remove('open'); sideNav.setAttribute('aria-hidden','true'); }
+navBtn.addEventListener('click', () => sideNav.classList.contains('open') ? closeSideNav() : openSideNav());
+sideOverlay.addEventListener('click', closeSideNav);
+</script>
+</body>
+</html>

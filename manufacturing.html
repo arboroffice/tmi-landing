@@ -1,0 +1,421 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<meta name="description" content="TMI builds AI systems for manufacturing — production floor intelligence, maintenance automation, inventory tracking, and operational reporting."/>
+<meta property="og:title" content="Manufacturing | TMI"/>
+<meta property="og:description" content="AI infrastructure for production floors, machine shops, and industrial operations. Built around your workflows."/>
+<meta property="og:type" content="website"/>
+<link rel="canonical" href="https://tmi-technology.com/manufacturing.html"/>
+<title>Manufacturing | TMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #ffffff; --bg-alt: #f5f5f7; --bg-deep: #0d0e1a; --bg-dark: #0a0b14;
+    --ink: #1a1a1a; --ink-2: #505060; --muted: #86868b;
+    --line: rgba(0,0,0,0.07); --line-strong: rgba(0,0,0,0.12);
+    --accent: #1a1a1a; --accent-dark: #000;
+    --accent-light: rgba(0,0,0,0.05); --accent-glow: rgba(0,0,0,0.09);
+    --serif: "Barlow", system-ui, sans-serif;
+    --sans: "Neue Haas Grotesk Display", "Neue Haas Grotesk", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --chart: #E4FF97; --chart-dark: #D0FF6A;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.55; overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  ::selection { background: var(--accent); color: #fff; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+  h1, h2, h3, h4 { margin: 0; }
+  h1 { font-family: var(--serif); font-size: clamp(44px, 6vw, 80px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.05; }
+  h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; }
+  h3 { font-family: var(--sans); font-size: clamp(18px, 2vw, 22px); font-weight: 600; line-height: 1.25; }
+  h4 { font-size: 15px; font-weight: 600; }
+  p { margin: 0; }
+  .eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 8px; }
+  .eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: #7C6CF2; flex: none; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 24px; border-radius: 999px; font-size: 14px; font-weight: 500; font-family: var(--sans); transition: all 0.2s; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+  .btn-primary { background: var(--chart); color: #0a0b14; }
+  .btn-primary:hover { background: var(--chart-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(200,255,0,0.22); }
+  .btn-white-outline { background: transparent; color: #fff; border-color: rgba(255,255,255,0.35); }
+  .btn-white-outline:hover { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); }
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-d1 { transition-delay: 0.1s; } .reveal-d2 { transition-delay: 0.2s; } .reveal-d3 { transition-delay: 0.3s; }
+
+  .topnav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 68px; background: rgba(255,255,255,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--line); display: flex; align-items: center; }
+  .topnav-inner { max-width: 1280px; margin: 0 auto; padding: 0 40px; width: 100%; display: flex; align-items: center; gap: 40px; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink); }
+  .nav-brand img { height: 32px; width: auto; }
+  .nav-links { display: flex; align-items: center; gap: 4px; flex: 1; justify-content: center; }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-2); padding: 8px 16px; border-radius: 8px; transition: color 0.2s, background 0.2s; }
+  .nav-links a:hover { color: var(--ink); background: var(--bg-alt); }
+  .nav-right { flex: none; }
+  @media (max-width: 768px) { .nav-links { display: none; } .topnav-inner { padding: 0 20px; } .container { padding: 0 20px; } }
+
+  .hero { position: relative; height: 90vh; min-height: 560px; display: flex; align-items: flex-end; overflow: hidden; }
+  .hero-photo { position: absolute; inset: 0; background-image: url('https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=1600&q=80'); background-size: cover; background-position: center; }
+  .hero-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,11,20,0.35) 0%, rgba(10,11,20,0.88) 100%); }
+  .hero-inner { position: relative; z-index: 2; padding: 0 40px 80px; max-width: 1280px; margin: 0 auto; width: 100%; }
+  .hero-inner .eyebrow { color: rgba(255,255,255,0.55); margin-bottom: 20px; }
+  .hero-inner .eyebrow .dot { background: rgba(255,255,255,0.4); }
+  .hero-inner h1 { color: #fff; max-width: 18ch; margin-bottom: 20px; }
+  .hero-inner h1 em { color: rgba(255,255,255,0.65); font-style: italic; }
+  .hero-inner p { font-size: clamp(16px, 1.3vw, 19px); color: rgba(255,255,255,0.7); max-width: 52ch; margin-bottom: 36px; line-height: 1.6; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .challenges { padding: 100px 0; background: var(--bg); }
+  .sec-head { margin-bottom: 56px; }
+  .sec-head .eyebrow { margin-bottom: 14px; }
+  .sec-sub { font-size: clamp(16px, 1.3vw, 19px); color: var(--ink-2); margin-top: 14px; max-width: 54ch; line-height: 1.6; }
+  .challenge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .challenge-card { background: var(--bg-alt); border: 1px solid var(--line); border-radius: 20px; padding: 36px 32px; }
+  .challenge-num { font-family: var(--sans); font-size: 11px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
+  .challenge-card h3 { margin-bottom: 12px; color: var(--ink); font-size: clamp(17px, 1.6vw, 20px); }
+  .challenge-card p { font-size: 15px; color: var(--ink-2); line-height: 1.65; }
+  @media (max-width: 768px) { .challenge-grid { grid-template-columns: 1fr; } }
+
+  .solutions { padding: 100px 0; background: var(--bg-alt); }
+  .sol-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
+  .sol-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 28px; transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s; }
+  .sol-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 32px var(--accent-light); }
+  .sol-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-light); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .sol-icon svg { width: 20px; height: 20px; color: var(--accent); }
+  .sol-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .sol-card p { font-size: 14px; color: var(--ink-2); line-height: 1.6; }
+  @media (max-width: 768px) { .sol-grid { grid-template-columns: 1fr; } }
+
+  .stats-bar { background: var(--accent); color: #fff; padding: 64px 0; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-left: 1px solid rgba(255,255,255,0.15); }
+  .stat-item { padding: 0 40px; border-right: 1px solid rgba(255,255,255,0.15); text-align: center; }
+  .stat-val { font-family: var(--serif); font-size: clamp(36px, 4vw, 52px); letter-spacing: -0.03em; margin-bottom: 6px; }
+  .stat-label { font-size: 13px; color: rgba(255,255,255,0.7); }
+  @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .stat-item { padding: 24px 20px; } }
+
+  .cta-section { background: var(--bg-deep); color: #fff; padding: 100px 0; text-align: center; }
+  .cta-inner { max-width: 640px; margin: 0 auto; }
+  .cta-inner .eyebrow { color: rgba(255,255,255,0.4); justify-content: center; }
+  .cta-inner .eyebrow .dot { background: rgba(255,255,255,0.4); }
+  .cta-inner h2 { color: #fff; margin: 14px 0 16px; }
+  .cta-inner p { color: rgba(255,255,255,0.6); font-size: 18px; margin-bottom: 36px; }
+  .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  footer { background: var(--bg-alt); border-top: 1px solid var(--line); padding: 72px 0 36px; }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 80px; margin-bottom: 56px; }
+  .footer-brand { font-family: var(--serif); font-size: 22px; color: var(--ink); display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .footer-brand img { height: 28px; width: auto; }
+  .footer-desc { font-size: 14px; color: var(--ink-2); line-height: 1.65; max-width: 34ch; margin-bottom: 20px; }
+  .footer-contact a { font-size: 14px; color: var(--ink-2); }
+  .footer-right { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; }
+  .footer-col h5 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 14px; }
+  .footer-col a { display: block; font-size: 14px; color: var(--ink-2); padding: 3px 0; transition: color 0.15s; }
+  .footer-col a:hover { color: var(--ink); }
+  .footer-bottom { padding-top: 28px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  @media (max-width: 1024px) { .footer-right { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr; gap: 40px; } .footer-right { grid-template-columns: 1fr; } .footer-bottom { flex-direction: column; gap: 8px; } }
+  /* SYSTEMS GRID */
+  .industry-systems { padding: 100px 0; background: var(--bg-alt); }
+  .ind-sys-head { margin-bottom: 56px; }
+  .ind-sys-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .ind-sys-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; }
+  .ind-sys-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 24px var(--accent-light); }
+  .ind-sys-body { flex: 1; }
+  .ind-sys-body h4 { font-size: 14px; font-weight: 600; color: var(--ink); margin: 0 0 4px; }
+  .ind-sys-body p { font-size: 13px; color: var(--ink-2); line-height: 1.55; margin: 0; }
+  .ind-sys-arrow { font-size: 16px; color: var(--muted); flex: none; margin-top: 2px; transition: color 0.15s, transform 0.15s; }
+  .ind-sys-card:hover .ind-sys-arrow { color: var(--ink); transform: translateX(3px); }
+  @media (max-width: 1024px) { .ind-sys-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .ind-sys-grid { grid-template-columns: 1fr; } }
+  /* SIDE NAV */
+  .nav-btn { position: fixed; top: 20px; left: 20px; z-index: 201; width: 44px; height: 44px; background: rgba(255,255,255,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; padding: 0; transition: background 0.2s, box-shadow 0.2s; }
+  .nav-btn:hover { background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .nav-btn span { display: block; width: 18px; height: 1.5px; background: var(--ink); border-radius: 2px; transition: transform 0.25s, opacity 0.25s; }
+  .nav-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .nav-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+  .side-overlay { position: fixed; inset: 0; z-index: 198; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: auto; }
+  .side-nav { position: fixed; left: 0; top: 0; bottom: 0; z-index: 200; width: 280px; background: #fff; border-right: 1px solid var(--line); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 28px 0 40px; overflow-y: auto; }
+  .side-nav.open { transform: translateX(0); box-shadow: 8px 0 48px rgba(0,0,0,0.15); }
+  .side-nav-top { display: flex; align-items: center; padding: 0 24px 28px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+  .side-nav-brand { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink); text-decoration: none; }
+  .side-nav-brand img { height: 28px; }
+  .side-nav-links { display: flex; flex-direction: column; padding: 0 12px; flex: 1; }
+  .side-nav-section { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 20px 12px 6px; }
+  .side-nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-2); padding: 10px 12px; border-radius: 8px; transition: color 0.15s, background 0.15s; display: block; }
+  .side-nav-links a:hover { color: var(--ink); background: var(--bg-alt); }
+  .side-nav-cta { padding: 24px 24px 0; border-top: 1px solid var(--line); margin-top: 16px; }
+  .side-nav-cta .btn { width: 100%; justify-content: center; }
+</style>
+</head>
+<body>
+
+<!-- HAMBURGER BUTTON -->
+<button class="nav-btn" id="nav-btn" aria-label="Open menu">
+  <span></span><span></span><span></span>
+</button>
+<!-- SIDE OVERLAY -->
+<div class="side-overlay" id="side-overlay"></div>
+<!-- SIDE NAV -->
+<div class="side-nav" id="side-nav" aria-hidden="true">
+  <div class="side-nav-top">
+    <a class="side-nav-brand" href="stratum.html">
+      <img src="logo.svg" alt="TMI"/> TMI
+    </a>
+  </div>
+  <div class="side-nav-links">
+    <div class="side-nav-section">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="systems.html">Systems</a>
+    <a href="news.html">Field Notes</a>
+    <a href="about.html">About</a>
+    <a href="partners.html">Partners</a>
+    <div class="side-nav-section">Industries</div>
+    <a href="trades.html">Trades &amp; Field Service</a>
+    <a href="construction.html">Construction</a>
+    <a href="oil-gas.html">Oil, Gas &amp; Energy</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="fleet.html">Fleet &amp; Logistics</a>
+    <a href="home-service.html">Home Service</a>
+    <div class="side-nav-section">Systems</div>
+    <a href="system-dispatch.html">AI Dispatch</a>
+    <a href="system-predictive-maintenance.html">Predictive Maintenance</a>
+    <a href="system-compliance.html">Compliance</a>
+    <a href="system-invoicing.html">Invoice &amp; Payment</a>
+    <a href="system-estimating.html">Job Costing</a>
+    <a href="system-revenue-leakage.html">Revenue Recovery</a>
+    <a href="system-llm.html">Operational LLM</a>
+    <a href="system-ops-twin.html">Operations Twin</a>
+    <a href="systems.html">All Systems &rarr;</a>
+  </div>
+  <div class="side-nav-cta">
+    <a href="stratum.html#cta" class="btn btn-primary">Book a Strategy Call &#8594;</a>
+  </div>
+</div>
+<section class="hero">
+  <div class="hero-photo"></div>
+  <div class="hero-inner">
+    <div class="eyebrow"><span class="dot"></span>Industry Focus</div>
+    <h1>Manufacturing</h1>
+    <p>Production floors, machine shops, fabrication facilities, and industrial operations. We build the systems that give you real-time visibility and automate the work that slows your floor down.</p>
+    <div class="hero-actions">
+      <a href="stratum.html#cta" class="btn btn-primary">Book a Strategy Call &#8594;</a>
+      <a href="systems.html" class="btn btn-white-outline">See Our Systems</a>
+    </div>
+  </div>
+</section>
+
+<section class="challenges">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="dot"></span>The Problem</div>
+      <h2>Where manufacturing operations lose margin</h2>
+      <p class="sec-sub">The gap between what your floor produces and what your data shows you is where margin disappears. Manual processes, equipment downtime, and slow reporting compound the problem.</p>
+    </div>
+    <div class="challenge-grid">
+      <div class="challenge-card reveal">
+        <div class="challenge-num">01</div>
+        <h3>Equipment downtime you can't predict</h3>
+        <p>Maintenance scheduled by calendar instead of condition means unexpected breakdowns that stop production lines and generate emergency repair costs.</p>
+      </div>
+      <div class="challenge-card reveal reveal-d1">
+        <div class="challenge-num">02</div>
+        <h3>Production data that's always stale</h3>
+        <p>Output, defect rates, and throughput tracked in spreadsheets updated end-of-shift means you're always making decisions with yesterday's data.</p>
+      </div>
+      <div class="challenge-card reveal reveal-d2">
+        <div class="challenge-num">03</div>
+        <h3>Billing and job costing done manually</h3>
+        <p>Custom work orders, material costs, and labor hours reconciled manually at month end — creating invoice lag and missed cost recovery.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="solutions">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="dot"></span>What We Build</div>
+      <h2>AI systems built for the production floor</h2>
+    </div>
+    <div class="sol-grid">
+      <div class="sol-card reveal">
+        <div class="sol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 00-14.14 0"/><path d="M4.93 19.07a10 10 0 0014.14 0"/></svg></div>
+        <h4>Predictive Maintenance</h4>
+        <p>AI-triggered maintenance based on equipment performance data — preventing failures before they stop your floor.</p>
+      </div>
+      <div class="sol-card reveal reveal-d1">
+        <div class="sol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <h4>Live Production Intelligence</h4>
+        <p>Real-time dashboards showing output, cycle times, defect rates, and OEE — updated continuously, not end-of-shift.</p>
+      </div>
+      <div class="sol-card reveal reveal-d2">
+        <div class="sol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div>
+        <h4>Job Costing &amp; Billing Flows</h4>
+        <p>Material, labor, and machine time captured automatically per job order — invoices generated on completion with full cost detail.</p>
+      </div>
+      <div class="sol-card reveal">
+        <div class="sol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h4>Inventory &amp; Materials Tracking</h4>
+        <p>Raw material levels, work-in-progress, and finished goods tracked in real time — with automated reorder triggers.</p>
+      </div>
+      <div class="sol-card reveal reveal-d1">
+        <div class="sol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h4>Quality &amp; Compliance Tracking</h4>
+        <p>QC inspections logged digitally, defect data tracked by machine and operator, and compliance documentation maintained automatically.</p>
+      </div>
+      <div class="sol-card reveal reveal-d2">
+        <div class="sol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <h4>Scheduling &amp; Capacity Planning</h4>
+        <p>Production schedules built and adjusted automatically based on orders, machine availability, and crew capacity.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item reveal"><div class="stat-val">40%</div><div class="stat-label">Reduction in unplanned downtime</div></div>
+      <div class="stat-item reveal reveal-d1"><div class="stat-val">Real-time</div><div class="stat-label">Production visibility</div></div>
+      <div class="stat-item reveal reveal-d2"><div class="stat-val">50%</div><div class="stat-label">Less admin &amp; reporting time</div></div>
+      <div class="stat-item reveal reveal-d3"><div class="stat-val">8 wks</div><div class="stat-label">Average to live</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SYSTEMS BUILT FOR MANUFACTURING -->
+<section class="industry-systems">
+  <div class="container">
+    <div class="ind-sys-head reveal">
+      <div class="eyebrow"><span class="dot"></span>Built for You</div>
+      <h2>Systems built <em>for manufacturing.</em></h2>
+      <p class="sec-sub">Built for production floors where every hour of downtime has a dollar cost and every manual process is a margin problem waiting to be solved.</p>
+    </div>
+    <div class="ind-sys-grid">
+      <a href="system-predictive-maintenance.html" class="ind-sys-card reveal">
+        <div class="ind-sys-body"><h4>Predictive Maintenance</h4><p>AI-triggered maintenance based on equipment performance — prevent failures before they stop your floor.</p></div>
+        <span class="ind-sys-arrow">&#8594;</span>
+      </a>
+      <a href="system-inventory.html" class="ind-sys-card reveal reveal-d1">
+        <div class="ind-sys-body"><h4>Smart Inventory &amp; Materials</h4><p>Raw material levels, WIP, and finished goods tracked in real time with automated reorder triggers.</p></div>
+        <span class="ind-sys-arrow">&#8594;</span>
+      </a>
+      <a href="system-compliance.html" class="ind-sys-card reveal reveal-d2">
+        <div class="ind-sys-body"><h4>Compliance Management</h4><p>Quality certifications, regulatory docs, and audit records maintained automatically across the floor.</p></div>
+        <span class="ind-sys-arrow">&#8594;</span>
+      </a>
+      <a href="system-analytics.html" class="ind-sys-card reveal">
+        <div class="ind-sys-body"><h4>Analytics &amp; Reporting</h4><p>OEE, throughput, defect rates, and cost-per-unit tracked live — not end-of-shift.</p></div>
+        <span class="ind-sys-arrow">&#8594;</span>
+      </a>
+      <a href="system-field-data.html" class="ind-sys-card reveal reveal-d1">
+        <div class="ind-sys-body"><h4>Field Data Capture</h4><p>Operators log production data, QC inspections, and shift notes digitally from the floor.</p></div>
+        <span class="ind-sys-arrow">&#8594;</span>
+      </a>
+      <a href="system-safety.html" class="ind-sys-card reveal reveal-d2">
+        <div class="ind-sys-body"><h4>Safety &amp; Incident Reporting</h4><p>Safety incidents logged, root causes tracked, and corrective actions managed without paper forms.</p></div>
+        <span class="ind-sys-arrow">&#8594;</span>
+      </a>
+      <a href="system-knowledge-base.html" class="ind-sys-card reveal">
+        <div class="ind-sys-body"><h4>Knowledge Base &amp; SOPs</h4><p>Machine specs, operating procedures, and troubleshooting guides searchable from any device on the floor.</p></div>
+        <span class="ind-sys-arrow">&#8594;</span>
+      </a>
+      <a href="system-training.html" class="ind-sys-card reveal reveal-d1">
+        <div class="ind-sys-body"><h4>Training &amp; Certification</h4><p>Operator certifications tracked, training modules assigned, and skill gaps surfaced automatically.</p></div>
+        <span class="ind-sys-arrow">&#8594;</span>
+      </a>
+      <a href="system-remote-monitoring.html" class="ind-sys-card reveal reveal-d2">
+        <div class="ind-sys-body"><h4>Remote Asset Monitoring</h4><p>Equipment status, sensor data, and anomaly alerts tracked in real time across the production floor.</p></div>
+        <span class="ind-sys-arrow">&#8594;</span>
+      </a>
+      <a href="system-ops-twin.html" class="ind-sys-card reveal">
+        <div class="ind-sys-body"><h4>Digital Operations Twin</h4><p>A live operational model that surfaces bottlenecks, simulates capacity changes, and flags inefficiencies.</p></div>
+        <span class="ind-sys-arrow">&#8594;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <div class="eyebrow"><span class="dot"></span>Get Started</div>
+    <h2>Ready to get real-time visibility into your floor?</h2>
+    <p>Tell us about your manufacturing operation. We'll build around your equipment, workflows, and output goals.</p>
+    <div class="cta-actions">
+      <a href="stratum.html#cta" class="btn btn-primary">Book a Strategy Call &#8594;</a>
+      <a href="stratum.html" class="btn btn-white-outline">Back to Home</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><img src="logo.svg" alt="TMI"/> TMI</div>
+        <p class="footer-desc">AI infrastructure for the trades. We digitize your operation so you run smarter, leaner, and ahead.</p>
+        <div class="footer-contact"><a href="mailto:hello@tmi-technology.com">hello@tmi-technology.com</a></div>
+      </div>
+      <div class="footer-right">
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="about.html">About</a>
+          <a href="systems.html">Systems</a>
+          <a href="partners.html">Partners</a>
+          <a href="news.html">Field Notes</a>
+          <a href="stratum.html#cta">Contact</a>
+        </div>
+        <div class="footer-col">
+          <h5>Industries</h5>
+          <a href="trades.html">Trades &amp; Field Service</a>
+          <a href="construction.html">Construction</a>
+          <a href="oil-gas.html">Oil, Gas &amp; Energy</a>
+          <a href="manufacturing.html">Manufacturing</a>
+          <a href="fleet.html">Fleet &amp; Logistics</a>
+          <a href="home-service.html">Home Service</a>
+        </div>
+        <div class="footer-col">
+          <h5>Systems</h5>
+          <a href="system-dispatch.html">AI Dispatch &amp; Scheduling</a>
+          <a href="system-predictive-maintenance.html">Predictive Maintenance</a>
+          <a href="system-compliance.html">Compliance Management</a>
+          <a href="system-invoicing.html">Invoice &amp; Payment</a>
+          <a href="system-estimating.html">Estimating &amp; Job Costing</a>
+          <a href="system-revenue-leakage.html">Revenue Recovery</a>
+          <a href="system-llm.html">Operational LLM</a>
+          <a href="system-ops-twin.html">Digital Operations Twin</a>
+          <a href="systems.html">View all 25 systems &rarr;</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 TMI Technology. All rights reserved.</span>
+      <span>Built for the companies that power the world.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+// Side nav
+const navBtn = document.getElementById('nav-btn');
+const sideNav = document.getElementById('side-nav');
+const sideOverlay = document.getElementById('side-overlay');
+function openSideNav() { sideNav.classList.add('open'); sideOverlay.classList.add('open'); navBtn.classList.add('open'); sideNav.setAttribute('aria-hidden','false'); }
+function closeSideNav() { sideNav.classList.remove('open'); sideOverlay.classList.remove('open'); navBtn.classList.remove('open'); sideNav.setAttribute('aria-hidden','true'); }
+navBtn.addEventListener('click', () => sideNav.classList.contains('open') ? closeSideNav() : openSideNav());
+sideOverlay.addEventListener('click', closeSideNav);
+</script>
+</body>
+</html>
