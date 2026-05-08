@@ -1012,30 +1012,6 @@ function closeSideNav() {
 navBtn.addEventListener('click', () => sideNav.classList.contains('open') ? closeSideNav() : openSideNav());
 sideOverlay.addEventListener('click', closeSideNav);
 
-// Form submit → reveal Cal link
-document.getElementById('cta-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const form = e.target;
-  const data = new FormData(form);
-  const btn = form.querySelector('button[type=submit]');
-  btn.textContent = 'Sending...'; btn.disabled = true;
-  try {
-    const res = await fetch('https://formsubmit.co/ajax/mialouviere@gmail.com', {
-      method: 'POST',
-      headers: { 'Accept': 'application/json' },
-      body: data
-    });
-    if (res.ok) {
-      form.style.display = 'none';
-      document.getElementById('form-success').style.display = 'block';
-    } else {
-      btn.textContent = 'Try again'; btn.disabled = false;
-    }
-  } catch {
-    btn.textContent = 'Try again'; btn.disabled = false;
-  }
-});
-
 // Scroll reveal
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
