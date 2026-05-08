@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMI — AI Operating System for Field Operations</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-dark: #0a0b14;
+    --bg-deep: #0d0e1a;
+    --ink: #1a1a1a;
+    --ink-2: #505060;
+    --muted: #86868b;
+    --chart: #E4FF97;
+    --chart-dark: #D0FF6A;
+    --serif: "Barlow", sans-serif;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg-dark);
+    color: #fff;
+    font-family: var(--serif);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px 64px;
+    position: relative;
+  }
+
+  /* subtle radial glow behind video */
+  .page::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 600px;
+    background: radial-gradient(ellipse at center top, rgba(228,255,151,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 760px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0;
+  }
+
+  .wordmark {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 40px;
+  }
+
+  .wordmark span {
+    color: var(--chart);
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 16px;
+    max-width: 640px;
+  }
+
+  .sub {
+    font-size: 17px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.5);
+    max-width: 500px;
+    margin-bottom: 40px;
+  }
+
+  .video-wrap {
+    width: 100%;
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 */
+    background: #0d0e1a;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.07);
+    margin-bottom: 40px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  }
+
+  .video-wrap iframe,
+  .video-wrap video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* placeholder shown until video URL is set */
+  .video-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: rgba(255,255,255,0.2);
+    font-size: 14px;
+  }
+
+  .video-placeholder svg {
+    opacity: 0.15;
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--chart);
+    color: #0a0b14;
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    padding: 18px 40px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 0 40px rgba(228,255,151,0.2);
+  }
+
+  .cta-btn:hover {
+    background: var(--chart-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 0 60px rgba(228,255,151,0.3);
+  }
+
+  .cta-btn:active {
+    transform: translateY(0);
+  }
+
+  .trust {
+    margin-top: 24px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.02em;
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 40px 16px 56px; }
+    .cta-btn { width: 100%; justify-content: center; font-size: 15px; padding: 16px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="inner">
+
+    <div class="wordmark">TMI &mdash; <span>AI Infrastructure</span> for Field Operations</div>
+
+    <h1>Replace the chaos with one AI system built for your crews.</h1>
+
+    <p class="sub">Watch how field teams cut admin time, recover lost revenue, and run tighter operations — without changing how they work.</p>
+
+    <!-- VIDEO: swap the placeholder below with your VSL embed -->
+    <div class="video-wrap">
+
+      <!-- OPTION A: YouTube embed (uncomment and replace VIDEO_ID)
+      <iframe
+        src="https://www.youtube.com/embed/VIDEO_ID?autoplay=0&rel=0&modestbranding=1"
+        title="TMI — AI Operating System for Field Operations"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      -->
+
+      <!-- OPTION B: Vimeo embed (uncomment and replace VIDEO_ID)
+      <iframe
+        src="https://player.vimeo.com/video/VIDEO_ID?color=E4FF97&title=0&byline=0&portrait=0"
+        title="TMI VSL"
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      -->
+
+      <!-- OPTION C: Self-hosted MP4 (uncomment and replace URL)
+      <video controls playsinline poster="">
+        <source src="YOUR_VIDEO_URL.mp4" type="video/mp4">
+      </video>
+      -->
+
+      <!-- placeholder — remove this div once video is added -->
+      <div class="video-placeholder">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="31" stroke="white" stroke-width="2"/>
+          <polygon points="26,20 48,32 26,44" fill="white"/>
+        </svg>
+        Video coming soon
+      </div>
+
+    </div>
+    <!-- END VIDEO -->
+
+    <a href="contact.html" class="cta-btn">
+      Apply for Access
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+
+    <p class="trust">Used across construction, oil &amp; gas, trades, and manufacturing</p>
+
+  </div>
+</div>
+
+</body>
+</html>
