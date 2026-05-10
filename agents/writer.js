@@ -6,6 +6,17 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
 
+// Load .env.local for local runs (GitHub Actions uses repo secrets)
+if (!process.env.ANTHROPIC_API_KEY) {
+  try {
+    const envFile = fs.readFileSync(path.join(ROOT, '.env.local'), 'utf8');
+    for (const line of envFile.split('\n')) {
+      const m = line.match(/^([A-Z_]+)\s*=\s*"?([^"\n]+)"?\s*$/);
+      if (m) process.env[m[1]] = m[2];
+    }
+  } catch {}
+}
+
 const PEXELS = {
   construction:   ['1216589', '1078884', '1117452'],
   hvac:           ['3964736', '3721272'],
@@ -132,7 +143,7 @@ async function writeArticleHtml(topic, { filename, imageUrl, dateStr }) {
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 5000,
+    max_tokens: 8000,
     system: `You are the editor of TMI Field Notes. Write one complete article as a full HTML file.
 
 TMI VOICE RULES - follow these exactly:
