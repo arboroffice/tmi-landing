@@ -1,0 +1,53 @@
+name: Daily Blog Post
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # 7am UTC = 3am ET / midnight PT
+  workflow_dispatch:        # manual trigger from GitHub Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: agents/package.json
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: agents
+
+      - name: Run research agent
+        run: node agents/research.js
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Run writer agent
+        run: node agents/writer.js
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Commit and push article
+        run: |
+          git config user.name "TMI Bot"
+          git config user.email "bot@tmi-technology.com"
+          TITLE=$(cat .last-title 2>/dev/null || echo "Daily Field Notes")
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Field Notes: $TITLE"
+            git push
+          fi
