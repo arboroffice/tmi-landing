@@ -412,11 +412,29 @@
     font-size: 12px; color: rgba(255,255,255,0.25);
   }
 
+  /* STATEMENT BREAK */
+  .statement-break { background: var(--bg-dark); padding: 140px 40px; text-align: center; }
+  .statement-break-inner { max-width: 980px; margin: 0 auto; }
+  .statement-break p { font-family: var(--serif); font-size: clamp(34px, 5.5vw, 76px); font-weight: 400; color: #fff; line-height: 1.08; letter-spacing: -0.02em; margin: 0; }
+  .statement-break p em { color: var(--chart); font-style: italic; }
+
+  /* WHAT CHANGES */
+  .change-section { background: var(--bg-alt); padding: 120px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .change-inner { display: grid; grid-template-columns: 1fr 1.3fr; gap: 100px; align-items: start; }
+  .change-left .eyebrow { margin-bottom: 20px; }
+  .change-left h2 { color: var(--ink); }
+  .change-right .change-lead { font-size: clamp(16px, 1.4vw, 19px); color: var(--ink-2); line-height: 1.8; margin-bottom: 20px; }
+  .change-closer { font-family: var(--serif); font-size: clamp(19px, 1.8vw, 26px); color: var(--ink); line-height: 1.25; font-weight: 400; letter-spacing: -0.01em; margin-top: 40px; padding-top: 40px; border-top: 1px solid var(--line); }
+
+  /* STAKES */
+  .apply-stakes { font-family: var(--serif); font-size: clamp(19px, 1.9vw, 27px); color: rgba(255,255,255,0.75); font-style: italic; line-height: 1.35; letter-spacing: -0.01em; max-width: 46ch; margin-bottom: 40px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08); }
+
   /* RESPONSIVE */
   @media (max-width: 1024px) {
     .manifesto-body { grid-template-columns: 1fr; gap: 16px; }
     .who-inner { grid-template-columns: 1fr; }
     .who-left { height: 300px; }
+    .change-inner { grid-template-columns: 1fr; gap: 40px; }
     .who-right { padding: 60px 32px; }
     .tier-grid { grid-template-columns: repeat(2, 1fr); }
     .os-section-head { grid-template-columns: 1fr; gap: 32px; }
@@ -505,7 +523,6 @@
     <p class="lede">We're the infrastructure, community, and operating system for the operators doing the work.</p>
     <div class="hero-actions">
       <a href="funnel.html" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
-      <a href="network.html" class="btn btn-white-outline">Join the Network <span class="arrow">&#8594;</span></a>
     </div>
   </div>
   <div class="hero-scroll">
@@ -559,6 +576,13 @@
     </div>
   </div>
 </div>
+
+<!-- STATEMENT BREAK -->
+<section class="statement-break">
+  <div class="statement-break-inner">
+    <p class="reveal">You don&rsquo;t need more software.<br>You need a system that works<br><em>without you in every decision.</em></p>
+  </div>
+</section>
 
 <!-- MANIFESTO -->
 <section class="manifesto-section">
@@ -633,6 +657,23 @@
   </div>
 </section>
 
+<!-- WHAT CHANGES -->
+<section class="change-section">
+  <div class="container">
+    <div class="change-inner">
+      <div class="change-left reveal">
+        <div class="eyebrow sec-eyebrow"><span class="dot"></span>What Changes</div>
+        <h2>What your operation looks like<br><em>when it&rsquo;s actually running.</em></h2>
+      </div>
+      <div class="change-right reveal reveal-d1">
+        <p class="change-lead">Your best person doesn&rsquo;t quit because they&rsquo;re not carrying the whole operation on their back anymore. Jobs get dispatched without your phone going off at 6am. Invoices collect before you remember to send them. Reports file themselves. Compliance stays current without anyone touching it.</p>
+        <p class="change-lead">You stop being the bottleneck. The business runs when you&rsquo;re not in it. And when you do show up, you&rsquo;re making decisions &mdash; not answering the same questions you&rsquo;ve answered a hundred times.</p>
+        <p class="change-closer">This is not automation for automation&rsquo;s sake.<br>This is what it means to build differently.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- APPLY CTA -->
 <section class="apply-section">
   <div class="container">
@@ -640,11 +681,11 @@
       <div class="eyebrow reveal"><span class="dot"></span>Ready to Start</div>
       <h2 class="reveal reveal-d1">The operators rebuilding<br>the trades <em>are already inside.</em></h2>
       <p class="reveal reveal-d2">We don&rsquo;t take every application. We take the operators who are serious about building systems that outlast them. If that&rsquo;s you, apply. We&rsquo;ll figure out the right starting point on a call.</p>
-      <div class="apply-actions reveal reveal-d2">
+      <p class="apply-stakes reveal reveal-d2">Every year you wait, a competitor in your market figures this out first. The operators who build in 2026 will be the ones setting prices in 2030.</p>
+      <div class="apply-actions reveal reveal-d3">
         <a href="funnel.html" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
-        <a href="network.html" class="btn btn-white-outline">Join the Network <span class="arrow">&#8594;</span></a>
       </div>
-      <p class="apply-note reveal reveal-d3">Not ready to apply? <a href="savings-calculator.html">Run the savings calculator first</a> or <a href="news.html">read the Field Notes.</a></p>
+      <p class="apply-note reveal reveal-d3">Not ready yet? <a href="news.html">Read the Field Notes.</a></p>
     </div>
   </div>
 </section>
@@ -669,7 +710,6 @@
           <a href="partners.html">Partners</a>
           <a href="news.html">Field Notes</a>
           <a href="funnel.html">Apply</a>
-          <a href="build-series.html">Build Series</a>
         </div>
       </div>
     </div>
