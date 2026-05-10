@@ -177,7 +177,7 @@ module.exports = async function handler(req, res) {
   else console.error('Lead insert:', leadErr.message);
 
   // 2. Insert full audit record
-  await supabase.from('audit_submissions').insert({
+  const { error: auditErr } = await supabase.from('audit_submissions').insert({
     lead_id: leadId,
     name: contact.name,
     company: contact.company || null,
@@ -192,7 +192,8 @@ module.exports = async function handler(req, res) {
     second_cat: results.secondCat,
     cat_scores: results.catPct,
     answers: answers,
-  }).catch(e => console.error('Audit insert:', e.message));
+  });
+  if (auditErr) console.error('Audit insert:', auditErr.message);
 
   const unsubUrl = leadId
     ? `${SITE}/api/unsubscribe?id=${leadId}`
@@ -203,7 +204,7 @@ module.exports = async function handler(req, res) {
 
   // 3. Send personalized results email
   resend.emails.send({
-    from: 'Mia from TMI <hello@tmi-technology.com>',
+    from: 'Mia from TMI <hello@tmitechai.com>',
     to: contact.email,
     subject: `Your TMI Audit — ${TIER_NAMES[results.tierKey]}`,
     html: buildResultsEmail(firstName, contact, results, unsubUrl),
@@ -220,7 +221,7 @@ module.exports = async function handler(req, res) {
 
   // 5. Internal email to Mia with full results + all answers
   resend.emails.send({
-    from: 'Mia from TMI <hello@tmi-technology.com>',
+    from: 'Mia from TMI <hello@tmitechai.com>',
     to: OWNER_EMAIL,
     subject: `Audit: ${contact.name} — ${TIER_NAMES[results.tierKey]} (${results.depPct}% dep)`,
     html: buildInternalEmail(contact, results, answers),

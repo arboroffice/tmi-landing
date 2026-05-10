@@ -1,0 +1,568 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMI Certified — The AI Operations Standard</title>
+<meta name="description" content="The credential that proves an operator knows how to run AI-powered field operations. TMI Certified is the industry standard for trades and field service companies.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff;
+    --bg-alt: #f5f5f7;
+    --bg-deep: #0d0e1a;
+    --ink: #0a0b14;
+    --ink-2: #505060;
+    --muted: #86868b;
+    --line: #e8e8ed;
+    --accent: #1a1a1a;
+    --chart: #E4FF97;
+    --serif: 'Barlow', sans-serif;
+    --sans: 'Neue Haas Grotesk Display Pro', 'Arial Nova', Arial, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; overflow-x: hidden; }
+
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 40px; display: flex; align-items: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav-logo { font-family: var(--serif); font-size: 18px; font-weight: 500; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+  .hamburger { background: none; border: none; cursor: pointer; padding: 4px; display: flex; flex-direction: column; gap: 5px; }
+  .hamburger span { display: block; width: 22px; height: 1.5px; background: var(--ink); transition: all 0.3s; }
+  .side-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: all; }
+  .side-nav { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--bg); z-index: 201; padding: 40px 32px; transition: left 0.35s cubic-bezier(.4,0,.2,1); overflow-y: auto; border-right: 1px solid var(--line); }
+  .side-nav.open { left: 0; }
+  .side-nav-close { background: none; border: none; cursor: pointer; font-size: 24px; color: var(--ink); margin-bottom: 32px; display: block; }
+  .side-nav-section { margin-bottom: 32px; }
+  .side-nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .side-nav a { display: block; font-family: var(--serif); font-size: 15px; color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .side-nav a:last-child { border-bottom: none; }
+  .side-nav-cta { display: block; margin-top: 32px; background: var(--ink); color: #fff; text-align: center; padding: 14px 20px; font-family: var(--serif); font-size: 14px; text-decoration: none; }
+
+  .page-hero { padding: 140px 0 80px; border-bottom: 1px solid var(--line); }
+  .page-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 80px; align-items: end; }
+  .page-hero-left { grid-column: 1 / 3; }
+  .page-hero-right { grid-column: 3 / 5; padding-bottom: 8px; }
+  .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .page-hero h1 { font-family: var(--serif); font-size: clamp(64px, 9vw, 120px); font-weight: 400; line-height: 1.0; letter-spacing: -0.03em; color: var(--ink); }
+  .page-hero h1 em { color: var(--accent); font-style: italic; }
+  .page-hero-right p { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 24px); font-weight: 300; color: var(--ink-2); line-height: 1.5; margin-bottom: 20px; }
+  .cert-badge { display: inline-flex; align-items: center; gap: 10px; background: var(--bg-alt); border: 1px solid var(--line); padding: 10px 16px; margin-bottom: 20px; }
+  .cert-badge-icon { width: 28px; height: 28px; background: var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .cert-badge-icon::after { content: '✓'; color: var(--chart); font-size: 12px; font-weight: 700; }
+  .cert-badge span { font-family: var(--serif); font-size: 13px; font-weight: 500; color: var(--ink); }
+
+  .section-white { padding: 80px 0; }
+  .section-alt { padding: 80px 0; background: var(--bg-alt); }
+  .section-dark { padding: 80px 0; background: var(--bg-deep); color: #fff; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .section-label.light { color: rgba(255,255,255,0.4); }
+  .section-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 56px); font-weight: 400; letter-spacing: -0.02em; color: var(--ink); line-height: 1.1; margin-bottom: 16px; }
+  .section-title.light { color: #fff; }
+  .section-title em { font-style: italic; }
+  .section-sub { font-family: var(--serif); font-size: clamp(16px, 1.4vw, 20px); font-weight: 300; color: var(--ink-2); max-width: 600px; line-height: 1.6; }
+  .section-sub.light { color: rgba(255,255,255,0.6); }
+  .divider { width: 40px; height: 1px; background: var(--line); margin: 24px 0; }
+  .divider.light { background: rgba(255,255,255,0.2); }
+
+  /* WHAT IT IS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; margin-top: 48px; }
+  .two-col-text p { font-family: var(--serif); font-size: 18px; font-weight: 300; color: var(--ink-2); line-height: 1.7; margin-bottom: 20px; }
+  .two-col-text p:last-child { margin-bottom: 0; }
+
+  /* WHAT IT COVERS */
+  .modules-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); margin-top: 48px; }
+  .module-card { background: var(--bg); padding: 36px 28px; }
+  .module-day { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .module-card h3 { font-family: var(--serif); font-size: 21px; font-weight: 400; color: var(--ink); margin-bottom: 12px; }
+  .module-card ul { list-style: none; }
+  .module-card ul li { font-size: 13px; color: var(--ink-2); padding: 5px 0; border-bottom: 1px solid var(--line); line-height: 1.5; }
+  .module-card ul li:last-child { border-bottom: none; }
+
+  /* TIERS */
+  .tiers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
+  .tier-card { border: 1px solid rgba(255,255,255,0.12); padding: 36px; }
+  .tier-card.featured { border-color: var(--chart); }
+  .tier-name { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 12px; }
+  .tier-card.featured .tier-name { color: var(--chart); }
+  .tier-title { font-family: var(--serif); font-size: 26px; font-weight: 400; color: #fff; margin-bottom: 8px; }
+  .tier-price { font-family: var(--serif); font-size: 32px; font-weight: 300; color: #fff; margin-bottom: 4px; }
+  .tier-price-note { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 24px; }
+  .tier-features { list-style: none; }
+  .tier-features li { font-size: 13px; color: rgba(255,255,255,0.6); padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .tier-features li:last-child { border-bottom: none; }
+  .tier-cta { display: block; margin-top: 28px; padding: 13px 20px; text-align: center; font-family: var(--serif); font-size: 14px; text-decoration: none; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.7); transition: all 0.2s; }
+  .tier-cta:hover { border-color: #fff; color: #fff; }
+  .tier-card.featured .tier-cta { background: var(--chart); color: var(--ink); border-color: var(--chart); }
+  .tier-card.featured .tier-cta:hover { background: #d4ef80; }
+
+  /* CREDENTIAL */
+  .credential-display { margin-top: 48px; display: grid; grid-template-columns: 340px 1fr; gap: 60px; align-items: center; }
+  .credential-card { background: var(--bg-deep); border: 1px solid var(--line); padding: 40px; text-align: center; }
+  .credential-seal { width: 80px; height: 80px; border-radius: 50%; background: var(--chart); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+  .credential-seal span { font-family: var(--serif); font-weight: 700; font-size: 22px; color: var(--ink); }
+  .credential-card h3 { font-family: var(--serif); font-size: 20px; font-weight: 400; color: #fff; margin-bottom: 6px; }
+  .credential-card p { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 20px; }
+  .credential-card-name { font-family: var(--serif); font-size: 16px; font-style: italic; color: rgba(255,255,255,0.6); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; }
+  .credential-details { }
+  .credential-details h3 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: var(--ink); margin-bottom: 16px; }
+  .credential-details p { font-size: 15px; color: var(--ink-2); line-height: 1.7; margin-bottom: 16px; }
+  .credential-list { list-style: none; margin-top: 24px; }
+  .credential-list li { padding: 10px 0; border-bottom: 1px solid var(--line); font-family: var(--serif); font-size: 15px; color: var(--ink-2); display: flex; gap: 12px; }
+  .credential-list li::before { content: '—'; color: var(--muted); }
+
+  /* PRICING TABLE */
+  .pricing-box { background: var(--bg-alt); border: 1px solid var(--line); padding: 48px; margin-top: 48px; }
+  .pricing-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .pricing-row:last-child { border-bottom: none; }
+  .pricing-row-label { font-family: var(--serif); font-size: 17px; color: var(--ink); }
+  .pricing-row-value { font-family: var(--serif); font-size: 17px; font-weight: 500; color: var(--ink); }
+  .pricing-row-note { font-size: 12px; color: var(--muted); }
+  .pricing-cta { display: inline-block; background: var(--ink); color: #fff; padding: 16px 40px; font-family: var(--serif); font-size: 15px; text-decoration: none; margin-top: 32px; }
+
+  /* FAQ */
+  .faq-list { margin-top: 48px; }
+  .faq-item { padding: 28px 0; border-bottom: 1px solid var(--line); }
+  .faq-item:first-child { border-top: 1px solid var(--line); }
+  .faq-q { font-family: var(--serif); font-size: 18px; font-weight: 400; color: var(--ink); margin-bottom: 10px; }
+  .faq-a { font-size: 14px; color: var(--ink-2); line-height: 1.7; max-width: 640px; }
+
+  .newsletter-section { padding: 80px 0; background: var(--bg-deep); }
+  .newsletter-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .newsletter-inner h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 400; color: #fff; line-height: 1.1; }
+  .newsletter-inner h2 em { font-style: italic; color: var(--chart); }
+  .newsletter-form { display: flex; flex-direction: column; gap: 12px; }
+  .newsletter-form input { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 14px 18px; font-family: var(--sans); font-size: 14px; outline: none; }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.35); }
+  .newsletter-form button { background: var(--chart); color: var(--ink); border: none; padding: 14px 24px; font-family: var(--serif); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; }
+
+  .footer { background: var(--bg-deep); border-top: 1px solid rgba(255,255,255,0.08); padding: 64px 0 40px; }
+  .footer-grid { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 80px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 12px; max-width: 280px; line-height: 1.6; }
+  .footer-logo { font-family: var(--serif); font-size: 20px; font-weight: 500; color: #fff; text-decoration: none; }
+  .footer-right { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .footer-col h4 { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; padding: 3px 0; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 24px 40px 0; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
+  .footer-bottom p { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 768px) {
+    .nav { padding: 16px 20px; }
+    .page-hero-inner { grid-template-columns: 1fr; gap: 32px; }
+    .page-hero-left, .page-hero-right { grid-column: 1; }
+    .two-col, .modules-grid, .tiers-grid, .credential-display, .newsletter-inner, .footer-right { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <a href="stratum.html" class="nav-logo" style="margin-left:16px;">TMI</a>
+</nav>
+
+<div class="side-overlay" id="overlay"></div>
+<div class="side-nav" id="sideNav">
+  <button class="side-nav-close" id="closeNav">×</button>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="platform.html">Platform</a>
+    <a href="os.html">TMI OS</a>
+    <a href="news.html">Field Notes</a>
+    <a href="audit.html">Free Audit</a>
+    <a href="about.html">About</a>
+    <a href="partners.html">Partners</a>
+  </div>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Industries</div>
+    <a href="construction.html">Construction</a>
+    <a href="oil-gas.html">Oil &amp; Gas</a>
+    <a href="trades.html">Trades</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="fleet.html">Fleet &amp; Logistics</a>
+  </div>
+  <a href="funnel.html" class="side-nav-cta">Apply to Work with TMI →</a>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-left">
+      <div class="page-eyebrow">TMI Certified</div>
+      <h1>The AI ops<br><em>standard.</em></h1>
+    </div>
+    <div class="page-hero-right">
+      <div class="cert-badge">
+        <div class="cert-badge-icon"></div>
+        <span>TMI Certified Operator</span>
+      </div>
+      <p>The credential that makes trade sophistication legible. TMI makes the language. The platform. The recognition.</p>
+      <p>One week. In-person or remote. The most rigorous AI operations training available for field-based companies — and the only credential that proves it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IT IS -->
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">About the Program</div>
+      <h2 class="section-title">Not software training.<br><em>Operator training.</em></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="two-col reveal">
+      <div class="two-col-text">
+        <p>Every industry eventually develops a credential that separates operators who know what they're doing from those who guessed their way through. For AI in field operations, that credential is TMI Certified.</p>
+        <p>This isn't a platform certification for a specific tool. It's a recognition that someone understands how to run AI-powered operations — how to deploy it, manage it, measure it, and hold a team accountable to it.</p>
+        <p>Insurers, investors, and larger GCs are starting to ask whether your team is AI-capable. TMI Certified answers that question with documentation, not claims.</p>
+      </div>
+      <div class="two-col-text">
+        <p>The program runs five days. Participants leave with a credential, a peer cohort, and a specific implementation plan for their operation.</p>
+        <p>TMI Certified is available for individual operators, management teams, and companies that want to certify their entire leadership bench. Each path has a different structure and price.</p>
+        <p>The first cohort runs in Q3 2026. Applications are open now.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CURRICULUM -->
+<section class="section-alt">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Curriculum</div>
+      <h2 class="section-title">Five days.<br>Field-<em>tested content.</em></h2>
+      <div class="divider"></div>
+      <p class="section-sub">Each day builds on the last. By the end of the week, participants have a complete picture of how AI operates in a field company — and a signed implementation plan for their own.</p>
+    </div>
+    <div class="modules-grid reveal">
+      <div class="module-card">
+        <div class="module-day">Day 1</div>
+        <h3>The Operating Model</h3>
+        <ul>
+          <li>How AI changes ops structure</li>
+          <li>Where humans stay in the loop</li>
+          <li>Mapping your current workflow</li>
+          <li>The 45 agents — what each one does</li>
+          <li>System selection framework</li>
+        </ul>
+      </div>
+      <div class="module-card">
+        <div class="module-day">Day 2</div>
+        <h3>Field &amp; Crew Systems</h3>
+        <ul>
+          <li>Dispatch and scheduling AI</li>
+          <li>Work order management</li>
+          <li>Crew accountability without surveillance</li>
+          <li>Equipment and maintenance tracking</li>
+          <li>Real job scenarios and case studies</li>
+        </ul>
+      </div>
+      <div class="module-card">
+        <div class="module-day">Day 3</div>
+        <h3>Finance &amp; Revenue</h3>
+        <ul>
+          <li>Job costing in real time</li>
+          <li>Revenue leakage — where it hides</li>
+          <li>Estimating accuracy with AI</li>
+          <li>Change order management</li>
+          <li>Cash flow and billing automation</li>
+        </ul>
+      </div>
+      <div class="module-card">
+        <div class="module-day">Day 4</div>
+        <h3>Deployment &amp; Change</h3>
+        <ul>
+          <li>Installing systems crews will actually use</li>
+          <li>Managing resistance in the field</li>
+          <li>Training frameworks that work</li>
+          <li>Measuring adoption, not just access</li>
+          <li>When to fire a system that isn't working</li>
+        </ul>
+      </div>
+      <div class="module-card">
+        <div class="module-day">Day 5</div>
+        <h3>Assessment &amp; Plan</h3>
+        <ul>
+          <li>Written and practical assessment</li>
+          <li>Peer review of implementation plans</li>
+          <li>Credential presentation</li>
+          <li>90-day implementation roadmap sign-off</li>
+          <li>Network integration and cohort placement</li>
+        </ul>
+      </div>
+      <div class="module-card" style="background: var(--bg-deep);">
+        <div class="module-day" style="color: var(--chart);">Throughout</div>
+        <h3 style="color: #fff;">Peer Cohort</h3>
+        <ul>
+          <li style="color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.1);">Max 20 participants per cohort</li>
+          <li style="color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.1);">Real operators, real companies</li>
+          <li style="color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.1);">No competitors in same cohort</li>
+          <li style="color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.1);">Cohort stays connected post-program</li>
+          <li style="color: rgba(255,255,255,0.6); border-bottom: none;">Placed in TMI Network after graduation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE CREDENTIAL -->
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">The Credential</div>
+      <h2 class="section-title">What you carry<br>out of the <em>room.</em></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="credential-display reveal">
+      <div class="credential-card">
+        <div class="credential-seal"><span>TMI</span></div>
+        <h3>TMI Certified Operator</h3>
+        <p>AI Operations · Field Services</p>
+        <div class="credential-card-name">Issued 2026 · Cohort I</div>
+      </div>
+      <div class="credential-details">
+        <h3>More than a certificate.</h3>
+        <p>TMI Certified includes a digital credential with verifiable ID, a printed certificate for the office, and a directory listing in the TMI Certified Operator Registry — a public-facing directory that contractors, GCs, and investors can check.</p>
+        <p>Certifications are valid for two years. Renewal requires either re-certification or documented continued education through the TMI Network.</p>
+        <ul class="credential-list">
+          <li>Digital credential with unique verification ID</li>
+          <li>Listing in the TMI Certified Operator Registry</li>
+          <li>TMI Network Member access for 12 months included</li>
+          <li>Right to display TMI Certified badge in proposals and bids</li>
+          <li>90-day implementation support access post-graduation</li>
+          <li>Priority enrollment in future TMI programs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIERS / PRICING -->
+<section class="section-dark">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label light">Enrollment</div>
+      <h2 class="section-title light">Three ways<br>to <em>enroll.</em></h2>
+      <div class="divider light"></div>
+      <p class="section-sub light">Individual operators, leadership teams, and companies that want company-wide certification all have a path in.</p>
+    </div>
+    <div class="tiers-grid reveal">
+      <div class="tier-card">
+        <div class="tier-name">Individual</div>
+        <div class="tier-title">Solo Operator</div>
+        <div class="tier-price">$2,500</div>
+        <div class="tier-price-note">Per seat · 5-day program</div>
+        <ul class="tier-features">
+          <li>Full 5-day curriculum</li>
+          <li>Written + practical assessment</li>
+          <li>TMI Certified credential</li>
+          <li>Registry listing</li>
+          <li>12-month Network membership</li>
+          <li>90-day post-grad support</li>
+        </ul>
+        <a href="funnel.html" class="tier-cta">Apply for a Seat →</a>
+      </div>
+      <div class="tier-card featured">
+        <div class="tier-name">Team</div>
+        <div class="tier-title">Leadership Team</div>
+        <div class="tier-price">$8,500</div>
+        <div class="tier-price-note">Up to 5 seats · same cohort</div>
+        <ul class="tier-features">
+          <li>5 seats in same cohort</li>
+          <li>Full curriculum for all members</li>
+          <li>Joint implementation plan</li>
+          <li>Credentials for all 5</li>
+          <li>12-month Network for all 5</li>
+          <li>180-day post-grad support</li>
+        </ul>
+        <a href="funnel.html" class="tier-cta">Apply as a Team →</a>
+      </div>
+      <div class="tier-card">
+        <div class="tier-name">Company</div>
+        <div class="tier-title">Company Certification</div>
+        <div class="tier-price">Custom</div>
+        <div class="tier-price-note">Private cohort · your team only</div>
+        <ul class="tier-features">
+          <li>Private cohort for your company</li>
+          <li>Curriculum adapted to your ops</li>
+          <li>On-site or remote delivery</li>
+          <li>All participants certified</li>
+          <li>Company-level certification badge</li>
+          <li>Ongoing certification program setup</li>
+        </ul>
+        <a href="funnel.html" class="tier-cta">Talk to TMI →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO SHOULD CERTIFY -->
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Who Should Certify</div>
+      <h2 class="section-title">The people<br>running <em>operations.</em></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="two-col reveal" style="margin-top: 48px;">
+      <div>
+        <div style="display: grid; gap: 1px; background: var(--line);">
+          <div style="background: var(--bg); padding: 28px;">
+            <div style="font-family: var(--serif); font-size: 19px; font-weight: 400; color: var(--ink); margin-bottom: 8px;">Owner-operators</div>
+            <div style="font-size: 14px; color: var(--ink-2); line-height: 1.6;">You're making the AI decisions for your company. TMI Certified gives you the framework to make them right — and the credential to prove you did.</div>
+          </div>
+          <div style="background: var(--bg); padding: 28px;">
+            <div style="font-family: var(--serif); font-size: 19px; font-weight: 400; color: var(--ink); margin-bottom: 8px;">Operations managers</div>
+            <div style="font-size: 14px; color: var(--ink-2); line-height: 1.6;">You're responsible for making systems work in the field. The certification teaches you how to deploy, train, and hold teams accountable to AI tools — not just how to buy them.</div>
+          </div>
+          <div style="background: var(--bg); padding: 28px;">
+            <div style="font-family: var(--serif); font-size: 19px; font-weight: 400; color: var(--ink); margin-bottom: 8px;">Field supervisors &amp; foremen</div>
+            <div style="font-size: 14px; color: var(--ink-2); line-height: 1.6;">The people who have to make AI work with real crews on real jobs. This program is built with people like you in mind — not IT departments or software consultants.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="display: grid; gap: 1px; background: var(--line);">
+          <div style="background: var(--bg); padding: 28px;">
+            <div style="font-family: var(--serif); font-size: 19px; font-weight: 400; color: var(--ink); margin-bottom: 8px;">GC and sub leadership</div>
+            <div style="font-size: 14px; color: var(--ink-2); line-height: 1.6;">As more GCs require AI-capable subs, TMI Certified is the proof that your company is operational — not just interested.</div>
+          </div>
+          <div style="background: var(--bg); padding: 28px;">
+            <div style="font-family: var(--serif); font-size: 19px; font-weight: 400; color: var(--ink); margin-bottom: 8px;">Companies seeking investment</div>
+            <div style="font-size: 14px; color: var(--ink-2); line-height: 1.6;">Investors and lenders are increasingly looking for operational maturity, not just revenue. A certified leadership team is a documented indicator.</div>
+          </div>
+          <div style="background: var(--bg-alt); padding: 28px;">
+            <div style="font-family: var(--serif); font-size: 19px; font-weight: 400; color: var(--ink); margin-bottom: 8px;">Not a fit if…</div>
+            <div style="font-size: 14px; color: var(--ink-2); line-height: 1.6;">You're a software vendor looking for a sales credential, an IT consultant without field operations experience, or a company with fewer than five employees. This program is built for people who run crews.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section-alt">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Questions</div>
+      <h2 class="section-title">Common <em>questions.</em></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q">When does the first cohort run?</div>
+        <div class="faq-a">The first TMI Certified cohort is scheduled for Q3 2026. Applications are open now. Cohort size is capped at 20 participants, and we expect to fill it from the waitlist. Apply early.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is it in-person or remote?</div>
+        <div class="faq-a">The standard program is in-person, delivered at TMI Summit events or at a TMI facility. Remote cohorts are available for company certification and select individual seats. In-person cohorts produce better cohort relationships, and we recommend them when feasible.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do I need to be using TMI software?</div>
+        <div class="faq-a">No. TMI Certified is platform-agnostic. The curriculum focuses on operational principles, deployment, and change management — not specific tools. Participants using TMI OS, ServiceTitan, Jobber, or their own systems are all welcome.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What if I don't pass the assessment?</div>
+        <div class="faq-a">Participants who don't pass the assessment on the first attempt get one remediation session and a second attempt within 90 days, included in the enrollment fee. We've designed the assessment to be rigorous, not arbitrary — everyone who completes the full five days in good faith has the foundation to pass.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How long does the credential last?</div>
+        <div class="faq-a">TMI Certified credentials are valid for two years from the date of issue. Renewal requires either re-certification or documented continued education through the TMI Network — at least four verified hours of coursework or peer learning per year.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I sponsor employees to attend?</div>
+        <div class="faq-a">Yes. Company-sponsored enrollment is the most common path for the Team and Company tiers. Invoicing is available to the company, and certificates are issued in the individual employee's name. Contact TMI directly for bulk enrollment invoicing.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="newsletter-section">
+  <div class="newsletter-inner">
+    <div class="reveal">
+      <h2>Field Notes.<br>The <em>weekly briefing</em><br>for operators.</h2>
+    </div>
+    <div class="reveal">
+      <p style="color:rgba(255,255,255,0.55); font-family: var(--serif); font-size:15px; margin-bottom:24px;">Case studies, operations frameworks, and what's actually working for field-based companies. No fluff.</p>
+      <form class="newsletter-form">
+        <input type="text" placeholder="Your name">
+        <input type="email" placeholder="Work email">
+        <button type="submit">Subscribe to Field Notes →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="stratum.html" class="footer-logo">TMI</a>
+      <p>The operating system for field-based companies. Built for the work that happens outside the office.</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="platform.html">Systems</a>
+        <a href="os.html">TMI OS</a>
+        <a href="zero.html">Start Kit</a>
+        <a href="certified.html">TMI Certified</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="network.html">Network</a>
+        <a href="events.html">Events</a>
+        <a href="about.html">About</a>
+        <a href="partners.html">Partners</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="news.html">Field Notes</a>
+        <a href="vault.html">The Vault</a>
+        <a href="developers.html">Developers</a>
+        <a href="audit.html">Free Audit</a>
+      </div>
+      <div class="footer-col">
+        <h4>Industries</h4>
+        <a href="construction.html">Construction</a>
+        <a href="oil-gas.html">Oil &amp; Gas</a>
+        <a href="trades.html">Trades</a>
+        <a href="fleet.html">Fleet</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 TMI. All rights reserved.</p>
+    <p style="color:rgba(255,255,255,0.3); font-size:12px;">tmitechai.com</p>
+  </div>
+</footer>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const overlay = document.getElementById('overlay');
+  const sideNav = document.getElementById('sideNav');
+  const closeNav = document.getElementById('closeNav');
+  function openNav() { sideNav.classList.add('open'); overlay.classList.add('open'); }
+  function closeNavFn() { sideNav.classList.remove('open'); overlay.classList.remove('open'); }
+  hamburger.addEventListener('click', openNav);
+  closeNav.addEventListener('click', closeNavFn);
+  overlay.addEventListener('click', closeNavFn);
+
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); } });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

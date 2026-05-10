@@ -90,7 +90,7 @@ async function handler(req, res) {
   if (step === 'day3_email') {
     // From Tyler
     await resend.emails.send({
-      from: 'Tyler at TMI <hello@tmi-technology.com>',
+      from: 'Tyler at TMI <hello@tmitechai.com>',
       to: lead.email,
       subject: 'Something I keep seeing',
       html: emailWrap(`
@@ -107,7 +107,7 @@ async function handler(req, res) {
   if (step === 'day7_email_sms') {
     // From Mia
     await resend.emails.send({
-      from: 'Mia at TMI <hello@tmi-technology.com>',
+      from: 'Mia at TMI <hello@tmitechai.com>',
       to: lead.email,
       subject: 'Straight question',
       html: emailWrap(`
@@ -132,7 +132,7 @@ async function handler(req, res) {
   if (step === 'day14_email') {
     // No name — just TMI
     await resend.emails.send({
-      from: 'TMI <hello@tmi-technology.com>',
+      from: 'TMI <hello@tmitechai.com>',
       to: lead.email,
       subject: "I'm going to stop here",
       html: emailWrap(`
@@ -150,7 +150,7 @@ async function handler(req, res) {
   if (step === 'pre_call_24h') {
     // From Mia — day before the call
     await resend.emails.send({
-      from: 'Mia at TMI <hello@tmi-technology.com>',
+      from: 'Mia at TMI <hello@tmitechai.com>',
       to: lead.email,
       subject: "We're talking tomorrow",
       html: emailWrap(`

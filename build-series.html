@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Series — TMI</title>
+<meta name="description" content="Deep-dive case studies of field operations companies building with AI. Real companies, real deployments, real numbers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff; --bg-alt: #f5f5f7; --bg-deep: #0d0e1a; --ink: #0a0b14; --ink-2: #505060; --muted: #86868b; --line: #e8e8ed; --accent: #1a1a1a; --chart: #E4FF97;
+    --serif: 'Barlow', sans-serif; --sans: 'Neue Haas Grotesk Display Pro', 'Arial Nova', Arial, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; overflow-x: hidden; }
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 40px; display: flex; align-items: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav-logo { font-family: var(--serif); font-size: 18px; font-weight: 500; color: var(--ink); text-decoration: none; }
+  .hamburger { background: none; border: none; cursor: pointer; padding: 4px; display: flex; flex-direction: column; gap: 5px; }
+  .hamburger span { display: block; width: 22px; height: 1.5px; background: var(--ink); }
+  .side-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: all; }
+  .side-nav { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--bg); z-index: 201; padding: 40px 32px; transition: left 0.35s cubic-bezier(.4,0,.2,1); overflow-y: auto; border-right: 1px solid var(--line); }
+  .side-nav.open { left: 0; }
+  .side-nav-close { background: none; border: none; cursor: pointer; font-size: 24px; color: var(--ink); margin-bottom: 32px; display: block; }
+  .side-nav-section { margin-bottom: 32px; }
+  .side-nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .side-nav a { display: block; font-family: var(--serif); font-size: 15px; color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .side-nav a:last-child { border-bottom: none; }
+  .side-nav-cta { display: block; margin-top: 32px; background: var(--ink); color: #fff; text-align: center; padding: 14px 20px; font-family: var(--serif); font-size: 14px; text-decoration: none; }
+  .page-hero { padding: 140px 0 80px; border-bottom: 1px solid var(--line); }
+  .page-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 80px; align-items: end; }
+  .page-hero-left { grid-column: 1 / 3; }
+  .page-hero-right { grid-column: 3 / 5; padding-bottom: 8px; }
+  .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .page-hero h1 { font-family: var(--serif); font-size: clamp(64px, 9vw, 120px); font-weight: 400; line-height: 1.0; letter-spacing: -0.03em; color: var(--ink); }
+  .page-hero h1 em { color: var(--accent); font-style: italic; }
+  .page-hero-right p { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 24px); font-weight: 300; color: var(--ink-2); line-height: 1.5; margin-bottom: 20px; }
+  .page-hero-right p:last-child { margin-bottom: 0; }
+  .section-white { padding: 80px 0; }
+  .section-alt { padding: 80px 0; background: var(--bg-alt); }
+  .section-dark { padding: 80px 0; background: var(--bg-deep); color: #fff; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .section-label.light { color: rgba(255,255,255,0.4); }
+  .section-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 56px); font-weight: 400; letter-spacing: -0.02em; color: var(--ink); line-height: 1.1; margin-bottom: 16px; }
+  .section-title.light { color: #fff; }
+  .section-title em { font-style: italic; }
+  .section-sub { font-family: var(--serif); font-size: clamp(16px, 1.4vw, 20px); font-weight: 300; color: var(--ink-2); max-width: 640px; line-height: 1.6; }
+  .divider { width: 40px; height: 1px; background: var(--line); margin: 24px 0; }
+  .divider.light { background: rgba(255,255,255,0.2); }
+  .featured-build { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); margin-top: 48px; }
+  .featured-build-img { background: var(--bg-deep); min-height: 360px; display: flex; align-items: end; padding: 40px; }
+  .featured-build-img-inner { }
+  .featured-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--chart); margin-bottom: 12px; }
+  .featured-build-img h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 44px); font-weight: 400; color: #fff; line-height: 1.2; }
+  .featured-build-content { background: var(--bg); padding: 48px; }
+  .featured-industry { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .featured-build-content h3 { font-family: var(--serif); font-size: 26px; font-weight: 400; color: var(--ink); margin-bottom: 16px; }
+  .featured-build-content p { font-size: 15px; color: var(--ink-2); line-height: 1.7; margin-bottom: 24px; }
+  .featured-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .featured-stat { border-top: 2px solid var(--ink); padding-top: 12px; }
+  .featured-stat-num { font-family: var(--serif); font-size: 28px; font-weight: 300; color: var(--ink); }
+  .featured-stat-label { font-size: 11px; color: var(--muted); }
+  .featured-cta { display: inline-block; background: var(--ink); color: #fff; padding: 13px 28px; font-family: var(--serif); font-size: 14px; text-decoration: none; }
+  .builds-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); margin-top: 1px; }
+  .build-card { background: var(--bg); padding: 32px; }
+  .build-card:hover { background: var(--bg-alt); }
+  .build-industry { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .build-card h3 { font-family: var(--serif); font-size: 20px; font-weight: 400; color: var(--ink); margin-bottom: 10px; line-height: 1.3; }
+  .build-card p { font-size: 13px; color: var(--ink-2); line-height: 1.6; margin-bottom: 16px; }
+  .build-meta { display: flex; gap: 16px; margin-bottom: 16px; }
+  .build-meta-item { font-size: 11px; color: var(--muted); }
+  .build-meta-item strong { font-family: var(--serif); font-size: 14px; font-weight: 400; color: var(--ink); display: block; }
+  .build-read { font-family: var(--serif); font-size: 13px; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--ink); padding-bottom: 2px; }
+  .member-cta { background: var(--bg-deep); padding: 48px; margin-top: 48px; display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center; }
+  .member-cta h3 { font-family: var(--serif); font-size: 26px; font-weight: 400; color: #fff; margin-bottom: 8px; }
+  .member-cta p { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+  .member-cta-btn { display: inline-block; background: var(--chart); color: var(--ink); padding: 14px 28px; font-family: var(--serif); font-size: 14px; text-decoration: none; white-space: nowrap; }
+  .newsletter-section { padding: 80px 0; background: var(--bg-deep); }
+  .newsletter-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .newsletter-inner h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 400; color: #fff; line-height: 1.1; }
+  .newsletter-inner h2 em { font-style: italic; color: var(--chart); }
+  .newsletter-form { display: flex; flex-direction: column; gap: 12px; }
+  .newsletter-form input { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 14px 18px; font-family: var(--sans); font-size: 14px; outline: none; }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.35); }
+  .newsletter-form button { background: var(--chart); color: var(--ink); border: none; padding: 14px 24px; font-family: var(--serif); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; }
+  .footer { background: var(--bg-deep); border-top: 1px solid rgba(255,255,255,0.08); padding: 64px 0 40px; }
+  .footer-grid { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 80px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 12px; max-width: 280px; line-height: 1.6; }
+  .footer-logo { font-family: var(--serif); font-size: 20px; font-weight: 500; color: #fff; text-decoration: none; }
+  .footer-right { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  .footer-col h4 { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; padding: 3px 0; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 24px 40px 0; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; }
+  .footer-bottom p { font-size: 12px; color: rgba(255,255,255,0.3); }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+  @media (max-width: 768px) {
+    .nav { padding: 16px 20px; }
+    .page-hero-inner, .featured-build { grid-template-columns: 1fr; }
+    .page-hero-left, .page-hero-right { grid-column: 1; }
+    .builds-grid, .newsletter-inner, .footer-right { grid-template-columns: 1fr; }
+    .featured-stats { grid-template-columns: repeat(2, 1fr); }
+    .member-cta { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  <a href="stratum.html" class="nav-logo" style="margin-left:16px;">TMI</a>
+</nav>
+<div class="side-overlay" id="overlay"></div>
+<div class="side-nav" id="sideNav">
+  <button class="side-nav-close" id="closeNav">×</button>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Navigation</div>
+    <a href="stratum.html">Home</a><a href="platform.html">Platform</a><a href="os.html">TMI OS</a><a href="news.html">Field Notes</a><a href="audit.html">Free Audit</a><a href="about.html">About</a>
+  </div>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Industries</div>
+    <a href="construction.html">Construction</a><a href="oil-gas.html">Oil &amp; Gas</a><a href="trades.html">Trades</a><a href="manufacturing.html">Manufacturing</a>
+  </div>
+  <a href="funnel.html" class="side-nav-cta">Apply to Work with TMI →</a>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-left">
+      <div class="page-eyebrow">Build Series</div>
+      <h1>Real builds.<br><em>Real numbers.</em></h1>
+    </div>
+    <div class="page-hero-right">
+      <p>Long-form case studies of field operations companies that built AI into their operations. What they deployed, what it cost, what broke, and what it's worth now.</p>
+      <p>Published monthly. Member-exclusive access to the full archive.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Latest Build</div>
+    </div>
+    <div class="featured-build reveal">
+      <div class="featured-build-img">
+        <div class="featured-build-img-inner">
+          <div class="featured-label">Build Series · May 2026</div>
+          <h2>How a 28-person HVAC company eliminated their dispatcher.</h2>
+        </div>
+      </div>
+      <div class="featured-build-content">
+        <div class="featured-industry">HVAC · Gulf South · 28 Employees</div>
+        <h3>12 months. One AI agent. $180K back in margin.</h3>
+        <p>Coastal Comfort deployed TMI's dispatch agent in March 2025. Their dispatcher of 11 years retired. They haven't replaced her. This is the story of what actually happened — the technical decisions, the crew resistance, the moment it almost fell apart, and the numbers 12 months later.</p>
+        <div class="featured-stats">
+          <div class="featured-stat">
+            <div class="featured-stat-num">$180K</div>
+            <div class="featured-stat-label">Recovered margin in year 1</div>
+          </div>
+          <div class="featured-stat">
+            <div class="featured-stat-num">31%</div>
+            <div class="featured-stat-label">Fewer jobs rescheduled</div>
+          </div>
+          <div class="featured-stat">
+            <div class="featured-stat-num">4 mo</div>
+            <div class="featured-stat-label">To full adoption</div>
+          </div>
+        </div>
+        <a href="network.html" class="featured-cta">Read Full Build (Member Access) →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Archive</div>
+      <h2 class="section-title">Previous<br><em>builds.</em></h2>
+      <div class="divider"></div>
+      <p class="section-sub">Every build in the archive is a real company with real numbers. No case studies written by the vendor. No anonymized data. Real names, real outcomes.</p>
+    </div>
+
+    <div class="builds-grid reveal">
+      <div class="build-card">
+        <div class="build-industry">Construction · Texas · 85 Employees</div>
+        <h3>How a mid-size GC cut change order disputes by 60%</h3>
+        <p>Pecos Ridge installed work order documentation AI across 12 active sites. The change order dispute rate dropped from 1 in 5 jobs to 1 in 12. Field Notes breakdown of how the system actually worked.</p>
+        <div class="build-meta">
+          <div class="build-meta-item"><strong>$240K</strong> saved in disputed COs</div>
+          <div class="build-meta-item"><strong>8 weeks</strong> to full deployment</div>
+        </div>
+        <a href="network.html" class="build-read">Read Build →</a>
+      </div>
+      <div class="build-card">
+        <div class="build-industry">Oil &amp; Gas Services · Louisiana · 140 Employees</div>
+        <h3>Pipeline inspection at 3x the pace with half the crew</h3>
+        <p>Bayou Energy Services deployed aerial + ground inspection robots on a 40-mile pipeline corridor. Inspection time dropped from 6 weeks to 9 days. Full deployment story including what the crew thought when the robots showed up.</p>
+        <div class="build-meta">
+          <div class="build-meta-item"><strong>67%</strong> faster inspection cycle</div>
+          <div class="build-meta-item"><strong>$380K</strong> project margin improvement</div>
+        </div>
+        <a href="network.html" class="build-read">Read Build →</a>
+      </div>
+      <div class="build-card">
+        <div class="build-industry">Electrical · Southeast · 34 Employees</div>
+        <h3>What happened when we told the crew the AI was tracking them</h3>
+        <p>Sunbelt Electric deployed crew accountability tracking and was honest about it. Three guys quit. Two came back. Revenue per crew member went up 22% in 6 months. A build series story about the human side of AI deployment.</p>
+        <div class="build-meta">
+          <div class="build-meta-item"><strong>22%</strong> revenue per crew member</div>
+          <div class="build-meta-item"><strong>3 → 2</strong> crew losses, then stabilized</div>
+        </div>
+        <a href="network.html" class="build-read">Read Build →</a>
+      </div>
+      <div class="build-card">
+        <div class="build-industry">Plumbing · Mountain West · 22 Employees</div>
+        <h3>A $8,500 Start Kit install that paid back in 11 weeks</h3>
+        <p>Rocky Mountain Plumbing did the Start Kit. One system — job costing. Eleven weeks later the payback math worked out. The owner explains exactly what changed and what they're installing next.</p>
+        <div class="build-meta">
+          <div class="build-meta-item"><strong>11 weeks</strong> payback on Start Kit</div>
+          <div class="build-meta-item"><strong>$52K</strong> identified in margin leakage</div>
+        </div>
+        <a href="network.html" class="build-read">Read Build →</a>
+      </div>
+      <div class="build-card">
+        <div class="build-industry">Landscaping · Mid-Atlantic · 67 Employees</div>
+        <h3>Running a seasonal crew with AI: the honest results</h3>
+        <p>Greenscapes Atlantic is seasonal — 30 people in winter, 90 in summer. They built a crew management system that handles the surge without hiring an operations manager. What worked and what didn't in year one.</p>
+        <div class="build-meta">
+          <div class="build-meta-item"><strong>3× crew</strong> scaled without ops hire</div>
+          <div class="build-meta-item"><strong>14%</strong> lower seasonal labor cost</div>
+        </div>
+        <a href="network.html" class="build-read">Read Build →</a>
+      </div>
+      <div class="build-card" style="background: var(--bg-deep);">
+        <div class="build-industry" style="color: var(--chart);">Member Access</div>
+        <h3 style="color: #fff;">12 more builds in the archive.</h3>
+        <p style="color: rgba(255,255,255,0.55);">The full Build Series archive is available to TMI Network members. Three free previews per month, full access with Member tier ($297/mo).</p>
+        <div style="margin-top: 20px;">
+          <a href="network.html" style="display: inline-block; background: var(--chart); color: var(--ink); padding: 12px 24px; font-family: var(--serif); font-size: 13px; text-decoration: none;">Join for Full Access →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="member-cta reveal">
+      <div>
+        <h3>Be featured in the Build Series.</h3>
+        <p>If you're a TMI Network member with a deployment story worth telling, we want to hear it. We're always looking for operators willing to share the real numbers — not a polished success story, but the actual build with the actual outcomes.</p>
+      </div>
+      <a href="funnel.html" class="member-cta-btn">Pitch Your Build →</a>
+    </div>
+  </div>
+</section>
+
+<section class="newsletter-section">
+  <div class="newsletter-inner">
+    <div class="reveal"><h2>Field Notes.<br>New <em>builds</em><br>every week.</h2></div>
+    <div class="reveal">
+      <p style="color:rgba(255,255,255,0.55); font-family: var(--serif); font-size:15px; margin-bottom:24px;">Build Series previews, Field Notes weekly briefing, and first access to new case studies. Free subscribers get three previews per month.</p>
+      <form class="newsletter-form">
+        <input type="text" placeholder="Your name"><input type="email" placeholder="Work email">
+        <button type="submit">Subscribe to Field Notes →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand"><a href="stratum.html" class="footer-logo">TMI</a><p>The operating system for field-based companies.</p></div>
+    <div class="footer-right">
+      <div class="footer-col"><h4>Platform</h4><a href="platform.html">Systems</a><a href="os.html">TMI OS</a><a href="zero.html">Start Kit</a></div>
+      <div class="footer-col"><h4>Community</h4><a href="network.html">Network</a><a href="events.html">Events</a><a href="build-series.html">Build Series</a></div>
+      <div class="footer-col"><h4>Resources</h4><a href="news.html">Field Notes</a><a href="vault.html">The Vault</a><a href="audit.html">Free Audit</a></div>
+      <div class="footer-col"><h4>Industries</h4><a href="construction.html">Construction</a><a href="oil-gas.html">Oil &amp; Gas</a><a href="trades.html">Trades</a></div>
+    </div>
+  </div>
+  <div class="footer-bottom"><p>&copy; 2026 TMI. All rights reserved.</p><p style="color:rgba(255,255,255,0.3); font-size:12px;">tmitechai.com</p></div>
+</footer>
+<script>
+  const hamburger=document.getElementById('hamburger'),overlay=document.getElementById('overlay'),sideNav=document.getElementById('sideNav'),closeNav=document.getElementById('closeNav');
+  function openNav(){sideNav.classList.add('open');overlay.classList.add('open');}
+  function closeNavFn(){sideNav.classList.remove('open');overlay.classList.remove('open');}
+  hamburger.addEventListener('click',openNav);closeNav.addEventListener('click',closeNavFn);overlay.addEventListener('click',closeNavFn);
+  const reveals=document.querySelectorAll('.reveal');
+  const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08});
+  reveals.forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>

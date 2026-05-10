@@ -1,0 +1,484 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start Kit — TMI</title>
+<meta name="description" content="One system. Thirty days. The fastest way to get a field operations company running on AI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff;
+    --bg-alt: #f5f5f7;
+    --bg-deep: #0d0e1a;
+    --ink: #0a0b14;
+    --ink-2: #505060;
+    --muted: #86868b;
+    --line: #e8e8ed;
+    --accent: #1a1a1a;
+    --chart: #E4FF97;
+    --serif: 'Barlow', sans-serif;
+    --sans: 'Neue Haas Grotesk Display Pro', 'Arial Nova', Arial, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; overflow-x: hidden; }
+
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 40px; display: flex; align-items: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav-logo { font-family: var(--serif); font-size: 18px; font-weight: 500; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+  .hamburger { background: none; border: none; cursor: pointer; padding: 4px; display: flex; flex-direction: column; gap: 5px; }
+  .hamburger span { display: block; width: 22px; height: 1.5px; background: var(--ink); transition: all 0.3s; }
+  .side-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: all; }
+  .side-nav { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--bg); z-index: 201; padding: 40px 32px; transition: left 0.35s cubic-bezier(.4,0,.2,1); overflow-y: auto; border-right: 1px solid var(--line); }
+  .side-nav.open { left: 0; }
+  .side-nav-close { background: none; border: none; cursor: pointer; font-size: 24px; color: var(--ink); margin-bottom: 32px; display: block; }
+  .side-nav-section { margin-bottom: 32px; }
+  .side-nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .side-nav a { display: block; font-family: var(--serif); font-size: 15px; color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .side-nav a:last-child { border-bottom: none; }
+  .side-nav-cta { display: block; margin-top: 32px; background: var(--ink); color: #fff; text-align: center; padding: 14px 20px; font-family: var(--serif); font-size: 14px; text-decoration: none; }
+
+  .page-hero { padding: 140px 0 80px; border-bottom: 1px solid var(--line); }
+  .page-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 80px; align-items: end; }
+  .page-hero-left { grid-column: 1 / 3; }
+  .page-hero-right { grid-column: 3 / 5; padding-bottom: 8px; }
+  .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .page-hero h1 { font-family: var(--serif); font-size: clamp(64px, 9vw, 120px); font-weight: 400; line-height: 1.0; letter-spacing: -0.03em; color: var(--ink); }
+  .page-hero h1 em { color: var(--accent); font-style: italic; }
+  .page-hero-right p { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 24px); font-weight: 300; color: var(--ink-2); line-height: 1.5; margin-bottom: 20px; }
+  .hero-price-tag { display: inline-block; background: var(--chart); color: var(--ink); font-family: var(--serif); font-size: 14px; font-weight: 500; padding: 8px 16px; margin-bottom: 20px; }
+
+  .section-white { padding: 80px 0; }
+  .section-alt { padding: 80px 0; background: var(--bg-alt); }
+  .section-dark { padding: 80px 0; background: var(--bg-deep); color: #fff; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .section-label.light { color: rgba(255,255,255,0.4); }
+  .section-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 56px); font-weight: 400; letter-spacing: -0.02em; color: var(--ink); line-height: 1.1; margin-bottom: 16px; }
+  .section-title.light { color: #fff; }
+  .section-title em { font-style: italic; }
+  .section-sub { font-family: var(--serif); font-size: clamp(16px, 1.4vw, 20px); font-weight: 300; color: var(--ink-2); max-width: 600px; line-height: 1.6; }
+  .section-sub.light { color: rgba(255,255,255,0.6); }
+  .divider { width: 40px; height: 1px; background: var(--line); margin: 24px 0; }
+  .divider.light { background: rgba(255,255,255,0.2); }
+
+  .kit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); margin-top: 48px; }
+  .kit-card { background: var(--bg); padding: 40px 32px; }
+  .kit-card-number { font-family: var(--serif); font-size: 11px; font-weight: 500; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 20px; }
+  .kit-card h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--ink); margin-bottom: 12px; }
+  .kit-card p { font-size: 14px; color: var(--ink-2); line-height: 1.6; }
+
+  .timeline { margin-top: 48px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,0.1); }
+  .timeline-step { background: var(--bg-deep); padding: 40px 28px; }
+  .timeline-week { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--chart); margin-bottom: 16px; }
+  .timeline-step h4 { font-family: var(--serif); font-size: 20px; font-weight: 400; color: #fff; margin-bottom: 12px; }
+  .timeline-step p { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+
+  .systems-list { margin-top: 48px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); }
+  .system-item { background: var(--bg-alt); padding: 32px; display: flex; align-items: start; gap: 20px; }
+  .system-check { width: 20px; height: 20px; background: var(--ink); border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .system-check::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--chart); }
+  .system-item h4 { font-family: var(--serif); font-size: 17px; font-weight: 400; color: var(--ink); margin-bottom: 6px; }
+  .system-item p { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+
+  .pricing-card { background: var(--bg); border: 1px solid var(--line); padding: 48px; margin-top: 48px; max-width: 640px; }
+  .pricing-amount { font-family: var(--serif); font-size: clamp(48px, 6vw, 80px); font-weight: 300; color: var(--ink); letter-spacing: -0.03em; margin-bottom: 8px; }
+  .pricing-note { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+  .pricing-includes { list-style: none; margin-bottom: 32px; }
+  .pricing-includes li { padding: 10px 0; border-bottom: 1px solid var(--line); font-family: var(--serif); font-size: 16px; color: var(--ink-2); display: flex; gap: 12px; }
+  .pricing-includes li::before { content: '—'; color: var(--muted); flex-shrink: 0; }
+  .pricing-cta { display: inline-block; background: var(--ink); color: #fff; padding: 16px 40px; font-family: var(--serif); font-size: 15px; text-decoration: none; transition: background 0.2s; }
+  .pricing-cta:hover { background: #333; }
+  .pricing-secondary { display: inline-block; margin-left: 16px; font-family: var(--serif); font-size: 14px; color: var(--muted); text-decoration: underline; }
+
+  .faq-list { margin-top: 48px; }
+  .faq-item { padding: 28px 0; border-bottom: 1px solid var(--line); }
+  .faq-item:first-child { border-top: 1px solid var(--line); }
+  .faq-q { font-family: var(--serif); font-size: 18px; font-weight: 400; color: var(--ink); margin-bottom: 10px; }
+  .faq-a { font-size: 14px; color: var(--ink-2); line-height: 1.7; max-width: 640px; }
+
+  .newsletter-section { padding: 80px 0; background: var(--bg-deep); }
+  .newsletter-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .newsletter-inner h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 400; color: #fff; line-height: 1.1; }
+  .newsletter-inner h2 em { font-style: italic; color: var(--chart); }
+  .newsletter-form { display: flex; flex-direction: column; gap: 12px; }
+  .newsletter-form input { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 14px 18px; font-family: var(--sans); font-size: 14px; outline: none; }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.35); }
+  .newsletter-form button { background: var(--chart); color: var(--ink); border: none; padding: 14px 24px; font-family: var(--serif); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; }
+
+  .footer { background: var(--bg-deep); border-top: 1px solid rgba(255,255,255,0.08); padding: 64px 0 40px; }
+  .footer-grid { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 80px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 12px; max-width: 280px; line-height: 1.6; }
+  .footer-logo { font-family: var(--serif); font-size: 20px; font-weight: 500; color: #fff; text-decoration: none; }
+  .footer-right { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .footer-col h4 { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; padding: 3px 0; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 24px 40px 0; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
+  .footer-bottom p { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 768px) {
+    .nav { padding: 16px 20px; }
+    .page-hero-inner { grid-template-columns: 1fr; gap: 32px; }
+    .page-hero-left, .page-hero-right { grid-column: 1; }
+    .kit-grid, .timeline, .systems-list, .newsletter-inner, .footer-right { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <a href="stratum.html" class="nav-logo" style="margin-left:16px;">TMI</a>
+</nav>
+
+<div class="side-overlay" id="overlay"></div>
+<div class="side-nav" id="sideNav">
+  <button class="side-nav-close" id="closeNav">×</button>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="platform.html">Platform</a>
+    <a href="os.html">TMI OS</a>
+    <a href="news.html">Field Notes</a>
+    <a href="audit.html">Free Audit</a>
+    <a href="about.html">About</a>
+    <a href="partners.html">Partners</a>
+  </div>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Industries</div>
+    <a href="construction.html">Construction</a>
+    <a href="oil-gas.html">Oil &amp; Gas</a>
+    <a href="trades.html">Trades</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="fleet.html">Fleet &amp; Logistics</a>
+  </div>
+  <a href="funnel.html" class="side-nav-cta">Apply to Work with TMI →</a>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-left">
+      <div class="page-eyebrow">Start Kit</div>
+      <h1>Start from<br><em>scratch.</em></h1>
+    </div>
+    <div class="page-hero-right">
+      <div class="hero-price-tag">$8,500 flat</div>
+      <p>One system. Thirty days. The fastest path from zero to operational AI for field-based companies.</p>
+      <p>Start Kit is how a growing trades company gets its first system installed without hiring a team, without a six-month engagement, and without guessing.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">What's Included</div>
+      <h2 class="section-title">Everything to go live<br>in <em>thirty days.</em></h2>
+      <div class="divider"></div>
+      <p class="section-sub">No discovery phase that takes three months. No endless customization sessions. One core system, installed and running.</p>
+    </div>
+    <div class="kit-grid reveal">
+      <div class="kit-card">
+        <div class="kit-card-number">01</div>
+        <h3>System Selection</h3>
+        <p>We identify the single highest-impact system for your operation — dispatch, work order management, job costing, or crew tracking — based on a pre-install audit.</p>
+      </div>
+      <div class="kit-card">
+        <div class="kit-card-number">02</div>
+        <h3>Full Installation</h3>
+        <p>TMI configures, tests, and deploys your system with your data. We don't hand you a manual. We run the install and stay with you through go-live.</p>
+      </div>
+      <div class="kit-card">
+        <div class="kit-card-number">03</div>
+        <h3>Crew Training</h3>
+        <p>Three live training sessions with your team. Field crews, office staff, and management all walk out knowing how to use it before we leave.</p>
+      </div>
+      <div class="kit-card">
+        <div class="kit-card-number">04</div>
+        <h3>30-Day Support</h3>
+        <p>Direct access to your install lead for thirty days post-launch. Real support, not a ticketing queue. Questions answered same day.</p>
+      </div>
+      <div class="kit-card">
+        <div class="kit-card-number">05</div>
+        <h3>Ops Audit Report</h3>
+        <p>A written report of what we found before install — gaps, waste, and the priority order for your next systems. A roadmap for what comes after.</p>
+      </div>
+      <div class="kit-card">
+        <div class="kit-card-number">06</div>
+        <h3>Network Access</h3>
+        <p>Sixty days of Member-tier access to the TMI Network. Peer operators, weekly calls, the Resource Library. Get connected while your system is going live.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Core Systems</div>
+      <h2 class="section-title">Pick <em>one.</em> We install it right.</h2>
+      <div class="divider"></div>
+      <p class="section-sub">Start Kit installs one system fully — not five systems at 20%. Most companies try to do everything at once. That's why nothing works.</p>
+    </div>
+    <div class="systems-list reveal">
+      <div class="system-item">
+        <div class="system-check"></div>
+        <div>
+          <h4>Dispatch &amp; Scheduling</h4>
+          <p>AI-routed job assignments, crew availability, and real-time schedule management. The most common first system for field service companies.</p>
+        </div>
+      </div>
+      <div class="system-item">
+        <div class="system-check"></div>
+        <div>
+          <h4>Work Order Management</h4>
+          <p>Digital work orders, photo capture, field sign-off, and automatic billing triggers. Eliminates paper and closes the billing lag.</p>
+        </div>
+      </div>
+      <div class="system-item">
+        <div class="system-check"></div>
+        <div>
+          <h4>Job Costing</h4>
+          <p>Labor hours, materials, and equipment tracked per job in real time. Know your margins before the job closes, not a month later.</p>
+        </div>
+      </div>
+      <div class="system-item">
+        <div class="system-check"></div>
+        <div>
+          <h4>Crew Accountability</h4>
+          <p>Time tracking, location check-ins, daily reporting, and performance metrics for field crews. Replaces the foreman's clipboard and the end-of-day phone call.</p>
+        </div>
+      </div>
+      <div class="system-item">
+        <div class="system-check"></div>
+        <div>
+          <h4>Maintenance Tracking</h4>
+          <p>Preventive maintenance schedules, inspection logs, and equipment history for your fleet. Stops the expensive surprise breakdowns.</p>
+        </div>
+      </div>
+      <div class="system-item">
+        <div class="system-check"></div>
+        <div>
+          <h4>Customer &amp; Estimate</h4>
+          <p>Quote generation, customer records, follow-up automation, and proposal tracking. The sales and customer side of a trades operation, systematized.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-dark">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label light">The Timeline</div>
+      <h2 class="section-title light">Thirty days,<br>four <em>phases.</em></h2>
+      <div class="divider light"></div>
+    </div>
+    <div class="timeline reveal">
+      <div class="timeline-step">
+        <div class="timeline-week">Week 1</div>
+        <h4>Audit &amp; Configure</h4>
+        <p>Pre-install ops audit. System configuration. Data migration from whatever you're using now — spreadsheets, paper, or a competitor's tool.</p>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-week">Week 2</div>
+        <h4>Pilot &amp; Test</h4>
+        <p>Live pilot with a subset of your team. Real jobs, real data. We find the friction before your whole crew hits it.</p>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-week">Week 3</div>
+        <h4>Train &amp; Launch</h4>
+        <p>Full crew training sessions. System goes live company-wide. Your team uses it for real work with your install lead available the whole time.</p>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-week">Week 4</div>
+        <h4>Stabilize &amp; Report</h4>
+        <p>Daily check-ins to resolve issues. Final ops audit report delivered. Roadmap for your next system. You run it on your own from here.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">One price.<br><em>No surprises.</em></h2>
+      <div class="divider"></div>
+      <p class="section-sub">Start Kit is a flat fee. No hourly overages. No change order surprises. Scope is fixed so cost is fixed.</p>
+    </div>
+    <div class="pricing-card reveal">
+      <div class="pricing-amount">$8,500</div>
+      <div class="pricing-note">One-time flat fee · 30-day install · No ongoing contract required</div>
+      <ul class="pricing-includes">
+        <li>Pre-install ops audit + written report</li>
+        <li>One core system, fully configured and deployed</li>
+        <li>Data migration from your current system</li>
+        <li>Three crew training sessions (up to 25 people)</li>
+        <li>30 days of direct post-launch support</li>
+        <li>60-day Member network access (then $297/mo if you continue)</li>
+        <li>Priority path to full TMI OS engagement</li>
+      </ul>
+      <a href="funnel.html" class="pricing-cta">Apply for Start Kit →</a>
+      <a href="audit.html" class="pricing-secondary">Free audit first</a>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="container reveal">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items:start;">
+      <div>
+        <div class="section-label">Who It's For</div>
+        <h2 class="section-title">Built for companies<br>starting <em>now.</em></h2>
+        <div class="divider"></div>
+        <p class="section-sub">Start Kit works for companies that have been running manually and know they need to change — but don't know where to start or can't afford a six-figure consulting engagement to figure it out.</p>
+      </div>
+      <div style="padding-top: 56px;">
+        <div class="faq-list" style="margin-top:0;">
+          <div class="faq-item" style="border-top: 1px solid var(--line);">
+            <div class="faq-q">5–50 employees</div>
+            <div class="faq-a">Big enough to have real operational problems. Small enough that you're still making decisions. Start Kit is sized for this range.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">Field-based work</div>
+            <div class="faq-a">Construction, trades, HVAC, plumbing, electrical, landscaping, oil &amp; gas services. Work that happens in the field with crews, equipment, and jobs.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">No system — or one that isn't working</div>
+            <div class="faq-a">Running on spreadsheets, using a tool nobody actually uses, or using five different apps that don't talk to each other. Any of these qualifies.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">Owner or operator making the call</div>
+            <div class="faq-a">Start Kit doesn't require an IT department or a procurement process. You decide, we start.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Questions</div>
+      <h2 class="section-title">Common <em>questions.</em></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q">What happens after 30 days?</div>
+        <div class="faq-a">You own the system and run it yourself. If you want to add more systems, you can engage for a full TMI OS deployment. If you want peer support and resources, you can continue your TMI Network membership at $297/month. Neither is required.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What software are we installing?</div>
+        <div class="faq-a">TMI selects and configures the right tool for your operation — either from our Marketplace or TMI's own OS modules. We don't push a specific platform. We configure what fits your work and your crew.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do I need any technical staff?</div>
+        <div class="faq-a">No. TMI runs the entire install. You need someone who can coordinate training schedules and has access to your company data — that's it.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can we do more than one system?</div>
+        <div class="faq-a">Start Kit installs one system. If you need a full multi-system deployment, that's a TMI OS engagement — a different scope, different timeline, different price. We recommend starting with one unless you've already operated with digital systems before.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What if the install goes sideways?</div>
+        <div class="faq-a">It's why we have a four-week timeline instead of two. The pilot week exists to find problems before the whole crew is on the system. We've done this enough to know where things break, and we build the fix into the process.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is there a revenue share?</div>
+        <div class="faq-a">Start Kit has no revenue share. It's a flat fee. Revenue share is part of Operator-tier TMI Network membership — a different, deeper engagement for companies that want an ongoing operational partnership.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="newsletter-section">
+  <div class="newsletter-inner">
+    <div class="reveal">
+      <h2>Field Notes.<br>The <em>weekly briefing</em><br>for operators.</h2>
+    </div>
+    <div class="reveal">
+      <p style="color:rgba(255,255,255,0.55); font-family: var(--serif); font-size:15px; margin-bottom:24px;">Case studies, operations frameworks, and what's actually working for field-based companies. No fluff.</p>
+      <form class="newsletter-form">
+        <input type="text" placeholder="Your name">
+        <input type="email" placeholder="Work email">
+        <button type="submit">Subscribe to Field Notes →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="stratum.html" class="footer-logo">TMI</a>
+      <p>The operating system for field-based companies. Built for the work that happens outside the office.</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="platform.html">Systems</a>
+        <a href="os.html">TMI OS</a>
+        <a href="zero.html">Start Kit</a>
+        <a href="certified.html">TMI Certified</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="network.html">Network</a>
+        <a href="events.html">Events</a>
+        <a href="about.html">About</a>
+        <a href="partners.html">Partners</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="news.html">Field Notes</a>
+        <a href="vault.html">The Vault</a>
+        <a href="developers.html">Developers</a>
+        <a href="audit.html">Free Audit</a>
+      </div>
+      <div class="footer-col">
+        <h4>Industries</h4>
+        <a href="construction.html">Construction</a>
+        <a href="oil-gas.html">Oil &amp; Gas</a>
+        <a href="trades.html">Trades</a>
+        <a href="fleet.html">Fleet</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 TMI. All rights reserved.</p>
+    <p style="color:rgba(255,255,255,0.3); font-size:12px;">tmitechai.com</p>
+  </div>
+</footer>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const overlay = document.getElementById('overlay');
+  const sideNav = document.getElementById('sideNav');
+  const closeNav = document.getElementById('closeNav');
+  function openNav() { sideNav.classList.add('open'); overlay.classList.add('open'); }
+  function closeNavFn() { sideNav.classList.remove('open'); overlay.classList.remove('open'); }
+  hamburger.addEventListener('click', openNav);
+  closeNav.addEventListener('click', closeNavFn);
+  overlay.addEventListener('click', closeNavFn);
+
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); } });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

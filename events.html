@@ -1,0 +1,432 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events — TMI 2026</title>
+<meta name="description" content="The full TMI 2026 events calendar. Summits, workshops, roundtables, and online events for field operations operators.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff;
+    --bg-alt: #f5f5f7;
+    --bg-deep: #0d0e1a;
+    --ink: #0a0b14;
+    --ink-2: #505060;
+    --muted: #86868b;
+    --line: #e8e8ed;
+    --accent: #1a1a1a;
+    --chart: #E4FF97;
+    --serif: 'Barlow', sans-serif;
+    --sans: 'Neue Haas Grotesk Display Pro', 'Arial Nova', Arial, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; overflow-x: hidden; }
+
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 40px; display: flex; align-items: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav-logo { font-family: var(--serif); font-size: 18px; font-weight: 500; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+  .hamburger { background: none; border: none; cursor: pointer; padding: 4px; display: flex; flex-direction: column; gap: 5px; }
+  .hamburger span { display: block; width: 22px; height: 1.5px; background: var(--ink); transition: all 0.3s; }
+  .side-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: all; }
+  .side-nav { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--bg); z-index: 201; padding: 40px 32px; transition: left 0.35s cubic-bezier(.4,0,.2,1); overflow-y: auto; border-right: 1px solid var(--line); }
+  .side-nav.open { left: 0; }
+  .side-nav-close { background: none; border: none; cursor: pointer; font-size: 24px; color: var(--ink); margin-bottom: 32px; display: block; }
+  .side-nav-section { margin-bottom: 32px; }
+  .side-nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .side-nav a { display: block; font-family: var(--serif); font-size: 15px; color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .side-nav a:last-child { border-bottom: none; }
+  .side-nav-cta { display: block; margin-top: 32px; background: var(--ink); color: #fff; text-align: center; padding: 14px 20px; font-family: var(--serif); font-size: 14px; text-decoration: none; }
+
+  .page-hero { padding: 140px 0 80px; border-bottom: 1px solid var(--line); }
+  .page-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 80px; align-items: end; }
+  .page-hero-left { grid-column: 1 / 3; }
+  .page-hero-right { grid-column: 3 / 5; padding-bottom: 8px; }
+  .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .page-hero h1 { font-family: var(--serif); font-size: clamp(64px, 9vw, 120px); font-weight: 400; line-height: 1.0; letter-spacing: -0.03em; color: var(--ink); }
+  .page-hero h1 em { color: var(--accent); font-style: italic; }
+  .page-hero-right p { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 24px); font-weight: 300; color: var(--ink-2); line-height: 1.5; margin-bottom: 20px; }
+  .page-hero-right p:last-child { margin-bottom: 0; }
+
+  .section-white { padding: 80px 0; }
+  .section-alt { padding: 80px 0; background: var(--bg-alt); }
+  .section-dark { padding: 80px 0; background: var(--bg-deep); color: #fff; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .section-label.light { color: rgba(255,255,255,0.4); }
+  .section-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 56px); font-weight: 400; letter-spacing: -0.02em; color: var(--ink); line-height: 1.1; margin-bottom: 16px; }
+  .section-title.light { color: #fff; }
+  .section-title em { font-style: italic; }
+  .section-sub { font-family: var(--serif); font-size: clamp(16px, 1.4vw, 20px); font-weight: 300; color: var(--ink-2); max-width: 640px; line-height: 1.6; }
+  .divider { width: 40px; height: 1px; background: var(--line); margin: 24px 0; }
+  .divider.light { background: rgba(255,255,255,0.2); }
+
+  /* FILTER */
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 40px 0 32px; }
+  .filter-btn { background: none; border: 1px solid var(--line); padding: 8px 18px; font-family: var(--serif); font-size: 13px; color: var(--ink-2); cursor: pointer; transition: all 0.2s; }
+  .filter-btn.active, .filter-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  /* EVENT LIST */
+  .event-list { display: flex; flex-direction: column; gap: 1px; background: var(--line); }
+  .event-row { background: var(--bg); display: grid; grid-template-columns: 140px 1fr auto; gap: 40px; padding: 32px; align-items: start; transition: background 0.15s; }
+  .event-row:hover { background: var(--bg-alt); }
+  .event-row-date { padding-top: 2px; }
+  .event-row-month { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .event-row-day { font-family: var(--serif); font-size: 36px; font-weight: 300; color: var(--ink); letter-spacing: -0.02em; line-height: 1; }
+  .event-row-type { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); padding: 3px 8px; margin-bottom: 8px; }
+  .event-row-type.summit { color: var(--ink); border-color: var(--ink); }
+  .event-row-type.workshop { color: #2563eb; border-color: #2563eb; }
+  .event-row-type.online { color: #059669; border-color: #059669; }
+  .event-row h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--ink); margin-bottom: 6px; }
+  .event-row-meta { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .event-row p { font-size: 14px; color: var(--ink-2); line-height: 1.6; max-width: 560px; }
+  .event-row-action { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding-top: 4px; }
+  .event-row-spots { font-size: 12px; color: var(--muted); text-align: right; }
+  .event-row-cta { display: inline-block; padding: 11px 24px; font-family: var(--serif); font-size: 13px; text-decoration: none; background: var(--ink); color: #fff; white-space: nowrap; }
+  .event-row-cta.waitlist { background: var(--bg-alt); color: var(--ink); border: 1px solid var(--line); }
+  .event-row-cta.free { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+  .event-row.past { opacity: 0.5; }
+
+  /* TYPES LEGEND */
+  .legend { display: flex; gap: 24px; align-items: center; margin-bottom: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .newsletter-section { padding: 80px 0; background: var(--bg-deep); }
+  .newsletter-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .newsletter-inner h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 400; color: #fff; line-height: 1.1; }
+  .newsletter-inner h2 em { font-style: italic; color: var(--chart); }
+  .newsletter-form { display: flex; flex-direction: column; gap: 12px; }
+  .newsletter-form input { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 14px 18px; font-family: var(--sans); font-size: 14px; outline: none; }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.35); }
+  .newsletter-form button { background: var(--chart); color: var(--ink); border: none; padding: 14px 24px; font-family: var(--serif); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; }
+
+  .footer { background: var(--bg-deep); border-top: 1px solid rgba(255,255,255,0.08); padding: 64px 0 40px; }
+  .footer-grid { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 80px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 12px; max-width: 280px; line-height: 1.6; }
+  .footer-logo { font-family: var(--serif); font-size: 20px; font-weight: 500; color: #fff; text-decoration: none; }
+  .footer-right { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .footer-col h4 { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; padding: 3px 0; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 24px 40px 0; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
+  .footer-bottom p { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 768px) {
+    .nav { padding: 16px 20px; }
+    .page-hero-inner { grid-template-columns: 1fr; gap: 32px; }
+    .page-hero-left, .page-hero-right { grid-column: 1; }
+    .event-row { grid-template-columns: 1fr; gap: 16px; }
+    .event-row-action { align-items: flex-start; }
+    .newsletter-inner, .footer-right { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <a href="stratum.html" class="nav-logo" style="margin-left:16px;">TMI</a>
+</nav>
+
+<div class="side-overlay" id="overlay"></div>
+<div class="side-nav" id="sideNav">
+  <button class="side-nav-close" id="closeNav">×</button>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="platform.html">Platform</a>
+    <a href="os.html">TMI OS</a>
+    <a href="news.html">Field Notes</a>
+    <a href="audit.html">Free Audit</a>
+    <a href="about.html">About</a>
+    <a href="partners.html">Partners</a>
+  </div>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Industries</div>
+    <a href="construction.html">Construction</a>
+    <a href="oil-gas.html">Oil &amp; Gas</a>
+    <a href="trades.html">Trades</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="fleet.html">Fleet &amp; Logistics</a>
+  </div>
+  <a href="funnel.html" class="side-nav-cta">Apply to Work with TMI →</a>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-left">
+      <div class="page-eyebrow">Events 2026</div>
+      <h1>Where operators<br><em>meet.</em></h1>
+    </div>
+    <div class="page-hero-right">
+      <p>Summits, workshops, roundtables, and online sessions throughout 2026. All of it for field operations companies building with AI.</p>
+      <p>Small by design. Operators only. No vendor pitches.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CALENDAR -->
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">2026 Calendar</div>
+      <h2 class="section-title">All events.<br>Full <em>year.</em></h2>
+      <div class="divider"></div>
+      <p class="section-sub">Every TMI event in one place. Filter by type or browse the full calendar.</p>
+    </div>
+
+    <div class="filter-bar reveal">
+      <button class="filter-btn active" data-filter="all">All Events</button>
+      <button class="filter-btn" data-filter="summit">Summit</button>
+      <button class="filter-btn" data-filter="workshop">Workshop</button>
+      <button class="filter-btn" data-filter="roundtable">Roundtable</button>
+      <button class="filter-btn" data-filter="online">Online</button>
+    </div>
+
+    <div class="event-list reveal">
+
+      <div class="event-row" data-type="online">
+        <div class="event-row-date">
+          <div class="event-row-month">March</div>
+          <div class="event-row-day">19</div>
+        </div>
+        <div>
+          <div class="event-row-type online">Online</div>
+          <h3>Q1 Field Operations AI Briefing</h3>
+          <div class="event-row-meta">Online · 90 minutes · Free</div>
+          <p>TMI's quarterly state-of-the-industry briefing. What's changed in AI for field ops, what operators are actually deploying, and what's worth paying attention to in Q2.</p>
+        </div>
+        <div class="event-row-action">
+          <div class="event-row-spots">Open registration</div>
+          <a href="funnel.html" class="event-row-cta free">Register Free →</a>
+        </div>
+      </div>
+
+      <div class="event-row" data-type="workshop">
+        <div class="event-row-date">
+          <div class="event-row-month">April</div>
+          <div class="event-row-day">10</div>
+        </div>
+        <div>
+          <div class="event-row-type workshop">Workshop</div>
+          <h3>Ops Audit Workshop — Houston</h3>
+          <div class="event-row-meta">Houston, TX · Half day · $350/seat</div>
+          <p>A working session for oil &amp; gas and industrial field companies. Bring your ops structure and walk out with an audit report and a prioritized system list. Limited to 15 companies.</p>
+        </div>
+        <div class="event-row-action">
+          <div class="event-row-spots">8 spots remaining</div>
+          <a href="funnel.html" class="event-row-cta">Apply →</a>
+        </div>
+      </div>
+
+      <div class="event-row" data-type="roundtable">
+        <div class="event-row-date">
+          <div class="event-row-month">May</div>
+          <div class="event-row-day">7</div>
+        </div>
+        <div>
+          <div class="event-row-type">Roundtable</div>
+          <h3>Construction Operators Roundtable</h3>
+          <div class="event-row-meta">Online · 2 hours · Member access</div>
+          <p>Closed roundtable for TMI Network members in construction. Structured conversation around one shared problem — submitted in advance by participants. Facilitated by TMI.</p>
+        </div>
+        <div class="event-row-action">
+          <div class="event-row-spots">Member-only</div>
+          <a href="network.html" class="event-row-cta">Join Network →</a>
+        </div>
+      </div>
+
+      <div class="event-row" data-type="summit">
+        <div class="event-row-date">
+          <div class="event-row-month">June</div>
+          <div class="event-row-day">12</div>
+        </div>
+        <div>
+          <div class="event-row-type summit">Summit</div>
+          <h3>TMI Summit — New Orleans</h3>
+          <div class="event-row-meta">New Orleans, LA · 2 days · $1,500 General / $900 Member</div>
+          <p>The flagship TMI event. Fifty operators, two days, zero vendor booths. Live builds, operated sessions, and the roundtable conversations that actually move things forward. Inaugural edition.</p>
+        </div>
+        <div class="event-row-action">
+          <div class="event-row-spots">Limited spots</div>
+          <a href="summit.html" class="event-row-cta">View Summit →</a>
+        </div>
+      </div>
+
+      <div class="event-row" data-type="workshop">
+        <div class="event-row-date">
+          <div class="event-row-month">July</div>
+          <div class="event-row-day">22</div>
+        </div>
+        <div>
+          <div class="event-row-type workshop">Workshop</div>
+          <h3>TMI Certified Training — Cohort I</h3>
+          <div class="event-row-meta">New Orleans, LA · 5 days · $2,500/seat</div>
+          <p>The first TMI Certified cohort. Five days of AI operations training for field company operators. Curriculum, assessment, credential, and peer cohort placement. Twenty seats.</p>
+        </div>
+        <div class="event-row-action">
+          <div class="event-row-spots">20 seats total</div>
+          <a href="certified.html" class="event-row-cta">Apply →</a>
+        </div>
+      </div>
+
+      <div class="event-row" data-type="online">
+        <div class="event-row-date">
+          <div class="event-row-month">Aug</div>
+          <div class="event-row-day">20</div>
+        </div>
+        <div>
+          <div class="event-row-type online">Online</div>
+          <h3>Q3 Field Operations AI Briefing</h3>
+          <div class="event-row-meta">Online · 90 minutes · Free</div>
+          <p>Quarterly state-of-the-industry update. What deployed in Q2, what's in testing for Q3, and a preview of what's coming at the Denver Summit.</p>
+        </div>
+        <div class="event-row-action">
+          <div class="event-row-spots">Open registration</div>
+          <a href="funnel.html" class="event-row-cta free">Register Free →</a>
+        </div>
+      </div>
+
+      <div class="event-row" data-type="summit">
+        <div class="event-row-date">
+          <div class="event-row-month">Sept</div>
+          <div class="event-row-day">18</div>
+        </div>
+        <div>
+          <div class="event-row-type summit">Summit</div>
+          <h3>TMI Summit — Denver</h3>
+          <div class="event-row-meta">Denver, CO · 2 days · $1,500 General / $900 Member</div>
+          <p>The Mountain West edition. Construction, oil &amp; gas, and trades operators across the region. Same format as New Orleans — fifty operators, two days, no vendor booths.</p>
+        </div>
+        <div class="event-row-action">
+          <div class="event-row-spots">Waitlist open</div>
+          <a href="summit.html" class="event-row-cta">Join Waitlist →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOST AN EVENT -->
+<section class="section-dark">
+  <div class="container reveal">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;">
+      <div>
+        <div class="section-label light">For Partners</div>
+        <h2 class="section-title light">Host a TMI<br><em>event.</em></h2>
+        <div class="divider light"></div>
+        <p class="section-sub light">If your company serves field operations companies — equipment, insurance, financing, software — co-hosting a TMI event is the highest-quality way to get in front of the right operators.</p>
+        <p style="font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 20px;">Co-hosts get a speaking slot, no booth. The format stays the same — operators only, no pitching. You get access to the room, not a platform to sell from it.</p>
+      </div>
+      <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); padding: 48px;">
+        <div style="font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--chart); margin-bottom: 16px;">Co-hosting</div>
+        <div style="font-family: var(--serif); font-size: 22px; font-weight: 400; color: #fff; margin-bottom: 24px; line-height: 1.3;">Interested in co-hosting a regional event or workshop?</div>
+        <p style="font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 28px; line-height: 1.6;">We're building out regional events in 2026 and 2027 across the Gulf South, Mountain West, Southeast, and Midwest. Partners who serve field operations companies are the right co-hosts.</p>
+        <a href="partners.html" style="display: inline-block; background: var(--chart); color: var(--ink); padding: 14px 28px; font-family: var(--serif); font-size: 14px; text-decoration: none;">See Partnership Options →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="newsletter-section">
+  <div class="newsletter-inner">
+    <div class="reveal">
+      <h2>Never miss<br>an <em>event.</em></h2>
+    </div>
+    <div class="reveal">
+      <p style="color:rgba(255,255,255,0.55); font-family: var(--serif); font-size:15px; margin-bottom:24px;">Get early access to tickets, agenda previews, and event updates in Field Notes every week.</p>
+      <form class="newsletter-form">
+        <input type="text" placeholder="Your name">
+        <input type="email" placeholder="Work email">
+        <button type="submit">Get Event Updates →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="stratum.html" class="footer-logo">TMI</a>
+      <p>The operating system for field-based companies. Built for the work that happens outside the office.</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="platform.html">Systems</a>
+        <a href="os.html">TMI OS</a>
+        <a href="zero.html">Start Kit</a>
+        <a href="certified.html">TMI Certified</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="network.html">Network</a>
+        <a href="events.html">Events</a>
+        <a href="about.html">About</a>
+        <a href="partners.html">Partners</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="news.html">Field Notes</a>
+        <a href="vault.html">The Vault</a>
+        <a href="developers.html">Developers</a>
+        <a href="audit.html">Free Audit</a>
+      </div>
+      <div class="footer-col">
+        <h4>Industries</h4>
+        <a href="construction.html">Construction</a>
+        <a href="oil-gas.html">Oil &amp; Gas</a>
+        <a href="trades.html">Trades</a>
+        <a href="fleet.html">Fleet</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 TMI. All rights reserved.</p>
+    <p style="color:rgba(255,255,255,0.3); font-size:12px;">tmitechai.com</p>
+  </div>
+</footer>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const overlay = document.getElementById('overlay');
+  const sideNav = document.getElementById('sideNav');
+  const closeNav = document.getElementById('closeNav');
+  function openNav() { sideNav.classList.add('open'); overlay.classList.add('open'); }
+  function closeNavFn() { sideNav.classList.remove('open'); overlay.classList.remove('open'); }
+  hamburger.addEventListener('click', openNav);
+  closeNav.addEventListener('click', closeNavFn);
+  overlay.addEventListener('click', closeNavFn);
+
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const eventRows = document.querySelectorAll('.event-row');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      eventRows.forEach(row => {
+        row.style.display = (filter === 'all' || row.dataset.type === filter) ? 'grid' : 'none';
+      });
+    });
+  });
+
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); } });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMI Funding — Capital for Field Operations Companies</title>
+<meta name="description" content="SBA loans, equipment financing, revenue-based capital, and SBIR grants. TMI Funding connects field operations companies with the right capital structure.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff;
+    --bg-alt: #f5f5f7;
+    --bg-deep: #0d0e1a;
+    --ink: #0a0b14;
+    --ink-2: #505060;
+    --muted: #86868b;
+    --line: #e8e8ed;
+    --accent: #1a1a1a;
+    --chart: #E4FF97;
+    --serif: 'Barlow', sans-serif;
+    --sans: 'Neue Haas Grotesk Display Pro', 'Arial Nova', Arial, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; overflow-x: hidden; }
+
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 40px; display: flex; align-items: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav-logo { font-family: var(--serif); font-size: 18px; font-weight: 500; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+  .hamburger { background: none; border: none; cursor: pointer; padding: 4px; display: flex; flex-direction: column; gap: 5px; }
+  .hamburger span { display: block; width: 22px; height: 1.5px; background: var(--ink); transition: all 0.3s; }
+  .side-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: all; }
+  .side-nav { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--bg); z-index: 201; padding: 40px 32px; transition: left 0.35s cubic-bezier(.4,0,.2,1); overflow-y: auto; border-right: 1px solid var(--line); }
+  .side-nav.open { left: 0; }
+  .side-nav-close { background: none; border: none; cursor: pointer; font-size: 24px; color: var(--ink); margin-bottom: 32px; display: block; }
+  .side-nav-section { margin-bottom: 32px; }
+  .side-nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .side-nav a { display: block; font-family: var(--serif); font-size: 15px; color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .side-nav a:last-child { border-bottom: none; }
+  .side-nav-cta { display: block; margin-top: 32px; background: var(--ink); color: #fff; text-align: center; padding: 14px 20px; font-family: var(--serif); font-size: 14px; text-decoration: none; }
+
+  .page-hero { padding: 140px 0 80px; border-bottom: 1px solid var(--line); }
+  .page-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 80px; align-items: end; }
+  .page-hero-left { grid-column: 1 / 3; }
+  .page-hero-right { grid-column: 3 / 5; padding-bottom: 8px; }
+  .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .page-hero h1 { font-family: var(--serif); font-size: clamp(64px, 9vw, 120px); font-weight: 400; line-height: 1.0; letter-spacing: -0.03em; color: var(--ink); }
+  .page-hero h1 em { color: var(--accent); font-style: italic; }
+  .page-hero-right p { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 24px); font-weight: 300; color: var(--ink-2); line-height: 1.5; margin-bottom: 20px; }
+  .page-hero-right p:last-child { margin-bottom: 0; }
+
+  .section-white { padding: 80px 0; }
+  .section-alt { padding: 80px 0; background: var(--bg-alt); }
+  .section-dark { padding: 80px 0; background: var(--bg-deep); color: #fff; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .section-label.light { color: rgba(255,255,255,0.4); }
+  .section-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 56px); font-weight: 400; letter-spacing: -0.02em; color: var(--ink); line-height: 1.1; margin-bottom: 16px; }
+  .section-title.light { color: #fff; }
+  .section-title em { font-style: italic; }
+  .section-sub { font-family: var(--serif); font-size: clamp(16px, 1.4vw, 20px); font-weight: 300; color: var(--ink-2); max-width: 640px; line-height: 1.6; }
+  .section-sub.light { color: rgba(255,255,255,0.6); }
+  .divider { width: 40px; height: 1px; background: var(--line); margin: 24px 0; }
+  .divider.light { background: rgba(255,255,255,0.2); }
+
+  /* FUNDING TYPES */
+  .funding-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); margin-top: 48px; }
+  .funding-card { background: var(--bg); padding: 48px 40px; }
+  .funding-card.alt { background: var(--bg-alt); }
+  .funding-tag { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; border: 1px solid var(--line); padding: 4px 10px; color: var(--muted); margin-bottom: 20px; }
+  .funding-card h3 { font-family: var(--serif); font-size: clamp(24px, 2.5vw, 36px); font-weight: 400; color: var(--ink); margin-bottom: 12px; }
+  .funding-range { font-family: var(--serif); font-size: 32px; font-weight: 300; color: var(--ink); letter-spacing: -0.02em; margin-bottom: 8px; }
+  .funding-terms { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .funding-card p { font-size: 15px; color: var(--ink-2); line-height: 1.7; margin-bottom: 20px; }
+  .funding-uses { list-style: none; margin-bottom: 28px; }
+  .funding-uses li { font-size: 13px; color: var(--ink-2); padding: 7px 0; border-bottom: 1px solid var(--line); display: flex; gap: 10px; }
+  .funding-uses li::before { content: '→'; color: var(--muted); flex-shrink: 0; }
+  .funding-uses li:last-child { border-bottom: none; }
+  .funding-cta { display: inline-block; background: var(--ink); color: #fff; padding: 13px 28px; font-family: var(--serif); font-size: 14px; text-decoration: none; }
+
+  /* HOW IT WORKS */
+  .process-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,0.1); margin-top: 48px; }
+  .process-step { background: var(--bg-deep); padding: 36px 28px; }
+  .process-num { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--chart); margin-bottom: 16px; }
+  .process-step h4 { font-family: var(--serif); font-size: 20px; font-weight: 400; color: #fff; margin-bottom: 12px; }
+  .process-step p { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+
+  /* SBIR SECTION */
+  .sbir-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 48px; align-items: start; }
+  .sbir-text p { font-family: var(--serif); font-size: 17px; font-weight: 300; color: var(--ink-2); line-height: 1.7; margin-bottom: 20px; }
+  .sbir-details { background: var(--bg-deep); padding: 48px; }
+  .sbir-stat { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .sbir-stat:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .sbir-stat-label { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 8px; }
+  .sbir-stat-value { font-family: var(--serif); font-size: 28px; font-weight: 300; color: #fff; }
+  .sbir-stat-note { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
+  /* FAQ */
+  .faq-list { margin-top: 48px; }
+  .faq-item { padding: 28px 0; border-bottom: 1px solid var(--line); }
+  .faq-item:first-child { border-top: 1px solid var(--line); }
+  .faq-q { font-family: var(--serif); font-size: 18px; font-weight: 400; color: var(--ink); margin-bottom: 10px; }
+  .faq-a { font-size: 14px; color: var(--ink-2); line-height: 1.7; max-width: 640px; }
+
+  .newsletter-section { padding: 80px 0; background: var(--bg-deep); }
+  .newsletter-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .newsletter-inner h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 400; color: #fff; line-height: 1.1; }
+  .newsletter-inner h2 em { font-style: italic; color: var(--chart); }
+  .newsletter-form { display: flex; flex-direction: column; gap: 12px; }
+  .newsletter-form input { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 14px 18px; font-family: var(--sans); font-size: 14px; outline: none; }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.35); }
+  .newsletter-form button { background: var(--chart); color: var(--ink); border: none; padding: 14px 24px; font-family: var(--serif); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; }
+
+  .footer { background: var(--bg-deep); border-top: 1px solid rgba(255,255,255,0.08); padding: 64px 0 40px; }
+  .footer-grid { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 80px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 12px; max-width: 280px; line-height: 1.6; }
+  .footer-logo { font-family: var(--serif); font-size: 20px; font-weight: 500; color: #fff; text-decoration: none; }
+  .footer-right { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  .footer-col h4 { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; padding: 3px 0; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 24px 40px 0; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
+  .footer-bottom p { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 768px) {
+    .nav { padding: 16px 20px; }
+    .page-hero-inner { grid-template-columns: 1fr; gap: 32px; }
+    .page-hero-left, .page-hero-right { grid-column: 1; }
+    .funding-grid, .process-steps, .sbir-grid, .newsletter-inner, .footer-right { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <a href="stratum.html" class="nav-logo" style="margin-left:16px;">TMI</a>
+</nav>
+
+<div class="side-overlay" id="overlay"></div>
+<div class="side-nav" id="sideNav">
+  <button class="side-nav-close" id="closeNav">×</button>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="platform.html">Platform</a>
+    <a href="os.html">TMI OS</a>
+    <a href="news.html">Field Notes</a>
+    <a href="audit.html">Free Audit</a>
+    <a href="about.html">About</a>
+    <a href="partners.html">Partners</a>
+  </div>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Industries</div>
+    <a href="construction.html">Construction</a>
+    <a href="oil-gas.html">Oil &amp; Gas</a>
+    <a href="trades.html">Trades</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="fleet.html">Fleet &amp; Logistics</a>
+  </div>
+  <a href="funnel.html" class="side-nav-cta">Apply to Work with TMI →</a>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-left">
+      <div class="page-eyebrow">TMI Funding</div>
+      <h1>Capital for<br><em>operators.</em></h1>
+    </div>
+    <div class="page-hero-right">
+      <p>The right capital structure for field operations companies deploying AI. SBA loans, equipment financing, revenue-based capital, and SBIR grants — matched to your situation, not a generic loan product.</p>
+      <p>TMI doesn't lend money. We connect operators with capital and help structure the deal correctly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOUR TYPES -->
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Capital Types</div>
+      <h2 class="section-title">Four ways<br>to <em>fund it.</em></h2>
+      <div class="divider"></div>
+      <p class="section-sub">Most field operations companies are undercapitalized for what they're trying to build. TMI Funding exists to fix that with the right structure — not just the fastest approval.</p>
+    </div>
+    <div class="funding-grid reveal">
+      <div class="funding-card">
+        <div class="funding-tag">SBA Loans</div>
+        <h3>SBA 7(a) &amp; 504</h3>
+        <div class="funding-range">$50K – $5M</div>
+        <div class="funding-terms">10–25 year terms · Below-market rates</div>
+        <p>SBA loans are the best capital available to most small field operations companies — low rates, long terms, and government-backed. Most operators don't pursue them because the application is complex. TMI Funding handles the preparation.</p>
+        <ul class="funding-uses">
+          <li>Equipment and fleet acquisition</li>
+          <li>Technology infrastructure and software</li>
+          <li>Working capital for growth</li>
+          <li>Real estate for operations</li>
+          <li>Business acquisition and expansion</li>
+        </ul>
+        <a href="funnel.html" class="funding-cta">Apply for SBA Funding →</a>
+      </div>
+      <div class="funding-card alt">
+        <div class="funding-tag">Equipment Finance</div>
+        <h3>Equipment &amp; Fleet</h3>
+        <div class="funding-range">$25K – $2M</div>
+        <div class="funding-terms">36–84 month terms · Fixed payments</div>
+        <p>Dedicated equipment financing for field operations companies — excavators, fleet vehicles, heavy machinery, aerial equipment, and specialized tools. The equipment secures the loan, which means faster approval and better rates than unsecured capital.</p>
+        <ul class="funding-uses">
+          <li>Heavy construction equipment</li>
+          <li>Fleet vehicles and trucks</li>
+          <li>Specialized field tools and machinery</li>
+          <li>Robotics and autonomous equipment</li>
+          <li>Technology hardware and sensors</li>
+        </ul>
+        <a href="funnel.html" class="funding-cta">Apply for Equipment Financing →</a>
+      </div>
+      <div class="funding-card alt">
+        <div class="funding-tag">Revenue-Based</div>
+        <h3>Revenue-Based Capital</h3>
+        <div class="funding-range">$50K – $500K</div>
+        <div class="funding-terms">No equity · Repay as % of revenue</div>
+        <p>Revenue-based financing for companies with consistent cash flow who don't want to dilute equity or commit to fixed monthly payments. Repayment scales with your revenue — fast months repay more, slow months less. Right for seasonal field operations companies.</p>
+        <ul class="funding-uses">
+          <li>Working capital gaps and cash flow</li>
+          <li>Technology deployment costs</li>
+          <li>Hiring and crew expansion</li>
+          <li>Marketing and growth investment</li>
+          <li>Bridge financing between contracts</li>
+        </ul>
+        <a href="funnel.html" class="funding-cta">Apply for Revenue-Based →</a>
+      </div>
+      <div class="funding-card">
+        <div class="funding-tag">Government Grants</div>
+        <h3>SBIR &amp; Government Grants</h3>
+        <div class="funding-range">$150K – $2M+</div>
+        <div class="funding-terms">Non-dilutive · Grant funding, not debt</div>
+        <p>Small Business Innovation Research (SBIR) grants fund companies developing new technology for specific government applications. Field operations companies deploying AI, robotics, or sensor systems for energy, infrastructure, or defense applications are often eligible. TMI identifies relevant programs and manages the application.</p>
+        <ul class="funding-uses">
+          <li>AI and automation R&amp;D</li>
+          <li>Robotics for field applications</li>
+          <li>Energy infrastructure technology</li>
+          <li>Safety and inspection systems</li>
+          <li>Environmental monitoring technology</li>
+        </ul>
+        <a href="funnel.html" class="funding-cta">Check SBIR Eligibility →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section-dark">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label light">How It Works</div>
+      <h2 class="section-title light">TMI's role in<br><em>your deal.</em></h2>
+      <div class="divider light"></div>
+      <p class="section-sub light">TMI isn't a lender. We're the operator-side partner that helps you identify the right structure, prepare correctly, and get to capital faster than you would alone.</p>
+    </div>
+    <div class="process-steps reveal">
+      <div class="process-step">
+        <div class="process-num">Step 01</div>
+        <h4>Capital Assessment</h4>
+        <p>A structured assessment of what you're trying to fund, your current financials, and which capital structures actually fit your situation. Takes about an hour.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-num">Step 02</div>
+        <h4>Structure Selection</h4>
+        <p>TMI recommends the right capital type and lender for your deal. We have relationships with SBA lenders, equipment finance companies, and revenue-based providers across the country.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-num">Step 03</div>
+        <h4>Application Support</h4>
+        <p>TMI prepares your package — financial documentation, business narrative, technology deployment plan. The part most operators get wrong is the story. We get it right.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-num">Step 04</div>
+        <h4>Close &amp; Deploy</h4>
+        <p>Once funded, the capital goes to work. TMI stays involved to make sure the deployment — equipment, technology, hiring — happens on the timeline the lender approved.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SBIR DEEP DIVE -->
+<section class="section-alt">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">For Technology Companies</div>
+      <h2 class="section-title">SBIR grants:<br>the <em>underused</em> path.</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="sbir-grid reveal">
+      <div>
+        <div class="sbir-text">
+          <p>Most field operations companies don't think of themselves as technology companies. But if you're deploying AI, robotics, or sensor systems for energy, infrastructure, safety, or defense applications — you may qualify for SBIR funding that most of your competitors have never heard of.</p>
+          <p>Phase I SBIR grants are typically $150K–$300K for feasibility research. Phase II can reach $2M for development. And unlike a loan, it's not debt — you don't pay it back, and you don't give up equity.</p>
+          <p>TMI has helped field operations companies identify applicable programs across DOE, DOD, DOT, and USDA. The application process is intensive, which is why most companies don't pursue it. TMI handles the application.</p>
+        </div>
+      </div>
+      <div class="sbir-details">
+        <div class="sbir-stat">
+          <div class="sbir-stat-label">Phase I Award</div>
+          <div class="sbir-stat-value">$150K – $300K</div>
+          <div class="sbir-stat-note">Feasibility and concept development · 6–12 months</div>
+        </div>
+        <div class="sbir-stat">
+          <div class="sbir-stat-label">Phase II Award</div>
+          <div class="sbir-stat-value">Up to $2M</div>
+          <div class="sbir-stat-note">Full development · 2 years</div>
+        </div>
+        <div class="sbir-stat">
+          <div class="sbir-stat-label">Funding Type</div>
+          <div class="sbir-stat-value">Non-dilutive</div>
+          <div class="sbir-stat-note">No debt repayment · No equity given up</div>
+        </div>
+        <div class="sbir-stat">
+          <div class="sbir-stat-label">TMI Assessment</div>
+          <div class="sbir-stat-value">Free</div>
+          <div class="sbir-stat-note">We assess eligibility before you commit any time</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Questions</div>
+      <h2 class="section-title">Common <em>questions.</em></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q">Do I need to be a TMI Network member?</div>
+        <div class="faq-a">No. TMI Funding is open to any field operations company, not just network members. That said, Operator-tier members get priority access to our lender relationships and faster processing. If you're not a member and the deal gets complex, we may recommend joining.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does TMI charge for the capital assessment?</div>
+        <div class="faq-a">The initial capital assessment is free. If TMI helps structure and prepare a full application, we charge a preparation fee that varies by deal size and complexity. We disclose the fee before any work begins.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How long does it take to get funded?</div>
+        <div class="faq-a">Equipment financing can close in 5–10 business days. Revenue-based capital in 1–3 weeks. SBA loans typically take 60–90 days from application to close. SBIR applications are a longer process — typically 6–12 months from submission to award.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What if I've been declined before?</div>
+        <div class="faq-a">Prior declines are common, especially for SBA applications where preparation quality matters. TMI reviews what went wrong and either structures the deal differently, targets a different capital type, or addresses the issues before reapplying. Most declines are fixable.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do you take a commission or referral fee from lenders?</div>
+        <div class="faq-a">In some cases TMI receives a referral fee from lending partners — we disclose this when applicable. Our goal is to match you with the best lender for your deal, not the one that pays us the most. If there's a referral arrangement, you'll know before we make the introduction.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="newsletter-section">
+  <div class="newsletter-inner">
+    <div class="reveal">
+      <h2>Field Notes.<br>The <em>weekly briefing</em><br>for operators.</h2>
+    </div>
+    <div class="reveal">
+      <p style="color:rgba(255,255,255,0.55); font-family: var(--serif); font-size:15px; margin-bottom:24px;">Case studies, capital structures, and what operators are actually doing to fund their AI deployments. In your inbox every week.</p>
+      <form class="newsletter-form">
+        <input type="text" placeholder="Your name">
+        <input type="email" placeholder="Work email">
+        <button type="submit">Subscribe to Field Notes →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="stratum.html" class="footer-logo">TMI</a>
+      <p>The operating system for field-based companies. Built for the work that happens outside the office.</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="platform.html">Systems</a>
+        <a href="os.html">TMI OS</a>
+        <a href="zero.html">Start Kit</a>
+        <a href="certified.html">TMI Certified</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="network.html">Network</a>
+        <a href="events.html">Events</a>
+        <a href="about.html">About</a>
+        <a href="partners.html">Partners</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="news.html">Field Notes</a>
+        <a href="vault.html">The Vault</a>
+        <a href="developers.html">Developers</a>
+        <a href="audit.html">Free Audit</a>
+      </div>
+      <div class="footer-col">
+        <h4>Industries</h4>
+        <a href="construction.html">Construction</a>
+        <a href="oil-gas.html">Oil &amp; Gas</a>
+        <a href="trades.html">Trades</a>
+        <a href="fleet.html">Fleet</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 TMI. All rights reserved.</p>
+    <p style="color:rgba(255,255,255,0.3); font-size:12px;">tmitechai.com</p>
+  </div>
+</footer>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const overlay = document.getElementById('overlay');
+  const sideNav = document.getElementById('sideNav');
+  const closeNav = document.getElementById('closeNav');
+  function openNav() { sideNav.classList.add('open'); overlay.classList.add('open'); }
+  function closeNavFn() { sideNav.classList.remove('open'); overlay.classList.remove('open'); }
+  hamburger.addEventListener('click', openNav);
+  closeNav.addEventListener('click', closeNavFn);
+  overlay.addEventListener('click', closeNavFn);
+
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); } });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,521 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMI Network — The Operator Community</title>
+<meta name="description" content="The community for field operations companies running on AI. Four tiers, real peers, no consultants.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff;
+    --bg-alt: #f5f5f7;
+    --bg-deep: #0d0e1a;
+    --ink: #0a0b14;
+    --ink-2: #505060;
+    --muted: #86868b;
+    --line: #e8e8ed;
+    --accent: #1a1a1a;
+    --chart: #E4FF97;
+    --serif: 'Barlow', sans-serif;
+    --sans: 'Neue Haas Grotesk Display Pro', 'Arial Nova', Arial, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; overflow-x: hidden; }
+
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 40px; display: flex; align-items: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav-logo { font-family: var(--serif); font-size: 18px; font-weight: 500; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+  .hamburger { background: none; border: none; cursor: pointer; padding: 4px; display: flex; flex-direction: column; gap: 5px; }
+  .hamburger span { display: block; width: 22px; height: 1.5px; background: var(--ink); transition: all 0.3s; }
+  .side-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: all; }
+  .side-nav { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--bg); z-index: 201; padding: 40px 32px; transition: left 0.35s cubic-bezier(.4,0,.2,1); overflow-y: auto; border-right: 1px solid var(--line); }
+  .side-nav.open { left: 0; }
+  .side-nav-close { background: none; border: none; cursor: pointer; font-size: 24px; color: var(--ink); margin-bottom: 32px; display: block; }
+  .side-nav-section { margin-bottom: 32px; }
+  .side-nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .side-nav a { display: block; font-family: var(--serif); font-size: 15px; color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .side-nav a:last-child { border-bottom: none; }
+  .side-nav-cta { display: block; margin-top: 32px; background: var(--ink); color: #fff; text-align: center; padding: 14px 20px; font-family: var(--serif); font-size: 14px; text-decoration: none; }
+
+  .page-hero { padding: 140px 0 80px; border-bottom: 1px solid var(--line); }
+  .page-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 80px; align-items: end; }
+  .page-hero-left { grid-column: 1 / 3; }
+  .page-hero-right { grid-column: 3 / 5; padding-bottom: 8px; }
+  .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .page-hero h1 { font-family: var(--serif); font-size: clamp(64px, 9vw, 120px); font-weight: 400; line-height: 1.0; letter-spacing: -0.03em; color: var(--ink); }
+  .page-hero h1 em { color: var(--accent); font-style: italic; }
+  .page-hero-right p { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 24px); font-weight: 300; color: var(--ink-2); line-height: 1.5; margin-bottom: 20px; }
+  .page-hero-right p:last-child { margin-bottom: 0; }
+
+  .section-white { padding: 80px 0; }
+  .section-alt { padding: 80px 0; background: var(--bg-alt); }
+  .section-dark { padding: 80px 0; background: var(--bg-deep); color: #fff; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .section-label.light { color: rgba(255,255,255,0.4); }
+  .section-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 56px); font-weight: 400; letter-spacing: -0.02em; color: var(--ink); line-height: 1.1; margin-bottom: 16px; }
+  .section-title.light { color: #fff; }
+  .section-title em { font-style: italic; }
+  .section-sub { font-family: var(--serif); font-size: clamp(16px, 1.4vw, 20px); font-weight: 300; color: var(--ink-2); max-width: 640px; line-height: 1.6; }
+  .section-sub.light { color: rgba(255,255,255,0.6); }
+  .divider { width: 40px; height: 1px; background: var(--line); margin: 24px 0; }
+  .divider.light { background: rgba(255,255,255,0.2); }
+
+  /* TIER CARDS */
+  .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); margin-top: 48px; }
+  .tier { background: var(--bg); padding: 36px 28px; position: relative; }
+  .tier.highlight { background: var(--bg-deep); }
+  .tier-badge { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .tier.highlight .tier-badge { color: var(--chart); }
+  .tier h3 { font-family: var(--serif); font-size: 24px; font-weight: 400; color: var(--ink); margin-bottom: 16px; }
+  .tier.highlight h3 { color: #fff; }
+  .tier-price { font-family: var(--serif); font-size: 32px; font-weight: 300; color: var(--ink); letter-spacing: -0.02em; margin-bottom: 4px; }
+  .tier.highlight .tier-price { color: #fff; }
+  .tier-price-note { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+  .tier.highlight .tier-price-note { color: rgba(255,255,255,0.4); }
+  .tier-features { list-style: none; }
+  .tier-features li { font-size: 13px; color: var(--ink-2); padding: 8px 0; border-bottom: 1px solid var(--line); line-height: 1.5; }
+  .tier.highlight .tier-features li { color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.1); }
+  .tier-features li:last-child { border-bottom: none; }
+  .tier-cta { display: block; margin-top: 28px; padding: 12px 16px; text-align: center; font-family: var(--serif); font-size: 13px; text-decoration: none; border: 1px solid var(--line); color: var(--ink-2); transition: all 0.2s; }
+  .tier-cta:hover { border-color: var(--ink); color: var(--ink); }
+  .tier.highlight .tier-cta { background: var(--chart); color: var(--ink); border-color: var(--chart); }
+
+  /* WHAT'S INSIDE */
+  .inside-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); margin-top: 48px; }
+  .inside-card { background: var(--bg-alt); padding: 36px 28px; }
+  .inside-card h3 { font-family: var(--serif); font-size: 20px; font-weight: 400; color: var(--ink); margin-bottom: 12px; }
+  .inside-card p { font-size: 14px; color: var(--ink-2); line-height: 1.6; }
+
+  /* COMPARISON TABLE */
+  .compare-table { margin-top: 48px; width: 100%; border-collapse: collapse; }
+  .compare-table th { text-align: left; padding: 12px 16px; font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .compare-table td { padding: 14px 16px; font-family: var(--serif); font-size: 14px; color: rgba(255,255,255,0.7); border-bottom: 1px solid rgba(255,255,255,0.06); vertical-align: top; }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table td:first-child { color: rgba(255,255,255,0.9); }
+  .check-yes { color: var(--chart); font-weight: 600; }
+  .check-no { color: rgba(255,255,255,0.2); }
+  .check-partial { color: rgba(255,255,255,0.5); }
+
+  /* STATS STRIP */
+  .stats-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,0.1); margin-top: 48px; }
+  .stat-item { background: var(--bg-deep); padding: 40px 28px; }
+  .stat-num { font-family: var(--serif); font-size: clamp(40px, 5vw, 64px); font-weight: 300; color: #fff; letter-spacing: -0.03em; margin-bottom: 8px; }
+  .stat-num em { color: var(--chart); font-style: normal; }
+  .stat-label { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+  /* FAQ */
+  .faq-list { margin-top: 48px; }
+  .faq-item { padding: 28px 0; border-bottom: 1px solid var(--line); }
+  .faq-item:first-child { border-top: 1px solid var(--line); }
+  .faq-q { font-family: var(--serif); font-size: 18px; font-weight: 400; color: var(--ink); margin-bottom: 10px; }
+  .faq-a { font-size: 14px; color: var(--ink-2); line-height: 1.7; max-width: 640px; }
+
+  .newsletter-section { padding: 80px 0; background: var(--bg-deep); }
+  .newsletter-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .newsletter-inner h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 400; color: #fff; line-height: 1.1; }
+  .newsletter-inner h2 em { font-style: italic; color: var(--chart); }
+  .newsletter-form { display: flex; flex-direction: column; gap: 12px; }
+  .newsletter-form input { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 14px 18px; font-family: var(--sans); font-size: 14px; outline: none; }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.35); }
+  .newsletter-form button { background: var(--chart); color: var(--ink); border: none; padding: 14px 24px; font-family: var(--serif); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; }
+
+  .footer { background: var(--bg-deep); border-top: 1px solid rgba(255,255,255,0.08); padding: 64px 0 40px; }
+  .footer-grid { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 80px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 12px; max-width: 280px; line-height: 1.6; }
+  .footer-logo { font-family: var(--serif); font-size: 20px; font-weight: 500; color: #fff; text-decoration: none; }
+  .footer-right { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .footer-col h4 { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; padding: 3px 0; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 24px 40px 0; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
+  .footer-bottom p { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 900px) {
+    .tiers, .stats-strip { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .nav { padding: 16px 20px; }
+    .page-hero-inner { grid-template-columns: 1fr; gap: 32px; }
+    .page-hero-left, .page-hero-right { grid-column: 1; }
+    .tiers, .inside-grid, .stats-strip, .newsletter-inner, .footer-right { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+    .compare-table { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <a href="stratum.html" class="nav-logo" style="margin-left:16px;">TMI</a>
+</nav>
+
+<div class="side-overlay" id="overlay"></div>
+<div class="side-nav" id="sideNav">
+  <button class="side-nav-close" id="closeNav">×</button>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="platform.html">Platform</a>
+    <a href="os.html">TMI OS</a>
+    <a href="news.html">Field Notes</a>
+    <a href="audit.html">Free Audit</a>
+    <a href="about.html">About</a>
+    <a href="partners.html">Partners</a>
+  </div>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Industries</div>
+    <a href="construction.html">Construction</a>
+    <a href="oil-gas.html">Oil &amp; Gas</a>
+    <a href="trades.html">Trades</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="fleet.html">Fleet &amp; Logistics</a>
+  </div>
+  <a href="funnel.html" class="side-nav-cta">Apply to Work with TMI →</a>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-left">
+      <div class="page-eyebrow">TMI Network</div>
+      <h1>The operator<br><em>community.</em></h1>
+    </div>
+    <div class="page-hero-right">
+      <p>Not a forum. Not a newsletter. A structured peer network for field operations companies building with AI.</p>
+      <p>Four tiers. Real operators. No consultants selling their services, no vendors pitching products. The people inside are running companies like yours.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TIERS -->
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Membership Tiers</div>
+      <h2 class="section-title">Four levels.<br>One <em>network.</em></h2>
+      <div class="divider"></div>
+      <p class="section-sub">Each tier reflects a deeper operational relationship with TMI. Start where you are. Move up when you're ready.</p>
+    </div>
+    <div class="tiers reveal">
+      <div class="tier">
+        <div class="tier-badge">Free</div>
+        <h3>Free Member</h3>
+        <div class="tier-price">$0</div>
+        <div class="tier-price-note">Always free</div>
+        <ul class="tier-features">
+          <li>Field Notes newsletter</li>
+          <li>Free Vault resources</li>
+          <li>Event announcements</li>
+          <li>TMI blog access</li>
+        </ul>
+        <a href="audit.html" class="tier-cta">Get Free Access →</a>
+      </div>
+      <div class="tier highlight">
+        <div class="tier-badge">Member</div>
+        <h3>Member</h3>
+        <div class="tier-price">$297<span style="font-size:18px;">/mo</span></div>
+        <div class="tier-price-note">or $2,500/year · save 30%</div>
+        <ul class="tier-features">
+          <li>Weekly member calls</li>
+          <li>Full Resource Library (Vault)</li>
+          <li>Peer operator directory</li>
+          <li>Build Series case studies</li>
+          <li>Member-only event access</li>
+          <li>Industry channels by trade</li>
+          <li>RFP templates &amp; frameworks</li>
+        </ul>
+        <a href="funnel.html" class="tier-cta">Join as Member →</a>
+      </div>
+      <div class="tier">
+        <div class="tier-badge">Partner</div>
+        <h3>Partner</h3>
+        <div class="tier-price">$500<span style="font-size:18px;">/mo</span></div>
+        <div class="tier-price-note">or $5,000/year · save 17%</div>
+        <ul class="tier-features">
+          <li>Everything in Member</li>
+          <li>Partner operator roundtables</li>
+          <li>TMI Marketplace priority listing</li>
+          <li>Co-marketing opportunities</li>
+          <li>TMI Summit Partner pricing</li>
+          <li>Quarterly strategy session</li>
+          <li>Early access to new programs</li>
+        </ul>
+        <a href="funnel.html" class="tier-cta">Apply as Partner →</a>
+      </div>
+      <div class="tier">
+        <div class="tier-badge">Operator</div>
+        <h3>Operator</h3>
+        <div class="tier-price">$1k<span style="font-size:18px;">/mo</span></div>
+        <div class="tier-price-note">+ 3% revenue share · applied engagement</div>
+        <ul class="tier-features">
+          <li>Everything in Partner</li>
+          <li>Dedicated TMI account lead</li>
+          <li>Monthly ops review calls</li>
+          <li>TMI OS deployment support</li>
+          <li>Revenue share on referrals</li>
+          <li>Priority for Ghost Crew deployment</li>
+          <li>Direct line to TMI leadership</li>
+        </ul>
+        <a href="funnel.html" class="tier-cta">Apply for Operator →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT'S INSIDE -->
+<section class="section-alt">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Inside the Network</div>
+      <h2 class="section-title">What happens<br><em>inside.</em></h2>
+      <div class="divider"></div>
+      <p class="section-sub">The TMI Network is built around things that actually move operations forward — not content calendars and engagement metrics.</p>
+    </div>
+    <div class="inside-grid reveal">
+      <div class="inside-card">
+        <h3>Weekly Member Calls</h3>
+        <p>Every week, a live call with 10–30 operators. One featured company walks through what they're building, what broke, and what's working. Open Q&amp;A. Recorded for members who can't attend live.</p>
+      </div>
+      <div class="inside-card">
+        <h3>Peer Operator Directory</h3>
+        <p>A searchable directory of verified operators — filterable by trade, company size, geography, and systems they're running. Real companies. No vendor profiles.</p>
+      </div>
+      <div class="inside-card">
+        <h3>Resource Library</h3>
+        <p>The Vault, fully open. Ops audit frameworks, industry build guides, monthly AI in field ops reports, RFP templates, and the TMI Build Library — documented deployments from real companies.</p>
+      </div>
+      <div class="inside-card">
+        <h3>Build Series</h3>
+        <p>Deep-dive case studies published monthly. A real company, their real problem, what they built, and the actual numbers. Long-form, editorial, no vendor advertising.</p>
+      </div>
+      <div class="inside-card">
+        <h3>Industry Channels</h3>
+        <p>Organized by trade — construction, HVAC, electrical, oil &amp; gas, landscaping, and more. Ask questions, share problems, get answers from people doing the same work.</p>
+      </div>
+      <div class="inside-card">
+        <h3>Events Access</h3>
+        <p>Members get early access and discounted tickets to TMI Summit. Partners get included tickets. Operators get VIP access to all TMI events including closed roundtables.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="section-dark">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label light">Tier Comparison</div>
+      <h2 class="section-title light">What's in<br><em>each tier.</em></h2>
+      <div class="divider light"></div>
+    </div>
+    <div class="reveal" style="overflow-x: auto;">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="width:35%;">Feature</th>
+            <th>Free</th>
+            <th>Member</th>
+            <th>Partner</th>
+            <th>Operator</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Field Notes newsletter</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Free Vault resources</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Weekly member calls</td><td class="check-no">—</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Full Resource Library</td><td class="check-no">—</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Peer operator directory</td><td class="check-no">—</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Build Series case studies</td><td class="check-no">—</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Member-only events</td><td class="check-no">—</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Summit included tickets</td><td class="check-no">—</td><td class="check-no">—</td><td class="check-yes">1 ticket</td><td class="check-yes">2 tickets</td></tr>
+          <tr><td>Partner roundtables</td><td class="check-no">—</td><td class="check-no">—</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Quarterly strategy session</td><td class="check-no">—</td><td class="check-no">—</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Marketplace priority listing</td><td class="check-no">—</td><td class="check-no">—</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Monthly ops review calls</td><td class="check-no">—</td><td class="check-no">—</td><td class="check-no">—</td><td class="check-yes">✓</td></tr>
+          <tr><td>Dedicated account lead</td><td class="check-no">—</td><td class="check-no">—</td><td class="check-no">—</td><td class="check-yes">✓</td></tr>
+          <tr><td>TMI OS deployment support</td><td class="check-no">—</td><td class="check-no">—</td><td class="check-no">—</td><td class="check-yes">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">The Network</div>
+      <h2 class="section-title">Who's<br><em>inside.</em></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="stats-strip reveal" style="background: var(--line); margin-top: 48px;">
+      <div class="stat-item" style="background: var(--bg-alt);">
+        <div class="stat-num" style="color: var(--ink);">12<em>+</em></div>
+        <div class="stat-label" style="color: var(--ink-2);">Trades and industries represented</div>
+      </div>
+      <div class="stat-item" style="background: var(--bg-alt);">
+        <div class="stat-num" style="color: var(--ink);">5–<em>500</em></div>
+        <div class="stat-label" style="color: var(--ink-2);">Employee range of member companies</div>
+      </div>
+      <div class="stat-item" style="background: var(--bg-alt);">
+        <div class="stat-num" style="color: var(--ink);"><em>0</em></div>
+        <div class="stat-label" style="color: var(--ink-2);">Vendors selling to members inside the community</div>
+      </div>
+      <div class="stat-item" style="background: var(--bg-alt);">
+        <div class="stat-num" style="color: var(--ink);">Weekly</div>
+        <div class="stat-label" style="color: var(--ink-2);">Live member calls — recorded and archived</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECT TIER CALLOUT -->
+<section class="section-alt">
+  <div class="container reveal">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;">
+      <div>
+        <div class="section-label">Above Operator</div>
+        <h2 class="section-title">TMI Direct.<br><em>Invite only.</em></h2>
+        <div class="divider"></div>
+        <p class="section-sub">A fifth tier that doesn't appear on pricing pages. For operators running complex, multi-system deployments who need a direct partnership with TMI leadership.</p>
+        <p style="font-size: 14px; color: var(--muted); margin-top: 20px;">There's no application form. TMI extends Direct invitations to companies we're already working with closely. If you're asking about it, you're probably not there yet — but Operator is how you get there.</p>
+      </div>
+      <div>
+        <div style="background: var(--bg-deep); padding: 48px;">
+          <div style="font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--chart); margin-bottom: 16px;">TMI Direct</div>
+          <div style="font-family: var(--serif); font-size: 28px; font-weight: 400; color: #fff; margin-bottom: 20px;">White-glove operational partnership.</div>
+          <ul style="list-style: none;">
+            <li style="font-size: 13px; color: rgba(255,255,255,0.6); padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">Invite-only, extended by TMI</li>
+            <li style="font-size: 13px; color: rgba(255,255,255,0.6); padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">Custom engagement structure</li>
+            <li style="font-size: 13px; color: rgba(255,255,255,0.6); padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">Co-building products together</li>
+            <li style="font-size: 13px; color: rgba(255,255,255,0.6); padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">Equity and revenue structures available</li>
+            <li style="font-size: 13px; color: rgba(255,255,255,0.6); padding: 10px 0;">No public pricing or applications</li>
+          </ul>
+          <a href="direct.html" style="display: block; margin-top: 28px; padding: 13px 20px; text-align: center; font-family: var(--serif); font-size: 13px; text-decoration: none; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6);">Learn About TMI Direct →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section-white">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Questions</div>
+      <h2 class="section-title">Common <em>questions.</em></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q">Who gets in?</div>
+        <div class="faq-a">Free and Member tiers are open to any operator in a field-based business. Partner and Operator tiers require an application — we screen for operational intent, not company size. We turn down vendors, consultants, and people who aren't actually running field operations.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What's the revenue share in Operator tier?</div>
+        <div class="faq-a">Operator members pay $1,000/month plus a 3% revenue share on new business generated through TMI introductions, referrals, and marketplace activity. It's a co-growth structure — TMI only benefits when you do. The 3% applies to the first year of new revenue from TMI-sourced relationships.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I cancel anytime?</div>
+        <div class="faq-a">Monthly tiers cancel anytime. Annual tiers are non-refundable after 30 days. Operator tier has a 90-day minimum engagement — enough time to actually see whether the partnership is working.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is the community active?</div>
+        <div class="faq-a">We cap community size to keep the signal-to-noise ratio high. When the Operator channel has 400 members having shallow conversations instead of 80 members having real ones, we've built something worthless. We grow slowly on purpose.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What's included in the annual price?</div>
+        <div class="faq-a">Member annual is $2,500 (saves about $1,060 versus monthly). Partner annual is $5,000 (saves about $1,000). Operator doesn't offer an annual rate — the engagement is dynamic and we price it accordingly.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="newsletter-section">
+  <div class="newsletter-inner">
+    <div class="reveal">
+      <h2>Field Notes.<br>The <em>weekly briefing</em><br>for operators.</h2>
+    </div>
+    <div class="reveal">
+      <p style="color:rgba(255,255,255,0.55); font-family: var(--serif); font-size:15px; margin-bottom:24px;">Free access starts here. Get Field Notes and free Vault resources before you decide whether the network is for you.</p>
+      <form class="newsletter-form">
+        <input type="text" placeholder="Your name">
+        <input type="email" placeholder="Work email">
+        <button type="submit">Get Free Access →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="stratum.html" class="footer-logo">TMI</a>
+      <p>The operating system for field-based companies. Built for the work that happens outside the office.</p>
+    </div>
+    <div class="footer-right">
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="platform.html">Systems</a>
+        <a href="os.html">TMI OS</a>
+        <a href="zero.html">Start Kit</a>
+        <a href="certified.html">TMI Certified</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="network.html">Network</a>
+        <a href="events.html">Events</a>
+        <a href="about.html">About</a>
+        <a href="partners.html">Partners</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="news.html">Field Notes</a>
+        <a href="vault.html">The Vault</a>
+        <a href="developers.html">Developers</a>
+        <a href="audit.html">Free Audit</a>
+      </div>
+      <div class="footer-col">
+        <h4>Industries</h4>
+        <a href="construction.html">Construction</a>
+        <a href="oil-gas.html">Oil &amp; Gas</a>
+        <a href="trades.html">Trades</a>
+        <a href="fleet.html">Fleet</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 TMI. All rights reserved.</p>
+    <p style="color:rgba(255,255,255,0.3); font-size:12px;">tmitechai.com</p>
+  </div>
+</footer>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const overlay = document.getElementById('overlay');
+  const sideNav = document.getElementById('sideNav');
+  const closeNav = document.getElementById('closeNav');
+  function openNav() { sideNav.classList.add('open'); overlay.classList.add('open'); }
+  function closeNavFn() { sideNav.classList.remove('open'); overlay.classList.remove('open'); }
+  hamburger.addEventListener('click', openNav);
+  closeNav.addEventListener('click', closeNavFn);
+  overlay.addEventListener('click', closeNavFn);
+
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); } });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

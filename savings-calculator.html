@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ops Savings Calculator — TMI</title>
+<meta name="description" content="Calculate how much operational waste your field company is carrying. Labor leakage, billing delays, idle time — see the number before you call anyone.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff; --bg-alt: #f5f5f7; --bg-deep: #0d0e1a; --ink: #0a0b14; --ink-2: #505060; --muted: #86868b; --line: #e8e8ed; --accent: #1a1a1a; --chart: #E4FF97;
+    --serif: 'Barlow', sans-serif; --sans: 'Neue Haas Grotesk Display Pro', 'Arial Nova', Arial, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; overflow-x: hidden; }
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 20px 40px; display: flex; align-items: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav-logo { font-family: var(--serif); font-size: 18px; font-weight: 500; color: var(--ink); text-decoration: none; }
+  .hamburger { background: none; border: none; cursor: pointer; padding: 4px; display: flex; flex-direction: column; gap: 5px; }
+  .hamburger span { display: block; width: 22px; height: 1.5px; background: var(--ink); }
+  .side-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: all; }
+  .side-nav { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--bg); z-index: 201; padding: 40px 32px; transition: left 0.35s cubic-bezier(.4,0,.2,1); overflow-y: auto; border-right: 1px solid var(--line); }
+  .side-nav.open { left: 0; }
+  .side-nav-close { background: none; border: none; cursor: pointer; font-size: 24px; color: var(--ink); margin-bottom: 32px; display: block; }
+  .side-nav-section { margin-bottom: 32px; }
+  .side-nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .side-nav a { display: block; font-family: var(--serif); font-size: 15px; color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .side-nav a:last-child { border-bottom: none; }
+  .side-nav-cta { display: block; margin-top: 32px; background: var(--ink); color: #fff; text-align: center; padding: 14px 20px; font-family: var(--serif); font-size: 14px; text-decoration: none; }
+  .page-hero { padding: 140px 0 60px; border-bottom: 1px solid var(--line); }
+  .page-hero-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 80px; align-items: end; }
+  .page-hero-left { grid-column: 1 / 3; }
+  .page-hero-right { grid-column: 3 / 5; padding-bottom: 8px; }
+  .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+  .page-hero h1 { font-family: var(--serif); font-size: clamp(48px, 7vw, 100px); font-weight: 400; line-height: 1.0; letter-spacing: -0.03em; color: var(--ink); }
+  .page-hero h1 em { color: var(--accent); font-style: italic; }
+  .page-hero-right p { font-family: var(--serif); font-size: clamp(16px, 1.4vw, 20px); font-weight: 300; color: var(--ink-2); line-height: 1.6; }
+
+  /* CALCULATOR */
+  .calc-section { padding: 64px 0 80px; }
+  .calc-layout { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1fr 420px; gap: 64px; align-items: start; }
+  .calc-form { }
+  .calc-group { margin-bottom: 40px; }
+  .calc-group-title { font-family: var(--serif); font-size: 20px; font-weight: 400; color: var(--ink); margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .calc-field { margin-bottom: 20px; }
+  .calc-field label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-2); margin-bottom: 8px; }
+  .calc-field-note { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .calc-input-wrap { display: flex; align-items: center; border: 1px solid var(--line); background: var(--bg); }
+  .calc-prefix { padding: 0 14px; font-family: var(--serif); font-size: 16px; color: var(--muted); border-right: 1px solid var(--line); height: 48px; display: flex; align-items: center; }
+  .calc-suffix { padding: 0 14px; font-family: var(--serif); font-size: 13px; color: var(--muted); border-left: 1px solid var(--line); height: 48px; display: flex; align-items: center; white-space: nowrap; }
+  .calc-input-wrap input { flex: 1; border: none; outline: none; padding: 0 16px; height: 48px; font-family: var(--serif); font-size: 18px; color: var(--ink); background: transparent; }
+  .calc-range { width: 100%; -webkit-appearance: none; height: 3px; background: var(--line); border-radius: 2px; outline: none; margin-top: 12px; cursor: pointer; }
+  .calc-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); cursor: pointer; }
+
+  /* RESULTS */
+  .calc-results { position: sticky; top: 100px; }
+  .results-card { background: var(--bg-deep); padding: 40px; }
+  .results-title { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 24px; }
+  .results-total { font-family: var(--serif); font-size: clamp(48px, 5vw, 72px); font-weight: 300; color: #fff; letter-spacing: -0.03em; margin-bottom: 4px; line-height: 1; }
+  .results-total-label { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 32px; }
+  .results-breakdown { display: flex; flex-direction: column; gap: 1px; background: rgba(255,255,255,0.08); margin-bottom: 32px; }
+  .results-line { background: var(--bg-deep); display: flex; justify-content: space-between; align-items: center; padding: 14px 0; }
+  .results-line-label { font-size: 13px; color: rgba(255,255,255,0.55); }
+  .results-line-value { font-family: var(--serif); font-size: 16px; font-weight: 400; color: #fff; }
+  .results-line-value.highlight { color: var(--chart); }
+  .results-cta { display: block; background: var(--chart); color: var(--ink); padding: 14px 20px; text-align: center; font-family: var(--serif); font-size: 14px; font-weight: 500; text-decoration: none; margin-bottom: 12px; }
+  .results-secondary { font-size: 12px; color: rgba(255,255,255,0.35); text-align: center; line-height: 1.5; }
+  .results-disclaimer { font-size: 11px; color: rgba(255,255,255,0.25); margin-top: 16px; line-height: 1.5; }
+
+  .section-alt { padding: 80px 0; background: var(--bg-alt); }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .section-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 56px); font-weight: 400; letter-spacing: -0.02em; color: var(--ink); line-height: 1.1; margin-bottom: 16px; }
+  .section-title em { font-style: italic; }
+  .section-sub { font-family: var(--serif); font-size: clamp(16px, 1.4vw, 20px); font-weight: 300; color: var(--ink-2); max-width: 640px; line-height: 1.6; }
+  .divider { width: 40px; height: 1px; background: var(--line); margin: 24px 0; }
+  .waste-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); margin-top: 48px; }
+  .waste-card { background: var(--bg); padding: 32px; }
+  .waste-card h3 { font-family: var(--serif); font-size: 18px; font-weight: 400; color: var(--ink); margin-bottom: 8px; }
+  .waste-pct { font-family: var(--serif); font-size: 36px; font-weight: 300; color: var(--ink); margin-bottom: 8px; }
+  .waste-label { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .waste-card p { font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+
+  .newsletter-section { padding: 80px 0; background: var(--bg-deep); }
+  .newsletter-inner { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .newsletter-inner h2 { font-family: var(--serif); font-size: clamp(32px, 4vw, 52px); font-weight: 400; color: #fff; line-height: 1.1; }
+  .newsletter-inner h2 em { font-style: italic; color: var(--chart); }
+  .newsletter-form { display: flex; flex-direction: column; gap: 12px; }
+  .newsletter-form input { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 14px 18px; font-family: var(--sans); font-size: 14px; outline: none; }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,0.35); }
+  .newsletter-form button { background: var(--chart); color: var(--ink); border: none; padding: 14px 24px; font-family: var(--serif); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; }
+  .footer { background: var(--bg-deep); border-top: 1px solid rgba(255,255,255,0.08); padding: 64px 0 40px; }
+  .footer-grid { max-width: 1200px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 80px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 12px; max-width: 280px; line-height: 1.6; }
+  .footer-logo { font-family: var(--serif); font-size: 20px; font-weight: 500; color: #fff; text-decoration: none; }
+  .footer-right { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  .footer-col h4 { font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; padding: 3px 0; }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 24px 40px 0; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; }
+  .footer-bottom p { font-size: 12px; color: rgba(255,255,255,0.3); }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+  @media (max-width: 900px) {
+    .calc-layout { grid-template-columns: 1fr; }
+    .calc-results { position: static; }
+  }
+  @media (max-width: 768px) {
+    .nav { padding: 16px 20px; }
+    .page-hero-inner { grid-template-columns: 1fr; gap: 32px; }
+    .page-hero-left, .page-hero-right { grid-column: 1; }
+    .waste-grid, .newsletter-inner, .footer-right { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  <a href="stratum.html" class="nav-logo" style="margin-left:16px;">TMI</a>
+</nav>
+<div class="side-overlay" id="overlay"></div>
+<div class="side-nav" id="sideNav">
+  <button class="side-nav-close" id="closeNav">×</button>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Navigation</div>
+    <a href="stratum.html">Home</a><a href="platform.html">Platform</a><a href="os.html">TMI OS</a><a href="news.html">Field Notes</a><a href="audit.html">Free Audit</a><a href="about.html">About</a>
+  </div>
+  <div class="side-nav-section">
+    <div class="side-nav-label">Industries</div>
+    <a href="construction.html">Construction</a><a href="oil-gas.html">Oil &amp; Gas</a><a href="trades.html">Trades</a><a href="manufacturing.html">Manufacturing</a>
+  </div>
+  <a href="funnel.html" class="side-nav-cta">Apply to Work with TMI →</a>
+</div>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-left">
+      <div class="page-eyebrow">Savings Calculator</div>
+      <h1>How much<br>are you<br><em>leaving?</em></h1>
+    </div>
+    <div class="page-hero-right">
+      <p>Field operations companies carry 15–30% of revenue in recoverable operational waste. This calculator estimates your number before you talk to anyone.</p>
+      <p>Takes 2 minutes. No email required. The estimate is yours.</p>
+    </div>
+  </div>
+</section>
+
+<div class="calc-section">
+  <div class="calc-layout">
+    <div class="calc-form">
+
+      <div class="calc-group">
+        <div class="calc-group-title">Your business</div>
+        <div class="calc-field">
+          <label>Annual revenue</label>
+          <div class="calc-input-wrap">
+            <div class="calc-prefix">$</div>
+            <input type="number" id="revenue" value="3000000" min="100000" max="50000000" step="100000">
+          </div>
+        </div>
+        <div class="calc-field">
+          <label>Field employees</label>
+          <div class="calc-input-wrap">
+            <input type="number" id="employees" value="25" min="5" max="500" step="1">
+            <div class="calc-suffix">people</div>
+          </div>
+        </div>
+        <div class="calc-field">
+          <label>Average employee hourly cost (loaded)</label>
+          <div class="calc-input-wrap">
+            <div class="calc-prefix">$</div>
+            <input type="number" id="hourly" value="55" min="20" max="200" step="5">
+            <div class="calc-suffix">/ hour</div>
+          </div>
+          <div class="calc-field-note">Loaded cost includes wages, burden, benefits. Rule of thumb: hourly wage × 1.3–1.5</div>
+        </div>
+      </div>
+
+      <div class="calc-group">
+        <div class="calc-group-title">Operational waste</div>
+        <div class="calc-field">
+          <label>Estimated idle time per crew member per week</label>
+          <div class="calc-input-wrap">
+            <input type="number" id="idleHours" value="4" min="0" max="20" step="0.5">
+            <div class="calc-suffix">hours / week</div>
+          </div>
+          <input type="range" class="calc-range" id="idleRange" min="0" max="20" step="0.5" value="4">
+          <div class="calc-field-note">Industry average: 3–6 hours/week. Includes travel time gaps, waiting on materials, re-work prep.</div>
+        </div>
+        <div class="calc-field">
+          <label>Average billing delay after job completion</label>
+          <div class="calc-input-wrap">
+            <input type="number" id="billingDelay" value="12" min="0" max="60" step="1">
+            <div class="calc-suffix">days</div>
+          </div>
+          <input type="range" class="calc-range" id="billingRange" min="0" max="60" step="1" value="12">
+          <div class="calc-field-note">Manual invoicing averages 12–20 days. Each day = carrying cost on completed work.</div>
+        </div>
+        <div class="calc-field">
+          <label>Jobs with billing disputes or unpaid COs per year</label>
+          <div class="calc-input-wrap">
+            <input type="number" id="disputes" value="8" min="0" max="100" step="1">
+            <div class="calc-suffix">jobs / year</div>
+          </div>
+          <input type="range" class="calc-range" id="disputeRange" min="0" max="100" step="1" value="8">
+        </div>
+        <div class="calc-field">
+          <label>Average value of a disputed or unpaid change order</label>
+          <div class="calc-input-wrap">
+            <div class="calc-prefix">$</div>
+            <input type="number" id="coValue" value="4500" min="500" max="100000" step="500">
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-group">
+        <div class="calc-group-title">Overhead and admin</div>
+        <div class="calc-field">
+          <label>Hours per week spent on manual reporting, scheduling, and data entry (office)</label>
+          <div class="calc-input-wrap">
+            <input type="number" id="adminHours" value="15" min="0" max="80" step="1">
+            <div class="calc-suffix">hours / week</div>
+          </div>
+          <input type="range" class="calc-range" id="adminRange" min="0" max="80" step="1" value="15">
+        </div>
+        <div class="calc-field">
+          <label>Office admin hourly cost</label>
+          <div class="calc-input-wrap">
+            <div class="calc-prefix">$</div>
+            <input type="number" id="adminHourly" value="28" min="15" max="100" step="1">
+            <div class="calc-suffix">/ hour</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-results">
+      <div class="results-card">
+        <div class="results-title">Estimated Annual Waste</div>
+        <div class="results-total" id="totalWaste">$0</div>
+        <div class="results-total-label">recoverable operational waste / year</div>
+        <div class="results-breakdown">
+          <div class="results-line">
+            <div class="results-line-label">Idle time (field)</div>
+            <div class="results-line-value highlight" id="idleWaste">—</div>
+          </div>
+          <div class="results-line">
+            <div class="results-line-label">Billing delay carrying cost</div>
+            <div class="results-line-value highlight" id="billingWaste">—</div>
+          </div>
+          <div class="results-line">
+            <div class="results-line-label">Disputed / unpaid COs</div>
+            <div class="results-line-value highlight" id="coWaste">—</div>
+          </div>
+          <div class="results-line">
+            <div class="results-line-label">Admin labor on manual work</div>
+            <div class="results-line-value highlight" id="adminWaste">—</div>
+          </div>
+          <div class="results-line">
+            <div class="results-line-label">As % of revenue</div>
+            <div class="results-line-value" id="wastePercent">—</div>
+          </div>
+        </div>
+        <a href="funnel.html" class="results-cta">Get a Real Audit →</a>
+        <div class="results-secondary">The free audit goes deeper than this calculator. A TMI ops analyst reviews your actual numbers, not estimates.</div>
+        <div class="results-disclaimer">This calculator uses industry benchmarks to estimate waste. Actual numbers depend on your specific operation. The free audit produces a company-specific analysis.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section-alt">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Where Waste Hides</div>
+      <h2 class="section-title">The six places<br>field companies<br><em>lose money.</em></h2>
+      <div class="divider"></div>
+      <p class="section-sub">Most of the waste in a field operations company isn't in a single obvious place. It's distributed across six categories that compound each other.</p>
+    </div>
+    <div class="waste-grid reveal">
+      <div class="waste-card">
+        <div class="waste-pct">18%</div>
+        <div class="waste-label">of field labor hours</div>
+        <h3>Idle Time</h3>
+        <p>Time between jobs, waiting on materials, re-work setup, and crew transportation gaps. Averaging 3–6 hours per person per week across most field operations.</p>
+      </div>
+      <div class="waste-card">
+        <div class="waste-pct">12</div>
+        <div class="waste-label">average days billing delay</div>
+        <h3>Billing Lag</h3>
+        <p>Every day between job completion and invoice sent is a day you're financing completed work. On $3M revenue, 12 days of lag is ~$100K in float.</p>
+      </div>
+      <div class="waste-card">
+        <div class="waste-pct">1 in 5</div>
+        <div class="waste-label">jobs with CO disputes</div>
+        <h3>Change Orders</h3>
+        <p>Without documentation, change orders are disputed. With documentation, they're paid. The gap is typically several thousand dollars per disputed job.</p>
+      </div>
+      <div class="waste-card">
+        <div class="waste-pct">15 hrs</div>
+        <div class="waste-label">weekly office admin on manual tasks</div>
+        <h3>Manual Admin</h3>
+        <p>Scheduling, reporting, invoicing, and data entry that AI handles automatically. Usually the first thing to recover in a digital deployment.</p>
+      </div>
+      <div class="waste-card">
+        <div class="waste-pct">8%</div>
+        <div class="waste-label">of materials cost</div>
+        <h3>Materials Shrinkage</h3>
+        <p>Missing materials, incorrect deliveries, and end-of-job inventory discrepancies. Adds up fast on large jobs without automated tracking.</p>
+      </div>
+      <div class="waste-card">
+        <div class="waste-pct">$2,400</div>
+        <div class="waste-label">average unplanned repair cost</div>
+        <h3>Reactive Maintenance</h3>
+        <p>Equipment breakdowns during jobs cost more than the repair — they cost the delay, the crew idle time, and the customer relationship hit. Preventive tracking closes most of this.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="newsletter-section">
+  <div class="newsletter-inner">
+    <div class="reveal"><h2>Field Notes.<br>The <em>weekly briefing</em><br>for operators.</h2></div>
+    <div class="reveal">
+      <p style="color:rgba(255,255,255,0.55); font-family: var(--serif); font-size:15px; margin-bottom:24px;">Ops frameworks, waste reduction case studies, and what field operators are actually recovering. Every week, free.</p>
+      <form class="newsletter-form">
+        <input type="text" placeholder="Your name"><input type="email" placeholder="Work email">
+        <button type="submit">Subscribe to Field Notes →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand"><a href="stratum.html" class="footer-logo">TMI</a><p>The operating system for field-based companies.</p></div>
+    <div class="footer-right">
+      <div class="footer-col"><h4>Platform</h4><a href="platform.html">Systems</a><a href="os.html">TMI OS</a><a href="zero.html">Start Kit</a></div>
+      <div class="footer-col"><h4>Community</h4><a href="network.html">Network</a><a href="events.html">Events</a><a href="build-series.html">Build Series</a></div>
+      <div class="footer-col"><h4>Resources</h4><a href="news.html">Field Notes</a><a href="vault.html">The Vault</a><a href="audit.html">Free Audit</a></div>
+      <div class="footer-col"><h4>Industries</h4><a href="construction.html">Construction</a><a href="oil-gas.html">Oil &amp; Gas</a><a href="trades.html">Trades</a></div>
+    </div>
+  </div>
+  <div class="footer-bottom"><p>&copy; 2026 TMI. All rights reserved.</p><p style="color:rgba(255,255,255,0.3); font-size:12px;">tmitechai.com</p></div>
+</footer>
+
+<script>
+  const hamburger=document.getElementById('hamburger'),overlay=document.getElementById('overlay'),sideNav=document.getElementById('sideNav'),closeNav=document.getElementById('closeNav');
+  function openNav(){sideNav.classList.add('open');overlay.classList.add('open');}
+  function closeNavFn(){sideNav.classList.remove('open');overlay.classList.remove('open');}
+  hamburger.addEventListener('click',openNav);closeNav.addEventListener('click',closeNavFn);overlay.addEventListener('click',closeNavFn);
+
+  function fmt(n){return '$'+Math.round(n).toLocaleString();}
+  function calc(){
+    const rev=parseFloat(document.getElementById('revenue').value)||0;
+    const emp=parseFloat(document.getElementById('employees').value)||0;
+    const hrly=parseFloat(document.getElementById('hourly').value)||0;
+    const idle=parseFloat(document.getElementById('idleHours').value)||0;
+    const delay=parseFloat(document.getElementById('billingDelay').value)||0;
+    const disputes=parseFloat(document.getElementById('disputes').value)||0;
+    const coVal=parseFloat(document.getElementById('coValue').value)||0;
+    const adminHrs=parseFloat(document.getElementById('adminHours').value)||0;
+    const adminHrly=parseFloat(document.getElementById('adminHourly').value)||0;
+
+    const idleWaste=emp*idle*52*hrly;
+    const billingWaste=(rev/365)*delay*0.03;
+    const coWaste=disputes*coVal*0.6;
+    const adminWaste=adminHrs*52*adminHrly;
+    const total=idleWaste+billingWaste+coWaste+adminWaste;
+    const pct=rev>0?((total/rev)*100).toFixed(1):0;
+
+    document.getElementById('totalWaste').textContent=fmt(total);
+    document.getElementById('idleWaste').textContent=fmt(idleWaste);
+    document.getElementById('billingWaste').textContent=fmt(billingWaste);
+    document.getElementById('coWaste').textContent=fmt(coWaste);
+    document.getElementById('adminWaste').textContent=fmt(adminWaste);
+    document.getElementById('wastePercent').textContent=pct+'%';
+  }
+
+  // Sync ranges with inputs
+  [['idleHours','idleRange'],['billingDelay','billingRange'],['disputes','disputeRange'],['adminHours','adminRange']].forEach(([inp,rng])=>{
+    const input=document.getElementById(inp),range=document.getElementById(rng);
+    input.addEventListener('input',()=>{range.value=input.value;calc();});
+    range.addEventListener('input',()=>{input.value=range.value;calc();});
+  });
+  ['revenue','employees','hourly','coValue','adminHourly'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',calc);
+  });
+  calc();
+
+  const reveals=document.querySelectorAll('.reveal');
+  const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.08});
+  reveals.forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>

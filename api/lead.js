@@ -97,7 +97,7 @@ module.exports = async function handler(req, res) {
 
   // Initial email — from Mia
   resend.emails.send({
-    from: 'Mia at TMI <hello@tmi-technology.com>',
+    from: 'Mia at TMI <hello@tmitechai.com>',
     to: email,
     subject: "You applied. Here's what happens next.",
     html: buildInitialEmail(firstName, unsubUrl),
