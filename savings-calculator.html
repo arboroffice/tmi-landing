@@ -103,6 +103,19 @@
   .footer-bottom p { font-size: 12px; color: rgba(255,255,255,0.3); }
   .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
   .reveal.visible { opacity: 1; transform: none; }
+
+  /* GATE */
+  .results-locked-preview { filter: blur(6px); user-select: none; pointer-events: none; margin-bottom: 24px; }
+  .results-gate-wrap { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); padding: 24px; }
+  .gate-label { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 18px; text-align: center; line-height: 1.55; }
+  .gate-form { display: flex; flex-direction: column; gap: 10px; }
+  .gate-form input { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); color: #fff; padding: 12px 16px; font-family: var(--sans); font-size: 14px; outline: none; transition: border-color 0.2s; }
+  .gate-form input::placeholder { color: rgba(255,255,255,0.3); }
+  .gate-form input:focus { border-color: var(--chart); background: rgba(255,255,255,0.1); }
+  .gate-form button { background: var(--chart); color: var(--ink); border: none; padding: 14px 20px; font-family: var(--sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .gate-form button:hover { background: #D0FF6A; }
+  .gate-form button:disabled { opacity: 0.55; cursor: not-allowed; }
+  .gate-error { font-size: 12px; color: #ff7070; text-align: center; min-height: 16px; margin-top: 4px; }
   @media (max-width: 900px) {
     .calc-layout { grid-template-columns: 1fr; }
     .calc-results { position: static; }
@@ -143,7 +156,7 @@
     </div>
     <div class="page-hero-right">
       <p>Field operations companies carry 15–30% of revenue in recoverable operational waste. This calculator estimates your number before you talk to anyone.</p>
-      <p>Takes 2 minutes. No email required. The estimate is yours.</p>
+      <p>Takes 2 minutes. Enter your details to unlock your results.</p>
     </div>
   </div>
 </section>
@@ -239,34 +252,49 @@
 
     <div class="calc-results">
       <div class="results-card">
-        <div class="results-title">Estimated Annual Waste</div>
-        <div class="results-total" id="totalWaste">$0</div>
-        <div class="results-total-label">recoverable operational waste / year</div>
-        <div class="results-breakdown">
-          <div class="results-line">
-            <div class="results-line-label">Idle time (field)</div>
-            <div class="results-line-value highlight" id="idleWaste">—</div>
+
+        <!-- LOCKED STATE -->
+        <div id="resultsLocked">
+          <div class="results-title">Estimated Annual Waste</div>
+          <div class="results-locked-preview">
+            <div class="results-total">$142,800</div>
+            <div class="results-total-label">recoverable operational waste / year</div>
+            <div class="results-breakdown">
+              <div class="results-line"><div class="results-line-label">Idle time (field)</div><div class="results-line-value highlight">$84,000</div></div>
+              <div class="results-line"><div class="results-line-label">Billing delay carrying cost</div><div class="results-line-value highlight">$7,397</div></div>
+              <div class="results-line"><div class="results-line-label">Disputed / unpaid COs</div><div class="results-line-value highlight">$21,600</div></div>
+              <div class="results-line"><div class="results-line-label">Admin labor on manual work</div><div class="results-line-value highlight">$21,840</div></div>
+            </div>
           </div>
-          <div class="results-line">
-            <div class="results-line-label">Billing delay carrying cost</div>
-            <div class="results-line-value highlight" id="billingWaste">—</div>
-          </div>
-          <div class="results-line">
-            <div class="results-line-label">Disputed / unpaid COs</div>
-            <div class="results-line-value highlight" id="coWaste">—</div>
-          </div>
-          <div class="results-line">
-            <div class="results-line-label">Admin labor on manual work</div>
-            <div class="results-line-value highlight" id="adminWaste">—</div>
-          </div>
-          <div class="results-line">
-            <div class="results-line-label">As % of revenue</div>
-            <div class="results-line-value" id="wastePercent">—</div>
+          <div class="results-gate-wrap">
+            <p class="gate-label">Enter your details to unlock your full results.</p>
+            <form class="gate-form" id="gateForm">
+              <input type="text" id="gateName" placeholder="Full name" required autocomplete="name">
+              <input type="email" id="gateEmail" placeholder="Work email" required autocomplete="email">
+              <input type="tel" id="gatePhone" placeholder="Phone number" required autocomplete="tel">
+              <button type="submit" id="gateSubmit">Unlock My Results &rarr;</button>
+              <div class="gate-error" id="gateError"></div>
+            </form>
           </div>
         </div>
-        <a href="funnel.html" class="results-cta">Get a Real Audit →</a>
-        <div class="results-secondary">The free audit goes deeper than this calculator. A TMI ops analyst reviews your actual numbers, not estimates.</div>
-        <div class="results-disclaimer">This calculator uses industry benchmarks to estimate waste. Actual numbers depend on your specific operation. The free audit produces a company-specific analysis.</div>
+
+        <!-- UNLOCKED STATE -->
+        <div id="resultsUnlocked" style="display:none;">
+          <div class="results-title">Estimated Annual Waste</div>
+          <div class="results-total" id="totalWaste">$0</div>
+          <div class="results-total-label">recoverable operational waste / year</div>
+          <div class="results-breakdown">
+            <div class="results-line"><div class="results-line-label">Idle time (field)</div><div class="results-line-value highlight" id="idleWaste">—</div></div>
+            <div class="results-line"><div class="results-line-label">Billing delay carrying cost</div><div class="results-line-value highlight" id="billingWaste">—</div></div>
+            <div class="results-line"><div class="results-line-label">Disputed / unpaid COs</div><div class="results-line-value highlight" id="coWaste">—</div></div>
+            <div class="results-line"><div class="results-line-label">Admin labor on manual work</div><div class="results-line-value highlight" id="adminWaste">—</div></div>
+            <div class="results-line"><div class="results-line-label">As % of revenue</div><div class="results-line-value" id="wastePercent">—</div></div>
+          </div>
+          <a href="funnel.html" class="results-cta">Get a Real Audit &rarr;</a>
+          <div class="results-secondary">The free audit goes deeper than this calculator. A TMI ops analyst reviews your actual numbers, not estimates.</div>
+          <div class="results-disclaimer">This calculator uses industry benchmarks to estimate waste. Actual numbers depend on your specific operation. The free audit produces a company-specific analysis.</div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -353,8 +381,12 @@
   function closeNavFn(){sideNav.classList.remove('open');overlay.classList.remove('open');}
   hamburger.addEventListener('click',openNav);closeNav.addEventListener('click',closeNavFn);overlay.addEventListener('click',closeNavFn);
 
+  let calcUnlocked = !!localStorage.getItem('calc_unlocked');
+
   function fmt(n){return '$'+Math.round(n).toLocaleString();}
+
   function calc(){
+    if (!calcUnlocked) return;
     const rev=parseFloat(document.getElementById('revenue').value)||0;
     const emp=parseFloat(document.getElementById('employees').value)||0;
     const hrly=parseFloat(document.getElementById('hourly').value)||0;
@@ -379,6 +411,43 @@
     document.getElementById('adminWaste').textContent=fmt(adminWaste);
     document.getElementById('wastePercent').textContent=pct+'%';
   }
+
+  function unlockResults(){
+    calcUnlocked = true;
+    document.getElementById('resultsLocked').style.display = 'none';
+    document.getElementById('resultsUnlocked').style.display = 'block';
+    calc();
+  }
+
+  // If already unlocked from a previous visit, skip the gate
+  if (calcUnlocked) unlockResults();
+
+  // Gate form submission
+  document.getElementById('gateForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const name = document.getElementById('gateName').value.trim();
+    const email = document.getElementById('gateEmail').value.trim();
+    const phone = document.getElementById('gatePhone').value.trim();
+    const btn = document.getElementById('gateSubmit');
+    const err = document.getElementById('gateError');
+    btn.disabled = true;
+    btn.textContent = 'Unlocking...';
+    err.textContent = '';
+    try {
+      const res = await fetch('/api/lead', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({name, email, phone, source:'savings-calculator'})
+      });
+      if (!res.ok) throw new Error('failed');
+      localStorage.setItem('calc_unlocked','1');
+      unlockResults();
+    } catch(ex){
+      err.textContent = 'Something went wrong — please try again.';
+      btn.disabled = false;
+      btn.textContent = 'Unlock My Results →';
+    }
+  });
 
   // Sync ranges with inputs
   [['idleHours','idleRange'],['billingDelay','billingRange'],['disputes','disputeRange'],['adminHours','adminRange']].forEach(([inp,rng])=>{
