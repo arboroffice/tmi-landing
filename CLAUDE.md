@@ -30,21 +30,24 @@ CSS variables:
 ```
 
 ### Field Notes Articles (article-*.html)
-Warm editorial style — completely separate CSS from the main site:
+Same design system as the main site — white background, Barlow, dark accent:
 ```css
---bg: #f4f1ea           /* warm paper */
---bg-alt: #ebe7dc
---bg-deep: #0a0a0a
---ink: #111111
---ink-2: #2a2a2a
---muted: #6b6b66
---line: #d8d3c5
---accent: #c87533       /* warm amber */
---accent-2: #8e3b13
---serif: "Playfair Display", Georgia, serif
---sans: "Inter", system-ui, sans-serif
+--bg: #ffffff
+--bg-alt: #f5f5f7
+--bg-deep: #0a0b14
+--ink: #1a1a1a
+--ink-2: #505060
+--muted: #86868b
+--line: rgba(0,0,0,0.08)
+--line-strong: rgba(0,0,0,0.13)
+--accent: #1a1a1a
+--accent-2: #000
+--chart: #E4FF97
+--chart-dark: #D0FF6A
+--serif: "Barlow", system-ui, sans-serif
+--sans: "Neue Haas Grotesk Display", "Neue Haas Grotesk", system-ui, sans-serif
 ```
-Fonts load from Google Fonts: `family=Barlow:ital,wght@...` and `family=Playfair+Display:ital,wght@...`
+Font: `family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600` only. No Playfair Display. No Inter. No warm paper colors.
 
 ---
 
@@ -99,6 +102,8 @@ Fonts load from Google Fonts: `family=Barlow:ital,wght@...` and `family=Playfair
 - article-trades-and-ai.html — Trades and AI overview
 - article-welding.html — Welding
 - ai-for-oil-gas-companies.html — AI for oil & gas
+- article-backlog-cash-timing.html — Cash flow timing and backlog vs. actual cash
+- article-power-ai-projects-crew-safety.html — Data center / power gen crew readiness
 
 ---
 
@@ -157,16 +162,16 @@ Writes and publishes one new Field Notes article per day. Picks a topic not alre
 <title>{TITLE} | TMI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --bg:#f4f1ea;--bg-alt:#ebe7dc;--bg-deep:#0a0a0a;
-    --ink:#111111;--ink-2:#2a2a2a;--muted:#6b6b66;
-    --line:#d8d3c5;--line-strong:#b9b3a3;
-    --accent:#c87533;--accent-2:#8e3b13;
+    --bg:#ffffff;--bg-alt:#f5f5f7;--bg-deep:#0a0b14;
+    --ink:#1a1a1a;--ink-2:#505060;--muted:#86868b;
+    --line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.13);
+    --accent:#1a1a1a;--accent-2:#000;
     --chart:#E4FF97;--chart-dark:#D0FF6A;
-    --serif:"Playfair Display",Georgia,serif;
-    --sans:"Inter",system-ui,sans-serif;
+    --serif:"Barlow",system-ui,sans-serif;
+    --sans:"Neue Haas Grotesk Display","Neue Haas Grotesk",system-ui,-apple-system,sans-serif;
   }
   *{box-sizing:border-box;}html,body{margin:0;padding:0;}html{scroll-behavior:smooth;}
   body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.55;overflow-x:hidden;}
