@@ -474,6 +474,9 @@ form.addEventListener('submit', async (e) => {
     });
   } catch(err) {}
 
+  // Save to FOTF list
+  try { const l = JSON.parse(localStorage.getItem('fotf_signups') || '[]'); if (!l.find(e => e.email === email)) { l.push({ email, date: new Date().toISOString(), source: 'funnel' }); localStorage.setItem('fotf_signups', JSON.stringify(l)); } } catch(err) {}
+
   document.getElementById('form-success').style.display = 'block';
   form.style.display = 'none';
   modal.classList.add('open');

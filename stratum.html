@@ -796,6 +796,27 @@
     line-height: 1.7;
     margin: 0;
   }
+  /* FOTF */
+  .fotf-section{background:var(--bg-deep);padding:96px 0;position:relative;overflow:hidden;}
+  .fotf-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 50%,rgba(228,255,151,0.07) 0%,transparent 65%);pointer-events:none;}
+  .fotf-wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;position:relative;z-index:1;}
+  .fotf-tag{font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(228,255,151,0.55);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+  .fotf-tag::before{content:'';display:block;width:20px;height:1px;background:var(--chart);}
+  .fotf-section h2{font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.05;color:#fff;margin-bottom:16px;}
+  .fotf-section h2 em{color:var(--chart);font-style:italic;}
+  .fotf-desc{font-family:var(--serif);font-size:17px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:24px;}
+  .fotf-explore{font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.28);transition:color 0.2s;}
+  .fotf-explore:hover{color:var(--chart);}
+  .fotf-form{display:flex;gap:8px;}
+  .fotf-input{flex:1;padding:14px 20px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.11);border-radius:999px;color:#fff;font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;min-width:0;}
+  .fotf-input::placeholder{color:rgba(255,255,255,0.28);}
+  .fotf-input:focus{border-color:rgba(228,255,151,0.4);}
+  .fotf-btn{padding:14px 22px;background:var(--chart);color:#0a0b14;border:none;border-radius:999px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.15s;}
+  .fotf-btn:hover{background:var(--chart-dark);}
+  .fotf-note{font-size:11px;color:rgba(255,255,255,0.18);margin-top:12px;letter-spacing:0.05em;}
+  .fotf-ok{display:none;font-family:var(--serif);font-size:18px;color:var(--chart);padding:14px 0;}
+  @media(max-width:768px){.fotf-wrap{grid-template-columns:1fr;gap:40px;}}
+  @media(max-width:480px){.fotf-form{flex-direction:column;}.fotf-btn{border-radius:999px;}}
 </style>
 </head>
 <body>
@@ -1061,6 +1082,28 @@
   </div>
 </section>
 
+<!-- FOUNDERS OF THE FUTURE -->
+<section class="fotf-section">
+  <div class="container">
+    <div class="fotf-wrap">
+      <div>
+        <div class="fotf-tag">Community &amp; Blog</div>
+        <h2>Founders of <em>the Future</em></h2>
+        <p class="fotf-desc">Essays, build notes, and case studies from operators reshaping their industries. For founders building businesses that run on systems, not on their hours.</p>
+        <a href="https://tmitechai.com/founders" class="fotf-explore">Explore the community &rarr;</a>
+      </div>
+      <div>
+        <form class="fotf-form" id="fotf-stratum-form">
+          <input type="email" class="fotf-input" placeholder="your@email.com" required/>
+          <button type="submit" class="fotf-btn">Join Free &rarr;</button>
+        </form>
+        <div class="fotf-ok" id="fotf-stratum-ok">You're in. We'll be in touch.</div>
+        <p class="fotf-note">One email when something worth reading drops. No spam.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="container">
@@ -1121,6 +1164,21 @@ const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+(function() {
+  const BEEHIIV_URL = 'https://www.beehiiv.com/subscribe/24a9962f-7b4a-4587-b363-263e5508e73c';
+  const form = document.getElementById('fotf-stratum-form');
+  const ok = document.getElementById('fotf-stratum-ok');
+  if (!form) return;
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = form.querySelector('input').value;
+    form.style.display = 'none'; ok.style.display = 'block';
+    try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from trades page\nEmail: ' + email); fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
+    window.open(BEEHIIV_URL + '?email=' + encodeURIComponent(email), '_blank');
+    try { const l = JSON.parse(localStorage.getItem('fotf_signups') || '[]'); if (!l.find(e => e.email === email)) { l.push({ email, date: new Date().toISOString(), source: 'trades' }); localStorage.setItem('fotf_signups', JSON.stringify(l)); } } catch(err) {}
+  });
+})();
 </script>
 </body>
 </html>

@@ -335,16 +335,15 @@ footer {
     The community and blog for operators building the next generation of businesses.
     <strong>Real builds. Real numbers. No hype.</strong> Join the people who are actually doing it.
   </p>
-  <div id="form-wrap">
-    <form class="signup-form" id="signup-form">
-      <input type="email" class="signup-input" placeholder="your@email.com" required/>
-      <button type="submit" class="signup-btn">Join the Community</button>
-    </form>
-    <p class="signup-note">No spam. One email when something worth reading drops.</p>
+  <!-- Beehiiv embed — subscribe directly without leaving the page -->
+  <div style="max-width:480px;margin:0 auto;width:100%;">
+    <iframe src="https://embeds.beehiiv.com/24a9962f-7b4a-4587-b363-263e5508e73c"
+      data-test-id="beehiiv-embed"
+      width="100%" height="180" frameborder="0" scrolling="no"
+      style="border-radius:8px;background:transparent;margin:0;">
+    </iframe>
   </div>
-  <div class="signup-success" id="signup-success">
-    You're in. We'll be in touch.
-  </div>
+  <p class="signup-note" style="margin-top:12px;">No spam. One email when something worth reading drops.</p>
 </section>
 
 <!-- WHAT IS IT -->
@@ -410,12 +409,12 @@ footer {
   <div class="container-sm">
     <h2>The future belongs to <em>the ones who build it.</em></h2>
     <p>Get in early. One email when something worth reading drops.</p>
-    <form class="signup-form" id="signup-form-2">
-      <input type="email" class="signup-input" placeholder="your@email.com" required/>
-      <button type="submit" class="signup-btn">Join Now</button>
-    </form>
-    <div class="signup-success" id="signup-success-2" style="color:var(--chart);font-family:var(--serif);font-size:18px;margin-top:16px;display:none;">
-      You're in. We'll be in touch.
+    <div style="max-width:480px;margin:0 auto;width:100%;">
+      <iframe src="https://embeds.beehiiv.com/24a9962f-7b4a-4587-b363-263e5508e73c"
+        data-test-id="beehiiv-embed"
+        width="100%" height="180" frameborder="0" scrolling="no"
+        style="border-radius:8px;background:transparent;margin:0;">
+      </iframe>
     </div>
     <p class="signup-note" style="color:rgba(255,255,255,0.2);margin-top:14px;">No spam. Unsubscribe anytime.</p>
   </div>
@@ -469,19 +468,31 @@ function saveEmail(email) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
-function handleSubmit(formId, successId) {
+async function handleSubmit(formId, successId) {
   const form = document.getElementById(formId);
   const success = document.getElementById(successId);
   if (!form) return;
-  form.addEventListener('submit', function(e) {
+  form.addEventListener('submit', async function(e) {
     e.preventDefault();
     const email = form.querySelector('input[type="email"]').value;
     saveEmail(email);
     form.style.display = 'none';
     success.style.display = 'block';
     if (formId === 'signup-form') {
-      document.querySelector('.signup-note').style.display = 'none';
+      const note = document.querySelector('.signup-note');
+      if (note) note.style.display = 'none';
     }
+    // Formsubmit - email notification
+    try {
+      const fd = new FormData();
+      fd.append('email', email);
+      fd.append('_subject', 'New FOTF Signup - ' + email);
+      fd.append('message', 'New Founders of the Future signup\nEmail: ' + email + '\nPage: ' + location.href);
+      await fetch('https://formsubmit.co/ajax/mia@tmitechai.com', {
+        method: 'POST', headers: { 'Accept': 'application/json' }, body: fd
+      });
+    } catch(err) {}
+    // TODO: replace with Beehiiv subscribe when code is ready
   });
 }
 handleSubmit('signup-form', 'signup-success');
