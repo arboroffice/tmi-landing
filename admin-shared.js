@@ -24,6 +24,7 @@ const TMIAdmin = (() => {
     clients:   `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="7" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>`,
     projects:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="8" width="5" height="13" rx="1"/><rect x="17" y="5" width="5" height="16" rx="1"/></svg>`,
     invoices:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4" stroke-linecap="round"/><circle cx="17" cy="17" r="3" fill="none"/><path d="M17 16v1l.75.5" stroke-linecap="round"/></svg>`,
+    onboarding:`<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round"/><polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     contacts:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"/></svg>`,
     email:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="4" width="20" height="16" rx="2"/><path stroke-linecap="round" d="m2 7 10 7 10-7"/></svg>`,
     sms:       `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
@@ -74,6 +75,7 @@ const TMIAdmin = (() => {
     ${navItem('clients', 'Clients', I.clients)}
     ${navItem('projects', 'Projects', I.projects)}
     ${navItem('invoices', 'Invoices', I.invoices)}
+    ${navItem('onboarding', 'Onboarding', I.onboarding)}
     <div class="sb-group-label">People</div>
     ${navItem('contacts', 'Contacts', I.contacts)}
     <div class="sb-group-label">Comms</div>
@@ -130,13 +132,14 @@ const TMIAdmin = (() => {
         el.innerHTML = `<div style="font-size:13px;color:var(--muted);padding:8px 0;">No activity yet.</div>`;
         return;
       }
-      el.innerHTML = `<div class="timeline">${data.map(a => `
+      const dotColor = { call:'blue', email:'chart', meeting:'green', note:'', sms:'blue', task:'' };
+      el.innerHTML = `<div class="tl-list">${data.map(a => `
         <div class="tl-item">
-          <div class="tl-dot tl-dot-${a.type}"></div>
+          <div class="tl-dot ${dotColor[a.type] || ''}"></div>
           <div class="tl-body">
             <div class="tl-title">${a.title}</div>
             ${a.body ? `<div class="tl-text">${a.body}</div>` : ''}
-            <div class="tl-time">${self.fmt(a.created_at)}${a.created_by ? ' · ' + a.created_by : ''}</div>
+            <div class="tl-time">${self.fmt(a.created_at)}</div>
           </div>
         </div>`).join('')}</div>`;
     },

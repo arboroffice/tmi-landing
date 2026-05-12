@@ -55,6 +55,14 @@
         <!-- Right column -->
         <div style="display:flex;flex-direction:column;gap:20px;">
 
+          <!-- Needs attention -->
+          <div class="card">
+            <div class="card-head"><span class="card-title">Needs Attention</span></div>
+            <div id="attention-wrap">
+              <div style="padding:16px 20px;font-size:13px;color:var(--muted);">Loading...</div>
+            </div>
+          </div>
+
           <!-- Pipeline summary -->
           <div class="card">
             <div class="card-head"><span class="card-title">Pipeline</span></div>
@@ -95,11 +103,13 @@ const STAGE_COLORS = {
 };
 
 async function loadDashboard() {
-  const [leads, clients, contacts, campaigns] = await Promise.all([
+  const [leads, clients, contacts, campaigns, apps, followups] = await Promise.all([
     TMIAdmin.api('/api/leads'),
     TMIAdmin.api('/api/clients'),
     TMIAdmin.api('/api/contacts'),
-    TMIAdmin.api('/api/emails')
+    TMIAdmin.api('/api/emails'),
+    TMIAdmin.api('/api/applications'),
+    TMIAdmin.api('/api/followups'),
   ]);
 
   // Stats
@@ -123,6 +133,37 @@ async function loadDashboard() {
     const total = sent.reduce((s, c) => s + (c.sent_count || 0), 0);
     if (total) document.getElementById('stat-emails-d').textContent = `${total.toLocaleString()} delivered`;
   }
+
+  // Needs attention card
+  const newApps = (apps || []).filter(a => a.status === 'new');
+  const now = new Date();
+  const overdueF = (followups || []).filter(f => !f.completed && new Date(f.due_at) < now);
+  const attentionItems = [
+    ...newApps.map(a => ({
+      icon: '📬',
+      text: `New application: <strong>${a.name}</strong>`,
+      sub: a.company || a.email,
+      href: '/admin-applications',
+      urgent: false,
+    })),
+    ...overdueF.slice(0, 3).map(f => ({
+      icon: '⚠️',
+      text: `Overdue task: <strong>${f.title}</strong>`,
+      sub: TMIAdmin.fmt(f.due_at),
+      href: '/admin-followups',
+      urgent: true,
+    })),
+  ];
+  document.getElementById('attention-wrap').innerHTML = attentionItems.length
+    ? attentionItems.map(item => `
+        <a href="${item.href}" style="display:flex;align-items:flex-start;gap:12px;padding:11px 20px;border-bottom:1px solid var(--line);text-decoration:none;cursor:pointer;transition:background 0.1s" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+          <span style="font-size:16px;flex-shrink:0;line-height:1.4">${item.icon}</span>
+          <div>
+            <div style="font-size:13px;color:var(--ink)">${item.text}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${item.sub || ''}</div>
+          </div>
+        </a>`).join('')
+    : `<div style="padding:16px 20px;font-size:13px;color:var(--muted)">All clear - nothing needs immediate attention.</div>`;
 
   // Recent leads table
   if (leads) {

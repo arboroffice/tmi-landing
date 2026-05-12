@@ -151,6 +151,12 @@
       <div class="panel-sep"></div>
       <div class="panel-sec-label">Notes</div>
       <div id="pd-notes" style="font-size:14px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;">—</div>
+      <div class="panel-sep"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="panel-sec-label" style="margin:0">Activity</div>
+        <button class="btn btn-ghost btn-sm" onclick="logClientActivity()">+ Log</button>
+      </div>
+      <div id="client-activity-feed"></div>
     </div>
   </div>
 </div>
@@ -245,7 +251,21 @@ function openPanel(cl) {
   document.getElementById('pd-start').textContent = cl.start_date ? TMIAdmin.fmt(cl.start_date) : '—';
   document.getElementById('pd-created').textContent = TMIAdmin.fmt(cl.created_at);
   document.getElementById('pd-notes').textContent = cl.notes || '—';
+  document.getElementById('client-activity-feed').innerHTML = '';
   TMIAdmin.openPanel('client-panel');
+  if (cl.contact_id) TMIAdmin.renderActivityPanel(cl.contact_id, 'client-activity-feed');
+}
+
+async function logClientActivity() {
+  if (!currentClient?.contact_id) return;
+  const type = prompt('Type (call / email / note / meeting):', 'note');
+  if (!type) return;
+  const title = prompt('Summary:');
+  if (!title) return;
+  const body = prompt('Details (optional):') || '';
+  await TMIAdmin.logActivity(currentClient.contact_id, type, title, body);
+  TMIAdmin.toast('Activity logged');
+  TMIAdmin.renderActivityPanel(currentClient.contact_id, 'client-activity-feed');
 }
 
 function openAddModal() {

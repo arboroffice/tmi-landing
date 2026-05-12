@@ -156,6 +156,12 @@
       <div id="pd-notes" style="font-size:14px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;">—</div>
       <div class="panel-sep"></div>
       <button class="btn btn-primary btn-sm" onclick="convertToClient()" id="convert-btn">Convert to Client &rarr;</button>
+      <div class="panel-sep"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="panel-sec-label" style="margin:0">Activity</div>
+        <button class="btn btn-ghost btn-sm" onclick="logLeadActivity()">+ Log</button>
+      </div>
+      <div id="lead-activity-feed"></div>
     </div>
   </div>
 </div>
@@ -248,7 +254,21 @@ function openPanel(lead) {
   document.getElementById('pd-created').textContent = TMIAdmin.fmt(lead.created_at);
   document.getElementById('pd-last').textContent = TMIAdmin.fmt(lead.last_contact);
   document.getElementById('pd-notes').textContent = [lead.notes, c.notes].filter(Boolean).join('\n\n') || '—';
+  document.getElementById('lead-activity-feed').innerHTML = '';
   TMIAdmin.openPanel('lead-panel');
+  if (lead.contact_id) TMIAdmin.renderActivityPanel(lead.contact_id, 'lead-activity-feed');
+}
+
+async function logLeadActivity() {
+  if (!currentLead?.contact_id) return;
+  const type = prompt('Type (call / email / note / meeting):', 'note');
+  if (!type) return;
+  const title = prompt('Summary:');
+  if (!title) return;
+  const body = prompt('Details (optional):') || '';
+  await TMIAdmin.logActivity(currentLead.contact_id, type, title, body);
+  TMIAdmin.toast('Activity logged');
+  TMIAdmin.renderActivityPanel(currentLead.contact_id, 'lead-activity-feed');
 }
 
 function openAddModal() {

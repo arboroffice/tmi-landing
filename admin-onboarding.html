@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Onboarding — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Onboarding</span></div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Onboarding Checklist</h1>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span id="progress-label" style="font-size:13px;color:var(--muted)"></span>
+          <button class="btn btn-ghost btn-sm" onclick="resetAll()">Reset</button>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div style="height:6px;background:var(--line);border-radius:999px;margin-bottom:28px;overflow:hidden">
+        <div id="progress-bar" style="height:100%;background:var(--chart);border-radius:999px;transition:width 0.4s ease;width:0%"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" id="checklist-grid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('onboarding');
+
+const CHECKLIST = [
+  {
+    section: 'Kickoff',
+    items: [
+      { id: 'kick-call', title: 'Kickoff call completed', desc: 'Discovery call, pain points documented, goals aligned' },
+      { id: 'kick-access', title: 'System access collected', desc: 'Logins, credentials, and API keys received from client' },
+      { id: 'kick-intake', title: 'Intake form sent & returned', desc: 'Operations questionnaire completed by client team' },
+      { id: 'kick-intro', title: 'Team intro email sent', desc: 'Client team introduced to their TMI contact' },
+    ]
+  },
+  {
+    section: 'Discovery & Audit',
+    items: [
+      { id: 'disc-ops', title: 'Operations audit complete', desc: 'Mapped current workflows, identified friction points' },
+      { id: 'disc-data', title: 'Data audit complete', desc: 'Reviewed existing data sources, formats, and gaps' },
+      { id: 'disc-tools', title: 'Current tools documented', desc: 'Software stack, integrations, and manual processes listed' },
+      { id: 'disc-priorities', title: 'Priorities ranked', desc: 'Top 3 pain points agreed upon with client' },
+    ]
+  },
+  {
+    section: 'Build Phase',
+    items: [
+      { id: 'build-spec', title: 'Spec / scope doc delivered', desc: 'Proposal or SOW signed, scope locked' },
+      { id: 'build-env', title: 'Dev environment set up', desc: 'Staging environment live, client has access' },
+      { id: 'build-v1', title: 'V1 delivered to client', desc: 'First working version shared for review' },
+      { id: 'build-feedback', title: 'Feedback round complete', desc: 'Client revisions documented and addressed' },
+    ]
+  },
+  {
+    section: 'Launch',
+    items: [
+      { id: 'launch-test', title: 'Testing sign-off', desc: 'Client team ran through all workflows, confirmed working' },
+      { id: 'launch-training', title: 'Training session done', desc: 'Walkthrough with all users who will use the system' },
+      { id: 'launch-docs', title: 'Docs / SOP delivered', desc: 'Operating procedures and how-to docs sent to client' },
+      { id: 'launch-live', title: 'System live in production', desc: 'Client running on the live system, not staging' },
+    ]
+  },
+  {
+    section: 'Post-Launch',
+    items: [
+      { id: 'post-check', title: '1-week check-in done', desc: 'Follow-up call to catch early issues' },
+      { id: 'post-30', title: '30-day review scheduled', desc: 'Performance review meeting on calendar' },
+      { id: 'post-invoice', title: 'Final invoice sent', desc: 'Project invoice delivered and confirmed received' },
+      { id: 'post-nps', title: 'NPS / testimonial requested', desc: 'Asked for feedback or referral' },
+    ]
+  },
+  {
+    section: 'Internal Housekeeping',
+    items: [
+      { id: 'int-crm', title: 'CRM record updated', desc: 'Client status set to active, all fields filled in' },
+      { id: 'int-invoice', title: 'MRR entered in CRM', desc: 'Monthly recurring revenue logged on client record' },
+      { id: 'int-project', title: 'Project logged', desc: 'Project record created with start date and value' },
+      { id: 'int-notes', title: 'Handoff notes written', desc: 'Key context documented for future team members' },
+    ]
+  }
+];
+
+const STORAGE_KEY = 'tmi_onboarding_state';
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+}
+
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getProgress(state) {
+  let total = 0, done = 0;
+  CHECKLIST.forEach(sec => sec.items.forEach(item => { total++; if (state[item.id]) done++; }));
+  return { total, done };
+}
+
+function render() {
+  const state = loadState();
+  const { total, done } = getProgress(state);
+  const pct = total ? Math.round(done / total * 100) : 0;
+
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done} of ${total} complete (${pct}%)`;
+
+  document.getElementById('checklist-grid').innerHTML = CHECKLIST.map(sec => `
+    <div class="card" style="height:fit-content">
+      <div class="card-head">
+        <span class="card-title">${sec.section}</span>
+        <span style="font-size:11px;color:var(--muted)">${sec.items.filter(i => state[i.id]).length}/${sec.items.length}</span>
+      </div>
+      <ul class="checklist" style="padding:0 16px">
+        ${sec.items.map(item => `
+          <li class="checklist-item ${state[item.id] ? 'done' : ''}">
+            <div class="checklist-check ${state[item.id] ? 'done' : ''}" onclick="toggleItem('${item.id}')"></div>
+            <div class="checklist-body">
+              <div class="checklist-title">${item.title}</div>
+              <div class="checklist-desc">${item.desc}</div>
+            </div>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+  `).join('');
+}
+
+function toggleItem(id) {
+  const state = loadState();
+  state[id] = !state[id];
+  saveState(state);
+  render();
+}
+
+function resetAll() {
+  if (!confirm('Reset all checklist items?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  render();
+  TMIAdmin.toast('Checklist reset');
+}
+
+render();
+</script>
+</body>
+</html>
