@@ -525,6 +525,247 @@
     .declaration-inner { gap: 40px; }
     .declaration-filter { padding-left: 20px; }
   }
+
+  /* TEXT STRIP */
+  .text-strip {
+    background: var(--bg-dark);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    padding: 18px 0;
+  }
+  .text-strip-track {
+    display: flex;
+    width: max-content;
+    animation: scroll-text 50s linear infinite;
+  }
+  @keyframes scroll-text { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+  .text-strip-item {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.28);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+  }
+  .text-strip-sep {
+    color: var(--chart);
+    margin: 0 24px;
+    opacity: 0.6;
+    font-size: 14px;
+  }
+
+  /* CEILING SECTION */
+  .ceiling-section {
+    background: var(--bg-dark);
+    padding: 120px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .ceiling-hd { margin-bottom: 72px; }
+  .ceiling-hd .eyebrow { color: rgba(255,255,255,0.35); margin-bottom: 20px; }
+  .ceiling-hd .eyebrow .dot { background: var(--chart); }
+  .ceiling-hd h2 { color: #fff; }
+  .ceiling-hd h2 em { color: var(--chart); font-style: italic; }
+  .ceiling-list { display: flex; flex-direction: column; }
+  .ceiling-row {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 32px;
+    padding: 36px 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    align-items: start;
+  }
+  .ceiling-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .ceiling-n {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: rgba(255,255,255,0.2);
+    padding-top: 6px;
+  }
+  .ceiling-p {
+    font-family: var(--serif);
+    font-size: clamp(20px, 2vw, 28px);
+    font-weight: 400;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .ceiling-p em { color: #fff; font-style: normal; }
+  @media (max-width: 768px) {
+    .ceiling-row { grid-template-columns: 40px 1fr; gap: 20px; }
+  }
+
+  /* VISION SECTION */
+  .vision-section {
+    background: var(--bg-alt);
+    padding: 120px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .vision-hd { margin-bottom: 72px; }
+  .vision-hd .eyebrow { margin-bottom: 20px; }
+  .vision-hd h2 { color: var(--ink); }
+  .vision-list { display: flex; flex-direction: column; }
+  .vision-row {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 32px;
+    padding: 44px 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  .vision-row:last-child { border-bottom: 1px solid var(--line); }
+  .vision-arr {
+    font-size: 22px;
+    color: var(--ink);
+    padding-top: 4px;
+    font-weight: 700;
+    opacity: 0.3;
+  }
+  .vision-p {
+    font-family: var(--serif);
+    font-size: clamp(22px, 2.2vw, 32px);
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    margin: 0;
+  }
+  .vision-p em { color: var(--ink-2); font-style: italic; }
+  @media (max-width: 768px) {
+    .vision-row { grid-template-columns: 32px 1fr; gap: 16px; }
+  }
+
+  /* STATS BAR */
+  .stats-section {
+    background: var(--bg);
+    padding: 80px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .stat-col {
+    padding: 0 40px;
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .stat-col:first-child { padding-left: 0; }
+  .stat-col:last-child { border-right: none; }
+  .stat-n {
+    font-family: var(--serif);
+    font-size: clamp(40px, 4.5vw, 64px);
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .stat-n .acc { color: var(--chart-dark); }
+  .stat-lbl {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  @media (max-width: 1024px) {
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .stat-col:nth-child(3) { border-right: none; }
+    .stat-col:nth-child(4) { padding-left: 0; padding-top: 48px; border-top: 1px solid var(--line); }
+    .stat-col:nth-child(5) { padding-top: 48px; border-top: 1px solid var(--line); border-right: none; }
+  }
+  @media (max-width: 640px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .stat-col { padding: 0 0 36px; border-right: none; border-bottom: 1px solid var(--line); }
+    .stat-col:nth-child(odd) { border-right: 1px solid var(--line); padding-right: 24px; }
+    .stat-col:nth-child(even) { padding-left: 24px; }
+    .stat-col:last-child { border-bottom: none; }
+    .stat-col:nth-child(3n) { border-right: none; }
+  }
+
+  /* AI IMPLEMENTATION */
+  .ai-impl-section { background: var(--bg-dark); padding: 120px 0; }
+  .ai-impl-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .ai-impl-left .eyebrow { color: rgba(255,255,255,0.35); margin-bottom: 20px; }
+  .ai-impl-left .eyebrow .dot { background: var(--chart); }
+  .ai-impl-left h2 { color: #fff; margin-bottom: 24px; }
+  .ai-impl-left h2 em { color: rgba(255,255,255,0.45); }
+  .ai-impl-left p { font-size: clamp(15px,1.2vw,17px); color: rgba(255,255,255,0.5); line-height:1.75; margin-bottom:16px; }
+  .ai-impl-left p:last-of-type { margin-bottom: 32px; }
+  .ai-terminal {
+    background: #080a14;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  }
+  .ai-term-bar {
+    background: #0f1120;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .ai-term-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .ai-term-title { font-family:var(--mono); font-size:11px; color:rgba(255,255,255,0.22); margin-left:8px; letter-spacing:0.06em; }
+  .ai-term-body { padding: 22px 20px; font-family:var(--mono); font-size:12px; line-height:2; }
+  .ai-t-prompt { color: var(--chart); }
+  .ai-t-run { color: rgba(255,255,255,0.45); }
+  .ai-t-ok { color: #22c55e; }
+  .ai-t-dim { color: rgba(255,255,255,0.2); }
+  .ai-t-cursor { display:inline-block; width:7px; height:13px; background:var(--chart); margin-left:4px; vertical-align:middle; animation:blink 1.2s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  @media (max-width: 1024px) { .ai-impl-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+  /* GUARANTEE */
+  .guarantee-section {
+    background: var(--bg-alt);
+    padding: 100px 0;
+    text-align: center;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .guarantee-inner { max-width: 620px; margin: 0 auto; }
+  .guarantee-shield {
+    width: 56px; height: 56px;
+    background: var(--bg-dark);
+    border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+    font-size: 24px;
+  }
+  .guarantee-inner h3 {
+    font-family: var(--serif);
+    font-size: clamp(26px, 2.5vw, 38px);
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0 0 16px;
+  }
+  .guarantee-inner p {
+    font-size: clamp(15px, 1.2vw, 17px);
+    color: var(--ink-2);
+    line-height: 1.7;
+    margin: 0;
+  }
 </style>
 </head>
 <body>
@@ -639,6 +880,87 @@
   </div>
 </div>
 
+<!-- TEXT STRIP -->
+<div class="text-strip" aria-hidden="true">
+  <div class="text-strip-track">
+    <span class="text-strip-item">Growth Infrastructure<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">AI Implementation<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">Field Operations OS<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">FrontDesk<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">TMI Network<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">TMI Online<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">The Trades<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">The Physical Economy<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">Growth Infrastructure<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">AI Implementation<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">Field Operations OS<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">FrontDesk<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">TMI Network<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">TMI Online<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">The Trades<span class="text-strip-sep">·</span></span>
+    <span class="text-strip-item">The Physical Economy<span class="text-strip-sep">·</span></span>
+  </div>
+</div>
+
+<!-- THE REAL CEILING -->
+<section class="ceiling-section">
+  <div class="container">
+    <div class="ceiling-hd reveal">
+      <div class="eyebrow"><span class="dot"></span>The Problem</div>
+      <h2>The real ceiling <em>isn&rsquo;t the market.</em></h2>
+    </div>
+    <div class="ceiling-list">
+      <div class="ceiling-row reveal">
+        <div class="ceiling-n">01</div>
+        <p class="ceiling-p">You&rsquo;re the <em>highest-paid person</em> on the job and the lowest-leverage one.</p>
+      </div>
+      <div class="ceiling-row reveal reveal-d1">
+        <div class="ceiling-n">02</div>
+        <p class="ceiling-p">Your revenue grows but your margins shrink because you add <em>more people</em> instead of systems.</p>
+      </div>
+      <div class="ceiling-row reveal reveal-d1">
+        <div class="ceiling-n">03</div>
+        <p class="ceiling-p">The work gets done, but nobody knows why a job lost money <em>until it&rsquo;s too late.</em></p>
+      </div>
+      <div class="ceiling-row reveal reveal-d2">
+        <div class="ceiling-n">04</div>
+        <p class="ceiling-p">Your best operator walks out and takes the <em>whole playbook</em> with them.</p>
+      </div>
+      <div class="ceiling-row reveal reveal-d2">
+        <div class="ceiling-n">05</div>
+        <p class="ceiling-p">You&rsquo;re quoting jobs on gut feel instead of data and losing ground to competitors <em>who aren&rsquo;t.</em></p>
+      </div>
+      <div class="ceiling-row reveal reveal-d3">
+        <div class="ceiling-n">06</div>
+        <p class="ceiling-p">The business is running you. You stopped running it <em>somewhere around job number 50.</em></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VISION -->
+<section class="vision-section">
+  <div class="container">
+    <div class="vision-hd reveal">
+      <div class="eyebrow"><span class="dot"></span>What It Should Look Like</div>
+      <h2>The version of this business<br>you had in mind when you started.</h2>
+    </div>
+    <div class="vision-list">
+      <div class="vision-row reveal">
+        <div class="vision-arr">&rarr;</div>
+        <p class="vision-p">A business that runs its own lead pipeline, books its own jobs, tracks its own costs, and flags problems <em>before they become losses.</em></p>
+      </div>
+      <div class="vision-row reveal reveal-d1">
+        <div class="vision-arr">&rarr;</div>
+        <p class="vision-p">An operator who spends their week in the work they&rsquo;re actually good at - not chasing invoices, answering the same question twice, or fixing <em>what fell through the cracks.</em></p>
+      </div>
+      <div class="vision-row reveal reveal-d2">
+        <div class="vision-arr">&rarr;</div>
+        <p class="vision-p">A company that grows without adding headcount to every new contract - because the infrastructure <em>scales with it.</em></p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- MANIFESTO -->
 <section class="manifesto-section">
@@ -696,7 +1018,78 @@
   </div>
 </section>
 
+<!-- STATS BAR -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-row">
+      <div class="stat-col reveal">
+        <div class="stat-n">847<span class="acc">+</span></div>
+        <div class="stat-lbl">Operators Served</div>
+      </div>
+      <div class="stat-col reveal reveal-d1">
+        <div class="stat-n">3.2<span class="acc">x</span></div>
+        <div class="stat-lbl">Avg Revenue Growth</div>
+      </div>
+      <div class="stat-col reveal reveal-d2">
+        <div class="stat-n">14</div>
+        <div class="stat-lbl">Days to Go Live</div>
+      </div>
+      <div class="stat-col reveal reveal-d3">
+        <div class="stat-n">14<span class="acc">hr</span></div>
+        <div class="stat-lbl">Reclaimed Per Week</div>
+      </div>
+      <div class="stat-col reveal reveal-d4">
+        <div class="stat-n">97<span class="acc">%</span></div>
+        <div class="stat-lbl">Client Renewal Rate</div>
+      </div>
+    </div>
+  </div>
+</section>
 
+<!-- AI IMPLEMENTATION -->
+<section class="ai-impl-section">
+  <div class="container">
+    <div class="ai-impl-grid">
+      <div class="ai-impl-left reveal">
+        <div class="eyebrow"><span class="dot"></span>AI Implementation</div>
+        <h2>Your operation, running on <em>systems that don&rsquo;t sleep.</em></h2>
+        <p>We build the AI infrastructure your business runs on - not software you buy and hope your team uses, but deployed agents wired into your actual workflows.</p>
+        <p>Dispatch. Lead follow-up. Invoice reconciliation. Job cost tracking. Compliance. Crew alerts. Built, trained, and live in 14 days.</p>
+        <a href="funnel.html" class="btn btn-primary">Start the Build <span class="arrow">&#8594;</span></a>
+      </div>
+      <div class="ai-terminal reveal reveal-d2">
+        <div class="ai-term-bar">
+          <div class="ai-term-dot" style="background:#ff5f57"></div>
+          <div class="ai-term-dot" style="background:#febc2e"></div>
+          <div class="ai-term-dot" style="background:#28c840"></div>
+          <span class="ai-term-title">tmi-os &mdash; live agents</span>
+        </div>
+        <div class="ai-term-body">
+          <div><span class="ai-t-prompt">$</span> <span class="ai-t-run">tmi deploy --env production</span></div>
+          <div class="ai-t-dim">Connecting to agent runtime...</div>
+          <div><span class="ai-t-ok">&#10003;</span> <span class="ai-t-run">Lead Qualifier Agent &mdash; active</span></div>
+          <div><span class="ai-t-ok">&#10003;</span> <span class="ai-t-run">Dispatch Optimizer &mdash; active</span></div>
+          <div><span class="ai-t-ok">&#10003;</span> <span class="ai-t-run">Invoice Reconciliation &mdash; active</span></div>
+          <div><span class="ai-t-ok">&#10003;</span> <span class="ai-t-run">Job Cost Tracker &mdash; active</span></div>
+          <div><span class="ai-t-ok">&#10003;</span> <span class="ai-t-run">Crew Alert System &mdash; active</span></div>
+          <div class="ai-t-dim">&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</div>
+          <div><span class="ai-t-ok">&#10003;</span> <span class="ai-t-run">All systems live</span><span class="ai-t-cursor"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GUARANTEE -->
+<section class="guarantee-section">
+  <div class="container">
+    <div class="guarantee-inner reveal">
+      <div class="guarantee-shield">&#9956;</div>
+      <h3>Built to work. Or we keep building.</h3>
+      <p>We don&rsquo;t hand you a login and disappear. Every system we deploy is guaranteed to run or we fix it - no support tickets, no upsells, no excuses. If the build doesn&rsquo;t deliver, neither do we.</p>
+    </div>
+  </div>
+</section>
 
 <!-- APPLY CTA -->
 <section class="apply-section">
