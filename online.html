@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -314,13 +314,53 @@ h1,h2,h3,h4{margin:0}
 .ai-status2{padding:12px 20px;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:9px;flex-wrap:wrap}
 .ai-badge2{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:1px solid rgba(228,255,151,.2);color:var(--chart);padding:4px 10px;border-radius:100px}
 @media(max-width:900px){.ai-wrap{grid-template-columns:1fr;gap:36px}}
-</style>
+  /* Online Side Nav */
+  .online-hamburger{display:flex;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;}
+  .online-hamburger span{display:block;width:20px;height:1.5px;background:rgba(255,255,255,0.75);border-radius:2px;transition:transform .25s,opacity .25s;}
+  .online-overlay{position:fixed;inset:0;z-index:198;background:rgba(0,0,0,0.65);opacity:0;pointer-events:none;transition:opacity .3s;}
+  .online-overlay.open{opacity:1;pointer-events:auto;}
+  .online-side-nav{position:fixed;left:0;top:0;bottom:0;z-index:200;width:280px;background:#0a0b14;border-right:1px solid rgba(255,255,255,0.07);transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding:28px 0 40px;overflow-y:auto;}
+  .online-side-nav.open{transform:translateX(0);box-shadow:8px 0 48px rgba(0,0,0,.6);}
+  .osn-top{display:flex;align-items:center;padding:0 24px 28px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:12px;}
+  .osn-brand{font-family:var(--sans);font-size:16px;font-weight:800;color:#fff;text-decoration:none;letter-spacing:-0.01em;}
+  .osn-brand span{color:#E4FF97;}
+  .osn-links{display:flex;flex-direction:column;padding:0 12px;flex:1;}
+  .osn-section{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:20px 12px 6px;}
+  .osn-links a{font-size:14px;font-weight:500;color:rgba(255,255,255,.55);padding:10px 12px;border-radius:8px;transition:color .15s,background .15s;display:block;text-decoration:none;}
+  .osn-links a:hover{color:#fff;background:rgba(255,255,255,.06);}
+  .osn-cta{padding:24px 24px 0;border-top:1px solid rgba(255,255,255,.07);margin-top:16px;}
+  .osn-btn{display:block;background:#E4FF97;color:#0a0b14;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:14px 20px;border-radius:4px;text-align:center;text-decoration:none;font-family:var(--sans);transition:background .15s;}
+  .osn-btn:hover{background:#D0FF6A;}</style>
 </head>
 <body>
+<div class="online-overlay" id="online-overlay"></div>
+<div class="online-side-nav" id="online-side-nav">
+  <div class="osn-top">
+    <a href="https://online.tmitechai.com" class="osn-brand">TMI <span>Online</span></a>
+  </div>
+  <div class="osn-links">
+    <div class="osn-section">Navigation</div>
+    <a href="https://online.tmitechai.com">Home</a>
+    <a href="news-online.html">Operator Notes</a>
+    <a href="https://www.tmitechai.com/about.html">About</a>
+    <div class="osn-section">Business Types</div>
+    <a href="online-coaches.html">Coaches &amp; Consultants</a>
+    <a href="online-courses.html">Course Creators</a>
+    <a href="online-creators.html">Content Creators</a>
+    <a href="online-info.html">Info Products</a>
+    <a href="online-ecom.html">E-commerce</a>
+    <div class="osn-section">Also From TMI</div>
+    <a href="https://trades.tmitechai.com">Physical Economy</a>
+  </div>
+  <div class="osn-cta">
+    <a href="https://www.tmitechai.com/funnel.html" class="osn-btn">Book a Call &rarr;</a>
+  </div>
+</div>
 
 <div class="topbar">Taking applications - <u onclick="document.getElementById('tiers').scrollIntoView({behavior:'smooth'})">6 operator builds available this quarter &rarr;</u></div>
 
 <nav class="nav">
+  <button class="online-hamburger" id="online-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   <a href="https://www.tmitechai.com" class="nav-logo">TMI <span>Online</span></a>
   <div class="nav-right">
     <button class="nav-link" onclick="document.getElementById('what').scrollIntoView({behavior:'smooth'})">What We Build</button>
@@ -334,13 +374,13 @@ h1,h2,h3,h4{margin:0}
 <!-- HERO -->
 <section class="hero">
   <div class="hero-grid"></div>
-  <div class="chip"><div class="chip-dot"></div>Growth and AI Infrastructure</div>
+  <div class="chip"><div class="chip-dot"></div>Built for coaches, creators &amp; online operators</div>
   <h1>
-    YOUR BUSINESS<br>
-    <span class="lm">IS BIGGER THAN</span><br>
-    THE WAY IT RUNS.
+    YOU BUILT THE AUDIENCE.<br>
+    <span class="lm">NOW BUILD THE</span><br>
+    MACHINE BEHIND IT.
   </h1>
-  <p class="hero-sub">Most businesses grow their revenue and their problems at the same rate. <strong>More customers, more manual work. More success, more of you required.</strong> We build the infrastructure that breaks that equation — for good.</p>
+  <p class="hero-sub">Coaches, course creators, consultants, and content businesses doing real revenue — <strong>still running on manual follow-ups, hand-built launches, and late-night admin.</strong> We install the AI infrastructure that runs all of it. Permanently.</p>
   <div class="hero-buttons">
     <a href="https://www.tmitechai.com/funnel.html" class="btn-lime">Book a Free Strategy Call &rarr;</a>
     <a href="#what" class="btn-outline">See What We Build</a>
@@ -509,7 +549,7 @@ h1,h2,h3,h4{margin:0}
       <div class="vision-row2 reveal">
         <div class="v-arr2">&rarr;</div>
         <div>
-          <div class="v-title2">Operations run cleanly whether you are in the building or not.</div>
+          <div class="v-title2">Operations run cleanly whether you log in or not.</div>
           <div class="v-body2">Onboarding, support, retention, team workflows — all built on systems that do not depend on you showing up.</div>
         </div>
       </div>
@@ -921,5 +961,7 @@ const ro = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting
 document.querySelectorAll('.reveal').forEach(r => ro.observe(r));
 window.addEventListener('scroll', () => document.getElementById('sticky').classList.toggle('show', scrollY > 600));
 </script>
-</body>
+<script>
+(function(){var b=document.getElementById('online-hamburger'),o=document.getElementById('online-overlay'),n=document.getElementById('online-side-nav');if(!b)return;function op(){n.classList.add('open');o.classList.add('open');}function cl(){n.classList.remove('open');o.classList.remove('open');}b.addEventListener('click',op);o.addEventListener('click',cl);})();
+</script></body>
 </html>

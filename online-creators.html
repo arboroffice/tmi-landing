@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -112,13 +112,53 @@ a{color:inherit;text-decoration:none}p{margin:0}h1,h2,h3,h4{margin:0}
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
 .reveal.in{opacity:1;transform:none}
 @media(max-width:640px){.sec{padding:60px 20px}.foot{padding:40px 20px 24px}.foot-inner{flex-direction:column;gap:24px}.foot-bottom{flex-direction:column;gap:8px}}
-</style>
+  /* Online Side Nav */
+  .online-hamburger{display:flex;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;}
+  .online-hamburger span{display:block;width:20px;height:1.5px;background:rgba(255,255,255,0.75);border-radius:2px;transition:transform .25s,opacity .25s;}
+  .online-overlay{position:fixed;inset:0;z-index:198;background:rgba(0,0,0,0.65);opacity:0;pointer-events:none;transition:opacity .3s;}
+  .online-overlay.open{opacity:1;pointer-events:auto;}
+  .online-side-nav{position:fixed;left:0;top:0;bottom:0;z-index:200;width:280px;background:#0a0b14;border-right:1px solid rgba(255,255,255,0.07);transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding:28px 0 40px;overflow-y:auto;}
+  .online-side-nav.open{transform:translateX(0);box-shadow:8px 0 48px rgba(0,0,0,.6);}
+  .osn-top{display:flex;align-items:center;padding:0 24px 28px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:12px;}
+  .osn-brand{font-family:var(--sans);font-size:16px;font-weight:800;color:#fff;text-decoration:none;letter-spacing:-0.01em;}
+  .osn-brand span{color:#E4FF97;}
+  .osn-links{display:flex;flex-direction:column;padding:0 12px;flex:1;}
+  .osn-section{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:20px 12px 6px;}
+  .osn-links a{font-size:14px;font-weight:500;color:rgba(255,255,255,.55);padding:10px 12px;border-radius:8px;transition:color .15s,background .15s;display:block;text-decoration:none;}
+  .osn-links a:hover{color:#fff;background:rgba(255,255,255,.06);}
+  .osn-cta{padding:24px 24px 0;border-top:1px solid rgba(255,255,255,.07);margin-top:16px;}
+  .osn-btn{display:block;background:#E4FF97;color:#0a0b14;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:14px 20px;border-radius:4px;text-align:center;text-decoration:none;font-family:var(--sans);transition:background .15s;}
+  .osn-btn:hover{background:#D0FF6A;}</style>
 </head>
 <body>
+<div class="online-overlay" id="online-overlay"></div>
+<div class="online-side-nav" id="online-side-nav">
+  <div class="osn-top">
+    <a href="https://online.tmitechai.com" class="osn-brand">TMI <span>Online</span></a>
+  </div>
+  <div class="osn-links">
+    <div class="osn-section">Navigation</div>
+    <a href="https://online.tmitechai.com">Home</a>
+    <a href="news-online.html">Operator Notes</a>
+    <a href="https://www.tmitechai.com/about.html">About</a>
+    <div class="osn-section">Business Types</div>
+    <a href="online-coaches.html">Coaches &amp; Consultants</a>
+    <a href="online-courses.html">Course Creators</a>
+    <a href="online-creators.html">Content Creators</a>
+    <a href="online-info.html">Info Products</a>
+    <a href="online-ecom.html">E-commerce</a>
+    <div class="osn-section">Also From TMI</div>
+    <a href="https://trades.tmitechai.com">Physical Economy</a>
+  </div>
+  <div class="osn-cta">
+    <a href="https://www.tmitechai.com/funnel.html" class="osn-btn">Book a Call &rarr;</a>
+  </div>
+</div>
 
 <div class="topbar">Taking applications - 6 builds available this quarter &rarr;</div>
 
 <nav class="nav">
+  <button class="online-hamburger" id="online-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   <a href="https://online.tmitechai.com" class="nav-logo">TMI <span>Online</span></a>
   <div class="nav-right">
     <a href="https://online.tmitechai.com" class="nav-back">&larr; All Business Types</a>
@@ -280,5 +320,7 @@ a{color:inherit;text-decoration:none}p{margin:0}h1,h2,h3,h4{margin:0}
 const ro = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } }), { threshold: .1 });
 document.querySelectorAll('.reveal').forEach(r => ro.observe(r));
 </script>
-</body>
+<script>
+(function(){var b=document.getElementById('online-hamburger'),o=document.getElementById('online-overlay'),n=document.getElementById('online-side-nav');if(!b)return;function op(){n.classList.add('open');o.classList.add('open');}function cl(){n.classList.remove('open');o.classList.remove('open');}b.addEventListener('click',op);o.addEventListener('click',cl);})();
+</script></body>
 </html>
