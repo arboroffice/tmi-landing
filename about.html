@@ -1,108 +1,63 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>About - TMI</title>
-<meta name="description" content="TMI is not a software company. It is a movement to rebuild how operations scale."/>
+<title>About TMI | Who We Are & What We Build</title>
+<meta name="description" content="TMI is the AI infrastructure, community, and operating system for trade operators. Founded by Mia and Tyler. We build the systems that run your operation while you build the business."/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --accent: #1a1a1a; --accent-dark: #000;
-    --bg: #ffffff; --bg-alt: #f5f5f7; --bg-deep: #0d0e1a;
+    --bg: #ffffff; --bg-alt: #f5f5f7; --bg-deep: #0d0e1a; --bg-dark: #0a0b14;
     --ink: #0a0b14; --ink-2: #505060; --muted: #86868b;
-    --line: #e8e8ed; --chart: #E4FF97;
+    --line: #e8e8ed; --line-strong: rgba(0,0,0,0.12);
+    --chart: #E4FF97; --chart-dark: #D0FF6A;
     --serif: 'Barlow', system-ui, sans-serif;
     --sans: 'Neue Haas Grotesk Display', 'Neue Haas Grotesk', system-ui, -apple-system, sans-serif;
-    --mono: 'JetBrains Mono', monospace;
   }
   html { scroll-behavior: smooth; }
-  body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   a { text-decoration: none; color: inherit; }
   img { display: block; max-width: 100%; }
+  ::selection { background: var(--ink); color: #fff; }
 
-  .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 8px; cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 13px; font-weight: 700; padding: 12px 24px; border-radius: 999px; cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; }
   .btn-primary { background: var(--chart); color: #0a0b14; }
-  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-primary:hover { background: var(--chart-dark); transform: translateY(-1px); }
+  .btn-white-outline { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+  .btn-white-outline:hover { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); }
 
   /* SIDE NAV */
-  .nav-btn {
-    position: fixed; top: 20px; left: 20px; z-index: 201;
-    width: 44px; height: 44px;
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(0,0,0,0.1);
-    border-radius: 12px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-    cursor: pointer; padding: 0;
-    transition: background 0.2s, box-shadow 0.2s;
-  }
+  .nav-btn { position: fixed; top: 20px; left: 20px; z-index: 201; width: 44px; height: 44px; background: rgba(255,255,255,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; padding: 0; transition: background 0.2s, box-shadow 0.2s; }
   .nav-btn:hover { background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-  .nav-btn span {
-    display: block; width: 18px; height: 1.5px;
-    background: var(--ink); border-radius: 2px;
-    transition: transform 0.25s, opacity 0.25s;
-  }
+  .nav-btn span { display: block; width: 18px; height: 1.5px; background: var(--ink); border-radius: 2px; transition: transform 0.25s, opacity 0.25s; }
   .nav-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
   .nav-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
   .nav-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
-  .side-overlay {
-    position: fixed; inset: 0; z-index: 198;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.3s;
-  }
+  .side-overlay { position: fixed; inset: 0; z-index: 198; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
   .side-overlay.open { opacity: 1; pointer-events: auto; }
-  .side-nav {
-    position: fixed; left: 0; top: 0; bottom: 0; z-index: 200;
-    width: 280px; background: #fff;
-    border-right: 1px solid var(--line);
-    transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-    display: flex; flex-direction: column;
-    padding: 28px 0 40px;
-    overflow-y: auto;
-  }
+  .side-nav { position: fixed; left: 0; top: 0; bottom: 0; z-index: 200; width: 280px; background: #fff; border-right: 1px solid var(--line); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 28px 0 40px; overflow-y: auto; }
   .side-nav.open { transform: translateX(0); box-shadow: 8px 0 48px rgba(0,0,0,0.15); }
-  .side-nav-top {
-    display: flex; align-items: center;
-    padding: 0 24px 28px;
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 12px;
-  }
-  .side-nav-brand {
-    display: flex; align-items: center; gap: 10px;
-    font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink); text-decoration: none;
-  }
+  .side-nav-top { display: flex; align-items: center; padding: 0 24px 28px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+  .side-nav-brand { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink); text-decoration: none; }
   .side-nav-brand img { height: 28px; }
   .side-nav-links { display: flex; flex-direction: column; padding: 0 12px; flex: 1; }
-  .side-nav-section {
-    font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--muted);
-    padding: 20px 12px 6px;
-  }
-  .side-nav-links a {
-    font-size: 14px; font-weight: 500; color: var(--ink-2);
-    padding: 10px 12px; border-radius: 8px;
-    transition: color 0.15s, background 0.15s; display: block;
-  }
+  .side-nav-section { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 20px 12px 6px; }
+  .side-nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-2); padding: 10px 12px; border-radius: 8px; transition: color 0.15s, background 0.15s; display: block; }
   .side-nav-links a:hover { color: var(--ink); background: var(--bg-alt); }
-  .side-nav-cta {
-    padding: 24px 24px 0; border-top: 1px solid var(--line); margin-top: 16px;
-  }
+  .side-nav-cta { padding: 24px 24px 0; border-top: 1px solid var(--line); margin-top: 16px; }
   .side-nav-cta .btn { width: 100%; justify-content: center; }
 
   /* LAYOUT */
-  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
   .section-pad { padding: 100px 0; }
-  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  .eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: #7C6CF2; display: inline-block; flex-shrink: 0; }
   .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
   .reveal.visible { opacity: 1; transform: none; }
   .reveal-d1 { transition-delay: 0.1s; }
@@ -110,98 +65,96 @@
   .reveal-d3 { transition-delay: 0.3s; }
 
   /* HERO */
-  .about-hero { background: var(--bg-deep); min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; }
-  .about-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 80%, rgba(255,255,255,0.03) 0%, transparent 70%); pointer-events: none; }
-  .about-hero-inner { max-width: 980px; margin: 0 auto; padding: 120px 32px 80px; position: relative; z-index: 1; }
-  .about-kicker { display: inline-block; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 7px 16px; border-radius: 100px; margin-bottom: 48px; }
-  .about-hero h1 { font-family: var(--serif); font-size: clamp(48px, 7.5vw, 96px); line-height: 1.06; font-weight: 400; color: #fff; margin-bottom: 48px; }
-  .about-hero h1 em { color: rgba(255,255,255,0.78); font-style: italic; }
-  .about-hero-body { display: grid; grid-template-columns: repeat(4, 1fr); gap: 64px; padding-top: 48px; border-top: 1px solid rgba(255,255,255,0.1); }
-  .about-hero-manifesto p { font-size: 16px; line-height: 1.7; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
-  .about-hero-manifesto p strong { color: rgba(255,255,255,0.8); font-weight: 500; }
-  .about-hero-list { list-style: none; }
-  .about-hero-list li { font-size: 15px; color: rgba(255,255,255,0.55); padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 12px; }
-  .about-hero-list li::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.4); flex-shrink: 0; }
-  .about-hero-list li:last-child { border-bottom: none; }
+  .about-hero { background: var(--bg-dark); min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; padding: 120px 0 80px; }
+  .about-hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 900px; height: 500px; background: radial-gradient(ellipse at 50% 0%, rgba(228,255,151,0.07) 0%, transparent 70%); pointer-events: none; }
+  .about-hero-inner { position: relative; z-index: 1; }
+  .about-kicker { display: inline-block; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.55); font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 16px; border-radius: 100px; margin-bottom: 48px; }
+  .about-hero h1 { font-family: var(--serif); font-size: clamp(44px, 6.5vw, 84px); line-height: 1.06; font-weight: 400; color: #fff; margin-bottom: 36px; max-width: 18ch; }
+  .about-hero h1 em { color: var(--chart); font-style: italic; }
+  .about-hero-sub { font-size: clamp(16px, 1.3vw, 19px); color: rgba(255,255,255,0.5); line-height: 1.7; max-width: 52ch; margin-bottom: 48px; }
+  .about-hero-divider { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 56px; margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 64px; }
+  .about-stat-label { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 8px; }
+  .about-stat-val { font-family: var(--serif); font-size: clamp(28px, 3vw, 40px); font-weight: 400; color: #fff; line-height: 1.1; margin-bottom: 6px; }
+  .about-stat-desc { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.5; }
 
-  /* QUOTE */
-  .quote-section { background: var(--bg-alt); }
-  .quote-inner { max-width: 760px; margin: 0 auto; text-align: center; }
-  .quote-mark { font-family: var(--serif); font-size: 80px; line-height: 0.6; color: var(--accent); opacity: 0.35; margin-bottom: 28px; display: block; }
-  .quote-text { font-family: var(--serif); font-size: clamp(20px, 2.8vw, 32px); line-height: 1.5; font-weight: 400; color: var(--ink); margin-bottom: 32px; }
-  .quote-text em { color: var(--accent); font-style: italic; }
-  .quote-attr { font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  /* WHO WE ARE */
+  .who-section { background: var(--bg); }
+  .who-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 80px; align-items: start; }
+  .who-left h2 { font-family: var(--serif); font-size: clamp(34px, 4vw, 52px); line-height: 1.12; font-weight: 400; margin-bottom: 28px; }
+  .who-left h2 em { color: var(--ink-2); font-style: italic; }
+  .who-left p { font-size: 16px; color: var(--ink-2); line-height: 1.75; margin-bottom: 20px; }
+  .who-left p strong { color: var(--ink); font-weight: 600; }
+  .who-left p:last-child { margin-bottom: 0; }
+  .who-right-items { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .who-item { padding: 28px 32px; border-bottom: 1px solid var(--line); }
+  .who-item:last-child { border-bottom: none; }
+  .who-item-label { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .who-item-text { font-size: 15px; color: var(--ink); line-height: 1.6; font-weight: 500; }
+  .who-item-sub { font-size: 14px; color: var(--ink-2); line-height: 1.6; margin-top: 4px; }
 
-  /* STORY */
-  .story-section { background: var(--bg); }
-  .story-header { max-width: 680px; margin-bottom: 72px; }
-  .story-header h2 { font-family: var(--serif); font-size: clamp(36px, 4.5vw, 60px); line-height: 1.12; font-weight: 400; margin-bottom: 20px; }
-  .story-header h2 em { color: var(--ink); font-style: italic; }
-  .story-header p { font-size: 17px; color: var(--ink-2); line-height: 1.7; }
-  .story-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 80px; align-items: start; }
-  .story-body p { font-size: 16px; line-height: 1.72; color: var(--ink-2); margin-bottom: 20px; }
-  .story-body p:last-child { margin-bottom: 0; }
-  .drag-list { list-style: none; margin: 20px 0; }
-  .drag-list li { font-size: 15px; color: var(--ink-2); padding: 8px 0; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
-  .drag-list li::before { content: '+'; font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--muted); }
-  .drag-list li:last-child { border-bottom: none; }
-  .story-aside-item { padding: 28px 0; border-bottom: 1px solid var(--line); }
-  .story-aside-item:first-child { padding-top: 0; }
-  .story-aside-item:last-child { border-bottom: none; }
-  .story-aside-item h4 { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-  .story-aside-item p { font-size: 15px; line-height: 1.65; color: var(--ink-2); }
+  /* WHAT WE BUILD */
+  .build-section { background: var(--bg-alt); }
+  .build-header { max-width: 640px; margin-bottom: 64px; }
+  .build-header h2 { font-family: var(--serif); font-size: clamp(34px, 4vw, 52px); line-height: 1.12; font-weight: 400; margin-top: 12px; }
+  .build-header p { font-size: 16px; color: var(--ink-2); line-height: 1.7; margin-top: 16px; }
+  .offers-list { display: flex; flex-direction: column; gap: 2px; }
+  .offer-item { background: var(--bg); border: 1px solid var(--line); border-radius: 16px; padding: 40px 48px; display: grid; grid-template-columns: 240px 1fr; gap: 48px; align-items: start; transition: border-color 0.2s; }
+  .offer-item:hover { border-color: rgba(0,0,0,0.18); }
+  .offer-item.featured { background: var(--bg-dark); border-color: transparent; }
+  .offer-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .offer-item.featured .offer-tag { color: var(--chart); }
+  .offer-name { font-family: var(--sans); font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1.2; margin-bottom: 4px; }
+  .offer-item.featured .offer-name { color: #fff; }
+  .offer-price { font-size: 13px; color: var(--muted); }
+  .offer-item.featured .offer-price { color: rgba(255,255,255,0.35); }
+  .offer-desc { font-size: 15px; color: var(--ink-2); line-height: 1.7; }
+  .offer-item.featured .offer-desc { color: rgba(255,255,255,0.55); }
 
-  /* HOW WE WORK */
-  .how-section { background: var(--bg-deep); color: #fff; }
-  .how-header { text-align: center; max-width: 680px; margin: 0 auto 80px; }
-  .how-header .eyebrow { color: rgba(255,255,255,0.5); }
-  .how-header .eyebrow .dot { background: rgba(255,255,255,0.4); }
-  .how-header h2 { font-family: var(--serif); font-size: clamp(38px, 5vw, 60px); line-height: 1.12; font-weight: 400; color: #fff; margin-bottom: 16px; }
-  .how-header h2 em { color: rgba(255,255,255,0.78); font-style: italic; }
-  .how-header p { font-size: 17px; color: rgba(255,255,255,0.5); line-height: 1.65; }
-  .phases-list { display: flex; flex-direction: column; gap: 2px; }
-  .phase-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 56px 64px; display: grid; grid-template-columns: 220px 1fr; gap: 64px; align-items: start; }
-  .phase-num { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: rgba(255,255,255,0.45); margin-bottom: 12px; }
-  .phase-title { font-family: var(--sans); font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 12px; line-height: 1.2; }
-  .phase-duration { font-family: var(--sans); font-size: 12px; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; }
-  .phase-body p { font-size: 16px; color: rgba(255,255,255,0.55); line-height: 1.7; margin-bottom: 16px; }
-  .phase-body p:last-child { margin-bottom: 0; }
-  .phase-body strong { color: rgba(255,255,255,0.8); font-weight: 500; }
-  .phase-list { list-style: none; margin: 16px 0; }
-  .phase-list li { font-size: 15px; color: rgba(255,255,255,0.5); padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; }
-  .phase-list li::before { content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.35); flex-shrink: 0; }
-  .phase-list li:last-child { border-bottom: none; }
+  /* HOW IT WORKS */
+  .how-section { background: var(--bg); }
+  .how-header { text-align: center; max-width: 600px; margin: 0 auto 72px; }
+  .how-header h2 { font-family: var(--serif); font-size: clamp(34px, 4vw, 52px); font-weight: 400; line-height: 1.12; margin-top: 12px; }
+  .how-header p { font-size: 16px; color: var(--ink-2); line-height: 1.7; margin-top: 16px; }
+  .steps-list { display: flex; flex-direction: column; gap: 2px; }
+  .step-item { padding: 52px 56px; border: 1px solid var(--line); border-radius: 16px; display: grid; grid-template-columns: 200px 1fr; gap: 48px; align-items: start; }
+  .step-num { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .step-title { font-family: var(--sans); font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1.2; margin-bottom: 6px; }
+  .step-detail { font-size: 13px; color: var(--muted); letter-spacing: 0.04em; }
+  .step-body p { font-size: 15px; color: var(--ink-2); line-height: 1.72; margin-bottom: 16px; }
+  .step-body p:last-child { margin-bottom: 0; }
+  .step-body p strong { color: var(--ink); font-weight: 600; }
 
-  /* SYSTEMS OVER CHAOS */
-  .systems-section { background: var(--bg); }
-  .systems-inner { max-width: 800px; }
-  .systems-inner h2 { font-family: var(--serif); font-size: clamp(36px, 4.5vw, 60px); line-height: 1.12; font-weight: 400; margin-bottom: 24px; }
-  .systems-inner h2 em { color: var(--ink); font-style: italic; }
-  .systems-inner .lead { font-size: 18px; color: var(--ink-2); line-height: 1.7; margin-bottom: 40px; }
-  .outcomes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
-  .outcome-item { background: var(--bg-alt); border-radius: 12px; padding: 24px 20px; }
-  .outcome-item span { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
-  .outcome-item strong { font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--ink); }
+  /* MISSION SECTION */
+  .mission-section { background: var(--bg-dark); padding: 100px 0; }
+  .mission-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .mission-left h2 { font-family: var(--serif); font-size: clamp(34px, 4vw, 56px); font-weight: 400; color: #fff; line-height: 1.1; margin-bottom: 24px; }
+  .mission-left h2 em { color: var(--chart); font-style: italic; }
+  .mission-left p { font-size: 16px; color: rgba(255,255,255,0.5); line-height: 1.75; margin-bottom: 20px; }
+  .mission-left p:last-of-type { margin-bottom: 36px; }
+  .mission-right { padding-top: 8px; }
+  .mission-points { display: flex; flex-direction: column; gap: 0; }
+  .mission-point { padding: 24px 0; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; gap: 20px; align-items: flex-start; }
+  .mission-point:last-child { border-bottom: none; }
+  .mission-point-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--chart); flex-shrink: 0; margin-top: 7px; }
+  .mission-point-body { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.65; }
+  .mission-point-body strong { color: #fff; font-weight: 600; display: block; margin-bottom: 2px; }
 
   /* CTA */
-  .about-cta { background: #0a0b14; padding: 100px 0; }
-  .about-cta-inner { max-width: 700px; margin: 0 auto; text-align: center; }
-  .about-cta-inner .eyebrow { color: rgba(255,255,255,0.5); justify-content: center; }
-  .about-cta-inner .eyebrow .dot { background: rgba(255,255,255,0.4); }
-  .about-cta-inner h2 { font-family: var(--serif); font-size: clamp(36px, 5vw, 60px); color: #fff; font-weight: 400; margin-bottom: 16px; line-height: 1.15; }
-  .about-cta-inner h2 em { color: rgba(255,255,255,0.78); font-style: italic; }
-  .about-cta-inner p { font-size: 17px; color: rgba(255,255,255,0.5); margin-bottom: 40px; line-height: 1.6; }
-  .btn-cta-main { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: #fff; font-family: var(--sans); font-size: 13px; font-weight: 700; padding: 16px 32px; border-radius: 8px; transition: background 0.15s; }
-  .btn-cta-main:hover { background: var(--accent-dark); }
+  .about-cta { background: var(--bg-alt); padding: 100px 0; }
+  .about-cta-inner { max-width: 640px; margin: 0 auto; text-align: center; }
+  .about-cta-inner h2 { font-family: var(--serif); font-size: clamp(34px, 4.5vw, 56px); color: var(--ink); font-weight: 400; margin-bottom: 16px; line-height: 1.12; }
+  .about-cta-inner h2 em { color: var(--ink-2); font-style: italic; }
+  .about-cta-inner p { font-size: 16px; color: var(--ink-2); margin-bottom: 36px; line-height: 1.65; }
+  .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-dark { background: var(--bg-dark); color: #fff; border-radius: 999px; padding: 12px 24px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s; }
+  .btn-dark:hover { background: #1a1d30; }
 
   /* FOOTER */
-  footer { background: var(--bg-deep); color: rgba(255,255,255,0.6); padding: 64px 0 32px; }
+  footer { background: var(--bg-deep); color: rgba(255,255,255,0.6); padding: 64px 0 32px; border-top: 1px solid rgba(255,255,255,0.06); }
   .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 64px; margin-bottom: 48px; }
   .footer-brand-name { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-weight: 700; font-size: 16px; color: #fff; margin-bottom: 16px; }
   .footer-brand-name img { height: 28px; filter: brightness(0) invert(1); }
-  .footer-desc { font-size: 14px; line-height: 1.65; color: rgba(255,255,255,0.45); max-width: 320px; margin-bottom: 20px; }
-  .footer-contact a { font-size: 14px; color: rgba(255,255,255,0.5); transition: color 0.15s; }
-  .footer-contact a:hover { color: #fff; }
+  .footer-desc { font-size: 14px; line-height: 1.65; color: rgba(255,255,255,0.45); max-width: 320px; }
   .footer-right { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
   .footer-col h5 { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; }
   .footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.55); margin-bottom: 10px; transition: color 0.15s; }
@@ -209,38 +162,30 @@
   .footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; display: flex; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.3); }
 
   @media (max-width: 1024px) {
-    .about-hero-body { grid-template-columns: 1fr; gap: 40px; }
-    .story-grid { grid-template-columns: 1fr; gap: 48px; }
-    .phase-item { grid-template-columns: 1fr; gap: 24px; padding: 40px 36px; }
-    .outcomes-grid { grid-template-columns: repeat(2, 1fr); }
+    .about-hero-divider { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .who-grid { grid-template-columns: 1fr; gap: 48px; }
+    .offer-item { grid-template-columns: 1fr; gap: 20px; padding: 32px 28px; }
+    .step-item { grid-template-columns: 1fr; gap: 20px; padding: 36px 28px; }
+    .mission-inner { grid-template-columns: 1fr; gap: 48px; }
     .footer-grid { grid-template-columns: 1fr; gap: 48px; }
-    .footer-right { gap: 24px; }
   }
   @media (max-width: 768px) {
     .container { padding: 0 20px; }
-    .section-pad { padding: 64px 0; }
-    .about-hero-inner { padding: 80px 20px 48px; }
-    .about-hero h1 { font-size: clamp(36px, 8vw, 52px); }
-    .about-hero-body { padding-top: 32px; gap: 28px; }
-    .phase-item { padding: 28px 20px; }
-    .outcomes-grid { grid-template-columns: 1fr; }
+    .section-pad { padding: 72px 0; }
+    .about-hero { padding: 80px 0 60px; }
+    .about-hero-divider { grid-template-columns: 1fr; gap: 32px; }
     .footer-right { grid-template-columns: 1fr; }
     .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
-    body { overflow-x: hidden; }
+    .cta-actions { flex-direction: column; align-items: center; }
   }
 </style>
 </head>
 <body>
 
-<!-- HAMBURGER BUTTON -->
 <button class="nav-btn" id="nav-btn" aria-label="Open menu">
   <span></span><span></span><span></span>
 </button>
-
-<!-- SIDE OVERLAY -->
 <div class="side-overlay" id="side-overlay"></div>
-
-<!-- SIDE NAV -->
 <div class="side-nav" id="side-nav" aria-hidden="true">
   <div class="side-nav-top">
     <a class="side-nav-brand" href="stratum.html">
@@ -260,188 +205,227 @@
     <a href="manufacturing.html">Manufacturing</a>
     <a href="fleet.html">Fleet &amp; Logistics</a>
     <a href="home-service.html">Home Service</a>
-          <a href="agriculture.html">Agriculture</a>
+    <a href="heavy-machinery.html">Heavy Machinery</a>
+    <a href="agriculture.html">Agriculture</a>
+    <a href="mining.html">Mining</a>
+    <a href="utilities.html">Utilities</a>
   </div>
   <div class="side-nav-cta">
-    <a href="funnel.html" class="btn btn-primary">Apply to Work With TMI &#8594;</a>
+    <a href="funnel.html" class="btn btn-primary">Apply to Work with TMI &#8594;</a>
   </div>
 </div>
 
 <!-- HERO -->
 <section class="about-hero">
-  <div class="about-hero-inner">
-    <div class="about-kicker">Mia &amp; Tyler - Founders, TMI</div>
-    <h1>We did not start TMI<br/>to sell <em>software.</em></h1>
-    <div class="about-hero-body">
-      <div class="about-hero-manifesto">
-        <p>We started it because we watched smart, hardworking business owners get buried under their own operations. Answering every call. Chasing every lead. Running dispatch from a truck. Filing compliance reports by hand. Being the business instead of owning it.</p>
-        <p><strong>That is not a people problem. That is an infrastructure problem.</strong></p>
-        <p>TMI is Mia and Tyler. Between us we have built companies, scaled operations, and installed systems that run without us. We are not consultants. We are builders. We come into a business and rewire how it operates from the inside.</p>
-        <p>We only work with owners who are serious. Not curious. Serious.</p>
-        <p>If that is you, we would like to talk.</p>
-      </div>
-      <ul class="about-hero-list">
-        <li>Not a tool</li>
-        <li>Not a subscription</li>
-        <li>Not a consultant on Zoom</li>
-        <li>A system that does the work</li>
-        <li>Custom built for your operation</li>
-        <li>Installed. Then it runs.</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- QUOTE -->
-<section class="quote-section section-pad">
   <div class="container">
-    <div class="quote-inner reveal">
-      <span class="quote-mark">&ldquo;</span>
-      <p class="quote-text">Most companies do not need more software. They need <em>operational systems that actually remove weight from the business.</em></p>
-      <div class="quote-attr">Mia &amp; Tyler - Founders, TMI</div>
-    </div>
-  </div>
-</section>
-
-<!-- STORY -->
-<section class="story-section section-pad">
-  <div class="container">
-    <div class="story-header reveal">
-      <div class="eyebrow"><span class="dot"></span>Our Story</div>
-      <h2>The systems were never <em>built for the field.</em></h2>
-      <p>The industries that power the world are still operating on disconnected systems, manual coordination, spreadsheets, phone calls, tribal knowledge, and reactive workflows.</p>
-    </div>
-    <div class="story-grid">
-      <div class="story-body reveal">
-        <p>Growth creates operational drag. Every new job adds to the pile.</p>
-        <ul class="drag-list">
-          <li>More calls</li>
-          <li>More paperwork</li>
-          <li>More dispatching</li>
-          <li>More approvals</li>
-          <li>More admin</li>
-          <li>More things falling through the cracks</li>
-        </ul>
-        <p>So we started building infrastructure around the real way operations run. Not office software repackaged for industrial companies. Not generic AI tools. Real operational systems built around crews, field work, maintenance, compliance, dispatch, equipment, scheduling, and execution.</p>
-        <p>What started as solving operational bottlenecks became frameworks. The frameworks became infrastructure. The infrastructure became TMI.</p>
-        <p>Today, TMI partners with operations across trades, energy, logistics, manufacturing, utilities, and heavy industry to build AI-powered operational systems that help companies scale without drowning in complexity.</p>
-        <p>The mission has never changed: build the systems that let operators focus on growth instead of operational drag.</p>
-      </div>
-      <div class="reveal reveal-d1">
-        <div class="story-aside-item">
-          <h4>Industries We Serve</h4>
-          <p>Oil &amp; gas. Construction. Manufacturing. Trades &amp; field service. Utilities. Heavy industry. The companies that keep the world running.</p>
-        </div>
-        <div class="story-aside-item">
-          <h4>What We Build</h4>
-          <p>AI-powered operational systems built around crews, field work, maintenance, compliance, dispatch, equipment, scheduling, and execution. Not software products. Infrastructure.</p>
-        </div>
-        <div class="story-aside-item">
-          <h4>Scale So Far</h4>
-          <p>45+ systems deployed. Real operations. Real leverage. Real results in the field, not just dashboards.</p>
-        </div>
-        <div class="story-aside-item">
-          <h4>The Mission</h4>
-          <p>Build the systems that let operators focus on growth instead of operational drag. The mission has never changed.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW WE WORK -->
-<section class="how-section section-pad">
-  <div class="container">
-    <div class="how-header reveal">
-      <div class="eyebrow"><span class="dot"></span>How We Work</div>
-      <h2>A structured engagement built around <em>your operation.</em></h2>
-      <p>Every company operates differently. Different workflows, different bottlenecks, different field environments. That is why TMI does not sell templated software. We build around the way your operation actually runs.</p>
-    </div>
-    <div class="phases-list">
-      <div class="phase-item reveal">
+    <div class="about-hero-inner">
+      <div class="about-kicker">Mia &amp; Tyler, Founders, TMI</div>
+      <h1>We build the systems.<br>You build <em>the business.</em></h1>
+      <p class="about-hero-sub">TMI is the infrastructure, community, and operating system for trade operators who are serious about building something that runs without them in every decision. We are not a software company. We are builders. We come in, map the operation, and wire it to run.</p>
+      <div class="about-hero-divider reveal">
         <div>
-          <div class="phase-num">Phase 01</div>
-          <div class="phase-title">Audit &amp; Map</div>
-          <div class="phase-duration">Duration: 1 call</div>
+          <div class="about-stat-label">What we are</div>
+          <div class="about-stat-val">Builders</div>
+          <div class="about-stat-desc">Not consultants. Not software vendors. We build operational AI infrastructure and install it.</div>
         </div>
-        <div class="phase-body">
-          <p><strong>We map the entire operation first.</strong> Before a single system gets built, we audit the business in detail.</p>
-          <p>We map:</p>
-          <ul class="phase-list">
-            <li>Workflows and team structure</li>
-            <li>Operational bottlenecks and communication paths</li>
-            <li>Reporting systems and existing software</li>
-            <li>Approval chains and repetitive tasks</li>
-            <li>Points where time, money, and visibility are being lost</li>
-          </ul>
-          <p>Then we identify where AI can remove operational weight and create leverage. Not theoretical leverage. Operational leverage that impacts the business immediately.</p>
-        </div>
-      </div>
-      <div class="phase-item reveal">
         <div>
-          <div class="phase-num">Phase 02</div>
-          <div class="phase-title">Build &amp; Deploy</div>
-          <div class="phase-duration">Duration: 4&ndash;6 weeks</div>
+          <div class="about-stat-label">Who we serve</div>
+          <div class="about-stat-val">Trade Operators</div>
+          <div class="about-stat-desc">Trades, construction, oil &amp; gas, manufacturing, fleet, agriculture, mining, utilities.</div>
         </div>
-        <div class="phase-body">
-          <p><strong>Systems built around your workflows.</strong> We build custom AI systems and operational infrastructure tailored specifically to your company.</p>
-          <p>Every system is integrated into existing workflows, connected to current tools, tested alongside your team, and deployed into real operational environments. These are operational systems designed around how your crews, managers, dispatchers, and leadership already work.</p>
-          <p>The goal: less repetitive coordination. Faster execution. More operational clarity.</p>
-        </div>
-      </div>
-      <div class="phase-item reveal">
         <div>
-          <div class="phase-num">Phase 03</div>
-          <div class="phase-title">Partner &amp; Grow</div>
-          <div class="phase-duration">Ongoing partnership</div>
-        </div>
-        <div class="phase-body">
-          <p><strong>We stay in and keep building.</strong> TMI operates as an ongoing infrastructure partner. As the business evolves, the systems evolve with it.</p>
-          <ul class="phase-list">
-            <li>Expanding automation coverage</li>
-            <li>Optimizing workflows as operations change</li>
-            <li>Deploying new AI agents</li>
-            <li>Improving reporting and visibility</li>
-            <li>Scaling operational leverage over time</li>
-          </ul>
-          <p>The companies that win with AI will not be the ones with the most tools. They will be the ones with the strongest operational systems underneath them.</p>
+          <div class="about-stat-label">How we start</div>
+          <div class="about-stat-val">Free Audit</div>
+          <div class="about-stat-desc">One call. We map your operation and show you exactly where the time and money are leaking.</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- SYSTEMS OVER CHAOS -->
-<section class="systems-section section-pad">
+<!-- WHO WE ARE -->
+<section class="who-section section-pad">
   <div class="container">
-    <div class="systems-inner reveal">
-      <div class="eyebrow"><span class="dot"></span>Systems Over Chaos</div>
-      <h2>Infrastructure designed to <em>compound.</em></h2>
-      <p class="lead">TMI is not software you buy and forget. It is operational infrastructure that builds on itself. Build once. Improve continuously. Scale with leverage.</p>
-      <div class="outcomes-grid">
-        <div class="outcome-item">
-          <span>Result</span>
-          <strong>Faster execution</strong>
+    <div class="who-grid">
+      <div class="who-left reveal">
+        <div class="eyebrow"><span class="dot"></span>Who We Are</div>
+        <h2>Not consultants.<br><em>Not software.</em> Builders.</h2>
+        <p>Mia and Tyler started TMI because they watched capable operators get buried under their own operations. Answering every call. Running dispatch from a truck. Chasing invoices. Filing compliance manually. Being the business instead of owning it.</p>
+        <p><strong>That is not a people problem. That is a systems problem.</strong></p>
+        <p>Between us we have built companies, scaled operations, and installed AI infrastructure that runs without us. We don't come in with advice. We come in with systems. Real ones, built around how your operation actually works, deployed into your real environment, and left running after we leave.</p>
+        <p>We only work with operators who are serious. Not curious. Serious. If that is you, we want to talk.</p>
+      </div>
+      <div class="who-right-items reveal reveal-d1">
+        <div class="who-item">
+          <div class="who-item-label">What we are not</div>
+          <div class="who-item-text">Not a SaaS product</div>
+          <div class="who-item-sub">There is no login, no subscription, no generic dashboard that does not fit your operation.</div>
         </div>
-        <div class="outcome-item">
-          <span>Result</span>
-          <strong>Leaner operations</strong>
+        <div class="who-item">
+          <div class="who-item-label">What we are not</div>
+          <div class="who-item-text">Not a consulting firm</div>
+          <div class="who-item-sub">We don't hand you a strategy document and a Zoom calendar. We build the thing and install it.</div>
         </div>
-        <div class="outcome-item">
-          <span>Result</span>
-          <strong>More resilient</strong>
+        <div class="who-item">
+          <div class="who-item-label">What we are</div>
+          <div class="who-item-text">An AI infrastructure team</div>
+          <div class="who-item-sub">We build custom agents, automate operations, and stay in as your fractional AI department as the business grows.</div>
         </div>
-        <div class="outcome-item">
-          <span>Result</span>
-          <strong>More scalable</strong>
+        <div class="who-item">
+          <div class="who-item-label">Where we operate</div>
+          <div class="who-item-text">Inside your operation</div>
+          <div class="who-item-sub">We connect to your existing tools, integrate with your workflows, and build around how your crews and teams actually work.</div>
         </div>
-        <div class="outcome-item">
-          <span>Result</span>
-          <strong>Harder to disrupt</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT WE BUILD -->
+<section class="build-section section-pad">
+  <div class="container">
+    <div class="build-header reveal">
+      <div class="eyebrow"><span class="dot"></span>What We Build</div>
+      <h2>Every engagement starts the same way.<br>Everything else is custom.</h2>
+      <p>The Operations Audit is free and it is the door into everything else. After the audit, we know your operation. Then we build what it needs.</p>
+    </div>
+    <div class="offers-list">
+
+      <div class="offer-item reveal">
+        <div>
+          <div class="offer-tag">Free Entry Point</div>
+          <div class="offer-name">Operations Audit</div>
+          <div class="offer-price">One call &middot; Free</div>
         </div>
-        <div class="outcome-item">
-          <span>Method</span>
-          <strong>Better systems, not bigger teams</strong>
+        <div class="offer-desc">
+          You map your operation on a single call. We find where the time and money are leaking and show you exactly what TMI can fix. No pitch. No pressure. Just clarity. This is the door into everything else. Nothing gets built until the audit is done.
+        </div>
+      </div>
+
+      <div class="offer-item reveal">
+        <div>
+          <div class="offer-tag">Entry Build</div>
+          <div class="offer-name">TMI Zero</div>
+          <div class="offer-price">Starting at $25,000</div>
+        </div>
+        <div class="offer-desc">
+          The foundational AI back office setup. Call agent, quote agent, basic automation. Built for operators who are ready to stop running everything manually but want to see the system working before committing to the full build. Most Zero clients move to the AI Wing Build within 60 to 90 days.
+        </div>
+      </div>
+
+      <div class="offer-item featured reveal">
+        <div>
+          <div class="offer-tag">Flagship Build</div>
+          <div class="offer-name">The AI Wing Build</div>
+          <div class="offer-price">$25,000 &ndash; $100,000</div>
+        </div>
+        <div class="offer-desc">
+          The full custom operational infrastructure build. Custom agents, integrations, and full deployment built specifically around your operation. This is the main product. Dispatch, invoicing, lead follow-up, compliance, crew coordination, reporting. The whole system. Scoped to your complexity and installed by the team that built it.
+        </div>
+      </div>
+
+      <div class="offer-item reveal">
+        <div>
+          <div class="offer-tag">Specific Problem</div>
+          <div class="offer-name">One-Off Tool Build</div>
+          <div class="offer-price">Priced per scope</div>
+        </div>
+        <div class="offer-desc">
+          A single tool or agent built for a single leak. Not the full system. One specific thing that solves one specific problem. Best for operators who have a particular bottleneck they want fixed without a full infrastructure engagement.
+        </div>
+      </div>
+
+      <div class="offer-item reveal">
+        <div>
+          <div class="offer-tag">Optional</div>
+          <div class="offer-name">AI Department</div>
+          <div class="offer-price">$5,000 &ndash; $15,000 / month</div>
+        </div>
+        <div class="offer-desc">
+          The fractional AI department retainer. TMI stays in, maintains the systems, builds new ones as the operation grows, and keeps the infrastructure ahead of the business. Most clients who complete a build stay on retainer. The system keeps compounding.
+        </div>
+      </div>
+
+      <div class="offer-item reveal">
+        <div>
+          <div class="offer-tag">Executive Level</div>
+          <div class="offer-name">Chief AI Officer Engagement</div>
+          <div class="offer-price">Custom pricing</div>
+        </div>
+        <div class="offer-desc">
+          Private one-on-one at the leadership level. For larger operations that need TMI embedded at the strategy layer, not just the operational layer. Custom architecture, custom pricing. Everything built is owned completely by the client.
+        </div>
+      </div>
+
+      <div class="offer-item reveal">
+        <div>
+          <div class="offer-tag">Licensing</div>
+          <div class="offer-name">IP Licensing</div>
+          <div class="offer-price">Recurring licensing fees</div>
+        </div>
+        <div class="offer-desc">
+          TMI's frameworks, workflows, and agent systems licensed to other operators or organizations. For operators who want to run TMI's infrastructure internally, or organizations that want to deploy it across a network of businesses they work with.
+        </div>
+      </div>
+
+      <div class="offer-item reveal">
+        <div>
+          <div class="offer-tag">Trainings / Events</div>
+          <div class="offer-name">Operator &amp; Team Training</div>
+          <div class="offer-price">Priced per engagement</div>
+        </div>
+        <div class="offer-desc">
+          Operator trainings and team trainings run as standalone engagements. We teach tech-native workers how to use AI tools to speed up their day-to-day work — not theory, hands-on. Built for field operators, office teams, and anyone in between. Can run as a one-time session or a structured program.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
+<!-- MISSION -->
+<section class="mission-section">
+  <div class="container">
+    <div class="mission-inner reveal">
+      <div class="mission-left">
+        <div class="eyebrow" style="color:rgba(255,255,255,0.35);"><span class="dot" style="background:var(--chart);"></span>The Mission</div>
+        <h2>The trades built America.<br>AI will rebuild <em>the trades.</em></h2>
+        <p>The industries that power the physical world are still running on phone calls, spreadsheets, tribal knowledge, and reactive workflows. Not because the operators are behind. Because nobody built the right infrastructure for them.</p>
+        <p>TMI exists to change that. We build the AI systems, the operator community, and the infrastructure that lets trade operators focus on growth instead of operational drag.</p>
+        <a href="funnel.html" class="btn btn-primary" style="margin-top:8px;">Apply to Work with TMI &nbsp;&#8594;</a>
+      </div>
+      <div class="mission-right">
+        <div class="mission-points">
+          <div class="mission-point">
+            <div class="mission-point-dot"></div>
+            <div class="mission-point-body">
+              <strong>The Infrastructure</strong>
+              AI systems custom built for field operations: dispatch, invoicing, compliance, crew coordination, lead follow-up, equipment, and more. Installed and running.
+            </div>
+          </div>
+          <div class="mission-point">
+            <div class="mission-point-dot"></div>
+            <div class="mission-point-body">
+              <strong>The Community</strong>
+              The TMI Network is where operators share what is working, what failed, and what they are building next. Industry channels, weekly calls, a resource library, real numbers from real builds.
+            </div>
+          </div>
+          <div class="mission-point">
+            <div class="mission-point-dot"></div>
+            <div class="mission-point-body">
+              <strong>The Movement</strong>
+              The next generation of trade operators will not work harder than the last generation. They will run smarter systems. TMI is the infrastructure behind that shift.
+            </div>
+          </div>
+          <div class="mission-point">
+            <div class="mission-point-dot"></div>
+            <div class="mission-point-body">
+              <strong>The Standard</strong>
+              We only work with operators who are serious about building something that outlasts them. Every engagement starts with an audit. Every build is custom. Nothing is templated.
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -452,10 +436,13 @@
 <section class="about-cta">
   <div class="container">
     <div class="about-cta-inner reveal">
-      <div class="eyebrow"><span class="dot"></span>Get Started</div>
-      <h2>Bring us your<br/><em>operation.</em></h2>
-      <p>We'll build what it's been missing.</p>
-      <a href="funnel.html" class="btn-cta-main">Apply to Work With TMI &#8594;</a>
+      <div class="eyebrow" style="justify-content:center;"><span class="dot"></span>Get Started</div>
+      <h2>Start with the<br><em>Operations Audit.</em></h2>
+      <p>One call. Free. We map your operation, find where the time and money are leaking, and show you exactly what we would build. No sales pitch. Just clarity on what's possible.</p>
+      <div class="cta-actions">
+        <a href="funnel.html" class="btn btn-primary">Apply to Work with TMI &#8594;</a>
+        <a href="audit.html" class="btn-dark">Take the Free Audit &#8594;</a>
+      </div>
     </div>
   </div>
 </section>
@@ -468,44 +455,31 @@
         <div class="footer-brand-name">
           <img src="logo.svg" alt="TMI"/> TMI
         </div>
-
-        <div class="footer-contact">
-          <a href="mailto:hello@tmitechai.com">hello@tmitechai.com</a>
-        </div>
+        <p class="footer-desc">AI infrastructure, community, and operating system for the operators rebuilding the trades.</p>
       </div>
       <div class="footer-right">
         <div class="footer-col">
           <h5>Company</h5>
           <a href="about.html">About</a>
           <a href="partners.html">Partners</a>
-          <a href="funnel.html">Contact</a>
+          <a href="news.html">Field Notes</a>
+          <a href="funnel.html">Apply</a>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>&copy; 2025 TMI Technology. All rights reserved.</span>
+      <span>&copy; 2026 TMI Technology. All rights reserved.</span>
       <span>Built for the companies that power the world.</span>
     </div>
   </div>
 </footer>
 
 <script>
-// Side nav
 const navBtn = document.getElementById('nav-btn');
 const sideNav = document.getElementById('side-nav');
 const sideOverlay = document.getElementById('side-overlay');
-function openSideNav() {
-  sideNav.classList.add('open');
-  sideOverlay.classList.add('open');
-  navBtn.classList.add('open');
-  sideNav.setAttribute('aria-hidden', 'false');
-}
-function closeSideNav() {
-  sideNav.classList.remove('open');
-  sideOverlay.classList.remove('open');
-  navBtn.classList.remove('open');
-  sideNav.setAttribute('aria-hidden', 'true');
-}
+function openSideNav() { sideNav.classList.add('open'); sideOverlay.classList.add('open'); navBtn.classList.add('open'); sideNav.setAttribute('aria-hidden','false'); }
+function closeSideNav() { sideNav.classList.remove('open'); sideOverlay.classList.remove('open'); navBtn.classList.remove('open'); sideNav.setAttribute('aria-hidden','true'); }
 navBtn.addEventListener('click', () => sideNav.classList.contains('open') ? closeSideNav() : openSideNav());
 sideOverlay.addEventListener('click', closeSideNav);
 const observer = new IntersectionObserver((entries) => {
