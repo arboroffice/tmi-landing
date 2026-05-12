@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Leads — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sb-brand"><img src="logo.svg" alt="TMI"/><div><div class="sb-brand-label">TMI</div><div class="sb-brand-sub">Admin</div></div></div>
+    <nav class="sb-nav">
+      <a href="/admin-dashboard" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="/admin-leads" class="sb-item active"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path stroke-linecap="round" d="M3 6h18M7 12h10M11 18h2"/></svg>Leads</a>
+      <a href="/admin-clients" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="7" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Clients</a>
+      <a href="/admin-contacts" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"/></svg>Contacts</a>
+      <a href="/admin-email" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="4" width="20" height="16" rx="2"/><path stroke-linecap="round" d="m2 7 10 7 10-7"/></svg>Email</a>
+      <div class="sb-sep"></div>
+      <a href="/admin-settings" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="sb-foot"><button class="sb-logout" onclick="TMIAdmin.logout()"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-linecap="round"/><polyline points="16 17 21 12 16 7" stroke-linecap="round" stroke-linejoin="round"/><line x1="21" y1="12" x2="9" y2="12" stroke-linecap="round"/></svg>Log out</button></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Leads</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Lead
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Leads</h1>
+        <span class="filter-count" id="lead-count"></span>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search name, email, company..." oninput="renderTable()"/>
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option>new</option><option>contacted</option><option>qualified</option>
+          <option>proposal</option><option>won</option><option>lost</option>
+        </select>
+        <select class="filter-select" id="filter-source" onchange="renderTable()">
+          <option value="">All sources</option>
+        </select>
+        <select class="filter-select" id="filter-audience" onchange="renderTable()">
+          <option value="">All audiences</option>
+          <option value="physical">Physical</option>
+          <option value="online">Online</option>
+          <option value="fotf">FOTF</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Name</th><th>Company</th><th>Email</th><th>Audience</th><th>Niche</th>
+              <th>Source</th><th>Status</th><th>Value</th><th>Added</th>
+            </tr></thead>
+            <tbody id="leads-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="lead-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title" id="modal-title">Add Lead</h2>
+      <button class="modal-x" onclick="TMIAdmin.closeModal('lead-modal')">&times;</button>
+    </div>
+    <input type="hidden" id="edit-id"/>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">First Name *</label><input class="form-input" id="f-first" placeholder="First"/></div>
+      <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="f-last" placeholder="Last"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-email" type="email" placeholder="email@company.com"/></div>
+      <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="f-phone" placeholder="+1 555 000 0000"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Company</label><input class="form-input" id="f-company" placeholder="Company name"/></div>
+      <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="f-title" placeholder="Job title"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Audience</label>
+        <select class="form-input" id="f-audience" onchange="onAudienceChange()">
+          <option value="">Select audience</option>
+          <option value="physical">Physical</option>
+          <option value="online">Online</option>
+          <option value="fotf">FOTF</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Niche</label>
+        <select class="form-input" id="f-niche"><option value="">Select niche</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="f-status">
+          <option value="new">New</option><option value="contacted">Contacted</option>
+          <option value="qualified">Qualified</option><option value="proposal">Proposal</option>
+          <option value="won">Won</option><option value="lost">Lost</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Source</label>
+        <select class="form-input" id="f-source"><option value="">Select source</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Deal Value ($)</label><input class="form-input" id="f-value" type="number" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Owner</label><input class="form-input" id="f-owner" placeholder="e.g. Mia"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="f-notes" rows="3"></textarea></div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="TMIAdmin.closeModal('lead-modal')">Cancel</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveLead()">Save Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail panel -->
+<div class="panel-overlay" id="lead-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('lead-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-name">—</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" id="panel-edit-btn" onclick="editFromPanel()">Edit</button>
+        <button class="btn btn-danger btn-sm" id="panel-del-btn" onclick="deleteFromPanel()">Delete</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val" id="pd-status">—</div></div>
+        <div class="detail-item"><div class="detail-label">Source</div><div class="detail-val" id="pd-source">—</div></div>
+        <div class="detail-item"><div class="detail-label">Email</div><div class="detail-val" id="pd-email">—</div></div>
+        <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-val" id="pd-phone">—</div></div>
+        <div class="detail-item"><div class="detail-label">Company</div><div class="detail-val" id="pd-company">—</div></div>
+        <div class="detail-item"><div class="detail-label">Title</div><div class="detail-val" id="pd-title">—</div></div>
+        <div class="detail-item"><div class="detail-label">Audience</div><div class="detail-val" id="pd-audience">—</div></div>
+        <div class="detail-item"><div class="detail-label">Niche</div><div class="detail-val" id="pd-niche">—</div></div>
+        <div class="detail-item"><div class="detail-label">Deal Value</div><div class="detail-val" id="pd-value">—</div></div>
+        <div class="detail-item"><div class="detail-label">Owner</div><div class="detail-val" id="pd-owner">—</div></div>
+        <div class="detail-item"><div class="detail-label">Added</div><div class="detail-val" id="pd-created">—</div></div>
+        <div class="detail-item"><div class="detail-label">Last Contact</div><div class="detail-val" id="pd-last">—</div></div>
+      </div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Notes</div>
+      <div id="pd-notes" style="font-size:14px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;">—</div>
+      <div class="panel-sep"></div>
+      <button class="btn btn-primary btn-sm" onclick="convertToClient()" id="convert-btn">Convert to Client &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+
+let allLeads = [];
+let currentLead = null;
+
+// Populate source filter and modal select
+const SOURCES = TMIAdmin.sources;
+SOURCES.forEach(s => {
+  document.getElementById('filter-source').innerHTML += `<option>${s}</option>`;
+  document.getElementById('f-source').innerHTML += `<option>${s}</option>`;
+});
+
+function onAudienceChange() {
+  const aud = document.getElementById('f-audience').value;
+  const niches = aud ? TMIAdmin.niches[aud] : [...TMIAdmin.niches.physical, ...TMIAdmin.niches.online, ...TMIAdmin.niches.fotf];
+  const sel = document.getElementById('f-niche');
+  sel.innerHTML = `<option value="">Select niche</option>` + (niches || []).map(n => `<option>${n}</option>`).join('');
+}
+
+async function loadLeads() {
+  const data = await TMIAdmin.api('/api/leads');
+  if (data) { allLeads = data; renderTable(); }
+}
+
+function renderTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const st = document.getElementById('filter-status').value;
+  const src = document.getElementById('filter-source').value;
+  const aud = document.getElementById('filter-audience').value;
+
+  const filtered = allLeads.filter(l => {
+    const c = l.contacts || {};
+    const name = [c.first_name, c.last_name, c.email, c.company].filter(Boolean).join(' ').toLowerCase();
+    if (q && !name.includes(q)) return false;
+    if (st && l.status !== st) return false;
+    if (src && l.source !== src) return false;
+    if (aud && c.audience !== aud) return false;
+    return true;
+  });
+
+  document.getElementById('lead-count').textContent = `${filtered.length} lead${filtered.length !== 1 ? 's' : ''}`;
+
+  const tbody = document.getElementById('leads-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><div class="empty-icon">📋</div><h3>No leads found</h3><p>Try adjusting your filters or add a new lead.</p></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(l => {
+    const c = l.contacts || {};
+    const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || '—';
+    return `<tr onclick="openPanel(${JSON.stringify(l).replace(/"/g,'&quot;')})">
+      <td class="td-name">${name}</td>
+      <td>${c.company || '—'}</td>
+      <td style="color:var(--ink-2)">${c.email || '—'}</td>
+      <td>${c.audience ? TMIAdmin.badge(c.audience) : '—'}</td>
+      <td class="td-muted">${c.niche || '—'}</td>
+      <td class="td-muted">${l.source || '—'}</td>
+      <td>${TMIAdmin.badge(l.status)}</td>
+      <td class="td-muted">${l.value ? TMIAdmin.currency(l.value) : '—'}</td>
+      <td class="td-muted">${TMIAdmin.fmt(l.created_at)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function openPanel(lead) {
+  currentLead = lead;
+  const c = lead.contacts || {};
+  const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || '—';
+  document.getElementById('panel-name').textContent = name;
+  document.getElementById('pd-status').innerHTML = TMIAdmin.badge(lead.status);
+  document.getElementById('pd-source').textContent = lead.source || '—';
+  document.getElementById('pd-email').innerHTML = c.email ? `<a href="mailto:${c.email}" style="color:var(--blue)">${c.email}</a>` : '—';
+  document.getElementById('pd-phone').textContent = c.phone || '—';
+  document.getElementById('pd-company').textContent = c.company || '—';
+  document.getElementById('pd-title').textContent = c.title || '—';
+  document.getElementById('pd-audience').innerHTML = c.audience ? TMIAdmin.badge(c.audience) : '—';
+  document.getElementById('pd-niche').textContent = c.niche || '—';
+  document.getElementById('pd-value').textContent = lead.value ? TMIAdmin.currency(lead.value) : '—';
+  document.getElementById('pd-owner').textContent = lead.owner || '—';
+  document.getElementById('pd-created').textContent = TMIAdmin.fmt(lead.created_at);
+  document.getElementById('pd-last').textContent = TMIAdmin.fmt(lead.last_contact);
+  document.getElementById('pd-notes').textContent = [lead.notes, c.notes].filter(Boolean).join('\n\n') || '—';
+  TMIAdmin.openPanel('lead-panel');
+}
+
+function openAddModal() {
+  document.getElementById('edit-id').value = '';
+  document.getElementById('modal-title').textContent = 'Add Lead';
+  document.getElementById('save-btn').textContent = 'Save Lead';
+  ['first','last','email','phone','company','title','notes','value','owner'].forEach(f => {
+    document.getElementById('f-' + f).value = '';
+  });
+  document.getElementById('f-status').value = 'new';
+  document.getElementById('f-audience').value = '';
+  document.getElementById('f-source').value = '';
+  onAudienceChange();
+  TMIAdmin.openModal('lead-modal');
+}
+
+function editFromPanel() {
+  if (!currentLead) return;
+  const l = currentLead;
+  const c = l.contacts || {};
+  TMIAdmin.closePanel('lead-panel');
+  document.getElementById('edit-id').value = l.id;
+  document.getElementById('modal-title').textContent = 'Edit Lead';
+  document.getElementById('save-btn').textContent = 'Update Lead';
+  document.getElementById('f-first').value = c.first_name || '';
+  document.getElementById('f-last').value = c.last_name || '';
+  document.getElementById('f-email').value = c.email || '';
+  document.getElementById('f-phone').value = c.phone || '';
+  document.getElementById('f-company').value = c.company || '';
+  document.getElementById('f-title').value = c.title || '';
+  document.getElementById('f-audience').value = c.audience || '';
+  onAudienceChange();
+  setTimeout(() => { document.getElementById('f-niche').value = c.niche || ''; }, 50);
+  document.getElementById('f-status').value = l.status || 'new';
+  document.getElementById('f-source').value = l.source || '';
+  document.getElementById('f-value').value = l.value || '';
+  document.getElementById('f-owner').value = l.owner || '';
+  document.getElementById('f-notes').value = l.notes || '';
+  TMIAdmin.openModal('lead-modal');
+}
+
+async function saveLead() {
+  const id = document.getElementById('edit-id').value;
+  const firstName = document.getElementById('f-first').value.trim();
+  if (!firstName) { TMIAdmin.toast('First name is required', 'error'); return; }
+
+  const payload = {
+    contact: {
+      first_name: firstName,
+      last_name: document.getElementById('f-last').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      phone: document.getElementById('f-phone').value.trim(),
+      company: document.getElementById('f-company').value.trim(),
+      title: document.getElementById('f-title').value.trim(),
+      audience: document.getElementById('f-audience').value,
+      niche: document.getElementById('f-niche').value
+    },
+    lead: {
+      status: document.getElementById('f-status').value,
+      source: document.getElementById('f-source').value,
+      value: parseFloat(document.getElementById('f-value').value) || null,
+      owner: document.getElementById('f-owner').value.trim(),
+      notes: document.getElementById('f-notes').value.trim()
+    }
+  };
+
+  if (id) payload.lead.id = id;
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  const res = await TMIAdmin.api('/api/leads', id ? 'PUT' : 'POST', payload);
+  btn.disabled = false; btn.textContent = id ? 'Update Lead' : 'Save Lead';
+
+  if (res) {
+    TMIAdmin.toast(id ? 'Lead updated' : 'Lead added');
+    TMIAdmin.closeModal('lead-modal');
+    await loadLeads();
+  }
+}
+
+async function deleteFromPanel() {
+  if (!currentLead) return;
+  const ok = await TMIAdmin.confirm('Delete this lead? This cannot be undone.');
+  if (!ok) return;
+  const res = await TMIAdmin.api(`/api/leads?id=${currentLead.id}`, 'DELETE');
+  if (res) {
+    TMIAdmin.toast('Lead deleted');
+    TMIAdmin.closePanel('lead-panel');
+    await loadLeads();
+  }
+}
+
+async function convertToClient() {
+  if (!currentLead) return;
+  const ok = await TMIAdmin.confirm('Convert this lead to a client?', false);
+  if (!ok) return;
+  const res = await TMIAdmin.api('/api/clients', 'POST', {
+    contact_id: currentLead.contact_id,
+    status: 'active',
+    notes: currentLead.notes
+  });
+  if (res) {
+    TMIAdmin.toast('Converted to client!');
+    TMIAdmin.closePanel('lead-panel');
+    // Update lead status to won
+    await TMIAdmin.api('/api/leads', 'PUT', {
+      lead: { id: currentLead.id, status: 'won' },
+      contact: { first_name: (currentLead.contacts || {}).first_name || 'Lead' }
+    });
+    await loadLeads();
+  }
+}
+
+loadLeads();
+</script>
+</body>
+</html>
