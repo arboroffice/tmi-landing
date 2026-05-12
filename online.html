@@ -1004,18 +1004,20 @@ const ro = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting
 document.querySelectorAll('.reveal').forEach(r => ro.observe(r));
 window.addEventListener('scroll', () => document.getElementById('sticky').classList.toggle('show', scrollY > 600));
 
-(function() {
-  const form = document.getElementById('fotf-online-form');
-  const ok = document.getElementById('fotf-online-ok');
+function fotfSubscribe(formId, okId, source) {
+  const form = document.getElementById(formId);
+  const ok = document.getElementById(okId);
   if (!form) return;
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     const email = form.querySelector('input').value;
     form.style.display = 'none'; ok.style.display = 'block';
-    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'online', audience: 'online' }) }); } catch(err) {}
-    try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from online page\nEmail: ' + email); fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
+    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source, audience: 'online' }) }); } catch(err) {}
+    try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from ' + source + '\nEmail: ' + email); fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
   });
-})();
+}
+fotfSubscribe('fotf-online-form', 'fotf-online-ok', 'online');
+fotfSubscribe('hero-nl-form', 'hero-nl-ok', 'online_hero');
 </script>
 <script>
 (function(){var b=document.getElementById('online-hamburger'),o=document.getElementById('online-overlay'),n=document.getElementById('online-side-nav');if(!b)return;function op(){n.classList.add('open');o.classList.add('open');}function cl(){n.classList.remove('open');o.classList.remove('open');}b.addEventListener('click',op);o.addEventListener('click',cl);})();
