@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dashboard — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <img src="logo.svg" alt="TMI"/>
+      <div><div class="sb-brand-label">TMI</div><div class="sb-brand-sub">Admin</div></div>
+    </div>
+    <nav class="sb-nav">
+      <a href="/admin-dashboard" class="sb-item active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="/admin-leads" class="sb-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path stroke-linecap="round" d="M3 6h18M7 12h10M11 18h2"/></svg>
+        Leads
+      </a>
+      <a href="/admin-clients" class="sb-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="7" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        Clients
+      </a>
+      <a href="/admin-contacts" class="sb-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        Contacts
+      </a>
+      <a href="/admin-email" class="sb-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="4" width="20" height="16" rx="2"/><path stroke-linecap="round" d="m2 7 10 7 10-7"/></svg>
+        Email
+      </a>
+      <div class="sb-sep"></div>
+      <a href="/admin-settings" class="sb-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="sb-foot">
+      <button class="sb-logout" onclick="TMIAdmin.logout()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-linecap="round"/><polyline points="16 17 21 12 16 7" stroke-linecap="round" stroke-linejoin="round"/><line x1="21" y1="12" x2="9" y2="12" stroke-linecap="round"/></svg>
+        Log out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><span class="page">Dashboard</span></div>
+      <div class="topbar-actions">
+        <a href="/admin-leads" class="btn btn-ghost btn-sm">+ Add Lead</a>
+        <a href="/admin-email-compose" class="btn btn-primary btn-sm">Compose Email</a>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats-row" id="stats">
+        <div class="stat-box"><div class="stat-label">Total Leads</div><div class="stat-val" id="stat-leads">—</div><div class="stat-delta" id="stat-leads-d"></div></div>
+        <div class="stat-box"><div class="stat-label">Active Clients</div><div class="stat-val" id="stat-clients">—</div><div class="stat-delta" id="stat-clients-d"></div></div>
+        <div class="stat-box"><div class="stat-label">Total Contacts</div><div class="stat-val" id="stat-contacts">—</div><div class="stat-delta" id="stat-contacts-d"></div></div>
+        <div class="stat-box"><div class="stat-label">Emails Sent</div><div class="stat-val" id="stat-emails">—</div><div class="stat-delta" id="stat-emails-d"></div></div>
+      </div>
+
+      <!-- Grid -->
+      <div class="grid-2">
+
+        <!-- Recent leads -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Recent Leads</span>
+            <a href="/admin-leads" class="btn btn-ghost btn-sm">View all</a>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>Name</th><th>Company</th><th>Status</th><th>Source</th><th>Added</th>
+              </tr></thead>
+              <tbody id="leads-tbody">
+                <tr><td colspan="5" style="padding:24px;text-align:center;color:var(--muted);font-size:13px;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+
+          <!-- Pipeline summary -->
+          <div class="card">
+            <div class="card-head"><span class="card-title">Pipeline</span></div>
+            <div style="padding:16px 20px;" id="pipeline-wrap">
+              <div style="font-size:13px;color:var(--muted);padding:8px 0;">Loading...</div>
+            </div>
+          </div>
+
+          <!-- Recent campaigns -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Recent Campaigns</span>
+              <a href="/admin-email" class="btn btn-ghost btn-sm">View all</a>
+            </div>
+            <div id="campaigns-wrap">
+              <div style="padding:16px 20px;font-size:13px;color:var(--muted);">Loading...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+
+const PIPELINE_STAGES = ['new','contacted','qualified','proposal','won','lost'];
+const STAGE_COLORS = {
+  new:'#dbeafe',contacted:'#ede9fe',qualified:'#fef9c3',
+  proposal:'#ffedd5',won:'#dcfce7',lost:'#f3f4f6'
+};
+
+async function loadDashboard() {
+  const [leads, clients, contacts, campaigns] = await Promise.all([
+    TMIAdmin.api('/api/leads'),
+    TMIAdmin.api('/api/clients'),
+    TMIAdmin.api('/api/contacts'),
+    TMIAdmin.api('/api/emails')
+  ]);
+
+  // Stats
+  if (leads) {
+    document.getElementById('stat-leads').textContent = leads.length;
+    const won = leads.filter(l => l.status === 'won').length;
+    document.getElementById('stat-leads-d').textContent = `${won} won`;
+  }
+  if (clients) {
+    const active = clients.filter(c => c.status === 'active');
+    document.getElementById('stat-clients').textContent = active.length;
+    const mrr = active.reduce((s, c) => s + (parseFloat(c.mrr) || 0), 0);
+    if (mrr) document.getElementById('stat-clients-d').textContent = `${TMIAdmin.currency(mrr)} MRR`;
+  }
+  if (contacts) {
+    document.getElementById('stat-contacts').textContent = contacts.length;
+  }
+  if (campaigns) {
+    const sent = campaigns.filter(c => c.status === 'sent');
+    document.getElementById('stat-emails').textContent = sent.length;
+    const total = sent.reduce((s, c) => s + (c.sent_count || 0), 0);
+    if (total) document.getElementById('stat-emails-d').textContent = `${total.toLocaleString()} delivered`;
+  }
+
+  // Recent leads table
+  if (leads) {
+    const tbody = document.getElementById('leads-tbody');
+    const recent = leads.slice(0, 8);
+    if (!recent.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:32px;text-align:center;color:var(--muted);font-size:13px;">No leads yet. <a href="/admin-leads" style="color:var(--ink);text-decoration:underline">Add your first one.</a></td></tr>`;
+    } else {
+      tbody.innerHTML = recent.map(l => {
+        const c = l.contacts || {};
+        const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || '—';
+        return `<tr onclick="location.href='/admin-leads'">
+          <td class="td-name">${name}</td>
+          <td>${c.company || '—'}</td>
+          <td>${TMIAdmin.badge(l.status)}</td>
+          <td class="td-muted">${l.source || '—'}</td>
+          <td class="td-muted">${TMIAdmin.fmt(l.created_at)}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  // Pipeline bars
+  if (leads) {
+    const counts = {};
+    PIPELINE_STAGES.forEach(s => counts[s] = 0);
+    leads.forEach(l => { if (counts[l.status] !== undefined) counts[l.status]++; });
+    const total = leads.length || 1;
+    document.getElementById('pipeline-wrap').innerHTML = PIPELINE_STAGES.map(s =>
+      `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:80px;font-size:12px;color:var(--ink-2);text-transform:capitalize">${s}</div>
+        <div style="flex:1;height:6px;background:var(--bg);border-radius:999px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(counts[s]/total*100)}%;background:${STAGE_COLORS[s]};border-radius:999px;min-width:${counts[s]?4:0}px"></div>
+        </div>
+        <div style="width:24px;font-size:12px;color:var(--muted);text-align:right">${counts[s]}</div>
+      </div>`
+    ).join('');
+  }
+
+  // Recent campaigns
+  if (campaigns) {
+    const recent = campaigns.slice(0, 4);
+    if (!recent.length) {
+      document.getElementById('campaigns-wrap').innerHTML = `<div style="padding:16px 20px;font-size:13px;color:var(--muted);">No campaigns yet.</div>`;
+    } else {
+      document.getElementById('campaigns-wrap').innerHTML = recent.map(c => {
+        const rate = c.sent_count ? Math.round(c.open_count / c.sent_count * 100) : 0;
+        return `<div style="padding:12px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;cursor:pointer" onclick="location.href='/admin-email'">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.subject}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${TMIAdmin.fmt(c.sent_at || c.created_at)}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            ${TMIAdmin.badge(c.status)}
+            ${c.status === 'sent' ? `<div style="font-size:11px;color:var(--muted);margin-top:3px">${rate}% open</div>` : ''}
+          </div>
+        </div>`;
+      }).join('') + `<div style="border-bottom:none"></div>`;
+    }
+  }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="logo.svg" alt="TMI"/>
+      <div class="login-logo-wrap">
+        <div class="login-logo-text">TMI</div>
+        <div class="login-logo-sub">Admin</div>
+      </div>
+    </div>
+    <h1 class="login-title">Sign in</h1>
+    <p class="login-sub">Internal use only. Keep your password private.</p>
+    <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" id="password" placeholder="••••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()">
+      Sign in &rarr;
+    </button>
+    <p class="login-footer" style="margin-top:20px;font-size:12px;color:var(--muted);text-align:center;">
+      &copy; 2026 TMI Technology
+    </p>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+// Redirect if already logged in
+if (TMIAdmin.token()) window.location.replace('/admin-dashboard');
+
+document.getElementById('password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+async function doLogin() {
+  const btn = document.getElementById('login-btn');
+  const pwd = document.getElementById('password').value.trim();
+  const err = document.getElementById('login-error');
+  if (!pwd) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  err.style.display = 'none';
+
+  const res = await fetch('/api/auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pwd })
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (res.ok && data.token) {
+    localStorage.setItem('tmi_admin_tk', data.token);
+    window.location.replace('/admin-dashboard');
+  } else {
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Sign in →';
+    document.getElementById('password').value = '';
+    document.getElementById('password').focus();
+  }
+}
+</script>
+</body>
+</html>
