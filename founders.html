@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
+<meta name="description" content="Founders of the Future is TMI's community and blog for operators building AI-powered businesses. Join the people building the next generation of companies."/>
+<meta property="og:title" content="Founders of the Future | TMI"/>
+<meta property="og:description" content="The community and blog for founders building AI-powered businesses. Real builds. Real numbers. No hype."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://tmitechai.com/founders"/>
+<meta property="og:image" content="https://www.tmitechai.com/hero-bg.png"/>
+<meta property="og:site_name" content="TMI"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Founders of the Future | TMI"/>
+<meta name="twitter:description" content="The community and blog for founders building AI-powered businesses. Real builds. Real numbers. No hype."/>
+<meta name="twitter:image" content="https://www.tmitechai.com/hero-bg.png"/>
+<link rel="canonical" href="https://tmitechai.com/founders"/>
+<title>Founders of the Future | TMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-alt: #f5f5f7;
+  --bg-deep: #0d0e1a;
+  --bg-dark: #0a0b14;
+  --ink: #1a1a1a;
+  --ink-2: #505060;
+  --muted: #86868b;
+  --line: rgba(0,0,0,0.07);
+  --line-strong: rgba(0,0,0,0.12);
+  --chart: #E4FF97;
+  --chart-dark: #D0FF6A;
+  --serif: "Barlow", system-ui, sans-serif;
+  --sans: "Neue Haas Grotesk Display", "Neue Haas Grotesk", system-ui, -apple-system, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.55; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+p { margin: 0; }
+h1, h2, h3, h4 { margin: 0; }
+::selection { background: var(--bg-deep); color: var(--chart); }
+
+.container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+.container-sm { max-width: 800px; margin: 0 auto; padding: 0 40px; }
+
+/* NAV */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 60px;
+  background: rgba(10,11,20,0.92);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center;
+}
+.nav-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0 40px;
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand {
+  font-family: var(--sans); font-size: 15px; font-weight: 700;
+  color: #fff; display: flex; align-items: center; gap: 8px;
+}
+.nav-brand img { height: 22px; width: auto; filter: brightness(0) invert(1); }
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-links a {
+  font-size: 13px; color: rgba(255,255,255,0.5); padding: 6px 14px;
+  border-radius: 6px; transition: color 0.15s, background 0.15s;
+}
+.nav-links a:hover { color: #fff; background: rgba(255,255,255,0.07); }
+.nav-cta {
+  font-size: 12px; font-weight: 700; background: var(--chart); color: #0a0b14;
+  padding: 9px 18px; border-radius: 999px; transition: background 0.15s; white-space: nowrap;
+}
+.nav-cta:hover { background: var(--chart-dark); }
+@media(max-width:640px) { .nav-links { display: none; } .nav-inner { padding: 0 20px; } }
+
+/* HERO */
+.hero {
+  background: var(--bg-dark);
+  padding: 140px 40px 100px;
+  position: relative; overflow: hidden;
+  text-align: center;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(228,255,151,0.09) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(228,255,151,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(228,255,151,0.02) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 0%, black 20%, transparent);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid rgba(228,255,151,0.2); border-radius: 999px;
+  padding: 6px 16px; margin-bottom: 36px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(228,255,151,0.7);
+}
+.hero-eyebrow-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--chart);
+  animation: pulse 2.5s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+.hero h1 {
+  font-family: var(--serif); font-size: clamp(52px, 8vw, 112px);
+  font-weight: 400; letter-spacing: -0.02em; line-height: 1.0;
+  color: #fff; margin-bottom: 28px; max-width: 18ch; margin-left: auto; margin-right: auto;
+}
+.hero h1 em { color: var(--chart); font-style: italic; }
+.hero-deck {
+  font-family: var(--serif); font-size: clamp(17px, 1.5vw, 21px);
+  color: rgba(255,255,255,0.5); line-height: 1.65; max-width: 48ch;
+  margin: 0 auto 56px;
+}
+.hero-deck strong { color: rgba(255,255,255,0.85); font-weight: 500; }
+
+/* EMAIL FORM */
+.signup-form {
+  max-width: 480px; margin: 0 auto;
+  display: flex; gap: 8px; position: relative;
+}
+.signup-input {
+  flex: 1; padding: 14px 20px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px; color: #fff;
+  font-family: var(--sans); font-size: 14px;
+  outline: none; transition: border-color 0.2s;
+}
+.signup-input::placeholder { color: rgba(255,255,255,0.35); }
+.signup-input:focus { border-color: rgba(228,255,151,0.45); }
+.signup-btn {
+  padding: 14px 24px; border-radius: 999px;
+  background: var(--chart); color: #0a0b14;
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
+  border: none; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: background 0.15s;
+}
+.signup-btn:hover { background: var(--chart-dark); }
+.signup-note {
+  font-size: 11px; color: rgba(255,255,255,0.25); margin-top: 14px;
+  letter-spacing: 0.05em;
+}
+.signup-success {
+  display: none; text-align: center;
+  font-family: var(--serif); font-size: 18px; color: var(--chart);
+  padding: 16px 0;
+}
+@media(max-width:540px) {
+  .signup-form { flex-direction: column; }
+  .signup-btn { border-radius: 999px; }
+}
+
+/* WHAT IS IT */
+.what-section { padding: 100px 0; border-top: 1px solid rgba(255,255,255,0.06); background: var(--bg-dark); }
+.what-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+  align-items: center;
+}
+.what-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.22em;
+  text-transform: uppercase; color: rgba(255,255,255,0.3);
+  margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+}
+.what-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--chart); opacity: 0.5; }
+.what-section h2 {
+  font-family: var(--serif); font-size: clamp(32px, 3.5vw, 52px);
+  font-weight: 400; letter-spacing: -0.02em; line-height: 1.1;
+  color: #fff; margin-bottom: 24px;
+}
+.what-section h2 em { color: var(--chart); font-style: italic; }
+.what-section p {
+  font-family: var(--serif); font-size: 18px; line-height: 1.75;
+  color: rgba(255,255,255,0.5); margin-bottom: 1.4em;
+}
+.what-section p:last-child { margin-bottom: 0; }
+.what-pillars { display: flex; flex-direction: column; gap: 2px; }
+.pillar {
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px; padding: 28px 32px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.pillar:hover { border-color: rgba(228,255,151,0.18); background: rgba(228,255,151,0.02); }
+.pillar-num {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.18em;
+  color: rgba(228,255,151,0.5); margin-bottom: 10px;
+}
+.pillar h4 {
+  font-family: var(--serif); font-size: 20px; font-weight: 400;
+  color: #fff; margin-bottom: 8px; letter-spacing: -0.01em;
+}
+.pillar p { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.6; }
+@media(max-width:768px) { .what-inner { grid-template-columns: 1fr; gap: 48px; } }
+
+/* WHO SECTION */
+.who-section { background: var(--bg); padding: 100px 0; border-top: 1px solid var(--line); }
+.who-header { text-align: center; margin-bottom: 64px; }
+.who-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 20px;
+}
+.who-header h2 {
+  font-family: var(--serif); font-size: clamp(34px, 4vw, 56px);
+  font-weight: 400; letter-spacing: -0.02em; color: var(--ink);
+}
+.who-header h2 em { font-style: italic; color: var(--ink-2); }
+.who-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.who-card {
+  border: 1px solid var(--line); border-radius: 16px; padding: 36px 32px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.who-card:hover { border-color: var(--line-strong); box-shadow: 0 8px 32px rgba(0,0,0,0.06); }
+.who-card-icon {
+  width: 40px; height: 40px; background: var(--bg-alt);
+  border-radius: 10px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.who-card h4 {
+  font-family: var(--serif); font-size: 22px; font-weight: 400;
+  letter-spacing: -0.01em; color: var(--ink); margin-bottom: 10px;
+}
+.who-card p { font-size: 14px; color: var(--ink-2); line-height: 1.65; }
+@media(max-width:768px) { .who-grid { grid-template-columns: 1fr; } }
+
+/* CTA STRIP */
+.cta-strip {
+  background: var(--bg-deep); padding: 100px 0; text-align: center;
+  position: relative; overflow: hidden;
+}
+.cta-strip::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(228,255,151,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-strip h2 {
+  font-family: var(--serif); font-size: clamp(38px, 5vw, 72px);
+  font-weight: 400; letter-spacing: -0.02em; color: #fff;
+  margin-bottom: 20px; max-width: 18ch; margin-left: auto; margin-right: auto;
+}
+.cta-strip h2 em { color: var(--chart); font-style: italic; }
+.cta-strip p {
+  font-family: var(--serif); font-size: 18px;
+  color: rgba(255,255,255,0.45); max-width: 44ch; margin: 0 auto 48px;
+  line-height: 1.65;
+}
+.cta-strip .signup-form { position: relative; z-index: 1; }
+
+/* FOOTER */
+footer {
+  background: var(--bg-dark); border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 72px 0 36px;
+}
+.footer-grid {
+  display: grid; grid-template-columns: 1.4fr 1fr; gap: 80px; margin-bottom: 56px;
+}
+.footer-brand {
+  font-family: var(--sans); font-size: 16px; font-weight: 700;
+  color: #fff; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+.footer-brand img { height: 24px; filter: brightness(0) invert(1); }
+.footer-desc { font-size: 14px; color: rgba(255,255,255,0.35); line-height: 1.65; max-width: 36ch; }
+.footer-right { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; }
+.footer-col h5 {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.25); margin: 0 0 14px;
+}
+.footer-col a {
+  display: block; font-size: 14px; color: rgba(255,255,255,0.45);
+  padding: 4px 0; transition: color 0.15s;
+}
+.footer-col a:hover { color: #fff; }
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.2);
+}
+@media(max-width:640px) {
+  .hero { padding: 120px 20px 80px; }
+  .what-section { padding: 72px 0; }
+  .container { padding: 0 20px; }
+  .container-sm { padding: 0 20px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+  .footer-right { grid-template-columns: 1fr 1fr; }
+  .footer-bottom { flex-direction: column; gap: 10px; text-align: center; }
+}
+
+/* REVEAL */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.2s; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="https://tmitechai.com" class="nav-brand">
+      <img src="logo.svg" alt="TMI"/> TMI
+    </a>
+    <div class="nav-links">
+      <a href="https://trades.tmitechai.com/news.html">Field Notes</a>
+      <a href="https://trades.tmitechai.com/about.html">About</a>
+    </div>
+    <a href="https://trades.tmitechai.com/funnel.html" class="nav-cta">Apply &rarr;</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-eyebrow">
+    <div class="hero-eyebrow-dot"></div>
+    Community &amp; Blog
+  </div>
+  <h1>Founders of <em>the Future</em></h1>
+  <p class="hero-deck">
+    The community and blog for operators building the next generation of businesses.
+    <strong>Real builds. Real numbers. No hype.</strong> Join the people who are actually doing it.
+  </p>
+  <div id="form-wrap">
+    <form class="signup-form" id="signup-form">
+      <input type="email" class="signup-input" placeholder="your@email.com" required/>
+      <button type="submit" class="signup-btn">Join the Community</button>
+    </form>
+    <p class="signup-note">No spam. One email when something worth reading drops.</p>
+  </div>
+  <div class="signup-success" id="signup-success">
+    You're in. We'll be in touch.
+  </div>
+</section>
+
+<!-- WHAT IS IT -->
+<section class="what-section">
+  <div class="container">
+    <div class="what-inner">
+      <div class="reveal">
+        <div class="what-label">What this is</div>
+        <h2>Built for founders who <em>build things that last.</em></h2>
+        <p>Founders of the Future is where the conversation about building real businesses with AI actually happens. Not theory. Not hype. Operators sharing what works, what doesn't, and what they're building next.</p>
+        <p>Essays, case studies, and community posts from founders in the trenches - physical economy, online business, and everything in between.</p>
+      </div>
+      <div class="what-pillars reveal reveal-d1">
+        <div class="pillar">
+          <div class="pillar-num">01</div>
+          <h4>The Blog</h4>
+          <p>Long-form essays on systems, growth, AI, and what it actually takes to build a company that runs without you in every decision.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-num">02</div>
+          <h4>The Community</h4>
+          <p>A room full of operators sharing real numbers, real builds, and honest takes on what's working right now.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-num">03</div>
+          <h4>The Dispatches</h4>
+          <p>A periodic email when something worth reading drops. Build notes, case studies, and thinking from inside TMI's client work.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section class="who-section">
+  <div class="container">
+    <div class="who-header reveal">
+      <div class="who-eyebrow">Who it's for</div>
+      <h2>If you're building something <em>real,</em> you belong here.</h2>
+    </div>
+    <div class="who-grid">
+      <div class="who-card reveal">
+        <div class="who-card-icon">&#127959;</div>
+        <h4>Trades &amp; Physical Economy</h4>
+        <p>Contractors, operators, and service companies building systems that let their business run without them on the tools every day.</p>
+      </div>
+      <div class="who-card reveal reveal-d1">
+        <div class="who-card-icon">&#128241;</div>
+        <h4>Online Operators</h4>
+        <p>Coaches, course creators, consultants, and content businesses scaling revenue without scaling their hours.</p>
+      </div>
+      <div class="who-card reveal reveal-d2">
+        <div class="who-card-icon">&#9881;</div>
+        <h4>Builders &amp; Founders</h4>
+        <p>Anyone building a company with intention - using AI, systems, and infrastructure instead of brute force and burnout.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOTTOM CTA -->
+<section class="cta-strip">
+  <div class="container-sm">
+    <h2>The future belongs to <em>the ones who build it.</em></h2>
+    <p>Get in early. One email when something worth reading drops.</p>
+    <form class="signup-form" id="signup-form-2">
+      <input type="email" class="signup-input" placeholder="your@email.com" required/>
+      <button type="submit" class="signup-btn">Join Now</button>
+    </form>
+    <div class="signup-success" id="signup-success-2" style="color:var(--chart);font-family:var(--serif);font-size:18px;margin-top:16px;display:none;">
+      You're in. We'll be in touch.
+    </div>
+    <p class="signup-note" style="color:rgba(255,255,255,0.2);margin-top:14px;">No spam. Unsubscribe anytime.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="logo.svg" alt="TMI"/> TMI
+        </div>
+        <p class="footer-desc">Done-for-you AI operational infrastructure for business owners building companies that run on systems.</p>
+      </div>
+      <div class="footer-right">
+        <div class="footer-col">
+          <h5>Verticals</h5>
+          <a href="https://trades.tmitechai.com">Physical Economy</a>
+          <a href="https://online.tmitechai.com">Online Business</a>
+        </div>
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="https://trades.tmitechai.com/about.html">About</a>
+          <a href="https://trades.tmitechai.com/news.html">Field Notes</a>
+          <a href="https://online.tmitechai.com/news-online.html">Online Blog</a>
+          <a href="founders.html">Founders of the Future</a>
+          <a href="https://trades.tmitechai.com/funnel.html">Apply</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 TMI Technology. All rights reserved.</span>
+      <span>Founders of the Future</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+function handleSubmit(formId, successId) {
+  const form = document.getElementById(formId);
+  const success = document.getElementById(successId);
+  if (!form) return;
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = form.querySelector('input[type="email"]').value;
+    // Wire up to your email service here (Mailchimp, ConvertKit, Formspree, etc.)
+    // For now: show success state
+    form.style.display = 'none';
+    success.style.display = 'block';
+    if (formId === 'signup-form') {
+      document.querySelector('.signup-note').style.display = 'none';
+    }
+  });
+}
+handleSubmit('signup-form', 'signup-success');
+handleSubmit('signup-form-2', 'signup-success-2');
+</script>
+</body>
+</html>
