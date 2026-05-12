@@ -51,9 +51,10 @@ h1,h2,h3,h4{margin:0}
 @media(max-width:640px){.nav-link{display:none}.nav{padding:14px 20px}}
 
 /* HERO */
-.hero{padding:100px 40px 80px;text-align:center;position:relative;overflow:hidden}
-.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(228,255,151,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(228,255,151,.025) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 100% 80% at 50% 0%,black 10%,transparent);pointer-events:none}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(228,255,151,.07) 0%,transparent 65%);pointer-events:none}
+.hero{padding:120px 40px 100px;text-align:center;position:relative;overflow:hidden;background-image:url('hero-online.png');background-size:cover;background-position:center top}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(228,255,151,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(228,255,151,.018) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 100% 80% at 50% 0%,black 10%,transparent);pointer-events:none;z-index:2}
+.hero::before{content:'';position:absolute;inset:0;background:rgba(10,11,20,0.74);pointer-events:none;z-index:1}
+.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 30%,rgba(228,255,151,.07) 0%,transparent 65%);pointer-events:none;z-index:2}
 .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--b2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;border-radius:100px;margin-bottom:32px}
 .chip-dot{width:5px;height:5px;border-radius:50%;background:var(--chart);animation:cdot 2.5s infinite}
 @keyframes cdot{0%,100%{opacity:1}50%{opacity:.15}}
