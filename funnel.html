@@ -25,7 +25,7 @@
   --serif: "Barlow", system-ui, sans-serif;
   --sans: "Barlow", system-ui, sans-serif;
 }
-*{box-sizing:border-box;}html,body{margin:0;padding:0;}html{scroll-behavior:smooth;}
+*{box-sizing:border-box;}html,body{margin:0;padding:0;}
 body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.55;overflow-x:hidden;}
 a{color:inherit;text-decoration:none;}img{display:block;max-width:100%;}
 ::selection{background:var(--ink);color:var(--bg);}
@@ -33,465 +33,168 @@ p{margin:0;}h1,h2,h3,h4{margin:0;}
 
 /* HEADER */
 .f-header{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;}
-.f-header-inner{max-width:1100px;margin:0 auto;padding:0 32px;width:100%;display:flex;align-items:center;gap:20px;}
+.f-header-inner{max-width:720px;margin:0 auto;padding:0 32px;width:100%;display:flex;align-items:center;gap:20px;}
 .f-brand{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--ink);flex:1;}
 .f-brand img{height:22px;width:auto;}
 .f-back{font-size:13px;color:var(--ink-2);padding:6px 12px;border-radius:6px;transition:color 0.15s,background 0.15s;}
 .f-back:hover{color:var(--ink);background:var(--bg-alt);}
 @media(max-width:640px){.f-header-inner{padding:0 20px;}.f-back{display:none;}}
 
-/* CONTAINER */
-.container{max-width:1100px;margin:0 auto;padding:0 32px;}
-.container-narrow{max-width:680px;margin:0 auto;padding:0 32px;}
-@media(max-width:640px){.container,.container-narrow{padding:0 20px;}}
+/* LAYOUT */
+.page-wrap{max-width:520px;margin:0 auto;padding:104px 32px 80px;}
+@media(max-width:640px){.page-wrap{padding:88px 20px 60px;}}
 
 /* HERO */
-.f-hero{padding:112px 0 72px;border-bottom:1px solid var(--line);}
-.f-eyebrow{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:28px;display:flex;align-items:center;gap:10px;}
+.f-eyebrow{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;display:flex;align-items:center;gap:10px;}
 .f-eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--ink);flex:none;}
-.f-hero h1{font-family:var(--serif);font-size:clamp(44px,6vw,84px);font-weight:400;line-height:1.0;letter-spacing:-0.025em;max-width:18ch;margin-bottom:32px;}
-.f-hero h1 em{font-style:italic;}
-.f-hero-deck{font-family:var(--serif);font-size:clamp(17px,1.5vw,21px);font-weight:400;line-height:1.6;color:var(--ink-2);max-width:52ch;margin-bottom:40px;}
-
-/* TOGGLE */
-.biz-toggle-wrap{margin-bottom:0;}
-.biz-toggle{display:inline-flex;background:var(--bg-alt);border:1px solid var(--line-strong);border-radius:8px;padding:3px;gap:2px;}
-.biz-tab{padding:9px 22px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:0.05em;cursor:pointer;transition:all .15s;border:none;background:transparent;color:var(--muted);font-family:var(--sans);}
-.biz-tab.active{background:var(--ink);color:#fff;}
-@media(max-width:480px){.biz-tab{padding:8px 16px;font-size:11px;}}
-
-/* PROOF ROW */
-.f-proof{display:flex;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg-alt);}
-.f-proof-item{flex:1;text-align:center;padding:24px 16px;border-right:1px solid var(--line);}
-.f-proof-item:last-child{border-right:none;}
-.f-proof-n{font-family:var(--serif);font-size:clamp(26px,3vw,36px);font-weight:400;letter-spacing:-0.03em;color:var(--ink);line-height:1;}
-.f-proof-l{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-top:6px;font-weight:500;}
-@media(max-width:600px){.f-proof{flex-wrap:wrap;}.f-proof-item{flex:1 1 50%;border-bottom:1px solid var(--line);}}
-
-/* PAIN */
-.f-pain{padding:80px 0;}
-.f-section-label{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
-.f-pain h2{font-family:var(--serif);font-size:clamp(28px,3vw,44px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;margin-bottom:14px;}
-.f-pain-intro{font-size:16px;color:var(--ink-2);line-height:1.65;max-width:54ch;margin-bottom:40px;}
-.pain-list{border:1px solid var(--line);border-radius:4px;overflow:hidden;}
-.pain-item{display:grid;grid-template-columns:20px 1fr auto;gap:16px;padding:18px 22px;border-bottom:1px solid var(--line);align-items:start;background:var(--bg);transition:background .15s;}
-.pain-item:last-child{border-bottom:none;}
-.pain-item:hover{background:var(--bg-alt);}
-.pain-x{color:#cc3333;font-size:12px;font-weight:700;margin-top:2px;}
-.pain-t{font-size:14px;color:var(--ink-2);line-height:1.55;}
-.pain-t strong{color:var(--ink);font-weight:600;}
-.pain-tag{padding:3px 10px;border-radius:100px;font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;white-space:nowrap;background:var(--bg-alt);color:var(--muted);border:1px solid var(--line-strong);}
-@media(max-width:500px){.pain-item{grid-template-columns:16px 1fr;}.pain-tag{display:none;}}
-
-/* WHAT YOU GET */
-.f-wyg{background:var(--bg-deep);padding:72px 0;}
-.f-wyg .f-section-label{color:rgba(255,255,255,0.35);}
-.f-wyg h2{font-family:var(--serif);font-size:clamp(28px,3vw,44px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;color:#fff;margin-bottom:44px;}
-.wyg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;}
-.wyg-card{background:var(--bg-deep);padding:28px 30px;}
-.wyg-card-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--chart);margin-bottom:12px;font-weight:600;}
-.wyg-card h4{font-family:var(--serif);font-size:18px;font-weight:400;letter-spacing:-0.01em;color:#fff;margin-bottom:10px;}
-.wyg-card p{font-size:14px;color:rgba(255,255,255,0.45);line-height:1.65;}
-@media(max-width:600px){.wyg-grid{grid-template-columns:1fr;}}
+.f-hero-head{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:400;line-height:1.05;letter-spacing:-0.025em;margin-bottom:16px;}
+.f-hero-head em{font-style:italic;}
+.f-hero-deck{font-size:16px;color:var(--ink-2);line-height:1.65;max-width:44ch;margin-bottom:48px;}
 
 /* FORM */
-.f-form-section{padding:80px 0 100px;}
-.f-form-section .f-section-label{text-align:center;margin-bottom:12px;}
-.f-form-section h2{font-family:var(--serif);font-size:clamp(28px,3vw,44px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;text-align:center;margin-bottom:8px;}
-.f-form-section .f-form-deck{font-size:16px;color:var(--ink-2);line-height:1.6;text-align:center;max-width:46ch;margin:0 auto 44px;}
-.f-form-card{background:var(--bg);border:1px solid var(--line-strong);border-radius:4px;padding:40px;}
-.f-form-card h3{font-family:var(--serif);font-size:22px;font-weight:400;letter-spacing:-0.01em;margin-bottom:6px;}
-.f-form-sub{font-size:14px;color:var(--muted);margin-bottom:28px;}
-.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.f-form-card{border-top:1px solid var(--line);padding-top:40px;}
+.f-form-label{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;font-weight:600;}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
 label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
 input,select{background:var(--bg);border:1px solid var(--line-strong);border-radius:4px;padding:13px 16px;font-family:var(--sans);font-size:15px;color:var(--ink);outline:none;transition:border-color .15s;width:100%;}
 input::placeholder{color:var(--muted);}
 input:focus,select:focus{border-color:var(--ink);}
 select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2386868b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;cursor:pointer;}
-select option[value=""]{color:var(--muted);}
 select:invalid{color:var(--muted);}
 .submit-btn{width:100%;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--ink);color:#fff;font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:0.02em;padding:16px 32px;border-radius:4px;border:none;cursor:pointer;transition:background .15s,transform .12s;}
 .submit-btn:hover{background:#2a2a2a;transform:translateY(-1px);}
 .submit-btn:disabled{opacity:.5;cursor:default;transform:none;}
-.form-note{font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6;}
-.form-success{display:none;text-align:center;padding:36px;background:var(--bg-alt);border:1px solid var(--line-strong);border-radius:4px;margin-top:20px;}
-.form-success h4{font-family:var(--serif);font-size:24px;font-weight:400;letter-spacing:-0.01em;color:var(--ink);margin-bottom:8px;}
-.form-success p{font-size:14px;color:var(--ink-2);line-height:1.6;}
-.reassure-strip{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-top:20px;}
+.form-success{display:none;text-align:center;padding:48px 24px;background:var(--bg-alt);border:1px solid var(--line-strong);border-radius:4px;}
+.form-success h4{font-family:var(--serif);font-size:28px;font-weight:400;letter-spacing:-0.01em;color:var(--ink);margin-bottom:10px;}
+.form-success p{font-size:15px;color:var(--ink-2);line-height:1.6;}
+.reassure-strip{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-top:20px;}
 .ri{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0.05em;display:flex;align-items:center;gap:6px;}
 .ri .ck{color:var(--ink);font-weight:700;}
-@media(max-width:560px){.f-form-card{padding:24px 20px;}}
-
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,11,20,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:24px;}
-.modal-overlay.open{display:flex;}
-.modal-card{background:#fff;border:1px solid var(--line-strong);border-radius:4px;padding:48px 44px;max-width:500px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.18);animation:modal-in .22s cubic-bezier(.34,1.4,.64,1) both;}
-@keyframes modal-in{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
-.modal-card h2{font-family:var(--serif);font-size:clamp(22px,3vw,30px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;margin-bottom:12px;}
-.modal-card .modal-desc{font-size:15px;color:var(--ink-2);line-height:1.65;margin-bottom:28px;}
-.modal-list{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:20px 0;margin-bottom:28px;display:flex;flex-direction:column;gap:10px;}
-.modal-list li{font-size:14px;color:var(--ink-2);display:flex;align-items:flex-start;gap:10px;line-height:1.5;list-style:none;}
-.modal-list li::before{content:'';display:block;width:5px;height:5px;border-radius:50%;background:var(--ink);flex:none;margin-top:5px;}
-.modal-actions{display:flex;flex-direction:column;gap:10px;}
-.modal-btn-yes{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ink);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:15px 28px;border-radius:4px;border:none;cursor:pointer;transition:background .15s;text-decoration:none;width:100%;}
-.modal-btn-yes:hover{background:#2a2a2a;}
-.modal-btn-no{display:flex;align-items:center;justify-content:center;background:transparent;color:var(--muted);font-family:var(--sans);font-size:13px;font-weight:500;padding:13px 28px;border-radius:4px;border:1px solid var(--line-strong);cursor:pointer;transition:border-color .15s,color .15s;width:100%;}
-.modal-btn-no:hover{border-color:var(--ink-2);color:var(--ink);}
-@media(max-width:560px){.modal-card{padding:32px 24px;}}
-
-/* CAL */
-#cal-section{display:none;width:100%;max-width:680px;margin:56px auto 0;text-align:center;}
-.cal-heading{font-family:var(--serif);font-size:26px;font-weight:400;letter-spacing:-0.01em;margin-bottom:8px;}
-.cal-sub{font-size:14px;color:var(--muted);margin-bottom:24px;}
-#cal-embed{width:100%;min-height:620px;border-radius:4px;overflow:hidden;border:1px solid var(--line-strong);}
 
 /* FOOTER */
-.f-footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:32px 0;}
-.f-foot-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.f-footer{border-top:1px solid var(--line);padding:28px 0;margin-top:64px;}
+.f-foot-inner{max-width:520px;margin:0 auto;padding:0 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
 .f-foot-copy{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);}
-
-.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1);}
-.reveal.in{opacity:1;transform:none;}
-
-/* INITIAL CHOICE SCREEN */
-.choice-overlay{display:none;position:fixed;inset:0;z-index:300;background:#fff;align-items:center;justify-content:center;padding:32px;}
-.choice-overlay.show{display:flex;}
-.choice-card{max-width:520px;width:100%;text-align:center;}
-.choice-eyebrow{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:28px;}
-.choice-card h2{font-family:var(--serif);font-size:clamp(28px,4vw,44px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;margin-bottom:14px;}
-.choice-card p{font-size:16px;color:var(--ink-2);line-height:1.6;margin-bottom:44px;}
-.choice-buttons{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.choice-btn{padding:28px 24px;border:1.5px solid var(--line-strong);border-radius:4px;cursor:pointer;background:var(--bg);font-family:var(--sans);text-align:left;transition:border-color .15s,background .15s;}
-.choice-btn:hover{border-color:var(--ink);background:var(--bg-alt);}
-.choice-btn-label{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600;}
-.choice-btn-name{font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:-0.01em;color:var(--ink);margin-bottom:6px;}
-.choice-btn-desc{font-size:13px;color:var(--ink-2);line-height:1.5;}
-.choice-btn.selected{border-color:var(--ink);background:var(--ink);}
-.choice-btn.selected .choice-btn-label,.choice-btn.selected .choice-btn-name,.choice-btn.selected .choice-btn-desc{color:#fff;}
-@media(max-width:500px){.choice-buttons{grid-template-columns:1fr;}}
+@media(max-width:640px){.f-foot-inner{padding:0 20px;}}
 </style>
 </head>
 <body>
-
-<!-- INITIAL BUSINESS TYPE CHOICE -->
-<div class="choice-overlay" id="choice-overlay">
-  <div class="choice-card">
-    <div class="choice-eyebrow">Before we start</div>
-    <h2>What kind of business are you running?</h2>
-    <p>We build different systems for different worlds. Tell us where you operate and we will show you exactly what applies.</p>
-    <div class="choice-buttons">
-      <button class="choice-btn" onclick="chooseType('physical')">
-        <div class="choice-btn-label">Field &amp; Physical</div>
-        <div class="choice-btn-name">Physical Business</div>
-        <div class="choice-btn-desc">Trades, field service, construction, manufacturing, logistics</div>
-      </button>
-      <button class="choice-btn" onclick="chooseType('online')">
-        <div class="choice-btn-label">Digital &amp; Online</div>
-        <div class="choice-btn-name">Online Business</div>
-        <div class="choice-btn-desc">Coaches, creators, e-commerce, courses, digital products</div>
-      </button>
-    </div>
-  </div>
-</div>
 
 <header class="f-header">
   <div class="f-header-inner">
     <a href="https://www.tmitechai.com" class="f-brand">
       <img src="logo.svg" alt="TMI"/> TMI
     </a>
-    <a href="https://www.tmitechai.com" class="f-back">← Back to main site</a>
+    <a href="https://www.tmitechai.com" class="f-back">← Back</a>
   </div>
 </header>
 
-<section class="f-hero">
-  <div class="container-narrow">
-    <div class="f-eyebrow"><div class="f-eyebrow-dot"></div><span id="chip-label">AI Infrastructure for Business Operators</span></div>
-    <h1>Your business is <em>leaking.</em><br>Let's find where.</h1>
-    <p class="f-hero-deck" id="hero-sub-text">Most operations lose 12-18% of potential revenue to gaps in how information flows through the business. Before we build anything, we need to see exactly where yours is breaking.</p>
+<div class="page-wrap">
+  <div class="f-eyebrow"><div class="f-eyebrow-dot"></div><span>Free strategy call</span></div>
+  <h1 class="f-hero-head">Book a free call.<br><em>We'll find the gaps.</em></h1>
+  <p class="f-hero-deck">Most businesses lose time and money in the same places - follow-up, scheduling, reporting, and the work that falls through the cracks. We map it in one conversation and show you what a system-built version looks like.</p>
 
-    <div class="biz-toggle-wrap">
-      <div class="biz-toggle">
-        <button class="biz-tab active" data-type="physical" onclick="switchBizType('physical')">Physical Business</button>
-        <button class="biz-tab" data-type="online" onclick="switchBizType('online')">Online Business</button>
+  <div class="f-form-card">
+    <div class="f-form-label">Step one - tell us where to reach you</div>
+    <form id="quick-form">
+      <div class="field">
+        <label for="name">Your name</label>
+        <input type="text" id="name" name="Name" placeholder="First and last" required/>
       </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="Email" placeholder="you@yourbusiness.com" required/>
+      </div>
+      <div class="field">
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" name="Phone" placeholder="+1 (555) 000-0000" required/>
+      </div>
+      <div class="field">
+        <label for="company">Business name</label>
+        <input type="text" id="company" name="Company" placeholder="Your company"/>
+      </div>
+      <div class="field">
+        <label for="niche">Your industry</label>
+        <select id="niche" name="Niche">
+          <option value="">Select your industry...</option>
+          <optgroup label="Trades & Field Service">
+            <option value="hvac">HVAC</option>
+            <option value="construction">Construction</option>
+            <option value="plumbing">Plumbing</option>
+            <option value="electrical">Electrical</option>
+            <option value="roofing">Roofing</option>
+            <option value="landscaping">Landscaping</option>
+            <option value="manufacturing">Manufacturing</option>
+            <option value="oil-gas">Oil &amp; Gas</option>
+            <option value="mining">Mining</option>
+            <option value="fleet-logistics">Fleet / Logistics</option>
+            <option value="other-trades">Other Trades</option>
+          </optgroup>
+          <optgroup label="Online Business">
+            <option value="coaching">Coaching</option>
+            <option value="online-courses">Online Courses</option>
+            <option value="ecommerce">E-commerce</option>
+            <option value="creator-content">Creator / Content</option>
+            <option value="consulting">Consulting</option>
+            <option value="digital-products">Digital Products</option>
+            <option value="other-online">Other Online</option>
+          </optgroup>
+        </select>
+      </div>
+      <button type="submit" class="submit-btn" id="submit-btn">
+        Apply to Work with TMI
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </form>
+    <div id="form-success" class="form-success">
+      <h4>Application received.</h4>
+      <p>We will be in touch within 24 hours to schedule your strategy call. Check your inbox.</p>
     </div>
   </div>
-</section>
 
-
-<section class="f-pain">
-  <div class="container-narrow">
-    <div class="f-section-label reveal">What is actually happening</div>
-    <h2 class="reveal">You are the answer to every<br>question your business has.</h2>
-    <p class="f-pain-intro reveal" id="pain-intro-text">When dispatch, invoicing, quoting, follow-up, and reporting all route through you, the operation cannot grow past what you can personally handle. That is not a character flaw. It is a missing infrastructure problem.</p>
-
-    <div id="pain-physical" class="pain-list reveal">
-      <div class="pain-item">
-        <div class="pain-x">&#10005;</div>
-        <div class="pain-t">Jobs complete but <strong>invoices go out 3-7 days late</strong>, quietly eroding cash flow every week</div>
-        <div class="pain-tag">Finance</div>
-      </div>
-      <div class="pain-item">
-        <div class="pain-x">&#10005;</div>
-        <div class="pain-t">Dispatch runs through one person with a spreadsheet - <strong>and breaks the moment they are unavailable</strong></div>
-        <div class="pain-tag">Operations</div>
-      </div>
-      <div class="pain-item">
-        <div class="pain-x">&#10005;</div>
-        <div class="pain-t">Quotes go out manually every time with <strong>no visibility into whether jobs are actually profitable</strong></div>
-        <div class="pain-tag">Finance</div>
-      </div>
-      <div class="pain-item">
-        <div class="pain-x">&#10005;</div>
-        <div class="pain-t">Work completes in the field and <strong>the paperwork, reporting, and follow-up never catches up</strong></div>
-        <div class="pain-tag">Operations</div>
-      </div>
-    </div>
-
-    <div id="pain-online" class="pain-list reveal" style="display:none;">
-      <div class="pain-item">
-        <div class="pain-x">&#10005;</div>
-        <div class="pain-t">Leads come in while you are in delivery mode and <strong>nobody follows up until the window is gone</strong></div>
-        <div class="pain-tag">Growth</div>
-      </div>
-      <div class="pain-item">
-        <div class="pain-x">&#10005;</div>
-        <div class="pain-t">Client onboarding, scheduling, and handoffs <strong>route through you manually every single time</strong></div>
-        <div class="pain-tag">Operations</div>
-      </div>
-      <div class="pain-item">
-        <div class="pain-x">&#10005;</div>
-        <div class="pain-t">Every launch burns you out because <strong>the whole machine runs on your personal effort</strong></div>
-        <div class="pain-tag">Growth</div>
-      </div>
-      <div class="pain-item">
-        <div class="pain-x">&#10005;</div>
-        <div class="pain-t">Revenue leaks between campaigns because <strong>nothing is built to convert or retain while you rest</strong></div>
-        <div class="pain-tag">Revenue</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="f-wyg">
-  <div class="container-narrow">
-    <div class="f-section-label reveal">On the strategy call</div>
-    <h2 class="reveal">What you walk away with.</h2>
-    <div class="wyg-grid reveal">
-      <div class="wyg-card">
-        <div class="wyg-card-label">Clarity</div>
-        <h4>A full operational gap map.</h4>
-        <p>Every place your business loses time and money each week, laid out clearly.</p>
-      </div>
-      <div class="wyg-card">
-        <div class="wyg-card-label">Opportunity</div>
-        <h4>What can be automated, and what it's worth.</h4>
-        <p>Every gap an AI system can close, prioritized by the revenue and time it recovers.</p>
-      </div>
-      <div class="wyg-card">
-        <div class="wyg-card-label">Direction</div>
-        <h4>A clear path forward.</h4>
-        <p>Whether we are the right fit, and exactly what the build looks like if we are.</p>
-      </div>
-      <div class="wyg-card">
-        <div class="wyg-card-label">No pressure</div>
-        <h4>A diagnostic, not a sales call.</h4>
-        <p>You leave with useful insight regardless of whether we work together.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="f-form-section">
-  <div class="container-narrow">
-    <div class="f-section-label">Step one</div>
-    <h2>Tell us where to reach you.</h2>
-    <p class="f-form-deck">We will reach out within 24 hours to schedule a strategy call and walk through your operation together.</p>
-
-    <div class="f-form-card reveal">
-      <h3>Book a free strategy call.</h3>
-      <p class="f-form-sub">No pitch. No obligation. Just a clear look at where your business is now and what it could look like with the right infrastructure.</p>
-      <form id="quick-form">
-        <input type="hidden" id="biz-type-input" name="business_type" value="physical"/>
-        <div class="field">
-          <label for="name">Your name</label>
-          <input type="text" id="name" name="Name" placeholder="First and last" required/>
-        </div>
-        <div class="field">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="Email" placeholder="you@yourbusiness.com" required/>
-        </div>
-        <div class="field">
-          <label for="phone">Phone</label>
-          <input type="tel" id="phone" name="Phone" placeholder="+1 (555) 000-0000" required/>
-        </div>
-        <div class="field">
-          <label for="company">Business name</label>
-          <input type="text" id="company" name="Company" placeholder="Your company"/>
-        </div>
-        <div class="field" id="niche-field">
-          <label for="niche">Your industry / niche</label>
-          <select id="niche" name="Niche">
-            <option value="">Select your niche...</option>
-          </select>
-        </div>
-        <button type="submit" class="submit-btn" id="submit-btn">
-          Apply to Work with TMI
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </form>
-      <div id="form-success" class="form-success">
-        <h4>Application received.</h4>
-        <p>We will be in touch within 24 hours to schedule your strategy call. Check your inbox.</p>
-      </div>
-      <p class="form-note">Engagements start at $25,000. Every build is scoped to your operation on the call.</p>
-    </div>
-
-    <div class="reassure-strip">
-      <div class="ri"><span class="ck">&#10003;</span> Free first call</div>
-      <div class="ri"><span class="ck">&#10003;</span> No obligation</div>
-      <div class="ri"><span class="ck">&#10003;</span> Response within 24 hours</div>
-    </div>
-
-    <div id="cal-section">
-      <p class="cal-heading">Book your strategy call.</p>
-      <p class="cal-sub">Pick a time and we will walk through your operation together.</p>
-      <div id="cal-embed"></div>
-    </div>
-  </div>
-</section>
-
-<!-- AUDIT MODAL -->
-<div class="modal-overlay" id="modal" role="dialog" aria-modal="true">
-  <div class="modal-card">
-    <h2>Want a free operations audit first?</h2>
-    <p class="modal-desc">Before we build anything, we map exactly where your business is losing time and money. Most owners are surprised by what turns up.</p>
-    <ul class="modal-list">
-      <li>A full map of where your business leaks time and money each week</li>
-      <li>Every gap an AI system can close, ranked by revenue impact</li>
-      <li>A clear picture of what your operation looks like fully systematized</li>
-      <li>Takes 8 minutes. No calls, no pitch.</li>
-    </ul>
-    <div class="modal-actions">
-      <a href="audit.html" class="modal-btn-yes">
-        Yes - Audit My Business First
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
-      <button class="modal-btn-no" id="modal-no">No thanks - I'd rather book a call directly</button>
-    </div>
+  <div class="reassure-strip">
+    <div class="ri"><span class="ck">&#10003;</span> Free first call</div>
+    <div class="ri"><span class="ck">&#10003;</span> No obligation</div>
+    <div class="ri"><span class="ck">&#10003;</span> Response within 24 hours</div>
   </div>
 </div>
 
 <footer class="f-footer">
-  <div class="container">
-    <div class="f-foot-inner">
-      <span class="f-foot-copy">&copy; 2026 TMI Technology</span>
-      <span class="f-foot-copy">mia@tmitechai.com</span>
-    </div>
+  <div class="f-foot-inner">
+    <span class="f-foot-copy">&copy; 2026 TMI Technology</span>
+    <span class="f-foot-copy">mia@tmitechai.com</span>
   </div>
 </footer>
 
 <script>
 const form = document.getElementById('quick-form');
 const submitBtn = document.getElementById('submit-btn');
-const modal = document.getElementById('modal');
-const modalNo = document.getElementById('modal-no');
-const calSection = document.getElementById('cal-section');
-
-// ── REFERRER DETECTION ──
-function detectBizType() {
-  // 1. URL param (e.g. funnel.html?type=online)
-  const param = new URLSearchParams(window.location.search).get('type');
-  if (param === 'online' || param === 'physical') return param;
-
-  // 2. SessionStorage (returning within session)
-  const stored = sessionStorage.getItem('tmi_biz_type');
-  if (stored === 'online' || stored === 'physical') return stored;
-
-  // 3. Referrer detection
-  const ref = document.referrer || '';
-  if (ref.includes('online.tmitechai.com') || ref.includes('online-') || ref.includes('/coaches') || ref.includes('/creators') || ref.includes('/courses') || ref.includes('/ecom') || ref.includes('/info')) return 'online';
-  if (ref.includes('trades.tmitechai.com') || ref.includes('stratum') || ref.includes('oil-gas') || ref.includes('construction') || ref.includes('mining') || ref.includes('agriculture') || ref.includes('manufacturing') || ref.includes('fleet') || ref.includes('trades')) return 'physical';
-
-  return null; // unknown - show choice screen
-}
-
-function chooseType(type) {
-  sessionStorage.setItem('tmi_biz_type', type);
-  document.getElementById('choice-overlay').classList.remove('show');
-  switchBizType(type);
-}
-
-const NICHES = {
-  physical: ['HVAC', 'Construction', 'Plumbing', 'Electrical', 'Roofing', 'Landscaping', 'Manufacturing', 'Oil & Gas', 'Mining', 'Fleet / Logistics', 'Other Trades'],
-  online: ['Coaching', 'Online Courses', 'E-commerce', 'Creator / Content', 'Consulting', 'Digital Products', 'Other Online'],
-};
-
-function populateNiche(type) {
-  const sel = document.getElementById('niche');
-  sel.innerHTML = '<option value="">Select your niche...</option>';
-  (NICHES[type] || []).forEach(n => {
-    const o = document.createElement('option');
-    o.value = n.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    o.textContent = n;
-    sel.appendChild(o);
-  });
-}
-
-function switchBizType(type) {
-  document.querySelectorAll('.biz-tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.biz-tab[data-type="${type}"]`).classList.add('active');
-  document.getElementById('biz-type-input').value = type;
-  sessionStorage.setItem('tmi_biz_type', type);
-  populateNiche(type);
-  const isOnline = type === 'online';
-  document.getElementById('pain-physical').style.display = isOnline ? 'none' : '';
-  document.getElementById('pain-online').style.display = isOnline ? '' : 'none';
-  document.getElementById('chip-label').textContent = isOnline
-    ? 'AI Infrastructure for Online Business'
-    : 'AI Infrastructure for Field Operations';
-  document.getElementById('hero-sub-text').textContent = isOnline
-    ? 'Most online businesses lose 20-30% of potential revenue to gaps in follow-up, fulfilment, and retention. Before we build anything, we need to see exactly where yours is breaking.'
-    : 'Most operations lose 12-18% of potential revenue to gaps in how information flows through the business. Before we build anything, we need to see exactly where yours is breaking.';
-  document.getElementById('pain-intro-text').textContent = isOnline
-    ? 'When onboarding, follow-up, launches, and client management all route through you personally, the business can only grow as fast as you can handle it. That is a missing infrastructure problem.'
-    : 'When dispatch, invoicing, quoting, follow-up, and reporting all route through you, the operation cannot grow past what you can personally handle. That is not a character flaw. It is a missing infrastructure problem.';
-}
-
-// ── INIT ──
-(function init() {
-  const detected = detectBizType();
-  if (detected) {
-    switchBizType(detected);
-  } else {
-    document.getElementById('choice-overlay').classList.add('show');
-  }
-})();
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   submitBtn.disabled = true;
   submitBtn.textContent = 'Sending...';
 
-  const bizType = document.getElementById('biz-type-input').value;
   const name = document.getElementById('name').value;
   const email = document.getElementById('email').value;
   const phone = document.getElementById('phone').value;
   const company = document.getElementById('company').value;
   const niche = document.getElementById('niche').value;
 
+  const niches_physical = ['hvac','construction','plumbing','electrical','roofing','landscaping','manufacturing','oil-gas','mining','fleet-logistics','other-trades'];
+  const bizType = niches_physical.includes(niche) ? 'physical' : niche ? 'online' : 'unknown';
+
   try {
     const fd = new FormData();
     fd.append('name', name);
     fd.append('email', email);
-    fd.append('_subject', 'New TMI Lead - ' + name + ' (' + (bizType === 'online' ? 'Online' : 'Physical') + ')');
+    fd.append('_subject', 'New TMI Lead - ' + name);
     fd.append('message', [
       'Name: ' + name,
       'Email: ' + email,
       'Phone: ' + phone,
       'Company: ' + (company || 'Not provided'),
-      'Business Type: ' + (bizType === 'online' ? 'Online Business' : 'Physical / Field Business'),
-      'Niche: ' + (niche || 'Not selected'),
+      'Industry: ' + (niche || 'Not selected'),
       '',
       'Submitted from funnel.html',
     ].join('\n'));
@@ -502,54 +205,11 @@ form.addEventListener('submit', async (e) => {
     });
   } catch(err) {}
 
-  // Subscribe to Beehiiv with audience + niche segmentation
-  try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'funnel', audience: bizType || 'physical', niche: niche || undefined }) }); } catch(err) {}
-
-  // Save to FOTF list
-  try { const l = JSON.parse(localStorage.getItem('fotf_signups') || '[]'); if (!l.find(e => e.email === email)) { l.push({ email, date: new Date().toISOString(), source: 'funnel' }); localStorage.setItem('fotf_signups', JSON.stringify(l)); } } catch(err) {}
+  try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'funnel', audience: bizType, niche: niche || undefined }) }); } catch(err) {}
 
   document.getElementById('form-success').style.display = 'block';
   form.style.display = 'none';
-  modal.classList.add('open');
 });
-
-modalNo.addEventListener('click', () => {
-  modal.classList.remove('open');
-  calSection.style.display = 'block';
-  calSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  initCal();
-});
-
-modal.addEventListener('click', (e) => {
-  if (e.target === modal) {
-    modal.classList.remove('open');
-    calSection.style.display = 'block';
-    calSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    initCal();
-  }
-});
-
-let calLoaded = false;
-function initCal() {
-  if (calLoaded) return;
-  calLoaded = true;
-  (function (C, A, L) {
-    let p = function (a, ar) { a.q.push(ar); };
-    let d = C.document;
-    C.Cal = C.Cal || function () {
-      let cal = C.Cal; let ar = arguments;
-      if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement('script')).src = A; cal.loaded = true; }
-      if (ar[0] === L) { const api = function () { p(api, arguments); }; const ns = ar[1]; api.q = api.q || []; typeof ns === 'string' ? (cal.ns[ns] = api) && p(api, ar) : p(cal, ar); return; }
-      p(cal, ar);
-    };
-  })(window, 'https://app.cal.com/embed/embed.js', 'init');
-  Cal('init', { origin: 'https://cal.com' });
-  Cal('inline', { elementOrSelector: '#cal-embed', calLink: 'mia-elianaa-a4n2hk/30min', layout: 'month_view' });
-  Cal('ui', { styles: { branding: { brandColor: '#1a1a1a' } }, hideEventTypeDetails: false, layout: 'month_view' });
-}
-
-const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } }), { threshold: 0.08 });
-document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 </script>
 </body>
 </html>
