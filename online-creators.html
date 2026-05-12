@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="https://www.tmitechai.com/favicon.svg" type="image/svg+xml"/>
+<meta name="description" content="TMI builds AI infrastructure for creators and influencers. DM automation, brand deal CRM, monetization sequences - done for you. Yours forever."/>
+<meta property="og:title" content="TMI Online | AI Infrastructure for Creators &amp; Influencers"/>
+<meta property="og:type" content="website"/>
+<link rel="canonical" href="https://online.tmitechai.com/creators"/>
+<title>TMI Online | Creators &amp; Influencers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0b14;--s1:#0e0f1c;--s2:#141525;
+  --b1:rgba(255,255,255,0.07);--b2:rgba(255,255,255,0.12);
+  --white:#f8f8f8;--muted:#6a6a7a;
+  --chart:#E4FF97;--chart-dark:#D0FF6A;--ink:#1a1a1a;
+  --sans:'Barlow',system-ui,sans-serif;
+  --display:'Bebas Neue',system-ui,sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:var(--sans);font-weight:500;overflow-x:hidden;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}p{margin:0}h1,h2,h3,h4{margin:0}
+.topbar{background:var(--chart);color:var(--ink);text-align:center;padding:11px 20px;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase}
+.nav{background:rgba(10,11,20,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1);padding:16px 40px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:90}
+.nav-logo{font-size:16px;font-weight:800;color:var(--white)}
+.nav-logo span{color:var(--chart)}
+.nav-right{display:flex;align-items:center;gap:20px}
+.nav-back{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;transition:color .15s}
+.nav-back:hover{color:var(--white)}
+.nav-cta{background:var(--chart);color:var(--ink);font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;padding:12px 22px;border:none;border-radius:4px;cursor:pointer;font-family:var(--sans);transition:background .15s;white-space:nowrap}
+.nav-cta:hover{background:var(--chart-dark)}
+@media(max-width:640px){.nav-back{display:none}.nav{padding:14px 20px}}
+.hero{padding:100px 40px 80px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(228,255,151,.07) 0%,transparent 65%);pointer-events:none}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(228,255,151,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(228,255,151,.025) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 100% 80% at 50% 0%,black 10%,transparent);pointer-events:none}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--b2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;border-radius:100px;margin-bottom:32px}
+.chip-dot{width:5px;height:5px;border-radius:50%;background:var(--chart);animation:cdot 2.5s infinite}
+@keyframes cdot{0%,100%{opacity:1}50%{opacity:.15}}
+.hero h1{font-family:var(--display);font-size:clamp(52px,9vw,110px);line-height:.9;letter-spacing:.5px;margin-bottom:24px}
+.lm{color:var(--chart)}
+.hero-sub{font-size:clamp(15px,1.5vw,18px);color:rgba(255,255,255,.55);max-width:520px;margin:0 auto 44px;line-height:1.7;font-weight:500}
+.hero-sub strong{color:var(--white);font-weight:800}
+.hero-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-lime{display:inline-flex;align-items:center;gap:8px;background:var(--chart);color:var(--ink);font-family:var(--sans);font-size:14px;font-weight:800;letter-spacing:.5px;padding:16px 32px;border-radius:4px;border:none;cursor:pointer;transition:background .15s,transform .15s}
+.btn-lime:hover{background:var(--chart-dark);transform:translateY(-2px)}
+.btn-outline{display:inline-flex;align-items:center;gap:8px;background:transparent;color:rgba(255,255,255,.7);font-family:var(--sans);font-size:14px;font-weight:700;padding:16px 32px;border:1px solid var(--b2);border-radius:4px;cursor:pointer;transition:border-color .15s,color .15s}
+.btn-outline:hover{border-color:var(--chart);color:var(--chart)}
+@media(max-width:640px){.hero{padding:80px 20px 60px}.hero-buttons{flex-direction:column;align-items:center}}
+.sec{padding:80px 40px}
+.inner{max-width:880px;margin:0 auto}
+.inner-lg{max-width:1080px;margin:0 auto}
+.eye{font-size:10px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:var(--chart);margin-bottom:14px}
+.heading{font-family:var(--display);font-size:clamp(40px,6vw,80px);line-height:.9;margin-bottom:24px}
+.body-lg{font-size:clamp(15px,1.5vw,17px);color:rgba(255,255,255,.55);line-height:1.75;margin-bottom:16px}
+.body-lg strong{color:var(--white);font-weight:800}
+.pain-list{border:1px solid var(--b1);border-radius:10px;overflow:hidden;margin:36px 0}
+.pr{display:grid;grid-template-columns:24px 1fr auto;gap:16px;padding:18px 22px;border-bottom:1px solid var(--b1);align-items:center;background:var(--bg);transition:background .15s}
+.pr:last-child{border-bottom:none}
+.pr:hover{background:var(--s1)}
+.pr-x{color:#ff4f4f;font-size:13px;font-weight:900}
+.pr-t{font-size:14px;font-weight:600;color:rgba(255,255,255,.7);line-height:1.5}
+.pr-t strong{color:var(--white)}
+.pr-tag{padding:3px 10px;border-radius:100px;font-size:8px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;border:1px solid}
+.t-ops{background:rgba(255,85,32,.07);color:#ff8855;border-color:rgba(255,85,32,.2)}
+.t-grow{background:rgba(228,255,151,.07);color:var(--chart);border-color:rgba(228,255,151,.2)}
+.t-rev{background:rgba(0,230,118,.07);color:#00e676;border-color:rgba(0,230,118,.2)}
+@media(max-width:500px){.pr{grid-template-columns:20px 1fr}.pr-tag{display:none}}
+.done-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:44px}
+.dc{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:28px;transition:border-color .2s,transform .2s;position:relative;overflow:hidden}
+.dc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--chart);opacity:0;transition:opacity .2s}
+.dc:hover{border-color:rgba(228,255,151,.2);transform:translateY(-2px)}
+.dc:hover::before{opacity:1}
+.dc-area{font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--chart);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.dc-area::before{content:'';width:20px;height:1px;background:var(--chart)}
+.dc-heading{font-size:17px;font-weight:800;color:var(--white);line-height:1.3;margin-bottom:10px}
+.dc-body{font-size:13px;color:var(--muted);line-height:1.7}
+@media(max-width:900px){.done-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.done-grid{grid-template-columns:1fr}}
+.bridge{background:var(--chart);padding:72px 40px;text-align:center}
+.bridge-h{font-family:var(--display);font-size:clamp(48px,10vw,100px);color:var(--ink);line-height:.88;letter-spacing:.5px;margin-bottom:14px}
+.bridge-p{font-size:clamp(14px,1.5vw,17px);font-weight:700;color:rgba(0,0,0,.5);max-width:560px;margin:0 auto;line-height:1.6}
+.other-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:36px}
+.oc{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s,transform .2s}
+.oc:hover{border-color:rgba(228,255,151,.2);transform:translateY(-2px)}
+.oc-label{font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--chart)}
+.oc-name{font-size:15px;font-weight:800;color:var(--white)}
+.oc-arr{font-size:10px;color:rgba(255,255,255,.3);font-weight:700}
+.oc:hover .oc-arr{color:var(--chart)}
+@media(max-width:700px){.other-grid{grid-template-columns:1fr 1fr}}
+.fcta{background:var(--bg);padding:100px 40px;text-align:center}
+.fcta-h{font-family:var(--display);font-size:clamp(54px,10vw,100px);line-height:.88;margin-bottom:20px}
+.fcta-body{font-size:17px;color:rgba(255,255,255,.5);max-width:520px;margin:0 auto 44px;line-height:1.7}
+.fcta-body strong{color:var(--white);font-weight:800}
+.reassure{display:flex;justify-content:center;gap:24px;margin-top:20px;flex-wrap:wrap}
+.ri{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.ri .ck{color:var(--chart)}
+.foot{background:var(--s1);border-top:1px solid var(--b1);padding:48px 40px 28px}
+.foot-inner{max-width:1080px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;gap:40px;margin-bottom:40px;flex-wrap:wrap}
+.foot-brand{font-size:16px;font-weight:800;color:var(--white);margin-bottom:8px}
+.foot-brand span{color:var(--chart)}
+.foot-desc{font-size:13px;color:var(--muted);line-height:1.65;max-width:30ch}
+.foot-links{display:flex;gap:48px}
+.foot-col h5{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.foot-col a{display:block;font-size:13px;color:rgba(255,255,255,.4);padding:3px 0;transition:color .15s}
+.foot-col a:hover{color:var(--white)}
+.foot-bottom{max-width:1080px;margin:0 auto;padding-top:24px;border-top:1px solid var(--b1);display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
+.reveal.in{opacity:1;transform:none}
+@media(max-width:640px){.sec{padding:60px 20px}.foot{padding:40px 20px 24px}.foot-inner{flex-direction:column;gap:24px}.foot-bottom{flex-direction:column;gap:8px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">Taking applications - 6 builds available this quarter &rarr;</div>
+
+<nav class="nav">
+  <a href="https://online.tmitechai.com" class="nav-logo">TMI <span>Online</span></a>
+  <div class="nav-right">
+    <a href="https://online.tmitechai.com" class="nav-back">&larr; All Business Types</a>
+    <a href="https://www.tmitechai.com/funnel.html" class="nav-cta">Book a Call &rarr;</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="chip"><div class="chip-dot"></div>Creators &amp; Influencers</div>
+  <h1>YOU BUILT THE AUDIENCE.<br>YOUR INFRASTRUCTURE SHOULD<br><span class="lm">CONVERT IT AUTOMATICALLY.</span></h1>
+  <p class="hero-sub">
+    DMs, monetization, brand deals, content distribution.<br>
+    <strong>Your attention should compound. Right now it is just evaporating.</strong>
+  </p>
+  <div class="hero-buttons">
+    <a href="https://www.tmitechai.com/funnel.html" class="btn-lime">Book a Free Strategy Call &rarr;</a>
+    <a href="https://online.tmitechai.com" class="btn-outline">See All Business Types</a>
+  </div>
+</section>
+
+<section class="sec" style="background:var(--s1)">
+  <div class="inner">
+    <div class="eye reveal">What is actually happening</div>
+    <h2 class="heading reveal">THE AUDIENCE IS THERE.<br><span class="lm">THE SYSTEM ISN'T.</span></h2>
+    <p class="body-lg reveal">Attention is the hardest thing to build. You have it. The problem is that no infrastructure exists to turn it into revenue consistently, without you running every campaign by hand:</p>
+    <div class="pain-list reveal">
+      <div class="pr"><div class="pr-x">&#10005;</div><div class="pr-t">Buying intent shows up in DMs and <strong>goes unanswered for 24+ hours</strong> because you are creating</div><div class="pr-tag t-grow">Growth</div></div>
+      <div class="pr"><div class="pr-x">&#10005;</div><div class="pr-t">Brand deal pitches, contracts, and deliverables are <strong>tracked from memory or a chaotic spreadsheet</strong></div><div class="pr-tag t-ops">Ops</div></div>
+      <div class="pr"><div class="pr-x">&#10005;</div><div class="pr-t">Your back catalogue of content <strong>stops working the day after you post it</strong></div><div class="pr-tag t-rev">Revenue</div></div>
+      <div class="pr"><div class="pr-x">&#10005;</div><div class="pr-t">You have an email list that <strong>only gets touched when you personally run a campaign</strong></div><div class="pr-tag t-rev">Revenue</div></div>
+      <div class="pr"><div class="pr-x">&#10005;</div><div class="pr-t">Every launch is a <strong>manual sprint through DMs, stories, and follow-up for weeks</strong></div><div class="pr-tag t-grow">Growth</div></div>
+      <div class="pr"><div class="pr-x">&#10005;</div><div class="pr-t">People express interest in paid offers and <strong>slip through because no system catches them</strong></div><div class="pr-tag t-rev">Revenue</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="bridge">
+  <div class="bridge-h">AUDIENCE IN.<br>REVENUE OUT.<br>YOU CREATE.</div>
+  <p class="bridge-p">We build the infrastructure that turns your existing audience into consistent revenue - without manual campaigns every time you want money in.</p>
+</div>
+
+<section class="sec" id="what">
+  <div class="inner-lg">
+    <div class="eye reveal" style="text-align:center">What gets built</div>
+    <h2 class="heading reveal" style="text-align:center">SIX SYSTEMS.<br><span class="lm">ZERO MANUAL CAMPAIGNS.</span></h2>
+    <div class="done-grid">
+      <div class="dc reveal">
+        <div class="dc-area">Growth</div>
+        <div class="dc-heading">DMs convert themselves.</div>
+        <div class="dc-body">When someone sends buying intent, the right response goes out immediately. Qualified leads get a booking link or offer. You never miss a warm lead again.</div>
+      </div>
+      <div class="dc reveal">
+        <div class="dc-area">Operations</div>
+        <div class="dc-heading">Brand deals run on a system, not your memory.</div>
+        <div class="dc-body">Inbound pitches get tracked, follow-up goes out automatically, deliverables are logged, and payment reminders fire on schedule. Nothing falls through.</div>
+      </div>
+      <div class="dc reveal">
+        <div class="dc-area">Revenue</div>
+        <div class="dc-heading">Your existing content keeps earning.</div>
+        <div class="dc-body">Long-form posts, interviews, and evergreen content get repurposed and redistributed automatically. Email sequences, shorts, quotes - your archive works for you.</div>
+      </div>
+      <div class="dc reveal">
+        <div class="dc-area">Revenue</div>
+        <div class="dc-heading">Your list earns between launches.</div>
+        <div class="dc-body">Monetization sequences run in the background, surfacing the right offer to the right segment at the right moment. No new content needed. No manual sends.</div>
+      </div>
+      <div class="dc reveal">
+        <div class="dc-area">Growth</div>
+        <div class="dc-heading">Launches run once. Then run themselves.</div>
+        <div class="dc-body">Waitlist to urgency to close - the whole sequence automated. You record it once. The system runs it, optimizes it, and improves with every cycle.</div>
+      </div>
+      <div class="dc reveal">
+        <div class="dc-area">Revenue</div>
+        <div class="dc-heading">Your audience gets routed to the right offer automatically.</div>
+        <div class="dc-body">Different followers with different interests get different offers. No spray-and-pray campaigns. Everyone gets what is actually relevant to them.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="fcta">
+  <h2 class="fcta-h">STOP LEAVING<br><span style="-webkit-text-stroke:1.5px rgba(248,248,248,.15);color:transparent">REVENUE</span><br><span class="lm">IN YOUR DMS.</span></h2>
+  <p class="fcta-body">One call. We map your audience and offers. We build everything custom. <strong>You get the keys in 14 days or less.</strong></p>
+  <a href="https://www.tmitechai.com/funnel.html" class="btn-lime" style="font-size:15px;padding:20px 52px;letter-spacing:1px;">BOOK A FREE STRATEGY CALL &rarr;</a>
+  <div class="reassure">
+    <div class="ri"><span class="ck">&#10003;</span>Done For You</div>
+    <div class="ri"><span class="ck">&#10003;</span>14 Day Max Build</div>
+    <div class="ri"><span class="ck">&#10003;</span>30 Day Guarantee</div>
+    <div class="ri"><span class="ck">&#10003;</span>Yours Forever</div>
+  </div>
+</section>
+
+<section class="sec" style="background:var(--s1)">
+  <div class="inner">
+    <div class="eye reveal">Other business types</div>
+    <h2 class="heading reveal" style="font-size:clamp(36px,5vw,60px)">WE BUILD FOR<br><span class="lm">ALL OF THEM.</span></h2>
+    <div class="other-grid">
+      <a href="https://online.tmitechai.com/coaches" class="oc reveal">
+        <div class="oc-label">1:1 &amp; Group Programs</div>
+        <div class="oc-name">Coaches &amp; Consultants</div>
+        <div class="oc-arr">Explore &rarr;</div>
+      </a>
+      <a href="https://online.tmitechai.com/courses" class="oc reveal">
+        <div class="oc-label">Online Education</div>
+        <div class="oc-name">Course Creators</div>
+        <div class="oc-arr">Explore &rarr;</div>
+      </a>
+      <a href="https://online.tmitechai.com/info" class="oc reveal">
+        <div class="oc-label">Digital Products</div>
+        <div class="oc-name">Info &amp; Product Sellers</div>
+        <div class="oc-arr">Explore &rarr;</div>
+      </a>
+      <a href="https://online.tmitechai.com/ecom" class="oc reveal">
+        <div class="oc-label">Physical Products</div>
+        <div class="oc-name">E-Commerce Brands</div>
+        <div class="oc-arr">Explore &rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="foot-inner">
+    <div>
+      <div class="foot-brand">TMI <span>Online</span></div>
+      <div class="foot-desc">AI operational infrastructure for online business operators. Built custom. Done for you. Yours forever.</div>
+    </div>
+    <div class="foot-links">
+      <div class="foot-col">
+        <h5>Business Types</h5>
+        <a href="https://online.tmitechai.com/coaches">Coaches &amp; Consultants</a>
+        <a href="https://online.tmitechai.com/courses">Course Creators</a>
+        <a href="https://online.tmitechai.com/creators">Creators &amp; Influencers</a>
+        <a href="https://online.tmitechai.com/info">Info Product Sellers</a>
+        <a href="https://online.tmitechai.com/ecom">E-Commerce Brands</a>
+      </div>
+      <div class="foot-col">
+        <h5>Company</h5>
+        <a href="https://www.tmitechai.com">TMI Home</a>
+        <a href="https://trades.tmitechai.com">Physical Economy</a>
+        <a href="https://www.tmitechai.com/funnel.html">Apply</a>
+      </div>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>&copy; 2026 TMI Technology. All rights reserved.</span>
+    <span>Built for operators who build online.</span>
+  </div>
+</footer>
+
+<script>
+const ro = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } }), { threshold: .1 });
+document.querySelectorAll('.reveal').forEach(r => ro.observe(r));
+</script>
+</body>
+</html>

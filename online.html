@@ -69,6 +69,25 @@ h1,h2,h3,h4{margin:0}
 .btn-outline:hover{border-color:var(--chart);color:var(--chart)}
 @media(max-width:640px){.hero{padding:80px 20px 60px}.hero-buttons{flex-direction:column;align-items:center}}
 
+/* BIZ CAROUSEL */
+.biz-carousel{overflow:hidden;background:var(--bg);border-bottom:1px solid var(--b1);padding:0}
+.biz-carousel-label{text-align:center;font-size:9px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:var(--muted);padding:28px 0 16px}
+.biz-marquee{overflow:hidden;padding:8px 0}
+@keyframes biz-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.biz-track{display:flex;gap:12px;width:max-content;animation:biz-scroll 28s linear infinite}
+.biz-track:hover{animation-play-state:paused}
+.biz-card{width:300px;height:210px;flex:none;border-radius:10px;position:relative;overflow:hidden;cursor:pointer;transition:transform 0.3s;background-size:cover;background-position:center;display:block;text-decoration:none}
+.biz-card:hover{transform:scale(1.03)}
+.biz-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,11,20,0.92) 0%,rgba(10,11,20,0.25) 60%)}
+.biz-card-content{position:absolute;bottom:0;left:0;right:0;padding:16px 18px}
+.biz-card-tag{font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--chart);margin-bottom:6px}
+.biz-card-name{font-size:17px;font-weight:800;color:var(--white);line-height:1.2}
+.biz-card-arr{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:4px}
+.biz-card:hover .biz-card-arr{color:var(--chart)}
+.biz-section-head{padding:48px 40px 0;text-align:center}
+.biz-section-head .eye{display:inline-block}
+@media(max-width:640px){.biz-section-head{padding:40px 20px 0}}
+
 /* PROOF */
 .proof{background:var(--s1);border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);display:flex;justify-content:center;align-items:stretch;flex-wrap:wrap}
 .proof-item{text-align:center;padding:22px 40px;border-right:1px solid var(--b1);display:flex;flex-direction:column;justify-content:center}
@@ -263,6 +282,57 @@ h1,h2,h3,h4{margin:0}
   <div class="proof-item"><div class="proof-n">Forever</div><div class="proof-l">Yours to keep</div></div>
 </div>
 
+<!-- BIZ TYPE CAROUSEL -->
+<div class="biz-carousel">
+  <div class="biz-section-head">
+    <div class="eye">Who we build for</div>
+  </div>
+  <div class="biz-marquee" aria-hidden="true">
+    <div class="biz-track">
+      <a href="https://online.tmitechai.com/coaches" class="biz-card" style="background-image:url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')">
+        <div class="biz-card-overlay"></div>
+        <div class="biz-card-content"><div class="biz-card-tag">1:1 &amp; Group Programs</div><div class="biz-card-name">Coaches &amp; Consultants</div><div class="biz-card-arr">Explore &rarr;</div></div>
+      </a>
+      <a href="https://online.tmitechai.com/courses" class="biz-card" style="background-image:url('https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')">
+        <div class="biz-card-overlay"></div>
+        <div class="biz-card-content"><div class="biz-card-tag">Online Education</div><div class="biz-card-name">Course Creators</div><div class="biz-card-arr">Explore &rarr;</div></div>
+      </a>
+      <a href="https://online.tmitechai.com/creators" class="biz-card" style="background-image:url('https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')">
+        <div class="biz-card-overlay"></div>
+        <div class="biz-card-content"><div class="biz-card-tag">Audience &amp; Content</div><div class="biz-card-name">Creators &amp; Influencers</div><div class="biz-card-arr">Explore &rarr;</div></div>
+      </a>
+      <a href="https://online.tmitechai.com/info" class="biz-card" style="background-image:url('https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')">
+        <div class="biz-card-overlay"></div>
+        <div class="biz-card-content"><div class="biz-card-tag">Digital Products</div><div class="biz-card-name">Info &amp; Product Sellers</div><div class="biz-card-arr">Explore &rarr;</div></div>
+      </a>
+      <a href="https://online.tmitechai.com/ecom" class="biz-card" style="background-image:url('https://images.pexels.com/photos/4968391/pexels-photo-4968391.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')">
+        <div class="biz-card-overlay"></div>
+        <div class="biz-card-content"><div class="biz-card-tag">Physical Products</div><div class="biz-card-name">E-Commerce Brands</div><div class="biz-card-arr">Explore &rarr;</div></div>
+      </a>
+      <a href="https://online.tmitechai.com/coaches" class="biz-card" style="background-image:url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')">
+        <div class="biz-card-overlay"></div>
+        <div class="biz-card-content"><div class="biz-card-tag">1:1 &amp; Group Programs</div><div class="biz-card-name">Coaches &amp; Consultants</div><div class="biz-card-arr">Explore &rarr;</div></div>
+      </a>
+      <a href="https://online.tmitechai.com/courses" class="biz-card" style="background-image:url('https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')">
+        <div class="biz-card-overlay"></div>
+        <div class="biz-card-content"><div class="biz-card-tag">Online Education</div><div class="biz-card-name">Course Creators</div><div class="biz-card-arr">Explore &rarr;</div></div>
+      </a>
+      <a href="https://online.tmitechai.com/creators" class="biz-card" style="background-image:url('https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')">
+        <div class="biz-card-overlay"></div>
+        <div class="biz-card-content"><div class="biz-card-tag">Audience &amp; Content</div><div class="biz-card-name">Creators &amp; Influencers</div><div class="biz-card-arr">Explore &rarr;</div></div>
+      </a>
+      <a href="https://online.tmitechai.com/info" class="biz-card" style="background-image:url('https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')">
+        <div class="biz-card-overlay"></div>
+        <div class="biz-card-content"><div class="biz-card-tag">Digital Products</div><div class="biz-card-name">Info &amp; Product Sellers</div><div class="biz-card-arr">Explore &rarr;</div></div>
+      </a>
+      <a href="https://online.tmitechai.com/ecom" class="biz-card" style="background-image:url('https://images.pexels.com/photos/4968391/pexels-photo-4968391.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')">
+        <div class="biz-card-overlay"></div>
+        <div class="biz-card-content"><div class="biz-card-tag">Physical Products</div><div class="biz-card-name">E-Commerce Brands</div><div class="biz-card-arr">Explore &rarr;</div></div>
+      </a>
+    </div>
+  </div>
+</div>
+
 <!-- WHO -->
 <section class="sec">
   <div class="inner">
@@ -274,6 +344,7 @@ h1,h2,h3,h4{margin:0}
       <div class="wc reveal"><div class="wc-icon">🎙️</div><div><div class="wc-name">Coaches &amp; Consultants</div><div class="wc-text">Every hour you spend on admin and follow-up is an hour you are not being paid to do the actual work.</div></div></div>
       <div class="wc reveal"><div class="wc-icon">📱</div><div><div class="wc-name">Creators &amp; Influencers</div><div class="wc-text">You built the audience. Your infrastructure should turn it into revenue without manual campaigns every time.</div></div></div>
       <div class="wc reveal"><div class="wc-icon">📦</div><div><div class="wc-name">Info &amp; Digital Product Sellers</div><div class="wc-text">High-margin products should have near-zero fulfillment overhead. If operations are eating your margins, that is a systems problem.</div></div></div>
+      <div class="wc reveal"><div class="wc-icon">🛒</div><div><div class="wc-name">E-Commerce &amp; Product Brands</div><div class="wc-text">Supplement brands, product companies, and DTC stores should run repeat purchases, cart recovery, and support without manual effort.</div></div></div>
     </div>
   </div>
 </section>

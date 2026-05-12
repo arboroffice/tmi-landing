@@ -1,9 +1,644 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=stratum.html">
-<title>TMI | Powering the companies that keep the world moving</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
+<meta name="description" content="TMI builds done-for-you AI operational infrastructure for business owners who are done being the bottleneck. We design, build, and deploy the systems that run your business without you."/>
+<meta property="og:title" content="TMI | AI Infrastructure for Business"/>
+<meta property="og:description" content="Done-for-you AI operational infrastructure. We build the systems that let your business run without you in every decision."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://tmitechai.com/"/>
+<meta property="og:image" content="https://www.tmitechai.com/hero-bg.png"/>
+<meta property="og:site_name" content="TMI"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="TMI | AI Infrastructure for Business"/>
+<meta name="twitter:description" content="Done-for-you AI operational infrastructure. We build the systems that let your business run without you in every decision."/>
+<meta name="twitter:image" content="https://www.tmitechai.com/hero-bg.png"/>
+<link rel="canonical" href="https://tmitechai.com/"/>
+<title>TMI | AI Infrastructure for Business</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,600;1,700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-alt: #f5f5f7;
+    --bg-deep: #0d0e1a;
+    --bg-dark: #0a0b14;
+    --ink: #1a1a1a;
+    --ink-2: #505060;
+    --muted: #86868b;
+    --line: rgba(0,0,0,0.07);
+    --line-strong: rgba(0,0,0,0.12);
+    --accent: #1a1a1a;
+    --chart: #E4FF97;
+    --chart-dark: #D0FF6A;
+    --serif: "Barlow", system-ui, sans-serif;
+    --sans: "Neue Haas Grotesk Display", "Neue Haas Grotesk", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans); color: var(--ink); background: var(--bg);
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    line-height: 1.55; overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+  ::selection { background: #1a1a1a; color: #fff; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+  .container-sm { max-width: 960px; margin: 0 auto; padding: 0 40px; }
+
+  /* TYPE */
+  .eyebrow {
+    font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: #7C6CF2; flex: none; }
+  h1, h2, h3, h4 { margin: 0; }
+  h1 { font-family: var(--serif); font-size: clamp(52px, 7.5vw, 104px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.0; }
+  h2 { font-family: var(--serif); font-size: clamp(34px, 4vw, 60px); font-weight: 400; letter-spacing: -0.01em; line-height: 1.1; }
+  h3 { font-family: var(--sans); font-size: clamp(18px, 1.8vw, 24px); font-weight: 600; line-height: 1.2; }
+  h4 { font-family: var(--sans); font-size: 16px; font-weight: 600; line-height: 1.3; }
+  p { margin: 0; }
+  .lede { font-size: clamp(16px, 1.3vw, 19px); color: var(--ink-2); line-height: 1.65; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 26px; border-radius: 999px;
+    font-size: 14px; font-weight: 500; font-family: var(--sans);
+    transition: all 0.2s ease; cursor: pointer; border: 1px solid transparent;
+    white-space: nowrap; text-decoration: none;
+  }
+  .btn-primary { background: var(--chart); color: #0a0b14; }
+  .btn-primary:hover { background: var(--chart-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(228,255,151,0.28); }
+  .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-dark { background: var(--bg-dark); color: #fff; }
+  .btn-dark:hover { background: #1a1d30; }
+  .btn-white { background: #fff; color: var(--ink); }
+  .btn-white:hover { background: var(--bg-alt); }
+  .btn-white-outline { background: transparent; color: #fff; border-color: rgba(255,255,255,0.3); }
+  .btn-white-outline:hover { border-color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.08); }
+  .btn .arrow { font-size: 14px; transition: transform 0.2s; }
+  .btn:hover .arrow { transform: translateX(3px); }
+
+  /* SIDE NAV */
+  .nav-btn {
+    position: fixed; top: 20px; left: 20px; z-index: 201;
+    width: 44px; height: 44px;
+    background: rgba(10,11,20,0.75);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    cursor: pointer; padding: 0; transition: background 0.2s;
+  }
+  .nav-btn:hover { background: rgba(10,11,20,0.9); }
+  .nav-btn span { display: block; width: 18px; height: 1.5px; background: #fff; border-radius: 2px; transition: transform 0.25s, opacity 0.25s; }
+  .nav-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .nav-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+  .side-overlay {
+    position: fixed; inset: 0; z-index: 198;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .side-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .side-nav {
+    position: fixed; left: 0; top: 0; bottom: 0; z-index: 200;
+    width: 280px; background: #fff;
+    border-right: 1px solid var(--line);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    display: flex; flex-direction: column;
+    padding: 28px 0 40px; overflow-y: auto;
+  }
+  .side-nav.open { transform: translateX(0); box-shadow: 8px 0 48px rgba(0,0,0,0.2); }
+  .side-nav-top {
+    display: flex; align-items: center;
+    padding: 0 24px 28px; border-bottom: 1px solid var(--line); margin-bottom: 12px;
+  }
+  .side-nav-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink);
+  }
+  .side-nav-brand img { height: 28px; }
+  .side-nav-links { display: flex; flex-direction: column; padding: 0 12px; flex: 1; }
+  .side-nav-section {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted); padding: 20px 12px 6px;
+  }
+  .side-nav-links a {
+    font-size: 14px; font-weight: 500; color: var(--ink-2);
+    padding: 10px 12px; border-radius: 8px;
+    transition: color 0.15s, background 0.15s; display: block;
+  }
+  .side-nav-links a:hover { color: var(--ink); background: var(--bg-alt); }
+  .side-nav-cta { padding: 24px 24px 0; border-top: 1px solid var(--line); margin-top: 16px; }
+  .side-nav-cta .btn { width: 100%; justify-content: center; }
+
+  /* HERO */
+  .hero {
+    position: relative; height: 100vh; height: 100dvh; min-height: 680px;
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+  }
+  .hero-bg-full { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
+  .hero-bg-full img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
+  .hero-bg-full::after {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, rgba(10,11,20,0.55) 0%, rgba(10,11,20,0.82) 100%);
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    text-align: left; padding: 0 40px;
+    max-width: 1280px; width: 100%;
+  }
+  .hero-kicker {
+    font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; font-weight: 600;
+    color: var(--chart); display: flex; align-items: center; gap: 10px; margin-bottom: 32px;
+  }
+  .hero-kicker::before { content: ""; display: block; width: 24px; height: 1px; background: var(--chart); opacity: 0.6; }
+  .hero h1 { color: #fff; margin-bottom: 32px; max-width: 14ch; }
+  .hero h1 em { color: rgba(255,255,255,0.55); font-style: italic; }
+  .hero .lede { color: rgba(255,255,255,0.65); margin-bottom: 44px; max-width: 46ch; font-size: clamp(16px,1.3vw,20px); }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hero-scroll {
+    position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 2;
+  }
+  .hero-scroll-line {
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
+    animation: scroll-pulse 2s ease-in-out infinite;
+  }
+  .hero-scroll-label { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+  @keyframes scroll-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-d1 { transition-delay: 0.1s; }
+  .reveal-d2 { transition-delay: 0.2s; }
+  .reveal-d3 { transition-delay: 0.3s; }
+  .reveal-d4 { transition-delay: 0.4s; }
+
+  /* SECTION UTILITIES */
+  .section-pad { padding: 120px 0; }
+  .section-pad-sm { padding: 80px 0; }
+  .sec-eyebrow { margin-bottom: 16px; }
+  .sec-head { margin-bottom: 64px; }
+  .sec-head h2 { margin-top: 12px; }
+  .sec-sub { font-size: clamp(16px, 1.3vw, 19px); color: var(--ink-2); margin-top: 16px; max-width: 52ch; line-height: 1.6; }
+
+  /* VERTICALS */
+  .verticals-section { background: var(--bg); padding: 120px 0; border-bottom: 1px solid var(--line); }
+  .verticals-head { margin-bottom: 64px; }
+  .verticals-head .eyebrow { margin-bottom: 16px; }
+  .verticals-head h2 { color: var(--ink); }
+  .verticals-head p { font-size: clamp(16px,1.3vw,19px); color: var(--ink-2); line-height: 1.65; margin-top: 16px; max-width: 52ch; }
+  .verticals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .vertical-card {
+    position: relative; border-radius: 20px; overflow: hidden;
+    height: 560px; display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 48px; cursor: pointer; transition: transform 0.4s cubic-bezier(.2,.7,.2,1);
+    text-decoration: none; color: #fff;
+  }
+  .vertical-card:hover { transform: translateY(-6px); }
+  .vertical-card-bg {
+    position: absolute; inset: 0; background-size: cover; background-position: center;
+    transition: transform 0.6s cubic-bezier(.2,.7,.2,1);
+  }
+  .vertical-card:hover .vertical-card-bg { transform: scale(1.05); }
+  .vertical-card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,11,20,0.95) 0%, rgba(10,11,20,0.6) 50%, rgba(10,11,20,0.25) 100%);
+  }
+  .vertical-card-content { position: relative; z-index: 2; }
+  .vertical-card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+  .vertical-card-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 999px; padding: 5px 11px;
+  }
+  .vertical-card h3 { font-family: var(--serif); font-size: clamp(30px,3.2vw,48px); font-weight: 400; line-height: 1.08; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .vertical-card p { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.65; margin-bottom: 28px; max-width: 36ch; }
+  .vertical-card-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--chart); transition: gap 0.2s;
+  }
+  .vertical-card:hover .vertical-card-link { gap: 14px; }
+  .vertical-card-domain {
+    position: absolute; top: 28px; right: 28px; z-index: 2;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 6px 14px;
+    transition: color 0.2s, background 0.2s;
+  }
+  .vertical-card:hover .vertical-card-domain { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.1); }
+
+  /* INDUSTRIES CAROUSEL */
+  .industries-section {
+    background: var(--bg); border-bottom: 1px solid var(--line); overflow: hidden;
+    padding: 48px 0;
+  }
+  .industries-label {
+    text-align: center; font-size: 11px; font-weight: 600; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 32px;
+  }
+  .marquee { overflow: hidden; padding: 8px 0; }
+  @keyframes scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+  @keyframes scroll-reverse { 0%{transform:translateX(-50%)} 100%{transform:translateX(0)} }
+  .marquee-track { display: flex; gap: 12px; width: max-content; animation: scroll 55s linear infinite; }
+  .marquee-track--reverse { animation: scroll-reverse 50s linear infinite; }
+  .marquee-track:hover, .marquee-track--reverse:hover { animation-play-state: paused; }
+  .marquee-img {
+    width: 260px; height: 172px; flex: none; border-radius: 10px;
+    background-size: cover; background-position: center;
+    position: relative; overflow: hidden; cursor: pointer; transition: transform 0.3s;
+  }
+  .marquee-img:hover { transform: scale(1.02); }
+  .marquee-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 28px 14px 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%);
+    color: #fff; font-size: 13px; font-weight: 600;
+  }
+
+  /* MANIFESTO */
+  .manifesto-section { background: var(--bg); padding: 120px 0; border-bottom: 1px solid var(--line); }
+  .manifesto-header { max-width: 680px; margin-bottom: 80px; }
+  .manifesto-header .eyebrow { margin-bottom: 20px; }
+  .manifesto-header h2 { color: var(--ink); line-height: 1.1; }
+  .manifesto-statements { border-top: 1px solid var(--line); }
+  .manifesto-item {
+    display: grid; grid-template-columns: 64px 1fr;
+    gap: 40px; padding: 52px 0; border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+  .manifesto-num {
+    font-family: var(--sans); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+    padding-top: 8px;
+  }
+  .manifesto-body { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .manifesto-title {
+    font-family: var(--serif); font-size: clamp(28px, 3vw, 44px);
+    font-weight: 400; line-height: 1.1; letter-spacing: -0.01em; color: var(--ink);
+  }
+  .manifesto-title em { color: var(--ink-2); font-style: italic; }
+  .manifesto-desc { font-size: clamp(15px, 1.2vw, 17px); color: var(--ink-2); line-height: 1.7; }
+  .manifesto-tag {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 20px;
+    background: var(--bg-alt); border: 1px solid var(--line-strong);
+    border-radius: 999px; padding: 6px 14px;
+    font-size: 11px; font-weight: 600; color: var(--ink-2); letter-spacing: 0.06em;
+  }
+
+  /* STATEMENT BREAK */
+  .statement-break { background: var(--bg-dark); padding: 140px 40px; text-align: center; }
+  .statement-break-inner { max-width: 980px; margin: 0 auto; }
+  .statement-break p { font-family: var(--serif); font-size: clamp(34px, 5.5vw, 76px); font-weight: 400; color: #fff; line-height: 1.08; letter-spacing: -0.02em; margin: 0; }
+  .statement-break p em { color: var(--chart); font-style: italic; }
+
+  /* APPLY CTA */
+  .apply-section { background: var(--bg-dark); padding: 140px 0; }
+  .apply-inner { max-width: 860px; }
+  .apply-inner .eyebrow { color: rgba(255,255,255,0.35); margin-bottom: 24px; }
+  .apply-inner .eyebrow .dot { background: var(--chart); }
+  .apply-inner h2 {
+    font-family: var(--serif); font-size: clamp(40px, 5.5vw, 80px);
+    font-weight: 400; color: #fff; letter-spacing: -0.02em; line-height: 1.05; margin-bottom: 28px;
+  }
+  .apply-inner h2 em { color: rgba(255,255,255,0.45); font-style: italic; }
+  .apply-inner p { font-size: clamp(16px, 1.3vw, 19px); color: rgba(255,255,255,0.5); line-height: 1.65; max-width: 48ch; margin-bottom: 44px; }
+  .apply-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .apply-stakes { font-family: var(--serif); font-size: clamp(19px, 1.9vw, 27px); color: rgba(255,255,255,0.75); font-style: italic; line-height: 1.35; letter-spacing: -0.01em; max-width: 46ch; margin-bottom: 40px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .apply-note { margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.3); }
+  .apply-note a { color: rgba(255,255,255,0.5); border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 1px; }
+  .apply-note a:hover { color: rgba(255,255,255,0.8); }
+
+  /* FOOTER */
+  footer { background: var(--bg-deep); border-top: 1px solid rgba(255,255,255,0.06); padding: 80px 0 40px; }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 80px; margin-bottom: 64px; }
+  .footer-brand-name { font-family: var(--serif); font-size: 24px; color: #fff; letter-spacing: -0.01em; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+  .footer-brand-name img { height: 28px; width: auto; filter: brightness(0) invert(1); }
+  .footer-desc { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.65; max-width: 36ch; margin-bottom: 28px; }
+  .footer-contact a { font-size: 14px; color: rgba(255,255,255,0.5); transition: color 0.15s; }
+  .footer-contact a:hover { color: #fff; }
+  .footer-right { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .footer-col h5 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,0.3); margin: 0 0 16px; }
+  .footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.45); padding: 4px 0; transition: color 0.15s; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom {
+    padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; color: rgba(255,255,255,0.25);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .manifesto-body { grid-template-columns: 1fr; gap: 16px; }
+    .footer-grid { grid-template-columns: 1fr; gap: 48px; }
+    .footer-right { gap: 24px; }
+  }
+  @media (max-width: 768px) {
+    .hero-content { padding: 0 24px; }
+    .manifesto-item { grid-template-columns: 40px 1fr; gap: 20px; }
+    .verticals-grid { grid-template-columns: 1fr; }
+    .vertical-card { height: 460px; padding: 32px; }
+    .footer-right { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+    .hero-actions { flex-direction: column; align-items: flex-start; }
+    .apply-actions { flex-direction: column; align-items: flex-start; }
+    .container { padding: 0 20px; }
+    .container-sm { padding: 0 20px; }
+    .section-pad { padding: 80px 0; }
+    .marquee-img { width: 200px; height: 136px; }
+    .marquee-track { animation-duration: 70s; gap: 10px; }
+  }
+  @media (max-width: 480px) {
+    .apply-section { padding: 100px 0; }
+    .footer-right { grid-template-columns: 1fr 1fr; }
+  }
+</style>
 </head>
-<body></body>
+<body>
+
+<!-- HAMBURGER -->
+<button class="nav-btn" id="nav-btn" aria-label="Open menu">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- OVERLAY -->
+<div class="side-overlay" id="side-overlay"></div>
+
+<!-- SIDE NAV -->
+<div class="side-nav" id="side-nav" aria-hidden="true">
+  <div class="side-nav-top">
+    <a class="side-nav-brand" href="/">
+      <img src="favicon.svg" alt="TMI"/> TMI
+    </a>
+  </div>
+  <div class="side-nav-links">
+    <div class="side-nav-section">Verticals</div>
+    <a href="https://trades.tmitechai.com">Physical Economy</a>
+    <a href="https://online.tmitechai.com">Online Business</a>
+    <div class="side-nav-section">Industries</div>
+    <a href="https://trades.tmitechai.com/construction.html">Construction</a>
+    <a href="https://trades.tmitechai.com/manufacturing.html">Manufacturing</a>
+    <a href="https://trades.tmitechai.com/oil-gas.html">Oil &amp; Gas</a>
+    <a href="https://trades.tmitechai.com/home-service.html">Home Service</a>
+    <a href="https://trades.tmitechai.com/utilities.html">Utilities</a>
+    <a href="https://trades.tmitechai.com/fleet.html">Fleet &amp; Trucking</a>
+    <div class="side-nav-section">Company</div>
+    <a href="https://trades.tmitechai.com/news.html">Field Notes</a>
+    <a href="https://trades.tmitechai.com/about.html">About</a>
+    <a href="https://trades.tmitechai.com/partners.html">Partners</a>
+  </div>
+  <div class="side-nav-cta">
+    <a href="https://trades.tmitechai.com/funnel.html" class="btn btn-primary" onclick="closeSideNav()">Apply to Work with TMI &#8594;</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-bg-full"><img src="https://www.tmitechai.com/hero-bg.png" alt="" fetchpriority="high"/></div>
+  <div class="hero-content container">
+    <p class="hero-kicker">AI Infrastructure</p>
+    <h1>Your Business,<br><em>Built to Run Without You.</em></h1>
+    <p class="lede">TMI designs, builds, and deploys AI operational infrastructure for business owners who are done being the bottleneck in their own company. We build the system. You run the business.</p>
+    <div class="hero-actions">
+      <a href="https://trades.tmitechai.com/funnel.html" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
+      <a href="#verticals" class="btn btn-white-outline">See Where We Build</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span class="hero-scroll-label">Scroll</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- VERTICALS -->
+<section class="verticals-section" id="verticals">
+  <div class="container">
+    <div class="verticals-head reveal">
+      <div class="eyebrow"><span class="dot"></span>Where We Build</div>
+      <h2>Two economies.<br>One infrastructure layer.</h2>
+      <p>We build AI systems for the two kinds of businesses that drive the modern economy - the ones that move physical things, and the ones that move people.</p>
+    </div>
+    <div class="verticals-grid">
+
+      <a href="https://trades.tmitechai.com" class="vertical-card reveal">
+        <div class="vertical-card-bg" style="background-image:url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1200&q=80')"></div>
+        <div class="vertical-card-overlay"></div>
+        <span class="vertical-card-domain">trades.tmitechai.com</span>
+        <div class="vertical-card-content">
+          <div class="vertical-card-tags">
+            <span class="vertical-card-tag">Construction</span>
+            <span class="vertical-card-tag">Manufacturing</span>
+            <span class="vertical-card-tag">Oil &amp; Gas</span>
+            <span class="vertical-card-tag">Home Service</span>
+            <span class="vertical-card-tag">Utilities</span>
+            <span class="vertical-card-tag">Fleet</span>
+          </div>
+          <h3>Physical Economy</h3>
+          <p>Dispatch, job costing, compliance, field ops, crew management - automated end to end for the companies that keep the world running.</p>
+          <span class="vertical-card-link">Explore the Physical Economy <span class="arrow">&#8594;</span></span>
+        </div>
+      </a>
+
+      <a href="https://online.tmitechai.com" class="vertical-card reveal reveal-d1">
+        <div class="vertical-card-bg" style="background-image:url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1200&q=80')"></div>
+        <div class="vertical-card-overlay"></div>
+        <span class="vertical-card-domain">online.tmitechai.com</span>
+        <div class="vertical-card-content">
+          <div class="vertical-card-tags">
+            <span class="vertical-card-tag">Course Creators</span>
+            <span class="vertical-card-tag">Coaches</span>
+            <span class="vertical-card-tag">Info Sellers</span>
+            <span class="vertical-card-tag">Influencers</span>
+          </div>
+          <h3>Online Business</h3>
+          <p>Lead capture, launch automation, content distribution, client onboarding, revenue dashboards - built for the people whose product is their expertise.</p>
+          <span class="vertical-card-link">Explore Online Business <span class="arrow">&#8594;</span></span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- INDUSTRIES CAROUSEL -->
+<div class="industries-section">
+  <p class="industries-label">Industries we serve</p>
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <a href="https://trades.tmitechai.com/home-service.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3721272/pexels-photo-3721272.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Plumbing</div></a>
+      <a href="https://trades.tmitechai.com/home-service.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Electrical</div></a>
+      <a href="https://trades.tmitechai.com/home-service.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3964736/pexels-photo-3964736.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">HVAC</div></a>
+      <a href="https://trades.tmitechai.com/construction.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Construction</div></a>
+      <a href="https://trades.tmitechai.com/construction.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1078884/pexels-photo-1078884.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Heavy Equipment</div></a>
+      <a href="https://trades.tmitechai.com/oil-gas.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3229014/pexels-photo-3229014.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Oil &amp; Gas</div></a>
+      <a href="https://trades.tmitechai.com/oil-gas.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/247763/pexels-photo-247763.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Pipeline</div></a>
+      <a href="https://trades.tmitechai.com/manufacturing.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Manufacturing</div></a>
+      <a href="https://trades.tmitechai.com/mining.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/2101137/pexels-photo-2101137.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Mining</div></a>
+      <a href="https://trades.tmitechai.com/real-estate.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1732414/pexels-photo-1732414.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Real Estate</div></a>
+      <a href="https://online.tmitechai.com" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Coaching</div></a>
+      <a href="https://online.tmitechai.com" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Info Products</div></a>
+      <a href="https://trades.tmitechai.com/home-service.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3721272/pexels-photo-3721272.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Plumbing</div></a>
+      <a href="https://trades.tmitechai.com/home-service.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Electrical</div></a>
+      <a href="https://trades.tmitechai.com/home-service.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3964736/pexels-photo-3964736.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">HVAC</div></a>
+      <a href="https://trades.tmitechai.com/construction.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Construction</div></a>
+      <a href="https://trades.tmitechai.com/manufacturing.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Manufacturing</div></a>
+      <a href="https://trades.tmitechai.com/fleet.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/2199293/pexels-photo-2199293.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Fleet &amp; Trucking</div></a>
+      <a href="https://trades.tmitechai.com/agriculture.html" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Agriculture</div></a>
+      <a href="https://online.tmitechai.com" class="marquee-img" style="background-image:url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=900&q=80')"><div class="marquee-label">Coaching</div></a>
+    </div>
+  </div>
+</div>
+
+<!-- MANIFESTO -->
+<section class="manifesto-section">
+  <div class="container">
+    <div class="manifesto-header reveal">
+      <div class="eyebrow"><span class="dot"></span>What We Build</div>
+      <h2>Three things. One mission.</h2>
+    </div>
+    <div class="manifesto-statements">
+
+      <div class="manifesto-item reveal">
+        <div class="manifesto-num">01</div>
+        <div class="manifesto-body">
+          <div class="manifesto-title">An operating system <em>that runs your business without you in every decision.</em></div>
+          <div>
+            <p class="manifesto-desc" style="font-size:clamp(17px,1.4vw,21px);font-weight:500;color:var(--ink);margin-bottom:12px;">A done-for-you AI system install that automates the work you hate and amplifies the work you love.</p>
+            <p class="manifesto-desc">TMI OS deploys AI agents that handle the repetitive, administrative, and operational work that drains your time and ties you to the business. One platform. Running around the clock. The businesses that will win this decade are already building their systems. We build them for you.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="manifesto-item reveal reveal-d1">
+        <div class="manifesto-num">02</div>
+        <div class="manifesto-body">
+          <div class="manifesto-title">A community <em>of operators building the future of their industries together.</em></div>
+          <div>
+            <p class="manifesto-desc">The TMI Network is where operators share what's working, what failed, and what they're building next. Weekly calls. A searchable directory. A resource library you can actually use. Real numbers from real builds. Not a newsletter. A room.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="manifesto-item reveal reveal-d2">
+        <div class="manifesto-num">03</div>
+        <div class="manifesto-body">
+          <div class="manifesto-title">A movement <em>to put AI in the hands of the people who actually build things.</em></div>
+          <div>
+            <p class="manifesto-desc">Business owners are not behind. They're being rebuilt from the inside by operators who see what's possible and decide to go first. TMI exists to accelerate that. We fund it, train it, and deploy the infrastructure to prove it. The movement already started.</p>
+            <a href="https://trades.tmitechai.com/funnel.html" class="manifesto-tag">Apply to Join &#8594;</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- STATEMENT BREAK -->
+<section class="statement-break">
+  <div class="statement-break-inner reveal">
+    <p>The businesses that automate in 2026 <em>will be the ones setting prices in 2030.</em></p>
+  </div>
+</section>
+
+<!-- APPLY CTA -->
+<section class="apply-section">
+  <div class="container">
+    <div class="apply-inner">
+      <div class="eyebrow reveal"><span class="dot"></span>Ready to Start</div>
+      <h2 class="reveal reveal-d1">Build the system that runs<br>your business <em>without you.</em></h2>
+      <p class="reveal reveal-d2">We don't take every application. We work with owners who are serious about building infrastructure that outlasts them. If that's you, apply and we'll find the right starting point on a call.</p>
+      <p class="apply-stakes reveal reveal-d2">Every year you wait, a competitor in your market figures this out first.</p>
+      <div class="apply-actions reveal reveal-d3">
+        <a href="https://trades.tmitechai.com/funnel.html" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
+        <a href="https://trades.tmitechai.com/news.html" class="btn btn-white-outline">Read the Field Notes</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">
+          <img src="https://www.tmitechai.com/logo.svg" alt="TMI"/> TMI
+        </div>
+        <p class="footer-desc">Done-for-you AI operational infrastructure for business owners building companies that run on systems.</p>
+        <div class="footer-contact">
+          <a href="mailto:hello@tmitechai.com">hello@tmitechai.com</a>
+        </div>
+      </div>
+      <div class="footer-right">
+        <div class="footer-col">
+          <h5>Verticals</h5>
+          <a href="https://trades.tmitechai.com">Physical Economy</a>
+          <a href="https://online.tmitechai.com">Online Business</a>
+        </div>
+        <div class="footer-col">
+          <h5>Industries</h5>
+          <a href="https://trades.tmitechai.com/construction.html">Construction</a>
+          <a href="https://trades.tmitechai.com/manufacturing.html">Manufacturing</a>
+          <a href="https://trades.tmitechai.com/oil-gas.html">Oil &amp; Gas</a>
+          <a href="https://trades.tmitechai.com/home-service.html">Home Service</a>
+          <a href="https://trades.tmitechai.com/utilities.html">Utilities</a>
+          <a href="https://trades.tmitechai.com/fleet.html">Fleet</a>
+        </div>
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="https://trades.tmitechai.com/about.html">About</a>
+          <a href="https://trades.tmitechai.com/partners.html">Partners</a>
+          <a href="https://trades.tmitechai.com/news.html">Field Notes</a>
+          <a href="https://trades.tmitechai.com/funnel.html">Apply</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 TMI Technology. All rights reserved.</span>
+      <span>AI infrastructure for the businesses that build the world.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const navBtn = document.getElementById('nav-btn');
+const sideNav = document.getElementById('side-nav');
+const sideOverlay = document.getElementById('side-overlay');
+function openSideNav() {
+  sideNav.classList.add('open'); sideOverlay.classList.add('open'); navBtn.classList.add('open');
+  sideNav.setAttribute('aria-hidden', 'false');
+}
+function closeSideNav() {
+  sideNav.classList.remove('open'); sideOverlay.classList.remove('open'); navBtn.classList.remove('open');
+  sideNav.setAttribute('aria-hidden', 'true');
+}
+navBtn.addEventListener('click', () => sideNav.classList.contains('open') ? closeSideNav() : openSideNav());
+sideOverlay.addEventListener('click', closeSideNav);
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
 </html>
