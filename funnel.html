@@ -38,8 +38,14 @@ body{background:var(--bg);color:#fff;font-family:var(--sans);-webkit-font-smooth
 .nav-back:hover{color:#fff}
 @media(max-width:480px){.nav{padding:16px 20px}}
 
+/* BIZ TYPE TOGGLE */
+.biz-toggle-wrap{display:flex;justify-content:center;padding:32px 20px 0}
+.biz-toggle{display:inline-flex;background:rgba(255,255,255,0.05);border:1px solid var(--b1);border-radius:8px;padding:4px}
+.biz-tab{padding:9px 24px;border-radius:6px;font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .15s;border:none;background:transparent;color:var(--muted);font-family:var(--sans)}
+.biz-tab.active{background:var(--chart);color:var(--ink)}
+
 /* HERO */
-.hero-block{text-align:center;padding:72px 24px 52px;position:relative;overflow:hidden}
+.hero-block{text-align:center;padding:52px 24px 52px;position:relative;overflow:hidden}
 .hero-block::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse at 50% 0%,rgba(228,255,151,.07) 0%,transparent 65%);pointer-events:none}
 .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(228,255,151,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(228,255,151,.02) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(ellipse 90% 90% at 50% 0%,black,transparent);pointer-events:none}
 .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--b2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:28px}
@@ -94,11 +100,17 @@ label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercas
 input{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:14px 16px;font-family:var(--sans);font-size:15px;color:#fff;outline:none;transition:border-color .15s,background .15s;width:100%;font-weight:500}
 input::placeholder{color:rgba(255,255,255,.2)}
 input:focus{border-color:rgba(228,255,151,.4);background:rgba(228,255,151,.03)}
+select{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:14px 16px;font-family:var(--sans);font-size:15px;color:#fff;outline:none;transition:border-color .15s;width:100%;font-weight:500;-webkit-appearance:none;cursor:pointer}
+select option{background:#141525;color:#fff}
+select:focus{border-color:rgba(228,255,151,.4)}
 .submit-btn{width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--chart);color:var(--ink);font-family:var(--sans);font-size:15px;font-weight:900;letter-spacing:.5px;padding:18px 32px;border-radius:8px;border:none;cursor:pointer;transition:background .15s,transform .12s,box-shadow .15s;box-shadow:0 0 40px rgba(228,255,151,.18)}
 .submit-btn:hover{background:var(--chart-dark);transform:translateY(-1px);box-shadow:0 0 60px rgba(228,255,151,.28)}
 .submit-btn:active{transform:translateY(0)}
 .submit-btn:disabled{opacity:.6;cursor:default;transform:none}
 .form-note{font-size:11px;color:rgba(255,255,255,.3);text-align:center;margin-top:14px;line-height:1.6}
+.form-success{display:none;text-align:center;padding:32px;background:rgba(228,255,151,.05);border:1px solid rgba(228,255,151,.15);border-radius:10px;margin-top:20px}
+.form-success h4{font-size:18px;font-weight:800;color:var(--chart);margin-bottom:8px}
+.form-success p{font-size:14px;color:rgba(255,255,255,.5);line-height:1.6}
 
 /* REASSURE */
 .reassure-strip{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-top:24px}
@@ -130,7 +142,7 @@ input:focus{border-color:rgba(228,255,151,.4);background:rgba(228,255,151,.03)}
 .cal-sub{font-size:14px;color:rgba(255,255,255,.4);margin-bottom:24px}
 #cal-embed{width:100%;min-height:620px;border-radius:14px;overflow:hidden;border:1px solid var(--b1);background:var(--s2)}
 
-@media(max-width:480px){.form-card{padding:24px 18px}.modal-card{padding:32px 20px}.nav{padding:14px 16px}}
+@media(max-width:480px){.form-card{padding:24px 18px}.modal-card{padding:32px 20px}.nav{padding:14px 16px}.biz-tab{padding:8px 16px;font-size:10px}}
 </style>
 </head>
 <body>
@@ -138,23 +150,31 @@ input:focus{border-color:rgba(228,255,151,.4);background:rgba(228,255,151,.03)}
 <div class="topbar">Taking applications &mdash; 6 operator installs available this quarter</div>
 
 <nav class="nav">
-  <a href="stratum.html" class="nav-logo">TMI <span>Technology</span></a>
-  <a href="stratum.html" class="nav-back">&#8592; Back to main site</a>
+  <a href="https://www.tmitechai.com" class="nav-logo">TMI <span>Technology</span></a>
+  <a href="https://www.tmitechai.com" class="nav-back">&#8592; Back to main site</a>
 </nav>
+
+<!-- BIZ TYPE TOGGLE -->
+<div class="biz-toggle-wrap">
+  <div class="biz-toggle">
+    <button class="biz-tab active" data-type="physical" onclick="switchBizType('physical')">Physical Business</button>
+    <button class="biz-tab" data-type="online" onclick="switchBizType('online')">Online Business</button>
+  </div>
+</div>
 
 <!-- HERO -->
 <div class="hero-block">
   <div class="hero-grid"></div>
-  <div class="chip"><div class="chip-dot"></div>AI Infrastructure for Field Operations</div>
-  <h1 class="hero-h">YOUR OPERATION<br>IS <span class="lm">LEAKING.</span><br><span style="-webkit-text-stroke:1.5px rgba(255,255,255,.18);color:transparent;">LET'S FIND WHERE.</span></h1>
-  <p class="hero-sub">Most operations lose 12-18% of potential revenue to gaps in how information flows through the business. <strong>Before we build anything, we need to see exactly where yours is breaking.</strong></p>
+  <div class="chip"><div class="chip-dot"></div><span id="chip-label">AI Infrastructure for Field Operations</span></div>
+  <h1 class="hero-h">YOUR BUSINESS<br>IS <span class="lm">LEAKING.</span><br><span style="-webkit-text-stroke:1.5px rgba(255,255,255,.18);color:transparent;">LET'S FIND WHERE.</span></h1>
+  <p class="hero-sub" id="hero-sub-text">Most operations lose 12-18% of potential revenue to gaps in how information flows through the business. <strong>Before we build anything, we need to see exactly where yours is breaking.</strong></p>
 </div>
 
 <!-- PROOF -->
 <div class="proof-strip">
   <div class="ps-item"><div class="ps-n">80%</div><div class="ps-l">Ops reduction avg</div></div>
   <div class="ps-item"><div class="ps-n">$0</div><div class="ps-l">Cost of audit call</div></div>
-  <div class="ps-item"><div class="ps-n">6 wks</div><div class="ps-l">Average deploy time</div></div>
+  <div class="ps-item"><div class="ps-n">14 days</div><div class="ps-l">Average deploy time</div></div>
   <div class="ps-item"><div class="ps-n">24/7</div><div class="ps-l">Systems run always</div></div>
 </div>
 
@@ -163,12 +183,19 @@ input:focus{border-color:rgba(228,255,151,.4);background:rgba(228,255,151,.03)}
   <div class="pain-strip-inner">
     <div class="ps-eye">What is actually happening</div>
     <h2 class="ps-h">YOU ARE THE ANSWER TO EVERY QUESTION YOUR BUSINESS HAS.</h2>
-    <p class="ps-sub">When dispatch, invoicing, quoting, follow-up, and reporting all run through you, the operation cannot grow past what you can personally handle.</p>
-    <div class="pain-rows">
+    <p class="ps-sub" id="pain-sub-physical">When dispatch, invoicing, quoting, follow-up, and reporting all run through you, the operation cannot grow past what you can personally handle.</p>
+    <p class="ps-sub" id="pain-sub-online" style="display:none">When onboarding, follow-up, fulfillment, and client management all route through you personally, the business cannot grow past what you can handle in a day.</p>
+    <div id="pain-physical" class="pain-rows">
       <div class="pain-row"><div class="pain-x">&#10005;</div><div class="pain-t">Jobs complete but <strong>invoices go out 3-7 days late</strong>, quietly killing cash flow</div></div>
       <div class="pain-row"><div class="pain-x">&#10005;</div><div class="pain-t">Dispatch is a person with a spreadsheet, not a system - <strong>and it breaks when they call in sick</strong></div></div>
       <div class="pain-row"><div class="pain-x">&#10005;</div><div class="pain-t">Quotes get done manually every time, <strong>with no visibility into whether the job was profitable</strong> afterward</div></div>
       <div class="pain-row"><div class="pain-x">&#10005;</div><div class="pain-t">Work gets completed in the field and <strong>the paperwork never catches up</strong></div></div>
+    </div>
+    <div id="pain-online" class="pain-rows" style="display:none">
+      <div class="pain-row"><div class="pain-x">&#10005;</div><div class="pain-t">Leads come in while you are heads down in delivery, and <strong>nobody follows up until it is too late</strong></div></div>
+      <div class="pain-row"><div class="pain-x">&#10005;</div><div class="pain-t">Client onboarding, scheduling, and follow-up <strong>route through you manually every single time</strong></div></div>
+      <div class="pain-row"><div class="pain-x">&#10005;</div><div class="pain-t">Every launch or campaign burns you out because <strong>the whole machine runs on your personal effort</strong></div></div>
+      <div class="pain-row"><div class="pain-x">&#10005;</div><div class="pain-t">Revenue leaks between campaigns because <strong>nothing is automated to convert while you rest</strong></div></div>
     </div>
   </div>
 </div>
@@ -179,7 +206,7 @@ input:focus{border-color:rgba(228,255,151,.4);background:rgba(228,255,151,.03)}
     <div class="wyg-eye">On the call</div>
     <h2 class="wyg-h">WHAT YOU WILL WALK AWAY WITH</h2>
     <div class="wyg-grid">
-      <div class="wyg-card"><div class="wyg-dot"></div><div class="wyg-text"><strong>Operational gap map</strong>A full picture of where your operation loses time and money every week</div></div>
+      <div class="wyg-card"><div class="wyg-dot"></div><div class="wyg-text"><strong>Operational gap map</strong>A full picture of where your business loses time and money every week</div></div>
       <div class="wyg-card"><div class="wyg-dot"></div><div class="wyg-text"><strong>Automation opportunity list</strong>Every gap an AI system can close, prioritized by revenue impact</div></div>
       <div class="wyg-card"><div class="wyg-dot"></div><div class="wyg-text"><strong>Clear next step</strong>Whether we are a fit, and what the path forward looks like if we are</div></div>
       <div class="wyg-card"><div class="wyg-dot"></div><div class="wyg-text"><strong>No pitch. No pressure.</strong>This is a diagnostic, not a sales call. You leave with clarity regardless of what you decide</div></div>
@@ -195,6 +222,7 @@ input:focus{border-color:rgba(228,255,151,.4);background:rgba(228,255,151,.03)}
       <h3>Tell us where to reach you.</h3>
       <p class="form-sub">We will reach out within 24 hours to find a time that works.</p>
       <form id="quick-form">
+        <input type="hidden" id="biz-type-input" name="business_type" value="physical">
         <div class="field">
           <label for="name">Your name</label>
           <input type="text" id="name" name="Name" placeholder="First and last" required>
@@ -207,12 +235,20 @@ input:focus{border-color:rgba(228,255,151,.4);background:rgba(228,255,151,.03)}
           <label for="phone">Phone</label>
           <input type="tel" id="phone" name="Phone" placeholder="+1 (555) 000-0000" required>
         </div>
+        <div class="field">
+          <label for="company">Company / Business Name</label>
+          <input type="text" id="company" name="Company" placeholder="Your business name">
+        </div>
         <button type="submit" class="submit-btn" id="submit-btn">
           Apply to Work with TMI
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </form>
-      <div class="form-note">Enterprise operational systems start at $25,000. Every engagement is scoped to your operation on the call.</div>
+      <div id="form-success" class="form-success">
+        <h4>Application received.</h4>
+        <p>We will reach out within 24 hours to schedule your strategy call. Check your inbox.</p>
+      </div>
+      <div class="form-note">Engagements start at $25,000. Every build is scoped to your operation on the call.</div>
     </div>
 
     <div class="reassure-strip">
@@ -235,12 +271,12 @@ input:focus{border-color:rgba(228,255,151,.4);background:rgba(228,255,151,.03)}
     <div class="modal-icon">
       <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 3v10l6 3" stroke="#E4FF97" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="13" cy="13" r="11" stroke="#E4FF97" stroke-width="1.5"/></svg>
     </div>
-    <h2>Want a free operations audit?</h2>
-    <p class="modal-desc">Before we build anything, we map exactly where your operation is leaking. Most owners are surprised by what we find.</p>
+    <h2>Want a free operations audit first?</h2>
+    <p class="modal-desc">Before we build anything, we map exactly where your business is leaking. Most owners are surprised by what we find.</p>
     <div class="modal-wyg">
       <p>What you get</p>
       <ul>
-        <li>A full map of where your operation loses time and money</li>
+        <li>A full map of where your business loses time and money</li>
         <li>Every gap an AI system can close, by revenue impact</li>
         <li>A clear picture of what your operation looks like fully automated</li>
         <li>No pitch. No pressure. Just clarity.</li>
@@ -248,7 +284,7 @@ input:focus{border-color:rgba(228,255,151,.4);background:rgba(228,255,151,.03)}
     </div>
     <div class="modal-actions">
       <a href="audit.html" class="modal-btn-yes">
-        Yes - Audit My Operation
+        Yes - Audit My Business
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
       <button class="modal-btn-no" id="modal-no">No thanks - I'd rather book a call directly</button>
@@ -263,19 +299,62 @@ const modal = document.getElementById('modal');
 const modalNo = document.getElementById('modal-no');
 const calSection = document.getElementById('cal-section');
 
+// ── BIZ TYPE TOGGLE ──
+function switchBizType(type) {
+  document.querySelectorAll('.biz-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.biz-tab[data-type="${type}"]`).classList.add('active');
+  document.getElementById('biz-type-input').value = type;
+
+  const isOnline = type === 'online';
+  document.getElementById('pain-physical').style.display = isOnline ? 'none' : 'flex';
+  document.getElementById('pain-online').style.display = isOnline ? 'flex' : 'none';
+  document.getElementById('pain-sub-physical').style.display = isOnline ? 'none' : 'block';
+  document.getElementById('pain-sub-online').style.display = isOnline ? 'block' : 'none';
+  document.getElementById('chip-label').textContent = isOnline
+    ? 'AI Infrastructure for Online Businesses'
+    : 'AI Infrastructure for Field Operations';
+  document.getElementById('hero-sub-text').innerHTML = isOnline
+    ? 'Most online businesses lose 20-30% of potential revenue to gaps in follow-up, fulfillment, and retention. <strong>Before we build anything, we need to see exactly where yours is breaking.</strong>'
+    : 'Most operations lose 12-18% of potential revenue to gaps in how information flows through the business. <strong>Before we build anything, we need to see exactly where yours is breaking.</strong>';
+}
+
+// ── FORM SUBMIT ──
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   submitBtn.disabled = true;
   submitBtn.textContent = 'Sending...';
-  fetch('/api/lead', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-      phone: document.getElementById('phone').value,
-    }),
-  }).catch(() => {});
+
+  const bizType = document.getElementById('biz-type-input').value;
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const phone = document.getElementById('phone').value;
+  const company = document.getElementById('company').value;
+
+  try {
+    await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: 'YOUR_WEB3FORMS_ACCESS_KEY',
+        subject: 'New TMI Lead - ' + name + ' (' + (bizType === 'online' ? 'Online' : 'Physical') + ')',
+        from_name: 'TMI Funnel',
+        name,
+        email,
+        message: [
+          'Name: ' + name,
+          'Email: ' + email,
+          'Phone: ' + phone,
+          'Company: ' + (company || 'Not provided'),
+          'Business Type: ' + (bizType === 'online' ? 'Online Business' : 'Physical / Field Business'),
+          '',
+          'Submitted from funnel.html',
+        ].join('\n'),
+      }),
+    });
+  } catch(err) {}
+
+  document.getElementById('form-success').style.display = 'block';
+  form.style.display = 'none';
   modal.classList.add('open');
 });
 
