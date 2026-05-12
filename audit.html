@@ -206,6 +206,22 @@ p{margin:0;}
 .res-retake{font-size:13px;color:rgba(255,255,255,0.4);cursor:pointer;transition:color 0.15s;}
 .res-retake:hover{color:rgba(255,255,255,0.7);}
 
+/* Open text question */
+.q-textarea{width:100%;padding:16px;border:1.5px solid var(--line-strong);border-radius:12px;font-family:var(--sans);font-size:15px;color:var(--ink);resize:vertical;outline:none;transition:border-color 0.15s;margin-bottom:20px;line-height:1.6;min-height:140px;}
+.q-textarea:focus{border-color:var(--ink);}
+.q-textarea::placeholder{color:var(--muted);}
+.q-open-note{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5;}
+.q-skip{background:none;border:none;font-family:var(--sans);font-size:13px;color:var(--muted);cursor:pointer;margin-left:16px;padding:0;transition:color 0.15s;}
+.q-skip:hover{color:var(--ink-2);}
+
+/* Results: open answers */
+.res-answers-section{background:var(--bg-alt);padding:80px 0;}
+.res-answers-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:40px;}
+.res-answer-card{background:#fff;border:1px solid var(--line-strong);border-radius:16px;padding:28px;}
+.res-answer-q{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.res-answer-a{font-size:15px;color:var(--ink);line-height:1.65;white-space:pre-wrap;}
+.res-answer-empty{font-size:15px;color:var(--muted);font-style:italic;}
+
 /* RESPONSIVE */
 @media(max-width:768px){
   .intro-nav,.intro-body,.quiz-header-inner{padding-left:20px;padding-right:20px;}
@@ -215,9 +231,10 @@ p{margin:0;}
   .res-dep-block{padding:24px;}
   .res-pain-grid{grid-template-columns:1fr;}
   .res-support-grid{grid-template-columns:1fr;}
+  .res-answers-grid{grid-template-columns:1fr;}
   .q2-cats{grid-template-columns:repeat(2,1fr);}
   .q-text{margin-bottom:24px;}
-  .res-tier-section,.res-bleeding-section,.res-roadmap-section,.res-offer-section,.res-support-section,.res-path-section,.res-cta-section{padding:56px 0;}
+  .res-tier-section,.res-bleeding-section,.res-roadmap-section,.res-offer-section,.res-support-section,.res-path-section,.res-answers-section,.res-cta-section{padding:56px 0;}
 }
 @media(max-width:480px){
   .intro-stats{flex-direction:column;}
@@ -232,7 +249,7 @@ p{margin:0;}
 <!-- ═══ SCREEN: INTRO ═══ -->
 <section id="screen-intro" class="screen">
   <nav class="intro-nav">
-    <a href="stratum.html" class="audit-logo">
+    <a href="https://www.tmitechai.com" class="audit-logo">
       <img src="logo.svg" alt="TMI"/> TMI
     </a>
   </nav>
@@ -240,10 +257,10 @@ p{margin:0;}
     <div class="intro-inner">
       <div class="eyebrow"><span class="dot"></span>Free Business Audit</div>
       <h1 class="intro-h1">Find Out Exactly Where Your Business Is Leaking.</h1>
-      <p class="intro-sub">15 questions. 4 minutes. We score your operation, find your biggest leaks, and build a personalized AI infrastructure roadmap for where you are right now.</p>
+      <p class="intro-sub">19 questions. 5 minutes. We score your operation, find your biggest leaks, and build a personalized AI infrastructure roadmap for where you are right now.</p>
       <div class="intro-stats">
-        <div class="intro-stat"><div class="intro-stat-val">15</div><div class="intro-stat-label">Questions</div></div>
-        <div class="intro-stat"><div class="intro-stat-val">4 Min</div><div class="intro-stat-label">Average Time</div></div>
+        <div class="intro-stat"><div class="intro-stat-val">19</div><div class="intro-stat-label">Questions</div></div>
+        <div class="intro-stat"><div class="intro-stat-val">5 Min</div><div class="intro-stat-label">Average Time</div></div>
         <div class="intro-stat"><div class="intro-stat-val">100%</div><div class="intro-stat-label">Personalized</div></div>
       </div>
       <button class="btn btn-primary" onclick="startAudit()" style="font-size:16px;padding:16px 40px;">Start My Free Audit</button>
@@ -254,7 +271,7 @@ p{margin:0;}
 <!-- ═══ SCREEN: CONTACT ═══ -->
 <section id="screen-contact" class="screen screen-hidden">
   <nav class="intro-nav">
-    <a href="stratum.html" class="audit-logo"><img src="logo.svg" alt="TMI"/> TMI</a>
+    <a href="https://www.tmitechai.com" class="audit-logo"><img src="logo.svg" alt="TMI"/> TMI</a>
   </nav>
   <div class="contact-body">
     <div class="contact-inner">
@@ -326,6 +343,35 @@ const Q1_OPTIONS = [
   {text:"Multiple crews or locations, getting complex",val:"multicrew",pts:4},
   {text:"Around $10M, old systems are starting to break",val:"ten_mil",pts:5},
   {text:"Above $10M, running a real company now",val:"above_ten",pts:6},
+];
+
+const Q2_CATS_ONLINE = [
+  {label:"Coaching & Consulting",val:"coaching",subs:[
+    {label:"Business/Executive Coaching",val:"coaching_business"},{label:"Life/Wellness Coaching",val:"coaching_life"},
+    {label:"Career/Skills Coaching",val:"coaching_career"},{label:"Consulting/Advisory",val:"coaching_consulting"},
+    {label:"Other",val:"coaching_other"},
+  ]},
+  {label:"Online Education",val:"education",subs:[
+    {label:"Online Courses",val:"education_courses"},{label:"Membership/Community",val:"education_membership"},
+    {label:"Bootcamp/Cohort",val:"education_bootcamp"},{label:"Other",val:"education_other"},
+  ]},
+  {label:"Creator & Media",val:"creator",subs:[
+    {label:"YouTube/Video Creator",val:"creator_youtube"},{label:"Social Media/Influencer",val:"creator_social"},
+    {label:"Newsletter/Writer",val:"creator_newsletter"},{label:"Podcaster",val:"creator_podcast"},
+    {label:"Other",val:"creator_other"},
+  ]},
+  {label:"E-Commerce",val:"ecommerce",subs:[
+    {label:"Supplements/Health Products",val:"ecommerce_supplements"},{label:"Fashion/Apparel",val:"ecommerce_apparel"},
+    {label:"Physical DTC Products",val:"ecommerce_dtc"},{label:"Other",val:"ecommerce_other"},
+  ]},
+  {label:"Digital Products",val:"digitalproducts",subs:[
+    {label:"Templates/Downloads",val:"digital_templates"},{label:"Software/SaaS",val:"digital_saas"},
+    {label:"Info Products/Ebooks",val:"digital_info"},{label:"Other",val:"digital_other"},
+  ]},
+  {label:"Agency & Services",val:"agency",subs:[
+    {label:"Marketing Agency",val:"agency_marketing"},{label:"Design/Creative Agency",val:"agency_design"},
+    {label:"Freelance/Consulting",val:"agency_freelance"},{label:"Other",val:"agency_other"},
+  ]},
 ];
 
 const Q2_CATS = [
@@ -469,6 +515,48 @@ const CAT_STEPS = {
   comms:{key:"cs_comms",name:"Remove Yourself As The Communication Hub",desc:"Too much routes through your personal phone. Customer updates, crew questions, job changes, and complaints should all be handled by the system not by you.",bullets:["AI handles customer updates automatically based on live job status","Centralized crew communication that is documented and searchable","Escalation rules that only send the real exceptions to you","End of day summaries delivered automatically without anyone being asked"]},
 };
 
+const INDUSTRY_PAIN_ONLINE = {
+  coaching:[
+    {title:"Client Onboarding and Admin Eats the Time You Should Be Coaching",body:"Manual intake, scheduling, follow-up, and onboarding creates administrative overhead that compounds with every new client. Every hour spent on admin is an hour not spent coaching or acquiring clients."},
+    {title:"Your Lead Follow-Up Stops the Moment You Get Busy",body:"When your client load fills up, follow-up falls off. There is no system chasing leads who did not book yet, re-engaging cold enquiries, or nurturing prospects who were not ready. Revenue leaks in the gap."},
+    {title:"No-Shows and Lapsed Clients Have No Automated Recovery",body:"Every missed session and every disengaged client represents revenue that evaporated without a system to recover it. Without automated reminders, rescheduling, and re-engagement, attrition is silent and expensive."},
+  ],
+  education:[
+    {title:"Students Enroll and Drop Before Getting Value",body:"The gap between registration and first meaningful outcome is where most students are lost. Without an automated onboarding and early engagement sequence, dropout rates stay high regardless of how good the content is."},
+    {title:"Your Support Inbox Scales Linearly With Enrollment",body:"Every new student adds to the support queue. Without a knowledge base handling the 80% of questions that repeat, support volume grows with sales and eventually becomes the bottleneck that caps growth."},
+    {title:"Revenue Spikes Around Launches and Flatlines Between Them",body:"Back-catalogue products sit idle after their launch window. Without an automated system surfacing them to the right buyers at the right time, existing inventory earns nothing between campaigns."},
+  ],
+  creator:[
+    {title:"Your DM Inbox Is Full of Revenue You Never Respond to Fast Enough",body:"Every unanswered message from a follower asking about your offer, product, or how to work with you is a lead going cold. The window is narrow and manual follow-up at scale is impossible."},
+    {title:"The Admin Work Is Stealing Time You Should Be Creating",body:"The more your business grows, the more of your week disappears into backend tasks. You built this to create. The systems should be handling everything else so you can stay in that role."},
+    {title:"Brand Deals and Partnerships Route Through You Personally",body:"Inbound brand opportunities get dropped or delayed because there is no system managing the pipeline, tracking deliverables, or handling communication. Revenue from partnerships is inconsistent and hard to scale."},
+  ],
+  ecommerce:[
+    {title:"Abandoned Carts Fire One Email and Never Follow Up Again",body:"Most stores send one cart abandonment email at one hour and stop. Without a multi-step recovery sequence that adapts by cart value and runs for days, a significant share of recoverable revenue is permanently left on the table."},
+    {title:"Repeat Purchase Windows Open and Close With No Automated Outreach",body:"Your customers need your product again in 30, 60, or 90 days. Without sequences timed to your product cycle, they either reorder on their own or they go to a competitor who stayed in front of them."},
+    {title:"Support Volume Scales With Orders and Eventually Swamps You",body:"Every surge in orders creates a surge in support tickets. Without a system trained on your policies and FAQs handling the common questions automatically, support becomes a bottleneck that limits how fast you can grow."},
+  ],
+  digitalproducts:[
+    {title:"Manual Delivery and Fulfillment Eats the Margin on Every Sale",body:"Every purchase requiring manual action to deliver, confirm access, or follow up adds overhead that compounds at scale. Digital products should deliver instantly and automatically every time without exception."},
+    {title:"Your Back Catalogue Earns Nothing After the Launch Window Closes",body:"Products built months or years ago sit idle between launches. Without automated sequences surfacing them to buyers who match the profile, your catalogue is a sunk cost instead of a compounding revenue stream."},
+    {title:"Support Volume Grows With Every Launch Whether You Are Ready or Not",body:"Product questions, access issues, and refund requests multiply with every campaign. Without a trained support system handling common issues automatically, every launch creates a personal support burden."},
+  ],
+  agency:[
+    {title:"Scope Creep and Client Communication Route Through You",body:"Every client wants direct access to the owner. Change requests, approvals, feedback rounds, and updates all come to your inbox. Without a system managing client communication, you are the account manager for every single engagement."},
+    {title:"New Business Development Stops When You Are Heads Down in Delivery",body:"When you are busy delivering for existing clients, the pipeline dries up. Without automated lead nurture and follow-up, new business is feast-or-famine and the dry stretches always come at the worst time."},
+    {title:"Client Onboarding Is a Manual Production Every Single Time",body:"Every new client requires the same intake, contract, brief, access, and kickoff done manually each time. Without a systematized onboarding that runs itself, every new client creates a week of administrative overhead."},
+  ],
+};
+
+const INDUSTRY_STEPS_ONLINE = {
+  coaching:{key:"is_coaching",name:"Build Client Onboarding, Lead Nurture, and Re-Engagement Infrastructure",desc:"The two biggest leaks in coaching businesses are leads that go cold before booking and clients that drop before getting results. Both are infrastructure problems, not product problems.",bullets:["AI handles initial lead response and booking enquiries in under 5 minutes regardless of when they reach out","Automated onboarding delivers resources, sets expectations, and captures intake without manual steps","Session reminders and confirmation sequences reduce no-shows without you following up personally","Re-engagement sequences recover lapsed clients and warm cold leads without manual outreach"]},
+  education:{key:"is_education",name:"Install Enrollment Automation, Student Retention, and Back-Catalogue Monetization",desc:"Revenue and retention both depend on what happens after the purchase. Most course businesses lose students in the first two weeks because nothing guides them to their first outcome.",bullets:["Automated student onboarding from purchase to first action completed without manual steps","Early engagement sequences identify at-risk students before they drop","Support knowledge base trained on your content handles 80% of questions without your involvement","Back-catalogue sequences surface older products to buyers who have not purchased them yet"]},
+  creator:{key:"is_creator",name:"Build Backend Infrastructure That Gives You Back Time to Create",desc:"You built this to create. The admin, the follow-up, the monetization backend - none of that should live on your plate. Infrastructure handles it so you stay in the role only you can fill.",bullets:["DM automation responds to inbound enquiries, qualifies prospects, and routes to offers without your input","Email sequences convert audience attention into revenue without a new manual campaign every time","Brand deal pipeline tracks inbound opportunities, manages communication, and monitors deliverables","Offer router surfaces the right product or program to the right follower at the right moment"]},
+  ecommerce:{key:"is_ecommerce",name:"Install Cart Recovery, Repeat Purchase Sequences, and Support Automation",desc:"In e-commerce the margin lives in recovery and retention. Most stores optimize for acquisition. The infrastructure play is making every existing buyer more valuable.",bullets:["Multi-step abandoned cart recovery that runs for 7 days and adapts by cart value and product","Repeat purchase sequences timed precisely to your product consumption cycle","Support system trained on your FAQs and policies handles 90% of tickets automatically","Post-purchase upsell flows increase average order value on existing traffic without new ad spend"]},
+  digitalproducts:{key:"is_digital",name:"Automate Delivery, Monetize the Back Catalogue, and Remove Support Overhead",desc:"High-margin products should have near-zero operational overhead after the build. Most digital product businesses still run manual fulfillment, support, and re-engagement.",bullets:["Instant delivery and welcome sequence fires on every purchase with zero manual involvement","Back-catalogue sequences surface existing products to buyers based on purchase history","Support system trained on your content handles common questions before they reach you","Launch infrastructure built once runs every future launch without rebuilding from scratch"]},
+  agency:{key:"is_agency",name:"Build Client Communication, Pipeline Automation, and Onboarding Infrastructure",desc:"Agency operators are usually the most bottlenecked business owners because they are delivering for clients while also trying to run the business. Infrastructure removes you from both.",bullets:["Standardized client onboarding runs without your involvement after the contract is signed","Pipeline follow-up sequences keep warm leads engaged between proposals without manual outreach","Client communication layer handles updates, approvals, and check-ins without routing through you","Scope change tracking and approval workflows built into the client relationship from day one"]},
+};
+
 const INDUSTRY_STEPS = {
   trades_field:{key:"is_trades",name:"Automate Compliance Tracking and Service Efficiency",desc:"In the trades, compliance gaps create liability and service inefficiency burns margin. Both are fixable with the right infrastructure running in the background.",bullets:["License, certification, and insurance tracking automated with renewal alerts","Job information pushed to technicians before arrival so first visit fix rates improve","After-service review and follow up sequences triggered automatically on job completion","Upsell and maintenance agreement follow up running without manual effort"]},
   construction:{key:"is_construction",name:"Build Bid Follow Up and Project Communication Infrastructure",desc:"You spend real resources building estimates. The follow up and project communication system needs to match that investment so jobs convert and stay profitable through completion.",bullets:["Automated bid follow up sequences that keep you in front of clients after estimates go out","Change order tracking and client notification automated end to end","Sub and supplier coordination workflows that reduce manual coordination time","Project status reporting that updates automatically from field inputs"]},
@@ -478,56 +566,61 @@ const INDUSTRY_STEPS = {
   home_service:{key:"is_home",name:"Install 24/7 Lead Capture and Recurring Revenue Infrastructure",desc:"In home services the job goes to whoever responds first and the most profitable clients are the ones who come back every season. Both require infrastructure not manual effort.",bullets:["24/7 AI phone and web response so no lead goes unanswered after hours","Automated booking that fills your schedule without office staff involvement","Maintenance agreement and seasonal renewal follow up running automatically","Review request sequences triggered after every completed job"]},
 };
 
+const OPEN_QS = [
+  {id:"qOpen1", catLabel:"Your Operation", text:"Walk me through a typical day. What does your morning through end of day actually look like right now?"},
+  {id:"qOpen2", catLabel:"Your Operation", text:"What tasks do you hate but can't delegate? What keeps ending up back on your plate no matter what?"},
+  {id:"qOpen3", catLabel:"Your Operation", text:"Where are you the bottleneck? Where does everything slow down or stop when you're not available?"},
+  {id:"qOpen4", catLabel:"Your Operation", text:"What do you wish you could automate but haven't figured out how?"},
+];
+
 const VISIBILITY_STEP = {key:"vs_visibility",name:"Build Real Time Visibility Across the Business",desc:"Stop finding out things went wrong after they already cost you. A live operations dashboard shows exactly what is happening in revenue, jobs, crew, and pipeline without asking anyone.",bullets:["Live operations view for revenue, active jobs, crew status, and open leads","Exception alerts that only surface the things that actually need your attention","Weekly performance summary delivered automatically every Monday","Pipeline and revenue forecast updated in real time"]};
 
 const OFFERS = {
-  tier1:{headline:"The Pilot",why:"You are at the stage where proving the system works matters more than building the whole thing at once. The Pilot installs one focused agent that solves your single biggest leak fast. You see it working before committing to anything bigger. Most Pilot clients are ready for the Core Build within 60 days.",bullets:["One custom AI agent built and installed for your specific operation and industry","Your choice of where to start: phone response, lead follow up, dispatch, booking, or compliance","Active support after launch to make sure it performs","A full roadmap showing what the complete build looks like for your business"]},
-  tier2:{headline:"The Core Build",why:"You have proven the business works. You are ready to stop running it manually. The Core Build installs the full agentic system across every point where you are currently losing time and money.",bullets:["Full front end agent stack covering phone, lead capture, qualification, booking, follow up, and reviews","Dispatch and job coordination automation","Invoice and payment follow up running automatically","Dead lead revival bringing back jobs that went cold","CRM with full pipeline visibility","Active support after launch"]},
-  tier3:{headline:"The Core Build",why:"You have everything you need to scale. The Core Build closes the gaps that are slowing you down and installs the full system so every lead gets followed up, every job runs clean, and growth stops depending on you personally.",bullets:["Full front end agent stack covering phone, lead capture, qualification, booking, follow up, and reviews","Dispatch and job coordination automation","Invoice and payment follow up running automatically","Dead lead revival bringing back jobs that went cold","CRM with full pipeline visibility","Active support after launch"]},
-  tier4:{headline:"Full Operation Build",why:"At your stage the Core Build covers the front end but you need more. Custom workflows built around how your specific operation runs, financial visibility, and a system that holds together under the volume you are running.",bullets:["Everything in Core Build","Custom agentic workflows built around your exact operation and industry","Financial automation and real time reporting","Compliance and safety documentation tracking where applicable","Analytics dashboard with live operational visibility","Crew and client onboarding automation","Extended active support after launch"]},
-  tier5:{headline:"Full Operation Build",why:"Running multiple crews or locations without connected infrastructure creates gaps that cost money every day. The Full Operation Build connects everything into one system with consistent standards enforced automatically.",bullets:["Everything in Core Build","Custom agentic workflows built around your exact operation and industry","Financial automation and real time reporting","Compliance and safety documentation tracking where applicable","Analytics dashboard with live operational visibility","Crew and client onboarding automation","Extended active support after launch"]},
-  tier6:{headline:"Build and Release",why:"At your level the off the shelf solutions stop working. You need infrastructure built specifically for how your business runs. Build and Release is a fully custom agentic architecture. You own it completely.",bullets:["Fully custom agentic architecture designed for your exact operation","Complete IP ownership transferred at delivery","Team training and full documentation handed over","Option to add ongoing retainer for future builds and upgrades","Option to license your system to others in your industry"]},
-  tier7:{headline:"Build and Release",why:"You are running a real company. The infrastructure needs to match that. Build and Release is not a product. It is a custom build from the ground up designed around your operation, your goals, and where you are taking this business.",bullets:["Fully custom agentic architecture designed for your exact operation","Complete IP ownership transferred at delivery","Team training and full documentation handed over","Option to add ongoing retainer for future builds and upgrades","Option to license your system to others in your industry"]},
+  tier1:{headline:"TMI Zero",why:"You are at the stage where building the right foundation now matters more than doing everything at once. TMI Zero installs the foundational AI back office that every growing operation needs. Call agent, quote agent, basic automation. You see it working, then we build from there. Most Zero clients are ready for the full AI Wing Build within 60 to 90 days.",bullets:["Call agent that handles inbound and follows up on every lead","Quote agent that turns job info into estimates without manual input","Basic back office automation covering the highest-friction tasks","A full roadmap showing what the complete AI Wing Build looks like for your operation"]},
+  tier2:{headline:"The AI Wing Build",why:"You have proven the business works. You are ready to stop running it manually. The AI Wing Build is the full custom operational infrastructure build. Custom agents, integrations, and full deployment built specifically around how your operation runs.",bullets:["Full front end agent stack covering phone, lead capture, qualification, booking, follow up, and reviews","Dispatch and job coordination automation","Invoice and payment follow up running automatically","Dead lead revival bringing back jobs that went cold","CRM with full pipeline visibility","Custom integrations with your existing tools","Active support after launch"]},
+  tier3:{headline:"The AI Wing Build",why:"You have everything you need to scale. The AI Wing Build closes the gaps that are slowing you down and installs the full system so every lead gets followed up, every job runs clean, and growth stops depending on you personally.",bullets:["Full front end agent stack covering phone, lead capture, qualification, booking, follow up, and reviews","Dispatch and job coordination automation","Invoice and payment follow up running automatically","Dead lead revival bringing back jobs that went cold","CRM with full pipeline visibility","Custom integrations with your existing tools","Active support after launch"]},
+  tier4:{headline:"The AI Wing Build",why:"At your stage you need the full build plus custom depth. The AI Wing Build at your complexity level means custom workflows built around how your specific operation runs, financial visibility, and a system that holds together under real volume.",bullets:["Everything in the foundational AI Wing Build","Custom agentic workflows built around your exact operation and industry","Financial automation and real time reporting","Compliance and safety documentation tracking where applicable","Analytics dashboard with live operational visibility","Crew and client onboarding automation","Extended active support after launch"]},
+  tier5:{headline:"The AI Wing Build",why:"Running multiple crews or locations without connected infrastructure creates gaps that cost money every day. The AI Wing Build at your scale connects everything into one system with consistent standards enforced automatically.",bullets:["Everything in the foundational AI Wing Build","Custom agentic workflows built around your exact operation and industry","Financial automation and real time reporting","Compliance and safety documentation tracking where applicable","Analytics dashboard with live operational visibility","Multi-crew and multi-location coordination","Extended active support after launch"]},
+  tier6:{headline:"Chief AI Officer Engagement",why:"At your level you need TMI embedded at the leadership layer, not just the operational layer. The CAO Engagement is private one-on-one consulting at the executive level. Custom architecture, custom pricing. You own everything built.",bullets:["Private engagement at the executive level — not a product, a partnership","Fully custom agentic architecture designed for your exact operation and scale","Complete IP ownership transferred at delivery","Team training and full documentation handed over","Ongoing retainer available for future expansion, new builds, and optimization","Option to license your built systems to others in your industry"]},
+  tier7:{headline:"Chief AI Officer Engagement",why:"You are running a real company. The infrastructure needs to match that. The CAO Engagement is not a software product. It is a custom build designed around your operation, your goals, and where you are taking this business — with TMI embedded at the decision-making level.",bullets:["Private engagement at the executive level — not a product, a partnership","Fully custom agentic architecture designed for your exact operation and scale","Complete IP ownership transferred at delivery","Team training and full documentation handed over","Ongoing retainer available for future expansion, new builds, and optimization","Option to license your built systems to others in your industry"]},
 };
 
 const PATHS = {
   tier1:[
-    {label:"Step 1",text:"Free Audit — Find your leaks. Get your personalized roadmap.",active:false},
-    {label:"Start Here",text:"The Pilot — One agent installed fast. See it work before committing to the full build.",active:true,note:"Most Pilot clients move to Core Build within 60 days."},
-    {label:"Step 3",text:"The Core Build — Full agentic system across every major leak in the business.",active:false},
-    {label:"Ongoing",text:"Monthly Support — Active management and new builds as you grow.",active:false},
+    {label:"Step 1",text:"Operations Audit — One call. Free. We map your operation and find what's leaking.",active:false},
+    {label:"Start Here",text:"TMI Zero — Foundational AI back office. Call agent, quote agent, basic automation. Starting around $25,000.",active:true,note:"Most Zero clients move to the full AI Wing Build within 60 to 90 days."},
+    {label:"Step 3",text:"The AI Wing Build — Full custom operational infrastructure. Every major leak fixed.",active:false},
+    {label:"Ongoing",text:"AI Department — Fractional AI department retainer. TMI stays in, maintains systems, builds new ones as you grow.",active:false},
   ],
   tier2:[
-    {label:"Step 1",text:"Free Audit — Find your leaks. Get your personalized roadmap.",active:false},
-    {label:"Start Here",text:"The Core Build — Full agentic front end. Lead to invoice automated. Every major leak fixed.",active:true},
-    {label:"Ongoing",text:"Monthly Support — Active management, updates, and new agents added as the business grows.",active:false},
-    {label:"Upgrade Available",text:"Full Operation Build when you need custom workflows or multi-location support.",active:false},
+    {label:"Step 1",text:"Operations Audit — One call. Free. We map your operation and find what's leaking.",active:false},
+    {label:"Start Here",text:"The AI Wing Build — Full custom operational infrastructure build. Lead to invoice automated. Every major leak fixed.",active:true},
+    {label:"Ongoing",text:"AI Department — Fractional AI department retainer. TMI stays in, maintains and builds as you grow.",active:false},
   ],
   tier3:[
-    {label:"Step 1",text:"Free Audit — Find your leaks. Get your personalized roadmap.",active:false},
-    {label:"Start Here",text:"The Core Build — Full agentic front end. Lead to invoice automated. Every major leak fixed.",active:true},
-    {label:"Ongoing",text:"Monthly Support — Active management, updates, and new agents added as the business grows.",active:false},
-    {label:"Upgrade Available",text:"Full Operation Build when you need custom workflows or multi-location support.",active:false},
+    {label:"Step 1",text:"Operations Audit — One call. Free. We map your operation and find what's leaking.",active:false},
+    {label:"Start Here",text:"The AI Wing Build — Full custom operational infrastructure build. Lead to invoice automated. Every major leak fixed.",active:true},
+    {label:"Ongoing",text:"AI Department — Fractional AI department retainer. TMI stays in, maintains and builds as you grow.",active:false},
   ],
   tier4:[
-    {label:"Step 1",text:"Free Audit — Find your leaks. Custom scoping conversation with the TMI team.",active:false},
-    {label:"Start Here",text:"Full Operation Build — Custom workflows, financial automation, analytics, and compliance built for your exact operation.",active:true},
-    {label:"Ongoing",text:"Monthly Support — Full ongoing management with direct access to the TMI team.",active:false},
+    {label:"Step 1",text:"Operations Audit — One call. Free. Custom scoping conversation with the TMI team.",active:false},
+    {label:"Start Here",text:"The AI Wing Build — Custom workflows, financial automation, analytics, and compliance built for your exact operation.",active:true},
+    {label:"Ongoing",text:"AI Department — Full fractional AI department. Direct access to the TMI team. Systems maintained and expanded.",active:false},
   ],
   tier5:[
-    {label:"Step 1",text:"Free Audit — Find your leaks. Custom scoping conversation with the TMI team.",active:false},
-    {label:"Start Here",text:"Full Operation Build — Custom workflows, financial automation, analytics, and compliance built for your exact operation.",active:true},
-    {label:"Ongoing",text:"Monthly Support — Full ongoing management with direct access to the TMI team.",active:false},
+    {label:"Step 1",text:"Operations Audit — One call. Free. Custom scoping conversation with the TMI team.",active:false},
+    {label:"Start Here",text:"The AI Wing Build — Custom multi-crew infrastructure. Every location connected. Standards enforced automatically.",active:true},
+    {label:"Ongoing",text:"AI Department — Full fractional AI department. Direct access to the TMI team. Systems maintained and expanded.",active:false},
   ],
   tier6:[
-    {label:"Step 1",text:"Free Audit — Find your leaks. Custom scoping conversation with TMI.",active:false},
-    {label:"Start Here",text:"Build and Release — Fully custom AI infrastructure. Complete IP ownership at delivery.",active:true},
-    {label:"Optional",text:"Upgrade Retainer — Ongoing retainer for future expansion, new builds, and upgrades.",active:false},
+    {label:"Step 1",text:"Operations Audit — One call. Free. Executive-level scoping conversation with TMI.",active:false},
+    {label:"Start Here",text:"Chief AI Officer Engagement — Private executive engagement. Fully custom AI infrastructure. You own everything built.",active:true},
+    {label:"Optional",text:"AI Department Retainer — Ongoing retainer for future expansion, new builds, and optimization.",active:false},
   ],
   tier7:[
-    {label:"Step 1",text:"Free Audit — Find your leaks. Custom scoping conversation with TMI.",active:false},
-    {label:"Start Here",text:"Build and Release — Fully custom AI infrastructure. Complete IP ownership at delivery.",active:true},
-    {label:"Optional",text:"Upgrade Retainer — Ongoing retainer for future expansion, new builds, and upgrades.",active:false},
+    {label:"Step 1",text:"Operations Audit — One call. Free. Executive-level scoping conversation with TMI.",active:false},
+    {label:"Start Here",text:"Chief AI Officer Engagement — Private executive engagement. Fully custom AI infrastructure. You own everything built.",active:true},
+    {label:"Optional",text:"AI Department Retainer — Ongoing retainer for future expansion, new builds, and optimization.",active:false},
   ],
 };
 
@@ -538,6 +631,7 @@ let currentQ = 0;
 let answers = {};
 let selectedCategory = null;
 let contactInfo = {};
+let businessType = null;
 
 /* ═══════════════════════════════════════════
    SCREEN MANAGEMENT
@@ -572,20 +666,45 @@ function showResults() {
 
 async function submitAuditToAPI(r) {
   try {
-    await fetch('/api/audit-submit', {
+    const openAnswers = OPEN_QS
+      .map(q => answers[q.id] ? q.text + '\n' + answers[q.id] : '')
+      .filter(Boolean).join('\n\n');
+
+    const emailBody = [
+      'Name: ' + contactInfo.name,
+      'Company: ' + contactInfo.company,
+      'Email: ' + contactInfo.email,
+      'Phone: ' + (contactInfo.phone || 'Not provided'),
+      '',
+      'Business Type: ' + (r.bizType === 'online' ? 'Online' : 'Physical / Field'),
+      'Industry: ' + (answers.q2 || 'Not selected'),
+      'Result Tier: ' + TIERS[r.tierKey].name,
+      'Dependency Score: ' + r.depPct + '%',
+      'Worst Category: ' + r.worstCat,
+      '',
+      openAnswers ? 'Open Answers:\n' + openAnswers : '',
+    ].filter(Boolean).join('\n');
+
+    await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ contact: contactInfo, results: r, answers: answers }),
+      body: JSON.stringify({
+        access_key: 'YOUR_WEB3FORMS_ACCESS_KEY',
+        subject: 'New TMI Audit - ' + contactInfo.name + ' | ' + TIERS[r.tierKey].name,
+        from_name: 'TMI Audit',
+        name: contactInfo.name,
+        email: contactInfo.email,
+        message: emailBody,
+      }),
     });
-  } catch(e) {
-    // Silent fail — results already displayed
-  }
+  } catch(e) {}
 }
 
 function retakeAudit() {
   answers = {};
   contactInfo = {};
   selectedCategory = null;
+  businessType = null;
   currentQ = 0;
   document.getElementById('screen-results').classList.add('screen-hidden');
   document.getElementById('screen-results').innerHTML = '';
@@ -600,8 +719,8 @@ const LETTERS = ['A','B','C','D','E','F','G'];
 
 function renderQuestion(idx) {
   currentQ = idx;
-  const pct = ((idx + 1) / 15) * 100;
-  document.getElementById('progress-label').textContent = `Question ${idx + 1} of 15`;
+  const pct = ((idx + 1) / 20) * 100;
+  document.getElementById('progress-label').textContent = `Question ${idx + 1} of 20`;
   document.getElementById('progress-bar').style.width = pct + '%';
 
   const container = document.getElementById('question-container');
@@ -617,18 +736,53 @@ function renderQuestion(idx) {
       </button>`).join('')}
     </div>`;
   } else if (idx === 1) {
-    html = buildQ2HTML();
-  } else if (idx >= 2 && idx <= 13) {
-    const q = SCORED_QS[idx - 2];
-    html = `<div class="q-category">${q.catLabel}</div>
-    <div class="q-text">${q.text}</div>
+    html = `<div class="q-category">Your Business</div>
+    <div class="q-text">Is your business primarily online or a physical operation?</div>
     <div class="q-options">
-      ${q.opts.map((o,i) => `<button class="q-btn" onclick="answerScored('${q.id}',${i},this)">
+      <button class="q-btn" onclick="answerBizType('online',this)">
+        <span class="q-badge">A</span>
+        <span class="q-btn-text">Online - I run a digital business (coaching, courses, creator, e-commerce, digital products)</span>
+      </button>
+      <button class="q-btn" onclick="answerBizType('physical',this)">
+        <span class="q-badge">B</span>
+        <span class="q-btn-text">Physical / Field - I run an operation in the field (trades, construction, oil and gas, manufacturing, fleet, home service)</span>
+      </button>
+    </div>`;
+  } else if (idx === 2) {
+    html = buildQ2HTML();
+  } else if (idx >= 3 && idx <= 14) {
+    const q = SCORED_QS[idx - 3];
+    let qText = q.text;
+    let qOpts = q.opts;
+    if (businessType === 'online') {
+      if (q.id === 'q6') {
+        qText = "When a client has an issue or needs support, how does your team handle it?";
+        qOpts = ["Handled through a documented process - I am never the first contact.","Usually handled by someone on my team for most issues.","Mix - some things handled but I often get pulled in.","Clients contact me directly for almost everything."];
+      } else if (q.id === 'q7') {
+        qText = "Can your business handle fulfillment, onboarding, and client delivery for a full week without you?";
+        qOpts = ["Yes. Fully automated or someone owns it end to end.","Yes but it is manual and things occasionally get missed.","Partially. Things would slow down if I were gone.","No. I manage delivery and onboarding personally."];
+      }
+    }
+    html = `<div class="q-category">${q.catLabel}</div>
+    <div class="q-text">${qText}</div>
+    <div class="q-options">
+      ${qOpts.map((o,i) => `<button class="q-btn" onclick="answerScored('${q.id}',${i},this)">
         <span class="q-badge">${LETTERS[i]}</span>
         <span class="q-btn-text">${o}</span>
       </button>`).join('')}
     </div>`;
-  } else if (idx === 14) {
+  } else if (idx >= 15 && idx <= 18) {
+    const q = OPEN_QS[idx - 15];
+    const saved = answers[q.id] || '';
+    html = `<div class="q-category">${q.catLabel}</div>
+    <div class="q-text">${q.text}</div>
+    <p class="q-open-note">Answer in your own words. There are no right answers - this helps us understand your actual situation before the strategy call.</p>
+    <textarea class="q-textarea" id="open-text-input" placeholder="Write as much or as little as you want...">${saved}</textarea>
+    <div style="display:flex;align-items:center;">
+      <button class="btn btn-primary" onclick="answerOpenText('${q.id}',${idx + 1})">Next &nbsp;&rarr;</button>
+      <button class="q-skip" onclick="answerOpenText('${q.id}',${idx + 1},true)">Skip</button>
+    </div>`;
+  } else if (idx === 19) {
     html = `<div class="q-category">Your Business</div>
     <div class="q-text">Roughly what is your current annual revenue?</div>
     <div class="q-options">
@@ -646,16 +800,18 @@ function renderQuestion(idx) {
 }
 
 function buildQ2HTML() {
-  const catHTML = Q2_CATS.map(c => `
+  const cats = businessType === 'online' ? Q2_CATS_ONLINE : Q2_CATS;
+  const catHTML = cats.map(c => `
     <button class="q2-cat-btn${selectedCategory===c.val?' active':''}" onclick="selectIndustryCat('${c.val}')">${c.label}</button>
   `).join('');
 
   let subsHTML = '';
   if (selectedCategory) {
-    const cat = Q2_CATS.find(c => c.val === selectedCategory);
+    const cat = cats.find(c => c.val === selectedCategory);
     if (cat) {
+      const subsLabel = businessType === 'online' ? 'Select your type' : 'Select your specific trade';
       subsHTML = `<div class="q2-subs-wrap">
-        <div class="q2-subs-label">Select your specific trade</div>
+        <div class="q2-subs-label">${subsLabel}</div>
         <div class="q2-subs">
           ${cat.subs.map(s => `<button class="q2-sub-btn" onclick="answerQ2('${s.val}',this)">${s.label}</button>`).join('')}
         </div>
@@ -664,17 +820,15 @@ function buildQ2HTML() {
   }
 
   return `<div class="q-category">Your Business</div>
-  <div class="q-text">What industry are you in?</div>
+  <div class="q-text">What type of business are you running?</div>
   <div class="q2-cats">${catHTML}</div>
   <div id="q2-subs-container">${subsHTML}</div>`;
 }
 
 function selectIndustryCat(catVal) {
   selectedCategory = catVal;
-  // Re-render just the category buttons and subs without full question animation
   const container = document.getElementById('question-container');
   container.innerHTML = buildQ2HTML();
-  // Scroll subs into view
   setTimeout(() => {
     const subs = document.getElementById('q2-subs-container');
     if (subs) subs.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -692,11 +846,27 @@ function answerQ1(val, pts, btn) {
   setTimeout(() => renderQuestion(1), 180);
 }
 
+function answerBizType(type, btn) {
+  btn.closest('.q-options').querySelectorAll('.q-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  businessType = type;
+  selectedCategory = null;
+  setTimeout(() => renderQuestion(2), 180);
+}
+
 function answerQ2(subVal, btn) {
   btn.closest('.q2-subs').querySelectorAll('.q2-sub-btn').forEach(b=>b.classList.remove('selected'));
   btn.classList.add('selected');
   answers.q2 = subVal;
-  setTimeout(() => renderQuestion(2), 250);
+  setTimeout(() => renderQuestion(3), 250);
+}
+
+function answerOpenText(qid, nextIdx, skip) {
+  if (!skip) {
+    const val = (document.getElementById('open-text-input').value || '').trim();
+    answers[qid] = val;
+  }
+  renderQuestion(nextIdx);
 }
 
 function answerScored(qid, score, btn) {
@@ -704,10 +874,7 @@ function answerScored(qid, score, btn) {
   btn.classList.add('selected');
   answers[qid] = score;
   const nextIdx = currentQ + 1;
-  setTimeout(() => {
-    if (nextIdx >= 15) showResults();
-    else renderQuestion(nextIdx);
-  }, 180);
+  setTimeout(() => renderQuestion(nextIdx), 180);
 }
 
 function answerQ15(val, pts, btn) {
@@ -721,6 +888,17 @@ function answerQ15(val, pts, btn) {
 /* ═══════════════════════════════════════════
    SCORING
 ═══════════════════════════════════════════ */
+function getPainGroupOnline(industryVal) {
+  if (!industryVal) return 'coaching';
+  if (industryVal.startsWith('coaching_')) return 'coaching';
+  if (industryVal.startsWith('education_')) return 'education';
+  if (industryVal.startsWith('creator_')) return 'creator';
+  if (industryVal.startsWith('ecommerce_')) return 'ecommerce';
+  if (industryVal.startsWith('digital_')) return 'digitalproducts';
+  if (industryVal.startsWith('agency_')) return 'agency';
+  return 'coaching';
+}
+
 function getPainGroup(industryVal) {
   if (!industryVal) return 'trades_field';
   if (industryVal.startsWith('trades_')) return 'trades_field';
@@ -773,9 +951,11 @@ function computeResults() {
   const sorted = Object.entries(catPct).sort((a,b)=>b[1]-a[1]);
   const worstCat = sorted[0][0];
   const secondCat = sorted[1][0];
-  const painGroup = getPainGroup(answers.q2);
+  const painGroup = businessType === 'online'
+    ? getPainGroupOnline(answers.q2)
+    : getPainGroup(answers.q2);
 
-  return {tierKey,composite,depPct,catPct,worstCat,secondCat,painGroup};
+  return {tierKey,composite,depPct,catPct,worstCat,secondCat,painGroup,bizType:businessType};
 }
 
 /* ═══════════════════════════════════════════
@@ -805,7 +985,8 @@ function buildResultsHTML(r) {
 
   // Pain points: worst cat + 3 industry pains
   const catPain = CAT_PAIN[r.worstCat];
-  const indPains = INDUSTRY_PAIN[r.painGroup] || INDUSTRY_PAIN.trades_field;
+  const indPainSource = r.bizType === 'online' ? INDUSTRY_PAIN_ONLINE : INDUSTRY_PAIN;
+  const indPains = indPainSource[r.painGroup] || (r.bizType === 'online' ? INDUSTRY_PAIN_ONLINE.coaching : INDUSTRY_PAIN.trades_field);
   const painCards = [catPain, ...indPains].map((p,i) => `
     <div class="res-pain-card">
       <div class="res-pain-title">${p.title}</div>
@@ -816,7 +997,8 @@ function buildResultsHTML(r) {
   const tierStep = TIER_STEPS[r.tierKey];
   const worstStep = CAT_STEPS[r.worstCat];
   const secondStep = CAT_STEPS[r.secondCat];
-  const industryStep = INDUSTRY_STEPS[r.painGroup] || INDUSTRY_STEPS.trades_field;
+  const industryStepSource = r.bizType === 'online' ? INDUSTRY_STEPS_ONLINE : INDUSTRY_STEPS;
+  const industryStep = industryStepSource[r.painGroup] || (r.bizType === 'online' ? INDUSTRY_STEPS_ONLINE.coaching : INDUSTRY_STEPS.trades_field);
   const seen = new Set();
   const roadmapSteps = [tierStep, worstStep, secondStep, industryStep, VISIBILITY_STEP].filter(s => {
     if (seen.has(s.key)) return false;
@@ -900,20 +1082,20 @@ function buildResultsHTML(r) {
     <!-- SUPPORT -->
     <div class="res-support-section">
       <div class="res-container">
-        <div class="eyebrow res-section-eyebrow"><span class="dot"></span>Monthly Support</div>
-        <h2 class="res-section-h2">Stay connected as you grow.</h2>
+        <div class="eyebrow res-section-eyebrow"><span class="dot"></span>The AI Department</div>
+        <h2 class="res-section-h2">TMI stays in after the build.</h2>
         <div class="res-support-grid">
           <div class="res-support-card">
             <div class="res-support-name">Maintain</div>
-            <div class="res-support-desc">Keep your infrastructure running clean. Monitoring, fixes, and regular check-ins.</div>
+            <div class="res-support-desc">Keep your infrastructure running clean. Monitoring, fixes, and regular check-ins. Systems stay current as the business changes.</div>
           </div>
           <div class="res-support-card highlight">
-            <div class="res-support-name">Grow</div>
-            <div class="res-support-desc">Active optimization, new agents added as the business grows, and priority support when you need it.</div>
+            <div class="res-support-name">AI Department</div>
+            <div class="res-support-desc">The full fractional AI department. TMI maintains the systems, builds new ones as the operation grows, and keeps the infrastructure ahead of the business. $5,000 to $15,000 per month.</div>
           </div>
           <div class="res-support-card">
-            <div class="res-support-name">Partner</div>
-            <div class="res-support-desc">Full ongoing management. Direct access to the TMI team. New builds included. Compliance layer covered.</div>
+            <div class="res-support-name">CAO Retainer</div>
+            <div class="res-support-desc">For larger operations — TMI embedded at the leadership level. New builds, strategic AI decisions, and full infrastructure management. Custom pricing.</div>
           </div>
         </div>
       </div>
@@ -927,6 +1109,22 @@ function buildResultsHTML(r) {
         <div class="res-path-steps">${pathHTML}</div>
       </div>
     </div>
+
+    <!-- YOUR ANSWERS -->
+    ${(answers.qOpen1||answers.qOpen2||answers.qOpen3||answers.qOpen4) ? `
+    <div class="res-answers-section">
+      <div class="res-container">
+        <div class="eyebrow res-section-eyebrow"><span class="dot" style="background:#7C6CF2"></span>Your Answers</div>
+        <h2 class="res-section-h2">What you told us.</h2>
+        <div class="res-answers-grid">
+          ${OPEN_QS.map(q => answers[q.id] ? `
+          <div class="res-answer-card">
+            <div class="res-answer-q">${q.text}</div>
+            <div class="res-answer-a">${answers[q.id].replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+          </div>` : '').join('')}
+        </div>
+      </div>
+    </div>` : ''}
 
     <!-- CTA -->
     <div class="res-cta-section">
