@@ -149,9 +149,47 @@ input:focus{border-color:var(--ink);}
 
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1);}
 .reveal.in{opacity:1;transform:none;}
+
+/* INITIAL CHOICE SCREEN */
+.choice-overlay{display:none;position:fixed;inset:0;z-index:300;background:#fff;align-items:center;justify-content:center;padding:32px;}
+.choice-overlay.show{display:flex;}
+.choice-card{max-width:520px;width:100%;text-align:center;}
+.choice-eyebrow{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:28px;}
+.choice-card h2{font-family:var(--serif);font-size:clamp(28px,4vw,44px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;margin-bottom:14px;}
+.choice-card p{font-size:16px;color:var(--ink-2);line-height:1.6;margin-bottom:44px;}
+.choice-buttons{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.choice-btn{padding:28px 24px;border:1.5px solid var(--line-strong);border-radius:4px;cursor:pointer;background:var(--bg);font-family:var(--sans);text-align:left;transition:border-color .15s,background .15s;}
+.choice-btn:hover{border-color:var(--ink);background:var(--bg-alt);}
+.choice-btn-label{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600;}
+.choice-btn-name{font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:-0.01em;color:var(--ink);margin-bottom:6px;}
+.choice-btn-desc{font-size:13px;color:var(--ink-2);line-height:1.5;}
+.choice-btn.selected{border-color:var(--ink);background:var(--ink);}
+.choice-btn.selected .choice-btn-label,.choice-btn.selected .choice-btn-name,.choice-btn.selected .choice-btn-desc{color:#fff;}
+@media(max-width:500px){.choice-buttons{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
+
+<!-- INITIAL BUSINESS TYPE CHOICE -->
+<div class="choice-overlay" id="choice-overlay">
+  <div class="choice-card">
+    <div class="choice-eyebrow">Before we start</div>
+    <h2>What kind of business are you running?</h2>
+    <p>We build different systems for different worlds. Tell us where you operate and we will show you exactly what applies.</p>
+    <div class="choice-buttons">
+      <button class="choice-btn" onclick="chooseType('physical')">
+        <div class="choice-btn-label">Field &amp; Physical</div>
+        <div class="choice-btn-name">Physical Business</div>
+        <div class="choice-btn-desc">Trades, field service, construction, manufacturing, logistics</div>
+      </button>
+      <button class="choice-btn" onclick="chooseType('online')">
+        <div class="choice-btn-label">Digital &amp; Online</div>
+        <div class="choice-btn-name">Online Business</div>
+        <div class="choice-btn-desc">Coaches, creators, e-commerce, courses, digital products</div>
+      </button>
+    </div>
+  </div>
+</div>
 
 <header class="f-header">
   <div class="f-header-inner">
@@ -165,8 +203,8 @@ input:focus{border-color:var(--ink);}
 <section class="f-hero">
   <div class="container-narrow">
     <div class="f-eyebrow"><div class="f-eyebrow-dot"></div><span id="chip-label">AI Infrastructure for Business Operators</span></div>
-    <h1>Your business runs on you.<br><em>It shouldn't have to.</em></h1>
-    <p class="f-hero-deck" id="hero-sub-text">Most business owners are the answer to every question their operation has. We build the systems that change that - so the business runs without you in the middle of everything.</p>
+    <h1>Your business is <em>leaking.</em><br>Let's find where.</h1>
+    <p class="f-hero-deck" id="hero-sub-text">Most operations lose 12-18% of potential revenue to gaps in how information flows through the business. Before we build anything, we need to see exactly where yours is breaking.</p>
 
     <div class="biz-toggle-wrap">
       <div class="biz-toggle">
@@ -187,8 +225,8 @@ input:focus{border-color:var(--ink);}
 <section class="f-pain">
   <div class="container-narrow">
     <div class="f-section-label reveal">What is actually happening</div>
-    <h2 class="reveal">You are the most expensive<br>bottleneck in your business.</h2>
-    <p class="f-pain-intro reveal" id="pain-intro-text">When dispatch, invoicing, quoting, follow-up, and reporting all route through one person - you - the operation can only grow as fast as you can personally handle it. That is not a people problem. It is a systems problem.</p>
+    <h2 class="reveal">You are the answer to every<br>question your business has.</h2>
+    <p class="f-pain-intro reveal" id="pain-intro-text">When dispatch, invoicing, quoting, follow-up, and reporting all route through you, the operation cannot grow past what you can personally handle. That is not a character flaw. It is a missing infrastructure problem.</p>
 
     <div id="pain-physical" class="pain-list reveal">
       <div class="pain-item">
@@ -357,23 +395,58 @@ const modal = document.getElementById('modal');
 const modalNo = document.getElementById('modal-no');
 const calSection = document.getElementById('cal-section');
 
+// ── REFERRER DETECTION ──
+function detectBizType() {
+  // 1. URL param (e.g. funnel.html?type=online)
+  const param = new URLSearchParams(window.location.search).get('type');
+  if (param === 'online' || param === 'physical') return param;
+
+  // 2. SessionStorage (returning within session)
+  const stored = sessionStorage.getItem('tmi_biz_type');
+  if (stored === 'online' || stored === 'physical') return stored;
+
+  // 3. Referrer detection
+  const ref = document.referrer || '';
+  if (ref.includes('online.tmitechai.com') || ref.includes('online-') || ref.includes('/coaches') || ref.includes('/creators') || ref.includes('/courses') || ref.includes('/ecom') || ref.includes('/info')) return 'online';
+  if (ref.includes('trades.tmitechai.com') || ref.includes('stratum') || ref.includes('oil-gas') || ref.includes('construction') || ref.includes('mining') || ref.includes('agriculture') || ref.includes('manufacturing') || ref.includes('fleet') || ref.includes('trades')) return 'physical';
+
+  return null; // unknown - show choice screen
+}
+
+function chooseType(type) {
+  sessionStorage.setItem('tmi_biz_type', type);
+  document.getElementById('choice-overlay').classList.remove('show');
+  switchBizType(type);
+}
+
 function switchBizType(type) {
   document.querySelectorAll('.biz-tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`.biz-tab[data-type="${type}"]`).classList.add('active');
   document.getElementById('biz-type-input').value = type;
+  sessionStorage.setItem('tmi_biz_type', type);
   const isOnline = type === 'online';
   document.getElementById('pain-physical').style.display = isOnline ? 'none' : '';
   document.getElementById('pain-online').style.display = isOnline ? '' : 'none';
   document.getElementById('chip-label').textContent = isOnline
     ? 'AI Infrastructure for Online Business'
-    : 'AI Infrastructure for Business Operators';
+    : 'AI Infrastructure for Field Operations';
   document.getElementById('hero-sub-text').textContent = isOnline
-    ? 'Most online businesses lose 20-30% of potential revenue to gaps in follow-up, fulfilment, and retention. We build the systems that close those gaps - done for you, custom-built, yours forever.'
-    : 'Most business owners are the answer to every question their operation has. We build the systems that change that - so the business runs without you in the middle of everything.';
+    ? 'Most online businesses lose 20-30% of potential revenue to gaps in follow-up, fulfilment, and retention. Before we build anything, we need to see exactly where yours is breaking.'
+    : 'Most operations lose 12-18% of potential revenue to gaps in how information flows through the business. Before we build anything, we need to see exactly where yours is breaking.';
   document.getElementById('pain-intro-text').textContent = isOnline
-    ? 'When onboarding, follow-up, launches, and client management all route through you personally, the business can only grow as fast as you can personally handle it. That is a systems problem.'
-    : 'When dispatch, invoicing, quoting, follow-up, and reporting all route through one person - you - the operation can only grow as fast as you can personally handle it. That is not a people problem. It is a systems problem.';
+    ? 'When onboarding, follow-up, launches, and client management all route through you personally, the business can only grow as fast as you can handle it. That is a missing infrastructure problem.'
+    : 'When dispatch, invoicing, quoting, follow-up, and reporting all route through you, the operation cannot grow past what you can personally handle. That is not a character flaw. It is a missing infrastructure problem.';
 }
+
+// ── INIT ──
+(function init() {
+  const detected = detectBizType();
+  if (detected) {
+    switchBizType(detected);
+  } else {
+    document.getElementById('choice-overlay').classList.add('show');
+  }
+})();
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
