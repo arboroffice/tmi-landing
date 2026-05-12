@@ -301,6 +301,50 @@ footer {
   .footer-bottom { flex-direction: column; gap: 10px; text-align: center; }
 }
 
+/* BLOGS SECTION */
+.blogs-section {
+  padding: 100px 0; border-top: 1px solid rgba(255,255,255,0.06); background: var(--bg-dark);
+}
+.blogs-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255,255,255,0.3); margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+}
+.blogs-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--chart); opacity: 0.5; }
+.blogs-section h2 {
+  font-family: var(--serif); font-size: clamp(30px, 4vw, 52px); font-weight: 400;
+  letter-spacing: -0.02em; line-height: 1.05; color: #fff; margin-bottom: 56px; max-width: 18ch;
+}
+.blogs-section h2 em { color: var(--chart); font-style: italic; }
+.blogs-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+  background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden;
+}
+.blog-card {
+  background: var(--bg-dark); padding: 48px 44px;
+  display: flex; flex-direction: column; gap: 20px;
+  transition: background 0.2s;
+}
+.blog-card:hover { background: #0f1020; }
+.blog-tag {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--chart); border: 1px solid rgba(228,255,151,0.25); border-radius: 999px;
+  padding: 4px 12px; display: inline-block; width: fit-content;
+}
+.blog-card h3 {
+  font-family: var(--serif); font-size: clamp(22px, 2vw, 30px); font-weight: 400;
+  letter-spacing: -0.01em; color: #fff; line-height: 1.2;
+}
+.blog-card p {
+  font-size: 15px; color: rgba(255,255,255,0.4); line-height: 1.65; max-width: 40ch;
+}
+.blog-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--chart); transition: gap 0.2s;
+}
+.blog-card:hover .blog-link { gap: 14px; }
+@media(max-width:640px) { .blogs-grid { grid-template-columns: 1fr; } .blog-card { padding: 36px 28px; } }
+
 /* REVEAL */
 .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.2,.7,.2,1); }
 .reveal.in { opacity: 1; transform: translateY(0); }
@@ -404,6 +448,30 @@ footer {
   </div>
 </section>
 
+<!-- BLOGS -->
+<section class="blogs-section">
+  <div class="container">
+    <div class="reveal">
+      <div class="blogs-label">From the community</div>
+      <h2>Two blogs. <em>One mission.</em></h2>
+    </div>
+    <div class="blogs-grid reveal reveal-d1">
+      <a class="blog-card" href="https://trades.tmitechai.com/news.html">
+        <div class="blog-tag">Physical Economy</div>
+        <h3>Field Notes</h3>
+        <p>Operations, systems, and what it actually takes to run a field business that doesn't depend on the owner being everywhere at once. Written for trades, construction, and physical economy operators.</p>
+        <span class="blog-link">Browse Field Notes &rarr;</span>
+      </a>
+      <a class="blog-card" href="https://online.tmitechai.com/news-online.html">
+        <div class="blog-tag">Online Business</div>
+        <h3>Operator Notes</h3>
+        <p>Growth, leverage, and the infrastructure behind online businesses that scale without burning out. For coaches, creators, consultants, and digital operators building something that runs without them.</p>
+        <span class="blog-link">Browse Operator Notes &rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- BOTTOM CTA -->
 <section class="cta-strip">
   <div class="container-sm">
@@ -439,8 +507,6 @@ footer {
         <div class="footer-col">
           <h5>Company</h5>
           <a href="https://trades.tmitechai.com/about.html">About</a>
-          <a href="https://trades.tmitechai.com/news.html">Field Notes</a>
-          <a href="https://online.tmitechai.com/news-online.html">Online Blog</a>
           <a href="founders.html">Founders of the Future</a>
           <a href="https://trades.tmitechai.com/funnel.html">Apply</a>
         </div>
@@ -483,7 +549,7 @@ async function handleSubmit(formId, successId) {
       if (note) note.style.display = 'none';
     }
     // Beehiiv API subscribe
-    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'founders_page' }) }); } catch(err) {}
+    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'founders_page', audience: 'fotf' }) }); } catch(err) {}
     // Formsubmit email notification
     try {
       const fd = new FormData();

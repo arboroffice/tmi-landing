@@ -104,9 +104,12 @@ p{margin:0;}h1,h2,h3,h4{margin:0;}
 .f-form-sub{font-size:14px;color:var(--muted);margin-bottom:28px;}
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
 label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
-input{background:var(--bg);border:1px solid var(--line-strong);border-radius:4px;padding:13px 16px;font-family:var(--sans);font-size:15px;color:var(--ink);outline:none;transition:border-color .15s;width:100%;}
+input,select{background:var(--bg);border:1px solid var(--line-strong);border-radius:4px;padding:13px 16px;font-family:var(--sans);font-size:15px;color:var(--ink);outline:none;transition:border-color .15s;width:100%;}
 input::placeholder{color:var(--muted);}
-input:focus{border-color:var(--ink);}
+input:focus,select:focus{border-color:var(--ink);}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2386868b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;cursor:pointer;}
+select option[value=""]{color:var(--muted);}
+select:invalid{color:var(--muted);}
 .submit-btn{width:100%;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--ink);color:#fff;font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:0.02em;padding:16px 32px;border-radius:4px;border:none;cursor:pointer;transition:background .15s,transform .12s;}
 .submit-btn:hover{background:#2a2a2a;transform:translateY(-1px);}
 .submit-btn:disabled{opacity:.5;cursor:default;transform:none;}
@@ -326,6 +329,12 @@ input:focus{border-color:var(--ink);}
           <label for="company">Business name</label>
           <input type="text" id="company" name="Company" placeholder="Your company"/>
         </div>
+        <div class="field" id="niche-field">
+          <label for="niche">Your industry / niche</label>
+          <select id="niche" name="Niche">
+            <option value="">Select your niche...</option>
+          </select>
+        </div>
         <button type="submit" class="submit-btn" id="submit-btn">
           Apply to Work with TMI
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -413,11 +422,28 @@ function chooseType(type) {
   switchBizType(type);
 }
 
+const NICHES = {
+  physical: ['HVAC', 'Construction', 'Plumbing', 'Electrical', 'Roofing', 'Landscaping', 'Manufacturing', 'Oil & Gas', 'Mining', 'Fleet / Logistics', 'Other Trades'],
+  online: ['Coaching', 'Online Courses', 'E-commerce', 'Creator / Content', 'Consulting', 'Digital Products', 'Other Online'],
+};
+
+function populateNiche(type) {
+  const sel = document.getElementById('niche');
+  sel.innerHTML = '<option value="">Select your niche...</option>';
+  (NICHES[type] || []).forEach(n => {
+    const o = document.createElement('option');
+    o.value = n.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    o.textContent = n;
+    sel.appendChild(o);
+  });
+}
+
 function switchBizType(type) {
   document.querySelectorAll('.biz-tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`.biz-tab[data-type="${type}"]`).classList.add('active');
   document.getElementById('biz-type-input').value = type;
   sessionStorage.setItem('tmi_biz_type', type);
+  populateNiche(type);
   const isOnline = type === 'online';
   document.getElementById('pain-physical').style.display = isOnline ? 'none' : '';
   document.getElementById('pain-online').style.display = isOnline ? '' : 'none';
@@ -452,6 +478,7 @@ form.addEventListener('submit', async (e) => {
   const email = document.getElementById('email').value;
   const phone = document.getElementById('phone').value;
   const company = document.getElementById('company').value;
+  const niche = document.getElementById('niche').value;
 
   try {
     const fd = new FormData();
@@ -464,6 +491,7 @@ form.addEventListener('submit', async (e) => {
       'Phone: ' + phone,
       'Company: ' + (company || 'Not provided'),
       'Business Type: ' + (bizType === 'online' ? 'Online Business' : 'Physical / Field Business'),
+      'Niche: ' + (niche || 'Not selected'),
       '',
       'Submitted from funnel.html',
     ].join('\n'));
@@ -473,6 +501,9 @@ form.addEventListener('submit', async (e) => {
       body: fd,
     });
   } catch(err) {}
+
+  // Subscribe to Beehiiv with audience + niche segmentation
+  try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'funnel', audience: bizType || 'physical', niche: niche || undefined }) }); } catch(err) {}
 
   // Save to FOTF list
   try { const l = JSON.parse(localStorage.getItem('fotf_signups') || '[]'); if (!l.find(e => e.email === email)) { l.push({ email, date: new Date().toISOString(), source: 'funnel' }); localStorage.setItem('fotf_signups', JSON.stringify(l)); } } catch(err) {}

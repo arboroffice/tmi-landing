@@ -5,8 +5,12 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, source } = req.body || {};
+  const { email, source, audience, niche } = req.body || {};
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Invalid email' });
+
+  const customFields = [];
+  if (audience) customFields.push({ name: 'Audience', value: audience });
+  if (niche) customFields.push({ name: 'Business Niche', value: niche });
 
   try {
     const r = await fetch(
@@ -23,6 +27,7 @@ module.exports = async function handler(req, res) {
           send_welcome_email: true,
           utm_source: source || 'website',
           utm_medium: 'inline_form',
+          ...(customFields.length ? { custom_fields: customFields } : {}),
         }),
       }
     );

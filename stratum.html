@@ -1173,7 +1173,7 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     e.preventDefault();
     const email = form.querySelector('input').value;
     form.style.display = 'none'; ok.style.display = 'block';
-    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'trades' }) }); } catch(err) {}
+    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'trades', audience: 'physical' }) }); } catch(err) {}
     try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from trades page\nEmail: ' + email); fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
   });
 })();
