@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Invoices — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Invoices</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Invoice
+        </button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- Summary bar -->
+      <div class="stats-row" id="inv-stats" style="grid-template-columns:repeat(4,1fr)"></div>
+
+      <div class="sec-head" style="margin-top:8px">
+        <h1>Invoices</h1>
+        <span class="filter-count" id="inv-count"></span>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search description, invoice #..." oninput="renderTable()"/>
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="viewed">Viewed</option>
+          <option value="paid">Paid</option>
+          <option value="overdue">Overdue</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Invoice #</th><th>Client / Contact</th><th>Amount</th><th>Status</th><th>Due</th><th>Created</th><th></th>
+            </tr></thead>
+            <tbody id="inv-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide panel -->
+<div class="panel-overlay" id="inv-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('inv-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-inv-num">Invoice</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="markPaid()">Mark Paid</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteInvoice()">Delete</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid" id="panel-inv-details"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Description</div>
+      <p id="panel-inv-desc" style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-top:8px;"></p>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Update Status</div>
+      <select class="form-input" id="panel-inv-status" style="margin-top:8px;max-width:200px" onchange="updateStatus()">
+        <option value="pending">Pending</option>
+        <option value="viewed">Viewed</option>
+        <option value="paid">Paid</option>
+        <option value="overdue">Overdue</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Add modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title">New Invoice</h2>
+      <button class="modal-x" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Invoice #</label>
+        <input class="form-input" id="f-number" placeholder="e.g. INV-001"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount ($)</label>
+        <input class="form-input" id="f-amount" type="number" step="0.01" placeholder="0.00"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <input class="form-input" id="f-desc" placeholder="What is this invoice for?"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="f-status">
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Due Date</label>
+        <input class="form-input" id="f-due" type="date"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="f-notes" rows="2" placeholder="Internal notes..."></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('invoices');
+
+let allInvoices = [];
+let currentInvoice = null;
+
+async function loadInvoices() {
+  allInvoices = await TMIAdmin.api('/api/invoices') || [];
+  renderStats();
+  renderTable();
+}
+
+function renderStats() {
+  const total = allInvoices.reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+  const paid = allInvoices.filter(i => i.status === 'paid').reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+  const pending = allInvoices.filter(i => i.status === 'pending').reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+  const overdue = allInvoices.filter(i => i.status === 'overdue').length;
+  document.getElementById('inv-stats').innerHTML = `
+    <div class="stat-box"><div class="stat-label">Total Invoiced</div><div class="stat-val">$${total.toLocaleString()}</div></div>
+    <div class="stat-box"><div class="stat-label">Collected</div><div class="stat-val" style="color:var(--green)">$${paid.toLocaleString()}</div></div>
+    <div class="stat-box"><div class="stat-label">Outstanding</div><div class="stat-val">$${pending.toLocaleString()}</div></div>
+    <div class="stat-box"><div class="stat-label">Overdue</div><div class="stat-val" style="color:var(--red)">${overdue}</div></div>
+  `;
+}
+
+function clientName(inv) {
+  const c = inv.clients?.contacts || inv.contacts;
+  if (!c) return '-';
+  return `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.company || '-';
+}
+
+function renderTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const st = document.getElementById('filter-status').value;
+
+  const rows = allInvoices.filter(i => {
+    if (st && i.status !== st) return false;
+    const name = clientName(i).toLowerCase();
+    if (q && !`${i.number || ''} ${i.description || ''} ${name}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  document.getElementById('inv-count').textContent = `${rows.length} invoice${rows.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('inv-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🧾</div><h3>No invoices</h3><p>Create your first invoice above.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(i => `
+    <tr onclick="openPanel('${i.id}')">
+      <td class="td-name">${i.number || '-'}</td>
+      <td>${clientName(i)}</td>
+      <td style="font-weight:600">$${parseFloat(i.amount).toLocaleString()}</td>
+      <td>${TMIAdmin.badge(i.status)}</td>
+      <td class="td-muted">${i.due_date ? TMIAdmin.fmt(i.due_date) : '-'}</td>
+      <td class="td-muted">${TMIAdmin.fmt(i.created_at)}</td>
+      <td class="td-action"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPanel('${i.id}')">View</button></td>
+    </tr>
+  `).join('');
+}
+
+function openPanel(id) {
+  currentInvoice = allInvoices.find(i => i.id === id);
+  if (!currentInvoice) return;
+  const i = currentInvoice;
+  document.getElementById('panel-inv-num').textContent = i.number || 'Invoice';
+  document.getElementById('panel-inv-desc').textContent = i.description || i.notes || '-';
+  document.getElementById('panel-inv-status').value = i.status;
+  document.getElementById('panel-inv-details').innerHTML = `
+    <div class="detail-item"><div class="detail-label">Amount</div><div class="detail-val" style="font-size:22px;font-weight:700">$${parseFloat(i.amount).toLocaleString()}</div></div>
+    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(i.status)}</div></div>
+    <div class="detail-item"><div class="detail-label">Client</div><div class="detail-val">${clientName(i)}</div></div>
+    <div class="detail-item"><div class="detail-label">Due Date</div><div class="detail-val">${i.due_date ? TMIAdmin.fmt(i.due_date) : '-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Created</div><div class="detail-val">${TMIAdmin.fmt(i.created_at)}</div></div>
+    ${i.paid_at ? `<div class="detail-item"><div class="detail-label">Paid</div><div class="detail-val">${TMIAdmin.fmt(i.paid_at)}</div></div>` : ''}
+  `;
+  TMIAdmin.openPanel('inv-panel');
+}
+
+async function updateStatus() {
+  if (!currentInvoice) return;
+  const status = document.getElementById('panel-inv-status').value;
+  const res = await TMIAdmin.api('/api/invoices', 'PUT', { id: currentInvoice.id, status });
+  if (res) {
+    currentInvoice.status = status;
+    TMIAdmin.toast('Status updated');
+    await loadInvoices();
+  }
+}
+
+async function markPaid() {
+  if (!currentInvoice) return;
+  const res = await TMIAdmin.api('/api/invoices', 'PUT', { id: currentInvoice.id, status: 'paid' });
+  if (res) {
+    TMIAdmin.toast('Marked as paid');
+    TMIAdmin.closePanel('inv-panel');
+    await loadInvoices();
+  }
+}
+
+async function deleteInvoice() {
+  if (!currentInvoice) return;
+  const ok = await TMIAdmin.confirm('Delete this invoice?', false);
+  if (!ok) return;
+  const res = await TMIAdmin.api('/api/invoices', 'DELETE', { id: currentInvoice.id });
+  if (res) {
+    TMIAdmin.toast('Deleted');
+    TMIAdmin.closePanel('inv-panel');
+    await loadInvoices();
+  }
+}
+
+function openAddModal() {
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeModal() { document.getElementById('add-modal').classList.remove('open'); }
+
+async function saveInvoice() {
+  const amount = parseFloat(document.getElementById('f-amount').value);
+  if (!amount) { TMIAdmin.toast('Amount required', 'error'); return; }
+  const res = await TMIAdmin.api('/api/invoices', 'POST', {
+    number: document.getElementById('f-number').value || null,
+    amount,
+    description: document.getElementById('f-desc').value,
+    status: document.getElementById('f-status').value,
+    due_date: document.getElementById('f-due').value || null,
+    notes: document.getElementById('f-notes').value || null,
+  });
+  if (res) {
+    TMIAdmin.toast('Invoice created');
+    closeModal();
+    await loadInvoices();
+  }
+}
+
+loadInvoices();
+</script>
+</body>
+</html>

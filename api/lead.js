@@ -74,28 +74,42 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { name, email, phone } = req.body || {};
+  const { name, email, phone, company, audience, niche, message } = req.body || {};
   if (!name || !email) return res.status(400).json({ error: 'Missing required fields' });
 
   const firstName = name.split(' ')[0];
 
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-  const { data: lead, error: dbError } = await supabase
-    .from('leads')
-    .insert({ name, email: email.toLowerCase(), phone: phone || null, status: 'new' })
+  // Support both env var names for Supabase key
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabase = createClient(process.env.SUPABASE_URL, supabaseKey);
+
+  // Write to applications table (CRM inbox)
+  const { data: app, error: dbError } = await supabase
+    .from('applications')
+    .insert({
+      name,
+      email: email.toLowerCase(),
+      phone: phone || null,
+      company: company || null,
+      audience: audience || null,
+      niche: niche || null,
+      message: message || null,
+      source: 'funnel',
+      status: 'new',
+    })
     .select()
     .single();
 
   if (dbError) {
     console.error('Supabase error:', dbError);
-    return res.status(500).json({ error: 'Failed to save lead' });
+    return res.status(500).json({ error: 'Failed to save application' });
   }
 
-  const unsubUrl = `${SITE}/api/unsubscribe?id=${lead.id}`;
+  const unsubUrl = `${SITE}/api/unsubscribe?id=${app.id}`;
   const resend = new Resend(process.env.RESEND_API_KEY);
   const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-  // Initial email — from Mia
+  // Initial email
   resend.emails.send({
     from: 'Mia at TMI <hello@tmitechai.com>',
     to: email,
@@ -103,7 +117,7 @@ module.exports = async function handler(req, res) {
     html: buildInitialEmail(firstName, unsubUrl),
   }).catch(e => console.error('Resend error:', e));
 
-  // SMS to lead — no name, just TMI
+  // SMS to lead
   if (phone) {
     sms.messages.create({
       body: `Hey ${firstName} - got your application. Going through your operation now, we'll be in touch. Talk sooner: ${SITE}/booking`,
@@ -112,10 +126,10 @@ module.exports = async function handler(req, res) {
     }).catch(e => console.error('Lead SMS error:', e));
   }
 
-  // Internal alert — two texts: contact + pitch brief
+  // Internal alerts
   const domain = email.split('@')[1] || '';
   sms.messages.create({
-    body: `New lead: ${name}\n${email}\n${phone || 'no phone'}\nCo: ${domain}`,
+    body: `New application: ${name}\n${email}\n${phone || 'no phone'}\nCo: ${company || domain}${audience ? '\nAudience: ' + audience : ''}${niche ? ' / ' + niche : ''}`,
     from: FROM_NUMBER,
     to: ALERT_NUMBER,
   }).catch(e => console.error('Alert SMS 1 error:', e));
@@ -141,7 +155,7 @@ module.exports = async function handler(req, res) {
     qstash.publishJSON({
       url: followupUrl,
       delay,
-      body: { leadId: lead.id, step },
+      body: { applicationId: app.id, step },
     }).catch(e => console.error(`QStash ${step} error:`, e));
   }
 

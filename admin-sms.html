@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SMS — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">SMS</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openCompose()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Send SMS
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>SMS Outreach</h1>
+        <span class="filter-count" id="sms-count"></span>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search messages..." oninput="renderTable()"/>
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">All</option>
+          <option value="sent">Sent</option>
+          <option value="delivered">Delivered</option>
+          <option value="failed">Failed</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>To</th><th>Contact</th><th>Message</th><th>Status</th><th>Sent</th>
+            </tr></thead>
+            <tbody id="sms-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Compose modal -->
+<div class="modal-overlay" id="compose-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title">Send SMS</h2>
+      <button class="modal-x" onclick="closeCompose()">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Phone Number</label>
+      <input class="form-input" id="c-phone" placeholder="+1 (555) 000-0000" type="tel"/>
+      <div class="form-hint">Include country code or US will be assumed.</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Message</label>
+      <textarea class="form-input" id="c-body" rows="5" placeholder="Type your message..." oninput="updateCharCount()"></textarea>
+      <div class="sms-char-count" id="char-count">0 / 160</div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeCompose()">Cancel</button>
+      <button class="btn btn-primary" id="send-btn" onclick="sendSMS()">Send Message</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('sms');
+
+let allSMS = [];
+
+async function loadSMS() {
+  allSMS = await TMIAdmin.api('/api/sms') || [];
+  renderTable();
+}
+
+function renderTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const st = document.getElementById('filter-status').value;
+  const rows = allSMS.filter(s => {
+    if (st && s.status !== st) return false;
+    if (q && !`${s.phone} ${s.body} ${contactName(s)}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('sms-count').textContent = `${rows.length} message${rows.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('sms-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">💬</div><h3>No messages</h3><p>Sent messages will appear here.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(s => `
+    <tr>
+      <td class="td-name">${s.phone}</td>
+      <td>${contactName(s)}</td>
+      <td style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--ink-2)">${s.body}</td>
+      <td>${TMIAdmin.badge(s.status)}</td>
+      <td class="td-muted">${TMIAdmin.fmt(s.created_at)}</td>
+    </tr>
+  `).join('');
+}
+
+function contactName(s) {
+  const c = s.contacts;
+  if (!c) return '';
+  return `${c.first_name || ''} ${c.last_name || ''}`.trim();
+}
+
+function openCompose() { document.getElementById('compose-modal').classList.add('open'); }
+function closeCompose() { document.getElementById('compose-modal').classList.remove('open'); }
+
+function updateCharCount() {
+  const len = document.getElementById('c-body').value.length;
+  document.getElementById('char-count').textContent = `${len} / 160`;
+  document.getElementById('char-count').style.color = len > 160 ? 'var(--red)' : 'var(--muted)';
+}
+
+async function sendSMS() {
+  const phone = document.getElementById('c-phone').value.trim();
+  const body = document.getElementById('c-body').value.trim();
+  if (!phone || !body) { TMIAdmin.toast('Phone and message required', 'error'); return; }
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  const res = await TMIAdmin.api('/api/sms', 'POST', { phone, body });
+  btn.disabled = false; btn.textContent = 'Send Message';
+  if (res) {
+    if (res.ok) {
+      TMIAdmin.toast('Message sent');
+      closeCompose();
+      document.getElementById('c-phone').value = '';
+      document.getElementById('c-body').value = '';
+      updateCharCount();
+      await loadSMS();
+    } else {
+      TMIAdmin.toast('Send failed - check Twilio config', 'error');
+    }
+  }
+}
+
+loadSMS();
+</script>
+</body>
+</html>

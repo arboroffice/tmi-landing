@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Proposals — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Proposals</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Proposal
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Proposals</h1>
+        <span class="filter-count" id="prop-count"></span>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search proposals..." oninput="renderTable()"/>
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option value="draft">Draft</option>
+          <option value="sent">Sent</option>
+          <option value="viewed">Viewed</option>
+          <option value="accepted">Accepted</option>
+          <option value="declined">Declined</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Title</th><th>Contact</th><th>Total</th><th>Status</th><th>Sent</th><th>Expires</th><th></th>
+            </tr></thead>
+            <tbody id="prop-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide panel -->
+<div class="panel-overlay" id="prop-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('prop-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-prop-title">Proposal</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="markSent()">Mark Sent</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteProposal()">Delete</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid" id="panel-prop-details"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Update Status</div>
+      <select class="form-input" id="panel-prop-status" style="margin-top:8px;max-width:220px" onchange="updatePropStatus()">
+        <option value="draft">Draft</option>
+        <option value="sent">Sent</option>
+        <option value="viewed">Viewed</option>
+        <option value="accepted">Accepted</option>
+        <option value="declined">Declined</option>
+      </select>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Notes</div>
+      <textarea class="form-input" id="panel-prop-notes" rows="3" style="margin-top:8px" placeholder="Notes..."></textarea>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="saveNotes()">Save Notes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title" id="modal-title-text">New Proposal</h2>
+      <button class="modal-x" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input class="form-input" id="f-title" placeholder="Proposal title" required/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Total ($)</label>
+        <input class="form-input" id="f-total" type="number" step="0.01" placeholder="0.00"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="f-status">
+          <option value="draft">Draft</option>
+          <option value="sent">Sent</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Expires</label>
+        <input class="form-input" id="f-expires" type="date"/>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <label class="form-label" style="margin:0">Line Items</label>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addLineItem()">+ Add item</button>
+      </div>
+      <div id="line-items-list"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="f-notes" rows="2" placeholder="Internal notes..."></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProposal()">Save Proposal</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('proposals');
+
+let allProposals = [];
+let currentProposal = null;
+let editId = null;
+let lineItems = [];
+
+async function loadProposals() {
+  allProposals = await TMIAdmin.api('/api/proposals') || [];
+  renderTable();
+}
+
+function contactName(p) {
+  const c = p.contacts;
+  if (!c) return '-';
+  return `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.company || '-';
+}
+
+function renderTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const st = document.getElementById('filter-status').value;
+  const rows = allProposals.filter(p => {
+    if (st && p.status !== st) return false;
+    if (q && !`${p.title} ${contactName(p)}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('prop-count').textContent = `${rows.length} proposal${rows.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('prop-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📄</div><h3>No proposals</h3><p>Create your first proposal above.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(p => `
+    <tr onclick="openPanel('${p.id}')">
+      <td class="td-name">${p.title}</td>
+      <td>${contactName(p)}</td>
+      <td>${p.total ? '$' + parseFloat(p.total).toLocaleString() : '<span class="td-muted">-</span>'}</td>
+      <td>${TMIAdmin.badge(p.status)}</td>
+      <td class="td-muted">${p.sent_at ? TMIAdmin.fmt(p.sent_at) : '-'}</td>
+      <td class="td-muted">${p.expires_at ? TMIAdmin.fmt(p.expires_at) : '-'}</td>
+      <td class="td-action"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPanel('${p.id}')">View</button></td>
+    </tr>
+  `).join('');
+}
+
+function openPanel(id) {
+  currentProposal = allProposals.find(p => p.id === id);
+  if (!currentProposal) return;
+  const p = currentProposal;
+  document.getElementById('panel-prop-title').textContent = p.title;
+  document.getElementById('panel-prop-status').value = p.status;
+  document.getElementById('panel-prop-notes').value = p.notes || '';
+  document.getElementById('panel-prop-details').innerHTML = `
+    <div class="detail-item"><div class="detail-label">Total</div><div class="detail-val" style="font-size:22px;font-weight:700">${p.total ? '$' + parseFloat(p.total).toLocaleString() : '-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(p.status)}</div></div>
+    <div class="detail-item"><div class="detail-label">Contact</div><div class="detail-val">${contactName(p)}</div></div>
+    <div class="detail-item"><div class="detail-label">Created</div><div class="detail-val">${TMIAdmin.fmt(p.created_at)}</div></div>
+    ${p.sent_at ? `<div class="detail-item"><div class="detail-label">Sent</div><div class="detail-val">${TMIAdmin.fmt(p.sent_at)}</div></div>` : ''}
+    ${p.expires_at ? `<div class="detail-item"><div class="detail-label">Expires</div><div class="detail-val">${TMIAdmin.fmt(p.expires_at)}</div></div>` : ''}
+  `;
+  TMIAdmin.openPanel('prop-panel');
+}
+
+async function updatePropStatus() {
+  if (!currentProposal) return;
+  const status = document.getElementById('panel-prop-status').value;
+  const res = await TMIAdmin.api('/api/proposals', 'PUT', { id: currentProposal.id, status });
+  if (res) { currentProposal.status = status; TMIAdmin.toast('Status updated'); await loadProposals(); }
+}
+
+async function markSent() {
+  if (!currentProposal) return;
+  const res = await TMIAdmin.api('/api/proposals', 'PUT', { id: currentProposal.id, status: 'sent' });
+  if (res) { TMIAdmin.toast('Marked as sent'); TMIAdmin.closePanel('prop-panel'); await loadProposals(); }
+}
+
+async function saveNotes() {
+  if (!currentProposal) return;
+  const notes = document.getElementById('panel-prop-notes').value;
+  await TMIAdmin.api('/api/proposals', 'PUT', { id: currentProposal.id, notes });
+  TMIAdmin.toast('Notes saved');
+}
+
+async function deleteProposal() {
+  if (!currentProposal) return;
+  const ok = await TMIAdmin.confirm('Delete this proposal?', false);
+  if (!ok) return;
+  const res = await TMIAdmin.api('/api/proposals', 'DELETE', { id: currentProposal.id });
+  if (res) { TMIAdmin.toast('Deleted'); TMIAdmin.closePanel('prop-panel'); await loadProposals(); }
+}
+
+// Line items
+function addLineItem() {
+  lineItems.push({ description: '', amount: 0 });
+  renderLineItems();
+}
+function removeLineItem(i) { lineItems.splice(i, 1); renderLineItems(); }
+function renderLineItems() {
+  document.getElementById('line-items-list').innerHTML = lineItems.map((item, i) => `
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+      <input class="form-input" style="flex:1" value="${item.description}" placeholder="Description" oninput="lineItems[${i}].description=this.value"/>
+      <input class="form-input" style="width:100px" type="number" value="${item.amount}" placeholder="$" oninput="lineItems[${i}].amount=parseFloat(this.value)||0"/>
+      <button type="button" class="btn btn-ghost btn-sm" style="color:var(--red);flex-shrink:0" onclick="removeLineItem(${i})">x</button>
+    </div>
+  `).join('');
+  updateTotal();
+}
+function updateTotal() {
+  const total = lineItems.reduce((s, i) => s + (i.amount || 0), 0);
+  if (total > 0) document.getElementById('f-total').value = total.toFixed(2);
+}
+
+function openAddModal() {
+  editId = null;
+  lineItems = [];
+  document.getElementById('modal-title-text').textContent = 'New Proposal';
+  ['f-title','f-total','f-expires','f-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-status').value = 'draft';
+  renderLineItems();
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeModal() { document.getElementById('add-modal').classList.remove('open'); editId = null; }
+
+async function saveProposal() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { TMIAdmin.toast('Title required', 'error'); return; }
+  const payload = {
+    title,
+    status: document.getElementById('f-status').value,
+    total: parseFloat(document.getElementById('f-total').value) || null,
+    expires_at: document.getElementById('f-expires').value || null,
+    notes: document.getElementById('f-notes').value || null,
+    sections: lineItems.length ? lineItems : null,
+  };
+  if (editId) payload.id = editId;
+  const method = editId ? 'PUT' : 'POST';
+  const res = await TMIAdmin.api('/api/proposals', method, payload);
+  if (res) {
+    TMIAdmin.toast(editId ? 'Proposal updated' : 'Proposal created');
+    closeModal();
+    await loadProposals();
+  }
+}
+
+loadProposals();
+</script>
+</body>
+</html>

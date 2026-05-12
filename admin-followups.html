@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Follow-ups — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Follow-ups</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Task
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Follow-up Queue</h1>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="filter-count" id="fu-count"></span>
+          <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="show-done" onchange="renderTable()"/> Show completed
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search tasks..." oninput="renderTable()"/>
+        </div>
+        <select class="filter-select" id="filter-type" onchange="renderTable()">
+          <option value="">All types</option>
+          <option value="call">Call</option>
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+          <option value="meeting">Meeting</option>
+          <option value="task">Task</option>
+        </select>
+        <select class="filter-select" id="filter-priority" onchange="renderTable()">
+          <option value="">All priorities</option>
+          <option value="high">High</option>
+          <option value="normal">Normal</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:32px"></th>
+              <th>Task</th><th>Contact</th><th>Type</th><th>Priority</th><th>Due</th><th></th>
+            </tr></thead>
+            <tbody id="fu-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title" id="modal-title-text">Add Task</h2>
+      <button class="modal-x" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Title</label>
+        <input class="form-input" id="f-title" placeholder="Task title" required/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-input" id="f-type">
+          <option value="task">Task</option>
+          <option value="call">Call</option>
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+          <option value="meeting">Meeting</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select class="form-input" id="f-priority">
+          <option value="normal">Normal</option>
+          <option value="high">High</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Due Date & Time</label>
+      <input class="form-input" id="f-due" type="datetime-local"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="f-notes" rows="3" placeholder="Optional notes..."></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTask()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('followups');
+
+let allTasks = [];
+let editId = null;
+
+async function loadTasks() {
+  allTasks = await TMIAdmin.api('/api/followups') || [];
+  renderTable();
+}
+
+function isOverdue(task) {
+  return !task.completed && new Date(task.due_at) < new Date();
+}
+
+function renderTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const type = document.getElementById('filter-type').value;
+  const pri = document.getElementById('filter-priority').value;
+  const showDone = document.getElementById('show-done').checked;
+
+  const rows = allTasks.filter(t => {
+    if (!showDone && t.completed) return false;
+    if (type && t.type !== type) return false;
+    if (pri && t.priority !== pri) return false;
+    if (q && !t.title.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  document.getElementById('fu-count').textContent = `${rows.length} task${rows.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('fu-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">✅</div><h3>Queue is clear</h3><p>No pending follow-ups.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(t => {
+    const overdue = isOverdue(t);
+    const contact = t.contacts || {};
+    const contactName = contact.first_name ? `${contact.first_name} ${contact.last_name || ''}`.trim() : '-';
+    const dueColor = overdue ? 'color:var(--red);font-weight:600' : '';
+    return `
+      <tr style="${t.completed ? 'opacity:0.5' : ''}">
+        <td>
+          <div class="checklist-check ${t.completed ? 'done' : ''}" onclick="toggleDone('${t.id}', ${!t.completed})"></div>
+        </td>
+        <td class="td-name">${t.title}${overdue ? ' <span class="badge badge-overdue" style="font-size:10px">overdue</span>' : ''}</td>
+        <td class="td-muted">${contactName}</td>
+        <td>${TMIAdmin.badge(t.type)}</td>
+        <td>${TMIAdmin.badge(t.priority)}</td>
+        <td style="font-size:12px;${dueColor}">${TMIAdmin.fmt(t.due_at)}</td>
+        <td class="td-action">
+          <button class="btn btn-ghost btn-sm" onclick="openEdit('${t.id}')">Edit</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red);margin-left:4px" onclick="deleteTask('${t.id}')">Del</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function toggleDone(id, completed) {
+  const res = await TMIAdmin.api('/api/followups', 'PUT', { id, completed });
+  if (res) {
+    const t = allTasks.find(t => t.id === id);
+    if (t) { t.completed = completed; t.completed_at = completed ? new Date().toISOString() : null; }
+    renderTable();
+    TMIAdmin.toast(completed ? 'Marked complete' : 'Reopened');
+  }
+}
+
+function openAddModal() {
+  editId = null;
+  document.getElementById('modal-title-text').textContent = 'Add Task';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-type').value = 'task';
+  document.getElementById('f-priority').value = 'normal';
+  document.getElementById('f-notes').value = '';
+  // Default due: tomorrow at 9am
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(9, 0, 0, 0);
+  document.getElementById('f-due').value = d.toISOString().slice(0, 16);
+  document.getElementById('add-modal').classList.add('open');
+}
+
+function openEdit(id) {
+  const t = allTasks.find(t => t.id === id);
+  if (!t) return;
+  editId = id;
+  document.getElementById('modal-title-text').textContent = 'Edit Task';
+  document.getElementById('f-title').value = t.title;
+  document.getElementById('f-type').value = t.type;
+  document.getElementById('f-priority').value = t.priority;
+  document.getElementById('f-notes').value = t.notes || '';
+  document.getElementById('f-due').value = t.due_at ? t.due_at.slice(0, 16) : '';
+  document.getElementById('add-modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('add-modal').classList.remove('open'); }
+
+async function saveTask() {
+  const title = document.getElementById('f-title').value.trim();
+  const due_at = document.getElementById('f-due').value;
+  if (!title || !due_at) { TMIAdmin.toast('Title and due date required', 'error'); return; }
+  const payload = {
+    title,
+    type: document.getElementById('f-type').value,
+    priority: document.getElementById('f-priority').value,
+    notes: document.getElementById('f-notes').value,
+    due_at: new Date(due_at).toISOString(),
+  };
+  if (editId) payload.id = editId;
+  const method = editId ? 'PUT' : 'POST';
+  const res = await TMIAdmin.api('/api/followups', method, payload);
+  if (res) {
+    TMIAdmin.toast(editId ? 'Task updated' : 'Task added');
+    closeModal();
+    await loadTasks();
+  }
+}
+
+async function deleteTask(id) {
+  const ok = await TMIAdmin.confirm('Delete this task?', false);
+  if (!ok) return;
+  const res = await TMIAdmin.api('/api/followups', 'DELETE', { id });
+  if (res) { TMIAdmin.toast('Deleted'); await loadTasks(); }
+}
+
+loadTasks();
+</script>
+</body>
+</html>

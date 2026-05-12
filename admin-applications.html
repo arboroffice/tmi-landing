@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Applications — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Applications</span></div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Applications</h1>
+        <span class="filter-count" id="app-count"></span>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search name, email, company..." oninput="renderTable()"/>
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option value="new">New</option>
+          <option value="reviewed">Reviewed</option>
+          <option value="accepted">Accepted</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <select class="filter-select" id="filter-audience" onchange="renderTable()">
+          <option value="">All audiences</option>
+          <option value="physical">Physical</option>
+          <option value="online">Online</option>
+          <option value="fotf">FOTF</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Name</th><th>Email</th><th>Company</th><th>Audience</th><th>Status</th><th>Received</th><th></th>
+            </tr></thead>
+            <tbody id="app-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide panel -->
+<div class="panel-overlay" id="app-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('app-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-name">Application</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-reject" onclick="rejectApp()">Reject</button>
+        <button class="btn btn-primary btn-sm" id="btn-accept" onclick="acceptApp()">Accept &rarr; Lead</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid" id="panel-details"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Message</div>
+      <p id="panel-message" style="font-size:14px;color:var(--ink-2);line-height:1.65;"></p>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Notes</div>
+      <textarea class="form-input" id="panel-notes" rows="3" placeholder="Internal notes..." style="margin-top:8px;"></textarea>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="saveNotes()">Save Notes</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('apps');
+
+let allApps = [];
+let currentApp = null;
+
+async function loadApps() {
+  allApps = await TMIAdmin.api('/api/applications') || [];
+  renderTable();
+}
+
+function renderTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const st = document.getElementById('filter-status').value;
+  const aud = document.getElementById('filter-audience').value;
+
+  const rows = allApps.filter(a => {
+    if (st && a.status !== st) return false;
+    if (aud && a.audience !== aud) return false;
+    if (q && !`${a.name} ${a.email} ${a.company || ''}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  document.getElementById('app-count').textContent = `${rows.length} application${rows.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('app-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📬</div><h3>No applications</h3><p>Funnel submissions will appear here.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(a => `
+    <tr onclick="openPanel('${a.id}')">
+      <td class="td-name">${a.name}</td>
+      <td>${a.email}</td>
+      <td>${a.company || '<span class="td-muted">-</span>'}</td>
+      <td>${a.audience ? TMIAdmin.badge(a.audience) : '<span class="td-muted">-</span>'}${a.niche ? ` <span style="font-size:11px;color:var(--muted)">${a.niche}</span>` : ''}</td>
+      <td>${TMIAdmin.badge(a.status)}</td>
+      <td class="td-muted">${TMIAdmin.fmt(a.created_at)}</td>
+      <td class="td-action"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPanel('${a.id}')">View</button></td>
+    </tr>
+  `).join('');
+}
+
+function openPanel(id) {
+  currentApp = allApps.find(a => a.id === id);
+  if (!currentApp) return;
+  const a = currentApp;
+  document.getElementById('panel-name').textContent = a.name;
+  document.getElementById('panel-message').textContent = a.message || 'No message provided.';
+  document.getElementById('panel-notes').value = a.notes || '';
+
+  const isDone = a.status === 'accepted' || a.status === 'rejected';
+  document.getElementById('btn-accept').disabled = isDone;
+  document.getElementById('btn-reject').disabled = isDone;
+
+  document.getElementById('panel-details').innerHTML = `
+    <div class="detail-item"><div class="detail-label">Email</div><div class="detail-val">${a.email}</div></div>
+    <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-val">${a.phone || '-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Company</div><div class="detail-val">${a.company || '-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Source</div><div class="detail-val">${a.source || 'funnel'}</div></div>
+    <div class="detail-item"><div class="detail-label">Audience</div><div class="detail-val">${a.audience ? TMIAdmin.badge(a.audience) : '-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Niche</div><div class="detail-val">${a.niche || '-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(a.status)}</div></div>
+    <div class="detail-item"><div class="detail-label">Received</div><div class="detail-val">${TMIAdmin.fmt(a.created_at)}</div></div>
+  `;
+  TMIAdmin.openPanel('app-panel');
+}
+
+async function acceptApp() {
+  if (!currentApp) return;
+  const res = await TMIAdmin.api('/api/applications', 'POST', { application_id: currentApp.id, action: 'accept' });
+  if (res) {
+    TMIAdmin.toast('Accepted and created as lead');
+    TMIAdmin.closePanel('app-panel');
+    await loadApps();
+  }
+}
+
+async function rejectApp() {
+  if (!currentApp) return;
+  const ok = await TMIAdmin.confirm('Mark as rejected?', false);
+  if (!ok) return;
+  const res = await TMIAdmin.api('/api/applications', 'POST', { application_id: currentApp.id, action: 'reject' });
+  if (res) {
+    TMIAdmin.toast('Marked as rejected');
+    TMIAdmin.closePanel('app-panel');
+    await loadApps();
+  }
+}
+
+async function saveNotes() {
+  if (!currentApp) return;
+  const notes = document.getElementById('panel-notes').value;
+  await TMIAdmin.api('/api/applications', 'PUT', { id: currentApp.id, notes });
+  TMIAdmin.toast('Notes saved');
+  currentApp.notes = notes;
+}
+
+loadApps();
+</script>
+</body>
+</html>
