@@ -675,7 +675,6 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // FOTF signup
 (function() {
-  const BEEHIIV_URL = 'https://www.beehiiv.com/subscribe/24a9962f-7b4a-4587-b363-263e5508e73c';
   const form = document.getElementById('fotf-index-form');
   const ok = document.getElementById('fotf-index-ok');
   if (!form) return;
@@ -684,18 +683,8 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     const email = form.querySelector('input').value;
     form.style.display = 'none';
     ok.style.display = 'block';
-    // Formsubmit notification
-    try {
-      const fd = new FormData();
-      fd.append('email', email);
-      fd.append('_subject', 'New FOTF Signup - ' + email);
-      fd.append('message', 'FOTF signup from homepage\nEmail: ' + email);
-      fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd });
-    } catch(err) {}
-    // Beehiiv subscribe (new tab, email pre-filled)
-    window.open(BEEHIIV_URL + '?email=' + encodeURIComponent(email), '_blank');
-    // localStorage backup
-    try { const l = JSON.parse(localStorage.getItem('fotf_signups') || '[]'); if (!l.find(e => e.email === email)) { l.push({ email, date: new Date().toISOString(), source: 'index' }); localStorage.setItem('fotf_signups', JSON.stringify(l)); } } catch(err) {}
+    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'homepage' }) }); } catch(err) {}
+    try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from homepage\nEmail: ' + email); fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
   });
 })();
 </script>

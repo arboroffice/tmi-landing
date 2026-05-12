@@ -482,17 +482,16 @@ async function handleSubmit(formId, successId) {
       const note = document.querySelector('.signup-note');
       if (note) note.style.display = 'none';
     }
-    // Formsubmit - email notification
+    // Beehiiv API subscribe
+    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'founders_page' }) }); } catch(err) {}
+    // Formsubmit email notification
     try {
       const fd = new FormData();
       fd.append('email', email);
       fd.append('_subject', 'New FOTF Signup - ' + email);
       fd.append('message', 'New Founders of the Future signup\nEmail: ' + email + '\nPage: ' + location.href);
-      await fetch('https://formsubmit.co/ajax/mia@tmitechai.com', {
-        method: 'POST', headers: { 'Accept': 'application/json' }, body: fd
-      });
+      fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd });
     } catch(err) {}
-    // TODO: replace with Beehiiv subscribe when code is ready
   });
 }
 handleSubmit('signup-form', 'signup-success');
