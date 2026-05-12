@@ -460,6 +460,15 @@ const obs = new IntersectionObserver(entries => {
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
+const STORAGE_KEY = 'fotf_signups';
+
+function saveEmail(email) {
+  const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  const entry = { email, date: new Date().toISOString() };
+  if (!list.find(e => e.email === email)) list.push(entry);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
 function handleSubmit(formId, successId) {
   const form = document.getElementById(formId);
   const success = document.getElementById(successId);
@@ -467,8 +476,7 @@ function handleSubmit(formId, successId) {
   form.addEventListener('submit', function(e) {
     e.preventDefault();
     const email = form.querySelector('input[type="email"]').value;
-    // Wire up to your email service here (Mailchimp, ConvertKit, Formspree, etc.)
-    // For now: show success state
+    saveEmail(email);
     form.style.display = 'none';
     success.style.display = 'block';
     if (formId === 'signup-form') {
@@ -478,6 +486,21 @@ function handleSubmit(formId, successId) {
 }
 handleSubmit('signup-form', 'signup-success');
 handleSubmit('signup-form-2', 'signup-success-2');
+
+// Admin view: founders.html?admin=fotf
+if (new URLSearchParams(location.search).get('admin') === 'fotf') {
+  document.addEventListener('DOMContentLoaded', function() {
+    const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const panel = document.createElement('div');
+    panel.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;background:#0d0e1a;border:1px solid rgba(228,255,151,0.3);border-radius:12px;padding:24px 28px;max-width:420px;font-family:monospace;font-size:13px;color:#E4FF97;box-shadow:0 8px 40px rgba(0,0,0,0.6);max-height:60vh;overflow-y:auto;';
+    const count = list.length;
+    const emails = list.map(e => e.email).join('\n');
+    panel.innerHTML = '<div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(228,255,151,0.5);margin-bottom:12px;">FOTF Signups (' + count + ')</div>'
+      + (count ? '<textarea readonly style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#fff;font-family:monospace;font-size:12px;padding:10px;resize:vertical;min-height:120px;">' + emails + '</textarea>' : '<p style="color:rgba(255,255,255,0.4);font-size:13px;">No signups yet.</p>')
+      + '<button onclick="this.parentElement.remove()" style="margin-top:12px;font-size:11px;color:rgba(255,255,255,0.3);background:none;border:none;cursor:pointer;font-family:monospace;">dismiss</button>';
+    document.body.appendChild(panel);
+  });
+}
 </script>
 </body>
 </html>
