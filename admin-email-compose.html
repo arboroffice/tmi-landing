@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Compose Email — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+.compose-layout{display:grid;grid-template-columns:1fr 420px;gap:24px;align-items:start;}
+.compose-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px;}
+.preview-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;position:sticky;top:28px;}
+.preview-header{background:#f0f0f0;padding:12px 16px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);}
+.preview-body{padding:24px;font-size:14px;color:var(--ink-2);line-height:1.8;white-space:pre-wrap;min-height:300px;max-height:600px;overflow-y:auto;}
+.compose-title{font-family:var(--serif);font-size:24px;font-weight:400;margin:0 0 24px;letter-spacing:-0.02em;}
+.section-divider{height:1px;background:var(--line);margin:24px 0;}
+.audience-row{display:flex;gap:10px;margin-bottom:12px;}
+.aud-btn{flex:1;padding:10px;border:1px solid var(--line-strong);border-radius:var(--r-sm);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;background:none;text-align:center;color:var(--ink-2);}
+.aud-btn.active{border-color:var(--ink);background:var(--ink);color:#fff;}
+.seg-box{background:var(--bg);border-radius:var(--r-sm);padding:18px;margin-top:12px;}
+.seg-box-title{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.count-chip{background:var(--chart);color:var(--ink);padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700;}
+@media(max-width:900px){.compose-layout{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sb-brand"><img src="logo.svg" alt="TMI"/><div><div class="sb-brand-label">TMI</div><div class="sb-brand-sub">Admin</div></div></div>
+    <nav class="sb-nav">
+      <a href="/admin-dashboard" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="/admin-leads" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path stroke-linecap="round" d="M3 6h18M7 12h10M11 18h2"/></svg>Leads</a>
+      <a href="/admin-clients" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="7" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Clients</a>
+      <a href="/admin-contacts" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"/></svg>Contacts</a>
+      <a href="/admin-email" class="sb-item active"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="4" width="20" height="16" rx="2"/><path stroke-linecap="round" d="m2 7 10 7 10-7"/></svg>Email</a>
+      <div class="sb-sep"></div>
+      <a href="/admin-settings" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="sb-foot"><button class="sb-logout" onclick="TMIAdmin.logout()"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-linecap="round"/><polyline points="16 17 21 12 16 7" stroke-linecap="round" stroke-linejoin="round"/><line x1="21" y1="12" x2="9" y2="12" stroke-linecap="round"/></svg>Log out</button></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <a href="/admin-dashboard">TMI Admin</a>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg>
+        <a href="/admin-email">Email</a>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="page" id="page-title">New Campaign</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="saveDraft()">Save Draft</button>
+        <button class="btn btn-primary btn-sm" id="send-btn" onclick="confirmSend()">
+          Send Now
+        </button>
+      </div>
+    </div>
+    <div class="content">
+
+      <div class="compose-layout">
+
+        <!-- Compose form -->
+        <div>
+          <h1 class="compose-title">Compose Email</h1>
+
+          <!-- Audience selection -->
+          <div style="margin-bottom:24px;">
+            <div class="form-label" style="margin-bottom:10px;">Send To</div>
+            <div class="audience-row">
+              <button class="aud-btn active" data-aud="all" onclick="selectAudience('all', this)">
+                Everyone
+              </button>
+              <button class="aud-btn" data-aud="segment" onclick="selectAudience('segment', this)">
+                By Segment
+              </button>
+              <button class="aud-btn" data-aud="custom" onclick="selectAudience('custom', this)">
+                Custom List
+              </button>
+            </div>
+
+            <!-- Segment filters (shown when "By Segment" selected) -->
+            <div id="segment-filters" style="display:none;">
+              <div class="seg-box">
+                <div class="seg-box-title">
+                  <span>Audience</span>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <span class="niche-pill" data-aud="physical" onclick="toggleAudPill(this)">Physical</span>
+                  <span class="niche-pill" data-aud="online" onclick="toggleAudPill(this)">Online</span>
+                  <span class="niche-pill" data-aud="fotf" onclick="toggleAudPill(this)">FOTF</span>
+                </div>
+
+                <div style="margin-top:16px;">
+                  <div class="seg-box-title">
+                    <span>Business Niche</span>
+                    <button class="btn btn-ghost btn-sm" onclick="clearNiches()" style="padding:4px 8px;font-size:11px">Clear</button>
+                  </div>
+                  <div id="niche-pills-container" class="niche-grid"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom list (shown when "Custom" selected) -->
+            <div id="custom-list" style="display:none;">
+              <div class="seg-box">
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Email Addresses</label>
+                  <textarea class="form-input" id="custom-emails" rows="4" placeholder="one@example.com&#10;two@example.com&#10;...one per line or comma-separated"></textarea>
+                  <div class="form-hint">Enter email addresses, one per line or comma-separated.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recipient count -->
+            <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <div class="count-chip" id="recipient-count">Calculating...</div>
+              <span style="font-size:13px;color:var(--muted)" id="recipient-label">contacts will receive this email</span>
+            </div>
+          </div>
+
+          <div class="section-divider"></div>
+
+          <!-- From -->
+          <div class="form-row" style="margin-bottom:16px">
+            <div class="form-group">
+              <label class="form-label">From Name</label>
+              <input class="form-input" id="from-name" value="TMI" placeholder="TMI"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">From Email</label>
+              <input class="form-input" id="from-email" value="hello@tmi-technology.com" placeholder="hello@tmi-technology.com"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reply-To (optional)</label>
+            <input class="form-input" id="reply-to" placeholder="replies@tmi-technology.com"/>
+          </div>
+
+          <div class="section-divider"></div>
+
+          <!-- Subject + Body -->
+          <div class="form-group">
+            <label class="form-label">Subject Line *</label>
+            <input class="form-input" id="subject" placeholder="What's this email about?" oninput="updatePreview()"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Body *</label>
+            <textarea class="form-input" id="body" rows="18" placeholder="Write your email here...&#10;&#10;Plain text works great. Keep it direct. One idea per email." oninput="updatePreview()" style="min-height:360px;font-family:var(--serif);font-size:15px;line-height:1.8;"></textarea>
+            <div class="form-hint">Plain text. Keep paragraphs short. Unsubscribe link added automatically.</div>
+          </div>
+
+          <!-- Bottom actions -->
+          <div style="display:flex;gap:12px;padding-top:8px;">
+            <button class="btn btn-ghost" onclick="saveDraft()">Save Draft</button>
+            <button class="btn btn-primary" id="send-btn-2" onclick="confirmSend()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Send Now
+            </button>
+          </div>
+        </div>
+
+        <!-- Preview -->
+        <div class="preview-card">
+          <div class="preview-header">Preview</div>
+          <div style="padding:16px;border-bottom:1px solid var(--line);">
+            <div style="font-size:11px;color:var(--muted)">Subject</div>
+            <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:3px" id="preview-subject">—</div>
+          </div>
+          <div class="preview-body" id="preview-body" style="white-space:pre-wrap;font-family:var(--serif);">Start typing to see preview...</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm send modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hd"><h2 class="modal-title">Send Campaign</h2><button class="modal-x" onclick="TMIAdmin.closeModal('confirm-modal')">&times;</button></div>
+    <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin-bottom:8px">You are about to send:</p>
+    <div style="background:var(--bg);border-radius:var(--r-sm);padding:14px;margin-bottom:20px;">
+      <div style="font-weight:600;color:var(--ink);margin-bottom:4px" id="conf-subject">—</div>
+      <div style="font-size:13px;color:var(--muted)" id="conf-to">—</div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:0">This will send immediately to all matching contacts with an email address. This cannot be undone.</p>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="TMIAdmin.closeModal('confirm-modal')">Cancel</button>
+      <button class="btn btn-primary" id="confirm-send-btn" onclick="doSend()">Send Now</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+
+let audienceType = 'all';
+let allContacts = [];
+let editId = null;
+
+// Check for edit mode
+const params = new URLSearchParams(location.search);
+if (params.get('id')) editId = params.get('id');
+
+async function init() {
+  // Load settings for defaults
+  const settings = await TMIAdmin.api('/api/settings');
+  if (settings) {
+    if (settings.from_name) document.getElementById('from-name').value = settings.from_name;
+    if (settings.from_email) document.getElementById('from-email').value = settings.from_email;
+    if (settings.reply_to) document.getElementById('reply-to').value = settings.reply_to;
+  }
+
+  // Load contacts for count
+  const contacts = await TMIAdmin.api('/api/contacts');
+  if (contacts) allContacts = contacts;
+  updateCount();
+
+  // Load existing draft if editing
+  if (editId) {
+    const campaign = await TMIAdmin.api(`/api/emails?id=${editId}`);
+    if (campaign) {
+      document.getElementById('page-title').textContent = 'Edit Draft';
+      document.getElementById('subject').value = campaign.subject || '';
+      document.getElementById('body').value = campaign.body || '';
+      document.getElementById('from-name').value = campaign.from_name || 'TMI';
+      document.getElementById('from-email').value = campaign.from_email || '';
+      if (campaign.reply_to) document.getElementById('reply-to').value = campaign.reply_to;
+      if (campaign.audience_type) {
+        selectAudience(campaign.audience_type);
+        if (campaign.audience_filter) {
+          // Restore segment selections
+          const f = campaign.audience_filter;
+          if (f.audiences) {
+            f.audiences.forEach(a => {
+              document.querySelector(`[data-aud="${a}"]`)?.classList.add('active');
+            });
+            updateNichePills();
+          }
+          if (f.niches) {
+            setTimeout(() => {
+              f.niches.forEach(n => {
+                document.querySelector(`[data-niche="${n}"]`)?.classList.add('active');
+              });
+              updateCount();
+            }, 100);
+          }
+        }
+      }
+      updatePreview();
+    }
+  }
+
+  // Populate niche pills
+  updateNichePills();
+}
+
+function selectAudience(type, btn = null) {
+  audienceType = type;
+  document.querySelectorAll('.aud-btn').forEach(b => b.classList.remove('active'));
+  (btn || document.querySelector(`[data-aud="${type}"]`))?.classList.add('active');
+  document.getElementById('segment-filters').style.display = type === 'segment' ? 'block' : 'none';
+  document.getElementById('custom-list').style.display = type === 'custom' ? 'block' : 'none';
+  updateCount();
+}
+
+function toggleAudPill(el) {
+  el.classList.toggle('active');
+  updateNichePills();
+  updateCount();
+}
+
+function updateNichePills() {
+  const selectedAuds = [...document.querySelectorAll('[data-aud].active')].map(e => e.dataset.aud);
+  const container = document.getElementById('niche-pills-container');
+  let niches;
+  if (!selectedAuds.length) {
+    niches = [...TMIAdmin.niches.physical, ...TMIAdmin.niches.online, ...TMIAdmin.niches.fotf];
+  } else {
+    niches = selectedAuds.flatMap(a => TMIAdmin.niches[a] || []);
+  }
+  const prevActive = [...document.querySelectorAll('#niche-pills-container .niche-pill.active')].map(p => p.dataset.niche);
+  container.innerHTML = niches.map(n =>
+    `<span class="niche-pill${prevActive.includes(n) ? ' active' : ''}" data-niche="${n}" onclick="this.classList.toggle('active');updateCount()">${n}</span>`
+  ).join('');
+  updateCount();
+}
+
+function clearNiches() {
+  document.querySelectorAll('#niche-pills-container .niche-pill').forEach(p => p.classList.remove('active'));
+  updateCount();
+}
+
+function getRecipients() {
+  if (audienceType === 'all') {
+    return allContacts.filter(c => c.email && !c.unsubscribed);
+  }
+  if (audienceType === 'segment') {
+    const selAuds = [...document.querySelectorAll('[data-aud].active')].map(e => e.dataset.aud);
+    const selNiches = [...document.querySelectorAll('#niche-pills-container .niche-pill.active')].map(p => p.dataset.niche);
+    return allContacts.filter(c => {
+      if (!c.email || c.unsubscribed) return false;
+      if (selAuds.length && !selAuds.includes(c.audience)) return false;
+      if (selNiches.length && !selNiches.includes(c.niche)) return false;
+      return true;
+    });
+  }
+  if (audienceType === 'custom') {
+    const raw = document.getElementById('custom-emails').value;
+    const emails = raw.split(/[\n,]/).map(e => e.trim().toLowerCase()).filter(Boolean);
+    return emails.map(e => ({ email: e }));
+  }
+  return [];
+}
+
+function updateCount() {
+  const r = getRecipients();
+  document.getElementById('recipient-count').textContent = r.length.toLocaleString();
+  document.getElementById('recipient-label').textContent = `contact${r.length !== 1 ? 's' : ''} will receive this email`;
+}
+
+function updatePreview() {
+  const sub = document.getElementById('subject').value || '—';
+  const body = document.getElementById('body').value || 'Start typing to see preview...';
+  document.getElementById('preview-subject').textContent = sub;
+  document.getElementById('preview-body').textContent = body;
+}
+
+function getPayload(status) {
+  const selectedAuds = audienceType === 'segment'
+    ? [...document.querySelectorAll('[data-aud].active')].map(e => e.dataset.aud)
+    : [];
+  const selectedNiches = audienceType === 'segment'
+    ? [...document.querySelectorAll('#niche-pills-container .niche-pill.active')].map(p => p.dataset.niche)
+    : [];
+
+  return {
+    id: editId || undefined,
+    subject: document.getElementById('subject').value.trim(),
+    body: document.getElementById('body').value.trim(),
+    from_name: document.getElementById('from-name').value.trim() || 'TMI',
+    from_email: document.getElementById('from-email').value.trim(),
+    reply_to: document.getElementById('reply-to').value.trim() || null,
+    audience_type: audienceType,
+    audience_filter: audienceType === 'segment' ? { audiences: selectedAuds, niches: selectedNiches }
+      : audienceType === 'custom' ? { custom_emails: document.getElementById('custom-emails').value }
+      : null,
+    status
+  };
+}
+
+async function saveDraft() {
+  const payload = getPayload('draft');
+  if (!payload.subject) { TMIAdmin.toast('Subject is required', 'error'); return; }
+  const res = await TMIAdmin.api('/api/emails', editId ? 'PUT' : 'POST', payload);
+  if (res) {
+    editId = res.id || editId;
+    TMIAdmin.toast('Draft saved');
+  }
+}
+
+function confirmSend() {
+  const subject = document.getElementById('subject').value.trim();
+  const body = document.getElementById('body').value.trim();
+  if (!subject) { TMIAdmin.toast('Subject is required', 'error'); return; }
+  if (!body) { TMIAdmin.toast('Email body is required', 'error'); return; }
+  const recipients = getRecipients();
+  if (!recipients.length) { TMIAdmin.toast('No recipients match this segment', 'error'); return; }
+
+  document.getElementById('conf-subject').textContent = subject;
+  document.getElementById('conf-to').textContent = `${recipients.length} recipient${recipients.length !== 1 ? 's' : ''}`;
+  TMIAdmin.openModal('confirm-modal');
+}
+
+async function doSend() {
+  const btn = document.getElementById('confirm-send-btn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+
+  // Save/update first
+  const payload = getPayload('draft');
+  if (!payload.subject) return;
+  const saved = await TMIAdmin.api('/api/emails', editId ? 'PUT' : 'POST', payload);
+  if (!saved) { btn.disabled = false; btn.textContent = 'Send Now'; return; }
+  const campaignId = saved.id || editId;
+
+  // Send
+  const res = await TMIAdmin.api('/api/email-send', 'POST', { campaign_id: campaignId });
+  btn.disabled = false; btn.textContent = 'Send Now';
+  TMIAdmin.closeModal('confirm-modal');
+
+  if (res) {
+    TMIAdmin.toast(`Sent to ${res.sent} contacts!`);
+    setTimeout(() => { window.location.href = '/admin-email'; }, 1500);
+  }
+}
+
+// Custom emails: update count on input
+document.getElementById('custom-emails')?.addEventListener('input', updateCount);
+
+init();
+</script>
+</body>
+</html>

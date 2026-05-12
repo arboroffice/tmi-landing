@@ -387,6 +387,18 @@
   .fotf-ok{display:none;font-family:var(--serif);font-size:18px;color:var(--chart);padding:14px 0;}
   @media(max-width:768px){.fotf-wrap{grid-template-columns:1fr;gap:40px;}}
   @media(max-width:480px){.fotf-form{flex-direction:column;}.fotf-btn{border-radius:999px;}}
+  /* HERO NEWSLETTER */
+  .hero-nl{margin-top:36px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.1);max-width:480px;}
+  .hero-nl-label{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .hero-nl-label::before{content:'';display:block;width:16px;height:1px;background:var(--chart);opacity:0.6;}
+  .hero-nl-form{display:flex;gap:8px;}
+  .hero-nl-input{flex:1;padding:13px 18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.11);border-radius:999px;color:#fff;font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;min-width:0;}
+  .hero-nl-input::placeholder{color:rgba(255,255,255,0.3);}
+  .hero-nl-input:focus{border-color:rgba(228,255,151,0.45);}
+  .hero-nl-btn{padding:13px 22px;background:var(--chart);color:#0a0b14;border:none;border-radius:999px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.15s;}
+  .hero-nl-btn:hover{background:var(--chart-dark);}
+  .hero-nl-ok{display:none;font-family:var(--serif);font-size:16px;color:var(--chart);padding:12px 0;}
+  @media(max-width:540px){.hero-nl-form{flex-direction:column;}.hero-nl-btn{border-radius:999px;}}
 </style>
 </head>
 <body>
@@ -437,6 +449,14 @@
     <div class="hero-actions">
       <a href="https://trades.tmitechai.com/funnel.html" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
       <a href="#verticals" class="btn btn-white-outline">See Where We Build</a>
+    </div>
+    <div class="hero-nl">
+      <div class="hero-nl-label">Founders of the Future</div>
+      <form class="hero-nl-form" id="hero-nl-form">
+        <input type="email" class="hero-nl-input" placeholder="your@email.com" required/>
+        <button type="submit" class="hero-nl-btn">Join Free &rarr;</button>
+      </form>
+      <div class="hero-nl-ok" id="hero-nl-ok">You're in. One email when something worth reading drops.</div>
     </div>
   </div>
   <div class="hero-scroll">
@@ -673,20 +693,20 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// FOTF signup
-(function() {
-  const form = document.getElementById('fotf-index-form');
-  const ok = document.getElementById('fotf-index-ok');
+function fotfSubscribe(formId, okId, source, audience) {
+  const form = document.getElementById(formId);
+  const ok = document.getElementById(okId);
   if (!form) return;
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     const email = form.querySelector('input').value;
-    form.style.display = 'none';
-    ok.style.display = 'block';
-    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'homepage', audience: 'fotf' }) }); } catch(err) {}
-    try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from homepage\nEmail: ' + email); fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
+    form.style.display = 'none'; ok.style.display = 'block';
+    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source, audience }) }); } catch(err) {}
+    try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from ' + source + '\nEmail: ' + email); fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
   });
-})();
+}
+fotfSubscribe('fotf-index-form', 'fotf-index-ok', 'homepage', 'fotf');
+fotfSubscribe('hero-nl-form', 'hero-nl-ok', 'homepage_hero', 'fotf');
 </script>
 </body>
 </html>

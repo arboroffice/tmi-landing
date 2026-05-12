@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Email — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sb-brand"><img src="logo.svg" alt="TMI"/><div><div class="sb-brand-label">TMI</div><div class="sb-brand-sub">Admin</div></div></div>
+    <nav class="sb-nav">
+      <a href="/admin-dashboard" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="/admin-leads" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path stroke-linecap="round" d="M3 6h18M7 12h10M11 18h2"/></svg>Leads</a>
+      <a href="/admin-clients" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="7" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Clients</a>
+      <a href="/admin-contacts" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="9" cy="7" r="4"/><path stroke-linecap="round" d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"/></svg>Contacts</a>
+      <a href="/admin-email" class="sb-item active"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="4" width="20" height="16" rx="2"/><path stroke-linecap="round" d="m2 7 10 7 10-7"/></svg>Email</a>
+      <div class="sb-sep"></div>
+      <a href="/admin-settings" class="sb-item"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="sb-foot"><button class="sb-logout" onclick="TMIAdmin.logout()"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-linecap="round"/><polyline points="16 17 21 12 16 7" stroke-linecap="round" stroke-linejoin="round"/><line x1="21" y1="12" x2="9" y2="12" stroke-linecap="round"/></svg>Log out</button></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Email</span></div>
+      <div class="topbar-actions">
+        <a href="/admin-email-compose" class="btn btn-primary btn-sm">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Compose
+        </a>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Email Campaigns</h1>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-row" id="email-stats" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-box"><div class="stat-label">Total Sent</div><div class="stat-val" id="es-sent">—</div></div>
+        <div class="stat-box"><div class="stat-label">Emails Delivered</div><div class="stat-val" id="es-delivered">—</div></div>
+        <div class="stat-box"><div class="stat-label">Total Opens</div><div class="stat-val" id="es-opens">—</div></div>
+        <div class="stat-box"><div class="stat-label">Avg Open Rate</div><div class="stat-val" id="es-rate">—</div></div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search subject..." oninput="renderTable()"/>
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option value="draft">Draft</option><option value="sent">Sent</option>
+          <option value="sending">Sending</option><option value="failed">Failed</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Subject</th><th>Audience</th><th>Status</th>
+              <th>Sent To</th><th>Opens</th><th>Open Rate</th><th>Date</th><th></th>
+            </tr></thead>
+            <tbody id="email-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Campaign detail panel -->
+<div class="panel-overlay" id="campaign-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('campaign-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-subject" style="font-size:16px;max-width:340px;line-height:1.3">—</h2>
+      <div class="panel-actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteFromPanel()">Delete</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val" id="pd-status">—</div></div>
+        <div class="detail-item"><div class="detail-label">Audience</div><div class="detail-val" id="pd-audience">—</div></div>
+        <div class="detail-item"><div class="detail-label">Sent To</div><div class="detail-val" id="pd-sent">—</div></div>
+        <div class="detail-item"><div class="detail-label">Opens</div><div class="detail-val" id="pd-opens">—</div></div>
+        <div class="detail-item"><div class="detail-label">Open Rate</div><div class="detail-val" id="pd-rate">—</div></div>
+        <div class="detail-item"><div class="detail-label">Clicks</div><div class="detail-val" id="pd-clicks">—</div></div>
+        <div class="detail-item"><div class="detail-label">From</div><div class="detail-val" id="pd-from">—</div></div>
+        <div class="detail-item"><div class="detail-label">Sent</div><div class="detail-val" id="pd-date">—</div></div>
+      </div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Email Body</div>
+      <div id="pd-body" style="font-size:13px;color:var(--ink-2);line-height:1.7;white-space:pre-wrap;background:var(--bg);padding:14px;border-radius:var(--r-sm);max-height:360px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+
+let allCampaigns = [];
+let currentCampaign = null;
+
+async function loadCampaigns() {
+  const data = await TMIAdmin.api('/api/emails');
+  if (!data) return;
+  allCampaigns = data;
+
+  // Stats
+  const sent = data.filter(c => c.status === 'sent');
+  const totalDelivered = sent.reduce((s, c) => s + (c.sent_count || 0), 0);
+  const totalOpens = sent.reduce((s, c) => s + (c.open_count || 0), 0);
+  const avgRate = sent.length && totalDelivered
+    ? Math.round(sent.reduce((s, c) => s + (c.sent_count ? c.open_count / c.sent_count : 0), 0) / sent.length * 100)
+    : 0;
+  document.getElementById('es-sent').textContent = sent.length;
+  document.getElementById('es-delivered').textContent = totalDelivered.toLocaleString();
+  document.getElementById('es-opens').textContent = totalOpens.toLocaleString();
+  document.getElementById('es-rate').textContent = sent.length ? `${avgRate}%` : '—';
+
+  renderTable();
+}
+
+function audienceLabel(c) {
+  if (c.audience_type === 'all') return 'Everyone';
+  if (!c.audience_filter) return 'Segment';
+  const f = c.audience_filter;
+  const parts = [];
+  if (f.audiences?.length) parts.push(f.audiences.join(', '));
+  if (f.niches?.length) parts.push(f.niches.slice(0, 2).join(', ') + (f.niches.length > 2 ? '…' : ''));
+  return parts.join(' · ') || 'Segment';
+}
+
+function renderTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const st = document.getElementById('filter-status').value;
+
+  const filtered = allCampaigns.filter(c => {
+    if (q && !c.subject.toLowerCase().includes(q)) return false;
+    if (st && c.status !== st) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('email-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-icon">✉️</div><h3>No campaigns yet</h3><p><a href="/admin-email-compose" style="color:var(--ink);text-decoration:underline">Compose your first email</a></p></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(c => {
+    const rate = c.sent_count ? Math.round(c.open_count / c.sent_count * 100) : 0;
+    return `<tr onclick="openPanel(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+      <td class="td-name" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.subject}</td>
+      <td class="td-muted">${audienceLabel(c)}</td>
+      <td>${TMIAdmin.badge(c.status)}</td>
+      <td>${c.sent_count ? c.sent_count.toLocaleString() : '—'}</td>
+      <td>${c.open_count ? c.open_count.toLocaleString() : '—'}</td>
+      <td>${c.sent_count ? `<span style="font-weight:600;color:${rate>=30?'#15803d':rate>=15?'#854d0e':'var(--ink-2)'};">${rate}%</span>` : '—'}</td>
+      <td class="td-muted">${TMIAdmin.fmt(c.sent_at || c.created_at)}</td>
+      <td class="td-action">
+        ${c.status === 'draft' ? `<a href="/admin-email-compose?id=${c.id}" class="btn btn-ghost btn-sm" onclick="event.stopPropagation()">Edit</a>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openPanel(campaign) {
+  currentCampaign = campaign;
+  document.getElementById('panel-subject').textContent = campaign.subject;
+  document.getElementById('pd-status').innerHTML = TMIAdmin.badge(campaign.status);
+  document.getElementById('pd-audience').textContent = audienceLabel(campaign);
+  document.getElementById('pd-sent').textContent = campaign.sent_count?.toLocaleString() || '0';
+  document.getElementById('pd-opens').textContent = campaign.open_count?.toLocaleString() || '0';
+  const rate = campaign.sent_count ? Math.round(campaign.open_count / campaign.sent_count * 100) : 0;
+  document.getElementById('pd-rate').textContent = campaign.sent_count ? `${rate}%` : '—';
+  document.getElementById('pd-clicks').textContent = campaign.click_count?.toLocaleString() || '0';
+  document.getElementById('pd-from').textContent = `${campaign.from_name} <${campaign.from_email}>`;
+  document.getElementById('pd-date').textContent = TMIAdmin.fmt(campaign.sent_at || campaign.created_at);
+  document.getElementById('pd-body').textContent = campaign.body || '—';
+  TMIAdmin.openPanel('campaign-panel');
+}
+
+async function deleteFromPanel() {
+  if (!currentCampaign) return;
+  const ok = await TMIAdmin.confirm('Delete this campaign? This cannot be undone.');
+  if (!ok) return;
+  const res = await TMIAdmin.api(`/api/emails?id=${currentCampaign.id}`, 'DELETE');
+  if (res) {
+    TMIAdmin.toast('Campaign deleted');
+    TMIAdmin.closePanel('campaign-panel');
+    await loadCampaigns();
+  }
+}
+
+loadCampaigns();
+</script>
+</body>
+</html>
