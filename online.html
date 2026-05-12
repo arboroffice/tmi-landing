@@ -10,6 +10,7 @@
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://online.tmitechai.com/"/>
 <meta property="og:site_name" content="TMI"/>
+<meta property="og:image" content="https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80"/>
 <link rel="canonical" href="https://online.tmitechai.com/"/>
 <title>TMI Online | AI Infrastructure for Online Businesses</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -31,9 +32,27 @@
   h1,h2,h3,h4{font-family:var(--serif);font-weight:400;letter-spacing:-0.02em;line-height:1.05;margin:0;}
   p{margin:0;}
 
+  /* Side nav */
+  .side-overlay{position:fixed;inset:0;z-index:198;background:rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:opacity 0.3s;}
+  .side-overlay.open{opacity:1;pointer-events:auto;}
+  .side-nav{position:fixed;left:0;top:0;bottom:0;z-index:200;width:288px;background:var(--bg);border-right:1px solid var(--line);transform:translateX(-100%);transition:transform 0.3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding:0 0 32px;overflow-y:auto;}
+  .side-nav.open{transform:translateX(0);box-shadow:8px 0 48px rgba(0,0,0,0.12);}
+  .sn-top{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);}
+  .sn-brand{font-family:var(--sans);font-size:15px;font-weight:700;color:var(--ink);}
+  .sn-close{background:none;border:none;cursor:pointer;padding:4px;color:var(--muted);font-size:20px;line-height:1;transition:color 0.15s;}
+  .sn-close:hover{color:var(--ink);}
+  .sn-section{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding:20px 20px 6px;}
+  .sn-link{display:block;font-family:var(--sans);font-size:14px;font-weight:500;color:var(--ink-2);padding:10px 20px;border-radius:0;transition:color 0.15s,background 0.15s;}
+  .sn-link:hover{color:var(--ink);background:var(--bg-alt);}
+  .sn-cta-wrap{padding:20px;border-top:1px solid var(--line);margin-top:auto;}
+  .sn-cta{display:block;background:var(--chart);color:#0a0b14;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:14px 20px;border-radius:4px;text-align:center;transition:background 0.15s;}
+  .sn-cta:hover{background:var(--chart-dark);}
+
   /* Header */
   .article-header{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;background:rgba(255,255,255,0.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;}
-  .article-header-inner{max-width:1320px;margin:0 auto;padding:0 32px;width:100%;display:flex;align-items:center;gap:20px;}
+  .article-header-inner{max-width:1320px;margin:0 auto;padding:0 32px;width:100%;display:flex;align-items:center;gap:16px;}
+  .hamburger{background:none;border:none;cursor:pointer;padding:4px;display:flex;flex-direction:column;gap:5px;flex-shrink:0;}
+  .hamburger span{display:block;width:20px;height:1.5px;background:var(--ink);border-radius:2px;transition:transform 0.2s,opacity 0.2s;}
   .ah-brand{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:15px;font-weight:700;color:var(--ink);flex:1;}
   .ah-brand img{height:22px;width:auto;}
   .ah-nav{display:flex;align-items:center;gap:2px;}
@@ -48,33 +67,39 @@
   .container-md{max-width:800px;margin:0 auto;padding:0 40px;}
   @media(max-width:640px){.container,.container-md{padding:0 20px;}}
 
-  /* Hero */
-  .page-hero{padding:120px 0 88px;border-bottom:1px solid var(--line);}
+  /* Hero - split */
+  .page-hero{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 56px);border-bottom:1px solid var(--line);}
+  .hero-text{display:flex;flex-direction:column;justify-content:center;padding:80px 64px 80px 40px;}
+  .hero-photo{background-image:url('https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1200&q=80');background-size:cover;background-position:center;min-height:480px;}
   .hero-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:28px;}
-  .page-hero h1{font-family:var(--serif);font-size:clamp(52px,6.5vw,96px);font-weight:400;line-height:1.0;letter-spacing:-0.03em;max-width:16ch;margin:0 0 32px;}
+  .page-hero h1{font-family:var(--serif);font-size:clamp(44px,5vw,80px);font-weight:400;line-height:1.0;letter-spacing:-0.03em;margin:0 0 28px;}
   .page-hero h1 em{font-style:italic;color:var(--ink-2);}
-  .page-hero .deck{font-family:var(--serif);font-size:clamp(18px,1.5vw,22px);font-weight:400;line-height:1.6;color:var(--ink-2);max-width:54ch;margin-bottom:40px;}
-  .hero-cta{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);font-family:var(--sans);font-size:13px;font-weight:600;padding:14px 28px;border-radius:999px;transition:background 0.15s;}
+  .page-hero .deck{font-family:var(--serif);font-size:clamp(17px,1.4vw,20px);font-weight:400;line-height:1.65;color:var(--ink-2);max-width:50ch;margin-bottom:36px;}
+  .hero-cta{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);font-family:var(--sans);font-size:13px;font-weight:600;padding:14px 28px;border-radius:999px;transition:background 0.15s;align-self:flex-start;}
   .hero-cta:hover{background:#333;}
   .hero-note{font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:14px;letter-spacing:0.02em;}
-  @media(max-width:640px){.page-hero{padding:88px 0 60px;}}
+  @media(max-width:900px){.page-hero{grid-template-columns:1fr;}.hero-photo{min-height:320px;order:-1;margin-top:56px;}.hero-text{padding:48px 40px 64px;}}
+  @media(max-width:640px){.hero-text{padding:40px 20px 56px;}}
 
-  /* Business types */
-  .types-section{padding:80px 0;border-bottom:1px solid var(--line);}
-  .eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;}
-  .types-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:36px;}
-  .type-card{background:var(--bg-alt);border:1px solid var(--line);border-radius:4px;padding:24px 20px;display:flex;flex-direction:column;gap:10px;transition:border-color 0.15s,background 0.15s,box-shadow 0.15s;}
-  .type-card:hover{background:var(--bg);border-color:var(--line-strong);box-shadow:0 4px 20px rgba(0,0,0,0.07);}
-  .type-tag{font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
-  .type-name{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--ink);line-height:1.2;}
-  .type-arr{font-family:var(--sans);font-size:11px;color:var(--muted);font-weight:600;transition:color 0.15s;}
-  .type-card:hover .type-arr{color:var(--ink);}
-  @media(max-width:1000px){.types-grid{grid-template-columns:repeat(3,1fr);}}
-  @media(max-width:640px){.types-grid{grid-template-columns:1fr 1fr;}}
+  /* Business type carousel */
+  .carousel-section{padding:56px 0;border-bottom:1px solid var(--line);overflow:hidden;}
+  .carousel-label{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:24px;}
+  @keyframes carousel-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+  .carousel-track{display:flex;gap:16px;width:max-content;animation:carousel-scroll 32s linear infinite;}
+  .carousel-track:hover{animation-play-state:paused;}
+  .biz-card{width:300px;height:220px;flex:none;border-radius:4px;position:relative;overflow:hidden;cursor:pointer;transition:transform 0.25s;background-size:cover;background-position:center;display:block;}
+  .biz-card:hover{transform:scale(1.03);}
+  .biz-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,11,20,0.88) 0%,rgba(10,11,20,0.1) 65%);}
+  .biz-card-content{position:absolute;bottom:0;left:0;right:0;padding:18px 20px;}
+  .biz-tag{font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--chart);margin-bottom:5px;}
+  .biz-name{font-family:var(--serif);font-size:18px;font-weight:400;color:#f8f8f8;line-height:1.2;margin-bottom:6px;}
+  .biz-arr{font-family:var(--sans);font-size:10px;font-weight:600;color:rgba(255,255,255,0.35);letter-spacing:0.05em;transition:color 0.15s;}
+  .biz-card:hover .biz-arr{color:var(--chart);}
 
-  /* Problem */
+  /* Sections */
   .section{padding:80px 0;}
   .section-alt{padding:80px 0;background:var(--bg-alt);}
+  .eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
   .section-heading{font-family:var(--serif);font-size:clamp(32px,3.5vw,52px);font-weight:400;letter-spacing:-0.025em;line-height:1.08;margin-bottom:24px;}
   .section-body{font-family:var(--serif);font-size:18px;font-weight:400;line-height:1.75;color:var(--ink-2);max-width:60ch;margin-bottom:40px;}
 
@@ -104,7 +129,7 @@
   @media(max-width:560px){.systems-grid{grid-template-columns:1fr;}.system-card{border-right:none!important;}.system-card:last-child{border-bottom:none;}}
 
   /* Steps */
-  .steps{margin-top:48px;display:flex;flex-direction:column;gap:0;}
+  .steps{margin-top:48px;}
   .step{display:grid;grid-template-columns:64px 1fr;gap:24px;padding:32px 0;border-top:1px solid var(--line);align-items:start;}
   .step:last-child{border-bottom:1px solid var(--line);}
   .step-n{font-family:var(--serif);font-size:clamp(28px,3vw,40px);font-weight:400;color:var(--muted);letter-spacing:-0.02em;line-height:1;}
@@ -115,7 +140,7 @@
 
   /* Guarantee */
   .guar{background:var(--bg-deep);padding:72px 0;text-align:center;color:#f8f8f8;}
-  .guar-box{max-width:640px;margin:0 auto;border:1px solid rgba(228,255,151,0.25);border-radius:4px;padding:52px 48px;}
+  .guar-box{max-width:640px;margin:0 auto;border:1px solid rgba(228,255,151,0.2);border-radius:4px;padding:52px 48px;}
   .guar-label{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(228,255,151,0.5);margin-bottom:20px;}
   .guar-heading{font-family:var(--serif);font-size:clamp(28px,3vw,44px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;color:#f8f8f8;margin-bottom:20px;}
   .guar-body{font-family:var(--serif);font-size:17px;line-height:1.75;color:rgba(255,255,255,0.5);max-width:46ch;margin:0 auto;}
@@ -132,8 +157,16 @@
   .ri .ck{color:var(--ink);font-weight:700;}
 
   /* Footer */
-  footer{background:var(--bg-alt);padding:48px 0 28px;border-top:1px solid var(--line);}
+  footer{background:var(--bg-alt);padding:56px 0 32px;border-top:1px solid var(--line);}
+  .foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:48px;margin-bottom:48px;}
+  .foot-brand{font-family:var(--sans);font-size:15px;font-weight:700;color:var(--ink);margin-bottom:10px;}
+  .foot-desc{font-family:var(--sans);font-size:13px;color:var(--muted);line-height:1.65;max-width:32ch;}
+  .foot-col h5{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;}
+  .foot-col a{display:block;font-family:var(--sans);font-size:13px;color:var(--ink-2);padding:3px 0;transition:color 0.15s;}
+  .foot-col a:hover{color:var(--ink);}
   .foot-bottom{display:flex;justify-content:space-between;font-family:var(--sans);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);padding-top:24px;border-top:1px solid var(--line);}
+  @media(max-width:768px){.foot-grid{grid-template-columns:1fr 1fr;}.foot-brand-col{grid-column:1/-1;}}
+  @media(max-width:480px){.foot-grid{grid-template-columns:1fr;}.foot-bottom{flex-direction:column;gap:8px;}}
 
   /* Reveal */
   .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.8s ease,transform 0.8s cubic-bezier(.2,.7,.2,1);}
@@ -142,9 +175,36 @@
 </head>
 <body>
 
+<!-- Side nav overlay + panel -->
+<div class="side-overlay" id="side-overlay"></div>
+<div class="side-nav" id="side-nav">
+  <div class="sn-top">
+    <span class="sn-brand">TMI Online</span>
+    <button class="sn-close" id="sn-close" aria-label="Close">&times;</button>
+  </div>
+  <div class="sn-section">Navigation</div>
+  <a class="sn-link" href="online.html">Home</a>
+  <a class="sn-link" href="founders.html">Founders of the Future</a>
+  <a class="sn-link" href="about.html">About</a>
+  <div class="sn-section">Business Types</div>
+  <a class="sn-link" href="online-coaches.html">Coaches &amp; Consultants</a>
+  <a class="sn-link" href="online-courses.html">Course Creators</a>
+  <a class="sn-link" href="online-creators.html">Creators &amp; Influencers</a>
+  <a class="sn-link" href="online-info.html">Info Product Sellers</a>
+  <a class="sn-link" href="online-ecom.html">E-Commerce Brands</a>
+  <div class="sn-section">Also From TMI</div>
+  <a class="sn-link" href="stratum.html">Physical Economy</a>
+  <div class="sn-cta-wrap">
+    <a class="sn-cta" href="funnel.html">Book a Call &rarr;</a>
+  </div>
+</div>
+
 <header class="article-header">
   <div class="article-header-inner">
-    <a href="online.html" class="ah-brand"><img src="logo.svg" alt="TMI"/> TMI</a>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="online.html" class="ah-brand"><img src="logo.svg" alt="TMI"/> TMI Online</a>
     <nav class="ah-nav">
       <a href="founders.html">Founders of the Future</a>
       <a href="about.html">About</a>
@@ -153,49 +213,108 @@
   </div>
 </header>
 
+<!-- Hero - split layout -->
 <section class="page-hero">
-  <div class="container-md">
+  <div class="hero-text">
     <div class="hero-eyebrow">TMI Online &mdash; For coaches, creators &amp; online operators</div>
     <h1>Your offer works. <em>Your backend doesn't.</em></h1>
-    <p class="deck">You're doing real revenue and still manually following up DMs, hand-building every launch, and onboarding each new client yourself. The offer isn't the problem. The fact that it all still runs through you is. We build the backend that handles it permanently.</p>
+    <p class="deck">You're doing real revenue and still manually following up DMs, hand-building every launch, and onboarding each new client yourself. The offer isn't the problem. The fact that it all still runs through you is.</p>
     <a href="funnel.html" class="hero-cta">Book a Free Strategy Call &rarr;</a>
     <p class="hero-note">45 minutes. No pitch. Just clarity on what's possible.</p>
   </div>
+  <div class="hero-photo" aria-hidden="true"></div>
 </section>
 
-<section class="types-section">
-  <div class="container">
-    <div class="eyebrow reveal">Who we build for</div>
-    <div class="types-grid">
-      <a class="type-card reveal" href="online-coaches.html">
-        <div class="type-tag">1:1 &amp; Group Programs</div>
-        <div class="type-name">Coaches &amp; Consultants</div>
-        <div class="type-arr">Explore &rarr;</div>
-      </a>
-      <a class="type-card reveal" href="online-courses.html">
-        <div class="type-tag">Online Education</div>
-        <div class="type-name">Course Creators</div>
-        <div class="type-arr">Explore &rarr;</div>
-      </a>
-      <a class="type-card reveal" href="online-creators.html">
-        <div class="type-tag">Audience &amp; Content</div>
-        <div class="type-name">Creators &amp; Influencers</div>
-        <div class="type-arr">Explore &rarr;</div>
-      </a>
-      <a class="type-card reveal" href="online-info.html">
-        <div class="type-tag">Digital Products</div>
-        <div class="type-name">Info Product Sellers</div>
-        <div class="type-arr">Explore &rarr;</div>
-      </a>
-      <a class="type-card reveal" href="online-ecom.html">
-        <div class="type-tag">Physical Products</div>
-        <div class="type-name">E-Commerce Brands</div>
-        <div class="type-arr">Explore &rarr;</div>
-      </a>
-    </div>
+<!-- Business type carousel -->
+<div class="carousel-section">
+  <div class="carousel-label">Who we build for</div>
+  <div class="carousel-track">
+    <!-- Set 1 -->
+    <a class="biz-card" href="online-coaches.html" style="background-image:url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=700&q=80')">
+      <div class="biz-card-overlay"></div>
+      <div class="biz-card-content">
+        <div class="biz-tag">1:1 &amp; Group Programs</div>
+        <div class="biz-name">Coaches &amp; Consultants</div>
+        <div class="biz-arr">Explore &rarr;</div>
+      </div>
+    </a>
+    <a class="biz-card" href="online-courses.html" style="background-image:url('https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=700&q=80')">
+      <div class="biz-card-overlay"></div>
+      <div class="biz-card-content">
+        <div class="biz-tag">Online Education</div>
+        <div class="biz-name">Course Creators</div>
+        <div class="biz-arr">Explore &rarr;</div>
+      </div>
+    </a>
+    <a class="biz-card" href="online-creators.html" style="background-image:url('https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=700&q=80')">
+      <div class="biz-card-overlay"></div>
+      <div class="biz-card-content">
+        <div class="biz-tag">Audience &amp; Content</div>
+        <div class="biz-name">Creators &amp; Influencers</div>
+        <div class="biz-arr">Explore &rarr;</div>
+      </div>
+    </a>
+    <a class="biz-card" href="online-info.html" style="background-image:url('https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=700&q=80')">
+      <div class="biz-card-overlay"></div>
+      <div class="biz-card-content">
+        <div class="biz-tag">Digital Products</div>
+        <div class="biz-name">Info Product Sellers</div>
+        <div class="biz-arr">Explore &rarr;</div>
+      </div>
+    </a>
+    <a class="biz-card" href="online-ecom.html" style="background-image:url('https://images.pexels.com/photos/4968391/pexels-photo-4968391.jpeg?auto=compress&cs=tinysrgb&w=700&q=80')">
+      <div class="biz-card-overlay"></div>
+      <div class="biz-card-content">
+        <div class="biz-tag">Physical Products</div>
+        <div class="biz-name">E-Commerce Brands</div>
+        <div class="biz-arr">Explore &rarr;</div>
+      </div>
+    </a>
+    <!-- Set 2 (duplicate for seamless loop) -->
+    <a class="biz-card" href="online-coaches.html" style="background-image:url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=700&q=80')">
+      <div class="biz-card-overlay"></div>
+      <div class="biz-card-content">
+        <div class="biz-tag">1:1 &amp; Group Programs</div>
+        <div class="biz-name">Coaches &amp; Consultants</div>
+        <div class="biz-arr">Explore &rarr;</div>
+      </div>
+    </a>
+    <a class="biz-card" href="online-courses.html" style="background-image:url('https://images.pexels.com/photos/4050315/pexels-photo-4050315.jpeg?auto=compress&cs=tinysrgb&w=700&q=80')">
+      <div class="biz-card-overlay"></div>
+      <div class="biz-card-content">
+        <div class="biz-tag">Online Education</div>
+        <div class="biz-name">Course Creators</div>
+        <div class="biz-arr">Explore &rarr;</div>
+      </div>
+    </a>
+    <a class="biz-card" href="online-creators.html" style="background-image:url('https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=700&q=80')">
+      <div class="biz-card-overlay"></div>
+      <div class="biz-card-content">
+        <div class="biz-tag">Audience &amp; Content</div>
+        <div class="biz-name">Creators &amp; Influencers</div>
+        <div class="biz-arr">Explore &rarr;</div>
+      </div>
+    </a>
+    <a class="biz-card" href="online-info.html" style="background-image:url('https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=700&q=80')">
+      <div class="biz-card-overlay"></div>
+      <div class="biz-card-content">
+        <div class="biz-tag">Digital Products</div>
+        <div class="biz-name">Info Product Sellers</div>
+        <div class="biz-arr">Explore &rarr;</div>
+      </div>
+    </a>
+    <a class="biz-card" href="online-ecom.html" style="background-image:url('https://images.pexels.com/photos/4968391/pexels-photo-4968391.jpeg?auto=compress&cs=tinysrgb&w=700&q=80')">
+      <div class="biz-card-overlay"></div>
+      <div class="biz-card-content">
+        <div class="biz-tag">Physical Products</div>
+        <div class="biz-name">E-Commerce Brands</div>
+        <div class="biz-arr">Explore &rarr;</div>
+      </div>
+    </a>
   </div>
-</section>
+</div>
 
+<!-- Problem section -->
 <section class="section">
   <div class="container-md">
     <div class="eyebrow reveal">The week that keeps repeating</div>
@@ -290,7 +409,7 @@
 <section class="section">
   <div class="container-md">
     <div class="eyebrow reveal">How it works</div>
-    <h2 class="section-heading reveal">One call. 14 days. Yours forever.</h2>
+    <h2 class="section-heading reveal">One call. 14 days on average. Yours forever.</h2>
     <div class="steps">
       <div class="step reveal">
         <div class="step-n">01</div>
@@ -319,7 +438,7 @@
       <div class="step reveal">
         <div class="step-n">04</div>
         <div>
-          <div class="step-tag">Day 14</div>
+          <div class="step-tag">Day 14 avg.</div>
           <div class="step-title">Handover - it is yours forever</div>
           <div class="step-desc">Full walkthrough. Complete documentation. We stay on for 7 days to tune anything that needs it. Then you own it permanently. No ongoing dependency. No monthly fees.</div>
         </div>
@@ -345,7 +464,7 @@
     <a href="funnel.html" class="hero-cta" style="font-size:14px;padding:16px 36px;">Book a Free Strategy Call &rarr;</a>
     <div class="reassure">
       <div class="ri"><span class="ck">&#10003;</span> Done For You</div>
-      <div class="ri"><span class="ck">&#10003;</span> 14 Day Max Build</div>
+      <div class="ri"><span class="ck">&#10003;</span> 14 Day Avg. Build</div>
       <div class="ri"><span class="ck">&#10003;</span> 30 Day Guarantee</div>
       <div class="ri"><span class="ck">&#10003;</span> Yours Forever</div>
       <div class="ri"><span class="ck">&#10003;</span> No Monthly Fees</div>
@@ -355,6 +474,27 @@
 
 <footer>
   <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand-col">
+        <div class="foot-brand">TMI Online</div>
+        <p class="foot-desc">AI infrastructure for online business operators. Built custom. Done for you. Yours forever.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Business Types</h5>
+        <a href="online-coaches.html">Coaches &amp; Consultants</a>
+        <a href="online-courses.html">Course Creators</a>
+        <a href="online-creators.html">Creators &amp; Influencers</a>
+        <a href="online-info.html">Info Product Sellers</a>
+        <a href="online-ecom.html">E-Commerce Brands</a>
+      </div>
+      <div class="foot-col">
+        <h5>Company</h5>
+        <a href="founders.html">Founders of the Future</a>
+        <a href="about.html">About</a>
+        <a href="funnel.html">Apply</a>
+        <a href="stratum.html">Physical Economy</a>
+      </div>
+    </div>
     <div class="foot-bottom">
       <span>&copy; 2026 TMI Technology</span>
       <span>Built for operators who build online.</span>
@@ -367,6 +507,17 @@ const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// Side nav
+const hamburger = document.getElementById('hamburger');
+const sideNav = document.getElementById('side-nav');
+const overlay = document.getElementById('side-overlay');
+const snClose = document.getElementById('sn-close');
+function openNav(){ sideNav.classList.add('open'); overlay.classList.add('open'); }
+function closeNav(){ sideNav.classList.remove('open'); overlay.classList.remove('open'); }
+hamburger.addEventListener('click', openNav);
+snClose.addEventListener('click', closeNav);
+overlay.addEventListener('click', closeNav);
 </script>
 </body>
 </html>
