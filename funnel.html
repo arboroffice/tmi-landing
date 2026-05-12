@@ -331,25 +331,23 @@ form.addEventListener('submit', async (e) => {
   const company = document.getElementById('company').value;
 
   try {
-    await fetch('https://api.web3forms.com/submit', {
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('email', email);
+    fd.append('_subject', 'New TMI Lead - ' + name + ' (' + (bizType === 'online' ? 'Online' : 'Physical') + ')');
+    fd.append('message', [
+      'Name: ' + name,
+      'Email: ' + email,
+      'Phone: ' + phone,
+      'Company: ' + (company || 'Not provided'),
+      'Business Type: ' + (bizType === 'online' ? 'Online Business' : 'Physical / Field Business'),
+      '',
+      'Submitted from funnel.html',
+    ].join('\n'));
+    await fetch('https://formsubmit.co/ajax/mia@elianatech.com', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        access_key: 'YOUR_WEB3FORMS_ACCESS_KEY',
-        subject: 'New TMI Lead - ' + name + ' (' + (bizType === 'online' ? 'Online' : 'Physical') + ')',
-        from_name: 'TMI Funnel',
-        name,
-        email,
-        message: [
-          'Name: ' + name,
-          'Email: ' + email,
-          'Phone: ' + phone,
-          'Company: ' + (company || 'Not provided'),
-          'Business Type: ' + (bizType === 'online' ? 'Online Business' : 'Physical / Field Business'),
-          '',
-          'Submitted from funnel.html',
-        ].join('\n'),
-      }),
+      headers: { 'Accept': 'application/json' },
+      body: fd,
     });
   } catch(err) {}
 

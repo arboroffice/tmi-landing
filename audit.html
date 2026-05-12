@@ -685,17 +685,15 @@ async function submitAuditToAPI(r) {
       openAnswers ? 'Open Answers:\n' + openAnswers : '',
     ].filter(Boolean).join('\n');
 
-    await fetch('https://api.web3forms.com/submit', {
+    const fd = new FormData();
+    fd.append('name', contactInfo.name);
+    fd.append('email', contactInfo.email);
+    fd.append('_subject', 'New TMI Audit - ' + contactInfo.name + ' | ' + TIERS[r.tierKey].name);
+    fd.append('message', emailBody);
+    await fetch('https://formsubmit.co/ajax/mia@elianatech.com', {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        access_key: 'YOUR_WEB3FORMS_ACCESS_KEY',
-        subject: 'New TMI Audit - ' + contactInfo.name + ' | ' + TIERS[r.tierKey].name,
-        from_name: 'TMI Audit',
-        name: contactInfo.name,
-        email: contactInfo.email,
-        message: emailBody,
-      }),
+      headers: {'Accept':'application/json'},
+      body: fd,
     });
   } catch(e) {}
 }
