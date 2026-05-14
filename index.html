@@ -396,18 +396,19 @@
     .industries-section { padding: 36px 0; }
     footer { padding: 60px 0 32px; }
   }
-  /* HERO NEWSLETTER */
-  .hero-nl{margin-top:36px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.1);max-width:480px;}
-  .hero-nl-label{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-  .hero-nl-label::before{content:'';display:block;width:16px;height:1px;background:var(--chart);opacity:0.6;}
-  .hero-nl-form{display:flex;gap:8px;}
-  .hero-nl-input{flex:1;padding:13px 18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.11);border-radius:999px;color:#fff;font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;min-width:0;}
+  /* NEWSLETTER STRIP */
+  .nl-strip{background:var(--bg-deep);border-bottom:1px solid rgba(255,255,255,0.06);padding:28px 0;}
+  .nl-strip-inner{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+  .nl-strip-label{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.35);white-space:nowrap;display:flex;align-items:center;gap:8px;flex:none;}
+  .nl-strip-label::before{content:'';display:block;width:16px;height:1px;background:var(--chart);opacity:0.6;}
+  .hero-nl-form{display:flex;gap:8px;flex:1;min-width:0;}
+  .hero-nl-input{flex:1;padding:12px 18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.11);border-radius:999px;color:#fff;font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;min-width:0;}
   .hero-nl-input::placeholder{color:rgba(255,255,255,0.3);}
   .hero-nl-input:focus{border-color:rgba(228,255,151,0.45);}
-  .hero-nl-btn{padding:13px 22px;background:var(--chart);color:#0a0b14;border:none;border-radius:999px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.15s;}
+  .hero-nl-btn{padding:12px 22px;background:var(--chart);color:#0a0b14;border:none;border-radius:999px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.15s;}
   .hero-nl-btn:hover{background:var(--chart-dark);}
-  .hero-nl-ok{display:none;font-family:var(--serif);font-size:16px;color:var(--chart);padding:12px 0;}
-  @media(max-width:540px){.hero-nl-form{flex-direction:column;}.hero-nl-btn{border-radius:999px;}}
+  .hero-nl-ok{display:none;font-family:var(--serif);font-size:16px;color:var(--chart);padding:4px 0;}
+  @media(max-width:640px){.nl-strip-inner{flex-direction:column;align-items:flex-start;gap:16px;}.hero-nl-form{width:100%;}.hero-nl-btn{width:100%;border-radius:999px;}}
 </style>
 </head>
 <body>
@@ -459,8 +460,18 @@
       <a href="https://trades.tmitechai.com/funnel.html" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
       <a href="#verticals" class="btn btn-white-outline">See Where We Build</a>
     </div>
-    <div class="hero-nl">
-      <div class="hero-nl-label">Founders of the Future</div>
+  </div>
+  <div class="hero-scroll">
+    <span class="hero-scroll-label">Scroll</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- NEWSLETTER STRIP -->
+<div class="nl-strip">
+  <div class="container">
+    <div class="nl-strip-inner">
+      <div class="nl-strip-label">Founders of the Future</div>
       <form class="hero-nl-form" id="hero-nl-form">
         <input type="email" class="hero-nl-input" placeholder="your@email.com" required/>
         <button type="submit" class="hero-nl-btn">Join Free &rarr;</button>
@@ -468,11 +479,7 @@
       <div class="hero-nl-ok" id="hero-nl-ok">You're in. One email when something worth reading drops.</div>
     </div>
   </div>
-  <div class="hero-scroll">
-    <span class="hero-scroll-label">Scroll</span>
-    <div class="hero-scroll-line"></div>
-  </div>
-</section>
+</div>
 
 <!-- VERTICALS -->
 <section class="verticals-section" id="verticals">
