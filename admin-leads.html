@@ -23,6 +23,7 @@
     <div class="topbar">
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Leads</span></div>
       <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Export CSV</button>
         <button class="btn btn-primary btn-sm" onclick="openAddModal()">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add Lead
@@ -475,6 +476,30 @@ async function convertToClient() {
     });
     await loadLeads();
   }
+}
+
+function exportCSV() {
+  const filtered = getFiltered();
+  const headers = ['Name','Email','Company','Status','Source','Added'];
+  const rows = filtered.map(l => {
+    const c = l.contacts || {};
+    const name = [c.first_name, c.last_name].filter(Boolean).join(' ');
+    return [
+      name,
+      c.email || '',
+      c.company || '',
+      l.status || '',
+      l.source || '',
+      l.created_at ? new Date(l.created_at).toLocaleDateString() : ''
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+  });
+  const csv = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().split('T')[0];
+  a.href = url; a.download = `leads-${date}.csv`;
+  a.click(); URL.revokeObjectURL(url);
 }
 
 loadLeads();

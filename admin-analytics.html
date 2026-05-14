@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Analytics — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Analytics</span></div>
+    </div>
+    <div class="content">
+      <div class="sec-head"><h1>Analytics</h1></div>
+
+      <!-- Pipeline Funnel -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-head"><span class="card-title">Pipeline Funnel</span><span class="card-sub" id="funnel-sub"></span></div>
+        <div id="funnel-body" style="padding:20px 24px">
+          <div style="font-size:13px;color:var(--muted)">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Deal Velocity -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-head"><span class="card-title">Deal Velocity</span><span class="card-sub">Avg days per stage</span></div>
+        <div id="velocity-body" style="padding:20px 24px">
+          <div style="font-size:13px;color:var(--muted)">Loading...</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:20px">
+
+        <!-- Revenue Forecast -->
+        <div class="card">
+          <div class="card-head"><span class="card-title">Revenue Forecast</span><span class="card-sub">Pipeline-weighted</span></div>
+          <div id="forecast-body" style="padding:24px">
+            <div style="font-size:13px;color:var(--muted)">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Invoices at a Glance -->
+        <div class="card">
+          <div class="card-head"><span class="card-title">Invoices at a Glance</span></div>
+          <div id="invoices-glance" style="padding:24px">
+            <div style="font-size:13px;color:var(--muted)">Loading...</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="grid-2" style="margin-top:20px">
+
+        <!-- Lead Sources -->
+        <div class="card">
+          <div class="card-head"><span class="card-title">Lead Sources</span></div>
+          <div id="sources-body" style="padding:20px 24px">
+            <div style="font-size:13px;color:var(--muted)">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Top Niches -->
+        <div class="card">
+          <div class="card-head"><span class="card-title">Top Niches</span></div>
+          <div id="niches-body" style="padding:20px 24px">
+            <div style="font-size:13px;color:var(--muted)">Loading...</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('analytics');
+
+const FUNNEL_STAGES = ['new','contacted','qualified','proposal','won','lost'];
+const STAGE_PROBS   = { new: 0.05, contacted: 0.15, qualified: 0.35, proposal: 0.60, won: 1.0, lost: 0 };
+
+function barChart(items, maxCount) {
+  // items: [{label, count, color?}]
+  if (!items.length) return `<div style="font-size:13px;color:var(--muted);padding:8px 0">No data yet.</div>`;
+  const max = maxCount || Math.max(...items.map(i => i.count), 1);
+  return items.map(item => {
+    const pct = Math.max(item.count ? 2 : 0, Math.round(item.count / max * 100));
+    return `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:120px;font-size:12px;color:var(--ink-2);text-overflow:ellipsis;overflow:hidden;white-space:nowrap;flex-shrink:0">${item.label}</div>
+        <div style="flex:1;height:6px;background:var(--line);border-radius:999px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${item.color || 'var(--chart)'};border-radius:999px;transition:width 0.4s ease"></div>
+        </div>
+        <div style="width:28px;font-size:12px;color:var(--muted);text-align:right;flex-shrink:0">${item.count}</div>
+      </div>`;
+  }).join('');
+}
+
+async function loadAnalytics() {
+  const [leads, clients, contacts, invoices, proposals] = await Promise.all([
+    TMIAdmin.api('/api/leads'),
+    TMIAdmin.api('/api/clients'),
+    TMIAdmin.api('/api/contacts'),
+    TMIAdmin.api('/api/invoices'),
+    TMIAdmin.api('/api/proposals'),
+  ]);
+
+  const now = new Date();
+
+  // ── Pipeline Funnel ──────────────────────────────────────────────────────
+  const funnelEl = document.getElementById('funnel-body');
+  const funnelSub = document.getElementById('funnel-sub');
+  const counts = {};
+  FUNNEL_STAGES.forEach(s => counts[s] = 0);
+  (leads || []).forEach(l => { if (counts[l.status] !== undefined) counts[l.status]++; });
+  const totalLeads = (leads || []).length;
+  funnelSub.textContent = `${totalLeads} total lead${totalLeads !== 1 ? 's' : ''}`;
+
+  // Conversion rates between adjacent stages (exclude won/lost from the active funnel)
+  const activeFunnel = ['new','contacted','qualified','proposal'];
+  const convRates = [];
+  for (let i = 0; i < activeFunnel.length - 1; i++) {
+    const from = activeFunnel[i];
+    const to   = activeFunnel[i + 1];
+    const rate = counts[from] > 0 ? Math.round(counts[to] / counts[from] * 100) : 0;
+    convRates.push({ from, to, rate });
+  }
+  // Won/lost rates from proposal
+  const proposalToWon  = counts['proposal'] > 0 ? Math.round(counts['won']  / counts['proposal'] * 100) : 0;
+  const proposalToLost = counts['proposal'] > 0 ? Math.round(counts['lost'] / counts['proposal'] * 100) : 0;
+
+  const funnelMaxCount = Math.max(...FUNNEL_STAGES.map(s => counts[s]), 1);
+  funnelEl.innerHTML = `
+    <div style="margin-bottom:24px">
+      ${FUNNEL_STAGES.map(stage => {
+        const c = counts[stage];
+        const pct = Math.max(c ? 2 : 0, Math.round(c / funnelMaxCount * 100));
+        const STAGE_COLORS = {
+          new:'#dbeafe', contacted:'#ede9fe', qualified:'#fef9c3',
+          proposal:'#ffedd5', won:'#dcfce7', lost:'#f3f4f6'
+        };
+        return `
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="width:90px;font-size:12px;color:var(--ink-2);text-transform:capitalize;flex-shrink:0">${stage}</div>
+            <div style="flex:1;height:8px;background:var(--line);border-radius:999px;overflow:hidden">
+              <div style="height:100%;width:${pct}%;background:${STAGE_COLORS[stage]};border-radius:999px;border:1px solid rgba(0,0,0,0.06)"></div>
+            </div>
+            <div style="width:28px;font-size:13px;font-weight:600;color:var(--ink);text-align:right;flex-shrink:0">${c}</div>
+          </div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;padding-top:16px;border-top:1px solid var(--line)">
+      ${convRates.map(r => `
+        <div style="background:var(--bg-alt);border-radius:6px;padding:10px 14px;min-width:120px">
+          <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${r.from} → ${r.to}</div>
+          <div style="font-size:20px;font-weight:700;color:var(--ink)">${r.rate}%</div>
+        </div>`).join('')}
+      <div style="background:var(--bg-alt);border-radius:6px;padding:10px 14px;min-width:120px">
+        <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Proposal → Won</div>
+        <div style="font-size:20px;font-weight:700;color:var(--ink)">${proposalToWon}%</div>
+      </div>
+      <div style="background:var(--bg-alt);border-radius:6px;padding:10px 14px;min-width:120px">
+        <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Proposal → Lost</div>
+        <div style="font-size:20px;font-weight:700;color:var(--ink)">${proposalToLost}%</div>
+      </div>
+    </div>`;
+
+  // ── Deal Velocity ────────────────────────────────────────────────────────
+  const velocityEl = document.getElementById('velocity-body');
+  const velocityStages = ['new','contacted','qualified','proposal'];
+  const stageAvgDays = {};
+  velocityStages.forEach(stage => {
+    const stageLeads = (leads || []).filter(l => l.status === stage);
+    if (!stageLeads.length) { stageAvgDays[stage] = null; return; }
+    const diffs = stageLeads.map(l => {
+      const updated = l.updated_at ? new Date(l.updated_at) : now;
+      const created = l.created_at ? new Date(l.created_at) : now;
+      return Math.max(0, Math.round((updated - created) / (1000 * 60 * 60 * 24)));
+    });
+    stageAvgDays[stage] = Math.round(diffs.reduce((a, b) => a + b, 0) / diffs.length);
+  });
+  const maxDays = Math.max(...Object.values(stageAvgDays).filter(v => v !== null), 1);
+  velocityEl.innerHTML = velocityStages.map(stage => {
+    const days = stageAvgDays[stage];
+    const pct = days !== null ? Math.max(days ? 3 : 0, Math.round(days / maxDays * 100)) : 0;
+    const label = days !== null ? `${days}d avg` : 'No data';
+    return `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <div style="width:90px;font-size:12px;color:var(--ink-2);text-transform:capitalize;flex-shrink:0">${stage}</div>
+        <div style="flex:1;height:6px;background:var(--line);border-radius:999px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:var(--chart);border-radius:999px"></div>
+        </div>
+        <div style="width:64px;font-size:12px;color:var(--muted);text-align:right;flex-shrink:0">${label}</div>
+      </div>`;
+  }).join('');
+
+  // ── Revenue Forecast ─────────────────────────────────────────────────────
+  const forecastEl = document.getElementById('forecast-body');
+  const activeClients = (clients || []).filter(c => c.status === 'active');
+  const totalMrr = activeClients.reduce((s, c) => s + (parseFloat(c.mrr) || 0), 0);
+  const avgDealSize = activeClients.length > 0 ? totalMrr / activeClients.length : 0;
+  const activeLeads = (leads || []).filter(l => !['won','lost'].includes(l.status));
+  let weightedPipeline = 0;
+  activeLeads.forEach(l => {
+    const prob = STAGE_PROBS[l.status] || 0;
+    const val  = parseFloat(l.value) || avgDealSize;
+    weightedPipeline += val * prob;
+  });
+  const stageRows = Object.keys(STAGE_PROBS).filter(s => s !== 'lost').map(stage => {
+    const stageLeads = activeLeads.filter(l => l.status === stage);
+    const val = stageLeads.reduce((s, l) => s + (parseFloat(l.value) || avgDealSize), 0);
+    const weighted = val * STAGE_PROBS[stage];
+    return { stage, count: stageLeads.length, val, weighted };
+  });
+  forecastEl.innerHTML = `
+    <div style="margin-bottom:24px;text-align:center;padding:20px;background:var(--bg-alt);border-radius:8px">
+      <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Weighted Pipeline</div>
+      <div style="font-size:40px;font-weight:700;color:var(--ink);letter-spacing:-0.02em">$${Math.round(weightedPipeline).toLocaleString()}</div>
+      ${avgDealSize > 0 ? `<div style="font-size:12px;color:var(--muted);margin-top:6px">Avg deal: $${Math.round(avgDealSize).toLocaleString()}/mo MRR</div>` : ''}
+    </div>
+    <div>
+      ${stageRows.filter(r => r.count > 0).map(r => `
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)">
+          <div style="flex:1;font-size:13px;color:var(--ink-2);text-transform:capitalize">${r.stage} <span style="color:var(--muted);font-size:11px">(${Math.round(STAGE_PROBS[r.stage] * 100)}%)</span></div>
+          <div style="font-size:12px;color:var(--muted)">${r.count} lead${r.count !== 1 ? 's' : ''}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--ink);min-width:64px;text-align:right">$${Math.round(r.weighted).toLocaleString()}</div>
+        </div>`).join('')}
+      ${stageRows.every(r => r.count === 0) ? `<div style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0">No active leads in pipeline.</div>` : ''}
+    </div>`;
+
+  // ── Invoices at a Glance ─────────────────────────────────────────────────
+  const invEl = document.getElementById('invoices-glance');
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+  const paidThisYear = (invoices || []).filter(i => {
+    if (i.status !== 'paid') return false;
+    const paid = i.paid_at || i.updated_at || i.created_at;
+    return paid && new Date(paid) >= yearStart;
+  });
+  const paidYTD = paidThisYear.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+  const overdueInvs = (invoices || []).filter(i => {
+    if (i.status === 'overdue') return true;
+    if (i.status === 'pending' && i.due_date && new Date(i.due_date) < now) return true;
+    return false;
+  });
+  const overdueAmt = overdueInvs.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+  const outstandingInvs = (invoices || []).filter(i => ['pending','viewed'].includes(i.status) && !(i.due_date && new Date(i.due_date) < now));
+  const outstandingAmt = outstandingInvs.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0);
+  invEl.innerHTML = `
+    <div style="display:grid;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-alt);border-radius:8px">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Paid YTD</div>
+          <div style="font-size:22px;font-weight:700;color:var(--ink)">$${paidYTD.toLocaleString()}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted)">${paidThisYear.length} invoice${paidThisYear.length !== 1 ? 's' : ''}</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-alt);border-radius:8px">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Outstanding</div>
+          <div style="font-size:22px;font-weight:700;color:var(--ink)">$${outstandingAmt.toLocaleString()}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted)">${outstandingInvs.length} pending</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:${overdueInvs.length > 0 ? 'rgba(239,68,68,0.07)' : 'var(--bg-alt)'};border-radius:8px;${overdueInvs.length > 0 ? 'border:1px solid rgba(239,68,68,0.18)' : ''}">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:${overdueInvs.length > 0 ? 'rgba(239,68,68,0.7)' : 'var(--muted)'};margin-bottom:4px">Overdue</div>
+          <div style="font-size:22px;font-weight:700;color:${overdueInvs.length > 0 ? 'rgb(239,68,68)' : 'var(--ink)'}">$${overdueAmt.toLocaleString()}</div>
+        </div>
+        <div style="font-size:12px;color:${overdueInvs.length > 0 ? 'rgba(239,68,68,0.8)' : 'var(--muted)'}">${overdueInvs.length} overdue</div>
+      </div>
+    </div>`;
+
+  // ── Lead Sources ─────────────────────────────────────────────────────────
+  const sourcesEl = document.getElementById('sources-body');
+  const sourceCounts = {};
+  (leads || []).forEach(l => {
+    const src = l.source || 'Unknown';
+    sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+  });
+  const sourceItems = Object.entries(sourceCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([label, count]) => ({ label, count }));
+  sourcesEl.innerHTML = sourceItems.length
+    ? barChart(sourceItems)
+    : `<div style="font-size:13px;color:var(--muted);padding:8px 0">No leads yet.</div>`;
+
+  // ── Top Niches ───────────────────────────────────────────────────────────
+  const nichesEl = document.getElementById('niches-body');
+  const nicheCounts = {};
+  // Count from contacts
+  (contacts || []).forEach(c => {
+    if (!c.niche) return;
+    nicheCounts[c.niche] = (nicheCounts[c.niche] || 0) + 1;
+  });
+  // Also count from leads (via lead.niche if present)
+  (leads || []).forEach(l => {
+    if (!l.niche) return;
+    nicheCounts[l.niche] = (nicheCounts[l.niche] || 0) + 1;
+  });
+  const nicheItems = Object.entries(nicheCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 15)
+    .map(([label, count]) => ({ label, count }));
+  nichesEl.innerHTML = nicheItems.length
+    ? barChart(nicheItems)
+    : `<div style="font-size:13px;color:var(--muted);padding:8px 0">No niche data yet.</div>`;
+}
+
+loadAnalytics();
+</script>
+</body>
+</html>

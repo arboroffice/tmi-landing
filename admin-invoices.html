@@ -68,6 +68,7 @@
     <div class="panel-hd">
       <h2 class="panel-title" id="panel-inv-num">Invoice</h2>
       <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="copyShareLink()">Copy Link</button>
         <button class="btn btn-ghost btn-sm" onclick="panelEdit()">Edit</button>
         <button class="btn btn-ghost btn-sm" onclick="markPaid()">Mark Paid</button>
         <button class="btn btn-ghost btn-sm" onclick="markOverdue()">Mark Overdue</button>
@@ -299,6 +300,12 @@ async function deleteInvoice() {
   if (!ok) return;
   const res = await TMIAdmin.api('/api/invoices', 'DELETE', { id: currentInvoice.id });
   if (res) { TMIAdmin.toast('Deleted'); TMIAdmin.closePanel('inv-panel'); await loadInvoices(); }
+}
+
+function copyShareLink() {
+  if (!currentInvoice) return;
+  const url = `${window.location.origin}/invoice-view.html?id=${currentInvoice.id}`;
+  navigator.clipboard.writeText(url).then(() => TMIAdmin.toast('Link copied to clipboard'));
 }
 
 // --- Auto-suggest next invoice number ---

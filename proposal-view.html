@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Proposal — TMI</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-alt: #f5f5f7;
+      --bg-deep: #0a0b14;
+      --ink: #1a1a1a;
+      --ink-2: #505060;
+      --muted: #86868b;
+      --line: rgba(0,0,0,0.08);
+      --line-strong: rgba(0,0,0,0.13);
+      --chart: #E4FF97;
+      --chart-dark: #D0FF6A;
+      --green: #22c55e;
+      --green-bg: #f0fdf4;
+      --sans: "Barlow", system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg-alt);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* Header */
+    .doc-header {
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .doc-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .doc-brand img { height: 24px; width: auto; }
+    .doc-type {
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Accepted banner */
+    .accepted-banner {
+      background: var(--green-bg);
+      border-bottom: 1px solid #bbf7d0;
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #15803d;
+    }
+    .accepted-banner .check {
+      width: 20px;
+      height: 20px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    /* Page wrap */
+    .page-wrap {
+      max-width: 760px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+
+    /* Document card */
+    .doc-card {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    /* Doc top */
+    .doc-top {
+      padding: 48px 48px 36px;
+      border-bottom: 1px solid var(--line);
+    }
+    .doc-title {
+      font-size: clamp(26px, 3vw, 38px);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin: 0 0 20px;
+      line-height: 1.1;
+    }
+    .doc-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .doc-meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .doc-meta-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .doc-meta-val {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-2);
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+    .status-badge.accepted { background: #dcfce7; color: #15803d; }
+    .status-badge.declined { background: #fee2e2; color: #b91c1c; }
+    .status-badge.sent { background: #dbeafe; color: #1d4ed8; }
+    .status-badge.viewed { background: #fef9c3; color: #854d0e; }
+    .status-badge.draft { background: #f1f5f9; color: #64748b; }
+
+    /* Line items */
+    .doc-section { padding: 36px 48px; }
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .li-table { width: 100%; border-collapse: collapse; }
+    .li-table thead tr {
+      border-bottom: 1px solid var(--line-strong);
+    }
+    .li-table thead th {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 0 0 10px;
+      text-align: left;
+    }
+    .li-table thead th.right { text-align: right; }
+    .li-table tbody tr {
+      border-bottom: 1px solid var(--line);
+    }
+    .li-table tbody tr:last-child { border-bottom: none; }
+    .li-table tbody td {
+      padding: 12px 0;
+      font-size: 14px;
+      color: var(--ink-2);
+      vertical-align: top;
+    }
+    .li-table tbody td.desc { color: var(--ink); font-weight: 500; }
+    .li-table tbody td.right { text-align: right; font-weight: 600; color: var(--ink); }
+    .li-table tbody td.num { color: var(--ink-2); }
+    .col-desc { width: 45%; }
+    .col-qty { width: 12%; }
+    .col-price { width: 20%; }
+    .col-total { width: 23%; }
+
+    /* Total row */
+    .doc-total-section {
+      padding: 0 48px 36px;
+    }
+    .total-divider {
+      height: 1px;
+      background: var(--line-strong);
+      margin-bottom: 20px;
+    }
+    .total-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 24px;
+    }
+    .total-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .total-amount {
+      font-size: clamp(28px, 3vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+
+    /* Notes */
+    .doc-notes {
+      padding: 0 48px 40px;
+      border-top: 1px solid var(--line);
+      margin-top: 8px;
+    }
+    .doc-notes .section-label { margin-top: 28px; }
+    .notes-text {
+      font-size: 14px;
+      color: var(--ink-2);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    /* Footer */
+    .doc-footer {
+      padding: 24px 48px;
+      background: var(--bg-alt);
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .doc-footer-text {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .doc-footer-link {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .doc-footer-link:hover { color: var(--ink); }
+
+    /* Loading */
+    .loading-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 16px;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--line-strong);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: var(--muted); }
+
+    /* Error */
+    .error-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 12px;
+      text-align: center;
+    }
+    .error-icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+    .error-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+      margin: 0;
+    }
+    .error-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    @media (max-width: 600px) {
+      .doc-header { padding: 14px 20px; }
+      .doc-top { padding: 32px 24px 24px; }
+      .doc-section { padding: 24px 24px; }
+      .doc-total-section { padding: 0 24px 28px; }
+      .doc-notes { padding: 0 24px 32px; }
+      .doc-footer { padding: 20px 24px; }
+      .accepted-banner { padding: 12px 20px; }
+      .doc-meta-row { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="doc-header">
+  <a href="https://tmi-technology.com" class="doc-brand">
+    <img src="logo.svg" alt="TMI"/>
+    TMI
+  </a>
+  <span class="doc-type">Proposal</span>
+</header>
+
+<div id="accepted-banner" style="display:none" class="accepted-banner">
+  <div class="check">&#10003;</div>
+  This proposal has been accepted.
+</div>
+
+<div class="page-wrap">
+  <div class="doc-card" id="doc-card">
+    <div class="loading-wrap" id="loading">
+      <div class="spinner"></div>
+      <span class="loading-text">Loading proposal...</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+
+  function fmt(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function currency(n) {
+    return '$' + parseFloat(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function statusBadge(s) {
+    return `<span class="status-badge ${s || ''}">${s || 'draft'}</span>`;
+  }
+
+  function renderError(msg) {
+    document.getElementById('doc-card').innerHTML = `
+      <div class="error-wrap">
+        <div class="error-icon">&#128274;</div>
+        <h2 class="error-title">Proposal not found</h2>
+        <p class="error-sub">${msg || 'This proposal link may be invalid or expired.'}</p>
+      </div>`;
+  }
+
+  function renderProposal(p) {
+    const clientName = p.client_name
+      || (p.contacts ? `${p.contacts.first_name || ''} ${p.contacts.last_name || ''}`.trim() || p.contacts.company : null)
+      || '';
+
+    const items = p.line_items || p.sections || [];
+
+    let lineItemsHtml = '';
+    if (items.length) {
+      const rows = items.map(li => {
+        const qty = parseFloat(li.qty || li.quantity || 1);
+        const price = parseFloat(li.price || li.unit_price || li.amount || 0);
+        const lineTotal = qty * price;
+        return `<tr>
+          <td class="desc">${escHtml(li.desc || li.description || '')}</td>
+          <td class="num">${qty}</td>
+          <td class="num">${currency(price)}</td>
+          <td class="right">${currency(lineTotal)}</td>
+        </tr>`;
+      }).join('');
+
+      lineItemsHtml = `
+        <div class="doc-section">
+          <div class="section-label">Line Items</div>
+          <table class="li-table">
+            <thead>
+              <tr>
+                <th class="col-desc">Description</th>
+                <th class="col-qty">Qty</th>
+                <th class="col-price">Unit Price</th>
+                <th class="col-total right">Total</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    }
+
+    const totalHtml = p.total != null ? `
+      <div class="doc-total-section">
+        <div class="total-divider"></div>
+        <div class="total-row">
+          <span class="total-label">Total</span>
+          <span class="total-amount">${currency(p.total)}</span>
+        </div>
+      </div>` : '';
+
+    const notesHtml = p.notes ? `
+      <div class="doc-notes">
+        <div class="section-label">Notes &amp; Terms</div>
+        <p class="notes-text">${escHtml(p.notes)}</p>
+      </div>` : '';
+
+    const footerHtml = `
+      <div class="doc-footer">
+        <span class="doc-footer-text">Prepared by TMI Technology</span>
+        <a class="doc-footer-link" href="https://tmi-technology.com">tmi-technology.com</a>
+      </div>`;
+
+    document.getElementById('doc-card').innerHTML = `
+      <div class="doc-top">
+        <h1 class="doc-title">${escHtml(p.title || 'Proposal')}</h1>
+        <div class="doc-meta-row">
+          ${clientName ? `<div class="doc-meta-item"><div class="doc-meta-label">Client</div><div class="doc-meta-val">${escHtml(clientName)}</div></div>` : ''}
+          <div class="doc-meta-item"><div class="doc-meta-label">Date</div><div class="doc-meta-val">${fmt(p.created_at)}</div></div>
+          ${p.expires_at ? `<div class="doc-meta-item"><div class="doc-meta-label">Expires</div><div class="doc-meta-val">${fmt(p.expires_at)}</div></div>` : ''}
+          <div class="doc-meta-item"><div class="doc-meta-label">Status</div><div class="doc-meta-val">${statusBadge(p.status)}</div></div>
+        </div>
+      </div>
+      ${lineItemsHtml}
+      ${totalHtml}
+      ${notesHtml}
+      ${footerHtml}
+    `;
+
+    if (p.status === 'accepted') {
+      document.getElementById('accepted-banner').style.display = 'flex';
+    }
+  }
+
+  function escHtml(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  if (!id) {
+    renderError('No proposal ID provided.');
+    return;
+  }
+
+  fetch('/api/proposals?id=' + encodeURIComponent(id))
+    .then(res => {
+      if (!res.ok) throw new Error('Not found');
+      return res.json();
+    })
+    .then(data => renderProposal(data))
+    .catch(() => renderError('This proposal could not be found.'));
+})();
+</script>
+</body>
+</html>

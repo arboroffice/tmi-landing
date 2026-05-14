@@ -64,6 +64,7 @@
     <div class="panel-hd">
       <h2 class="panel-title" id="panel-prop-title">Proposal</h2>
       <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="copyShareLink()">Copy Link</button>
         <button class="btn btn-ghost btn-sm" onclick="panelEdit()">Edit</button>
         <button class="btn btn-ghost btn-sm" onclick="panelMarkAccepted()">Accept</button>
         <button class="btn btn-ghost btn-sm" onclick="panelMarkDeclined()">Decline</button>
@@ -273,6 +274,12 @@ async function deleteProposal() {
   if (!ok) return;
   const res = await TMIAdmin.api('/api/proposals', 'DELETE', { id: currentProposal.id });
   if (res) { TMIAdmin.toast('Deleted'); TMIAdmin.closePanel('prop-panel'); await loadProposals(); }
+}
+
+function copyShareLink() {
+  if (!currentProposal) return;
+  const url = `${window.location.origin}/proposal-view.html?id=${currentProposal.id}`;
+  navigator.clipboard.writeText(url).then(() => TMIAdmin.toast('Link copied to clipboard'));
 }
 
 // --- Line Items ---

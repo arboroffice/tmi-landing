@@ -16,6 +16,7 @@
     <div class="topbar">
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Contacts</span></div>
       <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV(allContacts)">Export CSV</button>
         <button class="btn btn-primary btn-sm" onclick="openAddModal()">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add Contact
@@ -42,10 +43,18 @@
         </select>
       </div>
 
+      <div id="bulk-toolbar" style="display:none;position:sticky;top:0;background:var(--chart);padding:8px 16px;border-radius:var(--r-sm);display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:13px;font-weight:500;color:var(--ink)">
+        <span id="bulk-count">0 selected</span>
+        <button class="btn btn-ghost btn-sm" onclick="bulkExportCSV()">Export CSV</button>
+        <button class="btn btn-ghost btn-sm" onclick="bulkEmail()">Email Selected</button>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="clearSelection()">Clear</button>
+      </div>
+
       <div class="card">
         <div class="tbl-wrap">
           <table>
             <thead><tr>
+              <th style="width:36px"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"/></th>
               <th>Name</th><th>Email</th><th>Phone</th><th>Company</th>
               <th>Audience</th><th>Niche</th><th>Added</th>
             </tr></thead>
@@ -91,6 +100,7 @@
       </div>
     </div>
     <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="f-notes" rows="3"></textarea></div>
+    <div class="form-group"><label class="form-label">Tags</label><input class="form-input" id="f-tags" placeholder="comma-separated tags"/></div>
     <div class="modal-ft">
       <button class="btn btn-ghost" onclick="TMIAdmin.closeModal('contact-modal')">Cancel</button>
       <button class="btn btn-primary" id="save-btn" onclick="saveContact()">Save Contact</button>
@@ -122,6 +132,7 @@
       <div class="panel-sep"></div>
       <div class="panel-sec-label">Notes</div>
       <div id="pd-notes" style="font-size:14px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;">—</div>
+      <div id="pd-tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
       <div class="panel-sep"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <a id="pd-email-link" href="#" class="btn btn-ghost btn-sm">Send Email</a>
@@ -140,6 +151,7 @@ TMIAdmin.initSidebar('contacts');
 
 let allContacts = [];
 let currentContact = null;
+let selectedIds = new Set();
 
 // Build niche filter
 const allNiches = [...TMIAdmin.niches.physical, ...TMIAdmin.niches.online, ...TMIAdmin.niches.fotf];
@@ -175,13 +187,15 @@ function renderTable() {
 
   const tbody = document.getElementById('contacts-tbody');
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-icon">👤</div><h3>No contacts found</h3><p>Add contacts manually or they'll appear as leads are created.</p></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-icon">👤</div><h3>No contacts found</h3><p>Add contacts manually or they'll appear as leads are created.</p></td></tr>`;
     return;
   }
 
   tbody.innerHTML = filtered.map(c => {
     const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || '—';
+    const checked = selectedIds.has(String(c.id)) ? 'checked' : '';
     return `<tr onclick="openPanel(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+      <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" value="${c.id}" ${checked} onchange="onRowCheck()"/></td>
       <td class="td-name">${name}</td>
       <td style="color:var(--ink-2)">${c.email || '—'}</td>
       <td class="td-muted">${c.phone || '—'}</td>
@@ -205,6 +219,14 @@ function openPanel(contact) {
   document.getElementById('pd-niche').textContent = contact.niche || '—';
   document.getElementById('pd-created').textContent = TMIAdmin.fmt(contact.created_at);
   document.getElementById('pd-notes').textContent = contact.notes || '—';
+  const tagsEl = document.getElementById('pd-tags');
+  if (contact.tags) {
+    tagsEl.innerHTML = contact.tags.split(',').filter(t => t.trim()).map(t =>
+      `<span style="font-size:11px;padding:2px 8px;background:var(--bg-alt);border-radius:999px;color:var(--ink-2)">${t.trim()}</span>`
+    ).join('');
+  } else {
+    tagsEl.innerHTML = '';
+  }
   const emailLink = document.getElementById('pd-email-link');
   emailLink.href = contact.email ? `mailto:${contact.email}` : '#';
   TMIAdmin.openPanel('contact-panel');
@@ -214,7 +236,7 @@ function openAddModal() {
   document.getElementById('edit-id').value = '';
   document.getElementById('modal-title').textContent = 'Add Contact';
   document.getElementById('save-btn').textContent = 'Save Contact';
-  ['first','last','email','phone','company','title','notes'].forEach(f => {
+  ['first','last','email','phone','company','title','notes','tags'].forEach(f => {
     document.getElementById('f-' + f).value = '';
   });
   document.getElementById('f-audience').value = '';
@@ -239,6 +261,7 @@ function editFromPanel() {
   onAudienceChange();
   setTimeout(() => { document.getElementById('f-niche').value = c.niche || ''; }, 50);
   document.getElementById('f-notes').value = c.notes || '';
+  document.getElementById('f-tags').value = c.tags || '';
   TMIAdmin.openModal('contact-modal');
 }
 
@@ -256,7 +279,8 @@ async function saveContact() {
     title: document.getElementById('f-title').value.trim(),
     audience: document.getElementById('f-audience').value,
     niche: document.getElementById('f-niche').value,
-    notes: document.getElementById('f-notes').value.trim()
+    notes: document.getElementById('f-notes').value.trim(),
+    tags: document.getElementById('f-tags').value.trim()
   };
   if (id) payload.id = id;
 
@@ -290,6 +314,65 @@ function addAsLead() {
     sessionStorage.setItem('prefill_contact', JSON.stringify(currentContact));
     window.location.href = '/admin-leads';
   }
+}
+
+function toggleSelectAll(cb) {
+  const checks = document.querySelectorAll('.row-check');
+  checks.forEach(c => { c.checked = cb.checked; });
+  selectedIds.clear();
+  if (cb.checked) checks.forEach(c => selectedIds.add(String(c.value)));
+  updateBulkToolbar();
+}
+
+function onRowCheck() {
+  selectedIds.clear();
+  document.querySelectorAll('.row-check:checked').forEach(c => selectedIds.add(String(c.value)));
+  const allChecks = document.querySelectorAll('.row-check');
+  document.getElementById('select-all').checked = allChecks.length > 0 && selectedIds.size === allChecks.length;
+  updateBulkToolbar();
+}
+
+function updateBulkToolbar() {
+  const bar = document.getElementById('bulk-toolbar');
+  const count = selectedIds.size;
+  bar.style.display = count > 0 ? 'flex' : 'none';
+  document.getElementById('bulk-count').textContent = `${count} selected`;
+}
+
+function clearSelection() {
+  selectedIds.clear();
+  document.querySelectorAll('.row-check').forEach(c => { c.checked = false; });
+  document.getElementById('select-all').checked = false;
+  updateBulkToolbar();
+}
+
+function exportCSV(contacts) {
+  const headers = ['Name','Email','Phone','Company','Audience','Niche','Added'];
+  const rows = contacts.map(c => [
+    [c.first_name, c.last_name].filter(Boolean).join(' '),
+    c.email || '',
+    c.phone || '',
+    c.company || '',
+    c.audience || '',
+    c.niche || '',
+    TMIAdmin.fmt(c.created_at)
+  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'contacts.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function bulkExportCSV() {
+  exportCSV(allContacts.filter(c => selectedIds.has(String(c.id))));
+}
+
+function bulkEmail() {
+  const emails = allContacts.filter(c => selectedIds.has(String(c.id)) && c.email).map(c => c.email);
+  if (!emails.length) { TMIAdmin.toast('No email addresses in selection', 'error'); return; }
+  window.location.href = `mailto:?bcc=${encodeURIComponent(emails.join(','))}`;
 }
 
 loadContacts();

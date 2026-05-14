@@ -4,12 +4,28 @@ const { requireAuth, cors } = require('./_auth');
 module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (!requireAuth(req, res)) return;
+
+  // Allow unauthenticated GET when a single ?id= param is provided (secret link sharing)
+  const publicSingleFetch = req.method === 'GET'
+    && req.query.id
+    && Object.keys(req.query).length === 1
+    && !req.headers['authorization'];
+
+  if (!publicSingleFetch && !requireAuth(req, res)) return;
 
   let db;
   try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
 
   if (req.method === 'GET') {
+    if (publicSingleFetch) {
+      const { data, error } = await db
+        .from('invoices')
+        .select('*, line_items, contacts(first_name, last_name, company)')
+        .eq('id', req.query.id)
+        .single();
+      if (error || !data) return res.status(404).json({ error: 'Invoice not found' });
+      return res.json(data);
+    }
     const { data, error } = await db
       .from('invoices')
       .select('*, clients(contacts(first_name, last_name, company)), contacts(first_name, last_name, company)')

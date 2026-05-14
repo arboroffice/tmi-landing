@@ -24,6 +24,15 @@
     </div>
     <div class="content">
 
+      <!-- Overdue alerts banner -->
+      <div id="overdue-banner" style="display:none;margin-bottom:16px;padding:12px 16px;background:var(--chart);border-radius:8px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <span id="overdue-banner-text" style="font-size:13px;font-weight:600;color:var(--ink);flex:1"></span>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+          <a id="overdue-banner-link" href="/admin-invoices" style="font-size:12px;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:2px">View</a>
+          <button onclick="document.getElementById('overdue-banner').style.display='none';sessionStorage.setItem('tmi_overdue_dismissed','1')" style="background:none;border:none;cursor:pointer;font-size:18px;line-height:1;color:var(--ink);padding:0 2px;opacity:0.6" title="Dismiss">&times;</button>
+        </div>
+      </div>
+
       <!-- Stats -->
       <div class="stats-row" id="stats">
         <div class="stat-box"><div class="stat-label">Total Leads</div><div class="stat-val" id="stat-leads">—</div><div class="stat-delta" id="stat-leads-d"></div></div>
@@ -372,6 +381,36 @@ async function loadDashboard() {
         <div style="width:24px;font-size:12px;color:var(--muted);text-align:right">${counts[s]}</div>
       </div>`
     ).join('');
+  }
+
+  // Overdue alerts banner
+  if (!sessionStorage.getItem('tmi_overdue_dismissed')) {
+    const invData   = await TMIAdmin.api('/api/invoices');
+    const overdueInvCount = (invData || []).filter(i => {
+      if (i.status === 'overdue') return true;
+      if (i.status === 'pending' && i.due_date && new Date(i.due_date) < now) return true;
+      return false;
+    }).length;
+    const staleLeadCount = (leads || []).filter(l => {
+      if (['won','lost'].includes(l.status)) return false;
+      const updated = l.updated_at ? new Date(l.updated_at) : null;
+      return updated && (now - updated) > 14 * 24 * 60 * 60 * 1000;
+    }).length;
+    const overdueFuCount = overdueF.length;
+    if (overdueInvCount > 0 || staleLeadCount > 0 || overdueFuCount > 0) {
+      const parts = [];
+      if (overdueInvCount > 0) parts.push(`${overdueInvCount} overdue invoice${overdueInvCount !== 1 ? 's' : ''}`);
+      if (staleLeadCount  > 0) parts.push(`${staleLeadCount} stale lead${staleLeadCount !== 1 ? 's' : ''}`);
+      if (overdueFuCount  > 0) parts.push(`${overdueFuCount} overdue follow-up${overdueFuCount !== 1 ? 's' : ''}`);
+      const banner = document.getElementById('overdue-banner');
+      document.getElementById('overdue-banner-text').textContent = parts.join(' · ');
+      // Point to invoices if there are overdue invoices, else follow-ups, else leads
+      const bannerLink = document.getElementById('overdue-banner-link');
+      if (overdueInvCount > 0)     bannerLink.href = '/admin-invoices';
+      else if (overdueFuCount > 0) bannerLink.href = '/admin-followups';
+      else                          bannerLink.href = '/admin-leads';
+      if (banner) banner.style.display = 'flex';
+    }
   }
 
   // Recent campaigns

@@ -16,6 +16,7 @@
     <div class="topbar">
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Clients</span></div>
       <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Export CSV</button>
         <button class="btn btn-primary btn-sm" onclick="openAddModal()">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add Client
@@ -459,6 +460,45 @@ async function deleteFromPanel() {
     TMIAdmin.closePanel('client-panel');
     await loadClients();
   }
+}
+
+function getFilteredClients() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const st = document.getElementById('filter-status').value;
+  const aud = document.getElementById('filter-audience').value;
+  return allClients.filter(cl => {
+    const c = cl.contacts || {};
+    const text = [c.first_name, c.last_name, c.email, c.company].filter(Boolean).join(' ').toLowerCase();
+    if (q && !text.includes(q)) return false;
+    if (st && cl.status !== st) return false;
+    if (aud && c.audience !== aud) return false;
+    return true;
+  });
+}
+
+function exportCSV() {
+  const filtered = getFilteredClients();
+  const headers = ['Name','Email','Company','Plan','MRR','Status','Start Date'];
+  const rows = filtered.map(cl => {
+    const c = cl.contacts || {};
+    const name = [c.first_name, c.last_name].filter(Boolean).join(' ');
+    return [
+      name,
+      c.email || '',
+      c.company || '',
+      cl.plan || '',
+      cl.mrr || '',
+      cl.status || '',
+      cl.start_date ? new Date(cl.start_date).toLocaleDateString() : ''
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+  });
+  const csv = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().split('T')[0];
+  a.href = url; a.download = `clients-${date}.csv`;
+  a.click(); URL.revokeObjectURL(url);
 }
 
 loadClients();
