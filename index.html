@@ -331,8 +331,12 @@
   .footer-brand-name { font-family: var(--serif); font-size: 24px; color: #fff; letter-spacing: -0.01em; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
   .footer-brand-name img { height: 28px; width: auto; filter: brightness(0) invert(1); }
   .footer-desc { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.65; max-width: 36ch; margin-bottom: 28px; }
+  .footer-contact { margin-bottom: 20px; }
   .footer-contact a { font-size: 14px; color: rgba(255,255,255,0.5); transition: color 0.15s; }
   .footer-contact a:hover { color: #fff; }
+  .footer-social { display: flex; gap: 10px; }
+  .footer-social-link { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 6px; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.4); transition: background 0.15s, color 0.15s; }
+  .footer-social-link:hover { background: rgba(255,255,255,0.13); color: #fff; }
   .footer-right { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
   .footer-col h5 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,0.3); margin: 0 0 16px; }
   .footer-col a { display: block; font-size: 14px; color: rgba(255,255,255,0.45); padding: 4px 0; transition: color 0.15s; }
@@ -350,7 +354,8 @@
     .footer-right { gap: 24px; }
   }
   @media (max-width: 768px) {
-    .hero-content { padding: 0 24px; }
+    .hero { align-items: flex-start; }
+    .hero-content { padding: 104px 24px 0; }
     .manifesto-item { grid-template-columns: 40px 1fr; gap: 20px; }
     .verticals-grid { grid-template-columns: 1fr; }
     .vertical-card { height: 460px; padding: 32px; }
@@ -382,30 +387,8 @@
     .verticals-section { padding: 60px 0; }
     .manifesto-section { padding: 60px 0; }
     .industries-section { padding: 36px 0; }
-    .fotf-section { padding: 60px 0; }
     footer { padding: 60px 0 32px; }
   }
-  /* FOTF */
-  .fotf-section{background:var(--bg-deep);padding:96px 0;position:relative;overflow:hidden;}
-  .fotf-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 50%,rgba(228,255,151,0.07) 0%,transparent 65%);pointer-events:none;}
-  .fotf-wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;position:relative;z-index:1;}
-  .fotf-tag{font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(228,255,151,0.55);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
-  .fotf-tag::before{content:'';display:block;width:20px;height:1px;background:var(--chart);}
-  .fotf-section h2{font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.05;color:#fff;margin-bottom:16px;}
-  .fotf-section h2 em{color:var(--chart);font-style:italic;}
-  .fotf-desc{font-family:var(--serif);font-size:17px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:24px;}
-  .fotf-explore{font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.28);transition:color 0.2s;}
-  .fotf-explore:hover{color:var(--chart);}
-  .fotf-form{display:flex;gap:8px;}
-  .fotf-input{flex:1;padding:14px 20px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.11);border-radius:999px;color:#fff;font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;min-width:0;}
-  .fotf-input::placeholder{color:rgba(255,255,255,0.28);}
-  .fotf-input:focus{border-color:rgba(228,255,151,0.4);}
-  .fotf-btn{padding:14px 22px;background:var(--chart);color:#0a0b14;border:none;border-radius:999px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.15s;}
-  .fotf-btn:hover{background:var(--chart-dark);}
-  .fotf-note{font-size:11px;color:rgba(255,255,255,0.18);margin-top:12px;letter-spacing:0.05em;}
-  .fotf-ok{display:none;font-family:var(--serif);font-size:18px;color:var(--chart);padding:14px 0;}
-  @media(max-width:768px){.fotf-wrap{grid-template-columns:1fr;gap:40px;}}
-  @media(max-width:480px){.fotf-form{flex-direction:column;}.fotf-btn{border-radius:999px;}}
   /* HERO NEWSLETTER */
   .hero-nl{margin-top:36px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.1);max-width:480px;}
   .hero-nl-label{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
@@ -632,28 +615,6 @@
   </div>
 </section>
 
-<!-- FOUNDERS OF THE FUTURE -->
-<section class="fotf-section">
-  <div class="container">
-    <div class="fotf-wrap">
-      <div>
-        <div class="fotf-tag">Community &amp; Blog</div>
-        <h2>Founders of <em>the Future</em></h2>
-        <p class="fotf-desc">Essays, build notes, and case studies from operators reshaping their industries. For founders building businesses that run on systems, not on their hours.</p>
-        <a href="founders" class="fotf-explore">Explore the community &rarr;</a>
-      </div>
-      <div>
-        <form class="fotf-form" id="fotf-index-form">
-          <input type="email" class="fotf-input" placeholder="your@email.com" required/>
-          <button type="submit" class="fotf-btn">Join Free &rarr;</button>
-        </form>
-        <div class="fotf-ok" id="fotf-index-ok">You're in. We'll be in touch.</div>
-        <p class="fotf-note">One email when something worth reading drops. No spam.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- FOOTER -->
 <footer>
   <div class="container">
@@ -665,7 +626,11 @@
         <p class="footer-desc">Done-for-you AI operational infrastructure for business owners building companies that run on systems.</p>
         <div class="footer-contact">
           <a href="mailto:mia@tmitechai.com">mia@tmitechai.com</a>
-          <a href="https://www.instagram.com/tmitech/" target="_blank" rel="noopener">Instagram</a>
+        </div>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/tmitech/" target="_blank" rel="noopener" class="footer-social-link" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          </a>
         </div>
       </div>
       <div class="footer-right">
@@ -725,7 +690,6 @@ function fotfSubscribe(formId, okId, source, audience) {
     try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from ' + source + '\nEmail: ' + email); fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
   });
 }
-fotfSubscribe('fotf-index-form', 'fotf-index-ok', 'homepage', 'fotf');
 fotfSubscribe('hero-nl-form', 'hero-nl-ok', 'homepage_hero', 'fotf');
 </script>
 </body>
