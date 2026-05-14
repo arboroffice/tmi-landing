@@ -354,8 +354,7 @@
     .footer-right { gap: 24px; }
   }
   @media (max-width: 768px) {
-    .hero { align-items: flex-start; }
-    .hero-content { padding: 160px 24px 0; }
+    .hero-content { padding: 80px 24px 0; }
     .manifesto-item { grid-template-columns: 40px 1fr; gap: 20px; }
     .verticals-grid { grid-template-columns: 1fr; }
     .verticals-section { padding: 72px 0; }
@@ -396,19 +395,6 @@
     .industries-section { padding: 36px 0; }
     footer { padding: 60px 0 32px; }
   }
-  /* NEWSLETTER STRIP */
-  .nl-strip{background:var(--bg-deep);border-bottom:1px solid rgba(255,255,255,0.06);padding:28px 0;}
-  .nl-strip-inner{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
-  .nl-strip-label{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.35);white-space:nowrap;display:flex;align-items:center;gap:8px;flex:none;}
-  .nl-strip-label::before{content:'';display:block;width:16px;height:1px;background:var(--chart);opacity:0.6;}
-  .hero-nl-form{display:flex;gap:8px;flex:1;min-width:0;}
-  .hero-nl-input{flex:1;padding:12px 18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.11);border-radius:999px;color:#fff;font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;min-width:0;}
-  .hero-nl-input::placeholder{color:rgba(255,255,255,0.3);}
-  .hero-nl-input:focus{border-color:rgba(228,255,151,0.45);}
-  .hero-nl-btn{padding:12px 22px;background:var(--chart);color:#0a0b14;border:none;border-radius:999px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.15s;}
-  .hero-nl-btn:hover{background:var(--chart-dark);}
-  .hero-nl-ok{display:none;font-family:var(--serif);font-size:16px;color:var(--chart);padding:4px 0;}
-  @media(max-width:640px){.nl-strip-inner{flex-direction:column;align-items:flex-start;gap:16px;}.hero-nl-form{width:100%;}.hero-nl-btn{width:100%;border-radius:999px;}}
 </style>
 </head>
 <body>
@@ -466,20 +452,6 @@
     <div class="hero-scroll-line"></div>
   </div>
 </section>
-
-<!-- NEWSLETTER STRIP -->
-<div class="nl-strip">
-  <div class="container">
-    <div class="nl-strip-inner">
-      <div class="nl-strip-label">Founders of the Future</div>
-      <form class="hero-nl-form" id="hero-nl-form">
-        <input type="email" class="hero-nl-input" placeholder="your@email.com" required/>
-        <button type="submit" class="hero-nl-btn">Join Free &rarr;</button>
-      </form>
-      <div class="hero-nl-ok" id="hero-nl-ok">You're in. One email when something worth reading drops.</div>
-    </div>
-  </div>
-</div>
 
 <!-- VERTICALS -->
 <section class="verticals-section" id="verticals">
@@ -707,7 +679,6 @@ function fotfSubscribe(formId, okId, source, audience) {
     try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from ' + source + '\nEmail: ' + email); fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
   });
 }
-fotfSubscribe('hero-nl-form', 'hero-nl-ok', 'homepage_hero', 'fotf');
 </script>
 </body>
 </html>
