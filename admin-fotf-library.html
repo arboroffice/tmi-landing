@@ -6,6 +6,15 @@
 <title>Library — FOTF Admin</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="stylesheet" href="admin.css"/>
+<style>
+.cat-tabs{display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap;}
+.cat-tab{font-size:12px;padding:5px 14px;border-radius:999px;border:1px solid var(--line);cursor:pointer;background:none;color:var(--ink-2);font-family:inherit;transition:background 0.1s,color 0.1s;}
+.cat-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.badge-locker{background:#e0f2fe;color:#0369a1;}
+.badge-playbooks{background:#ede9fe;color:#6d28d9;}
+.badge-quote-cards{background:#fef9c3;color:#854d0e;}
+.badge-public{background:#dcfce7;color:#15803d;}
+</style>
 </head>
 <body>
 <div class="layout">
@@ -17,19 +26,231 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         <span class="page">Library</span>
       </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openNew()">+ Add Asset</button>
+      </div>
     </div>
-    <div class="content" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--muted)">
-      <div style="font-size:15px;font-weight:500;color:var(--ink-2)">Library — Coming in Phase 2</div>
-      <div style="font-size:13px;max-width:380px;text-align:center;line-height:1.6">The Locker, Playbooks, Quote Cards, and the Public Library. Every asset TMI has ever made, searchable in one place.</div>
-      <a href="/admin-fotf-dashboard" class="btn btn-ghost btn-sm" style="margin-top:8px">← Back to FOTF Home</a>
+
+    <div class="content">
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-box"><div class="stat-label">The Locker</div><div class="stat-val" id="s-locker">—</div><div class="stat-delta">Private resources</div></div>
+        <div class="stat-box"><div class="stat-label">Playbooks</div><div class="stat-val" id="s-playbooks">—</div><div class="stat-delta">Step-by-step guides</div></div>
+        <div class="stat-box"><div class="stat-label">Quote Cards</div><div class="stat-val" id="s-quote-cards">—</div><div class="stat-delta">Shareable assets</div></div>
+        <div class="stat-box"><div class="stat-label">Public Library</div><div class="stat-val" id="s-public">—</div><div class="stat-delta">Open access</div></div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+          <input placeholder="Search assets..." oninput="renderTable()" id="lib-search"/>
+        </div>
+        <select class="filter-select" id="lib-audience" onchange="renderTable()">
+          <option value="">All Audiences</option>
+          <option value="all">All Members</option>
+          <option value="members">Members Only</option>
+          <option value="premium">Premium Only</option>
+          <option value="public">Public</option>
+        </select>
+        <span class="filter-count" id="lib-count"></span>
+      </div>
+
+      <div class="cat-tabs">
+        <button class="cat-tab active" onclick="setCat('',this)">All</button>
+        <button class="cat-tab" onclick="setCat('locker',this)">The Locker</button>
+        <button class="cat-tab" onclick="setCat('playbooks',this)">Playbooks</button>
+        <button class="cat-tab" onclick="setCat('quote-cards',this)">Quote Cards</button>
+        <button class="cat-tab" onclick="setCat('public',this)">Public Library</button>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Title</th><th>Category</th><th>Audience</th><th>Type</th><th>Added</th><th></th>
+            </tr></thead>
+            <tbody id="lib-tbody">
+              <tr><td colspan="6" style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="lib-modal">
+  <div class="modal" style="max-width:520px;padding:28px">
+    <div class="modal-hd">
+      <h3 class="modal-title" id="lib-modal-title">Add Asset</h3>
+      <button class="modal-x" onclick="TMIAdmin.closeModal('lib-modal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Title <span style="color:var(--red)">*</span></label>
+      <input type="text" class="form-input" id="l-title" placeholder="Asset name"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-input" id="l-category">
+          <option value="locker">The Locker</option>
+          <option value="playbooks">Playbooks</option>
+          <option value="quote-cards">Quote Cards</option>
+          <option value="public">Public Library</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Audience</label>
+        <select class="form-input" id="l-audience">
+          <option value="all">All Members</option>
+          <option value="members">Members Only</option>
+          <option value="premium">Premium Only</option>
+          <option value="public">Public</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-input" id="l-type">
+          <option value="doc">Document</option>
+          <option value="template">Template</option>
+          <option value="video">Video</option>
+          <option value="image">Image</option>
+          <option value="link">Link</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URL / Link</label>
+        <input type="url" class="form-input" id="l-url" placeholder="https://..."/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-input" id="l-desc" style="min-height:80px" placeholder="What is this and when would a founder use it?"></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-danger btn-sm" id="l-delete-btn" style="display:none;margin-right:auto" onclick="deleteAsset()">Delete</button>
+      <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('lib-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveAsset()">Save</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-root"></div>
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
 TMIAdmin.initSidebar('fotf-library');
+
+const CAT_LABELS = {locker:'The Locker',playbooks:'Playbooks','quote-cards':'Quote Cards',public:'Public Library'};
+const TYPE_LABELS = {doc:'Doc',template:'Template',video:'Video',image:'Image',link:'Link',other:'Other'};
+
+let assets = [];
+let currentId = null;
+let filterCat = '';
+
+function setCat(c, btn) {
+  filterCat = c;
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  const q = document.getElementById('lib-search').value.toLowerCase();
+  const audience = document.getElementById('lib-audience').value;
+  let filtered = assets;
+  if (filterCat) filtered = filtered.filter(a => a.category === filterCat);
+  if (audience) filtered = filtered.filter(a => a.audience === audience);
+  if (q) filtered = filtered.filter(a =>
+    (a.title||'').toLowerCase().includes(q) ||
+    (a.description||'').toLowerCase().includes(q)
+  );
+  document.getElementById('lib-count').textContent = `${filtered.length} asset${filtered.length !== 1 ? 's' : ''}`;
+  document.getElementById('lib-tbody').innerHTML = filtered.length
+    ? filtered.map(a => `<tr onclick="openEdit('${a.id}')" style="cursor:pointer">
+        <td class="td-name">${a.title||'—'}</td>
+        <td><span class="badge badge-${a.category||''}">${CAT_LABELS[a.category]||a.category||'—'}</span></td>
+        <td class="td-muted">${a.audience||'—'}</td>
+        <td class="td-muted">${TYPE_LABELS[a.type]||a.type||'—'}</td>
+        <td class="td-muted">${TMIAdmin.fmt(a.created_at)}</td>
+        <td>${a.url ? `<a href="${a.url}" target="_blank" onclick="event.stopPropagation()" style="font-size:12px;color:var(--blue);text-decoration:underline">Open</a>` : ''}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="6" style="padding:32px;text-align:center;color:var(--muted);font-size:13px">No assets match this filter.</td></tr>`;
+}
+
+function openNew() {
+  currentId = null;
+  document.getElementById('lib-modal-title').textContent = 'Add Asset';
+  document.getElementById('l-title').value = '';
+  document.getElementById('l-category').value = 'locker';
+  document.getElementById('l-audience').value = 'members';
+  document.getElementById('l-type').value = 'doc';
+  document.getElementById('l-url').value = '';
+  document.getElementById('l-desc').value = '';
+  document.getElementById('l-delete-btn').style.display = 'none';
+  TMIAdmin.openModal('lib-modal');
+}
+
+function openEdit(id) {
+  const a = assets.find(x => x.id === id);
+  if (!a) return;
+  currentId = id;
+  document.getElementById('lib-modal-title').textContent = 'Edit Asset';
+  document.getElementById('l-title').value = a.title || '';
+  document.getElementById('l-category').value = a.category || 'locker';
+  document.getElementById('l-audience').value = a.audience || 'members';
+  document.getElementById('l-type').value = a.type || 'doc';
+  document.getElementById('l-url').value = a.url || '';
+  document.getElementById('l-desc').value = a.description || '';
+  document.getElementById('l-delete-btn').style.display = '';
+  TMIAdmin.openModal('lib-modal');
+}
+
+async function saveAsset() {
+  const title = document.getElementById('l-title').value.trim();
+  if (!title) return TMIAdmin.toast('Title is required','error');
+  const body = {
+    title,
+    category:    document.getElementById('l-category').value,
+    audience:    document.getElementById('l-audience').value,
+    type:        document.getElementById('l-type').value,
+    url:         document.getElementById('l-url').value.trim(),
+    description: document.getElementById('l-desc').value.trim(),
+  };
+  const data = currentId
+    ? await TMIAdmin.api('/api/fotf-library','PUT',{id:currentId,...body})
+    : await TMIAdmin.api('/api/fotf-library','POST',body);
+  if (!data) return;
+  TMIAdmin.closeModal('lib-modal');
+  TMIAdmin.toast(currentId ? 'Updated' : 'Asset added');
+  await reload();
+}
+
+async function deleteAsset() {
+  if (!currentId) return;
+  const ok = await TMIAdmin.confirm('Delete this asset?');
+  if (!ok) return;
+  await TMIAdmin.api(`/api/fotf-library?id=${currentId}`,'DELETE');
+  TMIAdmin.closeModal('lib-modal');
+  TMIAdmin.toast('Deleted');
+  await reload();
+}
+
+async function reload() {
+  assets = await TMIAdmin.api('/api/fotf-library') || [];
+  document.getElementById('s-locker').textContent      = assets.filter(a => a.category==='locker').length;
+  document.getElementById('s-playbooks').textContent   = assets.filter(a => a.category==='playbooks').length;
+  document.getElementById('s-quote-cards').textContent = assets.filter(a => a.category==='quote-cards').length;
+  document.getElementById('s-public').textContent      = assets.filter(a => a.category==='public').length;
+  renderTable();
+}
+
+reload();
 </script>
 </body>
 </html>

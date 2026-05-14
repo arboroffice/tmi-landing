@@ -6,6 +6,52 @@
 <title>Identity — FOTF Admin</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="stylesheet" href="admin.css"/>
+<style>
+.id-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:28px;}
+.id-tab{font-size:13px;font-weight:500;padding:11px 20px;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.15s,border-color 0.15s;}
+.id-tab:hover{color:var(--ink);}
+.id-tab.active{color:var(--ink);border-bottom-color:var(--ink);}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+/* Stage letters */
+.letter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.letter-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;cursor:pointer;transition:border-color 0.15s;}
+.letter-card:hover{border-color:var(--ink-2);}
+.lc-stage{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.lc-subject{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;line-height:1.3;}
+.lc-preview{font-size:12px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.lc-status{font-size:11px;margin-top:8px;}
+
+/* Glass Box */
+.gb-post{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;gap:14px;}
+.gb-body{flex:1;min-width:0;}
+.gb-text{font-size:14px;color:var(--ink-2);line-height:1.55;white-space:pre-wrap;}
+.gb-meta{font-size:11px;color:var(--muted);margin-top:8px;}
+.gb-del{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;flex-shrink:0;transition:color 0.15s;}
+.gb-del:hover{color:var(--red);}
+.gb-compose{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:16px;}
+.gb-compose textarea{width:100%;border:none;outline:none;font-size:14px;font-family:inherit;color:var(--ink);resize:none;min-height:80px;line-height:1.55;background:transparent;}
+.gb-compose-ft{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:10px;border-top:1px solid var(--line);}
+
+/* Stories */
+.story-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;gap:14px;}
+.story-body{flex:1;min-width:0;}
+.story-founder{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.story-text{font-size:14px;color:var(--ink-2);line-height:1.55;white-space:pre-wrap;}
+.story-meta{font-size:11px;color:var(--muted);margin-top:8px;}
+.story-del{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;flex-shrink:0;transition:color 0.15s;}
+.story-del:hover{color:var(--red);}
+
+/* Letter editor panel */
+.le-panel{position:fixed;top:0;right:-600px;width:580px;height:100vh;background:var(--surface);border-left:1px solid var(--line);z-index:200;transition:right 0.25s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;overflow:hidden;}
+.le-panel.open{right:0;}
+.le-hd{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.le-hd h3{font-size:16px;font-weight:600;margin:0;flex:1;}
+.le-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;display:flex;}
+.le-body{flex:1;overflow-y:auto;padding:24px;}
+.le-ft{padding:16px 24px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+</style>
 </head>
 <body>
 <div class="layout">
@@ -18,18 +64,299 @@
         <span class="page">Identity</span>
       </div>
     </div>
-    <div class="content" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--muted)">
-      <div style="font-size:15px;font-weight:500;color:var(--ink-2)">Identity — Coming in Phase 2</div>
-      <div style="font-size:13px;max-width:380px;text-align:center;line-height:1.6">Founder Receipts, stage letters, First Customer Stories, the Founder Wallet, and the Glass Box log. The layer that makes FOTF different.</div>
-      <a href="/admin-fotf-dashboard" class="btn btn-ghost btn-sm" style="margin-top:8px">← Back to FOTF Home</a>
+
+    <div class="content">
+      <div class="id-tabs">
+        <button class="id-tab active" onclick="switchTab('letters',this)">Stage Letters</button>
+        <button class="id-tab" onclick="switchTab('stories',this)">First Customer Stories</button>
+        <button class="id-tab" onclick="switchTab('glass-box',this)">Glass Box</button>
+      </div>
+
+      <!-- Stage Letters -->
+      <div class="tab-pane active" id="tab-letters">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px">One personal letter for each stage - sent when a founder first joins or updates their stage. Click any stage to edit.</p>
+        <div class="letter-grid" id="letter-grid">
+          <div style="color:var(--muted);font-size:13px">Loading...</div>
+        </div>
+      </div>
+
+      <!-- First Customer Stories -->
+      <div class="tab-pane" id="tab-stories">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <p style="font-size:13px;color:var(--muted);margin:0">The moment a founder landed their first customer. Log and keep these - they are the soul of the community.</p>
+          <button class="btn btn-primary btn-sm" onclick="openAddStory()">+ Add Story</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px" id="story-list">
+          <div style="color:var(--muted);font-size:13px">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Glass Box -->
+      <div class="tab-pane" id="tab-glass-box">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">The public build log. Every post here goes into the FOTF timeline - real decisions, real numbers, nothing polished.</p>
+        <div class="gb-compose">
+          <textarea id="gb-text" placeholder="What are we building, deciding, or wrestling with right now? Be specific."></textarea>
+          <div class="gb-compose-ft">
+            <span id="gb-char" style="font-size:12px;color:var(--muted)">0 chars</span>
+            <button class="btn btn-primary btn-sm" onclick="postGlassBox()">Post to Glass Box</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px" id="gb-list">
+          <div style="color:var(--muted);font-size:13px">Loading...</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Letter Editor Panel -->
+<div class="le-panel" id="le-panel">
+  <div class="le-hd">
+    <h3 id="le-stage-label">Edit Letter</h3>
+    <button class="le-close" onclick="closeLetterPanel()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="le-body">
+    <div class="form-group">
+      <label class="form-label">Subject Line</label>
+      <input type="text" class="form-input" id="le-subject" placeholder="e.g. You made it in, founder."/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Letter Body <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">- plain text, first person, from Mia</span></label>
+      <textarea class="form-input" id="le-body" style="min-height:340px" placeholder="Write it like you're texting a founder who just took a real step. Direct, warm, no fluff."></textarea>
+    </div>
+    <p class="form-hint">Available variables: {{name}}, {{business_name}}, {{city}}, {{founder_number}}</p>
+  </div>
+  <div class="le-ft">
+    <button class="btn btn-ghost btn-sm" onclick="closeLetterPanel()">Cancel</button>
+    <button class="btn btn-primary btn-sm" onclick="saveLetter()">Save Letter</button>
+  </div>
+</div>
+
+<!-- Add Story Modal -->
+<div class="modal-overlay" id="story-modal">
+  <div class="modal" style="max-width:500px;padding:28px">
+    <div class="modal-hd">
+      <h3 class="modal-title">Add First Customer Story</h3>
+      <button class="modal-x" onclick="TMIAdmin.closeModal('story-modal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Member <span style="color:var(--red)">*</span></label>
+      <select class="form-input" id="s-member">
+        <option value="">Select founder...</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Their Story <span style="color:var(--red)">*</span></label>
+      <textarea class="form-input" id="s-story" style="min-height:140px" placeholder="How did they get their first customer? What did they do, say, or build? Specific details only."></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('story-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveStory()">Save Story</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-root"></div>
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
 TMIAdmin.initSidebar('fotf-identity');
+
+const STAGE_LABELS = {
+  'day-one':'Day One','online-creator':'Online Creator','online-ecom':'Online E-com',
+  'online-agency':'Online Agency','online-saas':'Online SaaS','trades':'Trades',
+  'retail':'Retail','restaurant':'Food Service','not-yet':'Not Yet'
+};
+const ALL_STAGES = Object.keys(STAGE_LABELS);
+
+let letters = [];
+let stories = [];
+let glassBoxPosts = [];
+let members = [];
+let currentLetter = null;
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.id-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ── Stage Letters ────────────────────────────────────────────────────────────
+
+function renderLetters() {
+  document.getElementById('letter-grid').innerHTML = ALL_STAGES.map(stage => {
+    const letter = letters.find(l => l.stage === stage);
+    const subject = letter?.subject || '';
+    const body = letter?.body || '';
+    const hasContent = subject || body;
+    return `<div class="letter-card" onclick="openLetter('${stage}')">
+      <div class="lc-stage">${STAGE_LABELS[stage]}</div>
+      <div class="lc-subject">${subject || '(no subject yet)'}</div>
+      ${body ? `<div class="lc-preview">${body.slice(0,100)}${body.length>100?'...':''}</div>` : ''}
+      <div class="lc-status">${hasContent
+        ? '<span style="color:#16a34a;font-size:11px">● Written</span>'
+        : '<span style="color:var(--muted);font-size:11px">○ Not written yet</span>'}</div>
+    </div>`;
+  }).join('');
+}
+
+function openLetter(stage) {
+  currentLetter = letters.find(l => l.stage === stage) || {stage};
+  document.getElementById('le-stage-label').textContent = `${STAGE_LABELS[stage]} — Stage Letter`;
+  document.getElementById('le-subject').value = currentLetter.subject || '';
+  document.getElementById('le-body').value = currentLetter.body || '';
+  document.getElementById('le-panel').classList.add('open');
+}
+
+function closeLetterPanel() {
+  document.getElementById('le-panel').classList.remove('open');
+  currentLetter = null;
+}
+
+async function saveLetter() {
+  if (!currentLetter) return;
+  const body = {
+    id:      currentLetter.id,
+    subject: document.getElementById('le-subject').value.trim(),
+    body:    document.getElementById('le-body').value.trim(),
+  };
+  if (!body.id) return TMIAdmin.toast('This stage has no letter record yet - create one in the database first.','error');
+  const data = await TMIAdmin.api('/api/fotf-stage-letters','PUT',body);
+  if (!data) return;
+  closeLetterPanel();
+  TMIAdmin.toast('Letter saved');
+  await loadLetters();
+}
+
+async function loadLetters() {
+  letters = await TMIAdmin.api('/api/fotf-stage-letters') || [];
+  renderLetters();
+}
+
+// ── First Customer Stories ────────────────────────────────────────────────────
+
+function renderStories() {
+  const el = document.getElementById('story-list');
+  if (!stories.length) {
+    el.innerHTML = `<div class="empty-state"><h3>No stories yet</h3><p>When a founder lands their first customer, log it here.</p></div>`;
+    return;
+  }
+  el.innerHTML = stories.map(s => {
+    const m = s.fotf_members || {};
+    const who = m.name || m.email || 'Unknown founder';
+    const num = m.founder_number ? `#${m.founder_number}` : '';
+    return `<div class="story-card">
+      <div class="story-body">
+        <div class="story-founder">${who} ${num}</div>
+        <div class="story-text">${s.story_text || ''}</div>
+        <div class="story-meta">${TMIAdmin.fmt(s.submitted_at)}</div>
+      </div>
+      <button class="story-del" onclick="deleteStory('${s.id}')" title="Delete">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function openAddStory() {
+  document.getElementById('s-story').value = '';
+  const sel = document.getElementById('s-member');
+  sel.innerHTML = `<option value="">Select founder...</option>` +
+    members.map(m => `<option value="${m.id}">${m.name || m.email} (#${m.founder_number || '?'})</option>`).join('');
+  TMIAdmin.openModal('story-modal');
+}
+
+async function saveStory() {
+  const member_id = document.getElementById('s-member').value;
+  const story_text = document.getElementById('s-story').value.trim();
+  if (!member_id) return TMIAdmin.toast('Select a member','error');
+  if (!story_text) return TMIAdmin.toast('Story is required','error');
+  const data = await TMIAdmin.api('/api/fotf-stories','POST',{member_id,story_text});
+  if (!data) return;
+  TMIAdmin.closeModal('story-modal');
+  TMIAdmin.toast('Story saved');
+  await loadStories();
+}
+
+async function deleteStory(id) {
+  const ok = await TMIAdmin.confirm('Delete this story?');
+  if (!ok) return;
+  await TMIAdmin.api(`/api/fotf-stories?id=${id}`,'DELETE');
+  TMIAdmin.toast('Deleted');
+  await loadStories();
+}
+
+async function loadStories() {
+  stories = await TMIAdmin.api('/api/fotf-stories') || [];
+  renderStories();
+}
+
+// ── Glass Box ─────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  const ta = document.getElementById('gb-text');
+  if (ta) ta.addEventListener('input', () => {
+    document.getElementById('gb-char').textContent = `${ta.value.length} chars`;
+  });
+});
+
+function renderGlassBox() {
+  const el = document.getElementById('gb-list');
+  if (!glassBoxPosts.length) {
+    el.innerHTML = `<div class="empty-state"><h3>No posts yet</h3><p>Start the build log. Post what you are building and why.</p></div>`;
+    return;
+  }
+  el.innerHTML = glassBoxPosts.map(p => `
+    <div class="gb-post">
+      <div class="gb-body">
+        <div class="gb-text">${p.post_text || ''}</div>
+        <div class="gb-meta">${TMIAdmin.reltime(p.created_at)}</div>
+      </div>
+      <button class="gb-del" onclick="deleteGlassBox('${p.id}')" title="Delete">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+async function postGlassBox() {
+  const post_text = document.getElementById('gb-text').value.trim();
+  if (!post_text) return TMIAdmin.toast('Write something first','error');
+  const data = await TMIAdmin.api('/api/fotf-glass-box','POST',{post_text});
+  if (!data) return;
+  document.getElementById('gb-text').value = '';
+  document.getElementById('gb-char').textContent = '0 chars';
+  TMIAdmin.toast('Posted');
+  await loadGlassBox();
+}
+
+async function deleteGlassBox(id) {
+  const ok = await TMIAdmin.confirm('Delete this post?');
+  if (!ok) return;
+  await TMIAdmin.api(`/api/fotf-glass-box?id=${id}`,'DELETE');
+  TMIAdmin.toast('Deleted');
+  await loadGlassBox();
+}
+
+async function loadGlassBox() {
+  glassBoxPosts = await TMIAdmin.api('/api/fotf-glass-box') || [];
+  renderGlassBox();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+async function init() {
+  [members] = await Promise.all([
+    TMIAdmin.api('/api/fotf-members').then(d => d || [])
+  ]);
+  await Promise.all([loadLetters(), loadStories(), loadGlassBox()]);
+}
+
+init();
 </script>
 </body>
 </html>
