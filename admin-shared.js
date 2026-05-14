@@ -60,6 +60,139 @@ const TMIAdmin = (() => {
       window.location.replace('/admin');
     },
 
+    // ── Global Search (Cmd+K / Ctrl+K) ────────────────────────────────────
+    initSearch() {
+      if (document.getElementById('global-search-overlay')) return;
+
+      // Inject modal markup
+      const overlay = document.createElement('div');
+      overlay.id = 'global-search-overlay';
+      overlay.innerHTML = `
+        <div id="gs-backdrop" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9998;display:none;align-items:flex-start;justify-content:center;padding-top:80px">
+          <div id="gs-modal" style="background:var(--surface,#fff);border-radius:12px;width:100%;max-width:600px;box-shadow:0 24px 64px rgba(0,0,0,0.22);overflow:hidden">
+            <div style="display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--line)">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" style="width:18px;height:18px;color:var(--muted,#86868b);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="gs-input" type="search" placeholder="Search leads, clients, contacts..." autocomplete="off" style="flex:1;border:none;outline:none;font-size:16px;padding:16px 12px;background:transparent;color:var(--ink,#1a1a1a);font-family:inherit"/>
+              <kbd style="font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid var(--line);color:var(--muted);background:var(--bg-alt,#f5f5f7);cursor:default;flex-shrink:0">Esc</kbd>
+            </div>
+            <div id="gs-results" style="max-height:400px;overflow-y:auto;padding:8px 0"></div>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      const backdrop = document.getElementById('gs-backdrop');
+      const input    = document.getElementById('gs-input');
+      const results  = document.getElementById('gs-results');
+
+      function open() {
+        backdrop.style.display = 'flex';
+        input.value = '';
+        results.innerHTML = `<div style="padding:20px 18px;font-size:13px;color:var(--muted)">Type to search...</div>`;
+        setTimeout(() => input.focus(), 50);
+      }
+
+      function close() {
+        backdrop.style.display = 'none';
+        input.value = '';
+        results.innerHTML = '';
+      }
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', e => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); open(); return; }
+        if (e.key === 'Escape') close();
+      });
+
+      // Click backdrop to close
+      backdrop.addEventListener('mousedown', e => { if (e.target === backdrop) close(); });
+
+      // Search logic with debounce
+      let debounceTimer;
+      input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const q = input.value.trim();
+        if (!q) {
+          results.innerHTML = `<div style="padding:20px 18px;font-size:13px;color:var(--muted)">Type to search...</div>`;
+          return;
+        }
+        results.innerHTML = `<div style="padding:20px 18px;font-size:13px;color:var(--muted)">Searching...</div>`;
+        debounceTimer = setTimeout(() => self._runSearch(q, results, close), 200);
+      });
+    },
+
+    async _runSearch(q, resultsEl, closeFn) {
+      const ql = q.toLowerCase();
+      try {
+        const [leads, clients, contacts] = await Promise.all([
+          self.api('/api/leads').catch(() => []),
+          self.api('/api/clients').catch(() => []),
+          self.api('/api/contacts').catch(() => [])
+        ]);
+
+        function matchLead(l) {
+          const c = l.contacts || {};
+          return [l.title, c.first_name, c.last_name, c.company, c.email].filter(Boolean).join(' ').toLowerCase().includes(ql);
+        }
+        function matchClient(cl) {
+          const c = cl.contacts || {};
+          return [c.first_name, c.last_name, c.company, c.email, cl.plan].filter(Boolean).join(' ').toLowerCase().includes(ql);
+        }
+        function matchContact(c) {
+          return [c.first_name, c.last_name, c.company, c.email].filter(Boolean).join(' ').toLowerCase().includes(ql);
+        }
+
+        const matchedLeads    = (leads    || []).filter(matchLead).slice(0, 4);
+        const matchedClients  = (clients  || []).filter(matchClient).slice(0, 4);
+        const matchedContacts = (contacts || []).filter(matchContact).slice(0, 4);
+
+        if (!matchedLeads.length && !matchedClients.length && !matchedContacts.length) {
+          resultsEl.innerHTML = `<div style="padding:24px 18px;text-align:center;font-size:13px;color:var(--muted)">No results for "${q}"</div>`;
+          return;
+        }
+
+        function section(title, items, renderFn) {
+          if (!items.length) return '';
+          return `<div style="padding:8px 0">
+            <div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);padding:6px 18px 4px">${title}</div>
+            ${items.map(renderFn).join('')}
+          </div>`;
+        }
+
+        function item(href, primary, secondary, closeFn) {
+          return `<a href="${href}" onclick="event.preventDefault();window.location='${href}'" style="display:flex;flex-direction:column;padding:10px 18px;text-decoration:none;transition:background 0.1s;border-radius:0" onmouseenter="this.style.background='var(--bg-alt,#f5f5f7)'" onmouseleave="this.style.background='transparent'">
+            <span style="font-size:13px;font-weight:500;color:var(--ink)">${primary}</span>
+            ${secondary ? `<span style="font-size:11px;color:var(--muted);margin-top:2px">${secondary}</span>` : ''}
+          </a>`;
+        }
+
+        resultsEl.innerHTML =
+          section('Leads', matchedLeads, l => {
+            const c = l.contacts || {};
+            const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || l.title || 'Unknown';
+            const sub  = [c.company, c.email].filter(Boolean).join(' · ');
+            return item('/admin-leads', name, sub || l.title || '', closeFn);
+          }) +
+          section('Clients', matchedClients, cl => {
+            const c = cl.contacts || {};
+            const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.company || 'Unknown';
+            const sub  = [c.company, cl.plan].filter(Boolean).join(' · ');
+            return item('/admin-clients', name, sub, closeFn);
+          }) +
+          section('Contacts', matchedContacts, c => {
+            const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.company || 'Unknown';
+            const sub  = [c.company, c.email].filter(Boolean).join(' · ');
+            return item('/admin-contacts', name, sub, closeFn);
+          });
+
+        // Wire up clicks to also close modal
+        resultsEl.querySelectorAll('a').forEach(a => {
+          a.addEventListener('click', () => closeFn());
+        });
+      } catch (err) {
+        resultsEl.innerHTML = `<div style="padding:20px 18px;font-size:13px;color:var(--muted)">Search unavailable.</div>`;
+      }
+    },
+
     // ── Sidebar injection ──────────────────────────────────────────────────
     initSidebar(active) {
       const root = document.getElementById('sidebar-root');
@@ -111,6 +244,8 @@ const TMIAdmin = (() => {
       root.querySelectorAll(`[data-page="${active}"]`).forEach(el => el.classList.add('active'));
       // Load badge counts async
       self._loadBadges();
+      // Init global search
+      self.initSearch();
     },
 
     async _loadBadges() {

@@ -149,6 +149,8 @@
         <div class="detail-item"><div class="detail-label">Added</div><div class="detail-val" id="pd-created">—</div></div>
       </div>
       <div class="panel-sep"></div>
+      <div id="pd-health"></div>
+      <div class="panel-sep"></div>
       <div class="panel-sec-label">Notes</div>
       <div id="pd-notes" style="font-size:14px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;">—</div>
       <div class="panel-sep"></div>
@@ -233,7 +235,7 @@ function renderTable() {
   }).join('');
 }
 
-function openPanel(cl) {
+async function openPanel(cl) {
   currentClient = cl;
   const c = cl.contacts || {};
   const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || '—';
@@ -252,8 +254,108 @@ function openPanel(cl) {
   document.getElementById('pd-created').textContent = TMIAdmin.fmt(cl.created_at);
   document.getElementById('pd-notes').textContent = cl.notes || '—';
   document.getElementById('client-activity-feed').innerHTML = '';
+  document.getElementById('pd-health').innerHTML = '<div style="font-size:13px;color:var(--muted);padding:4px 0">Computing health...</div>';
   TMIAdmin.openPanel('client-panel');
-  if (cl.contact_id) TMIAdmin.renderActivityPanel(cl.contact_id, 'client-activity-feed');
+
+  // Fetch activities and compute health score
+  let lastActivityDate = null;
+  if (cl.contact_id) {
+    const activities = await TMIAdmin.api(`/api/activities?contact_id=${cl.contact_id}`);
+    if (activities && activities.length > 0) {
+      // activities assumed sorted newest first
+      lastActivityDate = new Date(activities[0].created_at);
+    }
+    TMIAdmin.renderActivityPanel(cl.contact_id, 'client-activity-feed');
+  }
+
+  renderHealthPanel(cl, lastActivityDate);
+}
+
+function renderHealthPanel(cl, lastActivityDate) {
+  const el = document.getElementById('pd-health');
+  if (!el) return;
+
+  // Score algorithm (max 100)
+  let score = 0;
+  const signals = [];
+  const now = new Date();
+
+  // +30 if status is active
+  if (cl.status === 'active') {
+    score += 30;
+    signals.push({ text: 'Status: Active', positive: true });
+  } else if (cl.status === 'paused') {
+    signals.push({ text: 'Status: Paused', positive: false });
+  } else if (cl.status === 'churned') {
+    signals.push({ text: 'Status: Churned', positive: false });
+  }
+
+  // Last contact scoring (+20 within 14 days, +10 within 30 days)
+  if (lastActivityDate) {
+    const daysSince = Math.floor((now - lastActivityDate) / (1000 * 60 * 60 * 24));
+    if (daysSince <= 14) {
+      score += 20;
+      signals.push({ text: `Last contact: ${daysSince <= 1 ? 'today' : daysSince + ' days ago'}`, positive: true });
+    } else if (daysSince <= 30) {
+      score += 10;
+      signals.push({ text: `Last contact: ${daysSince} days ago`, positive: null });
+    } else {
+      signals.push({ text: `Last contact: ${daysSince} days ago`, positive: false });
+    }
+  } else {
+    signals.push({ text: 'No activity recorded', positive: false });
+  }
+
+  // Client tenure scoring (+15 if >90 days, +8 if >30 days)
+  if (cl.start_date) {
+    const daysClient = Math.floor((now - new Date(cl.start_date)) / (1000 * 60 * 60 * 24));
+    if (daysClient >= 90) {
+      score += 15;
+      const months = Math.floor(daysClient / 30);
+      signals.push({ text: `Client for ${months} month${months !== 1 ? 's' : ''}`, positive: true });
+    } else if (daysClient >= 30) {
+      score += 8;
+      const months = Math.floor(daysClient / 30);
+      signals.push({ text: `Client for ${months} month${months !== 1 ? 's' : ''}`, positive: null });
+    } else {
+      signals.push({ text: `New client (${daysClient} day${daysClient !== 1 ? 's' : ''})`, positive: null });
+    }
+  }
+
+  score = Math.min(100, score);
+
+  // Badge class
+  let badgeClass, badgeLabel;
+  if (score >= 70) {
+    badgeClass = 'score-hot';
+    badgeLabel = 'Healthy';
+  } else if (score >= 40) {
+    badgeClass = 'score-warm';
+    badgeLabel = 'Fair';
+  } else {
+    badgeClass = 'score-cold';
+    badgeLabel = 'At Risk';
+  }
+
+  // Signal color helper
+  function signalColor(positive) {
+    if (positive === true)  return 'var(--green, #22c55e)';
+    if (positive === false) return 'var(--red, #ef4444)';
+    return 'var(--muted)';
+  }
+
+  el.innerHTML = `
+    <div class="panel-sec-label">Health</div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">
+      <span class="score-badge ${badgeClass}" style="font-size:13px;padding:4px 12px;border-radius:999px;font-weight:600">${score} — ${badgeLabel}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      ${signals.slice(0, 3).map(s => `
+        <div style="font-size:12px;color:${signalColor(s.positive)};display:flex;align-items:center;gap:6px">
+          <span style="font-size:9px">${s.positive === true ? '▲' : s.positive === false ? '▼' : '●'}</span>
+          ${s.text}
+        </div>`).join('')}
+    </div>`;
 }
 
 async function logClientActivity() {

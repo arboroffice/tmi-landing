@@ -22,6 +22,14 @@
       <!-- Top stats -->
       <div class="stats-row" id="rev-stats"></div>
 
+      <!-- MRR Trend Chart -->
+      <div class="card" id="mrr-trend-card" style="margin-top:20px">
+        <div class="card-head"><span class="card-title">MRR Trend</span><span class="card-sub" id="mrr-trend-sub"></span></div>
+        <div id="mrr-trend-body" style="padding:20px 24px 8px">
+          <div style="font-size:13px;color:var(--muted)">Loading...</div>
+        </div>
+      </div>
+
       <div class="grid-2" style="margin-top:20px">
 
         <!-- MRR by client -->
@@ -59,6 +67,60 @@
 TMIAdmin.requireAuth();
 TMIAdmin.initSidebar('revenue');
 
+function renderTrendChart(clients) {
+  const body = document.getElementById('mrr-trend-body');
+  const sub  = document.getElementById('mrr-trend-sub');
+  if (!body) return;
+
+  // Build the last 6 calendar months, oldest first
+  const months = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      year:  d.getFullYear(),
+      month: d.getMonth(),
+      label: d.toLocaleString('en-US', { month: 'short' })
+    });
+  }
+
+  // Sum MRR for each month: client counts if status=active AND start_date <= month end
+  const values = months.map(m => {
+    const monthEnd = new Date(m.year, m.month + 1, 0, 23, 59, 59);
+    let total = 0;
+    (clients || []).forEach(c => {
+      if (c.status !== 'active') return;
+      const startDate = c.start_date ? new Date(c.start_date) : null;
+      if (!startDate || startDate <= monthEnd) {
+        total += parseFloat(c.mrr || 0);
+      }
+    });
+    return total;
+  });
+
+  const maxVal = Math.max(...values);
+  if (maxVal === 0) {
+    body.innerHTML = `<div style="padding:24px 0;text-align:center;font-size:13px;color:var(--muted)">No MRR data yet.</div>`;
+    return;
+  }
+
+  sub.textContent = 'Last 6 months';
+  const maxBarH = 180;
+
+  const barsHtml = months.map((m, i) => {
+    const val = values[i];
+    const heightPx = Math.max(4, Math.round((val / maxVal) * maxBarH));
+    const displayVal = val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : (val > 0 ? `$${val.toLocaleString()}` : '');
+    return `<div class="rev-bar-col">
+      <div class="rev-bar-val">${displayVal}</div>
+      <div class="rev-bar" style="height:${heightPx}px"></div>
+      <div class="rev-bar-label">${m.label}</div>
+    </div>`;
+  }).join('');
+
+  body.innerHTML = `<div class="rev-chart-wrap">${barsHtml}</div>`;
+}
+
 async function loadRevenue() {
   const [clients, leads, invoices, proposals] = await Promise.all([
     TMIAdmin.api('/api/clients'),
@@ -66,6 +128,9 @@ async function loadRevenue() {
     TMIAdmin.api('/api/invoices'),
     TMIAdmin.api('/api/proposals'),
   ]);
+
+  // Render trend chart after clients are loaded
+  renderTrendChart(clients || []);
 
   // Stats
   const activeClients = (clients || []).filter(c => c.status === 'active');

@@ -17,8 +17,9 @@
     <div class="topbar">
       <div class="topbar-crumb"><span class="page">Dashboard</span></div>
       <div class="topbar-actions">
-        <a href="/admin-leads" class="btn btn-ghost btn-sm">+ Add Lead</a>
-        <a href="/admin-email-compose" class="btn btn-primary btn-sm">Compose Email</a>
+        <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.openModal('modal-add-lead')">+ Lead</button>
+        <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.openModal('modal-add-followup')">+ Follow-up</button>
+        <a href="/admin-email-compose" class="btn btn-primary btn-sm">Compose Email &rarr;</a>
       </div>
     </div>
     <div class="content">
@@ -26,7 +27,7 @@
       <!-- Stats -->
       <div class="stats-row" id="stats">
         <div class="stat-box"><div class="stat-label">Total Leads</div><div class="stat-val" id="stat-leads">—</div><div class="stat-delta" id="stat-leads-d"></div></div>
-        <div class="stat-box"><div class="stat-label">Active Clients</div><div class="stat-val" id="stat-clients">—</div><div class="stat-delta" id="stat-clients-d"></div></div>
+        <div class="stat-box"><div class="stat-label">Active Clients</div><div class="stat-val" id="stat-clients">—</div><div class="stat-delta" id="stat-clients-d"><span id="stat-mrr-val"></span><svg id="stat-mrr-spark" width="60" height="24" style="display:none;vertical-align:middle;margin-left:8px;" viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline id="stat-mrr-line" points="" stroke="#E4FF97" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div></div>
         <div class="stat-box"><div class="stat-label">Total Contacts</div><div class="stat-val" id="stat-contacts">—</div><div class="stat-delta" id="stat-contacts-d"></div></div>
         <div class="stat-box"><div class="stat-label">Emails Sent</div><div class="stat-val" id="stat-emails">—</div><div class="stat-delta" id="stat-emails-d"></div></div>
       </div>
@@ -85,11 +86,115 @@
         </div>
       </div>
 
+      <!-- Activity feed -->
+      <div class="card" style="margin-top:20px;">
+        <div class="card-head">
+          <span class="card-title">Recent Activity</span>
+          <a href="/admin-contacts" class="btn btn-ghost btn-sm">View all</a>
+        </div>
+        <div id="activity-feed-wrap">
+          <div style="padding:16px 20px;font-size:13px;color:var(--muted);">Loading...</div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
 <div id="toast-root"></div>
+
+<!-- Add Lead Modal -->
+<div class="modal-overlay" id="modal-add-lead" onclick="if(event.target===this)TMIAdmin.closeModal('modal-add-lead')">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-hd">
+      <h3 class="modal-title">Add Lead</h3>
+      <button class="modal-close" onclick="TMIAdmin.closeModal('modal-add-lead')">&times;</button>
+    </div>
+    <div class="modal-bd">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div>
+          <label class="form-label">First Name</label>
+          <input class="form-input" id="al-first" placeholder="Jane"/>
+        </div>
+        <div>
+          <label class="form-label">Last Name</label>
+          <input class="form-input" id="al-last" placeholder="Smith"/>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="al-email" type="email" placeholder="jane@example.com"/>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Company</label>
+        <input class="form-input" id="al-company" placeholder="Acme Corp"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label class="form-label">Status</label>
+          <select class="form-input" id="al-status">
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="qualified">Qualified</option>
+            <option value="proposal">Proposal</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Source</label>
+          <select class="form-input" id="al-source">
+            <option value="">— select —</option>
+            <option>Website</option>
+            <option>Referral</option>
+            <option>LinkedIn</option>
+            <option>Instagram</option>
+            <option>Cold Outreach</option>
+            <option>Event</option>
+            <option>Field Notes</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('modal-add-lead')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitAddLead()">Add Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Follow-up Modal -->
+<div class="modal-overlay" id="modal-add-followup" onclick="if(event.target===this)TMIAdmin.closeModal('modal-add-followup')">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-hd">
+      <h3 class="modal-title">Add Follow-up</h3>
+      <button class="modal-close" onclick="TMIAdmin.closeModal('modal-add-followup')">&times;</button>
+    </div>
+    <div class="modal-bd">
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Title</label>
+        <input class="form-input" id="af-title" placeholder="Follow up with Jane re: proposal"/>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Type</label>
+        <select class="form-input" id="af-type">
+          <option value="call">Call</option>
+          <option value="email">Email</option>
+          <option value="meeting">Meeting</option>
+          <option value="note">Note</option>
+          <option value="task">Task</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Due</label>
+        <input class="form-input" id="af-due" type="datetime-local"/>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('modal-add-followup')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitAddFollowup()">Save Follow-up</button>
+    </div>
+  </div>
+</div>
 
 <script src="admin-shared.js"></script>
 <script>
@@ -102,6 +207,70 @@ const STAGE_COLORS = {
   proposal:'#ffedd5',won:'#dcfce7',lost:'#f3f4f6'
 };
 
+// Dot color map matching admin-shared renderActivityPanel
+const DOT_COLOR = { call:'blue', email:'chart', meeting:'green', note:'', sms:'blue', task:'' };
+
+// ── MRR sparkline ──────────────────────────────────────────────────────────────
+function renderMrrSparkline(clients) {
+  const active = (clients || []).filter(c => c.status === 'active');
+  const now = new Date();
+  // Build array of last 6 months: [5 months ago, ..., current]
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(d);
+  }
+  const totals = months.map(monthStart => {
+    const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0, 23, 59, 59);
+    return active.reduce((sum, c) => {
+      const start = c.start_date ? new Date(c.start_date) : null;
+      // Client is active in this month if they started on or before the end of that month
+      if (!start || start > monthEnd) return sum;
+      return sum + (parseFloat(c.mrr) || 0);
+    }, 0);
+  });
+
+  const maxVal = Math.max(...totals, 1);
+  const W = 60, H = 24, PAD = 2;
+  // Map totals to SVG points
+  const pts = totals.map((v, i) => {
+    const x = PAD + (i / (totals.length - 1)) * (W - PAD * 2);
+    const y = H - PAD - ((v / maxVal) * (H - PAD * 2));
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+
+  const line = document.getElementById('stat-mrr-line');
+  const svg  = document.getElementById('stat-mrr-spark');
+  if (line && svg) {
+    line.setAttribute('points', pts);
+    svg.style.display = 'inline-block';
+  }
+}
+
+// ── Activity feed ──────────────────────────────────────────────────────────────
+async function loadActivityFeed() {
+  const data = await TMIAdmin.api('/api/activities');
+  const wrap = document.getElementById('activity-feed-wrap');
+  if (!wrap) return;
+  if (!data || !data.length) {
+    wrap.innerHTML = `<div style="padding:16px 20px;font-size:13px;color:var(--muted);">No activity logged yet.</div>`;
+    return;
+  }
+  const items = data.slice(0, 15);
+  wrap.innerHTML = `<div class="tl-list" style="padding:4px 20px 8px;">${items.map(a => {
+    const dc = DOT_COLOR[a.type] || '';
+    return `<div class="tl-item">
+      <div class="tl-dot ${dc}"></div>
+      <div class="tl-body">
+        <div class="tl-title">${a.title}</div>
+        ${a.body ? `<div class="tl-text">${a.body}</div>` : ''}
+        <div class="tl-time">${TMIAdmin.reltime(a.created_at)}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── Main dashboard loader ──────────────────────────────────────────────────────
 async function loadDashboard() {
   const [leads, clients, contacts, campaigns, apps, followups] = await Promise.all([
     TMIAdmin.api('/api/leads'),
@@ -122,7 +291,9 @@ async function loadDashboard() {
     const active = clients.filter(c => c.status === 'active');
     document.getElementById('stat-clients').textContent = active.length;
     const mrr = active.reduce((s, c) => s + (parseFloat(c.mrr) || 0), 0);
-    if (mrr) document.getElementById('stat-clients-d').textContent = `${TMIAdmin.currency(mrr)} MRR`;
+    const mrrEl = document.getElementById('stat-mrr-val');
+    if (mrr && mrrEl) mrrEl.textContent = `${TMIAdmin.currency(mrr)} MRR`;
+    renderMrrSparkline(clients);
   }
   if (contacts) {
     document.getElementById('stat-contacts').textContent = contacts.length;
@@ -226,7 +397,74 @@ async function loadDashboard() {
   }
 }
 
+// ── Quick-add: Lead ────────────────────────────────────────────────────────────
+async function submitAddLead() {
+  const first   = document.getElementById('al-first').value.trim();
+  const last    = document.getElementById('al-last').value.trim();
+  const email   = document.getElementById('al-email').value.trim();
+  const company = document.getElementById('al-company').value.trim();
+  const status  = document.getElementById('al-status').value;
+  const source  = document.getElementById('al-source').value;
+
+  if (!email && !first) { TMIAdmin.toast('Enter at least a name or email', 'error'); return; }
+
+  const btn = document.querySelector('#modal-add-lead .btn-primary');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const res = await TMIAdmin.api('/api/leads', 'POST', {
+    contact: { first_name: first, last_name: last, email, company },
+    status: status || 'new',
+    source: source || undefined,
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Add Lead';
+
+  if (res) {
+    TMIAdmin.toast('Lead added');
+    TMIAdmin.closeModal('modal-add-lead');
+    // Reset fields
+    ['al-first','al-last','al-email','al-company'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('al-status').value = 'new';
+    document.getElementById('al-source').value = '';
+    loadDashboard();
+  }
+}
+
+// ── Quick-add: Follow-up ──────────────────────────────────────────────────────
+async function submitAddFollowup() {
+  const title  = document.getElementById('af-title').value.trim();
+  const type   = document.getElementById('af-type').value;
+  const due_at = document.getElementById('af-due').value;
+
+  if (!title) { TMIAdmin.toast('Title is required', 'error'); return; }
+
+  const btn = document.querySelector('#modal-add-followup .btn-primary');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const res = await TMIAdmin.api('/api/followups', 'POST', {
+    title,
+    type,
+    due_at: due_at || undefined,
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Save Follow-up';
+
+  if (res) {
+    TMIAdmin.toast('Follow-up saved');
+    TMIAdmin.closeModal('modal-add-followup');
+    document.getElementById('af-title').value = '';
+    document.getElementById('af-type').value = 'call';
+    document.getElementById('af-due').value = '';
+    loadDashboard();
+  }
+}
+
 loadDashboard();
+loadActivityFeed();
 </script>
 </body>
 </html>

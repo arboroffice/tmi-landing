@@ -6,6 +6,60 @@
 <title>Onboarding — TMI Admin</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="stylesheet" href="admin.css"/>
+<style>
+  /* Two-column split layout */
+  .ob-layout{display:flex;gap:0;min-height:calc(100vh - 56px - 48px);border:1px solid var(--line);border-radius:var(--r,8px);background:var(--surface,#fff);overflow:hidden;}
+
+  /* Left: client list */
+  .ob-sidebar{width:280px;flex-shrink:0;border-right:1px solid var(--line);display:flex;flex-direction:column;}
+  .ob-sidebar-head{padding:16px 16px 12px;border-bottom:1px solid var(--line);}
+  .ob-sidebar-head h2{font-size:13px;font-weight:600;color:var(--ink);margin:0 0 10px;}
+  .ob-search{position:relative;}
+  .ob-search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted);pointer-events:none;}
+  .ob-search input{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--line);border-radius:6px;font-size:12px;outline:none;background:var(--bg-alt,#f5f5f7);color:var(--ink);}
+  .ob-search input:focus{border-color:var(--chart);background:#fff;}
+  .ob-client-list{flex:1;overflow-y:auto;}
+  .ob-client-row{padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--line);transition:background 0.12s;}
+  .ob-client-row:hover{background:var(--bg-alt,#f5f5f7);}
+  .ob-client-row.selected{background:var(--chart);color:var(--ink);}
+  .ob-client-row.selected .ob-client-co{color:var(--ink);}
+  .ob-client-row.selected .ob-prog-text{color:var(--ink);}
+  .ob-client-name{font-size:13px;font-weight:600;margin-bottom:2px;}
+  .ob-client-co{font-size:11px;color:var(--muted);margin-bottom:6px;}
+  .ob-prog-row{display:flex;align-items:center;gap:8px;}
+  .ob-prog-bar-wrap{flex:1;height:4px;background:rgba(0,0,0,0.08);border-radius:999px;overflow:hidden;}
+  .ob-prog-bar{height:100%;background:var(--ink);border-radius:999px;transition:width 0.3s ease;}
+  .ob-client-row.selected .ob-prog-bar{background:var(--ink);}
+  .ob-client-row.selected .ob-prog-bar-wrap{background:rgba(0,0,0,0.15);}
+  .ob-prog-text{font-size:10px;color:var(--muted);white-space:nowrap;}
+  .ob-no-clients{padding:32px 16px;text-align:center;color:var(--muted);font-size:13px;}
+
+  /* Right: checklist panel */
+  .ob-detail{flex:1;display:flex;flex-direction:column;overflow-y:auto;}
+  .ob-detail-head{padding:20px 24px 16px;border-bottom:1px solid var(--line);flex-shrink:0;}
+  .ob-detail-name{font-size:17px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+  .ob-detail-co{font-size:12px;color:var(--muted);margin-bottom:14px;}
+  .ob-detail-prog-bar-wrap{height:6px;background:var(--line);border-radius:999px;overflow:hidden;margin-bottom:8px;}
+  .ob-detail-prog-bar{height:100%;background:var(--chart);border-radius:999px;transition:width 0.4s ease;}
+  .ob-detail-prog-label{font-size:12px;color:var(--muted);}
+  .ob-detail-actions{display:flex;gap:8px;margin-top:12px;}
+
+  .ob-checklist-body{padding:20px 24px;flex:1;}
+  .ob-checklist-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:900px){.ob-checklist-grid{grid-template-columns:1fr;}}
+
+  /* Empty state for right panel */
+  .ob-empty{flex:1;display:flex;align-items:center;justify-content:center;}
+  .ob-empty-inner{text-align:center;color:var(--muted);}
+  .ob-empty-inner .ob-empty-icon{font-size:36px;margin-bottom:12px;}
+  .ob-empty-inner h3{font-size:15px;font-weight:600;color:var(--ink-2,#505060);margin-bottom:4px;}
+  .ob-empty-inner p{font-size:13px;}
+
+  @media(max-width:640px){
+    .ob-layout{flex-direction:column;}
+    .ob-sidebar{width:100%;border-right:none;border-bottom:1px solid var(--line);max-height:280px;}
+  }
+</style>
 </head>
 <body>
 <div class="layout">
@@ -17,21 +71,37 @@
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Onboarding</span></div>
     </div>
     <div class="content">
-      <div class="sec-head">
-        <h1>Onboarding Checklist</h1>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span id="progress-label" style="font-size:13px;color:var(--muted)"></span>
-          <button class="btn btn-ghost btn-sm" onclick="resetAll()">Reset</button>
+      <div class="sec-head" style="margin-bottom:20px">
+        <h1>Client Onboarding</h1>
+        <span id="client-count" style="font-size:13px;color:var(--muted)"></span>
+      </div>
+
+      <div class="ob-layout">
+        <!-- Left: client list -->
+        <div class="ob-sidebar">
+          <div class="ob-sidebar-head">
+            <h2>Active Clients</h2>
+            <div class="ob-search">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" id="client-search" placeholder="Search clients..." oninput="renderClientList()"/>
+            </div>
+          </div>
+          <div class="ob-client-list" id="ob-client-list">
+            <div class="ob-no-clients">Loading clients...</div>
+          </div>
         </div>
-      </div>
 
-      <!-- Progress bar -->
-      <div style="height:6px;background:var(--line);border-radius:999px;margin-bottom:28px;overflow:hidden">
-        <div id="progress-bar" style="height:100%;background:var(--chart);border-radius:999px;transition:width 0.4s ease;width:0%"></div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" id="checklist-grid">
-        <!-- Rendered by JS -->
+        <!-- Right: checklist detail -->
+        <div class="ob-detail" id="ob-detail">
+          <div class="ob-empty" id="ob-no-selection">
+            <div class="ob-empty-inner">
+              <div class="ob-empty-icon">&#128203;</div>
+              <h3>Select a client</h3>
+              <p>Choose a client from the left to view their onboarding checklist.</p>
+            </div>
+          </div>
+          <!-- Populated by JS when a client is selected -->
+        </div>
       </div>
     </div>
   </div>
@@ -44,97 +114,171 @@
 TMIAdmin.requireAuth();
 TMIAdmin.initSidebar('onboarding');
 
+// ─── Checklist definition ────────────────────────────────────────────────────
+
 const CHECKLIST = [
   {
     section: 'Kickoff',
     items: [
-      { id: 'kick-call', title: 'Kickoff call completed', desc: 'Discovery call, pain points documented, goals aligned' },
-      { id: 'kick-access', title: 'System access collected', desc: 'Logins, credentials, and API keys received from client' },
+      { id: 'kick-call',   title: 'Kickoff call completed',    desc: 'Discovery call, pain points documented, goals aligned' },
+      { id: 'kick-access', title: 'System access collected',   desc: 'Logins, credentials, and API keys received from client' },
       { id: 'kick-intake', title: 'Intake form sent & returned', desc: 'Operations questionnaire completed by client team' },
-      { id: 'kick-intro', title: 'Team intro email sent', desc: 'Client team introduced to their TMI contact' },
+      { id: 'kick-intro',  title: 'Team intro email sent',     desc: 'Client team introduced to their TMI contact' },
     ]
   },
   {
     section: 'Discovery & Audit',
     items: [
-      { id: 'disc-ops', title: 'Operations audit complete', desc: 'Mapped current workflows, identified friction points' },
-      { id: 'disc-data', title: 'Data audit complete', desc: 'Reviewed existing data sources, formats, and gaps' },
-      { id: 'disc-tools', title: 'Current tools documented', desc: 'Software stack, integrations, and manual processes listed' },
-      { id: 'disc-priorities', title: 'Priorities ranked', desc: 'Top 3 pain points agreed upon with client' },
+      { id: 'disc-ops',        title: 'Operations audit complete', desc: 'Mapped current workflows, identified friction points' },
+      { id: 'disc-data',       title: 'Data audit complete',       desc: 'Reviewed existing data sources, formats, and gaps' },
+      { id: 'disc-tools',      title: 'Current tools documented',  desc: 'Software stack, integrations, and manual processes listed' },
+      { id: 'disc-priorities', title: 'Priorities ranked',         desc: 'Top 3 pain points agreed upon with client' },
     ]
   },
   {
     section: 'Build Phase',
     items: [
-      { id: 'build-spec', title: 'Spec / scope doc delivered', desc: 'Proposal or SOW signed, scope locked' },
-      { id: 'build-env', title: 'Dev environment set up', desc: 'Staging environment live, client has access' },
-      { id: 'build-v1', title: 'V1 delivered to client', desc: 'First working version shared for review' },
-      { id: 'build-feedback', title: 'Feedback round complete', desc: 'Client revisions documented and addressed' },
+      { id: 'build-spec',     title: 'Spec / scope doc delivered', desc: 'Proposal or SOW signed, scope locked' },
+      { id: 'build-env',      title: 'Dev environment set up',     desc: 'Staging environment live, client has access' },
+      { id: 'build-v1',       title: 'V1 delivered to client',     desc: 'First working version shared for review' },
+      { id: 'build-feedback', title: 'Feedback round complete',    desc: 'Client revisions documented and addressed' },
+      { id: 'build-qa',       title: 'QA sign-off',               desc: 'Internal QA pass completed before launch' },
     ]
   },
   {
     section: 'Launch',
     items: [
-      { id: 'launch-test', title: 'Testing sign-off', desc: 'Client team ran through all workflows, confirmed working' },
-      { id: 'launch-training', title: 'Training session done', desc: 'Walkthrough with all users who will use the system' },
-      { id: 'launch-docs', title: 'Docs / SOP delivered', desc: 'Operating procedures and how-to docs sent to client' },
-      { id: 'launch-live', title: 'System live in production', desc: 'Client running on the live system, not staging' },
+      { id: 'launch-test',     title: 'Testing sign-off',       desc: 'Client team ran through all workflows, confirmed working' },
+      { id: 'launch-training', title: 'Training session done',  desc: 'Walkthrough with all users who will use the system' },
+      { id: 'launch-docs',     title: 'Docs / SOP delivered',   desc: 'Operating procedures and how-to docs sent to client' },
+      { id: 'launch-live',     title: 'System live in production', desc: 'Client running on the live system, not staging' },
     ]
   },
   {
     section: 'Post-Launch',
     items: [
-      { id: 'post-check', title: '1-week check-in done', desc: 'Follow-up call to catch early issues' },
-      { id: 'post-30', title: '30-day review scheduled', desc: 'Performance review meeting on calendar' },
-      { id: 'post-invoice', title: 'Final invoice sent', desc: 'Project invoice delivered and confirmed received' },
-      { id: 'post-nps', title: 'NPS / testimonial requested', desc: 'Asked for feedback or referral' },
+      { id: 'post-check',   title: '1-week check-in done',      desc: 'Follow-up call to catch early issues' },
+      { id: 'post-30',      title: '30-day review scheduled',   desc: 'Performance review meeting on calendar' },
+      { id: 'post-invoice', title: 'Final invoice sent',        desc: 'Project invoice delivered and confirmed received' },
+      { id: 'post-nps',     title: 'NPS / testimonial requested', desc: 'Asked for feedback or referral' },
     ]
   },
   {
     section: 'Internal Housekeeping',
     items: [
-      { id: 'int-crm', title: 'CRM record updated', desc: 'Client status set to active, all fields filled in' },
+      { id: 'int-crm',     title: 'CRM record updated', desc: 'Client status set to active, all fields filled in' },
       { id: 'int-invoice', title: 'MRR entered in CRM', desc: 'Monthly recurring revenue logged on client record' },
-      { id: 'int-project', title: 'Project logged', desc: 'Project record created with start date and value' },
-      { id: 'int-notes', title: 'Handoff notes written', desc: 'Key context documented for future team members' },
+      { id: 'int-notes',   title: 'Handoff notes written', desc: 'Key context documented for future team members' },
     ]
   }
 ];
 
-const STORAGE_KEY = 'tmi_onboarding_state';
+const TOTAL_ITEMS = CHECKLIST.reduce((n, s) => n + s.items.length, 0);
 
-function loadState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+// ─── State ───────────────────────────────────────────────────────────────────
+
+let allClients = [];
+let selectedClientId = null;
+
+function storageKey(clientId) { return `onboarding_${clientId}`; }
+
+function loadClientState(clientId) {
+  try { return JSON.parse(localStorage.getItem(storageKey(clientId))) || {}; } catch { return {}; }
 }
 
-function saveState(state) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+function saveClientState(clientId, state) {
+  localStorage.setItem(storageKey(clientId), JSON.stringify(state));
 }
 
-function getProgress(state) {
-  let total = 0, done = 0;
-  CHECKLIST.forEach(sec => sec.items.forEach(item => { total++; if (state[item.id]) done++; }));
-  return { total, done };
+function clientProgress(clientId) {
+  const state = loadClientState(clientId);
+  let done = 0;
+  CHECKLIST.forEach(sec => sec.items.forEach(item => { if (state[item.id]) done++; }));
+  return { done, total: TOTAL_ITEMS };
 }
 
-function render() {
-  const state = loadState();
-  const { total, done } = getProgress(state);
-  const pct = total ? Math.round(done / total * 100) : 0;
+// ─── Load clients ────────────────────────────────────────────────────────────
 
-  document.getElementById('progress-bar').style.width = pct + '%';
-  document.getElementById('progress-label').textContent = `${done} of ${total} complete (${pct}%)`;
+async function loadClients() {
+  const data = await TMIAdmin.api('/api/clients') || [];
+  allClients = data.filter(c => c.status === 'active');
+  document.getElementById('client-count').textContent = `${allClients.length} active client${allClients.length !== 1 ? 's' : ''}`;
+  renderClientList();
+}
 
-  document.getElementById('checklist-grid').innerHTML = CHECKLIST.map(sec => `
-    <div class="card" style="height:fit-content">
+// ─── Client list render ───────────────────────────────────────────────────────
+
+function renderClientList() {
+  const q = (document.getElementById('client-search').value || '').toLowerCase();
+  const filtered = allClients.filter(c => {
+    const name = `${c.first_name || ''} ${c.last_name || ''}`.toLowerCase();
+    const co = (c.company || '').toLowerCase();
+    return !q || name.includes(q) || co.includes(q);
+  });
+
+  const list = document.getElementById('ob-client-list');
+  if (!filtered.length) {
+    list.innerHTML = `<div class="ob-no-clients">${allClients.length ? 'No clients match.' : 'No active clients.'}</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(c => {
+    const { done, total } = clientProgress(c.id);
+    const pct = total ? Math.round(done / total * 100) : 0;
+    const name = `${c.first_name || ''} ${c.last_name || ''}`.trim() || 'Unnamed';
+    const selected = c.id === selectedClientId ? 'selected' : '';
+    return `<div class="ob-client-row ${selected}" onclick="selectClient('${c.id}')">
+      <div class="ob-client-name">${escHtml(name)}</div>
+      <div class="ob-client-co">${escHtml(c.company || '')}</div>
+      <div class="ob-prog-row">
+        <div class="ob-prog-bar-wrap"><div class="ob-prog-bar" style="width:${pct}%"></div></div>
+        <div class="ob-prog-text">${done}/${total}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Select client ────────────────────────────────────────────────────────────
+
+function selectClient(id) {
+  selectedClientId = id;
+  renderClientList(); // update selected highlight
+  renderDetail();
+}
+
+// ─── Detail / checklist render ────────────────────────────────────────────────
+
+function renderDetail() {
+  const client = allClients.find(c => c.id === selectedClientId);
+  const detail = document.getElementById('ob-detail');
+
+  if (!client) {
+    detail.innerHTML = `<div class="ob-empty" id="ob-no-selection">
+      <div class="ob-empty-inner">
+        <div class="ob-empty-icon">&#128203;</div>
+        <h3>Select a client</h3>
+        <p>Choose a client from the left to view their onboarding checklist.</p>
+      </div>
+    </div>`;
+    return;
+  }
+
+  const state = loadClientState(client.id);
+  const done = CHECKLIST.reduce((n, s) => n + s.items.filter(i => state[i.id]).length, 0);
+  const pct = TOTAL_ITEMS ? Math.round(done / TOTAL_ITEMS * 100) : 0;
+  const name = `${client.first_name || ''} ${client.last_name || ''}`.trim() || 'Unnamed';
+
+  const sectionsHtml = CHECKLIST.map(sec => {
+    const secDone = sec.items.filter(i => state[i.id]).length;
+    return `<div class="card" style="height:fit-content">
       <div class="card-head">
         <span class="card-title">${sec.section}</span>
-        <span style="font-size:11px;color:var(--muted)">${sec.items.filter(i => state[i.id]).length}/${sec.items.length}</span>
+        <span style="font-size:11px;color:var(--muted)">${secDone}/${sec.items.length}</span>
       </div>
       <ul class="checklist" style="padding:0 16px">
         ${sec.items.map(item => `
           <li class="checklist-item ${state[item.id] ? 'done' : ''}">
-            <div class="checklist-check ${state[item.id] ? 'done' : ''}" onclick="toggleItem('${item.id}')"></div>
+            <div class="checklist-check ${state[item.id] ? 'done' : ''}" onclick="toggleItem('${client.id}','${item.id}')"></div>
             <div class="checklist-body">
               <div class="checklist-title">${item.title}</div>
               <div class="checklist-desc">${item.desc}</div>
@@ -142,25 +286,56 @@ function render() {
           </li>
         `).join('')}
       </ul>
+    </div>`;
+  }).join('');
+
+  detail.innerHTML = `
+    <div class="ob-detail-head">
+      <div class="ob-detail-name">${escHtml(name)}</div>
+      <div class="ob-detail-co">${escHtml(client.company || '')}</div>
+      <div class="ob-detail-prog-bar-wrap">
+        <div class="ob-detail-prog-bar" style="width:${pct}%"></div>
+      </div>
+      <div class="ob-detail-prog-label">${done} of ${TOTAL_ITEMS} complete (${pct}%)</div>
+      <div class="ob-detail-actions">
+        <button class="btn btn-ghost btn-sm" onclick="resetClient('${client.id}')">Reset checklist</button>
+      </div>
     </div>
-  `).join('');
+    <div class="ob-checklist-body">
+      <div class="ob-checklist-grid">${sectionsHtml}</div>
+    </div>
+  `;
 }
 
-function toggleItem(id) {
-  const state = loadState();
-  state[id] = !state[id];
-  saveState(state);
-  render();
+// ─── Toggle item ──────────────────────────────────────────────────────────────
+
+function toggleItem(clientId, itemId) {
+  const state = loadClientState(clientId);
+  state[itemId] = !state[itemId];
+  saveClientState(clientId, state);
+  renderDetail();
+  renderClientList(); // refresh progress bars in sidebar
 }
 
-function resetAll() {
-  if (!confirm('Reset all checklist items?')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  render();
+// ─── Reset client ─────────────────────────────────────────────────────────────
+
+function resetClient(clientId) {
+  if (!confirm('Reset all checklist items for this client?')) return;
+  localStorage.removeItem(storageKey(clientId));
+  renderDetail();
+  renderClientList();
   TMIAdmin.toast('Checklist reset');
 }
 
-render();
+// ─── Utility ──────────────────────────────────────────────────────────────────
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+loadClients();
 </script>
 </body>
 </html>

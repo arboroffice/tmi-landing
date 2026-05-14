@@ -47,7 +47,7 @@
         <div class="tbl-wrap">
           <table>
             <thead><tr>
-              <th>Title</th><th>Contact</th><th>Total</th><th>Status</th><th>Sent</th><th>Expires</th><th></th>
+              <th>Title</th><th>Client</th><th>Total</th><th>Status</th><th>Date</th><th></th>
             </tr></thead>
             <tbody id="prop-tbody"></tbody>
           </table>
@@ -64,72 +64,85 @@
     <div class="panel-hd">
       <h2 class="panel-title" id="panel-prop-title">Proposal</h2>
       <div class="panel-actions">
-        <button class="btn btn-ghost btn-sm" onclick="markSent()">Mark Sent</button>
-        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteProposal()">Delete</button>
+        <button class="btn btn-ghost btn-sm" onclick="panelEdit()">Edit</button>
+        <button class="btn btn-ghost btn-sm" onclick="panelMarkAccepted()">Accept</button>
+        <button class="btn btn-ghost btn-sm" onclick="panelMarkDeclined()">Decline</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProposal()">Delete</button>
       </div>
     </div>
     <div class="panel-body">
       <div class="detail-grid" id="panel-prop-details"></div>
       <div class="panel-sep"></div>
-      <div class="panel-sec-label">Update Status</div>
-      <select class="form-input" id="panel-prop-status" style="margin-top:8px;max-width:220px" onchange="updatePropStatus()">
-        <option value="draft">Draft</option>
-        <option value="sent">Sent</option>
-        <option value="viewed">Viewed</option>
-        <option value="accepted">Accepted</option>
-        <option value="declined">Declined</option>
-      </select>
+      <div class="panel-sec-label">Line Items</div>
+      <div id="panel-line-items" style="margin-top:12px"></div>
+      <div id="panel-prop-total-row" style="margin-top:12px;display:none">
+        <div class="proposal-total">
+          <span class="proposal-total-label">Total</span>
+          <span class="proposal-total-val" id="panel-prop-total-val"></span>
+        </div>
+      </div>
       <div class="panel-sep"></div>
       <div class="panel-sec-label">Notes</div>
-      <textarea class="form-input" id="panel-prop-notes" rows="3" style="margin-top:8px" placeholder="Notes..."></textarea>
-      <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="saveNotes()">Save Notes</button>
+      <p id="panel-prop-notes" style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-top:8px;white-space:pre-wrap;"></p>
     </div>
   </div>
 </div>
 
-<!-- Add modal -->
+<!-- Proposal Builder Modal -->
 <div class="modal-overlay" id="add-modal">
-  <div class="modal">
+  <div class="modal" style="max-width:680px;width:100%">
     <div class="modal-hd">
       <h2 class="modal-title" id="modal-title-text">New Proposal</h2>
       <button class="modal-x" onclick="closeModal()">&times;</button>
     </div>
+
     <div class="form-group">
-      <label class="form-label">Title</label>
+      <label class="form-label">Title <span style="color:var(--red)">*</span></label>
       <input class="form-input" id="f-title" placeholder="Proposal title" required/>
     </div>
+
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Total ($)</label>
-        <input class="form-input" id="f-total" type="number" step="0.01" placeholder="0.00"/>
+        <label class="form-label">Client</label>
+        <input class="form-input" id="f-client" placeholder="Client name"/>
       </div>
       <div class="form-group">
         <label class="form-label">Status</label>
         <select class="form-input" id="f-status">
           <option value="draft">Draft</option>
           <option value="sent">Sent</option>
+          <option value="viewed">Viewed</option>
+          <option value="accepted">Accepted</option>
+          <option value="declined">Declined</option>
         </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Expires</label>
-        <input class="form-input" id="f-expires" type="date"/>
       </div>
     </div>
 
     <div style="margin-bottom:16px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <label class="form-label" style="margin:0">Line Items</label>
-        <button type="button" class="btn btn-ghost btn-sm" onclick="addLineItem()">+ Add item</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addLineItem()">+ Add Line Item</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 72px 96px 40px;gap:6px;margin-bottom:6px;padding:0 2px">
+        <span style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em">Description</span>
+        <span style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em">Qty</span>
+        <span style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em">Unit Price</span>
+        <span></span>
       </div>
       <div id="line-items-list"></div>
+      <div id="li-total-row" style="display:none;margin-top:12px">
+        <div class="proposal-total">
+          <span class="proposal-total-label">Total</span>
+          <span class="proposal-total-val" id="li-total-val">$0.00</span>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">
-      <label class="form-label">Notes</label>
-      <textarea class="form-input" id="f-notes" rows="2" placeholder="Internal notes..."></textarea>
+      <label class="form-label">Notes / Terms</label>
+      <textarea class="form-input" id="f-notes" rows="3" placeholder="Notes, payment terms, expiry details..."></textarea>
     </div>
+
     <div class="modal-ft">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveProposal()">Save Proposal</button>
@@ -155,6 +168,7 @@ async function loadProposals() {
 }
 
 function contactName(p) {
+  if (p.client_name) return p.client_name;
   const c = p.contacts;
   if (!c) return '-';
   return `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.company || '-';
@@ -171,17 +185,16 @@ function renderTable() {
   document.getElementById('prop-count').textContent = `${rows.length} proposal${rows.length !== 1 ? 's' : ''}`;
   const tbody = document.getElementById('prop-tbody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📄</div><h3>No proposals</h3><p>Create your first proposal above.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📄</div><h3>No proposals</h3><p>Create your first proposal above.</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(p => `
     <tr onclick="openPanel('${p.id}')">
       <td class="td-name">${p.title}</td>
       <td>${contactName(p)}</td>
-      <td>${p.total ? '$' + parseFloat(p.total).toLocaleString() : '<span class="td-muted">-</span>'}</td>
+      <td style="font-weight:600">${p.total != null ? TMIAdmin.currency(p.total) : '<span class="td-muted">-</span>'}</td>
       <td>${TMIAdmin.badge(p.status)}</td>
-      <td class="td-muted">${p.sent_at ? TMIAdmin.fmt(p.sent_at) : '-'}</td>
-      <td class="td-muted">${p.expires_at ? TMIAdmin.fmt(p.expires_at) : '-'}</td>
+      <td class="td-muted">${TMIAdmin.fmt(p.created_at)}</td>
       <td class="td-action"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPanel('${p.id}')">View</button></td>
     </tr>
   `).join('');
@@ -192,95 +205,169 @@ function openPanel(id) {
   if (!currentProposal) return;
   const p = currentProposal;
   document.getElementById('panel-prop-title').textContent = p.title;
-  document.getElementById('panel-prop-status').value = p.status;
-  document.getElementById('panel-prop-notes').value = p.notes || '';
+  document.getElementById('panel-prop-notes').textContent = p.notes || '-';
+
   document.getElementById('panel-prop-details').innerHTML = `
-    <div class="detail-item"><div class="detail-label">Total</div><div class="detail-val" style="font-size:22px;font-weight:700">${p.total ? '$' + parseFloat(p.total).toLocaleString() : '-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Client</div><div class="detail-val">${contactName(p)}</div></div>
     <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(p.status)}</div></div>
-    <div class="detail-item"><div class="detail-label">Contact</div><div class="detail-val">${contactName(p)}</div></div>
+    <div class="detail-item"><div class="detail-label">Total</div><div class="detail-val" style="font-size:20px;font-weight:700">${p.total != null ? TMIAdmin.currency(p.total) : '-'}</div></div>
     <div class="detail-item"><div class="detail-label">Created</div><div class="detail-val">${TMIAdmin.fmt(p.created_at)}</div></div>
-    ${p.sent_at ? `<div class="detail-item"><div class="detail-label">Sent</div><div class="detail-val">${TMIAdmin.fmt(p.sent_at)}</div></div>` : ''}
-    ${p.expires_at ? `<div class="detail-item"><div class="detail-label">Expires</div><div class="detail-val">${TMIAdmin.fmt(p.expires_at)}</div></div>` : ''}
   `;
+
+  // Line items
+  const items = p.line_items || p.sections || [];
+  const panelLI = document.getElementById('panel-line-items');
+  if (items.length) {
+    panelLI.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 52px 88px 88px;gap:4px 8px;font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line)">
+        <span>Description</span><span>Qty</span><span>Unit Price</span><span style="text-align:right">Line Total</span>
+      </div>
+      ${items.map(li => {
+        const qty = parseFloat(li.qty || li.quantity || 1);
+        const price = parseFloat(li.price || li.unit_price || li.amount || 0);
+        const lineTotal = qty * price;
+        return `<div style="display:grid;grid-template-columns:1fr 52px 88px 88px;gap:4px 8px;font-size:14px;padding:5px 0;border-bottom:1px solid var(--line)">
+          <span style="color:var(--ink)">${li.desc || li.description || '-'}</span>
+          <span style="color:var(--ink-2)">${qty}</span>
+          <span style="color:var(--ink-2)">${TMIAdmin.currency(price)}</span>
+          <span style="font-weight:600;color:var(--ink);text-align:right">${TMIAdmin.currency(lineTotal)}</span>
+        </div>`;
+      }).join('')}
+    `;
+  } else {
+    panelLI.innerHTML = '<span style="font-size:13px;color:var(--ink-3)">No line items.</span>';
+  }
+
+  const totalRow = document.getElementById('panel-prop-total-row');
+  if (p.total != null) {
+    totalRow.style.display = 'block';
+    document.getElementById('panel-prop-total-val').textContent = TMIAdmin.currency(p.total);
+  } else {
+    totalRow.style.display = 'none';
+  }
+
   TMIAdmin.openPanel('prop-panel');
 }
 
-async function updatePropStatus() {
+async function panelMarkAccepted() {
   if (!currentProposal) return;
-  const status = document.getElementById('panel-prop-status').value;
-  const res = await TMIAdmin.api('/api/proposals', 'PUT', { id: currentProposal.id, status });
-  if (res) { currentProposal.status = status; TMIAdmin.toast('Status updated'); await loadProposals(); }
+  const res = await TMIAdmin.api('/api/proposals', 'PUT', { id: currentProposal.id, status: 'accepted' });
+  if (res) { TMIAdmin.toast('Marked as accepted'); TMIAdmin.closePanel('prop-panel'); await loadProposals(); }
 }
 
-async function markSent() {
+async function panelMarkDeclined() {
   if (!currentProposal) return;
-  const res = await TMIAdmin.api('/api/proposals', 'PUT', { id: currentProposal.id, status: 'sent' });
-  if (res) { TMIAdmin.toast('Marked as sent'); TMIAdmin.closePanel('prop-panel'); await loadProposals(); }
+  const res = await TMIAdmin.api('/api/proposals', 'PUT', { id: currentProposal.id, status: 'declined' });
+  if (res) { TMIAdmin.toast('Marked as declined'); TMIAdmin.closePanel('prop-panel'); await loadProposals(); }
 }
 
-async function saveNotes() {
+function panelEdit() {
   if (!currentProposal) return;
-  const notes = document.getElementById('panel-prop-notes').value;
-  await TMIAdmin.api('/api/proposals', 'PUT', { id: currentProposal.id, notes });
-  TMIAdmin.toast('Notes saved');
+  TMIAdmin.closePanel('prop-panel');
+  openAddModal(currentProposal);
 }
 
 async function deleteProposal() {
   if (!currentProposal) return;
-  const ok = await TMIAdmin.confirm('Delete this proposal?', false);
+  const ok = await TMIAdmin.confirm('Delete this proposal?', true);
   if (!ok) return;
   const res = await TMIAdmin.api('/api/proposals', 'DELETE', { id: currentProposal.id });
   if (res) { TMIAdmin.toast('Deleted'); TMIAdmin.closePanel('prop-panel'); await loadProposals(); }
 }
 
-// Line items
+// --- Line Items ---
 function addLineItem() {
-  lineItems.push({ description: '', amount: 0 });
+  lineItems.push({ desc: '', qty: 1, price: 0 });
   renderLineItems();
 }
-function removeLineItem(i) { lineItems.splice(i, 1); renderLineItems(); }
-function renderLineItems() {
-  document.getElementById('line-items-list').innerHTML = lineItems.map((item, i) => `
-    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
-      <input class="form-input" style="flex:1" value="${item.description}" placeholder="Description" oninput="lineItems[${i}].description=this.value"/>
-      <input class="form-input" style="width:100px" type="number" value="${item.amount}" placeholder="$" oninput="lineItems[${i}].amount=parseFloat(this.value)||0"/>
-      <button type="button" class="btn btn-ghost btn-sm" style="color:var(--red);flex-shrink:0" onclick="removeLineItem(${i})">x</button>
-    </div>
-  `).join('');
-  updateTotal();
-}
-function updateTotal() {
-  const total = lineItems.reduce((s, i) => s + (i.amount || 0), 0);
-  if (total > 0) document.getElementById('f-total').value = total.toFixed(2);
+
+function removeLineItem(i) {
+  lineItems.splice(i, 1);
+  renderLineItems();
 }
 
-function openAddModal() {
-  editId = null;
+function renderLineItems() {
+  const list = document.getElementById('line-items-list');
+  if (!lineItems.length) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--ink-3);padding:4px 0">No line items yet. Click "+ Add Line Item" to begin.</div>';
+    document.getElementById('li-total-row').style.display = 'none';
+    return;
+  }
+  list.innerHTML = lineItems.map((item, i) => `
+    <div style="display:grid;grid-template-columns:1fr 72px 96px 40px;gap:6px;margin-bottom:6px;align-items:center">
+      <input class="form-input" style="font-size:13px" value="${escAttr(item.desc)}" placeholder="Description" oninput="lineItems[${i}].desc=this.value"/>
+      <input class="form-input" style="font-size:13px;text-align:center" type="number" min="1" value="${item.qty}" placeholder="1" oninput="lineItems[${i}].qty=parseFloat(this.value)||1;recalcTotal()"/>
+      <input class="form-input" style="font-size:13px;text-align:right" type="number" min="0" step="0.01" value="${item.price || ''}" placeholder="0.00" oninput="lineItems[${i}].price=parseFloat(this.value)||0;recalcTotal()"/>
+      <button type="button" class="btn btn-ghost btn-sm" style="color:var(--red);padding:0 8px;font-size:16px;line-height:1" onclick="removeLineItem(${i})">&times;</button>
+    </div>
+  `).join('');
+  recalcTotal();
+}
+
+function escAttr(s) {
+  return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function recalcTotal() {
+  const total = lineItems.reduce((s, li) => s + (parseFloat(li.qty) || 1) * (parseFloat(li.price) || 0), 0);
+  const row = document.getElementById('li-total-row');
+  row.style.display = lineItems.length ? 'block' : 'none';
+  document.getElementById('li-total-val').textContent = TMIAdmin.currency(total);
+}
+
+// --- Modal ---
+function openAddModal(proposal) {
+  editId = proposal ? proposal.id : null;
   lineItems = [];
-  document.getElementById('modal-title-text').textContent = 'New Proposal';
-  ['f-title','f-total','f-expires','f-notes'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('f-status').value = 'draft';
+  if (proposal) {
+    document.getElementById('modal-title-text').textContent = 'Edit Proposal';
+    document.getElementById('f-title').value = proposal.title || '';
+    document.getElementById('f-client').value = proposal.client_name || contactName(proposal) || '';
+    document.getElementById('f-status').value = proposal.status || 'draft';
+    document.getElementById('f-notes').value = proposal.notes || '';
+    const items = proposal.line_items || proposal.sections || [];
+    lineItems = items.map(li => ({
+      desc: li.desc || li.description || '',
+      qty: parseFloat(li.qty || li.quantity || 1),
+      price: parseFloat(li.price || li.unit_price || li.amount || 0),
+    }));
+  } else {
+    document.getElementById('modal-title-text').textContent = 'New Proposal';
+    ['f-title','f-client','f-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-status').value = 'draft';
+  }
   renderLineItems();
   document.getElementById('add-modal').classList.add('open');
 }
-function closeModal() { document.getElementById('add-modal').classList.remove('open'); editId = null; }
+
+function closeModal() {
+  document.getElementById('add-modal').classList.remove('open');
+  editId = null;
+  lineItems = [];
+}
 
 async function saveProposal() {
   const title = document.getElementById('f-title').value.trim();
-  if (!title) { TMIAdmin.toast('Title required', 'error'); return; }
+  if (!title) { TMIAdmin.toast('Title is required', 'error'); return; }
+
+  const total = lineItems.reduce((s, li) => s + (parseFloat(li.qty) || 1) * (parseFloat(li.price) || 0), 0);
   const payload = {
     title,
+    client_name: document.getElementById('f-client').value.trim() || null,
     status: document.getElementById('f-status').value,
-    total: parseFloat(document.getElementById('f-total').value) || null,
-    expires_at: document.getElementById('f-expires').value || null,
-    notes: document.getElementById('f-notes').value || null,
-    sections: lineItems.length ? lineItems : null,
+    line_items: lineItems.map(li => ({
+      desc: li.desc,
+      qty: parseFloat(li.qty) || 1,
+      price: parseFloat(li.price) || 0,
+    })),
+    total: lineItems.length ? total : null,
+    notes: document.getElementById('f-notes').value.trim() || null,
   };
   if (editId) payload.id = editId;
   const method = editId ? 'PUT' : 'POST';
   const res = await TMIAdmin.api('/api/proposals', method, payload);
   if (res) {
-    TMIAdmin.toast(editId ? 'Proposal updated' : 'Proposal created');
+    TMIAdmin.toast(editId ? 'Proposal updated' : 'Proposal saved');
     closeModal();
     await loadProposals();
   }

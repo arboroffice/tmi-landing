@@ -35,7 +35,7 @@
       <div class="filter-bar">
         <div class="search-wrap">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="search" id="search" placeholder="Search description, invoice #..." oninput="renderTable()"/>
+          <input type="search" id="search" placeholder="Search invoice #, client..." oninput="renderTable()"/>
         </div>
         <select class="filter-select" id="filter-status" onchange="renderTable()">
           <option value="">All statuses</option>
@@ -51,7 +51,7 @@
         <div class="tbl-wrap">
           <table>
             <thead><tr>
-              <th>Invoice #</th><th>Client / Contact</th><th>Amount</th><th>Status</th><th>Due</th><th>Created</th><th></th>
+              <th>Invoice #</th><th>Client</th><th>Amount</th><th>Status</th><th>Due</th><th>Created</th><th></th>
             </tr></thead>
             <tbody id="inv-tbody"></tbody>
           </table>
@@ -68,66 +68,89 @@
     <div class="panel-hd">
       <h2 class="panel-title" id="panel-inv-num">Invoice</h2>
       <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="panelEdit()">Edit</button>
         <button class="btn btn-ghost btn-sm" onclick="markPaid()">Mark Paid</button>
-        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteInvoice()">Delete</button>
+        <button class="btn btn-ghost btn-sm" onclick="markOverdue()">Mark Overdue</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteInvoice()">Delete</button>
       </div>
     </div>
     <div class="panel-body">
       <div class="detail-grid" id="panel-inv-details"></div>
       <div class="panel-sep"></div>
-      <div class="panel-sec-label">Description</div>
-      <p id="panel-inv-desc" style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-top:8px;"></p>
+      <div class="panel-sec-label">Line Items</div>
+      <div id="panel-inv-line-items" style="margin-top:12px"></div>
+      <div id="panel-inv-total-row" style="margin-top:12px;display:none">
+        <div class="proposal-total">
+          <span class="proposal-total-label">Total</span>
+          <span class="proposal-total-val" id="panel-inv-total-val"></span>
+        </div>
+      </div>
       <div class="panel-sep"></div>
-      <div class="panel-sec-label">Update Status</div>
-      <select class="form-input" id="panel-inv-status" style="margin-top:8px;max-width:200px" onchange="updateStatus()">
-        <option value="pending">Pending</option>
-        <option value="viewed">Viewed</option>
-        <option value="paid">Paid</option>
-        <option value="overdue">Overdue</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
+      <div class="panel-sec-label">Notes</div>
+      <p id="panel-inv-notes" style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-top:8px;white-space:pre-wrap;"></p>
     </div>
   </div>
 </div>
 
-<!-- Add modal -->
+<!-- Invoice Creator Modal -->
 <div class="modal-overlay" id="add-modal">
-  <div class="modal">
+  <div class="modal" style="max-width:680px;width:100%">
     <div class="modal-hd">
-      <h2 class="modal-title">New Invoice</h2>
+      <h2 class="modal-title" id="modal-title-text">New Invoice</h2>
       <button class="modal-x" onclick="closeModal()">&times;</button>
     </div>
+
     <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Client Name <span style="color:var(--red)">*</span></label>
+        <input class="form-input" id="f-client" placeholder="Client or company name" required/>
+      </div>
       <div class="form-group">
         <label class="form-label">Invoice #</label>
-        <input class="form-input" id="f-number" placeholder="e.g. INV-001"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Amount ($)</label>
-        <input class="form-input" id="f-amount" type="number" step="0.01" placeholder="0.00"/>
+        <input class="form-input" id="f-number" placeholder="INV-001"/>
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Description</label>
-      <input class="form-input" id="f-desc" placeholder="What is this invoice for?"/>
-    </div>
+
     <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Due Date</label>
+        <input class="form-input" id="f-due" type="date"/>
+      </div>
       <div class="form-group">
         <label class="form-label">Status</label>
         <select class="form-input" id="f-status">
           <option value="pending">Pending</option>
           <option value="paid">Paid</option>
+          <option value="overdue">Overdue</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">Due Date</label>
-        <input class="form-input" id="f-due" type="date"/>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <label class="form-label" style="margin:0">Line Items</label>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addLineItem()">+ Add Line Item</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 72px 96px 40px;gap:6px;margin-bottom:6px;padding:0 2px">
+        <span style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em">Description</span>
+        <span style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em">Qty</span>
+        <span style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em">Unit Price</span>
+        <span></span>
+      </div>
+      <div id="line-items-list"></div>
+      <div id="li-total-row" style="display:none;margin-top:12px">
+        <div class="proposal-total">
+          <span class="proposal-total-label">Total</span>
+          <span class="proposal-total-val" id="li-total-val">$0.00</span>
+        </div>
       </div>
     </div>
+
     <div class="form-group">
       <label class="form-label">Notes</label>
-      <textarea class="form-input" id="f-notes" rows="2" placeholder="Internal notes..."></textarea>
+      <textarea class="form-input" id="f-notes" rows="2" placeholder="Payment instructions, terms..."></textarea>
     </div>
+
     <div class="modal-ft">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
@@ -144,11 +167,14 @@ TMIAdmin.initSidebar('invoices');
 
 let allInvoices = [];
 let currentInvoice = null;
+let editId = null;
+let lineItems = [];
 
 async function loadInvoices() {
   allInvoices = await TMIAdmin.api('/api/invoices') || [];
   renderStats();
   renderTable();
+  suggestNextNumber();
 }
 
 function renderStats() {
@@ -157,14 +183,15 @@ function renderStats() {
   const pending = allInvoices.filter(i => i.status === 'pending').reduce((s, i) => s + parseFloat(i.amount || 0), 0);
   const overdue = allInvoices.filter(i => i.status === 'overdue').length;
   document.getElementById('inv-stats').innerHTML = `
-    <div class="stat-box"><div class="stat-label">Total Invoiced</div><div class="stat-val">$${total.toLocaleString()}</div></div>
-    <div class="stat-box"><div class="stat-label">Collected</div><div class="stat-val" style="color:var(--green)">$${paid.toLocaleString()}</div></div>
-    <div class="stat-box"><div class="stat-label">Outstanding</div><div class="stat-val">$${pending.toLocaleString()}</div></div>
+    <div class="stat-box"><div class="stat-label">Total Invoiced</div><div class="stat-val">${TMIAdmin.currency(total)}</div></div>
+    <div class="stat-box"><div class="stat-label">Collected</div><div class="stat-val" style="color:var(--green)">${TMIAdmin.currency(paid)}</div></div>
+    <div class="stat-box"><div class="stat-label">Outstanding</div><div class="stat-val">${TMIAdmin.currency(pending)}</div></div>
     <div class="stat-box"><div class="stat-label">Overdue</div><div class="stat-val" style="color:var(--red)">${overdue}</div></div>
   `;
 }
 
 function clientName(inv) {
+  if (inv.client_name) return inv.client_name;
   const c = inv.clients?.contacts || inv.contacts;
   if (!c) return '-';
   return `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.company || '-';
@@ -173,14 +200,12 @@ function clientName(inv) {
 function renderTable() {
   const q = document.getElementById('search').value.toLowerCase();
   const st = document.getElementById('filter-status').value;
-
   const rows = allInvoices.filter(i => {
     if (st && i.status !== st) return false;
     const name = clientName(i).toLowerCase();
-    if (q && !`${i.number || ''} ${i.description || ''} ${name}`.toLowerCase().includes(q)) return false;
+    if (q && !`${i.number || ''} ${name}`.toLowerCase().includes(q)) return false;
     return true;
   });
-
   document.getElementById('inv-count').textContent = `${rows.length} invoice${rows.length !== 1 ? 's' : ''}`;
   const tbody = document.getElementById('inv-tbody');
   if (!rows.length) {
@@ -191,7 +216,7 @@ function renderTable() {
     <tr onclick="openPanel('${i.id}')">
       <td class="td-name">${i.number || '-'}</td>
       <td>${clientName(i)}</td>
-      <td style="font-weight:600">$${parseFloat(i.amount).toLocaleString()}</td>
+      <td style="font-weight:600">${TMIAdmin.currency(parseFloat(i.amount || 0))}</td>
       <td>${TMIAdmin.badge(i.status)}</td>
       <td class="td-muted">${i.due_date ? TMIAdmin.fmt(i.due_date) : '-'}</td>
       <td class="td-muted">${TMIAdmin.fmt(i.created_at)}</td>
@@ -205,70 +230,197 @@ function openPanel(id) {
   if (!currentInvoice) return;
   const i = currentInvoice;
   document.getElementById('panel-inv-num').textContent = i.number || 'Invoice';
-  document.getElementById('panel-inv-desc').textContent = i.description || i.notes || '-';
-  document.getElementById('panel-inv-status').value = i.status;
+  document.getElementById('panel-inv-notes').textContent = i.notes || '-';
+
   document.getElementById('panel-inv-details').innerHTML = `
-    <div class="detail-item"><div class="detail-label">Amount</div><div class="detail-val" style="font-size:22px;font-weight:700">$${parseFloat(i.amount).toLocaleString()}</div></div>
-    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(i.status)}</div></div>
     <div class="detail-item"><div class="detail-label">Client</div><div class="detail-val">${clientName(i)}</div></div>
+    <div class="detail-item"><div class="detail-label">Amount</div><div class="detail-val" style="font-size:20px;font-weight:700">${TMIAdmin.currency(parseFloat(i.amount || 0))}</div></div>
+    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(i.status)}</div></div>
     <div class="detail-item"><div class="detail-label">Due Date</div><div class="detail-val">${i.due_date ? TMIAdmin.fmt(i.due_date) : '-'}</div></div>
     <div class="detail-item"><div class="detail-label">Created</div><div class="detail-val">${TMIAdmin.fmt(i.created_at)}</div></div>
     ${i.paid_at ? `<div class="detail-item"><div class="detail-label">Paid</div><div class="detail-val">${TMIAdmin.fmt(i.paid_at)}</div></div>` : ''}
   `;
+
+  const items = i.line_items || [];
+  const panelLI = document.getElementById('panel-inv-line-items');
+  if (items.length) {
+    panelLI.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 52px 88px 88px;gap:4px 8px;font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line)">
+        <span>Description</span><span>Qty</span><span>Unit Price</span><span style="text-align:right">Line Total</span>
+      </div>
+      ${items.map(li => {
+        const qty = parseFloat(li.qty || li.quantity || 1);
+        const price = parseFloat(li.price || li.unit_price || li.amount || 0);
+        const lineTotal = qty * price;
+        return `<div style="display:grid;grid-template-columns:1fr 52px 88px 88px;gap:4px 8px;font-size:14px;padding:5px 0;border-bottom:1px solid var(--line)">
+          <span style="color:var(--ink)">${li.desc || li.description || '-'}</span>
+          <span style="color:var(--ink-2)">${qty}</span>
+          <span style="color:var(--ink-2)">${TMIAdmin.currency(price)}</span>
+          <span style="font-weight:600;color:var(--ink);text-align:right">${TMIAdmin.currency(lineTotal)}</span>
+        </div>`;
+      }).join('')}
+    `;
+  } else {
+    panelLI.innerHTML = '<span style="font-size:13px;color:var(--ink-3)">No line items.</span>';
+  }
+
+  const totalRow = document.getElementById('panel-inv-total-row');
+  if (i.amount != null) {
+    totalRow.style.display = 'block';
+    document.getElementById('panel-inv-total-val').textContent = TMIAdmin.currency(parseFloat(i.amount));
+  } else {
+    totalRow.style.display = 'none';
+  }
+
   TMIAdmin.openPanel('inv-panel');
 }
 
-async function updateStatus() {
+function panelEdit() {
   if (!currentInvoice) return;
-  const status = document.getElementById('panel-inv-status').value;
-  const res = await TMIAdmin.api('/api/invoices', 'PUT', { id: currentInvoice.id, status });
-  if (res) {
-    currentInvoice.status = status;
-    TMIAdmin.toast('Status updated');
-    await loadInvoices();
-  }
+  TMIAdmin.closePanel('inv-panel');
+  openAddModal(currentInvoice);
 }
 
 async function markPaid() {
   if (!currentInvoice) return;
   const res = await TMIAdmin.api('/api/invoices', 'PUT', { id: currentInvoice.id, status: 'paid' });
-  if (res) {
-    TMIAdmin.toast('Marked as paid');
-    TMIAdmin.closePanel('inv-panel');
-    await loadInvoices();
-  }
+  if (res) { TMIAdmin.toast('Marked as paid'); TMIAdmin.closePanel('inv-panel'); await loadInvoices(); }
+}
+
+async function markOverdue() {
+  if (!currentInvoice) return;
+  const res = await TMIAdmin.api('/api/invoices', 'PUT', { id: currentInvoice.id, status: 'overdue' });
+  if (res) { TMIAdmin.toast('Marked as overdue'); TMIAdmin.closePanel('inv-panel'); await loadInvoices(); }
 }
 
 async function deleteInvoice() {
   if (!currentInvoice) return;
-  const ok = await TMIAdmin.confirm('Delete this invoice?', false);
+  const ok = await TMIAdmin.confirm('Delete this invoice?', true);
   if (!ok) return;
   const res = await TMIAdmin.api('/api/invoices', 'DELETE', { id: currentInvoice.id });
-  if (res) {
-    TMIAdmin.toast('Deleted');
-    TMIAdmin.closePanel('inv-panel');
-    await loadInvoices();
-  }
+  if (res) { TMIAdmin.toast('Deleted'); TMIAdmin.closePanel('inv-panel'); await loadInvoices(); }
 }
 
-function openAddModal() {
+// --- Auto-suggest next invoice number ---
+function suggestNextNumber() {
+  if (editId) return; // don't overwrite on edit
+  const nums = allInvoices
+    .map(i => i.number || '')
+    .filter(n => /^INV-\d+$/.test(n))
+    .map(n => parseInt(n.replace('INV-', ''), 10));
+  const next = nums.length ? Math.max(...nums) + 1 : 1;
+  const field = document.getElementById('f-number');
+  if (field && !field.value) field.placeholder = `INV-${String(next).padStart(3, '0')}`;
+}
+
+// --- Line Items ---
+function addLineItem() {
+  lineItems.push({ desc: '', qty: 1, price: 0 });
+  renderLineItems();
+}
+
+function removeLineItem(i) {
+  lineItems.splice(i, 1);
+  renderLineItems();
+}
+
+function renderLineItems() {
+  const list = document.getElementById('line-items-list');
+  if (!lineItems.length) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--ink-3);padding:4px 0">No line items yet. Click "+ Add Line Item" to begin.</div>';
+    document.getElementById('li-total-row').style.display = 'none';
+    return;
+  }
+  list.innerHTML = lineItems.map((item, i) => `
+    <div style="display:grid;grid-template-columns:1fr 72px 96px 40px;gap:6px;margin-bottom:6px;align-items:center">
+      <input class="form-input" style="font-size:13px" value="${escAttr(item.desc)}" placeholder="Description" oninput="lineItems[${i}].desc=this.value"/>
+      <input class="form-input" style="font-size:13px;text-align:center" type="number" min="1" value="${item.qty}" placeholder="1" oninput="lineItems[${i}].qty=parseFloat(this.value)||1;recalcTotal()"/>
+      <input class="form-input" style="font-size:13px;text-align:right" type="number" min="0" step="0.01" value="${item.price || ''}" placeholder="0.00" oninput="lineItems[${i}].price=parseFloat(this.value)||0;recalcTotal()"/>
+      <button type="button" class="btn btn-ghost btn-sm" style="color:var(--red);padding:0 8px;font-size:16px;line-height:1" onclick="removeLineItem(${i})">&times;</button>
+    </div>
+  `).join('');
+  recalcTotal();
+}
+
+function escAttr(s) {
+  return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function recalcTotal() {
+  const total = lineItems.reduce((s, li) => s + (parseFloat(li.qty) || 1) * (parseFloat(li.price) || 0), 0);
+  const row = document.getElementById('li-total-row');
+  row.style.display = lineItems.length ? 'block' : 'none';
+  document.getElementById('li-total-val').textContent = TMIAdmin.currency(total);
+}
+
+// --- Modal ---
+function openAddModal(invoice) {
+  editId = invoice ? invoice.id : null;
+  lineItems = [];
+
+  if (invoice) {
+    document.getElementById('modal-title-text').textContent = 'Edit Invoice';
+    document.getElementById('f-client').value = clientName(invoice);
+    document.getElementById('f-number').value = invoice.number || '';
+    document.getElementById('f-due').value = invoice.due_date || '';
+    document.getElementById('f-status').value = invoice.status || 'pending';
+    document.getElementById('f-notes').value = invoice.notes || '';
+    const items = invoice.line_items || [];
+    lineItems = items.map(li => ({
+      desc: li.desc || li.description || '',
+      qty: parseFloat(li.qty || li.quantity || 1),
+      price: parseFloat(li.price || li.unit_price || li.amount || 0),
+    }));
+  } else {
+    document.getElementById('modal-title-text').textContent = 'New Invoice';
+    ['f-client','f-number','f-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-due').value = '';
+    document.getElementById('f-status').value = 'pending';
+    // Suggest next number
+    const nums = allInvoices
+      .map(i => i.number || '')
+      .filter(n => /^INV-\d+$/.test(n))
+      .map(n => parseInt(n.replace('INV-', ''), 10));
+    const next = nums.length ? Math.max(...nums) + 1 : 1;
+    document.getElementById('f-number').placeholder = `INV-${String(next).padStart(3, '0')}`;
+  }
+
+  renderLineItems();
   document.getElementById('add-modal').classList.add('open');
 }
-function closeModal() { document.getElementById('add-modal').classList.remove('open'); }
+
+function closeModal() {
+  document.getElementById('add-modal').classList.remove('open');
+  editId = null;
+  lineItems = [];
+}
 
 async function saveInvoice() {
-  const amount = parseFloat(document.getElementById('f-amount').value);
-  if (!amount) { TMIAdmin.toast('Amount required', 'error'); return; }
-  const res = await TMIAdmin.api('/api/invoices', 'POST', {
-    number: document.getElementById('f-number').value || null,
-    amount,
-    description: document.getElementById('f-desc').value,
-    status: document.getElementById('f-status').value,
+  const clientVal = document.getElementById('f-client').value.trim();
+  if (!clientVal) { TMIAdmin.toast('Client name is required', 'error'); return; }
+
+  const total = lineItems.reduce((s, li) => s + (parseFloat(li.qty) || 1) * (parseFloat(li.price) || 0), 0);
+  const numberField = document.getElementById('f-number');
+  const numberVal = numberField.value.trim() || numberField.placeholder;
+
+  const payload = {
+    client_name: clientVal,
+    number: numberVal || null,
     due_date: document.getElementById('f-due').value || null,
-    notes: document.getElementById('f-notes').value || null,
-  });
+    status: document.getElementById('f-status').value,
+    line_items: lineItems.map(li => ({
+      desc: li.desc,
+      qty: parseFloat(li.qty) || 1,
+      price: parseFloat(li.price) || 0,
+    })),
+    amount: total || null,
+    notes: document.getElementById('f-notes').value.trim() || null,
+  };
+  if (editId) payload.id = editId;
+  const method = editId ? 'PUT' : 'POST';
+  const res = await TMIAdmin.api('/api/invoices', method, payload);
   if (res) {
-    TMIAdmin.toast('Invoice created');
+    TMIAdmin.toast(editId ? 'Invoice updated' : 'Invoice created');
     closeModal();
     await loadInvoices();
   }
