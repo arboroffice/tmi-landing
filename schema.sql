@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   first_name   TEXT NOT NULL,
   last_name    TEXT,
-  email        TEXT,
+  email        TEXT UNIQUE,
   phone        TEXT,
   company      TEXT,
   title        TEXT,
@@ -23,6 +23,9 @@ CREATE TABLE IF NOT EXISTS contacts (
 CREATE TABLE IF NOT EXISTS leads (
   id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   contact_id   UUID REFERENCES contacts(id) ON DELETE CASCADE,
+  name         TEXT,
+  email        TEXT,
+  phone        TEXT,
   status       TEXT DEFAULT 'new' CHECK (status IN ('new','contacted','qualified','proposal','won','lost')),
   source       TEXT,
   value        NUMERIC(12,2),

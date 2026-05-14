@@ -175,37 +175,19 @@ form.addEventListener('submit', async (e) => {
   submitBtn.disabled = true;
   submitBtn.textContent = 'Sending...';
 
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  const phone = document.getElementById('phone').value;
-  const company = document.getElementById('company').value;
-  const niche = document.getElementById('niche').value;
-
-  const niches_physical = ['hvac','construction','plumbing','electrical','roofing','landscaping','manufacturing','oil-gas','mining','fleet-logistics','other-trades'];
-  const bizType = niches_physical.includes(niche) ? 'physical' : niche ? 'online' : 'unknown';
-
   try {
-    const fd = new FormData();
-    fd.append('name', name);
-    fd.append('email', email);
-    fd.append('_subject', 'New TMI Lead - ' + name);
-    fd.append('message', [
-      'Name: ' + name,
-      'Email: ' + email,
-      'Phone: ' + phone,
-      'Company: ' + (company || 'Not provided'),
-      'Industry: ' + (niche || 'Not selected'),
-      '',
-      'Submitted from funnel.html',
-    ].join('\n'));
-    await fetch('https://formsubmit.co/ajax/mia@tmitechai.com', {
+    await fetch('/api/funnel-submit', {
       method: 'POST',
-      headers: { 'Accept': 'application/json' },
-      body: fd,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name:    document.getElementById('name').value.trim(),
+        email:   document.getElementById('email').value.trim(),
+        phone:   document.getElementById('phone').value.trim(),
+        company: document.getElementById('company').value.trim(),
+        niche:   document.getElementById('niche').value,
+      }),
     });
   } catch(err) {}
-
-  try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'funnel', audience: bizType, niche: niche || undefined }) }); } catch(err) {}
 
   document.getElementById('form-success').style.display = 'block';
   form.style.display = 'none';

@@ -624,11 +624,20 @@ document.getElementById('contact-form').addEventListener('submit', async functio
   btn.disabled = true;
   btnText.textContent = 'Sending...';
   try {
-    const formData = new FormData(this);
-    const res = await fetch(this.action, {
+    const areas = [...document.querySelectorAll('input[name="areas"]:checked')].map(el => el.value);
+    const res = await fetch('/api/contact-submit', {
       method: 'POST',
-      headers: { 'Accept': 'application/json' },
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name:      document.getElementById('fname').value.trim(),
+        last_name:       document.getElementById('lname').value.trim(),
+        email:           document.getElementById('email').value.trim(),
+        company:         document.getElementById('company').value.trim(),
+        team_size:       document.getElementById('team_size').value,
+        industry:        document.getElementById('industry').value,
+        areas,
+        biggest_problem: document.getElementById('problem').value.trim(),
+      }),
     });
     if (res.ok) {
       document.getElementById('form-wrap').style.display = 'none';
