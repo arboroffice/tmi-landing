@@ -4,6 +4,16 @@ const { requireAuth, cors } = require('./_auth');
 module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // Public single-project read (for prd-view.html shareable links)
+  if (req.method === 'GET' && req.query.id && !req.headers.authorization) {
+    let db2;
+    try { db2 = getSupabase(); } catch(e) { return res.status(503).json({ error: e.message }); }
+    const { data, error } = await db2.from('projects').select('id,name,description,notes,status,start_date,end_date,value,created_at').eq('id', req.query.id).single();
+    if (error || !data) return res.status(404).json({ error: 'Not found' });
+    return res.json(data);
+  }
+
   if (!requireAuth(req, res)) return;
 
   let db;

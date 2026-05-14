@@ -6,6 +6,54 @@
 <title>Projects — TMI Admin</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="stylesheet" href="admin.css"/>
+<style>
+.ptab {
+  background: none;
+  border: none;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+.ptab.active { color: var(--ink); border-bottom-color: var(--ink); }
+.ptab:hover:not(.active) { color: var(--ink); }
+.ctx-block {
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.ctx-block-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.prd-section { margin-bottom: 20px; }
+.prd-section label { display: block; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+.prd-section textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  font-family: var(--sans, system-ui);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  color: var(--ink);
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.prd-section textarea:focus { outline: none; border-color: var(--ink-2); }
+</style>
 </head>
 <body>
 <div class="layout">
@@ -68,7 +116,7 @@
 <!-- Slide panel -->
 <div class="panel-overlay" id="proj-panel">
   <div class="panel-bg" onclick="TMIAdmin.closePanel('proj-panel')"></div>
-  <div class="panel">
+  <div class="panel" style="max-width:720px;">
     <div class="panel-hd">
       <h2 class="panel-title" id="panel-proj-name">Project</h2>
       <div class="panel-actions">
@@ -76,19 +124,73 @@
         <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteProject()">Delete</button>
       </div>
     </div>
-    <div class="panel-body">
-      <div class="detail-grid" id="panel-proj-details"></div>
-      <div class="panel-sep"></div>
-      <div class="panel-sec-label">Description</div>
-      <p id="panel-proj-desc" style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-top:8px;"></p>
-      <div class="panel-sep"></div>
-      <div class="panel-sec-label">Update Status</div>
-      <select class="form-input" id="panel-proj-status" style="margin-top:8px;max-width:200px" onchange="updateProjectStatus()">
-        <option value="scoping">Scoping</option>
-        <option value="active">Active</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
+    <div class="panel-tabs" id="proj-tabs" style="display:flex;gap:0;border-bottom:1px solid var(--line);margin:0;">
+      <button class="ptab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
+      <button class="ptab" data-tab="context" onclick="switchTab('context')">Context</button>
+      <button class="ptab" data-tab="prd" onclick="switchTab('prd')">PRD</button>
+      <button class="ptab" data-tab="share" onclick="switchTab('share')">Share</button>
+    </div>
+    <div class="panel-body" style="padding:0;">
+      <!-- OVERVIEW tab -->
+      <div id="tab-overview" class="tab-pane" style="padding:20px 24px;">
+        <div class="detail-grid" id="panel-proj-details"></div>
+        <div class="panel-sep"></div>
+        <div class="panel-sec-label">Description</div>
+        <p id="panel-proj-desc" style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-top:8px;white-space:pre-wrap;"></p>
+        <div class="panel-sep"></div>
+        <div class="panel-sec-label">Update Status</div>
+        <select class="form-input" id="panel-proj-status" style="margin-top:8px;max-width:200px" onchange="updateProjectStatus()">
+          <option value="scoping">Scoping</option>
+          <option value="active">Active</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <!-- CONTEXT tab -->
+      <div id="tab-context" class="tab-pane" style="display:none;padding:20px 24px;">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.55;">Paste any raw input here - voice recording transcripts, meeting notes, Claude chat exports, requirements from a client. This becomes the source of truth for building the PRD.</p>
+        <div id="context-blocks"></div>
+        <button class="btn btn-ghost btn-sm" onclick="addContextBlock()" style="margin-top:4px;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add context block
+        </button>
+      </div>
+
+      <!-- PRD tab -->
+      <div id="tab-prd" class="tab-pane" style="display:none;padding:20px 24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <span style="font-size:13px;color:var(--muted);">Structure the PRD from your context.</span>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" id="btn-gen-prd" onclick="generatePRD()">Generate Draft from Context</button>
+            <button class="btn btn-primary btn-sm" onclick="savePRD()">Save PRD</button>
+          </div>
+        </div>
+        <div class="prd-section"><label>Overview</label><textarea id="prd-overview" rows="2" placeholder="One or two sentences. What is this project?"></textarea></div>
+        <div class="prd-section"><label>Problem Statement</label><textarea id="prd-problem" rows="3" placeholder="What problem are we solving? For whom?"></textarea></div>
+        <div class="prd-section"><label>Goals &amp; Success Metrics</label><textarea id="prd-goals" rows="3" placeholder="What does success look like? Include measurable outcomes."></textarea></div>
+        <div class="prd-section"><label>User Stories</label><textarea id="prd-stories" rows="4" placeholder="As a [role], I want [feature] so that [benefit].&#10;As a [role], I want [feature] so that [benefit]."></textarea></div>
+        <div class="prd-section"><label>Functional Requirements</label><textarea id="prd-requirements" rows="5" placeholder="What must the system do? Number each requirement."></textarea></div>
+        <div class="prd-section"><label>Non-Functional Requirements</label><textarea id="prd-nonfunc" rows="3" placeholder="Performance, security, scalability, browser support, etc."></textarea></div>
+        <div class="prd-section"><label>Out of Scope</label><textarea id="prd-outofscope" rows="2" placeholder="What are we explicitly NOT building?"></textarea></div>
+        <div class="prd-section"><label>Tech Notes for Dev Team</label><textarea id="prd-tech" rows="3" placeholder="Stack constraints, API details, integrations, known issues."></textarea></div>
+        <div class="prd-section"><label>Acceptance Criteria</label><textarea id="prd-criteria" rows="4" placeholder="How do we know it's done? Define done for each major feature."></textarea></div>
+        <div id="prd-gen-status" style="font-size:12px;color:var(--muted);margin-top:8px;display:none;"></div>
+      </div>
+
+      <!-- SHARE tab -->
+      <div id="tab-share" class="tab-pane" style="display:none;padding:20px 24px;">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.55;">Share a read-only PRD link with your dev team. No login required - just send the link.</p>
+        <div style="background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;font-size:13px;color:var(--ink-2);word-break:break-all;margin-bottom:16px;" id="share-url-display">-</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="copyPRDLink()">Copy Link</button>
+          <a id="btn-open-prd" href="#" target="_blank" class="btn btn-ghost btn-sm">Open in new tab</a>
+        </div>
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);">
+          <div class="panel-sec-label" style="margin-bottom:10px;">Before sharing</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.55;">Make sure you've saved the PRD (PRD tab &rarr; Save PRD). The shared link always shows the last saved version.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -152,6 +254,151 @@ let currentProject = null;
 let editId = null;
 let boardMode = false;
 
+// --- Context blocks ---
+let contextBlocks = [];
+
+const CONTEXT_TYPES = [
+  { value: 'voice_note', label: 'Voice Note / Transcript' },
+  { value: 'meeting_notes', label: 'Meeting Notes' },
+  { value: 'chat_export', label: 'Claude / Chat Export' },
+  { value: 'requirement', label: 'Requirements Doc' },
+  { value: 'prd_draft', label: 'PRD Draft' },
+  { value: 'other', label: 'Other' },
+];
+
+function renderContextBlocks() {
+  const container = document.getElementById('context-blocks');
+  if (!contextBlocks.length) {
+    container.innerHTML = `<div style="font-size:13px;color:var(--muted);padding:20px 0;text-align:center;">No context added yet. Click below to add your first block.</div>`;
+    return;
+  }
+  container.innerHTML = contextBlocks.map((block) => `
+    <div class="ctx-block" id="block-${block.id}">
+      <div class="ctx-block-head">
+        <select class="form-input" style="max-width:200px;font-size:12px;padding:5px 10px;" onchange="updateBlockType('${block.id}', this.value)">
+          ${CONTEXT_TYPES.map(t => `<option value="${t.value}" ${block.type === t.value ? 'selected' : ''}>${t.label}</option>`).join('')}
+        </select>
+        <input class="form-input" style="flex:1;font-size:12px;padding:5px 10px;" placeholder="Label (optional)" value="${(block.label || '').replace(/"/g, '&quot;')}" oninput="updateBlockLabel('${block.id}', this.value)"/>
+        <button class="btn btn-ghost btn-sm" style="padding:4px 8px;flex-shrink:0;color:var(--muted);" onclick="removeContextBlock('${block.id}')" title="Remove">&#x2715;</button>
+      </div>
+      <textarea style="width:100%;min-height:120px;resize:vertical;font-family:var(--sans,system-ui);font-size:13px;line-height:1.6;padding:10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);box-sizing:border-box;" placeholder="Paste your content here..." oninput="updateBlockContent('${block.id}', this.value)">${escAttr(block.content || '')}</textarea>
+    </div>
+  `).join('');
+}
+
+function escAttr(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function addContextBlock() {
+  contextBlocks.push({ id: Date.now().toString(), type: 'other', label: '', content: '' });
+  renderContextBlocks();
+}
+
+function updateBlockType(id, val) { const b = contextBlocks.find(b => b.id === id); if (b) b.type = val; }
+function updateBlockLabel(id, val) { const b = contextBlocks.find(b => b.id === id); if (b) b.label = val; }
+function updateBlockContent(id, val) { const b = contextBlocks.find(b => b.id === id); if (b) b.content = val; }
+function removeContextBlock(id) {
+  contextBlocks = contextBlocks.filter(b => b.id !== id);
+  renderContextBlocks();
+}
+
+// --- PRD fields ---
+const PRD_FIELDS = ['overview','problem','goals','stories','requirements','nonfunc','outofscope','tech','criteria'];
+
+function loadPRDFields(prd) {
+  PRD_FIELDS.forEach(f => {
+    const el = document.getElementById('prd-' + f);
+    if (el) el.value = (prd && prd[f]) || '';
+  });
+}
+
+function getPRDValues() {
+  const prd = {};
+  PRD_FIELDS.forEach(f => {
+    const el = document.getElementById('prd-' + f);
+    if (el) prd[f] = el.value.trim();
+  });
+  return prd;
+}
+
+async function savePRD() {
+  if (!currentProject) return;
+  const notesData = { context: contextBlocks, prd: getPRDValues() };
+  const res = await TMIAdmin.api('/api/projects', 'PUT', { id: currentProject.id, notes: JSON.stringify(notesData) });
+  if (res) {
+    currentProject.notes = JSON.stringify(notesData);
+    TMIAdmin.toast('PRD saved');
+  }
+}
+
+async function saveContext() {
+  if (!currentProject) return;
+  let existing = {};
+  try { existing = JSON.parse(currentProject.notes || '{}'); } catch(e) {}
+  const notesData = { ...existing, context: contextBlocks };
+  const res = await TMIAdmin.api('/api/projects', 'PUT', { id: currentProject.id, notes: JSON.stringify(notesData) });
+  if (res) { currentProject.notes = JSON.stringify(notesData); }
+}
+
+async function generatePRD() {
+  if (!currentProject) return;
+  if (!contextBlocks.length || !contextBlocks.some(b => b.content.trim())) {
+    TMIAdmin.toast('Add some context first', 'error');
+    switchTab('context');
+    return;
+  }
+
+  const btn = document.getElementById('btn-gen-prd');
+  const status = document.getElementById('prd-gen-status');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  status.style.display = '';
+  status.textContent = 'Calling Claude API...';
+
+  const contextText = contextBlocks
+    .filter(b => b.content.trim())
+    .map(b => `[${b.label || b.type}]\n${b.content}`)
+    .join('\n\n---\n\n');
+
+  try {
+    const res = await TMIAdmin.api('/api/prd-generate', 'POST', {
+      project_name: currentProject.name,
+      context: contextText,
+    });
+
+    if (res && res.prd) {
+      loadPRDFields(res.prd);
+      status.textContent = 'Draft generated. Review and edit before saving.';
+      TMIAdmin.toast('PRD draft generated');
+    } else if (res && res.error) {
+      status.textContent = res.error;
+      TMIAdmin.toast(res.error, 'error');
+    }
+  } catch(e) {
+    status.textContent = 'Generation failed. Check ANTHROPIC_API_KEY is set in Vercel env.';
+    TMIAdmin.toast('Generation failed', 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Generate Draft from Context';
+}
+
+function copyPRDLink() {
+  if (!currentProject) return;
+  const url = `${window.location.origin}/prd-view.html?id=${currentProject.id}`;
+  navigator.clipboard.writeText(url).then(() => TMIAdmin.toast('Link copied'));
+}
+
+// --- Tab switching ---
+function switchTab(tab) {
+  document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.ptab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).style.display = '';
+  document.querySelector(`.ptab[data-tab="${tab}"]`).classList.add('active');
+}
+
+// --- Projects list ---
 async function loadProjects() {
   allProjects = await TMIAdmin.api('/api/projects') || [];
   renderView();
@@ -182,7 +429,7 @@ function renderTable() {
   document.getElementById('proj-count').textContent = `${rows.length} project${rows.length !== 1 ? 's' : ''}`;
   const tbody = document.getElementById('proj-tbody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🗂️</div><h3>No projects</h3><p>Create your first project above.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">&#128194;</div><h3>No projects</h3><p>Create your first project above.</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(p => `
@@ -233,11 +480,12 @@ function toggleView() {
 }
 
 function openPanel(id) {
+  switchTab('overview');
   currentProject = allProjects.find(p => p.id === id);
   if (!currentProject) return;
   const p = currentProject;
   document.getElementById('panel-proj-name').textContent = p.name;
-  document.getElementById('panel-proj-desc').textContent = p.description || p.notes || '-';
+  document.getElementById('panel-proj-desc').textContent = p.description || '-';
   document.getElementById('panel-proj-status').value = p.status;
   document.getElementById('panel-proj-details').innerHTML = `
     <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(p.status)}</div></div>
@@ -247,6 +495,21 @@ function openPanel(id) {
     <div class="detail-item"><div class="detail-label">Start</div><div class="detail-val">${p.start_date ? TMIAdmin.fmt(p.start_date) : '-'}</div></div>
     <div class="detail-item"><div class="detail-label">End</div><div class="detail-val">${p.end_date ? TMIAdmin.fmt(p.end_date) : '-'}</div></div>
   `;
+
+  // Load notes data (context + PRD)
+  let notesData = {};
+  try { notesData = JSON.parse(p.notes || '{}'); } catch(e) {}
+  contextBlocks = notesData.context || [];
+  renderContextBlocks();
+  loadPRDFields(notesData.prd || {});
+
+  // Share tab URL
+  const shareUrl = `${window.location.origin}/prd-view.html?id=${p.id}`;
+  const shareDisplay = document.getElementById('share-url-display');
+  const openBtn = document.getElementById('btn-open-prd');
+  if (shareDisplay) shareDisplay.textContent = shareUrl;
+  if (openBtn) openBtn.href = shareUrl;
+
   TMIAdmin.openPanel('proj-panel');
 }
 

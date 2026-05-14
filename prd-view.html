@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>PRD — TMI</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-alt: #f5f5f7;
+      --bg-deep: #0a0b14;
+      --ink: #1a1a1a;
+      --ink-2: #505060;
+      --muted: #86868b;
+      --line: rgba(0,0,0,0.08);
+      --line-strong: rgba(0,0,0,0.13);
+      --chart: #E4FF97;
+      --chart-dark: #D0FF6A;
+      --sans: "Barlow", system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg-alt);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* Header */
+    .doc-header {
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .doc-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .doc-brand img { height: 24px; width: auto; }
+    .doc-type {
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .print-btn {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-2);
+      background: none;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .print-btn:hover { background: var(--bg-alt); color: var(--ink); }
+
+    /* Page wrap */
+    .page-wrap {
+      max-width: 800px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+
+    /* Document card */
+    .doc-card {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    /* Doc top */
+    .doc-top {
+      padding: 48px 48px 36px;
+      border-bottom: 1px solid var(--line);
+    }
+    .doc-label {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .doc-title {
+      font-size: clamp(26px, 3vw, 42px);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin: 0 0 24px;
+      line-height: 1.1;
+    }
+    .doc-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: center;
+    }
+    .doc-meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .doc-meta-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .doc-meta-val {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-2);
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .status-badge.scoping  { background: #f1f5f9; color: #475569; }
+    .status-badge.active   { background: #dcfce7; color: #15803d; }
+    .status-badge.delivered { background: #dbeafe; color: #1d4ed8; }
+    .status-badge.cancelled { background: #fee2e2; color: #b91c1c; }
+
+    /* PRD sections */
+    .prd-body {
+      padding: 0 48px 48px;
+    }
+    .prd-section {
+      padding-top: 36px;
+      border-top: 1px solid var(--line);
+      margin-top: 36px;
+    }
+    .prd-section:first-child {
+      border-top: none;
+      margin-top: 0;
+      padding-top: 36px;
+    }
+    .prd-section-label {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .prd-section-content {
+      font-size: 15px;
+      color: var(--ink-2);
+      line-height: 1.75;
+    }
+    .prd-section-content p {
+      margin: 0 0 0.8em;
+    }
+    .prd-section-content p:last-child {
+      margin-bottom: 0;
+    }
+    .prd-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .prd-list li {
+      display: flex;
+      gap: 12px;
+      font-size: 15px;
+      color: var(--ink-2);
+      line-height: 1.6;
+    }
+    .prd-list li .prd-list-num {
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      min-width: 20px;
+      padding-top: 2px;
+    }
+    .prd-list li .prd-list-text {
+      flex: 1;
+    }
+
+    /* Footer */
+    .doc-footer {
+      padding: 24px 48px;
+      background: var(--bg-alt);
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .doc-footer-text {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .doc-footer-link {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .doc-footer-link:hover { color: var(--ink); }
+
+    /* No PRD state */
+    .no-prd {
+      padding: 60px 48px;
+      text-align: center;
+    }
+    .no-prd-icon {
+      font-size: 36px;
+      margin-bottom: 16px;
+    }
+    .no-prd-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ink);
+      margin: 0 0 8px;
+    }
+    .no-prd-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* Loading */
+    .loading-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 16px;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--line-strong);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: var(--muted); }
+
+    /* Error */
+    .error-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 12px;
+      text-align: center;
+    }
+    .error-icon { font-size: 36px; margin-bottom: 8px; }
+    .error-title { font-size: 22px; font-weight: 600; color: var(--ink); margin: 0; }
+    .error-sub { font-size: 14px; color: var(--muted); margin: 0; }
+
+    @media (max-width: 600px) {
+      .doc-header { padding: 14px 20px; }
+      .doc-top { padding: 32px 24px 24px; }
+      .prd-body { padding: 0 24px 36px; }
+      .doc-footer { padding: 20px 24px; }
+      .no-prd { padding: 40px 24px; }
+    }
+
+    /* Print styles */
+    @media print {
+      body { background: #fff; }
+      .doc-header, .print-btn { display: none !important; }
+      .page-wrap { margin: 0; max-width: 100%; padding: 0; }
+      .doc-card { border: none; border-radius: 0; }
+      .prd-section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="doc-header">
+  <a href="https://tmi-technology.com" class="doc-brand">
+    <img src="logo.svg" alt="TMI"/>
+    TMI
+  </a>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span class="doc-type">Product Requirements Document</span>
+    <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+</header>
+
+<div class="page-wrap">
+  <div class="doc-card" id="doc-card">
+    <div class="loading-wrap" id="loading">
+      <div class="spinner"></div>
+      <span class="loading-text">Loading PRD...</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+
+  function fmt(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function esc(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function statusBadge(s) {
+    const label = s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Unknown';
+    return `<span class="status-badge ${esc(s || '')}">${label}</span>`;
+  }
+
+  // Sections that get rendered as a line-by-line list
+  const LIST_SECTIONS = new Set(['stories', 'requirements', 'nonfunc', 'criteria']);
+
+  const SECTION_DEFS = [
+    { key: 'overview',      label: 'Overview' },
+    { key: 'problem',       label: 'Problem Statement' },
+    { key: 'goals',         label: 'Goals & Success Metrics' },
+    { key: 'stories',       label: 'User Stories' },
+    { key: 'requirements',  label: 'Functional Requirements' },
+    { key: 'nonfunc',       label: 'Non-Functional Requirements' },
+    { key: 'outofscope',    label: 'Out of Scope' },
+    { key: 'tech',          label: 'Tech Notes for Dev Team' },
+    { key: 'criteria',      label: 'Acceptance Criteria' },
+  ];
+
+  function renderSection(def, content) {
+    if (!content || !content.trim()) return '';
+
+    let bodyHtml;
+    if (LIST_SECTIONS.has(def.key)) {
+      const lines = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length > 1) {
+        const items = lines.map((line, i) => `
+          <li>
+            <span class="prd-list-num">${i + 1}.</span>
+            <span class="prd-list-text">${esc(line)}</span>
+          </li>`).join('');
+        bodyHtml = `<ul class="prd-list">${items}</ul>`;
+      } else {
+        bodyHtml = `<div class="prd-section-content"><p>${esc(content.trim())}</p></div>`;
+      }
+    } else {
+      const paragraphs = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      bodyHtml = `<div class="prd-section-content">${paragraphs.map(p => `<p>${esc(p)}</p>`).join('')}</div>`;
+    }
+
+    return `
+      <div class="prd-section">
+        <div class="prd-section-label">${esc(def.label)}</div>
+        ${bodyHtml}
+      </div>`;
+  }
+
+  function renderError(msg) {
+    document.getElementById('doc-card').innerHTML = `
+      <div class="error-wrap">
+        <div class="error-icon">&#128274;</div>
+        <h2 class="error-title">PRD not found</h2>
+        <p class="error-sub">${esc(msg) || 'This link may be invalid or expired.'}</p>
+      </div>`;
+  }
+
+  function renderPRD(project) {
+    let prd = {};
+    try {
+      const notesData = JSON.parse(project.notes || '{}');
+      prd = notesData.prd || {};
+    } catch(e) {}
+
+    const hasPRD = SECTION_DEFS.some(def => prd[def.key] && prd[def.key].trim());
+
+    const sectionsHtml = hasPRD
+      ? SECTION_DEFS.map(def => renderSection(def, prd[def.key])).join('')
+      : '';
+
+    const prdBodyHtml = hasPRD
+      ? `<div class="prd-body">${sectionsHtml}</div>`
+      : `<div class="no-prd">
+           <div class="no-prd-icon">&#128196;</div>
+           <h2 class="no-prd-title">PRD not yet written</h2>
+           <p class="no-prd-sub">No PRD content has been saved for this project yet.</p>
+         </div>`;
+
+    const footerHtml = `
+      <div class="doc-footer">
+        <span class="doc-footer-text">TMI Technology</span>
+        <a class="doc-footer-link" href="https://tmi-technology.com">tmi-technology.com</a>
+      </div>`;
+
+    document.getElementById('doc-card').innerHTML = `
+      <div class="doc-top">
+        <div class="doc-label">Product Requirements Document</div>
+        <h1 class="doc-title">${esc(project.name || 'Untitled Project')}</h1>
+        <div class="doc-meta-row">
+          <div class="doc-meta-item">
+            <div class="doc-meta-label">Status</div>
+            <div class="doc-meta-val">${statusBadge(project.status)}</div>
+          </div>
+          ${project.start_date ? `<div class="doc-meta-item"><div class="doc-meta-label">Start Date</div><div class="doc-meta-val">${fmt(project.start_date)}</div></div>` : ''}
+          ${project.end_date ? `<div class="doc-meta-item"><div class="doc-meta-label">End Date</div><div class="doc-meta-val">${fmt(project.end_date)}</div></div>` : ''}
+          <div class="doc-meta-item">
+            <div class="doc-meta-label">Created</div>
+            <div class="doc-meta-val">${fmt(project.created_at)}</div>
+          </div>
+        </div>
+      </div>
+      ${prdBodyHtml}
+      ${footerHtml}
+    `;
+  }
+
+  if (!id) {
+    renderError('No project ID provided.');
+    return;
+  }
+
+  fetch('/api/projects?id=' + encodeURIComponent(id))
+    .then(res => {
+      if (!res.ok) throw new Error('Not found');
+      return res.json();
+    })
+    .then(data => renderPRD(data))
+    .catch(() => renderError('This project could not be found.'));
+})();
+</script>
+</body>
+</html>
