@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Newsletter — FOTF Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+body.nl-page .content { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.nl-wrap { display: flex; flex: 1; overflow: hidden; }
+
+/* Queue */
+.nl-queue { width: 260px; flex-shrink: 0; border-right: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; overflow: hidden; }
+.nl-queue-hd { padding: 14px 16px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.nl-queue-search { width: 100%; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 7px 10px; font-size: 13px; color: var(--ink); background: var(--bg); outline: none; font-family: inherit; }
+.nl-queue-search:focus { border-color: var(--ink); }
+.nl-filter-row { display: flex; gap: 4px; padding: 8px 10px; border-bottom: 1px solid var(--line); flex-shrink: 0; flex-wrap: wrap; }
+.nl-filter { font-size: 11px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); cursor: pointer; background: none; color: var(--ink-2); font-family: inherit; transition: background 0.1s, color 0.1s; }
+.nl-filter.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.nl-list { flex: 1; overflow-y: auto; }
+.nl-card { padding: 14px 16px; border-bottom: 1px solid var(--line); cursor: pointer; transition: background 0.1s; }
+.nl-card:hover { background: var(--bg); }
+.nl-card.active { background: var(--chart); }
+.nl-card-series { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.nl-card-title { font-size: 13px; font-weight: 500; color: var(--ink); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nl-card-meta { font-size: 11px; color: var(--muted); margin-top: 4px; display: flex; gap: 8px; align-items: center; }
+.nl-new-btn { display: block; padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--line); cursor: pointer; background: none; border-top: none; border-left: none; border-right: none; width: 100%; text-align: left; font-family: inherit; transition: background 0.1s; }
+.nl-new-btn:hover { background: var(--bg); }
+
+/* Editor */
+.nl-editor { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.nl-editor-bar { display: flex; align-items: center; gap: 12px; padding: 10px 24px; border-bottom: 1px solid var(--line); background: var(--surface); flex-shrink: 0; flex-wrap: wrap; }
+.two-sides { display: flex; gap: 6px; align-items: center; }
+.two-sides-chip { font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 500; }
+.two-sides-chip.ok { background: #dcfce7; color: #166534; }
+.two-sides-chip.warn { background: #fef3c7; color: #92400e; }
+.nl-editor-actions { margin-left: auto; display: flex; gap: 8px; }
+.nl-form { flex: 1; overflow-y: auto; padding: 28px 32px; }
+.nl-meta-row { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; }
+.nl-field { margin-bottom: 20px; }
+.nl-field label { display: block; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.nl-field input, .nl-field textarea, .nl-field select { width: 100%; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 9px 12px; font-size: 14px; color: var(--ink); background: var(--surface); outline: none; font-family: inherit; resize: vertical; transition: border-color 0.15s; }
+.nl-field input:focus, .nl-field textarea:focus, .nl-field select:focus { border-color: var(--ink); }
+.nl-field textarea.tall { min-height: 110px; }
+.nl-field textarea.short { min-height: 70px; }
+.nl-field input.headline { font-size: 20px; font-family: var(--serif); font-weight: 600; }
+.nl-section-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin: 28px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.nl-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); min-height: 42px; cursor: text; }
+.tag-pill { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: var(--chart); color: var(--ink); display: flex; align-items: center; gap: 4px; }
+.tag-pill button { background: none; border: none; cursor: pointer; color: var(--ink-2); font-size: 14px; line-height: 1; padding: 0; }
+.tag-input { border: none; outline: none; font-size: 13px; font-family: inherit; color: var(--ink); background: transparent; min-width: 80px; }
+.nl-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: var(--muted); gap: 12px; padding: 60px 32px; text-align: center; }
+.nl-empty h3 { font-size: 18px; font-weight: 400; color: var(--ink-2); }
+.series-rotation { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 28px; }
+.sr-cell { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 12px; font-size: 12px; }
+.sr-cell .sr-name { color: var(--ink); font-weight: 500; margin-bottom: 4px; }
+.sr-cell .sr-count { color: var(--muted); font-size: 11px; }
+.sr-cell.has-issue { border-color: var(--chart); background: #fafff0; }
+</style>
+</head>
+<body class="nl-page">
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span style="color:var(--muted)">FOTF</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span class="page">Newsletter</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="nl-wrap">
+
+        <!-- Queue -->
+        <div class="nl-queue">
+          <button class="nl-new-btn" onclick="newIssue()">+ New Issue</button>
+          <div class="nl-queue-hd">
+            <input class="nl-queue-search" placeholder="Search issues..." oninput="filterIssues(this.value)" id="q-search"/>
+          </div>
+          <div class="nl-filter-row" id="filter-row">
+            <button class="nl-filter active" data-f="all" onclick="setFilter('all',this)">All</button>
+            <button class="nl-filter" data-f="draft" onclick="setFilter('draft',this)">Draft</button>
+            <button class="nl-filter" data-f="scheduled" onclick="setFilter('scheduled',this)">Scheduled</button>
+            <button class="nl-filter" data-f="sent" onclick="setFilter('sent',this)">Sent</button>
+          </div>
+          <div class="nl-list" id="nl-list">
+            <div style="padding:20px 16px;font-size:13px;color:var(--muted)">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Editor -->
+        <div class="nl-editor" id="nl-editor">
+          <div class="nl-empty" id="nl-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13" stroke-linecap="round"/><line x1="16" y1="17" x2="8" y2="17" stroke-linecap="round"/></svg>
+            <h3>Select an issue or create a new one</h3>
+            <button class="btn btn-primary btn-sm" onclick="newIssue()">+ New Issue</button>
+          </div>
+          <div id="nl-form-wrap" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+            <div class="nl-editor-bar">
+              <div class="two-sides" id="two-sides">
+                <span class="two-sides-chip warn" id="chip-online">Online ?</span>
+                <span class="two-sides-chip warn" id="chip-physical">Physical ?</span>
+              </div>
+              <div class="nl-editor-actions">
+                <button class="btn btn-ghost btn-sm" onclick="deleteIssue()" id="btn-delete" style="color:var(--red)">Delete</button>
+                <button class="btn btn-ghost btn-sm" onclick="saveIssue()">Save Draft</button>
+                <button class="btn btn-ghost btn-sm" onclick="openSchedule()">Schedule</button>
+                <button class="btn btn-primary btn-sm" onclick="pushToBeehiiv()">Push to Beehiiv</button>
+              </div>
+            </div>
+            <div class="nl-form" id="nl-form">
+              <div class="nl-meta-row">
+                <div style="flex:0 0 auto">
+                  <label style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Series</label>
+                  <select class="form-input" id="f-series" style="font-size:13px;padding:7px 10px;" onchange="onSeriesChange()">
+                    <option value="">Pick series...</option>
+                    <option value="field-guide">Sunday Field Guide</option>
+                    <option value="tool-drop">Wednesday Tool Drop</option>
+                    <option value="field-notes">Field Notes</option>
+                    <option value="receipts">Receipts</option>
+                    <option value="build">Build</option>
+                    <option value="wrong-way">Wrong Way</option>
+                    <option value="day-one">Day One</option>
+                    <option value="open-tabs">Open Tabs</option>
+                  </select>
+                </div>
+                <div style="flex:0 0 80px">
+                  <label style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Issue #</label>
+                  <input type="number" id="f-issue-num" class="form-input" style="font-size:13px;padding:7px 10px;" placeholder="Auto"/>
+                </div>
+                <div id="f-status-badge" style="align-self:flex-end;padding-bottom:2px"></div>
+              </div>
+
+              <!-- Rotation tracker -->
+              <div id="rotation-wrap" style="margin-bottom:20px"></div>
+
+              <div class="nl-section-label">Headline & Dek</div>
+              <div class="nl-field">
+                <label>Headline</label>
+                <input type="text" id="f-headline" class="headline" placeholder="The job that cost more than the invoice said" oninput="markDirty()"/>
+              </div>
+              <div class="nl-field">
+                <label>Dek (italic subhead)</label>
+                <input type="text" id="f-dek" placeholder="One sentence. Sets up the idea." oninput="markDirty()"/>
+              </div>
+
+              <div class="nl-section-label">Body — Five Parts</div>
+              <div class="nl-field">
+                <label>Cold Open <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">— hook. Specific operator, specific situation.</span></label>
+                <textarea id="f-cold-open" class="tall" placeholder="Set the scene. One person, one problem, one real number." oninput="markDirty()"></textarea>
+              </div>
+              <div class="nl-field">
+                <label>Setup <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">— the problem and who has it</span></label>
+                <textarea id="f-setup" class="short" placeholder="Widen the lens to the industry pattern." oninput="markDirty()"></textarea>
+              </div>
+              <div class="nl-field">
+                <label>The Turn <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">— the new idea</span></label>
+                <textarea id="f-turn" class="tall" placeholder="The reframe. What they don't see yet." oninput="markDirty()"></textarea>
+              </div>
+              <div class="nl-field">
+                <label>The Proof <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">— number, name, screenshot</span></label>
+                <textarea id="f-proof" class="short" placeholder="One real data point. No abstractions." oninput="markDirty()"></textarea>
+              </div>
+
+              <div class="nl-section-label">Two Sides <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--red)">— both required before scheduling</span></div>
+              <div class="nl-two-col">
+                <div class="nl-field">
+                  <label>Online Example</label>
+                  <textarea id="f-online" class="tall" placeholder="How an online business (creator, SaaS, e-com, agency) uses this." oninput="checkTwoSides();markDirty()"></textarea>
+                </div>
+                <div class="nl-field">
+                  <label>Physical Example</label>
+                  <textarea id="f-physical" class="tall" placeholder="How a trades or physical business uses this." oninput="checkTwoSides();markDirty()"></textarea>
+                </div>
+              </div>
+
+              <div class="nl-section-label">Closing</div>
+              <div class="nl-field">
+                <label>Next Step <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">— one action the reader takes today</span></label>
+                <textarea id="f-next" class="short" placeholder="Specific. Actionable. No 'consider' or 'explore'." oninput="markDirty()"></textarea>
+              </div>
+              <div class="nl-field">
+                <label>Pull Quote <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">— the screenshot moment</span></label>
+                <input type="text" id="f-quote" placeholder="The one sentence they screenshot and share." oninput="markDirty()"/>
+              </div>
+
+              <div class="nl-section-label">Tags</div>
+              <div class="nl-field">
+                <label>Topics</label>
+                <div class="tags-wrap" id="tags-wrap" onclick="document.getElementById('tag-input').focus()">
+                  <input class="tag-input" id="tag-input" placeholder="Add tag..." onkeydown="handleTagKey(event)"/>
+                </div>
+              </div>
+
+              <div style="height:40px"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule modal -->
+<div class="modal-overlay" id="schedule-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-hd">
+      <h3 class="modal-title">Schedule Issue</h3>
+      <button class="modal-close" onclick="TMIAdmin.closeModal('schedule-modal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+      <div class="form-group">
+        <label class="form-label">Send Date & Time</label>
+        <input type="datetime-local" class="form-input" id="sched-dt"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Audience</label>
+        <select class="form-input" id="sched-audience">
+          <option value="all">All subscribers</option>
+          <option value="free">Free only</option>
+          <option value="premium">Premium (paid) only</option>
+        </select>
+      </div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.5">This saves the schedule to the panel and pushes the issue to Beehiiv as a scheduled send.</p>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('schedule-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmSchedule()">Schedule</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('fotf-newsletter');
+
+const SERIES_LABEL = {
+  'field-guide':'Sunday Field Guide','tool-drop':'Wednesday Tool Drop',
+  'field-notes':'Field Notes','receipts':'Receipts','build':'Build',
+  'wrong-way':'Wrong Way','day-one':'Day One','open-tabs':'Open Tabs'
+};
+const ALL_SERIES = Object.keys(SERIES_LABEL);
+
+let issues = [];
+let currentIssue = null;
+let dirty = false;
+let filterStatus = 'all';
+let tags = [];
+
+function markDirty() { dirty = true; }
+
+// ── Tags ───────────────────────────────────────────────────────────────────
+function handleTagKey(e) {
+  if ((e.key === 'Enter' || e.key === ',') && e.target.value.trim()) {
+    e.preventDefault();
+    addTag(e.target.value.trim());
+    e.target.value = '';
+  }
+}
+function addTag(t) {
+  if (tags.includes(t)) return;
+  tags.push(t);
+  renderTags();
+  markDirty();
+}
+function removeTag(t) {
+  tags = tags.filter(x => x !== t);
+  renderTags();
+  markDirty();
+}
+function renderTags() {
+  const wrap = document.getElementById('tags-wrap');
+  const input = document.getElementById('tag-input');
+  wrap.querySelectorAll('.tag-pill').forEach(p => p.remove());
+  tags.forEach(t => {
+    const pill = document.createElement('span');
+    pill.className = 'tag-pill';
+    pill.innerHTML = `${t}<button onclick="removeTag('${t}')" type="button">×</button>`;
+    wrap.insertBefore(pill, input);
+  });
+}
+
+// ── Two Sides Checker ──────────────────────────────────────────────────────
+function checkTwoSides() {
+  const online   = (document.getElementById('f-online')?.value || '').trim();
+  const physical = (document.getElementById('f-physical')?.value || '').trim();
+  document.getElementById('chip-online').className  = `two-sides-chip ${online   ? 'ok' : 'warn'}`;
+  document.getElementById('chip-online').textContent  = online   ? 'Online ✓' : 'Online —';
+  document.getElementById('chip-physical').className = `two-sides-chip ${physical ? 'ok' : 'warn'}`;
+  document.getElementById('chip-physical').textContent = physical ? 'Physical ✓' : 'Physical —';
+}
+
+// ── Series rotation tracker ────────────────────────────────────────────────
+function renderRotation(allIssues) {
+  const thisMonth = new Date(); thisMonth.setDate(1); thisMonth.setHours(0,0,0,0);
+  const counts = {};
+  ALL_SERIES.forEach(s => counts[s] = 0);
+  allIssues.forEach(i => {
+    if (i.series && new Date(i.created_at) >= thisMonth) counts[i.series] = (counts[i.series] || 0) + 1;
+  });
+  document.getElementById('rotation-wrap').innerHTML =
+    `<div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">This Month</div>
+    <div class="series-rotation">${ALL_SERIES.map(s =>
+      `<div class="sr-cell ${counts[s] ? 'has-issue' : ''}">
+        <div class="sr-name">${SERIES_LABEL[s]}</div>
+        <div class="sr-count">${counts[s]} issue${counts[s] !== 1 ? 's' : ''}</div>
+      </div>`).join('')}</div>`;
+}
+
+// ── Issue list ─────────────────────────────────────────────────────────────
+function onSeriesChange() { markDirty(); }
+
+function renderList(list) {
+  const el = document.getElementById('nl-list');
+  if (!list.length) {
+    el.innerHTML = `<div style="padding:20px 16px;font-size:13px;color:var(--muted)">No issues found.</div>`;
+    return;
+  }
+  el.innerHTML = list.map(i => {
+    const series = SERIES_LABEL[i.series] || i.series || 'Unknown';
+    const num = i.issue_number ? ` #${i.issue_number}` : '';
+    const isActive = currentIssue?.id === i.id;
+    return `<div class="nl-card${isActive?' active':''}" onclick="loadIssue('${i.id}')">
+      <div class="nl-card-series">${series}${num}</div>
+      <div class="nl-card-title">${i.headline || '(no headline)'}</div>
+      <div class="nl-card-meta">${TMIAdmin.badge(i.status)}<span>${TMIAdmin.fmt(i.created_at)}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function filterIssues(q) {
+  const search = q.toLowerCase();
+  let filtered = issues.filter(i => filterStatus === 'all' || i.status === filterStatus);
+  if (search) filtered = filtered.filter(i =>
+    (i.headline || '').toLowerCase().includes(search) ||
+    (i.series || '').includes(search)
+  );
+  renderList(filtered);
+}
+
+function setFilter(status, btn) {
+  filterStatus = status;
+  document.querySelectorAll('.nl-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterIssues(document.getElementById('q-search').value);
+}
+
+// ── Load / save issue ──────────────────────────────────────────────────────
+function loadIssue(id) {
+  if (dirty && currentIssue) {
+    if (!confirm('You have unsaved changes. Discard them?')) return;
+  }
+  const issue = issues.find(i => i.id === id);
+  if (!issue) return;
+  currentIssue = issue;
+  dirty = false;
+  tags = issue.tags || [];
+
+  document.getElementById('nl-empty').style.display = 'none';
+  document.getElementById('nl-form-wrap').style.display = 'flex';
+
+  document.getElementById('f-series').value      = issue.series || '';
+  document.getElementById('f-issue-num').value   = issue.issue_number || '';
+  document.getElementById('f-headline').value    = issue.headline || '';
+  document.getElementById('f-dek').value         = issue.dek || '';
+  document.getElementById('f-cold-open').value   = issue.cold_open || '';
+  document.getElementById('f-setup').value       = issue.setup || '';
+  document.getElementById('f-turn').value        = issue.the_turn || '';
+  document.getElementById('f-proof').value       = issue.the_proof || '';
+  document.getElementById('f-online').value      = issue.online_example || '';
+  document.getElementById('f-physical').value    = issue.physical_example || '';
+  document.getElementById('f-next').value        = issue.next_step || '';
+  document.getElementById('f-quote').value       = issue.pull_quote || '';
+
+  renderTags();
+  checkTwoSides();
+
+  document.getElementById('f-status-badge').innerHTML = TMIAdmin.badge(issue.status);
+  document.getElementById('btn-delete').style.display = issue.status === 'sent' ? 'none' : '';
+
+  renderList(issues.filter(i => filterStatus === 'all' || i.status === filterStatus));
+}
+
+function collectFields() {
+  return {
+    id:             currentIssue?.id,
+    series:         document.getElementById('f-series').value,
+    issue_number:   parseInt(document.getElementById('f-issue-num').value) || null,
+    headline:       document.getElementById('f-headline').value.trim(),
+    dek:            document.getElementById('f-dek').value.trim(),
+    cold_open:      document.getElementById('f-cold-open').value.trim(),
+    setup:          document.getElementById('f-setup').value.trim(),
+    the_turn:       document.getElementById('f-turn').value.trim(),
+    the_proof:      document.getElementById('f-proof').value.trim(),
+    online_example: document.getElementById('f-online').value.trim(),
+    physical_example: document.getElementById('f-physical').value.trim(),
+    next_step:      document.getElementById('f-next').value.trim(),
+    pull_quote:     document.getElementById('f-quote').value.trim(),
+    tags,
+  };
+}
+
+async function saveIssue() {
+  const fields = collectFields();
+  let updated;
+  if (currentIssue?.id) {
+    updated = await TMIAdmin.api('/api/fotf-issues', 'PUT', fields);
+  } else {
+    updated = await TMIAdmin.api('/api/fotf-issues', 'POST', fields);
+  }
+  if (!updated) return;
+  dirty = false;
+  currentIssue = updated;
+  TMIAdmin.toast('Saved');
+  await reload();
+}
+
+async function newIssue() {
+  if (dirty && currentIssue) {
+    if (!confirm('You have unsaved changes. Discard them?')) return;
+  }
+  currentIssue = null;
+  dirty = false;
+  tags = [];
+  document.getElementById('nl-empty').style.display = 'none';
+  document.getElementById('nl-form-wrap').style.display = 'flex';
+  document.getElementById('f-series').value = '';
+  document.getElementById('f-issue-num').value = '';
+  document.getElementById('f-headline').value = '';
+  document.getElementById('f-dek').value = '';
+  document.getElementById('f-cold-open').value = '';
+  document.getElementById('f-setup').value = '';
+  document.getElementById('f-turn').value = '';
+  document.getElementById('f-proof').value = '';
+  document.getElementById('f-online').value = '';
+  document.getElementById('f-physical').value = '';
+  document.getElementById('f-next').value = '';
+  document.getElementById('f-quote').value = '';
+  renderTags();
+  checkTwoSides();
+  document.getElementById('f-status-badge').innerHTML = TMIAdmin.badge('draft');
+  document.getElementById('btn-delete').style.display = 'none';
+  document.getElementById('f-headline').focus();
+  renderList(issues.filter(i => filterStatus === 'all' || i.status === filterStatus));
+}
+
+async function deleteIssue() {
+  if (!currentIssue?.id) return;
+  const ok = await TMIAdmin.confirm(`Delete "${currentIssue.headline || 'this issue'}"? This cannot be undone.`);
+  if (!ok) return;
+  await TMIAdmin.api(`/api/fotf-issues?id=${currentIssue.id}`, 'DELETE');
+  currentIssue = null; dirty = false;
+  document.getElementById('nl-empty').style.display = 'flex';
+  document.getElementById('nl-form-wrap').style.display = 'none';
+  await reload();
+}
+
+function openSchedule() {
+  if (!currentIssue?.id) { TMIAdmin.toast('Save the issue first','error'); return; }
+  const online = document.getElementById('f-online').value.trim();
+  const physical = document.getElementById('f-physical').value.trim();
+  if (!online || !physical) {
+    if (!confirm('Both Online and Physical examples are missing or incomplete. Schedule anyway?')) return;
+  }
+  const dt = document.getElementById('sched-dt');
+  dt.value = currentIssue.scheduled_at ? currentIssue.scheduled_at.slice(0,16) : '';
+  TMIAdmin.openModal('schedule-modal');
+}
+
+async function confirmSchedule() {
+  const dt = document.getElementById('sched-dt').value;
+  if (!dt) { TMIAdmin.toast('Pick a date and time','error'); return; }
+  await saveIssue();
+  const updated = await TMIAdmin.api('/api/fotf-issues', 'PUT', {
+    id: currentIssue.id, status: 'scheduled', scheduled_at: new Date(dt).toISOString()
+  });
+  if (!updated) return;
+  currentIssue = updated;
+  TMIAdmin.closeModal('schedule-modal');
+  TMIAdmin.toast('Scheduled');
+  await reload();
+}
+
+async function pushToBeehiiv() {
+  if (!currentIssue?.id) { await saveIssue(); }
+  if (!currentIssue?.id) return;
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'Pushing...';
+  const result = await TMIAdmin.api('/api/fotf-issues', 'POST', { action: 'push-beehiiv', id: currentIssue.id });
+  btn.disabled = false; btn.textContent = 'Push to Beehiiv';
+  if (result?.ok) TMIAdmin.toast('Pushed to Beehiiv as draft');
+}
+
+async function reload() {
+  issues = await TMIAdmin.api('/api/fotf-issues') || [];
+  issues.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  renderList(issues.filter(i => filterStatus === 'all' || i.status === filterStatus));
+  renderRotation(issues);
+}
+
+reload();
+</script>
+</body>
+</html>

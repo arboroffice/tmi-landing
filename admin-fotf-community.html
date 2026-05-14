@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Community — FOTF Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+.receipt-preview { background: #0a0b14; color: #fff; border-radius: 8px; padding: 32px 36px; max-width: 480px; font-family: var(--serif); }
+.receipt-preview .rp-brand { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 28px; }
+.receipt-preview .rp-num { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--chart); margin-bottom: 8px; }
+.receipt-preview .rp-name { font-size: 28px; font-weight: 700; margin-bottom: 4px; line-height: 1.1; }
+.receipt-preview .rp-biz { font-size: 15px; color: rgba(255,255,255,0.5); margin-bottom: 24px; }
+.receipt-preview .rp-line { display: flex; justify-content: space-between; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding: 10px 0; }
+.receipt-preview .rp-line span:first-child { color: rgba(255,255,255,0.4); }
+.receipt-preview .rp-sig { margin-top: 24px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+.profile-panel { position: fixed; top: 0; right: -520px; width: 520px; height: 100vh; background: var(--surface); border-left: 1px solid var(--line); z-index: 200; transition: right 0.25s cubic-bezier(.2,.8,.2,1); display: flex; flex-direction: column; overflow: hidden; }
+.profile-panel.open { right: 0; }
+.pp-hd { padding: 16px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.pp-hd h3 { font-size: 16px; font-weight: 600; margin: 0; }
+.pp-close { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; display: flex; }
+.pp-body { flex: 1; overflow-y: auto; padding: 24px; }
+.pp-sec { margin-bottom: 24px; }
+.pp-sec-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.pp-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.pp-row label { font-size: 12px; color: var(--muted); width: 110px; flex-shrink: 0; padding-top: 2px; }
+.pp-row input, .pp-row select, .pp-row textarea { flex: 1; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 6px 10px; font-size: 13px; font-family: inherit; color: var(--ink); outline: none; background: var(--surface); resize: none; }
+.pp-row input:focus, .pp-row select:focus, .pp-row textarea:focus { border-color: var(--ink); }
+.pp-ft { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; gap: 8px; justify-content: space-between; flex-shrink: 0; }
+.wallet-nums { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.wallet-num { background: var(--bg); border-radius: var(--r-sm); padding: 12px 14px; }
+.wallet-num .wn-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 4px; }
+.wallet-num .wn-val { font-size: 20px; font-weight: 700; font-family: var(--serif); color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span style="color:var(--muted)">FOTF</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span class="page">Community</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openAddMember()">+ Add Member</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-box"><div class="stat-label">Total Active</div><div class="stat-val" id="s-active">—</div></div>
+        <div class="stat-box"><div class="stat-label">Paused</div><div class="stat-val" id="s-paused">—</div></div>
+        <div class="stat-box"><div class="stat-label">New This Week</div><div class="stat-val" id="s-new">—</div></div>
+        <div class="stat-box"><div class="stat-label">Founding Members</div><div class="stat-val" id="s-founding">—</div></div>
+      </div>
+
+      <!-- Filters -->
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+        <input class="form-input" id="m-search" placeholder="Search name, email, city..." style="max-width:280px;font-size:13px;padding:7px 12px" oninput="renderTable()"/>
+        <select class="form-input" id="m-stage" style="font-size:13px;padding:7px 10px;width:auto" onchange="renderTable()">
+          <option value="">All Stages</option>
+          <option value="day-one">Day One</option>
+          <option value="online-creator">Online Creator</option>
+          <option value="online-ecom">Online E-com</option>
+          <option value="online-agency">Online Agency</option>
+          <option value="online-saas">Online SaaS</option>
+          <option value="trades">Trades</option>
+          <option value="retail">Retail</option>
+          <option value="restaurant">Food Service</option>
+          <option value="not-yet">Not Yet</option>
+        </select>
+        <select class="form-input" id="m-status" style="font-size:13px;padding:7px 10px;width:auto" onchange="renderTable()">
+          <option value="">All Statuses</option>
+          <option value="active">Active</option>
+          <option value="paused">Paused</option>
+          <option value="churned">Churned</option>
+        </select>
+        <span id="m-count" style="font-size:13px;color:var(--muted);margin-left:auto"></span>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Name</th><th>Business</th><th>Stage</th>
+              <th>City</th><th>Status</th><th>Sprint</th><th>Wallet $</th><th>Joined</th>
+            </tr></thead>
+            <tbody id="m-tbody">
+              <tr><td colspan="9" style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Member Profile Panel -->
+<div class="profile-panel" id="profile-panel">
+  <div class="pp-hd">
+    <div>
+      <h3 id="pp-name">—</h3>
+      <div id="pp-meta" style="font-size:12px;color:var(--muted)"></div>
+    </div>
+    <button class="pp-close" onclick="closeProfile()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="pp-body" id="pp-body"></div>
+  <div class="pp-ft">
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="viewReceipt()" id="pp-receipt-btn">View Receipt</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="churnMember()">Churn</button>
+      <button class="btn btn-primary btn-sm" onclick="saveMember()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal-overlay" id="receipt-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hd">
+      <h3 class="modal-title">Founder Receipt</h3>
+      <button class="modal-close" onclick="TMIAdmin.closeModal('receipt-modal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding:24px" id="receipt-body"></div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('receipt-modal')">Close</button>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">Print / Save PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Member Modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-hd">
+      <h3 class="modal-title">Add Member</h3>
+      <button class="modal-close" onclick="TMIAdmin.closeModal('add-modal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Email <span style="color:var(--red)">*</span></label>
+        <input type="email" class="form-input" id="nm-email" placeholder="founder@example.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="nm-name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Business Name</label>
+        <input type="text" class="form-input" id="nm-biz"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Stage</label>
+        <select class="form-input" id="nm-stage">
+          <option value="">Select stage...</option>
+          <option value="day-one">Day One</option>
+          <option value="online-creator">Online Creator</option>
+          <option value="online-ecom">Online E-com</option>
+          <option value="online-agency">Online Agency</option>
+          <option value="online-saas">Online SaaS</option>
+          <option value="trades">Trades</option>
+          <option value="retail">Retail</option>
+          <option value="restaurant">Food Service</option>
+          <option value="not-yet">Not Yet</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">City</label>
+        <input type="text" class="form-input" id="nm-city"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Billing Rate ($/hr)</label>
+        <input type="number" class="form-input" id="nm-rate" placeholder="0"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Join Date</label>
+        <input type="date" class="form-input" id="nm-date"/>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('add-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="addMember()">Add Member</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('fotf-community');
+
+const STAGE_LABELS = {
+  'day-one':'Day One','online-creator':'Creator','online-ecom':'E-com',
+  'online-agency':'Agency','online-saas':'SaaS','trades':'Trades',
+  'retail':'Retail','restaurant':'Food','not-yet':'Not Yet'
+};
+
+let members = [];
+let currentMember = null;
+
+function openAddMember() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('nm-email').value = '';
+  document.getElementById('nm-name').value = '';
+  document.getElementById('nm-biz').value = '';
+  document.getElementById('nm-stage').value = '';
+  document.getElementById('nm-city').value = '';
+  document.getElementById('nm-rate').value = '';
+  document.getElementById('nm-date').value = today;
+  TMIAdmin.openModal('add-modal');
+}
+
+async function addMember() {
+  const email = document.getElementById('nm-email').value.trim();
+  if (!email) return TMIAdmin.toast('Email is required','error');
+  const data = await TMIAdmin.api('/api/fotf-members','POST',{
+    email,
+    name: document.getElementById('nm-name').value.trim(),
+    business_name: document.getElementById('nm-biz').value.trim(),
+    stage: document.getElementById('nm-stage').value,
+    city: document.getElementById('nm-city').value.trim(),
+    billing_rate: parseFloat(document.getElementById('nm-rate').value) || null,
+    join_date: document.getElementById('nm-date').value,
+  });
+  if (!data) return;
+  TMIAdmin.closeModal('add-modal');
+  TMIAdmin.toast('Member added');
+  await reload();
+}
+
+function renderTable() {
+  const q = document.getElementById('m-search').value.toLowerCase();
+  const stage = document.getElementById('m-stage').value;
+  const status = document.getElementById('m-status').value;
+
+  let filtered = members;
+  if (q) filtered = filtered.filter(m =>
+    (m.name||'').toLowerCase().includes(q) ||
+    (m.email||'').toLowerCase().includes(q) ||
+    (m.city||'').toLowerCase().includes(q) ||
+    (m.business_name||'').toLowerCase().includes(q)
+  );
+  if (stage) filtered = filtered.filter(m => m.stage === stage);
+  if (status) filtered = filtered.filter(m => m.status === status);
+
+  document.getElementById('m-count').textContent = `${filtered.length} member${filtered.length !== 1 ? 's' : ''}`;
+
+  document.getElementById('m-tbody').innerHTML = filtered.length
+    ? filtered.map(m => `<tr onclick="openProfile('${m.id}')" style="cursor:pointer">
+        <td class="td-muted">#${m.founder_number || '—'}</td>
+        <td class="td-name">${m.name || m.email}</td>
+        <td class="td-muted">${m.business_name || '—'}</td>
+        <td>${TMIAdmin.badge(m.stage)}</td>
+        <td class="td-muted">${m.city || '—'}</td>
+        <td>${TMIAdmin.badge(m.status)}</td>
+        <td style="text-align:center">${m.sprint_active ? '<span style="color:#16a34a;font-size:13px">●</span>' : '<span style="color:var(--muted);font-size:13px">○</span>'}</td>
+        <td class="td-muted">${m.dollars_saved ? TMIAdmin.currency(m.dollars_saved) : '—'}</td>
+        <td class="td-muted">${TMIAdmin.fmt(m.join_date || m.created_at)}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--muted);font-size:13px">No members match this filter.</td></tr>`;
+}
+
+function openProfile(id) {
+  currentMember = members.find(m => m.id === id);
+  if (!currentMember) return;
+  const m = currentMember;
+
+  document.getElementById('pp-name').textContent = m.name || m.email;
+  document.getElementById('pp-meta').textContent = `Founder #${m.founder_number || '?'} · ${STAGE_LABELS[m.stage] || m.stage || 'No stage'} · ${m.city || 'No city'}`;
+
+  document.getElementById('pp-body').innerHTML = `
+    <div class="pp-sec">
+      <div class="pp-sec-label">Member Details</div>
+      <div class="pp-row"><label>Name</label><input id="pp-f-name" value="${m.name || ''}"/></div>
+      <div class="pp-row"><label>Email</label><input id="pp-f-email" value="${m.email || ''}" type="email"/></div>
+      <div class="pp-row"><label>Business</label><input id="pp-f-biz" value="${m.business_name || ''}"/></div>
+      <div class="pp-row"><label>Stage</label>
+        <select id="pp-f-stage">
+          <option value="">—</option>
+          ${['day-one','online-creator','online-ecom','online-agency','online-saas','trades','retail','restaurant','not-yet']
+            .map(s => `<option value="${s}"${m.stage===s?' selected':''}>${STAGE_LABELS[s]}</option>`).join('')}
+        </select>
+      </div>
+      <div class="pp-row"><label>City</label><input id="pp-f-city" value="${m.city || ''}"/></div>
+      <div class="pp-row"><label>Status</label>
+        <select id="pp-f-status">
+          <option value="active"${m.status==='active'?' selected':''}>Active</option>
+          <option value="paused"${m.status==='paused'?' selected':''}>Paused</option>
+          <option value="churned"${m.status==='churned'?' selected':''}>Churned</option>
+        </select>
+      </div>
+      <div class="pp-row"><label>Notes</label><textarea id="pp-f-notes" rows="3">${m.notes || ''}</textarea></div>
+    </div>
+
+    <div class="pp-sec">
+      <div class="pp-sec-label">Founder Wallet</div>
+      <div class="wallet-nums">
+        <div class="wallet-num"><div class="wn-label">Hrs/wk Baseline</div><div class="wn-val">${m.hours_baseline || 0}</div></div>
+        <div class="wallet-num"><div class="wn-label">Hrs/wk Current</div><div class="wn-val">${m.hours_current || 0}</div></div>
+        <div class="wallet-num"><div class="wn-label">$ Saved</div><div class="wn-val">${m.dollars_saved ? TMIAdmin.currency(m.dollars_saved) : '$0'}</div></div>
+        <div class="wallet-num"><div class="wn-label">Billing Rate</div><div class="wn-val">${m.billing_rate ? `$${m.billing_rate}/hr` : '—'}</div></div>
+      </div>
+      <div class="pp-row"><label>Billing Rate</label><input id="pp-f-rate" type="number" value="${m.billing_rate || ''}"/></div>
+      <div class="pp-row"><label>Hrs Baseline</label><input id="pp-f-hrs-base" type="number" value="${m.hours_baseline || ''}"/></div>
+      <div class="pp-row"><label>Hrs Current</label><input id="pp-f-hrs-now" type="number" value="${m.hours_current || ''}"/></div>
+    </div>
+
+    <div class="pp-sec">
+      <div class="pp-sec-label">Sprint</div>
+      <div class="pp-row"><label>Active Sprint</label>
+        <select id="pp-f-sprint">
+          <option value="false"${!m.sprint_active?' selected':''}>No</option>
+          <option value="true"${m.sprint_active?' selected':''}>Yes - Active</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="pp-sec">
+      <div class="pp-sec-label">Joined</div>
+      <div style="font-size:13px;color:var(--ink-2)">${TMIAdmin.fmt(m.join_date || m.created_at)}</div>
+    </div>
+  `;
+
+  document.getElementById('profile-panel').classList.add('open');
+}
+
+function closeProfile() {
+  document.getElementById('profile-panel').classList.remove('open');
+  currentMember = null;
+}
+
+async function saveMember() {
+  if (!currentMember) return;
+  const hoursBase = parseFloat(document.getElementById('pp-f-hrs-base').value) || 0;
+  const hoursCur = parseFloat(document.getElementById('pp-f-hrs-now').value) || 0;
+  const rate = parseFloat(document.getElementById('pp-f-rate').value) || 0;
+  const dollarsSaved = (hoursBase - hoursCur) * rate * 52; // annualized
+
+  const updated = await TMIAdmin.api('/api/fotf-members','PUT',{
+    id: currentMember.id,
+    name: document.getElementById('pp-f-name').value.trim(),
+    email: document.getElementById('pp-f-email').value.trim(),
+    business_name: document.getElementById('pp-f-biz').value.trim(),
+    stage: document.getElementById('pp-f-stage').value,
+    city: document.getElementById('pp-f-city').value.trim(),
+    status: document.getElementById('pp-f-status').value,
+    notes: document.getElementById('pp-f-notes').value.trim(),
+    billing_rate: rate || null,
+    hours_baseline: hoursBase || null,
+    hours_current: hoursCur || null,
+    dollars_saved: dollarsSaved > 0 ? dollarsSaved : null,
+    sprint_active: document.getElementById('pp-f-sprint').value === 'true',
+  });
+  if (!updated) return;
+  TMIAdmin.toast('Saved');
+  closeProfile();
+  await reload();
+}
+
+async function churnMember() {
+  if (!currentMember) return;
+  const ok = await TMIAdmin.confirm(`Mark ${currentMember.name || currentMember.email} as churned?`);
+  if (!ok) return;
+  await TMIAdmin.api(`/api/fotf-members?id=${currentMember.id}`,'DELETE');
+  TMIAdmin.toast('Member churned');
+  closeProfile();
+  await reload();
+}
+
+function viewReceipt() {
+  if (!currentMember) return;
+  const m = currentMember;
+  const joined = TMIAdmin.fmt(m.join_date || m.created_at);
+  document.getElementById('receipt-body').innerHTML = `
+    <div class="receipt-preview">
+      <div class="rp-brand">Founders of the Future · TMI Technology</div>
+      <div class="rp-num">Founder #${m.founder_number || '—'}</div>
+      <div class="rp-name">${m.name || m.email}</div>
+      <div class="rp-biz">${m.business_name || ''}</div>
+      <div class="rp-line"><span>Member Since</span><span>${joined}</span></div>
+      <div class="rp-line"><span>Stage</span><span>${STAGE_LABELS[m.stage] || m.stage || '—'}</span></div>
+      <div class="rp-line"><span>Status</span><span>Active Member</span></div>
+      <div class="rp-sig">Signed — Mia, Founder · TMI Technology</div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:16px;line-height:1.6">Use your browser's Print function (Cmd+P / Ctrl+P) and select "Save as PDF" to generate the receipt PDF.</p>
+  `;
+  TMIAdmin.openModal('receipt-modal');
+}
+
+async function reload() {
+  members = await TMIAdmin.api('/api/fotf-members') || [];
+  const now = new Date();
+  const weekAgo = new Date(now - 7 * 864e5);
+  document.getElementById('s-active').textContent   = members.filter(m => m.status === 'active').length;
+  document.getElementById('s-paused').textContent   = members.filter(m => m.status === 'paused').length;
+  document.getElementById('s-new').textContent      = members.filter(m => new Date(m.created_at) >= weekAgo).length;
+  document.getElementById('s-founding').textContent = members.filter(m => m.founder_number && m.founder_number <= 100).length;
+  renderTable();
+}
+
+reload();
+</script>
+</body>
+</html>
