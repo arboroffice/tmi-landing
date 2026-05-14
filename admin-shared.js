@@ -29,6 +29,7 @@ const TMIAdmin = (() => {
     email:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="2" y="4" width="20" height="16" rx="2"/><path stroke-linecap="round" d="m2 7 10 7 10-7"/></svg>`,
     sms:       `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
     content:   `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+    ideas:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M6.343 6.343a8 8 0 1 0 11.314 11.314A8 8 0 0 0 6.343 6.343z" opacity=".3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke-linecap="round"/></svg>`,
     settings:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
     logout:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-linecap="round"/><polyline points="16 17 21 12 16 7" stroke-linecap="round" stroke-linejoin="round"/><line x1="21" y1="12" x2="9" y2="12" stroke-linecap="round"/></svg>`,
     fotf:      `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
@@ -90,6 +91,7 @@ const TMIAdmin = (() => {
     ${navItem('sms', 'SMS', I.sms)}
     <div class="sb-group-label">Content</div>
     ${navItem('content', 'Field Notes', I.content)}
+    ${navItem('content-ideas', 'Social Ideas', I.ideas)}
     <div class="sb-group-label">FOTF</div>
     ${navItem('fotf-dashboard', 'Home', I.fotf)}
     ${navItem('fotf-newsletter', 'Newsletter', I.newsletter)}
@@ -248,6 +250,7 @@ const TMIAdmin = (() => {
         'retail':'badge-physical', 'restaurant':'badge-physical', 'not-yet':'badge-draft',
         reviewed:'badge-contacted', scheduled:'badge-qualified', accepted:'badge-won', rejected:'badge-lost',
         idea:'badge-draft', writing:'badge-qualified', ready:'badge-proposal', published:'badge-won',
+        scripted:'badge-new', filming:'badge-physical', editing:'badge-proposal', scheduled:'badge-qualified', posted:'badge-won', archived:'badge-lost',
         scoping:'badge-new', delivered:'badge-won', cancelled:'badge-lost',
         paid:'badge-won', overdue:'badge-failed', unpaid:'badge-proposal',
         high:'badge-failed', normal:'badge-draft', low:'badge-lost',

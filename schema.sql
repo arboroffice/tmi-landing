@@ -162,6 +162,25 @@ CREATE TABLE IF NOT EXISTS sms_log (
   created_at   TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Social / video content ideas pipeline
+CREATE TABLE IF NOT EXISTS content_ideas (
+  id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title        TEXT NOT NULL,
+  hook         TEXT,
+  notes        TEXT,
+  world        TEXT CHECK (world IN ('online','physical','intersection','mission')),
+  territory    TEXT,
+  formats      TEXT[],
+  series       TEXT,
+  status       TEXT DEFAULT 'idea' CHECK (status IN ('idea','scripted','filming','editing','scheduled','posted','archived')),
+  platforms    TEXT[],
+  post_url     TEXT,
+  scheduled_at TIMESTAMPTZ,
+  posted_at    TIMESTAMPTZ,
+  created_at   TIMESTAMPTZ DEFAULT NOW(),
+  updated_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Content calendar
 CREATE TABLE IF NOT EXISTS content_items (
   id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -219,6 +238,8 @@ CREATE INDEX IF NOT EXISTS idx_invoices_status       ON invoices(status);
 CREATE INDEX IF NOT EXISTS idx_invoices_client       ON invoices(client_id);
 CREATE INDEX IF NOT EXISTS idx_projects_client       ON projects(client_id);
 CREATE INDEX IF NOT EXISTS idx_proposals_lead        ON proposals(lead_id);
+CREATE INDEX IF NOT EXISTS idx_content_ideas_world   ON content_ideas(world);
+CREATE INDEX IF NOT EXISTS idx_content_ideas_status  ON content_ideas(status);
 CREATE INDEX IF NOT EXISTS idx_content_publish       ON content_items(publish_date);
 CREATE INDEX IF NOT EXISTS idx_campaigns_status      ON email_campaigns(status);
 CREATE INDEX IF NOT EXISTS idx_sends_campaign        ON email_sends(campaign_id);
@@ -237,6 +258,7 @@ DROP TRIGGER IF EXISTS followups_updated    ON followups;
 DROP TRIGGER IF EXISTS invoices_updated     ON invoices;
 DROP TRIGGER IF EXISTS projects_updated     ON projects;
 DROP TRIGGER IF EXISTS proposals_updated    ON proposals;
+DROP TRIGGER IF EXISTS content_ideas_updated ON content_ideas;
 DROP TRIGGER IF EXISTS content_updated      ON content_items;
 
 CREATE TRIGGER contacts_updated     BEFORE UPDATE ON contacts      FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -247,4 +269,5 @@ CREATE TRIGGER followups_updated    BEFORE UPDATE ON followups     FOR EACH ROW 
 CREATE TRIGGER invoices_updated     BEFORE UPDATE ON invoices      FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER projects_updated     BEFORE UPDATE ON projects      FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER proposals_updated    BEFORE UPDATE ON proposals     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER content_ideas_updated BEFORE UPDATE ON content_ideas  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER content_updated      BEFORE UPDATE ON content_items FOR EACH ROW EXECUTE FUNCTION update_updated_at();

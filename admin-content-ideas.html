@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Social Ideas — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+.world-tabs{display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap;}
+.world-tab{font-size:12px;padding:5px 16px;border-radius:999px;border:1px solid var(--line);cursor:pointer;background:none;color:var(--ink-2);font-family:inherit;transition:background 0.1s,color 0.1s,border-color 0.1s;}
+.world-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+.ideas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.idea-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:box-shadow 0.15s,transform 0.15s;}
+.idea-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.08);transform:translateY(-1px);}
+
+.idea-card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.world-pill{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:3px 10px;border-radius:999px;}
+.wp-online{background:#dbeafe;color:#1d4ed8;}
+.wp-physical{background:#fed7aa;color:#c2410c;}
+.wp-intersection{background:#ede9fe;color:#6d28d9;}
+.wp-mission{background:#E4FF97;color:#0a0b14;}
+
+.idea-title{font-size:14px;font-weight:600;color:var(--ink);line-height:1.35;}
+.idea-territory{font-size:11px;color:var(--muted);letter-spacing:0.04em;}
+.idea-formats{display:flex;flex-wrap:wrap;gap:4px;}
+.fmt-tag{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg-alt);color:var(--ink-2);font-weight:500;}
+.idea-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
+.idea-series{font-size:10px;color:var(--muted);font-style:italic;}
+
+.empty-state{padding:64px 32px;text-align:center;color:var(--muted);font-size:14px;border:1px dashed var(--line);border-radius:8px;}
+
+/* Panel */
+.panel-field{margin-bottom:16px;}
+.panel-label-sm{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.panel-val{font-size:14px;color:var(--ink);line-height:1.5;}
+.panel-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
+
+/* Format checkboxes */
+.fmt-checks{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.fmt-check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);cursor:pointer;}
+.fmt-check input{margin:0;cursor:pointer;}
+
+/* Platform checks */
+.plat-checks{display:flex;flex-wrap:wrap;gap:8px;}
+.plat-check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);cursor:pointer;}
+.plat-check input{margin:0;cursor:pointer;}
+
+.status-progress{display:flex;gap:0;margin:16px 0;overflow:hidden;border-radius:4px;border:1px solid var(--line);}
+.sp-step{flex:1;padding:6px 4px;text-align:center;font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;background:var(--bg-alt);color:var(--muted);cursor:pointer;transition:background 0.1s,color 0.1s;border-right:1px solid var(--line);}
+.sp-step:last-child{border-right:none;}
+.sp-step.active{background:var(--ink);color:#fff;}
+.sp-step.done{background:var(--chart);color:#0a0b14;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <a href="/admin-dashboard">TMI Admin</a>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="page">Social Ideas</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openNew()">+ Add Idea</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Stats -->
+      <div class="stats-row" style="grid-template-columns:repeat(5,1fr)">
+        <div class="stat-box"><div class="stat-label">Total Ideas</div><div class="stat-val" id="s-total">—</div><div class="stat-delta">in the bank</div></div>
+        <div class="stat-box"><div class="stat-label">Idea</div><div class="stat-val" id="s-idea">—</div><div class="stat-delta">not started</div></div>
+        <div class="stat-box"><div class="stat-label">In Production</div><div class="stat-val" id="s-prod">—</div><div class="stat-delta">scripted / filming / editing</div></div>
+        <div class="stat-box"><div class="stat-label">Scheduled</div><div class="stat-val" id="s-sched">—</div><div class="stat-delta">ready to post</div></div>
+        <div class="stat-box"><div class="stat-label">Posted</div><div class="stat-val" id="s-posted">—</div><div class="stat-delta">live content</div></div>
+      </div>
+
+      <!-- World tabs -->
+      <div class="world-tabs">
+        <button class="world-tab active" onclick="setWorld('',this)">All</button>
+        <button class="world-tab" onclick="setWorld('online',this)">Online World</button>
+        <button class="world-tab" onclick="setWorld('physical',this)">Physical World</button>
+        <button class="world-tab" onclick="setWorld('intersection',this)">Intersection</button>
+        <button class="world-tab" onclick="setWorld('mission',this)">Mission</button>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+          <input id="ci-search" placeholder="Search ideas..." oninput="render()"/>
+        </div>
+        <select class="filter-select" id="ci-status" onchange="render()">
+          <option value="">All statuses</option>
+          <option value="idea">Idea</option>
+          <option value="scripted">Scripted</option>
+          <option value="filming">Filming</option>
+          <option value="editing">Editing</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="posted">Posted</option>
+          <option value="archived">Archived</option>
+        </select>
+        <select class="filter-select" id="ci-series" onchange="render()">
+          <option value="">All series</option>
+          <option value="if-i-owned">If I Owned a</option>
+          <option value="400k">$400k Series</option>
+          <option value="ai-reaction">AI Tool Reaction</option>
+          <option value="build-series">Build Series</option>
+          <option value="founder">Founder Series</option>
+          <option value="confessional">Confessional Series</option>
+        </select>
+        <span class="filter-count" id="ci-count"></span>
+      </div>
+
+      <!-- Grid -->
+      <div class="ideas-grid" id="ci-grid">
+        <div class="empty-state">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="ci-modal">
+  <div class="modal" style="max-width:600px;padding:28px;max-height:90vh;overflow-y:auto">
+    <div class="modal-hd">
+      <h3 class="modal-title" id="ci-modal-title">Add Idea</h3>
+      <button class="modal-x" onclick="TMIAdmin.closeModal('ci-modal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <input type="hidden" id="ci-id"/>
+
+    <div class="form-group">
+      <label class="form-label">Title <span style="color:var(--red)">*</span></label>
+      <input class="form-input" id="ci-title" placeholder="The idea in one line"/>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">World</label>
+        <select class="form-input" id="ci-world">
+          <option value="">— Select world —</option>
+          <option value="online">Online World</option>
+          <option value="physical">Physical World</option>
+          <option value="intersection">Intersection</option>
+          <option value="mission">Mission & Movement</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="ci-status-field">
+          <option value="idea">Idea</option>
+          <option value="scripted">Scripted</option>
+          <option value="filming">Filming</option>
+          <option value="editing">Editing</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="posted">Posted</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Territory</label>
+        <input class="form-input" id="ci-territory" placeholder="e.g. The System Working Unseen"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Series</label>
+        <select class="form-input" id="ci-series-field">
+          <option value="">None</option>
+          <option value="if-i-owned">If I Owned a</option>
+          <option value="400k">$400k Series</option>
+          <option value="ai-reaction">AI Tool Reaction</option>
+          <option value="build-series">Build Series</option>
+          <option value="founder">Founder Series</option>
+          <option value="confessional">Confessional Series</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Format</label>
+      <div class="fmt-checks">
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="raw-moment"/> Raw Moment</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="reality-clip"/> Reality Clip</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="build-document"/> Build Document</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="confessional"/> Confessional</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="controversial-take"/> Controversial Take</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="reaction"/> Reaction</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="interview"/> Interview</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="founder-talking-head"/> Founder Talking Head</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Platforms</label>
+      <div class="plat-checks">
+        <label class="plat-check"><input type="checkbox" name="plat" value="tiktok"/> TikTok</label>
+        <label class="plat-check"><input type="checkbox" name="plat" value="instagram"/> Instagram</label>
+        <label class="plat-check"><input type="checkbox" name="plat" value="linkedin"/> LinkedIn</label>
+        <label class="plat-check"><input type="checkbox" name="plat" value="youtube"/> YouTube</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Hook / Caption</label>
+      <textarea class="form-input" id="ci-hook" rows="2" placeholder="Opening line or on-screen text" style="resize:vertical"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="ci-notes" rows="3" placeholder="Scene details, angles, specific numbers, references..." style="resize:vertical"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Scheduled At</label>
+        <input class="form-input" type="datetime-local" id="ci-scheduled-at"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Post URL</label>
+        <input class="form-input" id="ci-post-url" placeholder="https://tiktok.com/..."/>
+      </div>
+    </div>
+
+    <div class="modal-ft" style="margin-top:8px">
+      <button class="btn btn-ghost btn-sm" id="ci-delete-btn" onclick="deleteIdea()" style="display:none;color:var(--red)">Delete</button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('ci-modal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="saveIdea()">Save Idea</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root" class="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('content-ideas');
+
+const WORLD_LABELS = { online:'Online World', physical:'Physical World', intersection:'Intersection', mission:'Mission' };
+const SERIES_LABELS = {
+  'if-i-owned':'If I Owned a', '400k':'$400k Series', 'ai-reaction':'AI Tool Reaction',
+  'build-series':'Build Series', 'founder':'Founder Series', 'confessional':'Confessional'
+};
+const FMT_LABELS = {
+  'raw-moment':'Raw Moment','reality-clip':'Reality Clip','build-document':'Build Document',
+  'confessional':'Confessional','controversial-take':'Controversial Take',
+  'reaction':'Reaction','interview':'Interview','founder-talking-head':'Founder Talking Head'
+};
+const STATUS_ORDER = ['idea','scripted','filming','editing','scheduled','posted','archived'];
+
+let all = [];
+let worldFilter = '';
+
+async function load() {
+  all = await TMIAdmin.api('/api/content-ideas') || [];
+  updateStats();
+  render();
+}
+
+function updateStats() {
+  document.getElementById('s-total').textContent = all.length;
+  document.getElementById('s-idea').textContent = all.filter(i => i.status === 'idea').length;
+  document.getElementById('s-prod').textContent = all.filter(i => ['scripted','filming','editing'].includes(i.status)).length;
+  document.getElementById('s-sched').textContent = all.filter(i => i.status === 'scheduled').length;
+  document.getElementById('s-posted').textContent = all.filter(i => i.status === 'posted').length;
+}
+
+function setWorld(w, btn) {
+  worldFilter = w;
+  document.querySelectorAll('.world-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  const search = document.getElementById('ci-search').value.toLowerCase();
+  const status = document.getElementById('ci-status').value;
+  const series = document.getElementById('ci-series').value;
+
+  let filtered = all.filter(i => {
+    if (worldFilter && i.world !== worldFilter) return false;
+    if (status && i.status !== status) return false;
+    if (series && i.series !== series) return false;
+    if (search && !i.title.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  document.getElementById('ci-count').textContent = `${filtered.length} idea${filtered.length !== 1 ? 's' : ''}`;
+  const grid = document.getElementById('ci-grid');
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty-state">No ideas match. <a href="#" onclick="openNew();return false">Add one.</a></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(i => {
+    const wc = i.world ? `wp-${i.world}` : '';
+    const fmts = (i.formats || []).map(f => `<span class="fmt-tag">${FMT_LABELS[f] || f}</span>`).join('');
+    return `<div class="idea-card" onclick="openEdit(${JSON.stringify(i).replace(/"/g,'&quot;')})">
+      <div class="idea-card-top">
+        ${i.world ? `<span class="world-pill ${wc}">${WORLD_LABELS[i.world] || i.world}</span>` : ''}
+        ${TMIAdmin.badge(i.status)}
+      </div>
+      <div class="idea-title">${i.title}</div>
+      ${i.territory ? `<div class="idea-territory">${i.territory}</div>` : ''}
+      ${fmts ? `<div class="idea-formats">${fmts}</div>` : ''}
+      <div class="idea-footer">
+        <span class="idea-series">${i.series ? (SERIES_LABELS[i.series] || i.series) : ''}</span>
+        ${i.post_url ? `<a href="${i.post_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;color:var(--ink-2)">View post &rarr;</a>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openNew() {
+  document.getElementById('ci-id').value = '';
+  document.getElementById('ci-modal-title').textContent = 'Add Idea';
+  document.getElementById('ci-delete-btn').style.display = 'none';
+  clearForm();
+  TMIAdmin.openModal('ci-modal');
+}
+
+function openEdit(idea) {
+  document.getElementById('ci-id').value = idea.id;
+  document.getElementById('ci-modal-title').textContent = 'Edit Idea';
+  document.getElementById('ci-delete-btn').style.display = 'block';
+  fillForm(idea);
+  TMIAdmin.openModal('ci-modal');
+}
+
+function clearForm() {
+  ['ci-title','ci-hook','ci-notes','ci-territory','ci-post-url','ci-scheduled-at'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('ci-world').value = '';
+  document.getElementById('ci-status-field').value = 'idea';
+  document.getElementById('ci-series-field').value = '';
+  document.querySelectorAll('input[name="fmt"]').forEach(cb => cb.checked = false);
+  document.querySelectorAll('input[name="plat"]').forEach(cb => cb.checked = false);
+}
+
+function fillForm(i) {
+  document.getElementById('ci-title').value = i.title || '';
+  document.getElementById('ci-world').value = i.world || '';
+  document.getElementById('ci-status-field').value = i.status || 'idea';
+  document.getElementById('ci-territory').value = i.territory || '';
+  document.getElementById('ci-series-field').value = i.series || '';
+  document.getElementById('ci-hook').value = i.hook || '';
+  document.getElementById('ci-notes').value = i.notes || '';
+  document.getElementById('ci-post-url').value = i.post_url || '';
+  document.getElementById('ci-scheduled-at').value = i.scheduled_at ? i.scheduled_at.slice(0,16) : '';
+  document.querySelectorAll('input[name="fmt"]').forEach(cb => {
+    cb.checked = (i.formats || []).includes(cb.value);
+  });
+  document.querySelectorAll('input[name="plat"]').forEach(cb => {
+    cb.checked = (i.platforms || []).includes(cb.value);
+  });
+}
+
+function getFormData() {
+  const formats = [...document.querySelectorAll('input[name="fmt"]:checked')].map(c => c.value);
+  const platforms = [...document.querySelectorAll('input[name="plat"]:checked')].map(c => c.value);
+  return {
+    title: document.getElementById('ci-title').value.trim(),
+    world: document.getElementById('ci-world').value || null,
+    status: document.getElementById('ci-status-field').value,
+    territory: document.getElementById('ci-territory').value.trim() || null,
+    series: document.getElementById('ci-series-field').value || null,
+    hook: document.getElementById('ci-hook').value.trim() || null,
+    notes: document.getElementById('ci-notes').value.trim() || null,
+    post_url: document.getElementById('ci-post-url').value.trim() || null,
+    scheduled_at: document.getElementById('ci-scheduled-at').value || null,
+    formats: formats.length ? formats : null,
+    platforms: platforms.length ? platforms : null,
+  };
+}
+
+async function saveIdea() {
+  const id = document.getElementById('ci-id').value;
+  const body = getFormData();
+  if (!body.title) { TMIAdmin.toast('Title required', 'error'); return; }
+  if (id) body.id = id;
+  const result = await TMIAdmin.api('/api/content-ideas', id ? 'PUT' : 'POST', body);
+  if (!result) return;
+  TMIAdmin.closeModal('ci-modal');
+  TMIAdmin.toast(id ? 'Idea updated' : 'Idea added');
+  await load();
+}
+
+async function deleteIdea() {
+  const id = document.getElementById('ci-id').value;
+  if (!id) return;
+  const ok = await TMIAdmin.confirm('Delete this idea permanently?');
+  if (!ok) return;
+  const result = await TMIAdmin.api(`/api/content-ideas?id=${id}`, 'DELETE');
+  if (!result) return;
+  TMIAdmin.closeModal('ci-modal');
+  TMIAdmin.toast('Idea deleted');
+  await load();
+}
+
+load();
+</script>
+</body>
+</html>
