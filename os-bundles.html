@@ -309,6 +309,70 @@
     .included-block { padding: 40px 28px; }
   }
 
+  /* ── INDUSTRY PLAYBOOKS SECTION ── */
+  .playbooks-section {
+    background: var(--bg-deep); padding: 120px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .playbooks-head {
+    text-align: center; max-width: 640px; margin: 0 auto 72px;
+  }
+  .playbooks-eyebrow {
+    font-family: var(--sans); font-size: 11px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: rgba(255,255,255,0.3);
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 20px;
+  }
+  .playbooks-head h2 {
+    font-family: var(--serif);
+    font-size: clamp(32px, 3.8vw, 56px);
+    font-weight: 400; letter-spacing: -0.02em; line-height: 1.1;
+    color: #fff; margin-top: 12px; margin-bottom: 20px;
+  }
+  .playbooks-sub {
+    font-family: var(--sans); font-size: clamp(14px, 1.1vw, 16px);
+    color: rgba(255,255,255,0.38); line-height: 1.65;
+  }
+  .playbooks-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2px; background: rgba(255,255,255,0.06);
+    border-radius: 2px; overflow: hidden;
+  }
+  .playbook-card {
+    background: #fff; padding: 44px 40px;
+    display: flex; flex-direction: column; gap: 24px;
+  }
+  .playbook-industry {
+    font-family: var(--sans); font-size: 13px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink); display: flex; align-items: center; gap: 10px;
+  }
+  .playbook-industry::before {
+    content: ''; display: block; width: 20px; height: 2px;
+    background: var(--chart); flex: none;
+  }
+  .playbook-outcomes {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .playbook-outcomes li {
+    font-family: var(--sans); font-size: 13px; line-height: 1.55;
+    color: var(--ink-2); padding-left: 16px; position: relative;
+  }
+  .playbook-outcomes li::before {
+    content: ''; display: block; position: absolute;
+    left: 0; top: 8px; width: 5px; height: 5px;
+    border-radius: 50%; background: var(--chart); flex: none;
+  }
+  @media (max-width: 900px) {
+    .playbooks-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 580px) {
+    .playbooks-grid { grid-template-columns: 1fr; }
+    .playbook-card { padding: 36px 24px; }
+    .playbooks-section { padding: 80px 0; }
+  }
+
   /* ── DIFFERENCE SECTION ── */
   .diff-section {
     background: var(--bg-deep); padding: 120px 0;
@@ -468,8 +532,8 @@
   <div class="hero-glow"></div>
   <div class="hero-content">
     <p class="hero-kicker">Business OS</p>
-    <h1>The operating system<br><em>for your kind of business.</em></h1>
-    <p class="hero-deck">TMI builds and installs a complete AI operating system tailored to how your business actually runs. Physical or digital - pick your bundle.</p>
+    <h1>The operating system,<br><em>built for your industry.</em></h1>
+    <p class="hero-deck">Every OS bundle comes pre-loaded with industry playbooks built from real deployments. Proven in the field. Installed in your operation.</p>
     <div class="hero-actions">
       <a href="#physical" class="btn btn-outline-white">Physical Business &rarr;</a>
       <a href="#online" class="btn btn-primary">Online Business &rarr;</a>
@@ -615,6 +679,80 @@
         <h3>Done-for-you build and install</h3>
         <p>TMI doesn't hand you a tool and a tutorial. We build the system, install it in your business, train your team, and stay in the build until it runs. You don't go live until it works.</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- INDUSTRY PLAYBOOKS -->
+<section class="playbooks-section">
+  <div class="container">
+    <div class="playbooks-head reveal">
+      <p class="playbooks-eyebrow">Industry Playbooks</p>
+      <h2>Proven systems for your specific industry.</h2>
+      <p class="playbooks-sub">Every OS bundle comes pre-configured with playbooks built from real deployments. Not templates. Systems that have already run in businesses like yours.</p>
+    </div>
+    <div class="playbooks-grid reveal reveal-d1">
+
+      <div class="playbook-card">
+        <div class="playbook-industry">HVAC</div>
+        <ul class="playbook-outcomes">
+          <li>Seasonal PM calendar fills automatically based on install dates and contract terms</li>
+          <li>Equipment replacement predicted before failure - not after the call comes in</li>
+          <li>No-show emergency calls eliminated with automated dispatch confirmation</li>
+          <li>Maintenance agreements that don't lapse because no one remembered to call</li>
+        </ul>
+      </div>
+
+      <div class="playbook-card">
+        <div class="playbook-industry">Construction</div>
+        <ul class="playbook-outcomes">
+          <li>Subcontractor compliance tracked without a coordinator chasing certificates</li>
+          <li>Change orders captured before work starts - not after the invoice argument</li>
+          <li>Daily site reports that never get skipped, regardless of who's on site</li>
+          <li>RFIs that don't fall through because someone's inbox got too full</li>
+        </ul>
+      </div>
+
+      <div class="playbook-card">
+        <div class="playbook-industry">Roofing</div>
+        <ul class="playbook-outcomes">
+          <li>Insurance claim workflow that closes faster than any competitor in your market</li>
+          <li>Material waste eliminated on every estimate before the job is sold</li>
+          <li>Weather windows maximized with automated crew and material staging</li>
+          <li>Four-step close-out that captures every referral before the crew leaves the driveway</li>
+        </ul>
+      </div>
+
+      <div class="playbook-card">
+        <div class="playbook-industry">Plumbing</div>
+        <ul class="playbook-outcomes">
+          <li>Emergency calls answered in under 3 minutes any hour without a dispatcher on duty</li>
+          <li>Every address has a complete service history before the tech pulls up</li>
+          <li>Service agreement conversions run on every eligible job without a sales pitch</li>
+          <li>Callbacks tracked to root cause so the same fix stops getting repeated</li>
+        </ul>
+      </div>
+
+      <div class="playbook-card">
+        <div class="playbook-industry">Electrical</div>
+        <ul class="playbook-outcomes">
+          <li>Permits and inspections tracked across the entire backlog - nothing falls through</li>
+          <li>Change orders signed before work continues, not after the scope doubles</li>
+          <li>Crews matched to license requirements on every job, automatically</li>
+          <li>Inspection failures logged and routed to correction before reinspection costs stack up</li>
+        </ul>
+      </div>
+
+      <div class="playbook-card">
+        <div class="playbook-industry">Landscaping</div>
+        <ul class="playbook-outcomes">
+          <li>Route optimization cuts 2+ hours of drive time per day across your whole crew</li>
+          <li>Seasonal upsells run without making a single outbound call</li>
+          <li>Chemical application logs always compliant - no scrambling before an inspection</li>
+          <li>Property notes carry forward automatically so every crew knows the history</li>
+        </ul>
+      </div>
+
     </div>
   </div>
 </section>
