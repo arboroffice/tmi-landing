@@ -649,10 +649,42 @@ function submitContact(e) {
     email: document.getElementById('cf-email').value.trim(),
     phone: document.getElementById('cf-phone').value.trim(),
   };
+  // Fire-and-forget: save contact + schedule 10-min nudge
+  fetch('/api/audit-start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(contactInfo),
+  }).catch(() => {});
   document.getElementById('screen-contact').classList.add('screen-hidden');
   document.getElementById('screen-quiz').classList.remove('screen-hidden');
   renderQuestion(0);
 }
+
+// Handle ?resume=1 params — pre-fill contact form and skip straight to quiz
+(function checkResume() {
+  const p = new URLSearchParams(window.location.search);
+  if (!p.get('resume')) return;
+  contactInfo = {
+    name: p.get('n') || '',
+    email: p.get('e') || '',
+    phone: p.get('p') || '',
+    company: p.get('c') || '',
+  };
+  if (!contactInfo.email) return;
+  // Pre-fill fields then skip to quiz
+  document.addEventListener('DOMContentLoaded', () => {
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    setVal('cf-name', contactInfo.name);
+    setVal('cf-email', contactInfo.email);
+    setVal('cf-phone', contactInfo.phone);
+    setVal('cf-company', contactInfo.company);
+  });
+  // Skip intro + contact screens straight to quiz
+  document.getElementById('screen-intro').classList.add('screen-hidden');
+  document.getElementById('screen-contact').classList.add('screen-hidden');
+  document.getElementById('screen-quiz').classList.remove('screen-hidden');
+  renderQuestion(0);
+})();
 
 function showResults() {
   window.scrollTo(0,0);
