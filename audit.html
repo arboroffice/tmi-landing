@@ -392,12 +392,12 @@ const Q2_CATS = [
     {label:"Steel / Structural",val:"construction_steel"},{label:"Waterproofing",val:"construction_waterproofing"},
     {label:"Other",val:"construction_other"},
   ]},
-  {label:"Oil, Gas & Energy",val:"energy",subs:[
+  {label:"Oil, Gas, Energy & Mining",val:"energy",subs:[
     {label:"Oilfield Services",val:"energy_oilfield"},{label:"Pipeline",val:"energy_pipeline"},
     {label:"Wellsite Construction",val:"energy_wellsite"},{label:"Midstream / Compression",val:"energy_midstream"},
     {label:"Refinery / Petrochemical",val:"energy_refinery"},{label:"Renewables / Solar",val:"energy_solar"},
     {label:"Wind Energy",val:"energy_wind"},{label:"Electrical Utilities / Linework",val:"energy_linework"},
-    {label:"Other",val:"energy_other"},
+    {label:"Mining / Extraction",val:"energy_mining"},{label:"Other",val:"energy_other"},
   ]},
   {label:"Manufacturing",val:"manufacturing",subs:[
     {label:"Machine Shop / CNC Fabrication",val:"manufacturing_machineshop"},{label:"Welding / Metal Fabrication",val:"manufacturing_welding"},
@@ -419,6 +419,21 @@ const Q2_CATS = [
     {label:"Cleaning / Janitorial",val:"homeservice_cleaning"},{label:"Painting",val:"homeservice_painting"},
     {label:"Flooring",val:"homeservice_flooring"},{label:"Restoration / Remediation",val:"homeservice_restoration"},
     {label:"Fencing",val:"homeservice_fencing"},{label:"Other",val:"homeservice_other"},
+  ]},
+  {label:"Agriculture",val:"agriculture",subs:[
+    {label:"Crop Farming / Grain",val:"agriculture_crop"},{label:"Livestock / Cattle",val:"agriculture_livestock"},
+    {label:"Specialty / Horticulture",val:"agriculture_specialty"},{label:"Agribusiness / Co-op",val:"agriculture_agribusiness"},
+    {label:"Other",val:"agriculture_other"},
+  ]},
+  {label:"Healthcare & Medical",val:"healthcare",subs:[
+    {label:"Dental Practice",val:"healthcare_dental"},{label:"Medical Clinic / Group",val:"healthcare_medical"},
+    {label:"Physical Therapy / Rehab",val:"healthcare_pt"},{label:"Chiro / Alternative Medicine",val:"healthcare_chiro"},
+    {label:"Veterinary",val:"healthcare_vet"},{label:"Other",val:"healthcare_other"},
+  ]},
+  {label:"Professional Services",val:"professional",subs:[
+    {label:"Law Firm / Legal",val:"professional_legal"},{label:"Real Estate / Brokerage",val:"professional_realestate"},
+    {label:"Fitness / Gym / Studio",val:"professional_fitness"},{label:"Financial Advisory",val:"professional_finance"},
+    {label:"Insurance Agency",val:"professional_insurance"},{label:"Other",val:"professional_other"},
   ]},
 ];
 
@@ -495,6 +510,21 @@ const INDUSTRY_PAIN = {
     {title:"Seasonal Swings Create Chaos In Both Directions",body:"You go from completely slammed to painfully slow and your systems handle neither extreme. Busy seasons drop balls and miss follow ups. Slow seasons lose your best people to competitors who kept them busy. Infrastructure smooths both curves."},
     {title:"Recurring Revenue And Maintenance Agreements Are Leaking",body:"Maintenance plans, annual service agreements, seasonal tune-ups. These should be your most profitable and most stable revenue. Without an automated renewal and follow up system, clients drift away and you never know until they are already with someone else."},
   ],
+  agriculture:[
+    {title:"Seasonal Labor and Harvest Coordination Is Still Done By Phone and Paper",body:"When harvest hits, you need the right crew, the right equipment, and the right timing all aligned at once. Managing seasonal workforce, contractor scheduling, and equipment availability through calls, texts, and spreadsheets is how operations lose days they cannot get back."},
+    {title:"Equipment Downtime During Critical Windows Costs More Than the Repair",body:"A piece of equipment going down during planting or harvest is not just a repair cost. It is yield lost, windows missed, and margin gone. Without predictive maintenance tracking and fast escalation, the first sign of a problem is usually the breakdown itself."},
+    {title:"Input Costs and Profitability Are Estimated Not Tracked",body:"Fuel, chemicals, labor, and equipment time add up on every job and every season. Most operations track these loosely and find out after the fact whether a season was profitable. Real time input tracking against yield and revenue is how margins get managed instead of guessed."},
+  ],
+  healthcare:[
+    {title:"Your Front Desk Is The Bottleneck Between Patients and Revenue",body:"Every call that goes unanswered, every appointment that does not get confirmed, every no-show with no follow up is revenue that evaporated. Without automated appointment management, confirmation sequences, and recall systems, your schedule runs below capacity and you never see the lost revenue."},
+    {title:"Patient Reactivation Is Manual And Gets Skipped When You Are Busy",body:"Patients who have not been in for six or twelve months are your easiest and lowest-cost appointments to recover. Without an automated recall and reactivation system reaching out to them, that revenue goes to whoever stays in front of them."},
+    {title:"Insurance Verification and Billing Delays Slow Your Cash Flow",body:"Claims sitting in the queue, eligibility checks done manually, billing errors caught weeks after the visit. Every step of the billing cycle done manually is a delay in cash flow. The practices that win on margin are the ones that have automated it."},
+  ],
+  professional_services:[
+    {title:"New Client Intake and Onboarding Requires Personal Involvement Every Time",body:"Every new client means the same intake conversation, the same document collection, the same explanation of process. Without a systematized onboarding that handles itself, every new engagement creates administrative overhead that consumes billable hours."},
+    {title:"Follow Up On Consultations and Warm Leads Is Inconsistent",body:"Someone schedules a consultation, you meet with them, and the follow up depends on whether someone remembered to send it. Without automated sequences running after every consultation, leads that were almost ready to engage go cold and find someone else."},
+    {title:"Referral Generation Is Passive When It Should Be Systematic",body:"Most professional service firms run on referrals but have no system generating them consistently. A client finishes an engagement and nothing asks for a referral at the right moment. An automated referral and review request sequence running after every closed matter is the highest ROI marketing most firms never install."},
+  ],
 };
 
 const TIER_STEPS = {
@@ -564,6 +594,9 @@ const INDUSTRY_STEPS = {
   manufacturing:{key:"is_manufacturing",name:"Build Production Visibility and Quoting Automation",desc:"The margin in manufacturing lives in the gap between estimated and actual job cost. Real time visibility into production, combined with accurate automated quoting, closes that gap.",bullets:["Live production dashboard showing job status, bottlenecks, and machine utilization","Automated quoting system pulling from current labor and material cost data","Job costing that captures actual vs estimated in real time not after the fact","Workforce scheduling and capacity planning driven by data not gut feel"]},
   fleet_logistics:{key:"is_fleet",name:"Install Dispatch Intelligence and Compliance Automation",desc:"In fleet operations the margin is in the routes you optimize and the compliance gaps you close. Both are automated infrastructure problems not management problems.",bullets:["AI-powered dispatch and route optimization running continuously","DOT compliance, HOS tracking, and vehicle inspection documentation automated","Driver and dispatch communication centralized and logged automatically","Customer delivery updates triggered by real location and status data"]},
   home_service:{key:"is_home",name:"Install 24/7 Lead Capture and Recurring Revenue Infrastructure",desc:"In home services the job goes to whoever responds first and the most profitable clients are the ones who come back every season. Both require infrastructure not manual effort.",bullets:["24/7 AI phone and web response so no lead goes unanswered after hours","Automated booking that fills your schedule without office staff involvement","Maintenance agreement and seasonal renewal follow up running automatically","Review request sequences triggered after every completed job"]},
+  agriculture:{key:"is_agriculture",name:"Build Seasonal Workforce Coordination and Equipment Tracking Infrastructure",desc:"Agriculture operations run on narrow windows where every day of downtime costs real money. Infrastructure that keeps equipment running, crews coordinated, and input costs visible protects margin when it matters most.",bullets:["Equipment maintenance tracking with alerts before failure not after breakdown","Seasonal workforce coordination and scheduling built for variable crew size","Input cost tracking capturing fuel, chemicals, and labor against job and season in real time","Vendor and supplier follow up automation so materials arrive when needed"]},
+  healthcare:{key:"is_healthcare",name:"Install Automated Scheduling, Patient Reactivation, and Billing Follow Up",desc:"The margin in healthcare lives in schedule utilization and billing cycle speed. Both are infrastructure problems. The practice with the best systems fills the schedule faster and collects faster.",bullets:["Appointment confirmation and reminder sequences that cut no-show rates automatically","Patient reactivation campaigns that identify and reach lapsed patients without manual outreach","Insurance eligibility verification automated before appointments not after","Review request sequences triggered after every completed visit"]},
+  professional_services:{key:"is_professional",name:"Build Client Onboarding, Lead Nurture, and Referral Infrastructure",desc:"Professional service firms bill for time and expertise. Every hour spent on intake, follow up, and client communication is an hour not billed. Infrastructure handles the administrative layer so your time stays on the work.",bullets:["Client intake and onboarding workflow that delivers documents and captures information without your involvement","Consultation follow up sequences that nurture prospects automatically after the first meeting","Referral request automation triggered at the right moment after every closed engagement","Client communication updates sent automatically so status questions never route to you"]},
 };
 
 const OPEN_QS = [
@@ -698,34 +731,10 @@ function showResults() {
 
 async function submitAuditToAPI(r) {
   try {
-    const openAnswers = OPEN_QS
-      .map(q => answers[q.id] ? q.text + '\n' + answers[q.id] : '')
-      .filter(Boolean).join('\n\n');
-
-    const emailBody = [
-      'Name: ' + contactInfo.name,
-      'Company: ' + contactInfo.company,
-      'Email: ' + contactInfo.email,
-      'Phone: ' + (contactInfo.phone || 'Not provided'),
-      '',
-      'Business Type: ' + (r.bizType === 'online' ? 'Online' : 'Physical / Field'),
-      'Industry: ' + (answers.q2 || 'Not selected'),
-      'Result Tier: ' + TIERS[r.tierKey].name,
-      'Dependency Score: ' + r.depPct + '%',
-      'Worst Category: ' + r.worstCat,
-      '',
-      openAnswers ? 'Open Answers:\n' + openAnswers : '',
-    ].filter(Boolean).join('\n');
-
-    const fd = new FormData();
-    fd.append('name', contactInfo.name);
-    fd.append('email', contactInfo.email);
-    fd.append('_subject', 'New TMI Audit - ' + contactInfo.name + ' | ' + TIERS[r.tierKey].name);
-    fd.append('message', emailBody);
-    await fetch('https://formsubmit.co/ajax/support@tmitechai.com', {
+    await fetch('/api/audit-submit', {
       method: 'POST',
-      headers: {'Accept':'application/json'},
-      body: fd,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contact: contactInfo, results: r, answers: answers }),
     });
   } catch(e) {}
 }
@@ -937,6 +946,9 @@ function getPainGroup(industryVal) {
   if (industryVal.startsWith('manufacturing_')) return 'manufacturing';
   if (industryVal.startsWith('fleet_')) return 'fleet_logistics';
   if (industryVal.startsWith('homeservice_')) return 'home_service';
+  if (industryVal.startsWith('agriculture_')) return 'agriculture';
+  if (industryVal.startsWith('healthcare_')) return 'healthcare';
+  if (industryVal.startsWith('professional_')) return 'professional_services';
   return 'trades_field';
 }
 
