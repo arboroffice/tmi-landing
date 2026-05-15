@@ -779,26 +779,25 @@
     margin: 0;
   }
   /* FOTF */
-  .fotf-section{background:var(--bg-deep);padding:96px 0;position:relative;overflow:hidden;}
-  .fotf-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 50%,rgba(228,255,151,0.07) 0%,transparent 65%);pointer-events:none;}
-  .fotf-wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;position:relative;z-index:1;}
-  .fotf-tag{font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(228,255,151,0.55);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
-  .fotf-tag::before{content:'';display:block;width:20px;height:1px;background:var(--chart);}
-  .fotf-section h2{font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.05;color:#fff;margin-bottom:16px;}
+  .fotf-section{background:var(--bg-deep);padding:120px 0;position:relative;overflow:hidden;}
+  .fotf-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:500px;background:radial-gradient(ellipse at center,rgba(228,255,151,0.09) 0%,transparent 70%);pointer-events:none;}
+  .fotf-inner{position:relative;z-index:1;max-width:640px;margin:0 auto;text-align:center;}
+  .fotf-tag{font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(228,255,151,0.55);margin-bottom:24px;display:flex;align-items:center;justify-content:center;gap:10px;}
+  .fotf-tag::before,.fotf-tag::after{content:'';display:block;width:20px;height:1px;background:var(--chart);opacity:0.5;}
+  .fotf-section h2{font-family:var(--serif);font-size:clamp(38px,5vw,68px);font-weight:400;letter-spacing:-0.02em;line-height:1.05;color:#fff;margin-bottom:20px;}
   .fotf-section h2 em{color:var(--chart);font-style:italic;}
-  .fotf-desc{font-family:var(--serif);font-size:17px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:24px;}
-  .fotf-explore{font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.28);transition:color 0.2s;}
-  .fotf-explore:hover{color:var(--chart);}
-  .fotf-form{display:flex;gap:8px;}
-  .fotf-input{flex:1;padding:14px 20px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.11);border-radius:999px;color:#fff;font-family:var(--sans);font-size:14px;outline:none;transition:border-color 0.2s;min-width:0;}
+  .fotf-desc{font-family:var(--serif);font-size:clamp(15px,1.2vw,18px);color:rgba(255,255,255,0.38);line-height:1.7;margin-bottom:40px;max-width:46ch;margin-left:auto;margin-right:auto;}
+  .fotf-form-wrap{margin-bottom:20px;}
+  .fotf-form{display:flex;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:999px;padding:6px 6px 6px 22px;max-width:480px;margin:0 auto;}
+  .fotf-input{flex:1;background:none;border:none;color:#fff;font-family:var(--sans);font-size:14px;outline:none;min-width:0;}
   .fotf-input::placeholder{color:rgba(255,255,255,0.28);}
-  .fotf-input:focus{border-color:rgba(228,255,151,0.4);}
-  .fotf-btn{padding:14px 22px;background:var(--chart);color:#0a0b14;border:none;border-radius:999px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.15s;}
+  .fotf-btn{padding:11px 22px;background:var(--chart);color:#0a0b14;border:none;border-radius:999px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.15s;}
   .fotf-btn:hover{background:var(--chart-dark);}
-  .fotf-note{font-size:11px;color:rgba(255,255,255,0.18);margin-top:12px;letter-spacing:0.05em;}
-  .fotf-ok{display:none;font-family:var(--serif);font-size:18px;color:var(--chart);padding:14px 0;}
-  @media(max-width:768px){.fotf-wrap{grid-template-columns:1fr;gap:40px;}}
-  @media(max-width:480px){.fotf-form{flex-direction:column;}.fotf-btn{border-radius:999px;}}
+  .fotf-note{font-size:11px;color:rgba(255,255,255,0.16);letter-spacing:0.06em;margin-top:14px;}
+  .fotf-ok{display:none;font-family:var(--serif);font-size:20px;color:var(--chart);padding:16px 0;text-align:center;}
+  .fotf-explore{font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.25);transition:color 0.2s;display:inline-block;margin-top:32px;}
+  .fotf-explore:hover{color:var(--chart);}
+  @media(max-width:540px){.fotf-form{flex-direction:column;border-radius:16px;padding:12px;}.fotf-input{padding:8px 4px;}.fotf-btn{border-radius:999px;}}
   /* HERO NEWSLETTER */
   .hero-nl{margin-top:36px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.1);max-width:480px;}
   .hero-nl-label{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
@@ -881,7 +880,7 @@
     <a href="https://online.tmitechai.com/ecom">E-Commerce</a>
   </div>
   <div class="side-nav-cta">
-    <a href="funnel.html" class="btn btn-primary" onclick="closeSideNav()">Apply to Work with TMI &#8594;</a>
+    <a href="/apply" class="btn btn-primary" onclick="closeSideNav()">Apply to Work with TMI &#8594;</a>
   </div>
 </div>
 
@@ -893,15 +892,7 @@
     <h1>AI systems,<br><em>built and installed.</em></h1>
     <p class="lede">Most companies are guessing at AI. TMI installs the real thing. We help businesses adopt AI-native operations from the ground up.</p>
     <div class="hero-actions">
-      <a href="funnel.html" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
-    </div>
-    <div class="hero-nl">
-      <div class="hero-nl-label">Founders of the Future</div>
-      <form class="hero-nl-form" id="hero-nl-form">
-        <input type="email" class="hero-nl-input" placeholder="your@email.com" required/>
-        <button type="submit" class="hero-nl-btn">Join Free &rarr;</button>
-      </form>
-      <div class="hero-nl-ok" id="hero-nl-ok">You're in. One email when something worth reading drops.</div>
+      <a href="/apply" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
     </div>
   </div>
   <div class="hero-scroll">
@@ -1102,7 +1093,7 @@
           <div class="manifesto-title">A movement <em>to put AI in the hands of the people who actually build things.</em></div>
           <div>
             <p class="manifesto-desc">The trades are not behind. They're being rebuilt from the inside by operators who see what's possible and decide to go first. TMI exists to accelerate that. We fund it, train it, and deploy the hardware to prove it. The movement already started. You're either in it or watching from the outside.</p>
-            <a href="funnel.html" class="manifesto-tag">Apply to Join &#8594;</a>
+            <a href="/apply" class="manifesto-tag">Apply to Join &#8594;</a>
           </div>
         </div>
       </div>
@@ -1121,7 +1112,7 @@
         <h2>Your operation, running on <em>systems that don&rsquo;t sleep.</em></h2>
         <p>We build the AI infrastructure your business runs on - not software you buy and hope your team uses, but deployed agents wired into your actual workflows.</p>
         <p>Dispatch. Lead follow-up. Invoice reconciliation. Job cost tracking. Compliance. Crew alerts. Built, trained, and live in 14 days.</p>
-        <a href="funnel.html" class="btn btn-primary">Start the Build <span class="arrow">&#8594;</span></a>
+        <a href="/apply" class="btn btn-primary">Start the Build <span class="arrow">&#8594;</span></a>
       </div>
       <div class="ai-terminal reveal reveal-d2">
         <div class="ai-term-bar">
@@ -1154,7 +1145,7 @@
       <h3>Built to work. Or we keep building.</h3>
       <p>We don&rsquo;t hand you a login and disappear. Every system we deploy is guaranteed to run or we fix it - no support tickets, no upsells, no excuses. If the build doesn&rsquo;t deliver, neither do we.</p>
       <div style="margin-top:36px">
-        <a href="funnel.html" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
+        <a href="/apply" class="btn btn-primary">Apply to Work with TMI <span class="arrow">&#8594;</span></a>
       </div>
     </div>
   </div>
@@ -1162,22 +1153,21 @@
 
 <!-- FOUNDERS OF THE FUTURE -->
 <section class="fotf-section">
+  <div class="fotf-glow"></div>
   <div class="container">
-    <div class="fotf-wrap">
-      <div>
-        <div class="fotf-tag">Community &amp; Blog</div>
-        <h2>Founders of <em>the Future</em></h2>
-        <p class="fotf-desc">Essays, build notes, and case studies from operators reshaping their industries. For founders building businesses that run on systems, not on their hours.</p>
-        <a href="https://tmitechai.com/founders" class="fotf-explore">Explore the community &rarr;</a>
-      </div>
-      <div>
+    <div class="fotf-inner reveal">
+      <div class="fotf-tag">Community &amp; Newsletter</div>
+      <h2>Founders of <em>the Future</em></h2>
+      <p class="fotf-desc">Essays, build notes, and case studies from operators reshaping their industries. One email when something worth reading drops.</p>
+      <div class="fotf-form-wrap">
         <form class="fotf-form" id="fotf-stratum-form">
           <input type="email" class="fotf-input" placeholder="your@email.com" required/>
           <button type="submit" class="fotf-btn">Join Free &rarr;</button>
         </form>
-        <div class="fotf-ok" id="fotf-stratum-ok">You're in. We'll be in touch.</div>
-        <p class="fotf-note">One email when something worth reading drops. No spam.</p>
+        <div class="fotf-ok" id="fotf-stratum-ok">You're in. Watch your inbox.</div>
+        <p class="fotf-note">No spam. Unsubscribe any time.</p>
       </div>
+      <a href="https://tmitechai.com/founders" class="fotf-explore">Explore the community &rarr;</a>
     </div>
   </div>
 </section>
@@ -1218,7 +1208,7 @@
         <div class="footer-col">
           <h5>Community</h5>
           <a href="https://tmitechai.com/founders">Founders of the Future</a>
-          <a href="funnel.html">Apply</a>
+          <a href="/apply">Apply</a>
         </div>
       </div>
     </div>
@@ -1261,8 +1251,7 @@ function fotfSubscribe(formId, okId, source) {
     try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from ' + source + '\nEmail: ' + email); fetch('https://formsubmit.co/ajax/support@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
   });
 }
-fotfSubscribe('fotf-stratum-form', 'fotf-stratum-ok', 'trades');
-fotfSubscribe('hero-nl-form', 'hero-nl-ok', 'trades_hero');
+fotfSubscribe('fotf-stratum-form', 'fotf-stratum-ok', 'fotf_main');
 </script>
 </body>
 </html>

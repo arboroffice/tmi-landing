@@ -1,0 +1,1164 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<meta name="description" content="Free Business Audit. 15 questions. 4 minutes. Get your personalized AI infrastructure roadmap."/>
+<title>Free Business Audit | TMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#fff; --bg-alt:#f5f5f7; --bg-deep:#0d0e1a; --bg-dark:#0a0b14;
+  --ink:#1a1a1a; --ink-2:#505060; --muted:#86868b;
+  --line:rgba(0,0,0,0.07); --line-strong:rgba(0,0,0,0.12);
+  --chart:#E4FF97; --chart-dark:#D0FF6A;
+  --serif:"Barlow",system-ui,sans-serif;
+  --sans:"Neue Haas Grotesk Display","Neue Haas Grotesk",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.55;overflow-x:hidden;}
+a{color:inherit;text-decoration:none;}
+img{display:block;max-width:100%;}
+h1,h2,h3,h4{margin:0;}
+p{margin:0;}
+
+/* SCREENS */
+.screen{min-height:100vh;}
+.screen-hidden{display:none!important;}
+
+/* LOGO */
+.audit-logo{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);}
+.audit-logo img{height:28px;width:auto;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:999px;font-size:15px;font-weight:600;font-family:var(--sans);transition:all 0.2s;cursor:pointer;border:1px solid transparent;white-space:nowrap;text-decoration:none;}
+.btn-primary{background:var(--chart);color:#0a0b14;}
+.btn-primary:hover{background:var(--chart-dark);transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--ink);border-color:var(--line-strong);}
+.btn-outline:hover{border-color:var(--ink);}
+.btn-white{background:#fff;color:var(--ink-2);border-color:rgba(255,255,255,0.15);}
+.btn-white:hover{background:rgba(255,255,255,0.12);color:#fff;}
+
+/* EYEBROW */
+.eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:8px;}
+.eyebrow .dot{width:5px;height:5px;border-radius:50%;background:#E4FF97;flex:none;}
+
+/* ─── CONTACT SCREEN ─── */
+#screen-contact{display:flex;flex-direction:column;min-height:100vh;background:var(--bg);}
+.contact-body{flex:1;display:flex;align-items:center;justify-content:center;padding:80px 40px;}
+.contact-inner{max-width:580px;width:100%;}
+.contact-inner .eyebrow{margin-bottom:20px;}
+.contact-h2{font-family:var(--serif);font-size:clamp(26px,3vw,38px);font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;line-height:1.1;}
+.contact-sub{font-size:16px;color:var(--ink-2);line-height:1.6;margin-bottom:36px;}
+.contact-fields{display:flex;flex-direction:column;gap:14px;margin-bottom:28px;}
+.contact-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.cf{display:flex;flex-direction:column;gap:6px;}
+.cf label{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+.cf label span{font-weight:400;opacity:0.6;text-transform:none;letter-spacing:0;}
+.cf input{padding:14px 16px;border:1.5px solid var(--line-strong);border-radius:10px;font-family:var(--sans);font-size:15px;color:var(--ink);outline:none;transition:border-color 0.15s;background:#fff;-webkit-appearance:none;}
+.cf input:focus{border-color:var(--ink);}
+.cf input::placeholder{color:var(--muted);}
+@media(max-width:600px){.contact-row{grid-template-columns:1fr;}.contact-body{padding:40px 20px;}}
+
+/* ─── INTRO SCREEN ─── */
+#screen-intro{display:flex;flex-direction:column;min-height:100vh;background:var(--bg);}
+.intro-nav{padding:24px 40px;border-bottom:1px solid var(--line);}
+.intro-body{flex:1;display:flex;align-items:center;justify-content:center;padding:80px 40px;}
+.intro-inner{max-width:680px;width:100%;text-align:center;}
+.intro-inner .eyebrow{justify-content:center;margin-bottom:24px;}
+.intro-h1{font-family:var(--serif);font-size:clamp(36px,5vw,64px);font-weight:700;letter-spacing:-0.01em;line-height:1.05;margin-bottom:20px;}
+.intro-sub{font-size:clamp(16px,1.3vw,19px);color:var(--ink-2);line-height:1.65;max-width:52ch;margin:0 auto 40px;}
+.intro-stats{display:flex;justify-content:center;gap:0;margin-bottom:44px;border:1px solid var(--line-strong);border-radius:16px;overflow:hidden;}
+.intro-stat{flex:1;padding:20px 16px;text-align:center;border-right:1px solid var(--line-strong);}
+.intro-stat:last-child{border-right:none;}
+.intro-stat-val{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;line-height:1;}
+.intro-stat-label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+
+/* ─── QUIZ SCREEN ─── */
+#screen-quiz{background:var(--bg);display:flex;flex-direction:column;}
+.quiz-header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,0.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:0 40px;}
+.quiz-header-inner{max-width:720px;margin:0 auto;padding:16px 0;display:flex;align-items:center;gap:20px;}
+.quiz-progress-wrap{flex:1;}
+.quiz-progress-label{font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500;}
+.quiz-progress-track{height:3px;background:rgba(0,0,0,0.06);border-radius:99px;overflow:hidden;}
+.quiz-progress-bar{height:100%;background:var(--chart);border-radius:99px;transition:width 0.4s ease;}
+.quiz-body{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:56px 40px 80px;}
+.question-wrap{max-width:720px;width:100%;}
+.q-category{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:16px;}
+.q-text{font-family:var(--serif);font-size:clamp(22px,2.8vw,34px);font-weight:700;letter-spacing:-0.01em;line-height:1.15;color:var(--ink);margin-bottom:36px;}
+.q-options{display:flex;flex-direction:column;gap:10px;}
+.q-btn{display:flex;align-items:center;gap:16px;padding:16px 20px;border:1.5px solid var(--line-strong);border-radius:12px;cursor:pointer;transition:border-color 0.15s,background 0.15s;background:#fff;text-align:left;width:100%;font-family:var(--sans);}
+.q-btn:hover{border-color:var(--ink);background:var(--bg-alt);}
+.q-btn.selected{border-color:var(--ink);background:var(--ink);color:#fff;}
+.q-badge{width:32px;height:32px;border-radius:8px;background:var(--bg-alt);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:0.05em;color:var(--ink-2);flex:none;transition:background 0.15s,color 0.15s;}
+.q-btn.selected .q-badge{background:rgba(255,255,255,0.15);color:#fff;}
+.q-btn-text{font-size:15px;font-weight:500;color:var(--ink);line-height:1.4;transition:color 0.15s;}
+.q-btn.selected .q-btn-text{color:#fff;}
+/* Q2 industry selector */
+.q2-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.q2-cat-btn{padding:20px 16px;border:1.5px solid var(--line-strong);border-radius:12px;cursor:pointer;background:#fff;text-align:center;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink);transition:all 0.15s;line-height:1.3;}
+.q2-cat-btn:hover{border-color:var(--ink);background:var(--bg-alt);}
+.q2-cat-btn.active{border-color:var(--ink);background:var(--ink);color:#fff;}
+.q2-subs-wrap{margin-top:4px;}
+.q2-subs-label{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-weight:600;}
+.q2-subs{display:flex;flex-wrap:wrap;gap:8px;}
+.q2-sub-btn{padding:9px 16px;border:1.5px solid var(--line-strong);border-radius:999px;cursor:pointer;background:#fff;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink-2);transition:all 0.15s;}
+.q2-sub-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--bg-alt);}
+.q2-sub-btn.selected{border-color:var(--ink);background:var(--ink);color:#fff;}
+/* Question enter animation */
+@keyframes qEnter{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+.q-enter{animation:qEnter 0.35s ease forwards;}
+
+/* ─── RESULTS SCREEN ─── */
+#screen-results{background:var(--bg);}
+
+/* Tier card */
+.res-tier-section{background:var(--bg-dark);color:#fff;padding:80px 0;}
+.res-container{max-width:960px;margin:0 auto;padding:0 40px;}
+.res-tier-eyebrow{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;}
+.res-tier-name{font-family:var(--serif);font-size:clamp(48px,6vw,88px);font-weight:900;color:var(--chart);line-height:0.95;letter-spacing:-0.02em;margin-bottom:12px;}
+.res-tier-desc{font-size:clamp(16px,1.3vw,19px);color:rgba(255,255,255,0.65);line-height:1.6;max-width:56ch;margin-bottom:48px;}
+.res-scores-grid{display:grid;grid-template-columns:auto 1fr;gap:0 48px;align-items:start;}
+.res-dep-block{text-align:center;padding:32px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;}
+.res-dep-num{font-family:var(--serif);font-size:72px;font-weight:900;line-height:1;letter-spacing:-0.03em;}
+.res-dep-label{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;font-weight:600;}
+.res-cat-bars{display:flex;flex-direction:column;gap:20px;justify-content:center;padding:8px 0;}
+.res-cat-bar-row{display:flex;flex-direction:column;gap:6px;}
+.res-cat-bar-head{display:flex;justify-content:space-between;align-items:center;}
+.res-cat-bar-name{font-size:13px;color:rgba(255,255,255,0.7);font-weight:500;}
+.res-cat-bar-pct{font-size:13px;font-weight:700;}
+.res-cat-bar-track{height:5px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;}
+.res-cat-bar-fill{height:100%;border-radius:99px;transition:width 1s ease;}
+
+/* Bleeding section */
+.res-bleeding-section{background:var(--bg);padding:80px 0;}
+.res-section-eyebrow{margin-bottom:12px;}
+.res-section-h2{font-family:var(--serif);font-size:clamp(28px,3vw,42px);font-weight:700;letter-spacing:-0.01em;line-height:1.1;margin-bottom:48px;}
+.res-pain-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;}
+.res-pain-card{padding:32px 28px;border:1px solid var(--line-strong);border-radius:16px;}
+.res-pain-card:first-child{border-color:var(--ink);background:var(--ink);color:#fff;}
+.res-pain-title{font-family:var(--serif);font-size:18px;font-weight:700;line-height:1.2;margin-bottom:12px;}
+.res-pain-card:first-child .res-pain-title{color:#fff;}
+.res-pain-body{font-size:14px;line-height:1.65;color:var(--ink-2);}
+.res-pain-card:first-child .res-pain-body{color:rgba(255,255,255,0.65);}
+
+/* Roadmap */
+.res-roadmap-section{background:var(--bg-deep);padding:80px 0;color:#fff;}
+.res-roadmap-section .res-section-eyebrow{color:rgba(255,255,255,0.4);}
+.res-roadmap-section .res-section-h2{color:#fff;}
+.res-steps{display:flex;flex-direction:column;gap:0;border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;}
+.res-step{padding:28px 32px;border-bottom:1px solid rgba(255,255,255,0.08);display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;}
+.res-step:last-child{border-bottom:none;}
+.res-step-num{font-family:var(--serif);font-size:40px;font-weight:900;color:rgba(255,255,255,0.15);line-height:1;flex:none;width:40px;padding-top:4px;letter-spacing:-0.02em;}
+.res-step-body{}
+.res-step-name{font-family:var(--serif);font-size:clamp(17px,1.6vw,20px);font-weight:700;color:#fff;margin-bottom:8px;line-height:1.2;}
+.res-step-desc{font-size:14px;color:rgba(255,255,255,0.55);line-height:1.6;margin-bottom:14px;}
+.res-step-bullets{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;}
+.res-step-bullets li{font-size:13px;color:rgba(255,255,255,0.6);padding-left:16px;position:relative;line-height:1.5;}
+.res-step-bullets li::before{content:"→";position:absolute;left:0;color:var(--chart);font-size:11px;top:2px;}
+
+/* Offer */
+.res-offer-section{background:var(--bg);padding:80px 0;}
+.res-offer-card{border:1px solid var(--line-strong);border-radius:20px;padding:40px;position:relative;overflow:hidden;}
+.res-offer-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--chart);}
+.res-offer-headline{font-family:var(--serif);font-size:clamp(32px,3.5vw,48px);font-weight:900;color:var(--ink);letter-spacing:-0.02em;line-height:1.05;margin-bottom:16px;}
+.res-offer-why{font-size:16px;color:var(--ink-2);line-height:1.65;margin-bottom:28px;max-width:64ch;}
+.res-offer-covers-label{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:16px;}
+.res-offer-bullets{list-style:none;padding:0;display:flex;flex-direction:column;gap:10px;}
+.res-offer-bullets li{font-size:15px;color:var(--ink);padding-left:24px;position:relative;line-height:1.5;}
+.res-offer-bullets li::before{content:"✓";position:absolute;left:0;color:#22c55e;font-weight:700;}
+
+/* Support */
+.res-support-section{background:var(--bg-dark);padding:80px 0;color:#fff;}
+.res-support-section .res-section-eyebrow{color:rgba(255,255,255,0.4);}
+.res-support-section .res-section-h2{color:#fff;margin-bottom:40px;}
+.res-support-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.res-support-card{padding:32px 28px;border-radius:16px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);}
+.res-support-card.highlight{border-color:var(--chart);background:rgba(228,255,151,0.06);}
+.res-support-name{font-family:var(--serif);font-size:22px;font-weight:700;color:#fff;margin-bottom:12px;}
+.res-support-card.highlight .res-support-name{color:var(--chart);}
+.res-support-desc{font-size:14px;color:rgba(255,255,255,0.55);line-height:1.65;}
+
+/* Path */
+.res-path-section{background:var(--bg);padding:80px 0;}
+.res-path-steps{display:flex;flex-direction:column;gap:0;position:relative;padding-left:32px;}
+.res-path-steps::before{content:"";position:absolute;left:7px;top:12px;bottom:12px;width:2px;background:var(--line-strong);}
+.res-path-step{position:relative;padding:0 0 32px 24px;}
+.res-path-step:last-child{padding-bottom:0;}
+.res-path-dot{position:absolute;left:-32px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--bg-alt);border:2px solid var(--line-strong);}
+.res-path-step.active .res-path-dot{background:var(--ink);border-color:var(--ink);}
+.res-path-step-label{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:4px;}
+.res-path-step.active .res-path-step-label{color:var(--ink);font-weight:700;}
+.res-path-step-text{font-size:15px;color:var(--ink-2);line-height:1.5;}
+.res-path-step.active .res-path-step-text{color:var(--ink);font-weight:600;}
+.res-path-note{font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;}
+
+/* CTA */
+.res-cta-section{background:var(--bg-deep);padding:80px 0;color:#fff;}
+.res-cta-inner{text-align:center;max-width:600px;margin:0 auto;}
+.res-cta-h2{font-family:var(--serif);font-size:clamp(28px,3vw,42px);font-weight:700;color:#fff;margin-bottom:16px;letter-spacing:-0.01em;}
+.res-cta-body{font-size:16px;color:rgba(255,255,255,0.6);line-height:1.65;margin-bottom:36px;}
+.res-cta-actions{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.res-retake{font-size:13px;color:rgba(255,255,255,0.4);cursor:pointer;transition:color 0.15s;}
+.res-retake:hover{color:rgba(255,255,255,0.7);}
+
+/* Open text question */
+.q-textarea{width:100%;padding:16px;border:1.5px solid var(--line-strong);border-radius:12px;font-family:var(--sans);font-size:15px;color:var(--ink);resize:vertical;outline:none;transition:border-color 0.15s;margin-bottom:20px;line-height:1.6;min-height:140px;}
+.q-textarea:focus{border-color:var(--ink);}
+.q-textarea::placeholder{color:var(--muted);}
+.q-open-note{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5;}
+.q-skip{background:none;border:none;font-family:var(--sans);font-size:13px;color:var(--muted);cursor:pointer;margin-left:16px;padding:0;transition:color 0.15s;}
+.q-skip:hover{color:var(--ink-2);}
+
+/* Results: open answers */
+.res-answers-section{background:var(--bg-alt);padding:80px 0;}
+.res-answers-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:40px;}
+.res-answer-card{background:#fff;border:1px solid var(--line-strong);border-radius:16px;padding:28px;}
+.res-answer-q{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.res-answer-a{font-size:15px;color:var(--ink);line-height:1.65;white-space:pre-wrap;}
+.res-answer-empty{font-size:15px;color:var(--muted);font-style:italic;}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .intro-nav,.intro-body,.quiz-header-inner{padding-left:20px;padding-right:20px;}
+  .quiz-body{padding:36px 20px 60px;}
+  .res-container{padding:0 20px;}
+  .res-scores-grid{grid-template-columns:1fr;gap:28px;}
+  .res-dep-block{padding:24px;}
+  .res-pain-grid{grid-template-columns:1fr;}
+  .res-support-grid{grid-template-columns:1fr;}
+  .res-answers-grid{grid-template-columns:1fr;}
+  .q2-cats{grid-template-columns:repeat(2,1fr);}
+  .q-text{margin-bottom:24px;}
+  .res-tier-section,.res-bleeding-section,.res-roadmap-section,.res-offer-section,.res-support-section,.res-path-section,.res-answers-section,.res-cta-section{padding:56px 0;}
+}
+@media(max-width:480px){
+  .intro-stats{flex-direction:column;}
+  .intro-stat{border-right:none;border-bottom:1px solid var(--line-strong);}
+  .intro-stat:last-child{border-bottom:none;}
+  .q2-cats{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SCREEN: INTRO ═══ -->
+<section id="screen-intro" class="screen">
+  <nav class="intro-nav">
+    <a href="https://www.tmitechai.com" class="audit-logo">
+      <img src="logo.svg" alt="TMI"/> TMI
+    </a>
+  </nav>
+  <div class="intro-body">
+    <div class="intro-inner">
+      <div class="eyebrow"><span class="dot"></span>Free Business Audit</div>
+      <h1 class="intro-h1">Find Out Exactly Where Your Business Is Leaking.</h1>
+      <p class="intro-sub">19 questions. 5 minutes. We score your operation, find your biggest leaks, and build a personalized AI infrastructure roadmap for where you are right now.</p>
+      <div class="intro-stats">
+        <div class="intro-stat"><div class="intro-stat-val">19</div><div class="intro-stat-label">Questions</div></div>
+        <div class="intro-stat"><div class="intro-stat-val">5 Min</div><div class="intro-stat-label">Average Time</div></div>
+        <div class="intro-stat"><div class="intro-stat-val">100%</div><div class="intro-stat-label">Personalized</div></div>
+      </div>
+      <button class="btn btn-primary" onclick="startAudit()" style="font-size:16px;padding:16px 40px;">Start My Free Audit</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCREEN: CONTACT ═══ -->
+<section id="screen-contact" class="screen screen-hidden">
+  <nav class="intro-nav">
+    <a href="https://www.tmitechai.com" class="audit-logo"><img src="logo.svg" alt="TMI"/> TMI</a>
+  </nav>
+  <div class="contact-body">
+    <div class="contact-inner">
+      <div class="eyebrow"><span class="dot"></span>One Quick Step</div>
+      <h2 class="contact-h2">Where should we send your results?</h2>
+      <p class="contact-sub">We'll email you a full copy of your score, roadmap, and recommended next step.</p>
+      <form id="contact-form" onsubmit="submitContact(event)">
+        <div class="contact-fields">
+          <div class="contact-row">
+            <div class="cf">
+              <label>Your Name</label>
+              <input type="text" id="cf-name" placeholder="First and last name" required autocomplete="name"/>
+            </div>
+            <div class="cf">
+              <label>Company Name</label>
+              <input type="text" id="cf-company" placeholder="Your business name" required autocomplete="organization"/>
+            </div>
+          </div>
+          <div class="contact-row">
+            <div class="cf">
+              <label>Email</label>
+              <input type="email" id="cf-email" placeholder="you@company.com" required autocomplete="email"/>
+            </div>
+            <div class="cf">
+              <label>Phone <span>(optional)</span></label>
+              <input type="tel" id="cf-phone" placeholder="+1 (555) 000-0000" autocomplete="tel"/>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="font-size:15px;padding:15px 36px;">Start My Audit &nbsp;→</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCREEN: QUIZ ═══ -->
+<section id="screen-quiz" class="screen screen-hidden">
+  <div class="quiz-header">
+    <div class="quiz-header-inner">
+      <a href="stratum.html" class="audit-logo">
+        <img src="logo.svg" alt="TMI"/>
+      </a>
+      <div class="quiz-progress-wrap">
+        <div class="quiz-progress-label" id="progress-label">Question 1 of 15</div>
+        <div class="quiz-progress-track"><div class="quiz-progress-bar" id="progress-bar" style="width:6.67%"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="quiz-body">
+    <div class="question-wrap">
+      <div id="question-container"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCREEN: RESULTS ═══ -->
+<section id="screen-results" class="screen screen-hidden"></section>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════ */
+
+const Q1_OPTIONS = [
+  {text:"Just me and a few guys, still figuring it out",val:"early",pts:0},
+  {text:"Growing fast but everything still runs through me",val:"growing",pts:1},
+  {text:"Established and ready to scale smart",val:"ready",pts:2},
+  {text:"Scaling hard, pressure everywhere right now",val:"scaling",pts:3},
+  {text:"Multiple crews or locations, getting complex",val:"multicrew",pts:4},
+  {text:"Around $10M, old systems are starting to break",val:"ten_mil",pts:5},
+  {text:"Above $10M, running a real company now",val:"above_ten",pts:6},
+];
+
+const Q2_CATS_ONLINE = [
+  {label:"Coaching & Consulting",val:"coaching",subs:[
+    {label:"Business/Executive Coaching",val:"coaching_business"},{label:"Life/Wellness Coaching",val:"coaching_life"},
+    {label:"Career/Skills Coaching",val:"coaching_career"},{label:"Consulting/Advisory",val:"coaching_consulting"},
+    {label:"Other",val:"coaching_other"},
+  ]},
+  {label:"Online Education",val:"education",subs:[
+    {label:"Online Courses",val:"education_courses"},{label:"Membership/Community",val:"education_membership"},
+    {label:"Bootcamp/Cohort",val:"education_bootcamp"},{label:"Other",val:"education_other"},
+  ]},
+  {label:"Creator & Media",val:"creator",subs:[
+    {label:"YouTube/Video Creator",val:"creator_youtube"},{label:"Social Media/Influencer",val:"creator_social"},
+    {label:"Newsletter/Writer",val:"creator_newsletter"},{label:"Podcaster",val:"creator_podcast"},
+    {label:"Other",val:"creator_other"},
+  ]},
+  {label:"E-Commerce",val:"ecommerce",subs:[
+    {label:"Supplements/Health Products",val:"ecommerce_supplements"},{label:"Fashion/Apparel",val:"ecommerce_apparel"},
+    {label:"Physical DTC Products",val:"ecommerce_dtc"},{label:"Other",val:"ecommerce_other"},
+  ]},
+  {label:"Digital Products",val:"digitalproducts",subs:[
+    {label:"Templates/Downloads",val:"digital_templates"},{label:"Software/SaaS",val:"digital_saas"},
+    {label:"Info Products/Ebooks",val:"digital_info"},{label:"Other",val:"digital_other"},
+  ]},
+  {label:"Agency & Services",val:"agency",subs:[
+    {label:"Marketing Agency",val:"agency_marketing"},{label:"Design/Creative Agency",val:"agency_design"},
+    {label:"Freelance/Consulting",val:"agency_freelance"},{label:"Other",val:"agency_other"},
+  ]},
+];
+
+const Q2_CATS = [
+  {label:"Trades & Field Service",val:"trades",subs:[
+    {label:"Electrical",val:"trades_electrical"},{label:"Plumbing",val:"trades_plumbing"},
+    {label:"HVAC / Refrigeration",val:"trades_hvac"},{label:"Fire Protection",val:"trades_fire"},
+    {label:"Security Systems",val:"trades_security"},{label:"Low Voltage / AV",val:"trades_lowvoltage"},
+    {label:"Elevator / Lift",val:"trades_elevator"},{label:"Boilermaker",val:"trades_boilermaker"},
+    {label:"Insulation",val:"trades_insulation"},{label:"Glazing / Glass",val:"trades_glazing"},
+    {label:"Scaffolding",val:"trades_scaffolding"},{label:"Other",val:"trades_other"},
+  ]},
+  {label:"Construction",val:"construction",subs:[
+    {label:"General Contracting",val:"construction_gc"},{label:"Framing / Rough Carpentry",val:"construction_framing"},
+    {label:"Masonry / Brick",val:"construction_masonry"},{label:"Concrete",val:"construction_concrete"},
+    {label:"Excavation / Earthwork",val:"construction_excavation"},{label:"Demolition",val:"construction_demolition"},
+    {label:"Roofing",val:"construction_roofing"},{label:"Drywall",val:"construction_drywall"},
+    {label:"Flooring",val:"construction_flooring"},{label:"Painting",val:"construction_painting"},
+    {label:"Steel / Structural",val:"construction_steel"},{label:"Waterproofing",val:"construction_waterproofing"},
+    {label:"Other",val:"construction_other"},
+  ]},
+  {label:"Oil, Gas & Energy",val:"energy",subs:[
+    {label:"Oilfield Services",val:"energy_oilfield"},{label:"Pipeline",val:"energy_pipeline"},
+    {label:"Wellsite Construction",val:"energy_wellsite"},{label:"Midstream / Compression",val:"energy_midstream"},
+    {label:"Refinery / Petrochemical",val:"energy_refinery"},{label:"Renewables / Solar",val:"energy_solar"},
+    {label:"Wind Energy",val:"energy_wind"},{label:"Electrical Utilities / Linework",val:"energy_linework"},
+    {label:"Other",val:"energy_other"},
+  ]},
+  {label:"Manufacturing",val:"manufacturing",subs:[
+    {label:"Machine Shop / CNC Fabrication",val:"manufacturing_machineshop"},{label:"Welding / Metal Fabrication",val:"manufacturing_welding"},
+    {label:"Industrial Maintenance",val:"manufacturing_industrial"},{label:"Millwright",val:"manufacturing_millwright"},
+    {label:"Assembly / Production",val:"manufacturing_assembly"},{label:"Food Processing",val:"manufacturing_food"},
+    {label:"Other",val:"manufacturing_other"},
+  ]},
+  {label:"Fleet & Logistics",val:"fleet",subs:[
+    {label:"Trucking / Freight",val:"fleet_trucking"},{label:"Heavy Haul",val:"fleet_heavyhaul"},
+    {label:"Equipment Rental",val:"fleet_equipment"},{label:"Last Mile Delivery",val:"fleet_lastmile"},
+    {label:"Waste & Recycling",val:"fleet_waste"},{label:"Mobile Mechanics",val:"fleet_mechanics"},
+    {label:"Other",val:"fleet_other"},
+  ]},
+  {label:"Home Service",val:"homeservice",subs:[
+    {label:"HVAC",val:"homeservice_hvac"},{label:"Plumbing",val:"homeservice_plumbing"},
+    {label:"Electrical",val:"homeservice_electrical"},{label:"Roofing",val:"homeservice_roofing"},
+    {label:"Landscaping / Lawn Care",val:"homeservice_landscape"},{label:"Pest Control",val:"homeservice_pest"},
+    {label:"Pool / Spa",val:"homeservice_pool"},{label:"Tree Service",val:"homeservice_tree"},
+    {label:"Cleaning / Janitorial",val:"homeservice_cleaning"},{label:"Painting",val:"homeservice_painting"},
+    {label:"Flooring",val:"homeservice_flooring"},{label:"Restoration / Remediation",val:"homeservice_restoration"},
+    {label:"Fencing",val:"homeservice_fencing"},{label:"Other",val:"homeservice_other"},
+  ]},
+];
+
+const SCORED_QS = [
+  {id:"q3",catKey:"leads",catLabel:"Lead and Sales",text:"If you were unreachable for a full week, how many leads would get followed up on?",opts:["All of them. We have a system that handles it.","Most of them. Someone on my team would handle it.","Some of them. The obvious ones would get called.","Almost none. I am the one who follows up."]},
+  {id:"q4",catKey:"leads",catLabel:"Lead and Sales",text:"How fast does someone from your company respond to a new lead?",opts:["Under 5 minutes. It is automated.","Within an hour usually.","A few hours when we get to it.","Next day or longer."]},
+  {id:"q5",catKey:"leads",catLabel:"Lead and Sales",text:"Who closes new jobs at your company?",opts:["Mostly my team. I rarely have to get involved.","Mix of me and my team depending on the job.","Mostly me with some help sometimes.","Just me. Every single job."]},
+  {id:"q6",catKey:"ops",catLabel:"Operations",text:"When a problem happens on a job, what does your crew do?",opts:["Handle it using our documented process without calling me.","Usually handle it but call me on bigger issues.","Try to handle it but I get called most of the time.","Call me first every single time."]},
+  {id:"q7",catKey:"ops",catLabel:"Operations",text:"Can your business schedule and dispatch for a full week without you involved?",opts:["Yes. Fully automated or someone owns it clean.","Yes but it is messy and things slip sometimes.","Partially. Things would slow down without me.","No. I run the schedule."]},
+  {id:"q8",catKey:"ops",catLabel:"Operations",text:"How many times per day do people stop and wait on a decision from you?",opts:["Almost never. My team is empowered to make decisions.","1 to 3 times. Mostly smaller things.","4 to 8 times throughout the day.","Constantly. I am the one making all the calls."]},
+  {id:"q9",catKey:"people",catLabel:"People and Systems",text:"What happens at your company when you need to hire someone?",opts:["A system handles posting, screening, and onboarding.","Someone helps me but I am involved in most of it.","I do most of it myself with occasional help.","I find them, interview them, and bring them on by myself."]},
+  {id:"q10",catKey:"people",catLabel:"People and Systems",text:"If your best person walked out today, how bad would it be?",opts:["Manageable. We have their work documented.","Tough but we would recover fairly quickly.","Really painful. A lot of knowledge lives in their head.","Devastating. We would be in serious trouble."]},
+  {id:"q11",catKey:"finance",catLabel:"Finance and Admin",text:"What happens to invoices and payments when you are not around?",opts:["Handled automatically. The system takes care of it.","Someone handles it manually but it gets done.","It slows way down but eventually gets done.","They pile up and wait until I handle them."]},
+  {id:"q12",catKey:"finance",catLabel:"Finance and Admin",text:"How often do you know your real job margin without calculating it yourself?",opts:["Always. Tracked in real time in our system.","Monthly when the books get done.","Rarely. I estimate it in my head.","Basically never. I just go by how the job felt."]},
+  {id:"q13",catKey:"comms",catLabel:"Communication",text:"When a customer wants a job update, who handles that?",opts:["Automated updates go out or a team member always handles it.","Usually a team member handles it.","Mix of me and someone else depending on the day.","Me. I handle customer communication."]},
+  {id:"q14",catKey:"comms",catLabel:"Communication",text:"If you did not answer your phone for one full day, what would actually break?",opts:["Nothing critical. Systems and people have it covered.","A few things would slow down but nothing would break.","Several things would stall completely waiting on me.","A lot. I am the communication hub for everything."]},
+];
+
+const Q15_OPTIONS = [
+  {text:"Under $500K",val:"under500k",pts:0},
+  {text:"$500K to $2M",val:"500k_2m",pts:1},
+  {text:"$2M to $5M",val:"2m_5m",pts:2},
+  {text:"$5M to $10M",val:"5m_10m",pts:3},
+  {text:"$10M to $25M",val:"10m_25m",pts:4},
+  {text:"Over $25M",val:"over25m",pts:5},
+];
+
+const TIERS = {
+  tier1:{name:"Just Starting Out",desc:"You are earlier than most. That is your advantage. The infrastructure you build right now determines who owns your market in 24 months."},
+  tier2:{name:"Growing Fast",desc:"You have proven the model works. The problem is you are still the engine. Every lead, every decision, every fire routes through you and that is the ceiling."},
+  tier3:{name:"Ready To Scale",desc:"You have the volume, the crew, and the reputation. What you are missing is the infrastructure that turns what you have built into something that grows without you."},
+  tier4:{name:"Scaling Hard",desc:"Revenue is moving but the pressure is everywhere. Hiring, quality, customer experience, and cash flow are all getting harder to manage at the same time."},
+  tier5:{name:"Multi Crew / Multi Location",desc:"You have built something real. The complexity is creating cracks. Communication breaks down, standards drift, and things fall through the gaps between locations."},
+  tier6:{name:"Hitting $10 Million",desc:"Hitting $10M is something most never reach. It is also where everything that got you here starts to break. Margins compress. Management stops working. Old tools cannot carry the weight."},
+  tier7:{name:"Above $10 Million",desc:"You are not running a trades business anymore. You are running a company. The infrastructure, systems, and decisions need to reflect that reality."},
+};
+
+const CAT_PAIN = {
+  leads:{title:"Your Pipeline Leaks At Every Stage",body:"Leads come in and fall out before they become jobs. Without an automated system, every stage from first inquiry to booked job depends on someone remembering to do something. Most of that someone is you."},
+  ops:{title:"Every Decision Routes Through You",body:"Your crew cannot move without calling you first. That is not a people problem. That is a systems problem. And it puts a hard cap on how big this business can ever get."},
+  people:{title:"Your Business Runs On Memory Not Systems",body:"When someone leaves, the knowledge leaves with them. When you hire someone new, the ramp up takes months because nothing is documented. You are one resignation away from real chaos."},
+  finance:{title:"Money You Earned Is Not Getting Collected",body:"Jobs are getting done but paperwork lags, invoices pile up, and nobody follows up on payments. Every day that passes is harder to collect. That is revenue you already earned sitting uncollected."},
+  comms:{title:"You Are The Communication Hub For Everything",body:"Customer updates, crew questions, job changes, complaints. All of it routes to your phone. That is unsustainable at any size and it gets worse as you grow."},
+};
+
+const INDUSTRY_PAIN = {
+  trades_field:[
+    {title:"Skilled Labor Is Your Biggest Operational Risk",body:"The trades workforce is shrinking and aging out faster than new workers are entering. Every time you lose a licensed tech you are not just losing a body. You are losing the knowledge, the relationships, and the production capacity that went with them. Replacing them takes months."},
+    {title:"Compliance and Certification Tracking Is A Manual Nightmare",body:"License renewals, continuing education, safety certifications, insurance documentation. Someone is tracking all of this manually in a spreadsheet or in their head. One lapse creates liability. The system should be tracking this automatically."},
+    {title:"Service Call Efficiency Leaks Margin Every Day",body:"Repeat truck rolls, incomplete job information, parts not on the truck, technicians waiting on answers. Each of these costs time and margin. Without a system capturing job data and routing information intelligently, these leaks compound across every job every week."},
+  ],
+  construction:[
+    {title:"Bids Go Out And The Follow Up Never Happens",body:"You spend real time and real money building estimates. They go out and silence follows. No automated follow up, no way to track where they stand, no system nudging the client. The job goes to whoever stayed in front of them."},
+    {title:"Project Communication Lives In Personal Phones",body:"Change orders, RFIs, schedule updates, sub coordination. All of it happens in text chains on personal devices that nobody else can see. When something falls through the cracks, nobody knows until it already cost money."},
+    {title:"Subcontractor and Supplier Coordination Eats Management Time",body:"Coordinating multiple subs, material deliveries, inspections, and equipment across a project through calls and texts is how margin gets destroyed on jobs that should have been profitable. One missed message cascades into delays and cost overruns."},
+  ],
+  oil_gas_energy:[
+    {title:"Your Field and Office Are Operating In Separate Worlds",body:"Crews are out in the field working but the office has no live view of what is actually happening. Job status, safety updates, material needs, change orders. All of it lives in texts and phone calls that nobody tracks and nothing logs."},
+    {title:"Compliance Documentation Is A Full Time Job For The Wrong Person",body:"Safety records, daily reports, permit tracking, certifications, JSAs, inspection logs. Someone is spending serious hours every single week on paperwork that should take minutes. In oilfield, pipeline, and energy work, documentation gaps are not just inefficient. They are liability."},
+    {title:"Mobilization Inefficiency Destroys Margin Before The Job Starts",body:"Getting the right crew with the right certifications and the right equipment to the right location on time is a logistics problem that burns money every time something slips. Most operations still manage this through a whiteboard, a spreadsheet, and a lot of phone calls nobody is logging."},
+  ],
+  manufacturing:[
+    {title:"Downtime Is Your Most Expensive Cost And Nobody Is Measuring It Right",body:"Every hour a machine or line is down is direct margin loss. Most shops track this manually or after the fact. Without real time visibility into equipment status, job flow, and bottlenecks, you are managing downtime by reacting to it instead of preventing it."},
+    {title:"Quoting and Job Costing Is Costing You Jobs And Margin",body:"Estimating is still done manually in most shops. Quotes go out slow. Jobs get won at the wrong margin because the cost data is not current. Without an automated quoting and job costing system, you are guessing on the numbers that matter most."},
+    {title:"Workforce Scheduling and Capacity Planning Is Reactive Not Strategic",body:"You find out you are short on capacity when you are already behind on a job. Shift scheduling, overtime management, and capacity planning done through spreadsheets or informal systems is how you lose your best people and your best clients at the same time."},
+  ],
+  fleet_logistics:[
+    {title:"Dispatch and Route Inefficiency Is Bleeding Margin Every Day",body:"Every extra mile driven, every unoptimized route, every driver sitting idle waiting on instructions is margin gone. Without AI-powered dispatch and route optimization, you are paying for inefficiency that your competitors with better systems are not paying for."},
+    {title:"Compliance Is A Moving Target Nobody Can Track Manually",body:"HOS regulations, DOT compliance, vehicle inspections, driver certifications, insurance documentation. The exposure from a compliance gap in fleet operations is significant and the tracking burden is enormous when done manually."},
+    {title:"Communication Between Drivers and Office Breaks Down At The Worst Times",body:"Dispatch changes, route updates, delivery issues, mechanical problems. When communication between the road and the office runs through phone calls and texts, things get missed. The customer finds out at the same time you do."},
+  ],
+  home_service:[
+    {title:"Leads Go Cold After Hours And You Lose Jobs You Never Knew About",body:"A homeowner calls at 7pm with an urgent situation. Nobody answers. They call the next company on Google. You lose that job before morning. In residential services the first company to respond wins. Always. And most of you are not responding first."},
+    {title:"Seasonal Swings Create Chaos In Both Directions",body:"You go from completely slammed to painfully slow and your systems handle neither extreme. Busy seasons drop balls and miss follow ups. Slow seasons lose your best people to competitors who kept them busy. Infrastructure smooths both curves."},
+    {title:"Recurring Revenue And Maintenance Agreements Are Leaking",body:"Maintenance plans, annual service agreements, seasonal tune-ups. These should be your most profitable and most stable revenue. Without an automated renewal and follow up system, clients drift away and you never know until they are already with someone else."},
+  ],
+};
+
+const TIER_STEPS = {
+  tier1:{key:"ts_tier1",name:"Build The Foundation Before Volume Forces You To",desc:"The businesses that win at your stage are the ones that build the right infrastructure before they need it. Every system you put in now compounds. Every system you skip costs double to fix later.",bullets:["Lead capture and response installed and running before you lose another job to slow follow up","Basic CRM tracking every lead from first contact through invoice","Job booking automation so you stop scheduling everything manually","Foundation built to scale so you never have to redo it when volume hits"]},
+  tier2:{key:"ts_tier2",name:"Stop Being The Engine",desc:"You have proven the model works. The problem is you are still running everything manually. Infrastructure replaces you in all of those roles.",bullets:["Remove yourself from lead follow up and booking entirely","Crew and dispatch running without your input on routine jobs","Back office automation so invoices and payments happen without you touching them","Delegation layer so things do not break the moment you step away"]},
+  tier3:{key:"ts_tier3",name:"Install The Systems That Make Growth Automatic",desc:"You have what it takes. What you are missing is the infrastructure that makes growth happen without you adding more personal hours to it. More machine. Less hustle.",bullets:["Full lead to close automation with no leaks at any stage","Multi channel outreach keeping your pipeline full without manual effort","Process standardization so every job runs the same way regardless of who is doing it","Scale readiness audit mapping the infrastructure you will need for the next 24 months"]},
+  tier4:{key:"ts_tier4",name:"Build Infrastructure That Keeps Up With The Pace",desc:"Revenue is moving but the pressure is everywhere at once. Your current systems were not built for this volume and you feel it every day.",bullets:["Revenue operations automation from first inquiry to collected payment","Hiring and capacity infrastructure so growth does not stall waiting for the right people","Quality control layer so standards hold under volume without you inspecting everything","Financial visibility so you always know your real margin without calculating it yourself"]},
+  tier5:{key:"ts_tier5",name:"Connect Everything Into One Command Layer",desc:"Multiple crews or locations without connected infrastructure creates gaps that cost money every single day.",bullets:["Centralized platform connecting all locations, all crews, all job data in one place","Multi location automation with shared standards enforced automatically","Cross location reporting without anyone compiling a single spreadsheet","Redundancy built in so nothing breaks when a key person is unavailable"]},
+  tier6:{key:"ts_tier6",name:"Rebuild The Infrastructure Your Revenue Has Outgrown",desc:"The systems that got you to $10M cannot carry you to $20M. Margins compress, management layers stop working, and the tools built for smaller operations cannot carry the weight.",bullets:["Margin protection infrastructure to stop the compression before it gets worse","Management layer that runs without constant direction from you","Financial operations system built for your actual revenue size","Infrastructure roadmap from $10M to $20M built before the pressure forces it"]},
+  tier7:{key:"ts_tier7",name:"Build Like The Company You Actually Are",desc:"You are not running a trades business anymore. You are running a company. The decisions, the infrastructure, and the systems need to reflect that reality.",bullets:["Enterprise operations infrastructure built for scale and complexity","Exit and valuation readiness built into every system you touch","Acquisition and integration playbook ready to deploy when the opportunity comes","Owner independence infrastructure so the business runs and grows without you present"]},
+};
+
+const CAT_STEPS = {
+  leads:{key:"cs_leads",name:"Install Agentic Lead Response and Follow Up",desc:"Your biggest leak is in how leads are handled right now. AI handles first contact, qualification, follow up, and booking automatically so no lead falls through the cracks regardless of the hour.",bullets:["AI responds to every lead in under 60 seconds around the clock","Multi-touch follow up sequences run automatically without human input","Lead scoring routes your hottest leads to your team instantly","Dead lead revival campaigns recover jobs that went cold weeks or months ago"]},
+  ops:{key:"cs_ops",name:"Remove Yourself From The Operational Loop",desc:"Decisions and job flow are routing through you when they should not be. The infrastructure handles the routine so you only touch the exceptions.",bullets:["Automated dispatch based on crew availability and skill set","Decision frameworks that handle routine operational calls without involving you","Job status captured from the field automatically without manual entry","Customer notifications triggered by actual job status changes"]},
+  people:{key:"cs_people",name:"Build Onboarding and Knowledge Infrastructure",desc:"Your business is one resignation away from a serious problem. Document everything your best people know and make it accessible so you are never dependent on any single person again.",bullets:["Digital onboarding flows that ramp new hires fast without consuming your time","Knowledge base capturing your best people's processes and institutional knowledge","Cross training documentation for every key role in the operation","Retention signals that surface disengagement before someone gives notice"]},
+  finance:{key:"cs_finance",name:"Automate the Revenue Cycle",desc:"Money you already earned is sitting uncollected. Automate the entire cycle from job completion to collected payment so nothing slips and nothing waits on a person.",bullets:["Invoice triggered automatically the moment a job is marked complete","Payment follow up sequences that run without anyone having to initiate them","Real time job costing so you know your actual margin before you invoice","Weekly financial reporting delivered without anyone having to pull it together"]},
+  comms:{key:"cs_comms",name:"Remove Yourself As The Communication Hub",desc:"Too much routes through your personal phone. Customer updates, crew questions, job changes, and complaints should all be handled by the system not by you.",bullets:["AI handles customer updates automatically based on live job status","Centralized crew communication that is documented and searchable","Escalation rules that only send the real exceptions to you","End of day summaries delivered automatically without anyone being asked"]},
+};
+
+const INDUSTRY_PAIN_ONLINE = {
+  coaching:[
+    {title:"Client Onboarding and Admin Eats the Time You Should Be Coaching",body:"Manual intake, scheduling, follow-up, and onboarding creates administrative overhead that compounds with every new client. Every hour spent on admin is an hour not spent coaching or acquiring clients."},
+    {title:"Your Lead Follow-Up Stops the Moment You Get Busy",body:"When your client load fills up, follow-up falls off. There is no system chasing leads who did not book yet, re-engaging cold enquiries, or nurturing prospects who were not ready. Revenue leaks in the gap."},
+    {title:"No-Shows and Lapsed Clients Have No Automated Recovery",body:"Every missed session and every disengaged client represents revenue that evaporated without a system to recover it. Without automated reminders, rescheduling, and re-engagement, attrition is silent and expensive."},
+  ],
+  education:[
+    {title:"Students Enroll and Drop Before Getting Value",body:"The gap between registration and first meaningful outcome is where most students are lost. Without an automated onboarding and early engagement sequence, dropout rates stay high regardless of how good the content is."},
+    {title:"Your Support Inbox Scales Linearly With Enrollment",body:"Every new student adds to the support queue. Without a knowledge base handling the 80% of questions that repeat, support volume grows with sales and eventually becomes the bottleneck that caps growth."},
+    {title:"Revenue Spikes Around Launches and Flatlines Between Them",body:"Back-catalogue products sit idle after their launch window. Without an automated system surfacing them to the right buyers at the right time, existing inventory earns nothing between campaigns."},
+  ],
+  creator:[
+    {title:"Your DM Inbox Is Full of Revenue You Never Respond to Fast Enough",body:"Every unanswered message from a follower asking about your offer, product, or how to work with you is a lead going cold. The window is narrow and manual follow-up at scale is impossible."},
+    {title:"The Admin Work Is Stealing Time You Should Be Creating",body:"The more your business grows, the more of your week disappears into backend tasks. You built this to create. The systems should be handling everything else so you can stay in that role."},
+    {title:"Brand Deals and Partnerships Route Through You Personally",body:"Inbound brand opportunities get dropped or delayed because there is no system managing the pipeline, tracking deliverables, or handling communication. Revenue from partnerships is inconsistent and hard to scale."},
+  ],
+  ecommerce:[
+    {title:"Abandoned Carts Fire One Email and Never Follow Up Again",body:"Most stores send one cart abandonment email at one hour and stop. Without a multi-step recovery sequence that adapts by cart value and runs for days, a significant share of recoverable revenue is permanently left on the table."},
+    {title:"Repeat Purchase Windows Open and Close With No Automated Outreach",body:"Your customers need your product again in 30, 60, or 90 days. Without sequences timed to your product cycle, they either reorder on their own or they go to a competitor who stayed in front of them."},
+    {title:"Support Volume Scales With Orders and Eventually Swamps You",body:"Every surge in orders creates a surge in support tickets. Without a system trained on your policies and FAQs handling the common questions automatically, support becomes a bottleneck that limits how fast you can grow."},
+  ],
+  digitalproducts:[
+    {title:"Manual Delivery and Fulfillment Eats the Margin on Every Sale",body:"Every purchase requiring manual action to deliver, confirm access, or follow up adds overhead that compounds at scale. Digital products should deliver instantly and automatically every time without exception."},
+    {title:"Your Back Catalogue Earns Nothing After the Launch Window Closes",body:"Products built months or years ago sit idle between launches. Without automated sequences surfacing them to buyers who match the profile, your catalogue is a sunk cost instead of a compounding revenue stream."},
+    {title:"Support Volume Grows With Every Launch Whether You Are Ready or Not",body:"Product questions, access issues, and refund requests multiply with every campaign. Without a trained support system handling common issues automatically, every launch creates a personal support burden."},
+  ],
+  agency:[
+    {title:"Scope Creep and Client Communication Route Through You",body:"Every client wants direct access to the owner. Change requests, approvals, feedback rounds, and updates all come to your inbox. Without a system managing client communication, you are the account manager for every single engagement."},
+    {title:"New Business Development Stops When You Are Heads Down in Delivery",body:"When you are busy delivering for existing clients, the pipeline dries up. Without automated lead nurture and follow-up, new business is feast-or-famine and the dry stretches always come at the worst time."},
+    {title:"Client Onboarding Is a Manual Production Every Single Time",body:"Every new client requires the same intake, contract, brief, access, and kickoff done manually each time. Without a systematized onboarding that runs itself, every new client creates a week of administrative overhead."},
+  ],
+};
+
+const INDUSTRY_STEPS_ONLINE = {
+  coaching:{key:"is_coaching",name:"Build Client Onboarding, Lead Nurture, and Re-Engagement Infrastructure",desc:"The two biggest leaks in coaching businesses are leads that go cold before booking and clients that drop before getting results. Both are infrastructure problems, not product problems.",bullets:["AI handles initial lead response and booking enquiries in under 5 minutes regardless of when they reach out","Automated onboarding delivers resources, sets expectations, and captures intake without manual steps","Session reminders and confirmation sequences reduce no-shows without you following up personally","Re-engagement sequences recover lapsed clients and warm cold leads without manual outreach"]},
+  education:{key:"is_education",name:"Install Enrollment Automation, Student Retention, and Back-Catalogue Monetization",desc:"Revenue and retention both depend on what happens after the purchase. Most course businesses lose students in the first two weeks because nothing guides them to their first outcome.",bullets:["Automated student onboarding from purchase to first action completed without manual steps","Early engagement sequences identify at-risk students before they drop","Support knowledge base trained on your content handles 80% of questions without your involvement","Back-catalogue sequences surface older products to buyers who have not purchased them yet"]},
+  creator:{key:"is_creator",name:"Build Backend Infrastructure That Gives You Back Time to Create",desc:"You built this to create. The admin, the follow-up, the monetization backend - none of that should live on your plate. Infrastructure handles it so you stay in the role only you can fill.",bullets:["DM automation responds to inbound enquiries, qualifies prospects, and routes to offers without your input","Email sequences convert audience attention into revenue without a new manual campaign every time","Brand deal pipeline tracks inbound opportunities, manages communication, and monitors deliverables","Offer router surfaces the right product or program to the right follower at the right moment"]},
+  ecommerce:{key:"is_ecommerce",name:"Install Cart Recovery, Repeat Purchase Sequences, and Support Automation",desc:"In e-commerce the margin lives in recovery and retention. Most stores optimize for acquisition. The infrastructure play is making every existing buyer more valuable.",bullets:["Multi-step abandoned cart recovery that runs for 7 days and adapts by cart value and product","Repeat purchase sequences timed precisely to your product consumption cycle","Support system trained on your FAQs and policies handles 90% of tickets automatically","Post-purchase upsell flows increase average order value on existing traffic without new ad spend"]},
+  digitalproducts:{key:"is_digital",name:"Automate Delivery, Monetize the Back Catalogue, and Remove Support Overhead",desc:"High-margin products should have near-zero operational overhead after the build. Most digital product businesses still run manual fulfillment, support, and re-engagement.",bullets:["Instant delivery and welcome sequence fires on every purchase with zero manual involvement","Back-catalogue sequences surface existing products to buyers based on purchase history","Support system trained on your content handles common questions before they reach you","Launch infrastructure built once runs every future launch without rebuilding from scratch"]},
+  agency:{key:"is_agency",name:"Build Client Communication, Pipeline Automation, and Onboarding Infrastructure",desc:"Agency operators are usually the most bottlenecked business owners because they are delivering for clients while also trying to run the business. Infrastructure removes you from both.",bullets:["Standardized client onboarding runs without your involvement after the contract is signed","Pipeline follow-up sequences keep warm leads engaged between proposals without manual outreach","Client communication layer handles updates, approvals, and check-ins without routing through you","Scope change tracking and approval workflows built into the client relationship from day one"]},
+};
+
+const INDUSTRY_STEPS = {
+  trades_field:{key:"is_trades",name:"Automate Compliance Tracking and Service Efficiency",desc:"In the trades, compliance gaps create liability and service inefficiency burns margin. Both are fixable with the right infrastructure running in the background.",bullets:["License, certification, and insurance tracking automated with renewal alerts","Job information pushed to technicians before arrival so first visit fix rates improve","After-service review and follow up sequences triggered automatically on job completion","Upsell and maintenance agreement follow up running without manual effort"]},
+  construction:{key:"is_construction",name:"Build Bid Follow Up and Project Communication Infrastructure",desc:"You spend real resources building estimates. The follow up and project communication system needs to match that investment so jobs convert and stay profitable through completion.",bullets:["Automated bid follow up sequences that keep you in front of clients after estimates go out","Change order tracking and client notification automated end to end","Sub and supplier coordination workflows that reduce manual coordination time","Project status reporting that updates automatically from field inputs"]},
+  oil_gas_energy:{key:"is_energy",name:"Install Field to Office Intelligence and Compliance Infrastructure",desc:"Your field operations and your office need to operate as one connected system. Real time data flow, automated compliance documentation, and smart dispatch are not optional at your scale.",bullets:["Real time field data capture so the office always knows job status without calling","Compliance and safety documentation automation so records generate without manual effort","Dispatch and mobilization workflows that coordinate crews and certifications automatically","Change order and issue escalation routing that reaches the right person instantly"]},
+  manufacturing:{key:"is_manufacturing",name:"Build Production Visibility and Quoting Automation",desc:"The margin in manufacturing lives in the gap between estimated and actual job cost. Real time visibility into production, combined with accurate automated quoting, closes that gap.",bullets:["Live production dashboard showing job status, bottlenecks, and machine utilization","Automated quoting system pulling from current labor and material cost data","Job costing that captures actual vs estimated in real time not after the fact","Workforce scheduling and capacity planning driven by data not gut feel"]},
+  fleet_logistics:{key:"is_fleet",name:"Install Dispatch Intelligence and Compliance Automation",desc:"In fleet operations the margin is in the routes you optimize and the compliance gaps you close. Both are automated infrastructure problems not management problems.",bullets:["AI-powered dispatch and route optimization running continuously","DOT compliance, HOS tracking, and vehicle inspection documentation automated","Driver and dispatch communication centralized and logged automatically","Customer delivery updates triggered by real location and status data"]},
+  home_service:{key:"is_home",name:"Install 24/7 Lead Capture and Recurring Revenue Infrastructure",desc:"In home services the job goes to whoever responds first and the most profitable clients are the ones who come back every season. Both require infrastructure not manual effort.",bullets:["24/7 AI phone and web response so no lead goes unanswered after hours","Automated booking that fills your schedule without office staff involvement","Maintenance agreement and seasonal renewal follow up running automatically","Review request sequences triggered after every completed job"]},
+};
+
+const OPEN_QS = [
+  {id:"qOpen1", catLabel:"Your Operation", text:"Walk me through a typical day. What does your morning through end of day actually look like right now?"},
+  {id:"qOpen2", catLabel:"Your Operation", text:"What tasks do you hate but can't delegate? What keeps ending up back on your plate no matter what?"},
+  {id:"qOpen3", catLabel:"Your Operation", text:"Where are you the bottleneck? Where does everything slow down or stop when you're not available?"},
+  {id:"qOpen4", catLabel:"Your Operation", text:"What do you wish you could automate but haven't figured out how?"},
+];
+
+const VISIBILITY_STEP = {key:"vs_visibility",name:"Build Real Time Visibility Across the Business",desc:"Stop finding out things went wrong after they already cost you. A live operations dashboard shows exactly what is happening in revenue, jobs, crew, and pipeline without asking anyone.",bullets:["Live operations view for revenue, active jobs, crew status, and open leads","Exception alerts that only surface the things that actually need your attention","Weekly performance summary delivered automatically every Monday","Pipeline and revenue forecast updated in real time"]};
+
+const OFFERS = {
+  tier1:{headline:"TMI Zero",why:"You are at the stage where building the right foundation now matters more than doing everything at once. TMI Zero installs the foundational AI back office that every growing operation needs. Call agent, quote agent, basic automation. You see it working, then we build from there. Most Zero clients are ready for the full AI Wing Build within 60 to 90 days.",bullets:["Call agent that handles inbound and follows up on every lead","Quote agent that turns job info into estimates without manual input","Basic back office automation covering the highest-friction tasks","A full roadmap showing what the complete AI Wing Build looks like for your operation"]},
+  tier2:{headline:"The AI Wing Build",why:"You have proven the business works. You are ready to stop running it manually. The AI Wing Build is the full custom operational infrastructure build. Custom agents, integrations, and full deployment built specifically around how your operation runs.",bullets:["Full front end agent stack covering phone, lead capture, qualification, booking, follow up, and reviews","Dispatch and job coordination automation","Invoice and payment follow up running automatically","Dead lead revival bringing back jobs that went cold","CRM with full pipeline visibility","Custom integrations with your existing tools","Active support after launch"]},
+  tier3:{headline:"The AI Wing Build",why:"You have everything you need to scale. The AI Wing Build closes the gaps that are slowing you down and installs the full system so every lead gets followed up, every job runs clean, and growth stops depending on you personally.",bullets:["Full front end agent stack covering phone, lead capture, qualification, booking, follow up, and reviews","Dispatch and job coordination automation","Invoice and payment follow up running automatically","Dead lead revival bringing back jobs that went cold","CRM with full pipeline visibility","Custom integrations with your existing tools","Active support after launch"]},
+  tier4:{headline:"The AI Wing Build",why:"At your stage you need the full build plus custom depth. The AI Wing Build at your complexity level means custom workflows built around how your specific operation runs, financial visibility, and a system that holds together under real volume.",bullets:["Everything in the foundational AI Wing Build","Custom agentic workflows built around your exact operation and industry","Financial automation and real time reporting","Compliance and safety documentation tracking where applicable","Analytics dashboard with live operational visibility","Crew and client onboarding automation","Extended active support after launch"]},
+  tier5:{headline:"The AI Wing Build",why:"Running multiple crews or locations without connected infrastructure creates gaps that cost money every day. The AI Wing Build at your scale connects everything into one system with consistent standards enforced automatically.",bullets:["Everything in the foundational AI Wing Build","Custom agentic workflows built around your exact operation and industry","Financial automation and real time reporting","Compliance and safety documentation tracking where applicable","Analytics dashboard with live operational visibility","Multi-crew and multi-location coordination","Extended active support after launch"]},
+  tier6:{headline:"Chief AI Officer Engagement",why:"At your level you need TMI embedded at the leadership layer, not just the operational layer. The CAO Engagement is private one-on-one consulting at the executive level. Custom architecture, custom pricing. You own everything built.",bullets:["Private engagement at the executive level — not a product, a partnership","Fully custom agentic architecture designed for your exact operation and scale","Complete IP ownership transferred at delivery","Team training and full documentation handed over","Ongoing retainer available for future expansion, new builds, and optimization","Option to license your built systems to others in your industry"]},
+  tier7:{headline:"Chief AI Officer Engagement",why:"You are running a real company. The infrastructure needs to match that. The CAO Engagement is not a software product. It is a custom build designed around your operation, your goals, and where you are taking this business — with TMI embedded at the decision-making level.",bullets:["Private engagement at the executive level — not a product, a partnership","Fully custom agentic architecture designed for your exact operation and scale","Complete IP ownership transferred at delivery","Team training and full documentation handed over","Ongoing retainer available for future expansion, new builds, and optimization","Option to license your built systems to others in your industry"]},
+};
+
+const PATHS = {
+  tier1:[
+    {label:"Step 1",text:"Operations Audit — One call. Free. We map your operation and find what's leaking.",active:false},
+    {label:"Start Here",text:"TMI Zero — Foundational AI back office. Call agent, quote agent, basic automation. Starting around $25,000.",active:true,note:"Most Zero clients move to the full AI Wing Build within 60 to 90 days."},
+    {label:"Step 3",text:"The AI Wing Build — Full custom operational infrastructure. Every major leak fixed.",active:false},
+    {label:"Ongoing",text:"AI Department — Fractional AI department retainer. TMI stays in, maintains systems, builds new ones as you grow.",active:false},
+  ],
+  tier2:[
+    {label:"Step 1",text:"Operations Audit — One call. Free. We map your operation and find what's leaking.",active:false},
+    {label:"Start Here",text:"The AI Wing Build — Full custom operational infrastructure build. Lead to invoice automated. Every major leak fixed.",active:true},
+    {label:"Ongoing",text:"AI Department — Fractional AI department retainer. TMI stays in, maintains and builds as you grow.",active:false},
+  ],
+  tier3:[
+    {label:"Step 1",text:"Operations Audit — One call. Free. We map your operation and find what's leaking.",active:false},
+    {label:"Start Here",text:"The AI Wing Build — Full custom operational infrastructure build. Lead to invoice automated. Every major leak fixed.",active:true},
+    {label:"Ongoing",text:"AI Department — Fractional AI department retainer. TMI stays in, maintains and builds as you grow.",active:false},
+  ],
+  tier4:[
+    {label:"Step 1",text:"Operations Audit — One call. Free. Custom scoping conversation with the TMI team.",active:false},
+    {label:"Start Here",text:"The AI Wing Build — Custom workflows, financial automation, analytics, and compliance built for your exact operation.",active:true},
+    {label:"Ongoing",text:"AI Department — Full fractional AI department. Direct access to the TMI team. Systems maintained and expanded.",active:false},
+  ],
+  tier5:[
+    {label:"Step 1",text:"Operations Audit — One call. Free. Custom scoping conversation with the TMI team.",active:false},
+    {label:"Start Here",text:"The AI Wing Build — Custom multi-crew infrastructure. Every location connected. Standards enforced automatically.",active:true},
+    {label:"Ongoing",text:"AI Department — Full fractional AI department. Direct access to the TMI team. Systems maintained and expanded.",active:false},
+  ],
+  tier6:[
+    {label:"Step 1",text:"Operations Audit — One call. Free. Executive-level scoping conversation with TMI.",active:false},
+    {label:"Start Here",text:"Chief AI Officer Engagement — Private executive engagement. Fully custom AI infrastructure. You own everything built.",active:true},
+    {label:"Optional",text:"AI Department Retainer — Ongoing retainer for future expansion, new builds, and optimization.",active:false},
+  ],
+  tier7:[
+    {label:"Step 1",text:"Operations Audit — One call. Free. Executive-level scoping conversation with TMI.",active:false},
+    {label:"Start Here",text:"Chief AI Officer Engagement — Private executive engagement. Fully custom AI infrastructure. You own everything built.",active:true},
+    {label:"Optional",text:"AI Department Retainer — Ongoing retainer for future expansion, new builds, and optimization.",active:false},
+  ],
+};
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let currentQ = 0;
+let answers = {};
+let selectedCategory = null;
+let contactInfo = {};
+let businessType = null;
+
+/* ═══════════════════════════════════════════
+   SCREEN MANAGEMENT
+═══════════════════════════════════════════ */
+function startAudit() {
+  document.getElementById('screen-intro').classList.add('screen-hidden');
+  document.getElementById('screen-contact').classList.remove('screen-hidden');
+}
+
+function submitContact(e) {
+  e.preventDefault();
+  contactInfo = {
+    name: document.getElementById('cf-name').value.trim(),
+    company: document.getElementById('cf-company').value.trim(),
+    email: document.getElementById('cf-email').value.trim(),
+    phone: document.getElementById('cf-phone').value.trim(),
+  };
+  document.getElementById('screen-contact').classList.add('screen-hidden');
+  document.getElementById('screen-quiz').classList.remove('screen-hidden');
+  renderQuestion(0);
+}
+
+function showResults() {
+  window.scrollTo(0,0);
+  document.getElementById('screen-quiz').classList.add('screen-hidden');
+  const r = computeResults();
+  document.getElementById('screen-results').innerHTML = buildResultsHTML(r);
+  document.getElementById('screen-results').classList.remove('screen-hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+  submitAuditToAPI(r);
+}
+
+async function submitAuditToAPI(r) {
+  try {
+    const openAnswers = OPEN_QS
+      .map(q => answers[q.id] ? q.text + '\n' + answers[q.id] : '')
+      .filter(Boolean).join('\n\n');
+
+    const emailBody = [
+      'Name: ' + contactInfo.name,
+      'Company: ' + contactInfo.company,
+      'Email: ' + contactInfo.email,
+      'Phone: ' + (contactInfo.phone || 'Not provided'),
+      '',
+      'Business Type: ' + (r.bizType === 'online' ? 'Online' : 'Physical / Field'),
+      'Industry: ' + (answers.q2 || 'Not selected'),
+      'Result Tier: ' + TIERS[r.tierKey].name,
+      'Dependency Score: ' + r.depPct + '%',
+      'Worst Category: ' + r.worstCat,
+      '',
+      openAnswers ? 'Open Answers:\n' + openAnswers : '',
+    ].filter(Boolean).join('\n');
+
+    const fd = new FormData();
+    fd.append('name', contactInfo.name);
+    fd.append('email', contactInfo.email);
+    fd.append('_subject', 'New TMI Audit - ' + contactInfo.name + ' | ' + TIERS[r.tierKey].name);
+    fd.append('message', emailBody);
+    await fetch('https://formsubmit.co/ajax/support@tmitechai.com', {
+      method: 'POST',
+      headers: {'Accept':'application/json'},
+      body: fd,
+    });
+  } catch(e) {}
+}
+
+function retakeAudit() {
+  answers = {};
+  contactInfo = {};
+  selectedCategory = null;
+  businessType = null;
+  currentQ = 0;
+  document.getElementById('screen-results').classList.add('screen-hidden');
+  document.getElementById('screen-results').innerHTML = '';
+  document.getElementById('screen-intro').classList.remove('screen-hidden');
+  window.scrollTo(0,0);
+}
+
+/* ═══════════════════════════════════════════
+   QUESTION RENDERING
+═══════════════════════════════════════════ */
+const LETTERS = ['A','B','C','D','E','F','G'];
+
+function renderQuestion(idx) {
+  currentQ = idx;
+  const pct = ((idx + 1) / 20) * 100;
+  document.getElementById('progress-label').textContent = `Question ${idx + 1} of 20`;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  const container = document.getElementById('question-container');
+  let html = '';
+
+  if (idx === 0) {
+    html = `<div class="q-category">Your Business</div>
+    <div class="q-text">Where is your business right now?</div>
+    <div class="q-options">
+      ${Q1_OPTIONS.map((o,i) => `<button class="q-btn" onclick="answerQ1('${o.val}',${o.pts},this)">
+        <span class="q-badge">${LETTERS[i]}</span>
+        <span class="q-btn-text">${o.text}</span>
+      </button>`).join('')}
+    </div>`;
+  } else if (idx === 1) {
+    html = `<div class="q-category">Your Business</div>
+    <div class="q-text">Is your business primarily online or a physical operation?</div>
+    <div class="q-options">
+      <button class="q-btn" onclick="answerBizType('online',this)">
+        <span class="q-badge">A</span>
+        <span class="q-btn-text">Online - I run a digital business (coaching, courses, creator, e-commerce, digital products)</span>
+      </button>
+      <button class="q-btn" onclick="answerBizType('physical',this)">
+        <span class="q-badge">B</span>
+        <span class="q-btn-text">Physical / Field - I run an operation in the field (trades, construction, oil and gas, manufacturing, fleet, home service)</span>
+      </button>
+    </div>`;
+  } else if (idx === 2) {
+    html = buildQ2HTML();
+  } else if (idx >= 3 && idx <= 14) {
+    const q = SCORED_QS[idx - 3];
+    let qText = q.text;
+    let qOpts = q.opts;
+    if (businessType === 'online') {
+      if (q.id === 'q6') {
+        qText = "When a client has an issue or needs support, how does your team handle it?";
+        qOpts = ["Handled through a documented process - I am never the first contact.","Usually handled by someone on my team for most issues.","Mix - some things handled but I often get pulled in.","Clients contact me directly for almost everything."];
+      } else if (q.id === 'q7') {
+        qText = "Can your business handle fulfillment, onboarding, and client delivery for a full week without you?";
+        qOpts = ["Yes. Fully automated or someone owns it end to end.","Yes but it is manual and things occasionally get missed.","Partially. Things would slow down if I were gone.","No. I manage delivery and onboarding personally."];
+      }
+    }
+    html = `<div class="q-category">${q.catLabel}</div>
+    <div class="q-text">${qText}</div>
+    <div class="q-options">
+      ${qOpts.map((o,i) => `<button class="q-btn" onclick="answerScored('${q.id}',${i},this)">
+        <span class="q-badge">${LETTERS[i]}</span>
+        <span class="q-btn-text">${o}</span>
+      </button>`).join('')}
+    </div>`;
+  } else if (idx >= 15 && idx <= 18) {
+    const q = OPEN_QS[idx - 15];
+    const saved = answers[q.id] || '';
+    html = `<div class="q-category">${q.catLabel}</div>
+    <div class="q-text">${q.text}</div>
+    <p class="q-open-note">Answer in your own words. There are no right answers - this helps us understand your actual situation before the strategy call.</p>
+    <textarea class="q-textarea" id="open-text-input" placeholder="Write as much or as little as you want...">${saved}</textarea>
+    <div style="display:flex;align-items:center;">
+      <button class="btn btn-primary" onclick="answerOpenText('${q.id}',${idx + 1})">Next &nbsp;&rarr;</button>
+      <button class="q-skip" onclick="answerOpenText('${q.id}',${idx + 1},true)">Skip</button>
+    </div>`;
+  } else if (idx === 19) {
+    html = `<div class="q-category">Your Business</div>
+    <div class="q-text">Roughly what is your current annual revenue?</div>
+    <div class="q-options">
+      ${Q15_OPTIONS.map((o,i) => `<button class="q-btn" onclick="answerQ15('${o.val}',${o.pts},this)">
+        <span class="q-badge">${LETTERS[i]}</span>
+        <span class="q-btn-text">${o.text}</span>
+      </button>`).join('')}
+    </div>`;
+  }
+
+  container.innerHTML = html;
+  container.classList.remove('q-enter');
+  void container.offsetWidth;
+  container.classList.add('q-enter');
+}
+
+function buildQ2HTML() {
+  const cats = businessType === 'online' ? Q2_CATS_ONLINE : Q2_CATS;
+  const catHTML = cats.map(c => `
+    <button class="q2-cat-btn${selectedCategory===c.val?' active':''}" onclick="selectIndustryCat('${c.val}')">${c.label}</button>
+  `).join('');
+
+  let subsHTML = '';
+  if (selectedCategory) {
+    const cat = cats.find(c => c.val === selectedCategory);
+    if (cat) {
+      const subsLabel = businessType === 'online' ? 'Select your type' : 'Select your specific trade';
+      subsHTML = `<div class="q2-subs-wrap">
+        <div class="q2-subs-label">${subsLabel}</div>
+        <div class="q2-subs">
+          ${cat.subs.map(s => `<button class="q2-sub-btn" onclick="answerQ2('${s.val}',this)">${s.label}</button>`).join('')}
+        </div>
+      </div>`;
+    }
+  }
+
+  return `<div class="q-category">Your Business</div>
+  <div class="q-text">What type of business are you running?</div>
+  <div class="q2-cats">${catHTML}</div>
+  <div id="q2-subs-container">${subsHTML}</div>`;
+}
+
+function selectIndustryCat(catVal) {
+  selectedCategory = catVal;
+  const container = document.getElementById('question-container');
+  container.innerHTML = buildQ2HTML();
+  setTimeout(() => {
+    const subs = document.getElementById('q2-subs-container');
+    if (subs) subs.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }, 50);
+}
+
+/* ═══════════════════════════════════════════
+   ANSWER HANDLERS
+═══════════════════════════════════════════ */
+function answerQ1(val, pts, btn) {
+  btn.closest('.q-options').querySelectorAll('.q-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers.q1val = val;
+  answers.q1pts = pts;
+  setTimeout(() => renderQuestion(1), 180);
+}
+
+function answerBizType(type, btn) {
+  btn.closest('.q-options').querySelectorAll('.q-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  businessType = type;
+  selectedCategory = null;
+  setTimeout(() => renderQuestion(2), 180);
+}
+
+function answerQ2(subVal, btn) {
+  btn.closest('.q2-subs').querySelectorAll('.q2-sub-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers.q2 = subVal;
+  setTimeout(() => renderQuestion(3), 250);
+}
+
+function answerOpenText(qid, nextIdx, skip) {
+  if (!skip) {
+    const val = (document.getElementById('open-text-input').value || '').trim();
+    answers[qid] = val;
+  }
+  renderQuestion(nextIdx);
+}
+
+function answerScored(qid, score, btn) {
+  btn.closest('.q-options').querySelectorAll('.q-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers[qid] = score;
+  const nextIdx = currentQ + 1;
+  setTimeout(() => renderQuestion(nextIdx), 180);
+}
+
+function answerQ15(val, pts, btn) {
+  btn.closest('.q-options').querySelectorAll('.q-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers.q15val = val;
+  answers.q15pts = pts;
+  setTimeout(() => showResults(), 250);
+}
+
+/* ═══════════════════════════════════════════
+   SCORING
+═══════════════════════════════════════════ */
+function getPainGroupOnline(industryVal) {
+  if (!industryVal) return 'coaching';
+  if (industryVal.startsWith('coaching_')) return 'coaching';
+  if (industryVal.startsWith('education_')) return 'education';
+  if (industryVal.startsWith('creator_')) return 'creator';
+  if (industryVal.startsWith('ecommerce_')) return 'ecommerce';
+  if (industryVal.startsWith('digital_')) return 'digitalproducts';
+  if (industryVal.startsWith('agency_')) return 'agency';
+  return 'coaching';
+}
+
+function getPainGroup(industryVal) {
+  if (!industryVal) return 'trades_field';
+  if (industryVal.startsWith('trades_')) return 'trades_field';
+  if (industryVal.startsWith('construction_')) return 'construction';
+  if (industryVal.startsWith('energy_')) return 'oil_gas_energy';
+  if (industryVal.startsWith('manufacturing_')) return 'manufacturing';
+  if (industryVal.startsWith('fleet_')) return 'fleet_logistics';
+  if (industryVal.startsWith('homeservice_')) return 'home_service';
+  return 'trades_field';
+}
+
+function getTierKey(score) {
+  if (score <= 4.0) return 'tier1';
+  if (score <= 8.0) return 'tier2';
+  if (score <= 12.0) return 'tier3';
+  if (score <= 16.0) return 'tier4';
+  if (score <= 19.5) return 'tier5';
+  if (score <= 22.9) return 'tier6';
+  return 'tier7';
+}
+
+function getDepInfo(pct) {
+  if (pct >= 70) return {label:'Critical Dependency',color:'#e05a2b'};
+  if (pct >= 45) return {label:'High Dependency',color:'#d49320'};
+  if (pct >= 20) return {label:'Moderate Dependency',color:'#8aa82a'};
+  return {label:'Low Dependency',color:'#4caf7d'};
+}
+
+function computeResults() {
+  const stagePoints = answers.q1pts || 0;
+  const revenuePoints = answers.q15pts || 0;
+
+  const catRaw = {
+    leads: (answers.q3||0)+(answers.q4||0)+(answers.q5||0),
+    ops:   (answers.q6||0)+(answers.q7||0)+(answers.q8||0),
+    people:(answers.q9||0)+(answers.q10||0),
+    finance:(answers.q11||0)+(answers.q12||0),
+    comms: (answers.q13||0)+(answers.q14||0),
+  };
+  const catMax = {leads:9,ops:9,people:6,finance:6,comms:6};
+  const catPct = {};
+  for (const k in catRaw) catPct[k] = Math.round((catRaw[k]/catMax[k])*100);
+
+  const totalRaw = Object.values(catRaw).reduce((a,b)=>a+b,0);
+  const depPct = Math.round((totalRaw/36)*100);
+  const inverseDepPoints = ((36-totalRaw)/36)*6;
+  const composite = (stagePoints*2)+(revenuePoints*2)+inverseDepPoints;
+  const tierKey = getTierKey(composite);
+
+  const sorted = Object.entries(catPct).sort((a,b)=>b[1]-a[1]);
+  const worstCat = sorted[0][0];
+  const secondCat = sorted[1][0];
+  const painGroup = businessType === 'online'
+    ? getPainGroupOnline(answers.q2)
+    : getPainGroup(answers.q2);
+
+  return {tierKey,composite,depPct,catPct,worstCat,secondCat,painGroup,bizType:businessType};
+}
+
+/* ═══════════════════════════════════════════
+   RESULTS HTML
+═══════════════════════════════════════════ */
+const CAT_LABELS = {leads:'Lead & Sales',ops:'Operations',people:'People & Systems',finance:'Finance & Admin',comms:'Communication'};
+
+function buildResultsHTML(r) {
+  const tier = TIERS[r.tierKey];
+  const depInfo = getDepInfo(r.depPct);
+
+  // Category bars
+  const catOrder = ['leads','ops','people','finance','comms'];
+  const catBarsHTML = catOrder.map(k => {
+    const pct = r.catPct[k];
+    const info = getDepInfo(pct);
+    return `<div class="res-cat-bar-row">
+      <div class="res-cat-bar-head">
+        <span class="res-cat-bar-name">${CAT_LABELS[k]}</span>
+        <span class="res-cat-bar-pct" style="color:${info.color}">${pct}%</span>
+      </div>
+      <div class="res-cat-bar-track">
+        <div class="res-cat-bar-fill" style="width:${pct}%;background:${info.color}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Pain points: worst cat + 3 industry pains
+  const catPain = CAT_PAIN[r.worstCat];
+  const indPainSource = r.bizType === 'online' ? INDUSTRY_PAIN_ONLINE : INDUSTRY_PAIN;
+  const indPains = indPainSource[r.painGroup] || (r.bizType === 'online' ? INDUSTRY_PAIN_ONLINE.coaching : INDUSTRY_PAIN.trades_field);
+  const painCards = [catPain, ...indPains].map((p,i) => `
+    <div class="res-pain-card">
+      <div class="res-pain-title">${p.title}</div>
+      <div class="res-pain-body">${p.body}</div>
+    </div>`).join('');
+
+  // Roadmap steps
+  const tierStep = TIER_STEPS[r.tierKey];
+  const worstStep = CAT_STEPS[r.worstCat];
+  const secondStep = CAT_STEPS[r.secondCat];
+  const industryStepSource = r.bizType === 'online' ? INDUSTRY_STEPS_ONLINE : INDUSTRY_STEPS;
+  const industryStep = industryStepSource[r.painGroup] || (r.bizType === 'online' ? INDUSTRY_STEPS_ONLINE.coaching : INDUSTRY_STEPS.trades_field);
+  const seen = new Set();
+  const roadmapSteps = [tierStep, worstStep, secondStep, industryStep, VISIBILITY_STEP].filter(s => {
+    if (seen.has(s.key)) return false;
+    seen.add(s.key);
+    return true;
+  }).slice(0,5);
+
+  const stepsHTML = roadmapSteps.map((s,i) => `
+    <div class="res-step">
+      <div class="res-step-num">0${i+1}</div>
+      <div class="res-step-body">
+        <div class="res-step-name">${s.name}</div>
+        <div class="res-step-desc">${s.desc}</div>
+        <ul class="res-step-bullets">${s.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>
+      </div>
+    </div>`).join('');
+
+  // Offer
+  const offer = OFFERS[r.tierKey];
+  const offerHTML = `<div class="res-offer-card">
+    <div class="res-offer-headline">${offer.headline}</div>
+    <div class="res-offer-why">${offer.why}</div>
+    <div class="res-offer-covers-label">What it covers</div>
+    <ul class="res-offer-bullets">${offer.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>
+  </div>`;
+
+  // Path
+  const pathSteps = PATHS[r.tierKey] || PATHS.tier1;
+  const pathHTML = pathSteps.map(s => `
+    <div class="res-path-step${s.active?' active':''}">
+      <div class="res-path-dot"></div>
+      <div class="res-path-step-label">${s.label}</div>
+      <div class="res-path-step-text">${s.text}</div>
+      ${s.note ? `<div class="res-path-note">${s.note}</div>` : ''}
+    </div>`).join('');
+
+  return `
+    <!-- TIER CARD -->
+    <div class="res-tier-section">
+      <div class="res-container">
+        <div class="res-tier-eyebrow">Your Results</div>
+        <div class="res-tier-name">${tier.name}</div>
+        <div class="res-tier-desc">${tier.desc}</div>
+        <div class="res-scores-grid">
+          <div class="res-dep-block">
+            <div class="res-dep-num" style="color:${depInfo.color}">${r.depPct}%</div>
+            <div class="res-dep-label" style="color:${depInfo.color}">${depInfo.label}</div>
+          </div>
+          <div class="res-cat-bars">${catBarsHTML}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLEEDING -->
+    <div class="res-bleeding-section">
+      <div class="res-container">
+        <div class="eyebrow res-section-eyebrow"><span class="dot" style="background:#e05a2b"></span>Where You Are Bleeding</div>
+        <h2 class="res-section-h2">The four leaks costing you the most right now.</h2>
+        <div class="res-pain-grid">${painCards}</div>
+      </div>
+    </div>
+
+    <!-- ROADMAP -->
+    <div class="res-roadmap-section">
+      <div class="res-container">
+        <div class="eyebrow res-section-eyebrow"><span class="dot"></span>Your AI Infrastructure Roadmap</div>
+        <h2 class="res-section-h2" style="color:#fff;margin-bottom:40px;">Five moves. In this order.</h2>
+        <div class="res-steps">${stepsHTML}</div>
+      </div>
+    </div>
+
+    <!-- OFFER -->
+    <div class="res-offer-section">
+      <div class="res-container">
+        <div class="eyebrow res-section-eyebrow"><span class="dot"></span>Your Recommended TMI Offer</div>
+        <h2 class="res-section-h2">Where to start.</h2>
+        ${offerHTML}
+      </div>
+    </div>
+
+    <!-- SUPPORT -->
+    <div class="res-support-section">
+      <div class="res-container">
+        <div class="eyebrow res-section-eyebrow"><span class="dot"></span>The AI Department</div>
+        <h2 class="res-section-h2">TMI stays in after the build.</h2>
+        <div class="res-support-grid">
+          <div class="res-support-card">
+            <div class="res-support-name">Maintain</div>
+            <div class="res-support-desc">Keep your infrastructure running clean. Monitoring, fixes, and regular check-ins. Systems stay current as the business changes.</div>
+          </div>
+          <div class="res-support-card highlight">
+            <div class="res-support-name">AI Department</div>
+            <div class="res-support-desc">The full fractional AI department. TMI maintains the systems, builds new ones as the operation grows, and keeps the infrastructure ahead of the business. $5,000 to $15,000 per month.</div>
+          </div>
+          <div class="res-support-card">
+            <div class="res-support-name">CAO Retainer</div>
+            <div class="res-support-desc">For larger operations — TMI embedded at the leadership level. New builds, strategic AI decisions, and full infrastructure management. Custom pricing.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATH -->
+    <div class="res-path-section">
+      <div class="res-container">
+        <div class="eyebrow res-section-eyebrow"><span class="dot" style="background:#7C6CF2"></span>Your Path Through TMI</div>
+        <h2 class="res-section-h2" style="margin-bottom:48px;">The sequence that makes sense for where you are.</h2>
+        <div class="res-path-steps">${pathHTML}</div>
+      </div>
+    </div>
+
+    <!-- YOUR ANSWERS -->
+    ${(answers.qOpen1||answers.qOpen2||answers.qOpen3||answers.qOpen4) ? `
+    <div class="res-answers-section">
+      <div class="res-container">
+        <div class="eyebrow res-section-eyebrow"><span class="dot" style="background:#7C6CF2"></span>Your Answers</div>
+        <h2 class="res-section-h2">What you told us.</h2>
+        <div class="res-answers-grid">
+          ${OPEN_QS.map(q => answers[q.id] ? `
+          <div class="res-answer-card">
+            <div class="res-answer-q">${q.text}</div>
+            <div class="res-answer-a">${answers[q.id].replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+          </div>` : '').join('')}
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- CTA -->
+    <div class="res-cta-section">
+      <div class="res-container">
+        <div class="res-cta-inner">
+          <h2 class="res-cta-h2">Ready To Build This?</h2>
+          <p class="res-cta-body">Book a free strategy call with the TMI team. We will walk you through exactly what we would install in your operation, what it would do for your business, and what the path forward looks like. No pitch. No pressure. Just a clear plan.</p>
+          <div class="res-cta-actions">
+            <button onclick="openCal()" class="btn btn-primary" style="font-size:16px;padding:16px 40px;">Book My Free Strategy Call</button>
+            <span class="res-retake" onclick="retakeAudit()">Retake the audit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+</script>
+
+<script>
+(function (C, A, L) {
+  let p = function (a, ar) { a.q.push(ar); };
+  let d = C.document;
+  C.Cal = C.Cal || function () {
+    let cal = C.Cal; let ar = arguments;
+    if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement('script')).src = A; cal.loaded = true; }
+    if (ar[0] === L) { const api = function () { p(api, arguments); }; const ns = ar[1]; api.q = api.q || []; typeof ns === 'string' ? (cal.ns[ns] = api) && p(api, ar) : p(cal, ar); return; }
+    p(cal, ar);
+  };
+})(window, 'https://app.cal.com/embed/embed.js', 'init');
+
+Cal('init', 'popup', { origin: 'https://cal.com' });
+Cal.ns.popup('ui', { styles: { branding: { brandColor: '#E4FF97' } }, hideEventTypeDetails: false, layout: 'month_view' });
+
+function openCal() {
+  Cal.ns.popup('modal', { calLink: 'mia-elianaa-a4n2hk/30min', config: { layout: 'month_view' } });
+}
+</script>
+</body>
+</html>
