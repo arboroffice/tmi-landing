@@ -5,7 +5,7 @@ const { Client: QStashClient } = require('@upstash/qstash');
 
 const FROM_NUMBER = '+18557171044';
 const ALERT_NUMBER = '+13373809059';
-const OWNER_EMAIL = 'mialouviere@gmail.com';
+const OWNER_EMAIL = 'mia@elianatech.com';
 const SITE = 'https://www.tmi-technology.com';
 
 const PHYSICAL_INDUSTRIES = ['oil','gas','construction','trades','manufacturing','fleet','mining','utilities','home service','plumbing','hvac','roofing','electrical','landscaping','concrete','welding','pipeline'];
