@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Content Calendar — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+/* ── Calendar ────────────────────────────────────────────────── */
+.cal-nav{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.cal-month-label{font-size:22px;font-weight:700;color:var(--ink);min-width:200px;}
+.cal-nav-btn{background:none;border:1px solid var(--line);border-radius:6px;padding:6px 14px;font-size:14px;cursor:pointer;color:var(--ink-2);font-family:inherit;transition:background 0.1s;}
+.cal-nav-btn:hover{background:var(--bg-alt);}
+.cal-today-btn{font-size:12px;color:var(--muted);padding:6px 12px;border:1px solid var(--line);border-radius:999px;cursor:pointer;background:none;font-family:inherit;transition:background 0.1s;}
+.cal-today-btn:hover{background:var(--bg-alt);}
+
+.cal-plat-filters{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
+.cal-plat-btn{font-size:11px;padding:4px 12px;border-radius:999px;border:2px solid transparent;cursor:pointer;font-family:inherit;font-weight:600;background:none;transition:all 0.1s;}
+.cal-plat-btn.plat-all{border-color:var(--line);color:var(--ink-2);}
+.cal-plat-btn.plat-all.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.cal-plat-btn.plat-tiktok{border-color:#fecaca;color:#991b1b;}
+.cal-plat-btn.plat-tiktok.active{background:#fee2e2;border-color:#fca5a5;}
+.cal-plat-btn.plat-instagram{border-color:#ddd6fe;color:#6d28d9;}
+.cal-plat-btn.plat-instagram.active{background:#ede9fe;border-color:#c4b5fd;}
+.cal-plat-btn.plat-linkedin{border-color:#bfdbfe;color:#1d4ed8;}
+.cal-plat-btn.plat-linkedin.active{background:#dbeafe;border-color:#93c5fd;}
+.cal-plat-btn.plat-youtube{border-color:#fecaca;color:#b91c1c;}
+.cal-plat-btn.plat-youtube.active{background:#fee2e2;border-color:#fca5a5;}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.cal-dow{background:var(--bg-alt);padding:8px 10px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);text-align:center;}
+.cal-day{background:#fff;min-height:100px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:background 0.1s;position:relative;}
+.cal-day:hover{background:#fafafa;}
+.cal-day.other-month{background:var(--bg-alt);}
+.cal-day.other-month .cal-date{color:var(--muted);}
+.cal-day.is-today{background:#fffff0;}
+.cal-day.is-today .cal-date{background:var(--ink);color:#fff;border-radius:999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.cal-date{font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:4px;line-height:1;}
+.cal-chips{display:flex;flex-direction:column;gap:2px;flex:1;}
+.cal-chip{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.chip-tiktok{background:#fee2e2;color:#991b1b;}
+.chip-instagram{background:#ede9fe;color:#6d28d9;}
+.chip-linkedin{background:#dbeafe;color:#1d4ed8;}
+.chip-youtube{background:#fef2f2;color:#b91c1c;}
+.chip-draft{background:var(--bg-alt);color:var(--muted);}
+.cal-more{font-size:10px;color:var(--muted);padding:0 7px;}
+
+/* ── Month stats ─────────────────────────────────────────────── */
+.cal-stats{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.cal-stat{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 18px;display:flex;flex-direction:column;gap:2px;min-width:100px;}
+.cal-stat-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+.cal-stat-val{font-size:22px;font-weight:700;color:var(--ink);}
+
+/* ── Day detail panel ────────────────────────────────────────── */
+.panel-overlay{position:fixed;inset:0;z-index:400;pointer-events:none;}
+.panel-overlay.open{pointer-events:auto;}
+.panel-overlay.open .panel-backdrop{opacity:1;}
+.panel-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.18);opacity:0;transition:opacity 0.2s;cursor:pointer;}
+.panel{position:absolute;top:0;right:0;bottom:0;width:360px;background:var(--surface,#fff);box-shadow:-4px 0 32px rgba(0,0,0,0.12);display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.25s cubic-bezier(.4,0,.2,1);}
+.panel-overlay.open .panel{transform:translateX(0);}
+.panel-hd{padding:20px 24px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;}
+.panel-hd h3{font-size:16px;font-weight:700;color:var(--ink);margin:0;}
+.panel-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;}
+.panel-body{flex:1;overflow-y:auto;padding:20px 24px;}
+.post-item{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px;}
+.post-item-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.post-platform-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot-tiktok{background:#ef4444;}
+.dot-instagram{background:#8b5cf6;}
+.dot-linkedin{background:#3b82f6;}
+.dot-youtube{background:#dc2626;}
+.post-platform-label{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-2);}
+.post-status-chip{font-size:10px;padding:2px 8px;border-radius:999px;background:var(--bg-alt);color:var(--muted);margin-left:auto;}
+.post-idea-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.post-preview{font-size:12px;color:var(--ink-2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.post-item-foot{display:flex;gap:8px;margin-top:10px;}
+.panel-add-btn{width:100%;margin-top:4px;}
+
+@media(max-width:768px){
+  .cal-grid{grid-template-columns:repeat(7,1fr);}
+  .cal-day{min-height:60px;padding:4px 6px;}
+  .cal-chip{display:none;}
+  .cal-date{font-size:12px;}
+  .panel{width:100%;}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <a href="/admin-dashboard">TMI Admin</a>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="page">Content Calendar</span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/admin-content-ideas" class="btn btn-ghost btn-sm">Kanban</a>
+        <a href="/admin-content-compose" class="btn btn-primary btn-sm">+ Compose</a>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Stats row -->
+      <div class="cal-stats" id="cal-stats">
+        <div class="cal-stat"><div class="cal-stat-label">This Month</div><div class="cal-stat-val" id="cs-total">—</div></div>
+        <div class="cal-stat" style="border-top:3px solid #ef4444"><div class="cal-stat-label">TikTok</div><div class="cal-stat-val" id="cs-tiktok">—</div></div>
+        <div class="cal-stat" style="border-top:3px solid #8b5cf6"><div class="cal-stat-label">Instagram</div><div class="cal-stat-val" id="cs-instagram">—</div></div>
+        <div class="cal-stat" style="border-top:3px solid #3b82f6"><div class="cal-stat-label">LinkedIn</div><div class="cal-stat-val" id="cs-linkedin">—</div></div>
+        <div class="cal-stat" style="border-top:3px solid #dc2626"><div class="cal-stat-label">YouTube</div><div class="cal-stat-val" id="cs-youtube">—</div></div>
+      </div>
+
+      <!-- Nav + filters -->
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="prevMonth()">&#8592;</button>
+        <div class="cal-month-label" id="cal-month-label">May 2026</div>
+        <button class="cal-nav-btn" onclick="nextMonth()">&#8594;</button>
+        <button class="cal-today-btn" onclick="goToday()">Today</button>
+        <div class="cal-plat-filters">
+          <button class="cal-plat-btn plat-all active" data-plat="" onclick="setPlat(this)">All</button>
+          <button class="cal-plat-btn plat-tiktok" data-plat="tiktok" onclick="setPlat(this)">TikTok</button>
+          <button class="cal-plat-btn plat-instagram" data-plat="instagram" onclick="setPlat(this)">Instagram</button>
+          <button class="cal-plat-btn plat-linkedin" data-plat="linkedin" onclick="setPlat(this)">LinkedIn</button>
+          <button class="cal-plat-btn plat-youtube" data-plat="youtube" onclick="setPlat(this)">YouTube</button>
+        </div>
+      </div>
+
+      <!-- Calendar grid -->
+      <div class="cal-grid" id="cal-grid">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Day detail panel -->
+<div class="panel-overlay" id="day-panel">
+  <div class="panel-backdrop" onclick="closePanel()"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h3 id="dp-date">Posts</h3>
+      <button class="panel-close" onclick="closePanel()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="panel-body" id="dp-body"></div>
+  </div>
+</div>
+
+<div id="toast-root" class="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('content-calendar');
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const PLATFORM_COLORS = { tiktok:'chip-tiktok', instagram:'chip-instagram', linkedin:'chip-linkedin', youtube:'chip-youtube' };
+const DOT_COLORS = { tiktok:'dot-tiktok', instagram:'dot-instagram', linkedin:'dot-linkedin', youtube:'dot-youtube' };
+const PLATFORM_LABELS = { tiktok:'TikTok', instagram:'Instagram', linkedin:'LinkedIn', youtube:'YouTube' };
+
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+let posts = [];
+let platFilter = '';
+
+// ── Load posts for current month ──────────────────────────────────────────────
+async function load() {
+  const monthStr = currentYear + '-' + String(currentMonth + 1).padStart(2, '0');
+  document.getElementById('cal-month-label').textContent = MONTHS[currentMonth] + ' ' + currentYear;
+  posts = await TMIAdmin.api(`/api/content-posts?month=${monthStr}`) || [];
+  updateStats();
+  renderCalendar();
+}
+
+function updateStats() {
+  document.getElementById('cs-total').textContent = posts.length;
+  ['tiktok','instagram','linkedin','youtube'].forEach(p => {
+    const el = document.getElementById('cs-' + p);
+    if (el) el.textContent = posts.filter(post => post.platform === p).length;
+  });
+}
+
+// ── Navigate ──────────────────────────────────────────────────────────────────
+function prevMonth() {
+  currentMonth--;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  load();
+}
+function nextMonth() {
+  currentMonth++;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  load();
+}
+function goToday() {
+  const now = new Date();
+  currentYear = now.getFullYear();
+  currentMonth = now.getMonth();
+  load();
+}
+function setPlat(btn) {
+  document.querySelectorAll('.cal-plat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  platFilter = btn.dataset.plat;
+  renderCalendar();
+}
+
+// ── Build calendar grid ───────────────────────────────────────────────────────
+function renderCalendar() {
+  const grid = document.getElementById('cal-grid');
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+  const today = new Date();
+
+  const filteredPosts = platFilter ? posts.filter(p => p.platform === platFilter) : posts;
+
+  // Build posts-by-day map
+  const byDay = {};
+  filteredPosts.forEach(p => {
+    if (!p.scheduled_at) return;
+    const d = new Date(p.scheduled_at);
+    if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
+      const day = d.getDate();
+      if (!byDay[day]) byDay[day] = [];
+      byDay[day].push(p);
+    }
+  });
+
+  let html = DAYS.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  // Previous month tail
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="cal-day other-month"><div class="cal-date">${daysInPrevMonth - i}</div></div>`;
+  }
+
+  // Current month days
+  for (let day = 1; day <= daysInMonth; day++) {
+    const isToday = today.getDate() === day && today.getMonth() === currentMonth && today.getFullYear() === currentYear;
+    const dayPosts = byDay[day] || [];
+    const chips = dayPosts.slice(0, 3).map(p => {
+      const cc = PLATFORM_COLORS[p.platform] || 'chip-draft';
+      const title = p.content_ideas?.title || p.platform || 'Post';
+      return `<div class="cal-chip ${cc}" onclick="event.stopPropagation();openDay(${day})">${title.slice(0,28)}</div>`;
+    }).join('');
+    const more = dayPosts.length > 3 ? `<div class="cal-more">+${dayPosts.length - 3} more</div>` : '';
+
+    html += `<div class="cal-day${isToday ? ' is-today' : ''}" onclick="openDay(${day})">
+      <div class="cal-date">${day}</div>
+      <div class="cal-chips">${chips}${more}</div>
+    </div>`;
+  }
+
+  // Next month lead
+  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+  const remaining = totalCells - firstDay - daysInMonth;
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="cal-day other-month"><div class="cal-date">${i}</div></div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+// ── Day detail panel ──────────────────────────────────────────────────────────
+function openDay(day) {
+  const date = new Date(currentYear, currentMonth, day);
+  const label = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  document.getElementById('dp-date').textContent = label;
+
+  const dayPosts = posts.filter(p => {
+    if (!p.scheduled_at) return false;
+    const d = new Date(p.scheduled_at);
+    return d.getDate() === day && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const body = document.getElementById('dp-body');
+  if (!dayPosts.length) {
+    body.innerHTML = `
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">No posts scheduled.</div>
+      <a href="/admin-content-compose" class="btn btn-primary btn-sm panel-add-btn">+ Compose Post</a>`;
+  } else {
+    body.innerHTML = dayPosts.map(p => {
+      const dot = DOT_COLORS[p.platform] || '';
+      const platLabel = PLATFORM_LABELS[p.platform] || p.platform || 'Post';
+      const title = p.content_ideas?.title || '—';
+      const preview = p.content_body || '';
+      const time = p.scheduled_at ? new Date(p.scheduled_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+      return `<div class="post-item">
+        <div class="post-item-head">
+          <div class="platform-dot ${dot}"></div>
+          <span class="post-platform-label">${platLabel}</span>
+          ${time ? `<span style="font-size:11px;color:var(--muted)">${time}</span>` : ''}
+          <span class="post-status-chip">${p.status}</span>
+        </div>
+        <div class="post-idea-title">${title}</div>
+        ${preview ? `<div class="post-preview">${preview}</div>` : ''}
+        <div class="post-item-foot">
+          <a href="/admin-content-compose" class="btn btn-ghost btn-sm">Edit</a>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red,#ef4444)" onclick="deletePost('${p.id}')">Delete</button>
+        </div>
+      </div>`;
+    }).join('') + `<a href="/admin-content-compose" class="btn btn-ghost btn-sm panel-add-btn" style="width:100%;text-align:center;display:block;margin-top:4px">+ Add Another</a>`;
+  }
+
+  document.getElementById('day-panel').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('day-panel').classList.remove('open');
+}
+
+async function deletePost(id) {
+  const ok = await TMIAdmin.confirm('Delete this post?');
+  if (!ok) return;
+  await TMIAdmin.api(`/api/content-posts?id=${id}`, 'DELETE');
+  TMIAdmin.toast('Post deleted');
+  closePanel();
+  await load();
+}
+
+load();
+</script>
+</body>
+</html>

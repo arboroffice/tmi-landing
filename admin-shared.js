@@ -227,6 +227,8 @@ const TMIAdmin = (() => {
     <div class="sb-group-label">Content</div>
     ${navItem('content', 'Field Notes', I.content)}
     ${navItem('content-ideas', 'Social Ideas', I.ideas)}
+    ${navItem('content-compose', 'Compose', I.content)}
+    ${navItem('content-calendar', 'Calendar', I.rituals)}
     <div class="sb-group-label">FOTF</div>
     ${navItem('fotf-dashboard', 'Home', I.fotf)}
     ${navItem('fotf-newsletter', 'Newsletter', I.newsletter)}
@@ -248,6 +250,107 @@ const TMIAdmin = (() => {
       self._loadBadges();
       // Init global search
       self.initSearch();
+      // Mobile bottom nav
+      self.initMobileNav(active);
+    },
+
+    // ── Mobile bottom nav ──────────────────────────────────────────────────
+    initMobileNav(active) {
+      if (document.getElementById('mobile-nav')) return;
+
+      const navPages = [
+        { page: 'dashboard', label: 'Home',    icon: I.dashboard },
+        { page: 'leads',     label: 'Leads',   icon: I.leads     },
+        { page: 'clients',   label: 'Clients', icon: I.clients   },
+        { page: 'email',     label: 'Comms',   icon: I.email     },
+      ];
+
+      const nav = document.createElement('nav');
+      nav.id = 'mobile-nav';
+      nav.className = 'mobile-nav';
+      nav.innerHTML = `<div class="mobile-nav-inner">
+        ${navPages.map(n => `
+          <a href="/admin-${n.page}" class="mobile-nav-item${active===n.page?' active':''}" data-page="${n.page}">
+            ${n.icon}${n.label}
+          </a>`).join('')}
+        <button class="mobile-nav-item" onclick="TMIAdmin.openMoreSheet()" id="mn-more-btn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+          More
+        </button>
+      </div>`;
+      document.body.appendChild(nav);
+
+      // More sheet
+      const groups = [
+        { label: 'Overview', items: [
+          { page:'revenue',   label:'Revenue',    icon:I.revenue },
+          { page:'analytics', label:'Analytics',  icon:I.analytics || I.revenue },
+        ]},
+        { label: 'Sales', items: [
+          { page:'applications', label:'Applications', icon:I.apps, badge:'applications' },
+          { page:'followups',    label:'Follow-ups',   icon:I.followup, badge:'followups' },
+          { page:'proposals',    label:'Proposals',    icon:I.proposals },
+        ]},
+        { label: 'Clients', items: [
+          { page:'projects',    label:'Projects',    icon:I.projects },
+          { page:'invoices',    label:'Invoices',    icon:I.invoices },
+          { page:'onboarding',  label:'Onboarding',  icon:I.onboarding },
+        ]},
+        { label: 'People', items: [
+          { page:'contacts', label:'Contacts', icon:I.contacts },
+        ]},
+        { label: 'Comms', items: [
+          { page:'sms', label:'SMS', icon:I.sms },
+        ]},
+        { label: 'Content', items: [
+          { page:'content',       label:'Field Notes',   icon:I.content },
+          { page:'content-ideas', label:'Social Ideas',  icon:I.ideas },
+        ]},
+        { label: 'FOTF', items: [
+          { page:'fotf-dashboard',  label:'Home',       icon:I.fotf },
+          { page:'fotf-newsletter', label:'Newsletter', icon:I.newsletter },
+          { page:'fotf-community',  label:'Community',  icon:I.community },
+          { page:'fotf-rituals',    label:'Rituals',    icon:I.rituals },
+          { page:'fotf-library',    label:'Library',    icon:I.library },
+          { page:'fotf-growth',     label:'Growth',     icon:I.growth_fotf },
+          { page:'fotf-identity',   label:'Identity',   icon:I.identity },
+        ]},
+        { label: 'System', items: [
+          { page:'settings', label:'Settings', icon:I.settings },
+        ]},
+      ];
+
+      const sheet = document.createElement('div');
+      sheet.id = 'more-sheet-overlay';
+      sheet.className = 'more-sheet-overlay';
+      sheet.innerHTML = `
+        <div class="more-sheet-bg" onclick="TMIAdmin.closeMoreSheet()"></div>
+        <div class="more-sheet">
+          <div class="more-sheet-grip"></div>
+          ${groups.map(g => `
+            <div class="more-sheet-group">
+              <span class="more-sheet-group-label">${g.label}</span>
+              ${g.items.map(it => `
+                <a href="/admin-${it.page}" class="more-sheet-item${active===it.page?' active':''}" onclick="TMIAdmin.closeMoreSheet()">
+                  ${it.icon}${it.label}
+                </a>`).join('')}
+            </div>`).join('')}
+          <button class="more-sheet-logout" onclick="TMIAdmin.logout()">
+            ${I.logout} Log out
+          </button>
+          <div style="height:env(safe-area-inset-bottom,8px)"></div>
+        </div>`;
+      document.body.appendChild(sheet);
+    },
+
+    openMoreSheet() {
+      const el = document.getElementById('more-sheet-overlay');
+      if (el) el.classList.add('open');
+    },
+
+    closeMoreSheet() {
+      const el = document.getElementById('more-sheet-overlay');
+      if (el) el.classList.remove('open');
     },
 
     async _loadBadges() {

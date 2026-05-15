@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Compose — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+/* ── Layout ──────────────────────────────────────────────────── */
+.compose-layout{display:grid;grid-template-columns:280px 1fr 300px;gap:0;height:calc(100vh - 56px);overflow:hidden;}
+.cl, .cc, .cr{display:flex;flex-direction:column;overflow:hidden;}
+.cl{border-right:1px solid var(--line);background:var(--bg-alt);}
+.cc{background:#fff;}
+.cr{border-left:1px solid var(--line);background:var(--bg-alt);}
+
+.panel-sec{padding:16px;border-bottom:1px solid var(--line);}
+.panel-sec-label{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+
+/* ── Left: Idea bank ─────────────────────────────────────────── */
+.idea-search{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-family:inherit;background:#fff;color:var(--ink);outline:none;margin-bottom:8px;}
+.idea-search:focus{border-color:var(--ink);}
+.idea-list{flex:1;overflow-y:auto;padding:8px;}
+.idea-list-item{padding:8px 10px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--ink-2);line-height:1.35;transition:background 0.1s;}
+.idea-list-item:hover{background:rgba(0,0,0,0.04);}
+.idea-list-item.selected{background:var(--ink);color:#fff;}
+.idea-list-item .ili-world{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-top:2px;}
+.ili-world-online{color:#3b82f6;}
+.ili-world-physical{color:#f97316;}
+.ili-world-intersection{color:#8b5cf6;}
+.ili-world-mission{color:#a3a329;}
+.idea-list-item.selected .ili-world{color:rgba(255,255,255,0.6);}
+
+.selected-chip{background:rgba(228,255,151,0.35);border:1px solid #c8e86b;border-radius:6px;padding:8px 10px;font-size:12px;color:var(--ink);font-weight:600;line-height:1.3;}
+
+/* ── Platform buttons ────────────────────────────────────────── */
+.btn-group{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.plat-btn, .fmt-btn, .size-btn{padding:6px 4px;border:1px solid var(--line);border-radius:6px;font-size:11px;font-weight:600;font-family:inherit;background:#fff;color:var(--ink-2);cursor:pointer;text-align:center;transition:background 0.1s,color 0.1s,border-color 0.1s;}
+.plat-btn.active, .fmt-btn.active, .size-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.plat-btn:hover:not(.active), .fmt-btn:hover:not(.active), .size-btn:hover:not(.active){background:rgba(0,0,0,0.04);}
+
+.action-btns{display:flex;flex-direction:column;gap:6px;}
+
+/* ── Center: Output ──────────────────────────────────────────── */
+.cc-topbar{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.cc-platform-label{font-size:13px;font-weight:700;color:var(--ink);}
+.cc-char-count{font-size:12px;color:var(--muted);}
+.cc-output{flex:1;padding:20px;display:flex;flex-direction:column;gap:0;overflow:hidden;}
+.content-ta{flex:1;width:100%;border:1px solid var(--line);border-radius:8px;padding:16px;font-size:14px;font-family:inherit;color:var(--ink);line-height:1.65;resize:none;outline:none;background:#fff;transition:border-color 0.15s;}
+.content-ta:focus{border-color:var(--ink);}
+.content-ta.loading{background:var(--bg-alt);color:var(--muted);}
+.cc-actions{padding:14px 20px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
+.cc-sched{display:flex;align-items:center;gap:8px;margin-right:auto;}
+.cc-sched label{font-size:12px;color:var(--muted);white-space:nowrap;}
+.cc-sched input{font-size:12px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-family:inherit;color:var(--ink);outline:none;background:#fff;}
+
+/* ── Research block ──────────────────────────────────────────── */
+.research-output{display:none;margin-top:12px;padding:14px;background:var(--bg-alt);border-radius:6px;font-size:13px;color:var(--ink-2);line-height:1.65;white-space:pre-wrap;max-height:220px;overflow-y:auto;}
+.research-output.visible{display:block;}
+
+/* ── Right: Image gen ────────────────────────────────────────── */
+.cr-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;}
+.cr-label{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.img-prompt-ta{width:100%;min-height:80px;border:1px solid var(--line);border-radius:6px;padding:10px;font-size:12px;font-family:inherit;color:var(--ink);resize:vertical;outline:none;background:#fff;}
+.img-prompt-ta:focus{border-color:var(--ink);}
+.img-size-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;}
+.img-preview{width:100%;border-radius:8px;overflow:hidden;background:var(--bg-alt);border:1px solid var(--line);display:none;}
+.img-preview img{width:100%;display:block;}
+.img-preview-foot{padding:8px 10px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);}
+.img-preview-foot a{font-size:11px;color:var(--ink);font-weight:600;}
+.revised-prompt-text{font-size:11px;color:var(--muted);line-height:1.4;display:none;}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,0.1);border-top-color:var(--ink);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Ad variants output ──────────────────────────────────────── */
+.ad-variants-out{display:none;flex-direction:column;gap:12px;margin-top:12px;}
+.ad-variants-out.visible{display:flex;}
+.ad-card{background:var(--bg-alt);border:1px solid var(--line);border-radius:6px;padding:12px 14px;}
+.ad-card-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.ad-field{font-size:12px;color:var(--ink-2);margin-bottom:4px;}
+.ad-field strong{font-weight:700;color:var(--ink);}
+
+@media(max-width:900px){
+  .compose-layout{grid-template-columns:1fr;height:auto;}
+  .cl,.cr{border:none;border-bottom:1px solid var(--line);height:auto;}
+  .cc{min-height:400px;}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main" style="overflow:hidden;">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <a href="/admin-dashboard">TMI Admin</a>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg>
+        <a href="/admin-content-ideas">Social Ideas</a>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="page">Compose</span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/admin-content-calendar" class="btn btn-ghost btn-sm">Calendar</a>
+      </div>
+    </div>
+
+    <div class="compose-layout">
+
+      <!-- LEFT: Idea + Platform + Format + Actions -->
+      <div class="cl">
+        <!-- Idea bank -->
+        <div class="panel-sec" style="flex:1;display:flex;flex-direction:column;min-height:0;padding-bottom:0;">
+          <div class="panel-sec-label">Idea Bank</div>
+          <input class="idea-search" id="idea-search" placeholder="Search ideas..." oninput="filterIdeas()"/>
+          <div class="idea-list" id="idea-list">
+            <div style="font-size:12px;color:var(--muted);padding:8px">Loading ideas...</div>
+          </div>
+        </div>
+        <!-- Selected idea chip -->
+        <div class="panel-sec" id="selected-sec" style="display:none;">
+          <div class="selected-chip" id="selected-chip"></div>
+        </div>
+        <!-- Platform -->
+        <div class="panel-sec">
+          <div class="panel-sec-label">Platform</div>
+          <div class="btn-group">
+            <button class="plat-btn active" data-plat="tiktok" onclick="setPlatform(this)">TikTok</button>
+            <button class="plat-btn" data-plat="instagram" onclick="setPlatform(this)">Instagram</button>
+            <button class="plat-btn" data-plat="linkedin" onclick="setPlatform(this)">LinkedIn</button>
+            <button class="plat-btn" data-plat="youtube" onclick="setPlatform(this)">YouTube</button>
+          </div>
+        </div>
+        <!-- Format -->
+        <div class="panel-sec">
+          <div class="panel-sec-label">Format</div>
+          <div class="btn-group">
+            <button class="fmt-btn active" data-fmt="caption" onclick="setFormat(this)">Caption</button>
+            <button class="fmt-btn" data-fmt="script" onclick="setFormat(this)">Script</button>
+            <button class="fmt-btn" data-fmt="hooks" onclick="setFormat(this)">5 Hooks</button>
+            <button class="fmt-btn" data-fmt="thread" onclick="setFormat(this)">Thread</button>
+          </div>
+        </div>
+        <!-- Actions -->
+        <div class="panel-sec">
+          <div class="action-btns">
+            <button class="btn btn-primary btn-sm" onclick="generateCopy()" id="gen-btn">Generate Copy</button>
+            <button class="btn btn-ghost btn-sm" onclick="generateResearch()" id="res-btn">Research Topic</button>
+            <button class="btn btn-ghost btn-sm" onclick="generateAdVariants()" id="ad-btn">Ad Variants</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER: Output -->
+      <div class="cc">
+        <div class="cc-topbar">
+          <div>
+            <div class="cc-platform-label" id="cc-label">TikTok Caption</div>
+            <div style="font-size:11px;color:var(--muted)" id="cc-guide">Hook in first 2 words. Under 150 words.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="cc-char-count" id="cc-chars"></span>
+            <button class="btn btn-ghost btn-sm" onclick="copyToClipboard()" title="Copy to clipboard">Copy</button>
+          </div>
+        </div>
+
+        <div class="cc-output">
+          <textarea class="content-ta" id="content-out" placeholder="Select an idea and hit Generate Copy — or start typing your own content here." oninput="updateCharCount()"></textarea>
+          <!-- Research output -->
+          <div class="research-output" id="research-out"></div>
+          <!-- Ad variants output -->
+          <div class="ad-variants-out" id="ad-out"></div>
+        </div>
+
+        <div class="cc-actions">
+          <div class="cc-sched">
+            <label>Schedule</label>
+            <input type="datetime-local" id="post-schedule"/>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="savePost('draft')">Save Draft</button>
+          <button class="btn btn-primary btn-sm" onclick="savePost('ready')">Save as Ready</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Image generator -->
+      <div class="cr">
+        <div class="cr-body">
+          <div>
+            <div class="cr-label">Image / Ad Visual</div>
+            <textarea class="img-prompt-ta" id="img-prompt" placeholder="Describe the image. Or leave blank to auto-generate from idea."></textarea>
+          </div>
+
+          <div>
+            <div class="cr-label">Size</div>
+            <div class="img-size-btns">
+              <button class="size-btn active" data-size="1024x1024" onclick="setSize(this)">Square</button>
+              <button class="size-btn" data-size="1792x1024" onclick="setSize(this)">Landscape</button>
+              <button class="size-btn" data-size="1024x1792" onclick="setSize(this)">Portrait</button>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-sm" onclick="generateImage()" id="img-btn">Generate Image</button>
+
+          <div class="img-preview" id="img-preview">
+            <img id="img-out" src="" alt="Generated"/>
+            <div class="img-preview-foot">
+              <span id="img-revised" class="revised-prompt-text"></span>
+              <a id="img-dl" href="#" download="tmi-image.jpg" style="font-size:11px;font-weight:600;color:var(--ink)">Download →</a>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--line);padding-top:14px;">
+            <div class="cr-label">Use Image in Post</div>
+            <button class="btn btn-ghost btn-sm" onclick="attachImageToPost()" id="attach-btn" style="display:none;width:100%;">Attach to Post ↑</button>
+            <div id="no-img-note" style="font-size:12px;color:var(--muted)">Generate an image first.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /compose-layout -->
+  </div>
+</div>
+
+<div id="toast-root" class="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('content-compose');
+
+const PLATFORM_LABELS = {
+  tiktok: 'TikTok Caption',
+  instagram: 'Instagram Caption',
+  linkedin: 'LinkedIn Post',
+  youtube: 'YouTube Short Script',
+};
+const PLATFORM_GUIDE = {
+  tiktok: 'Hook in first 2 words. Under 150 words.',
+  instagram: 'Strong hook first line. Line breaks for breathing. 100-200 words.',
+  linkedin: '200-300 words. Punchy. No corporate fluff.',
+  youtube: 'Under 60 sec spoken. Include [on-screen text] in brackets.',
+};
+const FORMAT_SUFFIX = {
+  caption: 'Caption', script: 'Script', hooks: '5 Hooks', thread: 'Thread',
+};
+
+let allIdeas = [];
+let selectedIdea = null;
+let selectedPlatform = 'tiktok';
+let selectedFormat = 'caption';
+let selectedSize = '1024x1024';
+let generatedImageUrl = null;
+
+// ── Load ideas ────────────────────────────────────────────────────────────────
+async function loadIdeas() {
+  allIdeas = await TMIAdmin.api('/api/content-ideas') || [];
+  filterIdeas();
+
+  // Pre-select from URL param
+  const params = new URLSearchParams(window.location.search);
+  const ideaId = params.get('idea');
+  if (ideaId) {
+    const found = allIdeas.find(i => i.id === ideaId);
+    if (found) selectIdea(found);
+  }
+}
+
+function filterIdeas() {
+  const q = document.getElementById('idea-search').value.toLowerCase();
+  const filtered = allIdeas.filter(i => !q || i.title.toLowerCase().includes(q));
+  const list = document.getElementById('idea-list');
+  if (!filtered.length) {
+    list.innerHTML = `<div style="font-size:12px;color:var(--muted);padding:8px">No ideas found.</div>`;
+    return;
+  }
+  const WORLD_SHORT = { online:'Online', physical:'Physical', intersection:'Intersect', mission:'Mission' };
+  list.innerHTML = filtered.map(i => `
+    <div class="idea-list-item${selectedIdea?.id === i.id ? ' selected' : ''}" onclick="selectIdea(${JSON.stringify(i).replace(/"/g,'&quot;')})">
+      <div>${i.title}</div>
+      ${i.world ? `<div class="ili-world ili-world-${i.world}">${WORLD_SHORT[i.world] || i.world}</div>` : ''}
+    </div>`).join('');
+}
+
+function selectIdea(idea) {
+  selectedIdea = idea;
+  document.getElementById('selected-sec').style.display = 'block';
+  document.getElementById('selected-chip').textContent = idea.title;
+  // Auto-fill image prompt
+  if (!document.getElementById('img-prompt').value) {
+    document.getElementById('img-prompt').value = '';
+  }
+  filterIdeas();
+}
+
+// ── Platform / Format / Size ──────────────────────────────────────────────────
+function setPlatform(btn) {
+  document.querySelectorAll('.plat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedPlatform = btn.dataset.plat;
+  updateCenterLabel();
+}
+
+function setFormat(btn) {
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedFormat = btn.dataset.fmt;
+  updateCenterLabel();
+}
+
+function setSize(btn) {
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedSize = btn.dataset.size;
+}
+
+function updateCenterLabel() {
+  const fmtLabel = FORMAT_SUFFIX[selectedFormat] || selectedFormat;
+  document.getElementById('cc-label').textContent = PLATFORM_LABELS[selectedPlatform] + (selectedFormat !== 'caption' ? ' — ' + fmtLabel : '');
+  document.getElementById('cc-guide').textContent = PLATFORM_GUIDE[selectedPlatform] || '';
+  updateCharCount();
+}
+
+// ── Character count ───────────────────────────────────────────────────────────
+function updateCharCount() {
+  const text = document.getElementById('content-out').value;
+  const len = text.length;
+  const limits = { tiktok: 150, instagram: 200, linkedin: 300, youtube: null };
+  const lim = limits[selectedPlatform];
+  const el = document.getElementById('cc-chars');
+  el.textContent = lim ? `${len} / ${lim} chars` : `${len} chars`;
+  el.style.color = lim && len > lim ? '#ef4444' : 'var(--muted)';
+}
+
+// ── Copy to clipboard ─────────────────────────────────────────────────────────
+function copyToClipboard() {
+  const ta = document.getElementById('content-out');
+  if (!ta.value) { TMIAdmin.toast('Nothing to copy', 'error'); return; }
+  navigator.clipboard.writeText(ta.value).then(() => TMIAdmin.toast('Copied!')).catch(() => {
+    ta.select(); document.execCommand('copy'); TMIAdmin.toast('Copied!');
+  });
+}
+
+// ── Generate copy ─────────────────────────────────────────────────────────────
+async function generateCopy() {
+  if (!selectedIdea) { TMIAdmin.toast('Select an idea first', 'error'); return; }
+  const ta = document.getElementById('content-out');
+  ta.value = '';
+  ta.placeholder = 'Generating...';
+  ta.classList.add('loading');
+  document.getElementById('research-out').classList.remove('visible');
+  document.getElementById('ad-out').classList.remove('visible');
+  document.getElementById('gen-btn').disabled = true;
+
+  const res = await TMIAdmin.api('/api/content-ai', 'POST', {
+    action: 'write',
+    idea: selectedIdea.title + (selectedIdea.notes ? '\n\nNotes: ' + selectedIdea.notes : '') + (selectedIdea.hook ? '\n\nHook: ' + selectedIdea.hook : ''),
+    platform: selectedPlatform,
+    format: selectedFormat,
+  });
+
+  ta.classList.remove('loading');
+  ta.placeholder = '';
+  document.getElementById('gen-btn').disabled = false;
+
+  if (res?.content) {
+    ta.value = res.content;
+    updateCharCount();
+  }
+}
+
+// ── Research topic ────────────────────────────────────────────────────────────
+async function generateResearch() {
+  if (!selectedIdea) { TMIAdmin.toast('Select an idea first', 'error'); return; }
+  const out = document.getElementById('research-out');
+  out.textContent = 'Researching...';
+  out.classList.add('visible');
+  document.getElementById('ad-out').classList.remove('visible');
+  document.getElementById('res-btn').disabled = true;
+
+  const res = await TMIAdmin.api('/api/content-ai', 'POST', {
+    action: 'research',
+    topic: selectedIdea.title + (selectedIdea.notes ? ' — ' + selectedIdea.notes : ''),
+  });
+
+  document.getElementById('res-btn').disabled = false;
+  if (res?.content) {
+    out.textContent = res.content;
+  } else {
+    out.classList.remove('visible');
+  }
+}
+
+// ── Ad variants ───────────────────────────────────────────────────────────────
+async function generateAdVariants() {
+  if (!selectedIdea) { TMIAdmin.toast('Select an idea first', 'error'); return; }
+  const out = document.getElementById('ad-out');
+  out.innerHTML = '<div style="font-size:13px;color:var(--muted)">Generating variants...</div>';
+  out.classList.add('visible');
+  document.getElementById('research-out').classList.remove('visible');
+  document.getElementById('ad-btn').disabled = true;
+
+  const res = await TMIAdmin.api('/api/content-ai', 'POST', {
+    action: 'ad-variants',
+    idea: selectedIdea.title,
+  });
+
+  document.getElementById('ad-btn').disabled = false;
+
+  if (res?.content) {
+    const text = res.content;
+    const variants = text.split(/VARIANT\s+\d+/i).filter(s => s.trim());
+    if (variants.length) {
+      out.innerHTML = variants.map((v, idx) => {
+        const lines = v.trim().split('\n').filter(l => l.trim());
+        const fields = lines.map(l => {
+          const [key, ...rest] = l.split(':');
+          return `<div class="ad-field"><strong>${key.trim()}:</strong> ${rest.join(':').trim()}</div>`;
+        }).join('');
+        return `<div class="ad-card"><div class="ad-card-label">Variant ${idx + 1}</div>${fields}</div>`;
+      }).join('');
+    } else {
+      out.innerHTML = `<div style="white-space:pre-wrap;font-size:13px;color:var(--ink-2)">${text}</div>`;
+    }
+  } else {
+    out.classList.remove('visible');
+  }
+}
+
+// ── Generate image ────────────────────────────────────────────────────────────
+async function generateImage() {
+  const promptInput = document.getElementById('img-prompt').value.trim();
+  const auto = !promptInput && selectedIdea;
+  const prompt = promptInput || (auto ? selectedIdea.title : null);
+
+  if (!prompt) { TMIAdmin.toast('Enter an image prompt or select an idea', 'error'); return; }
+
+  const btn = document.getElementById('img-btn');
+  btn.innerHTML = '<span class="spinner"></span>Generating...';
+  btn.disabled = true;
+  document.getElementById('img-preview').style.display = 'none';
+  document.getElementById('no-img-note').textContent = 'Generating...';
+
+  const res = await TMIAdmin.api('/api/content-ai', 'POST', {
+    action: 'image',
+    image_prompt: prompt,
+    size: selectedSize,
+    idea: selectedIdea?.title || '',
+  });
+
+  btn.innerHTML = 'Generate Image';
+  btn.disabled = false;
+
+  if (res?.url) {
+    generatedImageUrl = res.url;
+    const preview = document.getElementById('img-preview');
+    document.getElementById('img-out').src = res.url;
+    document.getElementById('img-dl').href = res.url;
+    if (res.revised_prompt) {
+      const rp = document.getElementById('img-revised');
+      rp.textContent = res.revised_prompt;
+      rp.style.display = 'block';
+    }
+    preview.style.display = 'block';
+    document.getElementById('no-img-note').style.display = 'none';
+    document.getElementById('attach-btn').style.display = 'block';
+  } else {
+    document.getElementById('no-img-note').textContent = 'Generation failed.';
+    document.getElementById('no-img-note').style.display = 'block';
+  }
+}
+
+// ── Attach image to post ──────────────────────────────────────────────────────
+function attachImageToPost() {
+  if (!generatedImageUrl) return;
+  TMIAdmin.toast('Image URL will be saved with post');
+}
+
+// ── Save post ─────────────────────────────────────────────────────────────────
+async function savePost(status) {
+  const body = document.getElementById('content-out').value.trim();
+  if (!body) { TMIAdmin.toast('Write some content first', 'error'); return; }
+
+  const scheduled_at = document.getElementById('post-schedule').value || null;
+
+  const payload = {
+    idea_id: selectedIdea?.id || null,
+    platform: selectedPlatform,
+    format: selectedFormat,
+    content_body: body,
+    image_url: generatedImageUrl || null,
+    status,
+    scheduled_at,
+  };
+
+  const res = await TMIAdmin.api('/api/content-posts', 'POST', payload);
+  if (res) {
+    TMIAdmin.toast(status === 'ready' ? 'Saved as ready!' : 'Draft saved');
+    if (scheduled_at) TMIAdmin.toast('Scheduled for ' + new Date(scheduled_at).toLocaleDateString());
+  }
+}
+
+loadIdeas();
+updateCenterLabel();
+</script>
+</body>
+</html>
