@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
+<meta name="description" content="Every AI agent TMI builds is a working system - not a chatbot, not a plugin. Browse the full catalog and pick the agents your operation actually needs."/>
+<meta property="og:title" content="Agent Catalog | TMI"/>
+<meta property="og:description" content="Every agent TMI builds is a working system - not a chatbot, not a plugin. Each one does a specific job in your operation and does it without you."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://tmi-technology.com/agents"/>
+<meta property="og:image" content="https://www.tmitechai.com/hero-bg.png"/>
+<meta property="og:site_name" content="TMI"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Agent Catalog | TMI"/>
+<meta name="twitter:description" content="Every agent TMI builds is a working system - not a chatbot, not a plugin. Each one does a specific job in your operation and does it without you."/>
+<meta name="twitter:image" content="https://www.tmitechai.com/hero-bg.png"/>
+<link rel="canonical" href="https://tmi-technology.com/agents"/>
+<title>Agent Catalog | TMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-alt: #f5f5f7;
+  --bg-deep: #0d0e1a;
+  --bg-dark: #0a0b14;
+  --ink: #1a1a1a;
+  --ink-2: #505060;
+  --muted: #86868b;
+  --line: rgba(0,0,0,0.07);
+  --line-strong: rgba(0,0,0,0.12);
+  --chart: #E4FF97;
+  --chart-dark: #D0FF6A;
+  --serif: "Barlow", system-ui, sans-serif;
+  --sans: "Neue Haas Grotesk Display", "Neue Haas Grotesk", system-ui, -apple-system, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.55; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+p { margin: 0; }
+h1, h2, h3, h4 { margin: 0; }
+::selection { background: var(--bg-deep); color: var(--chart); }
+
+.container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+
+/* NAV */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 56px;
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center;
+}
+.nav-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0 40px;
+  width: 100%; display: flex; align-items: center; gap: 20px;
+}
+.nav-brand {
+  font-family: var(--sans); font-size: 15px; font-weight: 700;
+  color: var(--ink); display: flex; align-items: center; gap: 8px; flex: 1;
+}
+.nav-brand img { height: 22px; width: auto; }
+.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-links a {
+  font-size: 13px; color: var(--ink-2); padding: 6px 12px;
+  border-radius: 6px; transition: color 0.15s, background 0.15s;
+}
+.nav-links a:hover { color: var(--ink); background: var(--bg-alt); }
+.nav-cta {
+  font-size: 12px; font-weight: 700; background: var(--chart); color: #0a0b14;
+  padding: 8px 18px; border-radius: 999px; transition: background 0.15s; white-space: nowrap; flex: none;
+}
+.nav-cta:hover { background: var(--chart-dark); }
+@media(max-width:640px) { .nav-links { display: none; } .nav-inner { padding: 0 20px; } }
+
+/* HERO */
+.hero {
+  background: var(--bg-dark);
+  padding: 148px 40px 112px;
+  position: relative; overflow: hidden;
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; align-items: center;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(228,255,151,0.11) 0%, transparent 62%);
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(228,255,151,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(228,255,151,0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 0%, black 20%, transparent 100%);
+  pointer-events: none;
+}
+.hero-inner {
+  position: relative; z-index: 2;
+  max-width: 1280px; margin: 0 auto; width: 100%;
+}
+.hero-kicker {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(228,255,151,0.6); display: inline-flex; align-items: center; gap: 10px;
+  margin-bottom: 36px;
+  border: 1px solid rgba(228,255,151,0.18); border-radius: 999px; padding: 7px 18px;
+}
+.hero-kicker-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--chart);
+  animation: pulse 2.5s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+.hero h1 {
+  font-family: var(--serif); font-size: clamp(52px, 7.5vw, 104px);
+  font-weight: 400; letter-spacing: -0.02em; line-height: 1.0;
+  color: #fff; margin-bottom: 32px; max-width: 14ch;
+}
+.hero h1 em { color: var(--chart); font-style: italic; }
+.hero-deck {
+  font-family: var(--serif); font-size: clamp(17px, 1.5vw, 21px);
+  color: rgba(255,255,255,0.5); line-height: 1.65; max-width: 52ch;
+  margin-bottom: 48px;
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--chart); color: #0a0b14;
+  padding: 14px 28px; border-radius: 999px;
+  font-family: var(--sans); font-size: 14px; font-weight: 700;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.hero-cta:hover { background: var(--chart-dark); transform: translateY(-1px); box-shadow: 0 8px 28px rgba(228,255,151,0.28); }
+
+/* REVEAL */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.08s; }
+.reveal-d2 { transition-delay: 0.16s; }
+.reveal-d3 { transition-delay: 0.24s; }
+
+/* CATALOG SECTION */
+.catalog-section { padding: 112px 0; }
+.catalog-section + .catalog-section { padding-top: 0; }
+
+.category-block { margin-bottom: 80px; }
+.category-block:last-child { margin-bottom: 0; }
+
+.category-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 28px;
+  display: flex; align-items: center; gap: 12px;
+}
+.category-eyebrow::after {
+  content: ''; flex: 1; height: 1px; background: var(--line);
+}
+
+.agent-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+@media(max-width:960px) { .agent-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:560px) { .agent-grid { grid-template-columns: 1fr; } }
+
+.agent-card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--chart);
+  border-radius: 12px;
+  padding: 28px 28px 28px 26px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.agent-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.12);
+  border-left-color: var(--chart-dark);
+}
+.agent-tag {
+  display: inline-flex; align-items: center;
+  background: rgba(228,255,151,0.12); color: #3d5400;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 999px; align-self: flex-start;
+}
+.agent-name {
+  font-family: var(--serif); font-size: 22px; font-weight: 600;
+  letter-spacing: -0.01em; line-height: 1.15; color: var(--ink);
+}
+.agent-headline {
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  color: var(--ink-2); text-transform: none; letter-spacing: 0;
+}
+.agent-desc {
+  font-family: var(--serif); font-size: 15px; line-height: 1.7;
+  color: var(--ink-2);
+}
+
+/* DM AGENTS SECTION */
+.dm-section {
+  background: var(--bg-deep);
+  padding: 100px 0;
+  position: relative; overflow: hidden;
+}
+.dm-section::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(228,255,151,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.dm-inner { position: relative; z-index: 2; }
+.dm-header { margin-bottom: 52px; }
+.dm-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(228,255,151,0.5); margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.dm-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--chart); opacity: 0.5; }
+.dm-header h2 {
+  font-family: var(--serif); font-size: clamp(32px, 3.5vw, 52px);
+  font-weight: 400; letter-spacing: -0.02em; line-height: 1.1;
+  color: #fff; max-width: 20ch; margin-bottom: 16px;
+}
+.dm-header h2 em { color: var(--chart); font-style: italic; }
+.dm-header p {
+  font-family: var(--serif); font-size: 17px; line-height: 1.7;
+  color: rgba(255,255,255,0.45); max-width: 52ch;
+}
+
+.dm-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+}
+@media(max-width:640px) { .dm-grid { grid-template-columns: 1fr; } }
+
+.dm-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-left: 3px solid rgba(228,255,151,0.5);
+  border-radius: 12px;
+  padding: 32px 32px 32px 30px;
+  transition: background 0.2s, border-color 0.2s;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.dm-card:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.14);
+  border-left-color: var(--chart);
+}
+.dm-tag {
+  display: inline-flex; align-items: center;
+  background: rgba(228,255,151,0.1); color: var(--chart);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 999px; align-self: flex-start;
+}
+.dm-name {
+  font-family: var(--serif); font-size: 22px; font-weight: 600;
+  letter-spacing: -0.01em; line-height: 1.15; color: #fff;
+}
+.dm-headline {
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  color: rgba(255,255,255,0.45);
+}
+.dm-desc {
+  font-family: var(--serif); font-size: 15px; line-height: 1.7;
+  color: rgba(255,255,255,0.4);
+}
+
+/* DEPLOYMENT SECTION */
+.deploy-section {
+  background: var(--bg-alt); padding: 100px 0;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.deploy-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
+}
+@media(max-width:768px) { .deploy-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+.deploy-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 20px;
+}
+.deploy-col h3 {
+  font-family: var(--serif); font-size: clamp(24px, 2.5vw, 36px);
+  font-weight: 400; letter-spacing: -0.02em; line-height: 1.15;
+  color: var(--ink); margin-bottom: 16px;
+}
+.deploy-col p {
+  font-family: var(--serif); font-size: 17px; line-height: 1.75;
+  color: var(--ink-2);
+}
+
+/* FINAL CTA */
+.final-cta {
+  background: var(--bg-dark); padding: 112px 0; text-align: center;
+  position: relative; overflow: hidden;
+}
+.final-cta::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(228,255,151,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+.final-cta-inner { position: relative; z-index: 2; }
+.final-cta h2 {
+  font-family: var(--serif); font-size: clamp(36px, 5vw, 68px);
+  font-weight: 400; letter-spacing: -0.02em; line-height: 1.1;
+  color: #fff; margin-bottom: 20px; max-width: 22ch; margin-left: auto; margin-right: auto;
+}
+.final-cta h2 em { color: var(--chart); font-style: italic; }
+.final-cta p {
+  font-family: var(--serif); font-size: 18px; line-height: 1.65;
+  color: rgba(255,255,255,0.45); max-width: 44ch; margin: 0 auto 52px;
+}
+.final-cta-btns {
+  display: flex; align-items: center; justify-content: center;
+  gap: 14px; flex-wrap: wrap;
+}
+.btn-cta-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--chart); color: #0a0b14;
+  padding: 14px 28px; border-radius: 999px;
+  font-family: var(--sans); font-size: 14px; font-weight: 700;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.btn-cta-primary:hover { background: var(--chart-dark); transform: translateY(-1px); box-shadow: 0 8px 28px rgba(228,255,151,0.28); }
+.btn-cta-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 14px 28px; border-radius: 999px;
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.btn-cta-outline:hover { border-color: rgba(255,255,255,0.5); color: #fff; background: rgba(255,255,255,0.06); }
+
+/* FOOTER */
+footer {
+  background: var(--bg-dark); border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 72px 0 36px;
+}
+.footer-grid {
+  display: grid; grid-template-columns: 1.4fr 1fr; gap: 80px; margin-bottom: 56px;
+}
+.footer-brand {
+  font-family: var(--sans); font-size: 16px; font-weight: 700;
+  color: #fff; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+.footer-brand img { height: 24px; filter: brightness(0) invert(1); }
+.footer-desc { font-size: 14px; color: rgba(255,255,255,0.35); line-height: 1.65; max-width: 36ch; }
+.footer-email {
+  display: inline-block; margin-top: 16px;
+  font-size: 13px; color: rgba(255,255,255,0.3);
+  transition: color 0.15s;
+}
+.footer-email:hover { color: rgba(255,255,255,0.65); }
+.footer-right { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.footer-col h5 {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255,255,255,0.25); margin: 0 0 14px;
+}
+.footer-col a {
+  display: block; font-size: 14px; color: rgba(255,255,255,0.45);
+  padding: 4px 0; transition: color 0.15s;
+}
+.footer-col a:hover { color: #fff; }
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.2);
+}
+@media(max-width:768px) {
+  .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+  .footer-right { grid-template-columns: 1fr 1fr; }
+  .footer-bottom { flex-direction: column; gap: 10px; text-align: center; }
+}
+@media(max-width:540px) {
+  .catalog-section { padding: 72px 0; }
+  .container { padding: 0 20px; }
+  .hero { padding: 120px 20px 80px; }
+  .dm-section { padding: 72px 0; }
+  .deploy-section { padding: 72px 0; }
+  .final-cta { padding: 80px 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="stratum.html" class="nav-brand">
+      <img src="logo.svg" alt="TMI"/> TMI
+    </a>
+    <div class="nav-links">
+      <a href="/agentic-os">Agentic OS</a>
+      <a href="/os-bundles">Bundles</a>
+      <a href="/licensing">Licensing</a>
+    </div>
+    <a href="/audit" class="nav-cta">Take the Audit &rarr;</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="hero-kicker">
+      <span class="hero-kicker-dot"></span>
+      Agent Catalog
+    </div>
+    <h1>The agents.<br><em>Pick what you need.</em></h1>
+    <p class="hero-deck">Every agent TMI builds is a working system - not a chatbot, not a plugin. Each one does a specific job in your operation and does it without you.</p>
+    <a href="/audit" class="hero-cta">Take the Audit &rarr;</a>
+  </div>
+</section>
+
+<!-- CATALOG -->
+<section class="catalog-section">
+  <div class="container">
+
+    <!-- Field Operations -->
+    <div class="category-block reveal">
+      <div class="category-eyebrow">Field Operations</div>
+      <div class="agent-grid">
+
+        <div class="agent-card">
+          <span class="agent-tag">Field Operations</span>
+          <div class="agent-name">Dispatch Agent</div>
+          <div class="agent-headline">Routes jobs and crew without a dispatcher</div>
+          <p class="agent-desc">Reads your job queue, matches the right crew by skills and location, and sends assignments automatically. It replaces the dispatcher who spends three hours every morning moving pieces around a whiteboard. When a job drops in, this agent handles it - without anyone picking up the phone.</p>
+        </div>
+
+        <div class="agent-card">
+          <span class="agent-tag">Field Operations</span>
+          <div class="agent-name">Job Costing Agent</div>
+          <div class="agent-headline">Tracks real cost vs. estimate on every job in real time</div>
+          <p class="agent-desc">Watches labor hours, materials, and subcontractor spend as the job moves and flags when a job is trending over before it finishes. Most operators find out they lost money after they've invoiced. This agent tells you while there's still time to do something about it.</p>
+        </div>
+
+        <div class="agent-card">
+          <span class="agent-tag">Field Operations</span>
+          <div class="agent-name">Crew Check-in Agent</div>
+          <div class="agent-headline">Manages daily crew accountability without a manager chasing</div>
+          <p class="agent-desc">Handles clock-in, location verification, and task confirmation at the start of every shift. If someone doesn't check in, the agent escalates - not you. It replaces the 7am phone calls that eat the first hour of your morning and gives you a clean attendance record without paperwork.</p>
+        </div>
+
+        <div class="agent-card">
+          <span class="agent-tag">Field Operations</span>
+          <div class="agent-name">Compliance Agent</div>
+          <div class="agent-headline">Keeps certifications, permits, and documentation current</div>
+          <p class="agent-desc">Tracks expiration dates across every license, permit, and certification in your operation. Flags gaps before they become violations and generates the documentation trail your insurance carrier and GCs want to see. The cost of one compliance failure is usually more than the cost of the whole system.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Sales & Pipeline -->
+    <div class="category-block reveal">
+      <div class="category-eyebrow">Sales &amp; Pipeline</div>
+      <div class="agent-grid">
+
+        <div class="agent-card">
+          <span class="agent-tag">Sales &amp; Pipeline</span>
+          <div class="agent-name">Lead Follow-up Agent</div>
+          <div class="agent-headline">Contacts every new lead within 5 minutes</div>
+          <p class="agent-desc">The moment a lead comes in - from any source - this agent reaches out, qualifies them, and either books a call or routes them into a nurture sequence until they're ready. It replaces the mental load of remembering who you haven't called back. No lead goes cold because the crew was busy.</p>
+        </div>
+
+        <div class="agent-card">
+          <span class="agent-tag">Sales &amp; Pipeline</span>
+          <div class="agent-name">Estimating Agent</div>
+          <div class="agent-headline">Generates estimates from job details automatically</div>
+          <p class="agent-desc">Takes the job scope, pulls historical pricing from comparable work, adjusts for material costs and crew time, and sends a formatted estimate to the client. It doesn't replace your judgment on complex bids - it handles the volume so your best estimator isn't buried in straightforward work all day.</p>
+        </div>
+
+        <div class="agent-card">
+          <span class="agent-tag">Sales &amp; Pipeline</span>
+          <div class="agent-name">Proposal Agent</div>
+          <div class="agent-headline">Builds, sends, and follows up on proposals automatically</div>
+          <p class="agent-desc">Assembles proposals from your job data and scope notes, sends them with a tracked link, and follows up based on whether the client opened it or not. When the client is ready to sign, it collects the signature and confirms the booking. Proposals stop sitting in someone's outbox waiting for a slow day.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Finance & Admin -->
+    <div class="category-block reveal">
+      <div class="category-eyebrow">Finance &amp; Admin</div>
+      <div class="agent-grid">
+
+        <div class="agent-card">
+          <span class="agent-tag">Finance &amp; Admin</span>
+          <div class="agent-name">Invoice Agent</div>
+          <div class="agent-headline">Generates and sends invoices when jobs close</div>
+          <p class="agent-desc">When a job status changes to complete, the invoice goes out - without anyone touching it. Follows up on unpaid balances at set intervals and flags accounts that are aging past terms. Revenue stops sitting in the field waiting for someone in the office to have time to bill it.</p>
+        </div>
+
+        <div class="agent-card">
+          <span class="agent-tag">Finance &amp; Admin</span>
+          <div class="agent-name">Job Margin Agent</div>
+          <div class="agent-headline">Reports actual margin per job after close</div>
+          <p class="agent-desc">After every job closes, this agent compares what you estimated against what you actually spent - broken down by labor, materials, and subs. Over time it shows you which crew types, job sizes, or client categories are consistently over or under. Most operators are pricing based on feel. This replaces feel with data.</p>
+        </div>
+
+        <div class="agent-card">
+          <span class="agent-tag">Finance &amp; Admin</span>
+          <div class="agent-name">Payroll Prep Agent</div>
+          <div class="agent-headline">Compiles hours, tasks, and rates into payroll-ready reports</div>
+          <p class="agent-desc">Pulls time entries, matches them to job codes, applies the correct pay rates, and outputs a report your payroll system or accountant can use directly. It replaces the Friday afternoon scramble of chasing down missing hours from the field before the bank deadline hits.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Communications -->
+    <div class="category-block reveal">
+      <div class="category-eyebrow">Communications</div>
+      <div class="agent-grid">
+
+        <div class="agent-card">
+          <span class="agent-tag">Communications</span>
+          <div class="agent-name">Customer Update Agent</div>
+          <div class="agent-headline">Sends job status updates to clients at every milestone</div>
+          <p class="agent-desc">Every time a job milestone hits - scheduled, crew en route, work started, job complete - the client gets an update automatically. It eliminates the "where's my crew" calls that interrupt the office and the field. Clients feel like they're being taken care of because they actually are.</p>
+        </div>
+
+        <div class="agent-card">
+          <span class="agent-tag">Communications</span>
+          <div class="agent-name">Review Request Agent</div>
+          <div class="agent-headline">Sends review requests after every job close</div>
+          <p class="agent-desc">Times the request based on job type and client history, routes them to the right platform - Google, Yelp, or your industry-specific site - and follows up once if they didn't leave one. Review volume compounds over time. This makes it systematic instead of occasional.</p>
+        </div>
+
+        <div class="agent-card">
+          <span class="agent-tag">Communications</span>
+          <div class="agent-name">Internal Comms Agent</div>
+          <div class="agent-headline">Routes internal messages and flags what actually needs the owner</div>
+          <p class="agent-desc">Watches internal channels and escalates the things that genuinely require a decision from above. Everything else gets routed to the right person without passing through you first. It keeps the owner out of the group chat and gives the team a clear line for what gets escalated and what gets handled.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- DM AGENTS -->
+<section class="dm-section">
+  <div class="container dm-inner">
+    <div class="dm-header reveal">
+      <div class="dm-label">DM Agents</div>
+      <h2>Your channels.<br><em>Running 24/7.</em></h2>
+      <p>Inbound messages are where leads go to die if no one responds fast. These agents handle every conversation - qualifying, booking, and following up - across every platform your business gets found on.</p>
+    </div>
+
+    <div class="dm-grid">
+
+      <div class="dm-card reveal reveal-d1">
+        <span class="dm-tag">DM Agents</span>
+        <div class="dm-name">Instagram DM Agent</div>
+        <div class="dm-headline">Responds to DMs and books calls around the clock</div>
+        <p class="dm-desc">Every Instagram DM gets a real response within seconds - not a bot reply that gives it away, but a conversation that qualifies the lead, handles common objections, and books a call when they're ready. It runs the same whether it's Tuesday afternoon or Saturday at midnight.</p>
+      </div>
+
+      <div class="dm-card reveal reveal-d2">
+        <span class="dm-tag">DM Agents</span>
+        <div class="dm-name">Facebook DM Agent</div>
+        <div class="dm-headline">Same system for Facebook Messenger at any volume</div>
+        <p class="dm-desc">Handles the Facebook Messenger inbox the same way the Instagram agent handles DMs - qualification, follow-up, booking. If you're running paid ads to Facebook, this is the piece that makes sure every lead who messages you actually gets worked. Volume spikes don't create gaps.</p>
+      </div>
+
+      <div class="dm-card reveal reveal-d1">
+        <span class="dm-tag">DM Agents</span>
+        <div class="dm-name">SMS Pipeline Agent</div>
+        <div class="dm-headline">Manages inbound SMS leads from a single number</div>
+        <p class="dm-desc">One business number. Every inbound text gets handled - qualification questions, answers to common questions about your services, booking links, and follow-up if they go quiet. SMS has higher open rates than email. This is the system that makes sure that attention converts.</p>
+      </div>
+
+      <div class="dm-card reveal reveal-d2">
+        <span class="dm-tag">DM Agents</span>
+        <div class="dm-name">WhatsApp Agent</div>
+        <div class="dm-headline">Full conversation handling for WhatsApp Business</div>
+        <p class="dm-desc">Manages the full conversation from first message to booked call - without any human involvement required. Handles the volume, the timing, and the follow-up sequences. If your market communicates on WhatsApp, this is the agent that makes sure those conversations don't slip.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- DEPLOYMENT -->
+<section class="deploy-section">
+  <div class="container">
+    <div class="deploy-grid">
+
+      <div class="deploy-col reveal">
+        <div class="deploy-eyebrow">How agents are deployed</div>
+        <h3>Agents work inside your existing tools</h3>
+        <p>We connect to what you already use - your CRM, scheduling software, email, and SMS platforms. You don't switch systems. You don't retrain your team on new software. The agents plug into the workflow that's already running and make it faster and more consistent.</p>
+      </div>
+
+      <div class="deploy-col reveal reveal-d2">
+        <div class="deploy-eyebrow">How agents are built</div>
+        <h3>Each agent is custom-built and tested before install</h3>
+        <p>These aren't templates dropped into your account. Every agent is built to your actual workflow, tested against your real scenarios, and verified before it goes live. If it doesn't work the way it's supposed to, it doesn't get installed. That's what makes the system reliable instead of just present.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="container final-cta-inner">
+    <h2>Want the full system or <em>just one agent?</em></h2>
+    <p>Start with one agent that solves your biggest problem, or see how the full operating system fits together. Either way, the audit is where it starts.</p>
+    <div class="final-cta-btns reveal">
+      <a href="/agentic-os" class="btn-cta-outline">See the Full Install &rarr;</a>
+      <a href="/audit" class="btn-cta-primary">Take the Audit &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="logo.svg" alt="TMI"/> TMI
+        </div>
+        <p class="footer-desc">AI agents and operating systems built and installed for businesses that run on field operations.</p>
+        <a href="mailto:support@tmitechai.com" class="footer-email">support@tmitechai.com</a>
+      </div>
+      <div class="footer-right">
+        <div class="footer-col">
+          <h5>Products</h5>
+          <a href="/agentic-os">Agentic OS</a>
+          <a href="/os-bundles">OS Bundles</a>
+          <a href="agents.html">Agents</a>
+          <a href="/licensing">Licensing</a>
+        </div>
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="about.html">About</a>
+          <a href="/partners">Partners</a>
+          <a href="build-series.html">Build Series</a>
+        </div>
+        <div class="footer-col">
+          <h5>Community</h5>
+          <a href="founders.html">Founders of the Future</a>
+          <a href="/audit">Apply &rarr;</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 TMI Technology</span>
+      <span>Agent Catalog</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
