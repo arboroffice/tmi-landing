@@ -818,8 +818,12 @@
   .two-econ-intro h2{font-family:var(--serif);font-size:clamp(32px,3.5vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;color:var(--ink);margin-bottom:20px;}
   .two-econ-intro p{font-size:clamp(15px,1.2vw,18px);color:var(--ink-2);line-height:1.65;}
   .two-econ-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);}
-  .econ-card{background:var(--bg);padding:52px 48px 48px;}
-  .econ-card-dark{background:var(--bg-deep);color:#fff;}
+  .econ-card{background:var(--bg);padding:52px 48px 48px;position:relative;overflow:hidden;background-size:cover;background-position:center;}
+  .econ-card::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;}
+  .econ-card-dark{background-color:var(--bg-deep);color:#fff;}
+  .econ-card-dark::before{background:linear-gradient(135deg,rgba(10,11,20,0.88) 0%,rgba(10,11,20,0.76) 100%);}
+  .econ-card:not(.econ-card-dark)::before{background:linear-gradient(135deg,rgba(255,255,255,0.92) 0%,rgba(255,255,255,0.82) 100%);}
+  .econ-card>*{position:relative;z-index:1;}
   .econ-tag{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:28px;display:flex;align-items:center;gap:8px;}
   .econ-tag::before{content:'';display:block;width:20px;height:1px;background:var(--chart);}
   .econ-card-dark .econ-tag{color:rgba(255,255,255,0.35);}
@@ -910,7 +914,7 @@
       <p>The ones that move physical things, and the ones that move people.</p>
     </div>
     <div class="two-econ-grid">
-      <div class="econ-card econ-card-dark">
+      <div class="econ-card econ-card-dark" style="background-image:url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')">
         <div class="econ-tag">Physical Economy</div>
         <div class="econ-url">trades.tmitechai.com</div>
         <h3>Construction, Manufacturing, Oil &amp; Gas, Home Service, Utilities, Fleet</h3>
@@ -925,7 +929,7 @@
         <p class="econ-desc">Dispatch, job costing, compliance, field ops, crew management — automated end to end for the companies that keep the world running.</p>
         <a href="/physical" class="econ-cta">Explore the Physical Economy &rarr;</a>
       </div>
-      <div class="econ-card">
+      <div class="econ-card" style="background-image:url('https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80')">
         <div class="econ-tag">Online Business</div>
         <div class="econ-url">online.tmitechai.com</div>
         <h3>Course Creators, Coaches, Info Sellers, Influencers, E-Commerce</h3>
