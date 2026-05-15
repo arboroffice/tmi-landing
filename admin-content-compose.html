@@ -50,9 +50,12 @@
 .content-ta:focus{border-color:var(--ink);}
 .content-ta.loading{background:var(--bg-alt);color:var(--muted);}
 .cc-actions{padding:14px 20px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
-.cc-sched{display:flex;align-items:center;gap:8px;margin-right:auto;}
+.cc-sched{display:flex;align-items:center;gap:8px;}
 .cc-sched label{font-size:12px;color:var(--muted);white-space:nowrap;}
 .cc-sched input{font-size:12px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-family:inherit;color:var(--ink);outline:none;background:#fff;}
+.cc-publish-row{display:flex;align-items:center;gap:10px;margin-right:auto;}
+.pub-check{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-2);cursor:pointer;font-weight:600;}
+.pub-check input{width:14px;height:14px;accent-color:var(--ink);cursor:pointer;}
 
 /* ── Research block ──────────────────────────────────────────── */
 .research-output{display:none;margin-top:12px;padding:14px;background:var(--bg-alt);border-radius:6px;font-size:13px;color:var(--ink-2);line-height:1.65;white-space:pre-wrap;max-height:220px;overflow-y:auto;}
@@ -176,8 +179,13 @@
             <label>Schedule</label>
             <input type="datetime-local" id="post-schedule"/>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="savePost('draft')">Save Draft</button>
-          <button class="btn btn-primary btn-sm" onclick="savePost('ready')">Save as Ready</button>
+          <div class="cc-publish-row">
+            <label class="pub-check"><input type="checkbox" id="pub-x" checked/> X</label>
+            <label class="pub-check"><input type="checkbox" id="pub-li" checked/> LinkedIn</label>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="savePost('draft')">Draft</button>
+          <button class="btn btn-ghost btn-sm" onclick="scheduleOrPost()">Schedule</button>
+          <button class="btn btn-primary btn-sm" id="post-now-btn" onclick="postNow()">Post Now</button>
         </div>
       </div>
 
@@ -494,6 +502,97 @@ async function savePost(status) {
   if (res) {
     TMIAdmin.toast(status === 'ready' ? 'Saved as ready!' : 'Draft saved');
     if (scheduled_at) TMIAdmin.toast('Scheduled for ' + new Date(scheduled_at).toLocaleDateString());
+  }
+}
+
+// ── Get selected publish platforms ────────────────────────────────────────────
+function getPublishPlatforms() {
+  const p = [];
+  if (document.getElementById('pub-x').checked) p.push('x');
+  if (document.getElementById('pub-li').checked) p.push('linkedin');
+  return p;
+}
+
+// ── Post Now ──────────────────────────────────────────────────────────────────
+async function postNow() {
+  const body = document.getElementById('content-out').value.trim();
+  if (!body) { TMIAdmin.toast('Write some content first', 'error'); return; }
+  const platforms = getPublishPlatforms();
+  if (!platforms.length) { TMIAdmin.toast('Select at least one platform', 'error'); return; }
+
+  const btn = document.getElementById('post-now-btn');
+  btn.disabled = true;
+  btn.textContent = 'Posting...';
+
+  // Save draft first to get post_id
+  const saved = await TMIAdmin.api('/api/content-posts', 'POST', {
+    idea_id: selectedIdea?.id || null,
+    platform: selectedPlatform,
+    format: selectedFormat,
+    content_body: body,
+    image_url: generatedImageUrl || null,
+    status: 'posting',
+    scheduled_at: null,
+  });
+
+  const payload = {
+    post_id: saved?.id || null,
+    platforms,
+    content_body: body,
+  };
+
+  const res = await TMIAdmin.api('/api/social-post', 'POST', payload);
+
+  btn.disabled = false;
+  btn.textContent = 'Post Now';
+
+  if (res?.ok) {
+    const posted = [];
+    if (res.x_id) posted.push('X');
+    if (res.linkedin_id) posted.push('LinkedIn');
+    TMIAdmin.toast(`Posted to ${posted.join(' + ')}!`, 'success');
+    if (res.errors) {
+      Object.entries(res.errors).forEach(([plat, msg]) => {
+        TMIAdmin.toast(`${plat}: ${msg}`, 'error');
+      });
+    }
+  } else {
+    const errMsg = res?.errors ? Object.values(res.errors).join('; ') : (res?.error || 'Post failed');
+    TMIAdmin.toast(errMsg, 'error');
+  }
+}
+
+// ── Schedule Post ─────────────────────────────────────────────────────────────
+async function scheduleOrPost() {
+  const body = document.getElementById('content-out').value.trim();
+  if (!body) { TMIAdmin.toast('Write some content first', 'error'); return; }
+  const schedVal = document.getElementById('post-schedule').value;
+  if (!schedVal) { TMIAdmin.toast('Pick a schedule date/time first', 'error'); return; }
+  const platforms = getPublishPlatforms();
+  if (!platforms.length) { TMIAdmin.toast('Select at least one platform', 'error'); return; }
+
+  // Save to DB first
+  const saved = await TMIAdmin.api('/api/content-posts', 'POST', {
+    idea_id: selectedIdea?.id || null,
+    platform: selectedPlatform,
+    format: selectedFormat,
+    content_body: body,
+    image_url: generatedImageUrl || null,
+    status: 'scheduled',
+    scheduled_at: new Date(schedVal).toISOString(),
+  });
+
+  const res = await TMIAdmin.api('/api/social-post', 'POST', {
+    post_id: saved?.id || null,
+    platforms,
+    content_body: body,
+    schedule_at: new Date(schedVal).toISOString(),
+  });
+
+  if (res?.ok || res?.scheduled) {
+    TMIAdmin.toast(`Scheduled for ${new Date(schedVal).toLocaleString()}`);
+  } else {
+    TMIAdmin.toast(res?.error || 'Schedule failed — post saved as draft', 'error');
   }
 }
 
