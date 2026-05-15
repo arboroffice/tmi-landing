@@ -811,6 +811,36 @@
   .hero-nl-btn:hover{background:var(--chart-dark);}
   .hero-nl-ok{display:none;font-family:var(--serif);font-size:16px;color:var(--chart);padding:12px 0;}
   @media(max-width:540px){.hero-nl-form{flex-direction:column;}.hero-nl-btn{border-radius:999px;}}
+
+  /* ── Two Economies ── */
+  .two-econ{padding:100px 0;background:var(--bg);}
+  .two-econ-intro{text-align:center;max-width:640px;margin:0 auto 72px;}
+  .two-econ-intro .eyebrow{margin-bottom:20px;justify-content:center;}
+  .two-econ-intro h2{font-family:var(--serif);font-size:clamp(32px,3.5vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;color:var(--ink);margin-bottom:20px;}
+  .two-econ-intro p{font-size:clamp(15px,1.2vw,18px);color:var(--ink-2);line-height:1.65;}
+  .two-econ-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);}
+  .econ-card{background:var(--bg);padding:52px 48px 48px;}
+  .econ-card-dark{background:var(--bg-deep);color:#fff;}
+  .econ-tag{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:28px;display:flex;align-items:center;gap:8px;}
+  .econ-tag::before{content:'';display:block;width:20px;height:1px;background:var(--chart);}
+  .econ-card-dark .econ-tag{color:rgba(255,255,255,0.35);}
+  .econ-card h3{font-family:var(--serif);font-size:clamp(26px,2.2vw,38px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;margin-bottom:16px;color:var(--ink);}
+  .econ-card-dark h3{color:#fff;}
+  .econ-url{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart);margin-bottom:28px;}
+  .econ-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:32px;}
+  .econ-pill{font-family:var(--sans);font-size:11px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--bg-alt);color:var(--ink-2);}
+  .econ-card-dark .econ-pill{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6);}
+  .econ-desc{font-family:var(--sans);font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:36px;}
+  .econ-card-dark .econ-desc{color:rgba(255,255,255,0.5);}
+  .econ-cta{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);border-bottom:1px solid var(--line-strong);padding-bottom:2px;transition:gap 0.2s,border-color 0.2s;}
+  .econ-card-dark .econ-cta{color:#fff;border-color:rgba(255,255,255,0.2);}
+  .econ-cta:hover{gap:14px;border-color:var(--ink);}
+  .econ-card-dark .econ-cta:hover{border-color:rgba(255,255,255,0.6);}
+  @media(max-width:768px){
+    .two-econ{padding:64px 0;}
+    .two-econ-grid{grid-template-columns:1fr;}
+    .econ-card{padding:40px 24px;}
+  }
 </style>
 </head>
 <body>
@@ -877,6 +907,48 @@
   <div class="hero-scroll">
     <span class="hero-scroll-label">Scroll</span>
     <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- TWO ECONOMIES -->
+<section class="two-econ reveal">
+  <div class="container">
+    <div class="two-econ-intro">
+      <div class="eyebrow"><span class="dot"></span>Two economies. One infrastructure layer.</div>
+      <h2>We build AI systems for the two kinds of businesses that drive the modern economy.</h2>
+      <p>The ones that move physical things, and the ones that move people.</p>
+    </div>
+    <div class="two-econ-grid">
+      <div class="econ-card econ-card-dark">
+        <div class="econ-tag">Physical Economy</div>
+        <div class="econ-url">trades.tmitechai.com</div>
+        <h3>Construction, Manufacturing, Oil &amp; Gas, Home Service, Utilities, Fleet</h3>
+        <div class="econ-tags">
+          <span class="econ-pill">Construction</span>
+          <span class="econ-pill">Manufacturing</span>
+          <span class="econ-pill">Oil &amp; Gas</span>
+          <span class="econ-pill">Home Service</span>
+          <span class="econ-pill">Utilities</span>
+          <span class="econ-pill">Fleet</span>
+        </div>
+        <p class="econ-desc">Dispatch, job costing, compliance, field ops, crew management — automated end to end for the companies that keep the world running.</p>
+        <a href="https://trades.tmitechai.com" class="econ-cta">Explore the Physical Economy &rarr;</a>
+      </div>
+      <div class="econ-card">
+        <div class="econ-tag">Online Business</div>
+        <div class="econ-url">online.tmitechai.com</div>
+        <h3>Course Creators, Coaches, Info Sellers, Influencers, E-Commerce</h3>
+        <div class="econ-tags">
+          <span class="econ-pill">Course Creators</span>
+          <span class="econ-pill">Coaches</span>
+          <span class="econ-pill">Info Sellers</span>
+          <span class="econ-pill">Influencers</span>
+          <span class="econ-pill">E-Commerce</span>
+        </div>
+        <p class="econ-desc">Lead capture, launch automation, content distribution, client onboarding, revenue dashboards — built for the people whose product is their expertise.</p>
+        <a href="https://online.tmitechai.com" class="econ-cta">Explore Online Business &rarr;</a>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1118,7 +1190,10 @@
         <div class="footer-brand-name">
           <img src="logo.svg" alt="TMI"/> TMI
         </div>
-        <p class="footer-desc">AI operational infrastructure for contractors and trades businesses.</p>
+        <p class="footer-desc">AI systems, built and installed. We help businesses adopt AI-native operations from the ground up.</p>
+        <div class="footer-contact" style="margin-bottom:16px;">
+          <a href="mailto:support@tmitechai.com">support@tmitechai.com</a>
+        </div>
         <div class="footer-social">
           <a href="https://www.linkedin.com/company/tmiai/" target="_blank" rel="noopener" class="footer-social-link" aria-label="LinkedIn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
@@ -1130,26 +1205,26 @@
       </div>
       <div class="footer-right">
         <div class="footer-col">
-          <h5>Trades</h5>
-          <a href="construction.html">Construction</a>
-          <a href="home-service.html">Home Service</a>
-          <a href="oil-gas.html">Oil &amp; Gas</a>
-          <a href="manufacturing.html">Manufacturing</a>
-          <a href="fleet.html">Fleet &amp; Transport</a>
+          <h5>Verticals</h5>
+          <a href="https://trades.tmitechai.com">Physical Economy</a>
+          <a href="https://online.tmitechai.com">Online Business</a>
         </div>
         <div class="footer-col">
           <h5>Company</h5>
           <a href="about.html">About</a>
           <a href="partners.html">Partners</a>
-          
           <a href="build-series.html">Build Series</a>
-          <a href="https://tmitechai.com/founders">Founders of the Future</a><a href="funnel.html">Apply</a>
+        </div>
+        <div class="footer-col">
+          <h5>Community</h5>
+          <a href="https://tmitechai.com/founders">Founders of the Future</a>
+          <a href="funnel.html">Apply</a>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
       <span>&copy; 2026 TMI Technology. All rights reserved.</span>
-      <span>Built for the trades.</span>
+      <span>support@tmitechai.com</span>
     </div>
   </div>
 </footer>
@@ -1183,7 +1258,7 @@ function fotfSubscribe(formId, okId, source) {
     const email = form.querySelector('input').value;
     form.style.display = 'none'; ok.style.display = 'block';
     try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source, audience: 'physical' }) }); } catch(err) {}
-    try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from ' + source + '\nEmail: ' + email); fetch('https://formsubmit.co/ajax/mia@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
+    try { const fd = new FormData(); fd.append('email', email); fd.append('_subject', 'New FOTF Signup - ' + email); fd.append('message', 'FOTF signup from ' + source + '\nEmail: ' + email); fetch('https://formsubmit.co/ajax/support@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd }); } catch(err) {}
   });
 }
 fotfSubscribe('fotf-stratum-form', 'fotf-stratum-ok', 'trades');

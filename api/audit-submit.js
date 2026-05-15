@@ -204,7 +204,7 @@ module.exports = async function handler(req, res) {
 
   // 3. Send personalized results email
   resend.emails.send({
-    from: 'Mia from TMI <hello@tmitechai.com>',
+    from: 'TMI <support@tmitechai.com>',
     to: contact.email,
     subject: `Your TMI Audit — ${TIER_NAMES[results.tierKey]}`,
     html: buildResultsEmail(firstName, contact, results, unsubUrl),
@@ -221,7 +221,7 @@ module.exports = async function handler(req, res) {
 
   // 5. Internal email to Mia with full results + all answers
   resend.emails.send({
-    from: 'Mia from TMI <hello@tmitechai.com>',
+    from: 'TMI <support@tmitechai.com>',
     to: OWNER_EMAIL,
     subject: `Audit: ${contact.name} — ${TIER_NAMES[results.tierKey]} (${results.depPct}% dep)`,
     html: buildInternalEmail(contact, results, answers),

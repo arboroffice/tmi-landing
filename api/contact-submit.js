@@ -98,7 +98,7 @@ module.exports = async function handler(req, res) {
 
     // Confirmation to submitter
     resend.emails.send({
-      from: 'Mia from TMI <hello@tmitechai.com>',
+      from: 'TMI <support@tmitechai.com>',
       to: email,
       subject: `Got it, ${first_name} — let's talk`,
       html: `<!DOCTYPE html><html><body style="background:#fff;font-family:Arial,sans-serif;color:#111;max-width:560px;margin:0 auto;padding:40px 24px;line-height:1.7;">
@@ -113,7 +113,7 @@ module.exports = async function handler(req, res) {
 
     // Internal alert to Mia
     resend.emails.send({
-      from: 'Mia from TMI <hello@tmitechai.com>',
+      from: 'TMI <support@tmitechai.com>',
       to: OWNER_EMAIL,
       subject: `Strategy call request: ${name} — ${company || 'no company'}`,
       html: `<!DOCTYPE html><html><body style="background:#fff;font-family:Arial,sans-serif;color:#111;max-width:560px;margin:0 auto;padding:32px 24px;line-height:1.6;">

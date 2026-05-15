@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
     // Fall back to env-var defaults
     const defaults = {
       from_name: process.env.EMAIL_FROM_NAME || 'TMI',
-      from_email: process.env.EMAIL_FROM_ADDRESS || 'hello@tmi-technology.com',
+      from_email: process.env.EMAIL_FROM_ADDRESS || 'support@tmitechai.com',
       reply_to: process.env.EMAIL_REPLY_TO || '',
       footer_text: 'TMI Technology · tmi-technology.com\nYou received this because you opted in.'
     };
