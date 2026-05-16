@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
+<meta name="description" content="The three paths to AI implementation for construction companies, what each costs in time and money, and what to build first to see results in 90 days."/>
+<meta property="og:title" content="How Construction Companies Actually Implement AI | TMI"/>
+<meta property="og:description" content="The three paths to AI implementation for construction companies, what each costs in time and money, and what to build first to see results in 90 days."/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://tmi-technology.com/article-how-construction-ai"/>
+<meta property="og:image" content="https://images.pexels.com/photos/1117452/pexels-photo-1117452.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80"/>
+<meta property="og:site_name" content="TMI"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="How Construction Companies Actually Implement AI | TMI"/>
+<meta name="twitter:description" content="The three paths to AI implementation for construction companies, what each costs in time and money, and what to build first to see results in 90 days."/>
+<meta name="twitter:image" content="https://images.pexels.com/photos/1117452/pexels-photo-1117452.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80"/>
+<link rel="canonical" href="https://tmi-technology.com/article-how-construction-ai"/>
+<title>How Construction Companies Actually Implement AI | TMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#ffffff;--bg-alt:#f5f5f7;--bg-deep:#0a0b14;
+    --ink:#1a1a1a;--ink-2:#505060;--muted:#86868b;
+    --line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.13);
+    --accent:#1a1a1a;--accent-2:#000;
+    --chart:#E4FF97;--chart-dark:#D0FF6A;
+    --serif:"Barlow",system-ui,sans-serif;
+    --sans:"Neue Haas Grotesk Display","Neue Haas Grotesk",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}html{scroll-behavior:smooth;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.55;overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}img{display:block;max-width:100%;}
+  ::selection{background:var(--ink);color:var(--bg);}
+  h1,h2,h3,h4{font-family:var(--serif);font-weight:400;letter-spacing:-0.02em;line-height:1.05;margin:0;}
+  p{margin:0;}
+  .article-header{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;background:rgba(255,255,255,0.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;}
+  .article-header-inner{max-width:1320px;margin:0 auto;padding:0 32px;width:100%;display:flex;align-items:center;gap:20px;}
+  .ah-brand{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:15px;font-weight:700;color:var(--ink);flex:1;}
+  .ah-brand img{height:22px;width:auto;}
+  .ah-nav{display:flex;align-items:center;gap:2px;}
+  .ah-nav a{font-family:var(--sans);font-size:13px;color:var(--ink-2);padding:6px 12px;border-radius:6px;transition:color 0.15s,background 0.15s;}
+  .ah-nav a:hover{color:var(--ink);background:var(--bg-alt);}
+  .ah-cta{font-family:var(--sans);font-size:12px;font-weight:600;background:var(--chart);color:#0a0b14;padding:8px 16px;border-radius:999px;transition:background 0.15s;white-space:nowrap;flex:none;}
+  .ah-cta:hover{background:var(--chart-dark);}
+  @media(max-width:640px){.ah-nav{display:none;}.article-header-inner{padding:0 16px;}}
+  .article-hero{padding:104px 0 72px;border-bottom:1px solid var(--line);}
+  .article-back{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:36px;display:inline-flex;align-items:center;gap:8px;transition:color 0.2s;}
+  .article-back:hover{color:var(--accent);}
+  .article-meta{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);display:flex;gap:20px;align-items:center;margin-bottom:28px;}
+  .article-meta .cat{color:var(--accent);}
+  .article-title{font-family:var(--serif);font-size:clamp(40px,5vw,76px);font-weight:400;line-height:1.05;letter-spacing:-0.02em;max-width:20ch;margin:0 0 32px;}
+  .article-title em{font-style:italic;color:var(--accent-2);}
+  .article-deck{font-family:var(--serif);font-size:clamp(18px,1.5vw,22px);font-weight:400;line-height:1.5;color:var(--ink-2);max-width:56ch;}
+  .container-article{max-width:760px;margin:0 auto;padding:0 32px;}
+  .container{max-width:1320px;margin:0 auto;padding:0 32px;}
+  .article-cover{width:100%;height:clamp(320px,45vw,560px);background-size:cover;background-position:center;margin:64px 0;border-radius:2px;}
+  .article-body{font-family:var(--serif);font-size:19px;font-weight:400;line-height:1.75;color:var(--ink-2);}
+  .article-body p{margin-bottom:1.6em;}
+  .article-body h2{font-family:var(--serif);font-size:clamp(24px,2.2vw,34px);font-weight:400;letter-spacing:-0.02em;line-height:1.15;color:var(--ink);margin:2.8em 0 0.8em;}
+  .article-body blockquote{border-left:3px solid var(--accent);margin:2.5em 0;padding:0 0 0 28px;font-size:clamp(22px,2vw,28px);font-style:italic;color:var(--ink);font-weight:400;line-height:1.35;}
+  .article-body .callout{background:var(--bg-alt);border-radius:4px;padding:28px 32px;margin:2.5em 0;font-family:var(--sans);font-size:15px;line-height:1.6;color:var(--ink-2);}
+  .article-body .callout strong{font-weight:600;color:var(--ink);}
+  .article-end{padding:56px 0;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-top:48px;}
+  .article-end .byline{font-family:var(--sans);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+  .article-end .back-link{font-size:13px;padding:10px 20px;border:1px solid var(--line-strong);border-radius:999px;font-family:var(--sans);color:var(--ink);transition:background 0.2s,color 0.2s,border-color 0.2s;}
+  .article-end .back-link:hover{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+  .read-next{background:var(--bg-alt);padding:80px 0;border-top:1px solid var(--line);}
+  .read-next h3{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:36px;}
+  .read-next-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:32px;}
+  .next-card{display:flex;flex-direction:column;gap:12px;}
+  .next-card .photo{height:200px;background-size:cover;background-position:center;border-radius:2px;}
+  .next-card .meta{font-family:var(--sans);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);display:flex;gap:14px;}
+  .next-card .meta .cat{color:var(--accent);}
+  .next-card h4{font-family:var(--serif);font-size:22px;font-weight:400;letter-spacing:-0.01em;line-height:1.2;}
+  .next-card .read{font-family:var(--sans);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink);display:inline-flex;align-items:center;gap:8px;transition:gap 0.2s,color 0.2s;}
+  .next-card:hover .read{gap:12px;color:var(--accent);}
+  footer{background:var(--bg-alt);padding:72px 0 36px;border-top:1px solid var(--line);}
+  .foot-bottom{display:flex;justify-content:space-between;font-family:var(--sans);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);padding-top:32px;border-top:1px solid var(--line);}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.8s ease,transform 0.8s cubic-bezier(.2,.7,.2,1);}
+  .reveal.in{opacity:1;transform:translateY(0);}
+  @media(max-width:640px){.article-hero{padding:80px 0 48px;}.container-article{padding:0 20px;}.article-body{font-size:17px;}.read-next-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<header class="article-header">
+  <div class="article-header-inner">
+    <a href="stratum.html" class="ah-brand"><img src="logo.svg" alt="TMI"/> TMI</a>
+    <nav class="ah-nav">
+      <a href="news.html">Field Notes</a>
+      <a href="about.html">About</a>
+    </nav>
+    <a href="funnel.html" class="ah-cta">Apply &rarr;</a>
+  </div>
+</header>
+
+<section class="article-hero">
+  <div class="container-article">
+    <a href="news.html" class="article-back">&#8592; Back to Field Notes</a>
+    <div class="article-meta"><span class="cat">Operations</span><span>7 min read</span><span>May 2026</span></div>
+    <h1 class="article-title">How construction companies <em>actually</em> implement AI</h1>
+    <p class="article-deck">Three paths, real timelines, and the one mistake most construction companies make before they write a single line of code.</p>
+  </div>
+</section>
+
+<div class="container-article">
+  <div class="article-cover" style="background-image:url('https://images.pexels.com/photos/1117452/pexels-photo-1117452.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80');background-position:center;"></div>
+  <div class="article-body reveal">
+
+    <p>Construction companies implement AI in one of three ways: they buy a platform with AI features built in, they hire developers to build something internal, or they work with an implementation partner who builds custom systems around how the company already operates. Each path has a different cost, a different timeline, and a different ceiling for what it can actually change.</p>
+
+    <p>Construction has the most to gain from AI and the most reasons to hesitate. Crews move. Jobs are non-recurring. Every project is different, every site has different constraints, and the software companies that sell into construction have mostly built for project management — not for the field operations where the money actually gets made or lost.</p>
+
+    <h2>Three Ways In — and What Each Actually Costs</h2>
+
+    <p>Buying a platform is the fastest path to having something deployed. Procore, Autodesk Build, and their competitors have AI features embedded in project management, document control, and scheduling. The cost runs $300 to $600 per user per month at scale, the implementation is measured in weeks rather than months, and you get a system your team can use on day one. The ceiling is defined by what the platform was built to do. Most of these tools were designed for project managers, not for the foreman trying to log a field ticket from his phone or the dispatcher figuring out which crew has the right certifications for a last-minute job change.</p>
+
+    <p>Building internally means hiring developers, owning the roadmap, and becoming a software company that also does construction. The advantage is that the system is built exactly for your operation. The cost is real: a meaningful internal build runs $400,000 to $800,000 in the first year and takes twelve to eighteen months before it is actually useful to the people in the field. Most companies that go this route underestimate both numbers by about half.</p>
+
+    <p>Working with an implementation partner means a company that builds custom systems around your specific workflows — and stays in after the build to run and expand them. The timeline is faster than internal, the cost is lower than hiring a development team, and you stay in construction rather than becoming a technology company. The tradeoff is that you are dependent on the partner's quality. The right partner delivers a system that fits. The wrong one delivers something that requires your team to work around it.</p>
+
+    <blockquote>The question is not which option is best in the abstract. It is which option fits the scale of the problem you are actually trying to solve.</blockquote>
+
+    <h2>What to Build First</h2>
+
+    <p>Regardless of the path, the sequence matters more than the tools. Construction companies that implement AI in the wrong order — starting with predictive analytics before their field data is structured, or deploying a scheduling system before they have a reliable work order process — stall in Phase 1 and often abandon the effort.</p>
+
+    <p>The sequence that consistently works: change order tracking first, job costing second, billing automation third. Change orders are where most construction companies lose the most money fastest — disputed scope, unsigned approvals, work that got done without a paper trail. A system that captures change orders in the field, routes them to the office for review, and requires a signature before work continues pays for itself on the first job where it catches a disputed scope.</p>
+
+    <p>Job costing in real time means actual versus estimated costs visible mid-job, not post-mortem. Most construction accounting shows you what happened after the job closed. By then the decisions that drove the overrun were made weeks ago. Real-time job costing surfaces overruns while there is still time to adjust — different crew composition, tighter material ordering, a conversation with the sub before they bill.</p>
+
+    <p>Billing automation closes the loop. Construction invoice cycles average eleven days from job completion to invoice going out. Every day in that cycle is cash not in the company's account. Billing automation — triggered by job completion, assembled from field tickets, sent without someone having to remember to do it — is the single fastest ROI item in most construction operations.</p>
+
+    <div class="callout"><strong>The data problem most construction companies have before they start:</strong> The data exists — work orders, field tickets, subcontractor logs, material receipts — but it lives in three different systems, two spreadsheets, and a folder of photos on someone's phone. Phase 1 of any AI implementation is connecting that data before running any intelligence on it. Skipping that step is why most Phase 1 deployments stall.</div>
+
+    <h2>What Goes Wrong</h2>
+
+    <p>The most common failure mode is buying software before auditing what the data actually looks like. A predictive cost overrun system needs structured job costing data. If the job costing lives in a spreadsheet that a project manager updates weekly from memory, the AI has nothing to work with. The tool gets deployed, nothing changes, and the company concludes that AI does not work in construction. The conclusion is wrong. The sequence was wrong.</p>
+
+    <p>The second failure mode is training crews on software instead of building software that works like crews work. Field crews do not use apps that require twelve fields before they can submit a work order. They use apps where the most common action takes two taps. Every construction AI deployment that fails on the field side fails because the software was designed for the office, not for the person on the job site.</p>
+
+    <p>The third: measuring adoption instead of measuring ROI. Adoption is a proxy. It tells you whether people are using the system. It does not tell you whether the system is making the company money. The right questions are: did invoice cycles compress, did change order disputes drop, did cost overruns get caught earlier? Those are the numbers that matter.</p>
+
+    <h2>What Year Two Looks Like</h2>
+
+    <p>Companies that built Phase 1 right in 2024 are now running systems their competitors cannot replicate in six months. Eighteen months of structured job cost data lets them price more accurately than anyone relying on historical averages. Eighteen months of change order history shows them where scope disputes are most likely on which project types. Eighteen months of field data feeds maintenance scheduling that prevents the equipment downtime that was killing schedule and margin.</p>
+
+    <p>The companies getting this right did not go looking for AI. They went looking for the three places they were losing the most money and built systems around those. The AI was the tool. The target was the margin.</p>
+
+    <div class="article-end">
+      <div class="byline">TMI Field Notes &middot; Operations</div>
+      <a href="news.html" class="back-link">&#8592; All stories</a>
+    </div>
+  </div>
+</div>
+
+<div class="read-next">
+  <div class="container">
+    <h3>Read next</h3>
+    <div class="read-next-grid">
+      <a class="next-card" href="article-change-orders.html">
+        <div class="photo" style="background-image:url('https://images.pexels.com/photos/1117452/pexels-photo-1117452.jpeg?auto=compress&cs=tinysrgb&w=800&q=80')"></div>
+        <div class="meta"><span class="cat">Operations</span><span>5 min</span></div>
+        <h4>Change orders kill margins. Here's the fix.</h4>
+        <span class="read">Read &rarr;</span>
+      </a>
+      <a class="next-card" href="article-budget-overruns.html">
+        <div class="photo" style="background-image:url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=800&q=80')"></div>
+        <div class="meta"><span class="cat">Operations</span><span>5 min</span></div>
+        <h4>Construction budgets don't blow up on the last day.</h4>
+        <span class="read">Read &rarr;</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <div class="foot-bottom">
+      <span>&copy; 2026 TMI Technology</span>
+      <span>Field Notes</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
