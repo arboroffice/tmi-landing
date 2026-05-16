@@ -341,6 +341,7 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
 @media(max-width:900px){
   .stats-row{grid-template-columns:repeat(2,1fr);}
   .grid-2{grid-template-columns:1fr;}
+  .growth-grid{grid-template-columns:1fr;}
 }
 @media(max-width:768px){
   :root{--topbar-h:48px;}
@@ -351,7 +352,7 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
   .topbar-crumb a{display:none;}
   .topbar-crumb>svg{display:none;}
   .topbar-actions{gap:6px;flex-shrink:0;}
-  .stats-row{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .stats-row{grid-template-columns:1fr 1fr !important;gap:10px;margin-bottom:16px;}
   .stat-box{padding:14px 16px;}
   .stat-val{font-size:24px;}
   .grid-2{grid-template-columns:1fr;gap:14px;}
@@ -371,15 +372,25 @@ textarea.form-input{resize:vertical;min-height:100px;line-height:1.6;}
   #toast-root{bottom:calc(66px + env(safe-area-inset-bottom,0px));right:12px;left:12px;}
   .toast{text-align:center;white-space:normal;}
   .kanban{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .nl-page .content{padding:0;}
+  .nl-page .content{padding:0;overflow-y:auto;display:flex;flex-direction:column;}
+  .nl-wrap{flex-direction:column;height:auto;overflow:visible;}
+  .nl-queue{width:100%;max-height:260px;border-right:none;border-bottom:1px solid var(--line);}
+  .nl-editor{min-height:360px;}
+  .nl-editor-bar{flex-wrap:wrap;gap:8px;padding:10px 16px;}
+  .nl-editor-actions{margin-left:0;flex-wrap:wrap;}
+  .nl-form{padding:20px 16px;}
+  .cal-nav{flex-wrap:wrap;row-gap:10px;}
+  .cal-plat-filters{margin-left:0;width:100%;}
   .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   tbody td{white-space:nowrap;}
   .series-rotation{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:480px){
-  .stats-row{grid-template-columns:1fr 1fr;}
+  .stats-row{grid-template-columns:1fr 1fr !important;}
   .content{padding:12px 12px calc(68px + env(safe-area-inset-bottom,0px)) 12px;}
   .detail-grid{grid-template-columns:1fr;}
   .panel-actions{flex-wrap:wrap;gap:6px;}
   .modal{padding:20px 16px;}
+  .nl-queue{max-height:200px;}
+  .series-rotation{grid-template-columns:1fr 1fr;}
 }
