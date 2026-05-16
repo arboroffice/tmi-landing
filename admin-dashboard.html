@@ -65,6 +65,20 @@
         <!-- Right column -->
         <div style="display:flex;flex-direction:column;gap:20px;">
 
+          <!-- Quick Idea capture -->
+          <div class="card" id="quick-idea-card">
+            <div class="card-head">
+              <span class="card-title">Quick Idea</span>
+              <a href="/admin-content-ideas" class="btn btn-ghost btn-sm">All ideas</a>
+            </div>
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;">
+              <textarea id="qi-text" class="form-input" rows="3" placeholder="Drop an idea, thought, or hook..." style="resize:none;font-size:13px;line-height:1.5;"></textarea>
+              <input id="qi-url" class="form-input" type="url" placeholder="Post URL (optional)" style="font-size:13px;"/>
+              <button class="btn btn-primary btn-sm" id="qi-save-btn" onclick="saveQuickIdea()" style="align-self:flex-end;">Save Idea &rarr;</button>
+              <div id="qi-success" style="display:none;font-size:12px;color:var(--chart-dark);font-weight:600;text-align:right;">Saved ✓</div>
+            </div>
+          </div>
+
           <!-- Needs attention -->
           <div class="card">
             <div class="card-head"><span class="card-title">Needs Attention</span></div>
@@ -504,6 +518,41 @@ async function submitAddFollowup() {
 
 loadDashboard();
 loadActivityFeed();
+
+// ── Quick Idea capture ─────────────────────────────────────────────────────
+async function saveQuickIdea() {
+  const text = document.getElementById('qi-text').value.trim();
+  const url  = document.getElementById('qi-url').value.trim();
+  if (!text && !url) return;
+
+  const btn = document.getElementById('qi-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const payload = {
+    title: text || url,
+    post_url: url || null,
+    status: 'idea'
+  };
+
+  const res = await TMIAdmin.api('/api/content-ideas', 'POST', payload);
+
+  btn.disabled = false;
+  btn.textContent = 'Save Idea →';
+
+  if (res) {
+    document.getElementById('qi-text').value = '';
+    document.getElementById('qi-url').value = '';
+    const succ = document.getElementById('qi-success');
+    succ.style.display = 'block';
+    setTimeout(() => { succ.style.display = 'none'; }, 2500);
+  }
+}
+
+// Cmd+Enter / Ctrl+Enter to save from the textarea
+document.getElementById('qi-text').addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') saveQuickIdea();
+});
 </script>
 </body>
 </html>
