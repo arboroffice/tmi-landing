@@ -336,7 +336,15 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('people');
+(function(){
+  const _h = location.hash.slice(1);
+  const _valid = ['contacts','partners','activity'];
+  const _tab = _valid.includes(_h) ? _h : 'contacts';
+  const _btns = document.querySelectorAll('.tab-btn');
+  const _btnMap = { contacts: _btns[0], partners: _btns[1], activity: _btns[2] };
+  if (_tab !== 'contacts') switchTab(_tab, _btnMap[_tab] || _btns[0]);
+  TMIAdmin.initSidebar(_h || 'contacts');
+})();
 
 /* ──────────────────────────────────────────
    TAB SWITCHING
@@ -363,6 +371,7 @@ function switchTab(name, btn) {
   document.getElementById('topbar-actions').innerHTML = TOPBAR_ACTIONS[name] || '';
   if (name === 'partners' && !partnersLoaded) { partnersLoaded = true; loadPartners(); }
   if (name === 'activity' && !activityLoaded) { activityLoaded = true; actReload(); }
+  history.replaceState(null, '', '#' + name);
 }
 
 /* ──────────────────────────────────────────

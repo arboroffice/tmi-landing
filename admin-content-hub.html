@@ -577,7 +577,17 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('content-hub');
+(function(){
+  const _h = location.hash.slice(1);
+  const _CCMAP = {'content':'articles','content-ideas':'ideas','content-calendar':'calendar'};
+  const _CCRMAP = {'articles':'content','ideas':'content-ideas','calendar':'content-calendar'};
+  const _valid = ['articles','ideas','calendar'];
+  const _tab = _CCMAP[_h] || (_valid.includes(_h) ? _h : 'articles');
+  const _btns = document.querySelectorAll('.tab-btn');
+  const _btnMap = { articles: _btns[0], ideas: _btns[1], calendar: _btns[2] };
+  if (_tab !== 'articles') switchTab(_tab, _btnMap[_tab] || _btns[0]);
+  TMIAdmin.initSidebar(_CCRMAP[_tab] || _h || 'content');
+})();
 
 // ══════════════════════════════════════════════════════════════════
 // TAB SWITCHING
@@ -593,6 +603,8 @@ function switchTab(name, btn) {
   if (name === 'ideas' && !ideasLoaded) { ideasLoaded = true; ideaLoad(); }
   if (name === 'calendar' && !calendarLoaded) { calendarLoaded = true; calLoad(); }
   renderTopbarActions(name);
+  const _CCH = {'articles':'content','ideas':'content-ideas','calendar':'content-calendar'};
+  history.replaceState(null, '', '#' + (_CCH[name] || name));
 }
 
 function renderTopbarActions(tab) {

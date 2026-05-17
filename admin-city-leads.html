@@ -191,7 +191,15 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('city-leads');
+(function(){
+  const _h = location.hash.slice(1);
+  const _CLMAP = {'city-dashboard':'overview','cities':'cities','city-roster':'roster'};
+  const _CLRMAP = {'overview':'city-dashboard','cities':'cities','roster':'city-roster'};
+  const _valid = ['overview','cities','roster'];
+  const _tab = _CLMAP[_h] || (_valid.includes(_h) ? _h : 'overview');
+  switchTab(_tab);
+  TMIAdmin.initSidebar(_CLRMAP[_tab] || _h || 'city-dashboard');
+})();
 
 const STAGES = [
   { key:'seed', label:'Seed' }, { key:'met-owner', label:'Met' }, { key:'second-visit', label:'2nd Visit' },
@@ -214,6 +222,8 @@ function switchTab(tab) {
   document.getElementById('tab-roster').style.display   = tab === 'roster'   ? '' : 'none';
   if (tab === 'cities' && !citiesLoaded && allLeads.length) { citiesLoaded = true; citiesRenderTable(); }
   if (tab === 'roster' && !rosterLoaded && allLeads.length) { rosterLoaded = true; rosterRenderGrid(); }
+  const _CLH = {'overview':'city-dashboard','cities':'cities','roster':'city-roster'};
+  history.replaceState(null, '', '#' + (_CLH[tab] || tab));
 }
 
 async function loadData() {

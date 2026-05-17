@@ -357,7 +357,6 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('fotf-community-hub');
 
 // ── Tab switching ────────────────────────────────────────────────────────────
 const TAB_ACTIONS = {
@@ -377,7 +376,20 @@ function switchTab(name, btn) {
   document.getElementById('topbar-actions').innerHTML = TAB_ACTIONS[name] || '';
   if (name === 'stories' && !storiesTabLoaded) { storiesTabLoaded = true; st_reload(); }
   if (name === 'identity' && !identityTabLoaded) { identityTabLoaded = true; id_init(); }
+  history.replaceState(null, '', '#' + name);
 }
+
+// Hash-aware init
+(function(){
+  const _h = location.hash.slice(1);
+  const _valid = ['community','stories','identity'];
+  const _tab = _valid.includes(_h) ? _h : 'community';
+  const _btns = document.querySelectorAll('.tab-btn');
+  const _btnMap = { community: _btns[0], stories: _btns[1], identity: _btns[2] };
+  if (_tab !== 'community') switchTab(_tab, _btnMap[_tab] || _btns[0]);
+  const _FCMAP = {'community':'fotf-community','stories':'fotf-stories','identity':'fotf-identity'};
+  TMIAdmin.initSidebar(_FCMAP[_tab] || 'fotf-community');
+})();
 
 // ════════════════════════════════════════════════════════════════════════════
 // COMMUNITY TAB  (prefix: cm_)

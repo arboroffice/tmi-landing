@@ -231,7 +231,14 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('inbox');
+(function(){
+  const _h = location.hash.slice(1);
+  const _IMAP = {'applications':'apps','followups':'followups'};
+  const _IRMAP = {'apps':'applications','followups':'followups'};
+  const _tab = _IMAP[_h] || _h || 'apps';
+  switchTab(_tab);
+  TMIAdmin.initSidebar(_IRMAP[_tab] || _h || 'applications');
+})();
 
 let fuLoaded = false;
 
@@ -247,6 +254,8 @@ function switchTab(tab) {
   } else {
     actionsArea.innerHTML = '';
   }
+  const _IH = {'apps':'applications','followups':'followups'};
+  history.replaceState(null, '', '#' + (_IH[tab] || tab));
 }
 
 // ── Applications ──────────────────────────────────────────────────────────────

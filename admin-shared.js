@@ -55,8 +55,9 @@ const TMIAdmin = (() => {
     cityMoney:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="1" y="4" width="22" height="16" rx="2"/><circle cx="12" cy="12" r="4"/><path d="M6 12h.01M18 12h.01" stroke-linecap="round" stroke-width="2.5"/></svg>`
   };
 
-  function navItem(page, label, icon, badge) {
-    return `<a href="/admin-${page}" class="sb-item" data-page="${page}">${icon}${label}${badge ? `<span class="sb-badge" id="sb-badge-${page}" style="display:none"></span>` : ''}</a>`;
+  function navItem(page, label, icon, badge, href) {
+    const url = href !== undefined ? href : `/admin-${page}`;
+    return `<a href="${url}" class="sb-item" data-page="${page}">${icon}${label}${badge ? `<span class="sb-badge" id="sb-badge-${page}" style="display:none"></span>` : ''}</a>`;
   }
 
   const self = {
@@ -220,34 +221,56 @@ const TMIAdmin = (() => {
   <nav class="sb-nav">
     <div class="sb-group-label">Overview</div>
     ${navItem('dashboard', 'Dashboard', I.dashboard)}
-    ${navItem('reports', 'Reports', I.revenue)}
+    ${navItem('revenue', 'Revenue', I.revenue, false, '/admin-reports#revenue')}
+    ${navItem('analytics', 'Analytics', I.analytics, false, '/admin-reports#analytics')}
     <div class="sb-group-label">Sales</div>
-    ${navItem('sales', 'Sales', I.pipeline)}
-    ${navItem('inbox', 'Inbox', I.apps, true)}
+    ${navItem('pipeline', 'Pipeline', I.pipeline, false, '/admin-sales#pipeline')}
+    ${navItem('audits', 'Audits', I.audits, false, '/admin-sales#audits')}
+    ${navItem('bookings', 'Bookings', I.bookings, false, '/admin-sales#bookings')}
+    ${navItem('applications', 'Applications', I.apps, true, '/admin-inbox#apps')}
+    ${navItem('followups', 'Follow-ups', I.followup, true, '/admin-inbox#followups')}
     ${navItem('leads', 'Leads', I.leads)}
     ${navItem('proposals', 'Proposals', I.proposals)}
     <div class="sb-group-label">Clients</div>
-    ${navItem('clients', 'Clients', I.clients)}
-    ${navItem('work', 'Work', I.projects)}
+    ${navItem('clients', 'Clients', I.clients, false, '/admin-clients')}
+    ${navItem('client-health', 'Client Health', I.clientHealth, false, '/admin-clients#health')}
+    ${navItem('projects', 'Projects', I.projects, false, '/admin-work#projects')}
+    ${navItem('invoices', 'Invoices', I.invoices, false, '/admin-work#invoices')}
     ${navItem('onboarding', 'Onboarding', I.onboarding)}
     <div class="sb-group-label">People</div>
-    ${navItem('people', 'People', I.contacts)}
+    ${navItem('contacts', 'Contacts', I.contacts, false, '/admin-people#contacts')}
+    ${navItem('partners', 'Partners', I.partners, false, '/admin-people#partners')}
+    ${navItem('activity', 'Activity', I.activity, false, '/admin-people#activity')}
     <div class="sb-group-label">Comms</div>
-    ${navItem('comms', 'Comms', I.email)}
+    ${navItem('email', 'Email', I.email, false, '/admin-comms#email')}
+    ${navItem('sms', 'SMS', I.sms, false, '/admin-comms#sms')}
     <div class="sb-group-label">Content</div>
-    ${navItem('content-hub', 'Content Hub', I.content)}
+    ${navItem('content', 'Field Notes', I.content, false, '/admin-content-hub#articles')}
+    ${navItem('content-ideas', 'Social Ideas', I.ideas, false, '/admin-content-hub#ideas')}
+    ${navItem('content-compose', 'Compose', I.content)}
+    ${navItem('content-calendar', 'Calendar', I.rituals, false, '/admin-content-hub#calendar')}
+    ${navItem('brand-plan', 'Brand Plan', I.identity)}
     <div class="sb-group-label">FOTF</div>
     ${navItem('fotf-dashboard', 'Home', I.fotf)}
-    ${navItem('fotf-editorial', 'Editorial', I.newsletter)}
-    ${navItem('fotf-community-hub', 'Community', I.community)}
-    ${navItem('fotf-resources', 'Resources', I.library)}
+    ${navItem('fotf-newsletter', 'Newsletter', I.newsletter, false, '/admin-fotf-editorial#newsletter')}
+    ${navItem('fotf-issues', 'Issues', I.newsletter, false, '/admin-fotf-editorial#issues')}
+    ${navItem('fotf-community', 'Community', I.community, false, '/admin-fotf-community-hub#community')}
+    ${navItem('fotf-stories', 'Stories', I.stories, false, '/admin-fotf-community-hub#stories')}
+    ${navItem('fotf-glass-box', 'Glass Box', I.glassBox, false, '/admin-fotf-resources#glass-box')}
+    ${navItem('fotf-stage-letters', 'Stage Letters', I.stageLetters, false, '/admin-fotf-resources#stage-letters')}
+    ${navItem('fotf-rituals', 'Rituals', I.rituals, false, '/admin-fotf-resources#rituals')}
+    ${navItem('fotf-identity', 'Identity', I.identity, false, '/admin-fotf-community-hub#identity')}
+    ${navItem('fotf-library', 'Library', I.library, false, '/admin-fotf-resources#library')}
     ${navItem('fotf-growth', 'Growth', I.growth_fotf)}
     <div class="sb-group-label">City Leads</div>
-    ${navItem('city-leads', 'City Leads', I.cityPin)}
+    ${navItem('city-dashboard', 'Overview', I.cityPin, false, '/admin-city-leads#overview')}
+    ${navItem('cities', 'Cities', I.cityMap, false, '/admin-city-leads#cities')}
+    ${navItem('city-roster', 'Roster', I.team, false, '/admin-city-leads#roster')}
     ${navItem('city-businesses', 'Businesses', I.clients)}
     ${navItem('city-money', 'Money', I.cityMoney)}
     <div class="sb-group-label">Plans</div>
-    ${navItem('plans', 'Plans', I.revenue)}
+    ${navItem('financial-model', 'Financial Model', I.revenue, false, '/admin-plans#model')}
+    ${navItem('retention-plan', 'Retention Plan', I.clientHealth, false, '/admin-plans#retention')}
     <div class="sb-sep"></div>
     ${navItem('team', 'Team', I.team)}
     ${navItem('settings', 'Settings', I.settings)}
@@ -295,37 +318,61 @@ const TMIAdmin = (() => {
       // More sheet
       const groups = [
         { label: 'Overview', items: [
-          { page:'reports', label:'Reports', icon:I.revenue },
+          { page:'revenue',   label:'Revenue',   icon:I.revenue,   href:'/admin-reports#revenue' },
+          { page:'analytics', label:'Analytics', icon:I.analytics, href:'/admin-reports#analytics' },
         ]},
         { label: 'Sales', items: [
-          { page:'sales',     label:'Sales',     icon:I.pipeline },
-          { page:'inbox',     label:'Inbox',     icon:I.apps, badge:'inbox' },
-          { page:'proposals', label:'Proposals', icon:I.proposals },
+          { page:'pipeline',     label:'Pipeline',     icon:I.pipeline, href:'/admin-sales#pipeline' },
+          { page:'audits',       label:'Audits',       icon:I.audits,   href:'/admin-sales#audits' },
+          { page:'bookings',     label:'Bookings',     icon:I.bookings, href:'/admin-sales#bookings' },
+          { page:'applications', label:'Applications', icon:I.apps,     href:'/admin-inbox#apps',      badge:'inbox' },
+          { page:'followups',    label:'Follow-ups',   icon:I.followup, href:'/admin-inbox#followups', badge:'inbox' },
+          { page:'proposals',    label:'Proposals',    icon:I.proposals },
         ]},
         { label: 'Clients', items: [
-          { page:'work',       label:'Work',       icon:I.projects },
-          { page:'onboarding', label:'Onboarding', icon:I.onboarding },
+          { page:'client-health', label:'Client Health', icon:I.clientHealth, href:'/admin-clients#health' },
+          { page:'projects',      label:'Projects',      icon:I.projects,  href:'/admin-work#projects' },
+          { page:'invoices',      label:'Invoices',      icon:I.invoices,  href:'/admin-work#invoices' },
+          { page:'onboarding',    label:'Onboarding',    icon:I.onboarding },
         ]},
         { label: 'People', items: [
-          { page:'people', label:'People', icon:I.contacts },
+          { page:'contacts', label:'Contacts', icon:I.contacts, href:'/admin-people#contacts' },
+          { page:'partners', label:'Partners', icon:I.partners, href:'/admin-people#partners' },
+          { page:'activity', label:'Activity', icon:I.activity, href:'/admin-people#activity' },
+        ]},
+        { label: 'Comms', items: [
+          { page:'sms', label:'SMS', icon:I.sms, href:'/admin-comms#sms' },
         ]},
         { label: 'Content', items: [
-          { page:'content-hub', label:'Content Hub', icon:I.content },
+          { page:'content',          label:'Field Notes',  icon:I.content,  href:'/admin-content-hub#articles' },
+          { page:'content-ideas',    label:'Social Ideas', icon:I.ideas,    href:'/admin-content-hub#ideas' },
+          { page:'content-compose',  label:'Compose',      icon:I.content },
+          { page:'content-calendar', label:'Calendar',     icon:I.rituals,  href:'/admin-content-hub#calendar' },
+          { page:'brand-plan',       label:'Brand Plan',   icon:I.identity },
         ]},
         { label: 'FOTF', items: [
-          { page:'fotf-dashboard',     label:'Home',      icon:I.fotf },
-          { page:'fotf-editorial',     label:'Editorial', icon:I.newsletter },
-          { page:'fotf-community-hub', label:'Community', icon:I.community },
-          { page:'fotf-resources',     label:'Resources', icon:I.library },
-          { page:'fotf-growth',        label:'Growth',    icon:I.growth_fotf },
+          { page:'fotf-dashboard',     label:'Home',          icon:I.fotf },
+          { page:'fotf-newsletter',    label:'Newsletter',    icon:I.newsletter,   href:'/admin-fotf-editorial#newsletter' },
+          { page:'fotf-issues',        label:'Issues',        icon:I.newsletter,   href:'/admin-fotf-editorial#issues' },
+          { page:'fotf-community',     label:'Community',     icon:I.community,    href:'/admin-fotf-community-hub#community' },
+          { page:'fotf-stories',       label:'Stories',       icon:I.stories,      href:'/admin-fotf-community-hub#stories' },
+          { page:'fotf-glass-box',     label:'Glass Box',     icon:I.glassBox,     href:'/admin-fotf-resources#glass-box' },
+          { page:'fotf-stage-letters', label:'Stage Letters', icon:I.stageLetters, href:'/admin-fotf-resources#stage-letters' },
+          { page:'fotf-rituals',       label:'Rituals',       icon:I.rituals,      href:'/admin-fotf-resources#rituals' },
+          { page:'fotf-identity',      label:'Identity',      icon:I.identity,     href:'/admin-fotf-community-hub#identity' },
+          { page:'fotf-library',       label:'Library',       icon:I.library,      href:'/admin-fotf-resources#library' },
+          { page:'fotf-growth',        label:'Growth',        icon:I.growth_fotf },
         ]},
         { label: 'City Leads', items: [
-          { page:'city-leads',      label:'City Leads', icon:I.cityPin },
+          { page:'city-dashboard',  label:'Overview',   icon:I.cityPin,   href:'/admin-city-leads#overview' },
+          { page:'cities',          label:'Cities',     icon:I.cityMap,   href:'/admin-city-leads#cities' },
+          { page:'city-roster',     label:'Roster',     icon:I.team,      href:'/admin-city-leads#roster' },
           { page:'city-businesses', label:'Businesses', icon:I.clients },
           { page:'city-money',      label:'Money',      icon:I.cityMoney },
         ]},
         { label: 'Plans', items: [
-          { page:'plans', label:'Plans', icon:I.revenue },
+          { page:'financial-model', label:'Financial Model', icon:I.revenue,      href:'/admin-plans#model' },
+          { page:'retention-plan',  label:'Retention Plan',  icon:I.clientHealth, href:'/admin-plans#retention' },
         ]},
         { label: 'System', items: [
           { page:'team',     label:'Team',     icon:I.team },
@@ -344,7 +391,7 @@ const TMIAdmin = (() => {
             <div class="more-sheet-group">
               <span class="more-sheet-group-label">${g.label}</span>
               ${g.items.map(it => `
-                <a href="/admin-${it.page}" class="more-sheet-item${active===it.page?' active':''}" onclick="TMIAdmin.closeMoreSheet()">
+                <a href="${it.href || '/admin-'+it.page}" class="more-sheet-item${active===it.page?' active':''}" onclick="TMIAdmin.closeMoreSheet()">
                   ${it.icon}${it.label}
                 </a>`).join('')}
             </div>`).join('')}

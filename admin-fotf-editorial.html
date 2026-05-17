@@ -352,7 +352,6 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('fotf-editorial');
 
 // ── Tab switching ────────────────────────────────────────────────────────────
 const TAB_ACTIONS = {
@@ -371,10 +370,21 @@ function switchTab(name, btn) {
   document.getElementById('topbar-actions').innerHTML = TAB_ACTIONS[name] || '';
   activeTab = name;
   if (name === 'issues' && !issTabLoaded) { issTabLoaded = true; iss_loadIssues(); }
+  history.replaceState(null, '', '#' + name);
 }
 
-// Set initial topbar action for first tab
-document.getElementById('topbar-actions').innerHTML = TAB_ACTIONS.newsletter;
+// Hash-aware init
+(function(){
+  const _h = location.hash.slice(1);
+  const _valid = ['newsletter','issues'];
+  const _tab = _valid.includes(_h) ? _h : 'newsletter';
+  const _btns = document.querySelectorAll('.tab-btn');
+  const _btnMap = { newsletter: _btns[0], issues: _btns[1] };
+  if (_tab !== 'newsletter') switchTab(_tab, _btnMap[_tab] || _btns[0]);
+  else document.getElementById('topbar-actions').innerHTML = TAB_ACTIONS.newsletter;
+  const _FEMAP = {'newsletter':'fotf-newsletter','issues':'fotf-issues'};
+  TMIAdmin.initSidebar(_FEMAP[_tab] || 'fotf-newsletter');
+})();
 
 // ════════════════════════════════════════════════════════════════════════════
 // NEWSLETTER TAB  (prefix: nl_)

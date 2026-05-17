@@ -278,12 +278,23 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('plans');
+(function(){
+  const _h = location.hash.slice(1);
+  const _PLMAP = {'financial-model':'model','retention-plan':'retention'};
+  const _PLRMAP = {'model':'financial-model','retention':'retention-plan'};
+  const _tab = _PLMAP[_h] || _h || 'model';
+  const _valid = ['model','retention'];
+  const _safeTab = _valid.includes(_tab) ? _tab : 'model';
+  switchTab(_safeTab);
+  TMIAdmin.initSidebar(_PLRMAP[_safeTab] || _h || 'financial-model');
+})();
 
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['model','retention'][i] === tab));
   document.getElementById('tab-model').style.display     = tab === 'model'     ? '' : 'none';
   document.getElementById('tab-retention').style.display  = tab === 'retention' ? '' : 'none';
+  const _PLH = {'model':'financial-model','retention':'retention-plan'};
+  history.replaceState(null, '', '#' + (_PLH[tab] || tab));
 }
 
 // ── Financial Model ───────────────────────────────────────────────────────────

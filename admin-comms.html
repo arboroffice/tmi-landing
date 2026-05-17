@@ -352,7 +352,15 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('comms');
+(function(){
+  const _h = location.hash.slice(1);
+  const _valid = ['email','sms'];
+  const _tab = _valid.includes(_h) ? _h : 'email';
+  const _btns = document.querySelectorAll('.tab-btn');
+  const _btnMap = { email: _btns[0], sms: _btns[1] };
+  if (_tab !== 'email') switchTab(_tab, _btnMap[_tab] || _btns[0]);
+  TMIAdmin.initSidebar(_h || 'email');
+})();
 
 // ============================================================
 // TOP-LEVEL TAB SWITCHING (Email / SMS)
@@ -373,6 +381,7 @@ function switchTab(name, btn) {
     smsLoaded = true;
     loadSMS();
   }
+  history.replaceState(null, '', '#' + name);
 }
 
 function renderTopbarActions(tab) {

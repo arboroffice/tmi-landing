@@ -398,7 +398,15 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('work');
+(function(){
+  const _h = location.hash.slice(1);
+  const _valid = ['projects','invoices'];
+  const _tab = _valid.includes(_h) ? _h : 'projects';
+  const _btns = document.querySelectorAll('.tab-btn');
+  const _btnMap = { projects: _btns[0], invoices: _btns[1] };
+  if (_tab !== 'projects') switchTab(_tab, _btnMap[_tab] || _btns[0]);
+  TMIAdmin.initSidebar(_h || 'projects');
+})();
 
 // =====================================================================
 // PAGE TAB SWITCHING
@@ -412,6 +420,7 @@ function switchTab(name, btn) {
   btn.classList.add('active');
   if (name === 'invoices' && !invoicesLoaded) { invoicesLoaded = true; invLoad(); }
   renderTopbarActions(name);
+  history.replaceState(null, '', '#' + name);
 }
 
 function renderTopbarActions(tab) {

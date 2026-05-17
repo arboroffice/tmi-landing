@@ -214,7 +214,14 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('clients');
+(function(){
+  const _h = location.hash.slice(1);
+  const _CMAP = {'clients':'list','client-health':'health'};
+  const _CRMAP = {'list':'clients','health':'client-health'};
+  const _tab = _CMAP[_h] || _h || 'list';
+  switchTab(_tab);
+  TMIAdmin.initSidebar(_CRMAP[_tab] || _h || 'clients');
+})();
 
 let allClients = [];
 let currentClient = null;
@@ -226,6 +233,8 @@ function switchTab(tab) {
   document.getElementById('tab-health').style.display  = tab === 'health' ? '' : 'none';
   document.getElementById('clients-topbar-actions').style.display = tab === 'list' ? '' : 'none';
   if (tab === 'health' && !healthLoaded) { healthLoaded = true; ch_loadData(); }
+  const _CH = {'list':'clients','health':'client-health'};
+  history.replaceState(null, '', '#' + (_CH[tab] || tab));
 }
 
 function onAudienceChange() {

@@ -348,7 +348,6 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('fotf-resources');
 
 // ── Tab switching ────────────────────────────────────────────────────────────
 const TAB_ACTIONS = {
@@ -371,10 +370,21 @@ function switchTab(name, btn) {
   if (name === 'stage-letters' && !slTabLoaded)  { slTabLoaded = true;  sl_init(); }
   if (name === 'rituals'       && !rtTabLoaded)  { rtTabLoaded = true;  rt_reload(); }
   if (name === 'library'       && !libTabLoaded) { libTabLoaded = true; lib_reload(); }
+  history.replaceState(null, '', '#' + name);
 }
 
-// Set initial topbar
-document.getElementById('topbar-actions').innerHTML = TAB_ACTIONS['glass-box'];
+// Hash-aware init
+(function(){
+  const _h = location.hash.slice(1);
+  const _valid = ['glass-box','stage-letters','rituals','library'];
+  const _tab = _valid.includes(_h) ? _h : 'glass-box';
+  const _btns = document.querySelectorAll('.tab-btn');
+  const _btnMap = { 'glass-box': _btns[0], 'stage-letters': _btns[1], rituals: _btns[2], library: _btns[3] };
+  if (_tab !== 'glass-box') switchTab(_tab, _btnMap[_tab] || _btns[0]);
+  else document.getElementById('topbar-actions').innerHTML = TAB_ACTIONS['glass-box'];
+  const _FRMAP = {'glass-box':'fotf-glass-box','stage-letters':'fotf-stage-letters','rituals':'fotf-rituals','library':'fotf-library'};
+  TMIAdmin.initSidebar(_FRMAP[_tab] || 'fotf-glass-box');
+})();
 
 // ════════════════════════════════════════════════════════════════════════════
 // GLASS BOX TAB  (prefix: gb_)

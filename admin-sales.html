@@ -284,7 +284,15 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('sales');
+(function(){
+  const _h = location.hash.slice(1);
+  const _valid = ['pipeline','audits','bookings'];
+  const _tab = _valid.includes(_h) ? _h : 'pipeline';
+  const _btns = document.querySelectorAll('.tab-btn');
+  const _btnMap = { pipeline: _btns[0], audits: _btns[1], bookings: _btns[2] };
+  if (_tab !== 'pipeline') switchTab(_tab, _btnMap[_tab] || _btns[0]);
+  TMIAdmin.initSidebar(_h || 'pipeline');
+})();
 
 // ── Lazy-load flags ────────────────────────────────────────────────────────────
 let auditsLoaded   = false;
@@ -304,6 +312,7 @@ function switchTab(name, btn) {
   // Lazy-load data on first switch
   if (name === 'audits'   && !auditsLoaded)   loadAudits();
   if (name === 'bookings' && !bookingsLoaded) loadBookings();
+  history.replaceState(null, '', '#' + name);
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
