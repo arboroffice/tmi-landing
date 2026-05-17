@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Comms — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  /* ---- Top-level Email/SMS tab bar ---- */
+  .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px;}
+  .tab-btn{font-size:13px;font-weight:500;padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--ink-2);font-family:inherit;transition:color 0.15s,border-color 0.15s;margin-bottom:-1px;}
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+  .tab-btn:hover:not(.active){color:var(--ink);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* ---- Email inner tabs ---- */
+  .email-sub-tab-bar{display:flex;gap:2px;margin-bottom:24px;}
+  .email-sub-tab-btn{font-size:13px;font-weight:500;padding:7px 18px;border-radius:6px;border:none;background:transparent;color:var(--ink-2);cursor:pointer;transition:background .15s,color .15s;}
+  .email-sub-tab-btn.active{background:var(--bg-alt,#f5f5f5);color:var(--ink);font-weight:600;}
+  .email-sub-tab-btn:hover:not(.active){background:var(--bg-alt,#f5f5f5);}
+  .email-sub-panel{display:none;}
+  .email-sub-panel.active{display:block;}
+
+  /* ---- Email template cards ---- */
+  .tmpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+  .tmpl-card{background:var(--bg);border:1px solid var(--line,rgba(0,0,0,.08));border-radius:var(--r,8px);padding:20px;display:flex;flex-direction:column;gap:10px;transition:border-color .15s,box-shadow .15s;}
+  .tmpl-card:hover{border-color:var(--ink-3,#ccc);box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .tmpl-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .tmpl-card-name{font-size:14px;font-weight:600;color:var(--ink);line-height:1.3;}
+  .tmpl-card-subject{font-size:13px;color:var(--ink-2);line-height:1.4;}
+  .tmpl-card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
+  .tmpl-card-actions{display:flex;gap:6px;}
+
+  /* ---- SMS inner tab bar ---- */
+  .sms-sub-tab-bar{display:inline-flex;gap:2px;background:var(--bg);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:2px;margin-bottom:20px;}
+  .sms-sub-tab-bar button{background:none;border:none;padding:5px 14px;border-radius:4px;font-size:12px;font-weight:500;color:var(--ink-2);cursor:pointer;transition:background 0.12s,color 0.12s;line-height:1;}
+  .sms-sub-tab-bar button.active{background:var(--chart);color:var(--ink);}
+  .sms-sub-tab-bar button:not(.active):hover{background:var(--surface);color:var(--ink);}
+
+  /* ---- SMS conversations ---- */
+  .conv-list{display:flex;flex-direction:column;gap:4px;}
+  .conv-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);cursor:pointer;transition:background 0.12s,border-color 0.12s;}
+  .conv-card:hover{background:var(--bg-alt);border-color:var(--line-strong);}
+  .conv-avatar{width:38px;height:38px;border-radius:50%;background:var(--chart);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--ink);flex:none;}
+  .conv-info{flex:1;min-width:0;}
+  .conv-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+  .conv-preview{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .conv-time{font-size:11px;color:var(--muted);flex:none;}
+
+  /* ---- SMS thread panel ---- */
+  .thread-messages{display:flex;flex-direction:column;gap:10px;padding:16px 0;min-height:200px;}
+  .bubble-wrap{display:flex;justify-content:flex-end;}
+  .bubble{background:var(--bg-alt);border:1px solid var(--line);border-radius:14px 14px 2px 14px;padding:9px 14px;max-width:80%;font-size:13px;color:var(--ink);line-height:1.5;}
+  .bubble-meta{font-size:10px;color:var(--muted);text-align:right;margin-top:3px;}
+  .thread-reply{display:flex;gap:8px;padding:16px 0 0;border-top:1px solid var(--line);margin-top:auto;}
+  .thread-reply textarea{flex:1;border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:8px 12px;font-size:13px;font-family:inherit;resize:none;background:var(--bg);color:var(--ink);}
+  .thread-reply textarea:focus{outline:none;border-color:var(--ink);}
+  .thread-contact-hd{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+
+  /* ---- SMS templates ---- */
+  .tpl-list{display:flex;flex-direction:column;gap:8px;}
+  .tpl-card{padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);display:flex;align-items:flex-start;gap:12px;}
+  .tpl-body-wrap{flex:1;min-width:0;}
+  .tpl-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+  .tpl-preview{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tpl-actions{display:flex;gap:6px;flex:none;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Comms</span></div>
+      <div class="topbar-actions" id="topbar-actions">
+        <!-- actions injected by switchTab() -->
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Comms</h1>
+      </div>
+
+      <!-- Top-level tab bar: Email / SMS -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('email',this)">Email</button>
+        <button class="tab-btn" onclick="switchTab('sms',this)">SMS</button>
+      </div>
+
+      <!-- ======== EMAIL PANEL ======== -->
+      <div id="tab-email" class="tab-panel active">
+
+        <!-- Email inner tab bar: Campaigns / Templates -->
+        <div class="email-sub-tab-bar">
+          <button class="email-sub-tab-btn active" id="email-sub-campaigns-btn" onclick="switchEmailSubTab('campaigns')">Campaigns</button>
+          <button class="email-sub-tab-btn" id="email-sub-templates-btn" onclick="switchEmailSubTab('templates')">Templates</button>
+        </div>
+
+        <!-- CAMPAIGNS sub-panel -->
+        <div class="email-sub-panel active" id="email-sub-campaigns">
+          <div class="stats-row" id="email-stats" style="grid-template-columns:repeat(4,1fr)">
+            <div class="stat-box"><div class="stat-label">Total Sent</div><div class="stat-val" id="es-sent">-</div></div>
+            <div class="stat-box"><div class="stat-label">Emails Delivered</div><div class="stat-val" id="es-delivered">-</div></div>
+            <div class="stat-box"><div class="stat-label">Total Opens</div><div class="stat-val" id="es-opens">-</div></div>
+            <div class="stat-box"><div class="stat-label">Avg Open Rate</div><div class="stat-val" id="es-rate">-</div></div>
+          </div>
+
+          <div class="filter-bar" style="margin-top:16px">
+            <div class="search-wrap">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" id="email-search" placeholder="Search subject..." oninput="renderEmailTable()"/>
+            </div>
+            <select class="filter-select" id="email-filter-status" onchange="renderEmailTable()">
+              <option value="">All statuses</option>
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="sending">Sending</option>
+              <option value="failed">Failed</option>
+            </select>
+          </div>
+
+          <div class="card">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>Subject</th><th>Audience</th><th>Status</th>
+                  <th>Sent To</th><th>Opens</th><th>Open Rate</th><th>Date</th><th></th>
+                </tr></thead>
+                <tbody id="email-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEMPLATES sub-panel -->
+        <div class="email-sub-panel" id="email-sub-templates">
+          <div class="sec-head" style="margin-bottom:20px">
+            <span></span>
+            <button class="btn btn-primary btn-sm" onclick="openEmailTemplateModal()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Template
+            </button>
+          </div>
+          <div id="email-templates-container">
+            <div class="tmpl-grid" id="tmpl-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======== SMS PANEL ======== -->
+      <div id="tab-sms" class="tab-panel" style="display:none">
+        <div class="sec-head" style="margin-bottom:16px">
+          <span class="filter-count" id="sms-count"></span>
+        </div>
+
+        <!-- SMS inner tab bar -->
+        <div class="sms-sub-tab-bar">
+          <button id="sms-tab-messages" class="active" onclick="setSmsTab('messages')">Messages</button>
+          <button id="sms-tab-conversations" onclick="setSmsTab('conversations')">Conversations</button>
+          <button id="sms-tab-templates" onclick="setSmsTab('templates')">Templates</button>
+        </div>
+
+        <!-- Messages view -->
+        <div id="sms-view-messages">
+          <div class="filter-bar">
+            <div class="search-wrap">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" id="sms-search" placeholder="Search messages..." oninput="renderSmsTable()"/>
+            </div>
+            <select class="filter-select" id="sms-filter-status" onchange="renderSmsTable()">
+              <option value="">All</option>
+              <option value="sent">Sent</option>
+              <option value="delivered">Delivered</option>
+              <option value="failed">Failed</option>
+            </select>
+          </div>
+
+          <div class="card">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>To</th><th>Contact</th><th>Message</th><th>Status</th><th>Sent</th>
+                </tr></thead>
+                <tbody id="sms-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversations view -->
+        <div id="sms-view-conversations" style="display:none;">
+          <div class="card" style="padding:16px;">
+            <div class="conv-list" id="conv-list"></div>
+          </div>
+        </div>
+
+        <!-- SMS Templates view -->
+        <div id="sms-view-templates" style="display:none;">
+          <div class="card" style="padding:16px;">
+            <div class="tpl-list" id="tpl-list"></div>
+            <div id="tpl-empty" style="display:none;padding:32px 0;text-align:center;">
+              <div style="font-size:28px;margin-bottom:8px;">📝</div>
+              <div style="font-size:13px;color:var(--muted);">No templates yet. Click "+ New Template" to create one.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ======== EMAIL: Campaign detail panel ======== -->
+<div class="panel-overlay" id="campaign-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('campaign-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-subject" style="font-size:16px;max-width:340px;line-height:1.3">-</h2>
+      <div class="panel-actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteEmailFromPanel()">Delete</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val" id="pd-status">-</div></div>
+        <div class="detail-item"><div class="detail-label">Audience</div><div class="detail-val" id="pd-audience">-</div></div>
+        <div class="detail-item"><div class="detail-label">Sent To</div><div class="detail-val" id="pd-sent">-</div></div>
+        <div class="detail-item"><div class="detail-label">Opens</div><div class="detail-val" id="pd-opens">-</div></div>
+        <div class="detail-item"><div class="detail-label">Open Rate</div><div class="detail-val" id="pd-rate">-</div></div>
+        <div class="detail-item"><div class="detail-label">Clicks</div><div class="detail-val" id="pd-clicks">-</div></div>
+        <div class="detail-item"><div class="detail-label">From</div><div class="detail-val" id="pd-from">-</div></div>
+        <div class="detail-item"><div class="detail-label">Sent</div><div class="detail-val" id="pd-date">-</div></div>
+      </div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Email Body</div>
+      <div id="pd-body" style="font-size:13px;color:var(--ink-2);line-height:1.7;white-space:pre-wrap;background:var(--bg);padding:14px;border-radius:var(--r-sm);max-height:360px;overflow-y:auto;margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== EMAIL: New Template Modal ======== -->
+<div class="modal-overlay" id="email-tmpl-modal">
+  <div class="modal" style="max-width:580px;width:100%">
+    <div class="modal-hd">
+      <h2 class="modal-title" id="email-tmpl-modal-title">New Template</h2>
+      <button class="modal-x" onclick="closeEmailTemplateModal()">&times;</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Template Name <span style="color:var(--red)">*</span></label>
+        <input class="form-input" id="tf-name" placeholder="e.g. Monthly Newsletter"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Audience</label>
+        <select class="form-input" id="tf-audience">
+          <option value="all">Everyone</option>
+          <option value="physical">Physical</option>
+          <option value="online">Online</option>
+          <option value="fotf">FOTF</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Subject <span style="color:var(--red)">*</span></label>
+      <input class="form-input" id="tf-subject" placeholder="Email subject line"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Body</label>
+      <textarea class="form-input" id="tf-body" rows="7" style="min-height:150px;resize:vertical" placeholder="Email body content..."></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeEmailTemplateModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEmailTemplate()">Save Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== SMS: Compose modal ======== -->
+<div class="modal-overlay" id="sms-compose-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title">Send SMS</h2>
+      <button class="modal-x" onclick="closeSmsCompose()">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Phone Number</label>
+      <input class="form-input" id="c-phone" placeholder="+1 (555) 000-0000" type="tel"/>
+      <div class="form-hint">Include country code or US will be assumed.</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Message</label>
+      <textarea class="form-input" id="c-body" rows="5" placeholder="Type your message..." oninput="updateSmsCharCount()"></textarea>
+      <div class="sms-char-count" id="sms-char-count">0 / 160</div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeSmsCompose()">Cancel</button>
+      <button class="btn btn-primary" id="sms-send-btn" onclick="sendSMS()">Send Message</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== SMS: New Template modal ======== -->
+<div class="modal-overlay" id="sms-tpl-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title">New Template</h2>
+      <button class="modal-x" onclick="closeSmsTemplateModal()">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Template Name</label>
+      <input class="form-input" id="sms-tpl-name-input" placeholder="e.g. Follow-up, Introduction..."/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Message Body</label>
+      <textarea class="form-input" id="sms-tpl-body-input" rows="5" placeholder="Type your template message..."></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeSmsTemplateModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSmsTemplate()">Save Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== SMS: Thread panel (conversation detail) ======== -->
+<div class="panel-overlay" id="thread-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('thread-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="thread-title">-</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closePanel('thread-panel')">Close</button>
+      </div>
+    </div>
+    <div class="panel-body" id="thread-panel-body" style="display:flex;flex-direction:column;height:100%;">
+      <div class="thread-contact-hd" id="thread-contact-hd"></div>
+      <div class="thread-messages" id="thread-messages"></div>
+      <div class="thread-reply">
+        <textarea id="thread-reply-input" rows="2" placeholder="Reply..." oninput="updateThreadCharCount()"></textarea>
+        <button class="btn btn-primary btn-sm" onclick="sendThreadReply()" id="thread-send-btn">Send</button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);text-align:right;margin-top:4px;" id="thread-char-count">0 / 160</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('comms');
+
+// ============================================================
+// TOP-LEVEL TAB SWITCHING (Email / SMS)
+// ============================================================
+
+let smsLoaded = false;
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = '';
+  btn.classList.add('active');
+
+  // Rebuild topbar actions for the active top-level tab
+  renderTopbarActions(name);
+
+  if (name === 'sms' && !smsLoaded) {
+    smsLoaded = true;
+    loadSMS();
+  }
+}
+
+function renderTopbarActions(tab) {
+  const actions = document.getElementById('topbar-actions');
+  actions.innerHTML = '';
+
+  if (tab === 'email') {
+    // Show Compose button only when Campaigns sub-tab is active
+    if (currentEmailSubTab === 'campaigns') {
+      actions.innerHTML = `<a href="/admin-email-compose" class="btn btn-primary btn-sm" id="compose-btn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Compose
+      </a>`;
+    }
+  } else if (tab === 'sms') {
+    if (currentSmsSubTab === 'templates') {
+      actions.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="openSmsTemplateModal()">+ New Template</button>
+        <button class="btn btn-primary btn-sm" onclick="openSmsCompose()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Send SMS
+        </button>`;
+    } else {
+      actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openSmsCompose()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Send SMS
+      </button>`;
+    }
+  }
+}
+
+// ============================================================
+// EMAIL — inner sub-tabs
+// ============================================================
+
+let currentEmailSubTab = 'campaigns';
+let allCampaigns = [];
+let allEmailTemplates = [];
+let currentCampaign = null;
+
+function switchEmailSubTab(tab) {
+  currentEmailSubTab = tab;
+  document.querySelectorAll('.email-sub-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.email-sub-tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('email-sub-' + tab).classList.add('active');
+  document.getElementById('email-sub-' + tab + '-btn').classList.add('active');
+
+  // Keep topbar in sync
+  renderTopbarActions('email');
+
+  if (tab === 'templates' && !allEmailTemplates.length) {
+    loadEmailTemplates();
+  }
+}
+
+// --- Campaigns ---
+async function loadCampaigns() {
+  const data = await TMIAdmin.api('/api/emails');
+  if (!data) return;
+  allCampaigns = data;
+
+  const sent = data.filter(c => c.status === 'sent');
+  const totalDelivered = sent.reduce((s, c) => s + (c.sent_count || 0), 0);
+  const totalOpens = sent.reduce((s, c) => s + (c.open_count || 0), 0);
+  const avgRate = sent.length && totalDelivered
+    ? Math.round(sent.reduce((s, c) => s + (c.sent_count ? c.open_count / c.sent_count : 0), 0) / sent.length * 100)
+    : 0;
+  document.getElementById('es-sent').textContent = sent.length;
+  document.getElementById('es-delivered').textContent = totalDelivered.toLocaleString();
+  document.getElementById('es-opens').textContent = totalOpens.toLocaleString();
+  document.getElementById('es-rate').textContent = sent.length ? `${avgRate}%` : '-';
+
+  renderEmailTable();
+}
+
+function audienceLabel(c) {
+  if (c.audience_type === 'all') return 'Everyone';
+  if (!c.audience_filter) return 'Segment';
+  const f = c.audience_filter;
+  const parts = [];
+  if (f.audiences?.length) parts.push(f.audiences.join(', '));
+  if (f.niches?.length) parts.push(f.niches.slice(0, 2).join(', ') + (f.niches.length > 2 ? '...' : ''));
+  return parts.join(' · ') || 'Segment';
+}
+
+function renderEmailTable() {
+  const q = document.getElementById('email-search').value.toLowerCase();
+  const st = document.getElementById('email-filter-status').value;
+
+  const filtered = allCampaigns.filter(c => {
+    if (q && !c.subject.toLowerCase().includes(q)) return false;
+    if (st && c.status !== st) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('email-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">✉</div><h3>No campaigns yet</h3><p><a href="/admin-email-compose" style="color:var(--ink);text-decoration:underline">Compose your first email</a></p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(c => {
+    const rate = c.sent_count ? Math.round(c.open_count / c.sent_count * 100) : 0;
+    return `<tr onclick="openEmailPanel(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+      <td class="td-name" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.subject}</td>
+      <td class="td-muted">${audienceLabel(c)}</td>
+      <td>${TMIAdmin.badge(c.status)}</td>
+      <td>${c.sent_count ? c.sent_count.toLocaleString() : '-'}</td>
+      <td>${c.open_count ? c.open_count.toLocaleString() : '-'}</td>
+      <td>${c.sent_count ? `<span style="font-weight:600;color:${rate>=30?'#15803d':rate>=15?'#854d0e':'var(--ink-2)'};">${rate}%</span>` : '-'}</td>
+      <td class="td-muted">${TMIAdmin.fmt(c.sent_at || c.created_at)}</td>
+      <td class="td-action">
+        ${c.status === 'draft' ? `<a href="/admin-email-compose?id=${c.id}" class="btn btn-ghost btn-sm" onclick="event.stopPropagation()">Edit</a>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openEmailPanel(campaign) {
+  currentCampaign = campaign;
+  document.getElementById('panel-subject').textContent = campaign.subject;
+  document.getElementById('pd-status').innerHTML = TMIAdmin.badge(campaign.status);
+  document.getElementById('pd-audience').textContent = audienceLabel(campaign);
+  document.getElementById('pd-sent').textContent = campaign.sent_count?.toLocaleString() || '0';
+  document.getElementById('pd-opens').textContent = campaign.open_count?.toLocaleString() || '0';
+  const rate = campaign.sent_count ? Math.round(campaign.open_count / campaign.sent_count * 100) : 0;
+  document.getElementById('pd-rate').textContent = campaign.sent_count ? `${rate}%` : '-';
+  document.getElementById('pd-clicks').textContent = campaign.click_count?.toLocaleString() || '0';
+  document.getElementById('pd-from').textContent = `${campaign.from_name} <${campaign.from_email}>`;
+  document.getElementById('pd-date').textContent = TMIAdmin.fmt(campaign.sent_at || campaign.created_at);
+  document.getElementById('pd-body').textContent = campaign.body || '-';
+  TMIAdmin.openPanel('campaign-panel');
+}
+
+async function deleteEmailFromPanel() {
+  if (!currentCampaign) return;
+  const ok = await TMIAdmin.confirm('Delete this campaign? This cannot be undone.', true);
+  if (!ok) return;
+  const res = await TMIAdmin.api(`/api/emails?id=${currentCampaign.id}`, 'DELETE');
+  if (res) {
+    TMIAdmin.toast('Campaign deleted');
+    TMIAdmin.closePanel('campaign-panel');
+    await loadCampaigns();
+  }
+}
+
+// --- Email Templates ---
+async function loadEmailTemplates() {
+  try {
+    const data = await TMIAdmin.api('/api/email-templates');
+    allEmailTemplates = data || [];
+  } catch (e) {
+    allEmailTemplates = [];
+  }
+  renderEmailTemplates();
+}
+
+function audienceLabelSimple(a) {
+  const map = { all: 'Everyone', physical: 'Physical', online: 'Online', fotf: 'FOTF' };
+  return map[a] || a || 'All';
+}
+
+function renderEmailTemplates() {
+  const grid = document.getElementById('tmpl-grid');
+  if (!allEmailTemplates.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📋</div><h3>No templates yet</h3><p>Create reusable email templates to speed up your campaigns.</p></div>`;
+    return;
+  }
+  grid.innerHTML = allEmailTemplates.map(t => `
+    <div class="tmpl-card">
+      <div class="tmpl-card-head">
+        <div>
+          <div class="tmpl-card-name">${escHtml(t.name)}</div>
+          <div class="tmpl-card-subject" style="margin-top:4px">${escHtml(t.subject)}</div>
+        </div>
+        <span class="badge">${audienceLabelSimple(t.audience)}</span>
+      </div>
+      ${t.body ? `<div style="font-size:12px;color:var(--ink-3);line-height:1.55;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(t.body)}</div>` : ''}
+      <div class="tmpl-card-foot">
+        <div class="tmpl-card-actions">
+          <a href="/admin-email-compose?template_id=${encodeURIComponent(t.id)}" class="btn btn-primary btn-sm">Use</a>
+          <button class="btn btn-ghost btn-sm" onclick="deleteEmailTemplate('${t.id}')">Delete</button>
+        </div>
+        ${t.created_at ? `<span style="font-size:11px;color:var(--ink-3)">${TMIAdmin.fmt(t.created_at)}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function deleteEmailTemplate(id) {
+  const ok = await TMIAdmin.confirm('Delete this template?', true);
+  if (!ok) return;
+  const res = await TMIAdmin.api(`/api/email-templates?id=${encodeURIComponent(id)}`, 'DELETE');
+  if (res !== null) {
+    allEmailTemplates = allEmailTemplates.filter(t => t.id !== id);
+    TMIAdmin.toast('Template deleted');
+    renderEmailTemplates();
+  }
+}
+
+function openEmailTemplateModal() {
+  ['tf-name','tf-subject','tf-body'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('tf-audience').value = 'all';
+  document.getElementById('email-tmpl-modal').classList.add('open');
+}
+
+function closeEmailTemplateModal() {
+  document.getElementById('email-tmpl-modal').classList.remove('open');
+}
+
+async function saveEmailTemplate() {
+  const name = document.getElementById('tf-name').value.trim();
+  const subject = document.getElementById('tf-subject').value.trim();
+  if (!name) { TMIAdmin.toast('Template name is required', 'error'); return; }
+  if (!subject) { TMIAdmin.toast('Subject is required', 'error'); return; }
+
+  const payload = {
+    name,
+    subject,
+    body: document.getElementById('tf-body').value.trim() || null,
+    audience: document.getElementById('tf-audience').value,
+  };
+
+  const res = await TMIAdmin.api('/api/email-templates', 'POST', payload);
+  if (res) {
+    TMIAdmin.toast('Template saved');
+    closeEmailTemplateModal();
+    await loadEmailTemplates();
+  }
+}
+
+// ============================================================
+// SMS
+// ============================================================
+
+let allSMS = [];
+let currentSmsSubTab = 'messages';
+let currentThreadPhone = null;
+
+// --- SMS inner sub-tab switching ---
+function setSmsTab(tab) {
+  currentSmsSubTab = tab;
+  ['messages','conversations','templates'].forEach(t => {
+    document.getElementById('sms-view-' + t).style.display = t === tab ? '' : 'none';
+    document.getElementById('sms-tab-' + t).classList.toggle('active', t === tab);
+  });
+
+  // Keep topbar in sync
+  renderTopbarActions('sms');
+
+  if (tab === 'conversations') renderSmsConversations();
+  if (tab === 'templates') renderSmsTemplates();
+}
+
+// --- SMS data ---
+async function loadSMS() {
+  allSMS = await TMIAdmin.api('/api/sms') || [];
+  renderSmsTable();
+}
+
+function renderSmsTable() {
+  const q = document.getElementById('sms-search').value.toLowerCase();
+  const st = document.getElementById('sms-filter-status').value;
+  const rows = allSMS.filter(s => {
+    if (st && s.status !== st) return false;
+    if (q && !`${s.phone} ${s.body} ${smsContactName(s)}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('sms-count').textContent = `${rows.length} message${rows.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('sms-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">💬</div><h3>No messages</h3><p>Sent messages will appear here.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(s => `
+    <tr>
+      <td class="td-name">${s.phone}</td>
+      <td>${smsContactName(s)}</td>
+      <td style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--ink-2)">${s.body}</td>
+      <td>${TMIAdmin.badge(s.status)}</td>
+      <td class="td-muted">${TMIAdmin.fmt(s.created_at)}</td>
+    </tr>
+  `).join('');
+}
+
+function smsContactName(s) {
+  const c = s.contacts;
+  if (!c) return '';
+  return `${c.first_name || ''} ${c.last_name || ''}`.trim();
+}
+
+// --- Compose ---
+function openSmsCompose(prefillPhone) {
+  document.getElementById('sms-compose-modal').classList.add('open');
+  if (prefillPhone) {
+    document.getElementById('c-phone').value = prefillPhone;
+    document.getElementById('c-body').focus();
+  }
+}
+function closeSmsCompose() {
+  document.getElementById('sms-compose-modal').classList.remove('open');
+}
+
+function updateSmsCharCount() {
+  const len = document.getElementById('c-body').value.length;
+  document.getElementById('sms-char-count').textContent = `${len} / 160`;
+  document.getElementById('sms-char-count').style.color = len > 160 ? 'var(--red)' : 'var(--muted)';
+}
+
+async function sendSMS() {
+  const phone = document.getElementById('c-phone').value.trim();
+  const body = document.getElementById('c-body').value.trim();
+  if (!phone || !body) { TMIAdmin.toast('Phone and message required', 'error'); return; }
+  const btn = document.getElementById('sms-send-btn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  const res = await TMIAdmin.api('/api/sms', 'POST', { phone, body });
+  btn.disabled = false; btn.textContent = 'Send Message';
+  if (res) {
+    if (res.ok) {
+      TMIAdmin.toast('Message sent');
+      closeSmsCompose();
+      document.getElementById('c-phone').value = '';
+      document.getElementById('c-body').value = '';
+      updateSmsCharCount();
+      await loadSMS();
+    } else {
+      TMIAdmin.toast('Send failed - check Twilio config', 'error');
+    }
+  }
+}
+
+// --- Conversations ---
+function renderSmsConversations() {
+  const byPhone = {};
+  allSMS.forEach(s => {
+    if (!byPhone[s.phone]) byPhone[s.phone] = [];
+    byPhone[s.phone].push(s);
+  });
+
+  const phones = Object.keys(byPhone).sort((a, b) => {
+    const aLatest = Math.max(...byPhone[a].map(s => new Date(s.created_at)));
+    const bLatest = Math.max(...byPhone[b].map(s => new Date(s.created_at)));
+    return bLatest - aLatest;
+  });
+
+  const list = document.getElementById('conv-list');
+  if (!phones.length) {
+    list.innerHTML = `<div style="padding:32px 0;text-align:center;"><div style="font-size:28px;margin-bottom:8px;">💬</div><div style="font-size:13px;color:var(--muted);">No conversations yet.</div></div>`;
+    return;
+  }
+
+  list.innerHTML = phones.map(phone => {
+    const msgs = byPhone[phone].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    const last = msgs[msgs.length - 1];
+    const contact = last.contacts;
+    const name = contact ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || phone : phone;
+    const initials = name === phone ? '#' : name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const preview = last.body.length > 60 ? last.body.slice(0, 60) + '...' : last.body;
+    const time = TMIAdmin.fmt(last.created_at);
+    const data = JSON.stringify({ phone, name }).replace(/"/g, '&quot;');
+    return `<div class="conv-card" onclick="openThread(${data})">
+      <div class="conv-avatar">${initials}</div>
+      <div class="conv-info">
+        <div class="conv-name">${name}</div>
+        <div class="conv-preview">${preview}</div>
+      </div>
+      <div class="conv-time">${time}</div>
+    </div>`;
+  }).join('');
+}
+
+function openThread(data) {
+  const { phone, name } = data;
+  currentThreadPhone = phone;
+
+  const msgs = allSMS
+    .filter(s => s.phone === phone)
+    .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+
+  document.getElementById('thread-title').textContent = name;
+  document.getElementById('thread-contact-hd').textContent = phone === name ? '' : phone;
+
+  document.getElementById('thread-messages').innerHTML = msgs.map(s => `
+    <div class="bubble-wrap">
+      <div>
+        <div class="bubble">${s.body}</div>
+        <div class="bubble-meta">${TMIAdmin.badge(s.status)} ${TMIAdmin.fmt(s.created_at)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('thread-reply-input').value = '';
+  updateThreadCharCount();
+  TMIAdmin.openPanel('thread-panel');
+
+  setTimeout(() => {
+    const el = document.getElementById('thread-messages');
+    el.scrollTop = el.scrollHeight;
+  }, 50);
+}
+
+function updateThreadCharCount() {
+  const len = document.getElementById('thread-reply-input').value.length;
+  document.getElementById('thread-char-count').textContent = `${len} / 160`;
+}
+
+async function sendThreadReply() {
+  if (!currentThreadPhone) return;
+  const body = document.getElementById('thread-reply-input').value.trim();
+  if (!body) return;
+  const btn = document.getElementById('thread-send-btn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  const res = await TMIAdmin.api('/api/sms', 'POST', { phone: currentThreadPhone, body });
+  btn.disabled = false; btn.textContent = 'Send';
+  if (res && res.ok) {
+    TMIAdmin.toast('Message sent');
+    await loadSMS();
+    const contact = (allSMS.find(s => s.phone === currentThreadPhone) || {}).contacts;
+    const name = contact ? `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || currentThreadPhone : currentThreadPhone;
+    openThread({ phone: currentThreadPhone, name });
+  } else {
+    TMIAdmin.toast('Send failed', 'error');
+  }
+}
+
+// --- SMS Templates (localStorage) ---
+const SMS_TPL_KEY = 'sms_templates';
+
+function getSmsTemplates() {
+  try { return JSON.parse(localStorage.getItem(SMS_TPL_KEY)) || []; }
+  catch { return []; }
+}
+
+function storeSmsTemplates(tpls) {
+  localStorage.setItem(SMS_TPL_KEY, JSON.stringify(tpls));
+}
+
+function renderSmsTemplates() {
+  const tpls = getSmsTemplates();
+  const list = document.getElementById('tpl-list');
+  const empty = document.getElementById('tpl-empty');
+  if (!tpls.length) {
+    list.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = tpls.map(t => `
+    <div class="tpl-card">
+      <div class="tpl-body-wrap">
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-preview">${t.body.length > 80 ? t.body.slice(0,80) + '...' : t.body}</div>
+      </div>
+      <div class="tpl-actions">
+        <button class="btn btn-ghost btn-sm" onclick="useSmsTemplate('${t.id}')">Use</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSmsTemplate('${t.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openSmsTemplateModal() {
+  document.getElementById('sms-tpl-name-input').value = '';
+  document.getElementById('sms-tpl-body-input').value = '';
+  document.getElementById('sms-tpl-modal').classList.add('open');
+}
+
+function closeSmsTemplateModal() {
+  document.getElementById('sms-tpl-modal').classList.remove('open');
+}
+
+function saveSmsTemplate() {
+  const name = document.getElementById('sms-tpl-name-input').value.trim();
+  const body = document.getElementById('sms-tpl-body-input').value.trim();
+  if (!name || !body) { TMIAdmin.toast('Name and body required', 'error'); return; }
+  const tpls = getSmsTemplates();
+  tpls.push({ id: Date.now().toString(), name, body });
+  storeSmsTemplates(tpls);
+  TMIAdmin.toast('Template saved');
+  closeSmsTemplateModal();
+  renderSmsTemplates();
+}
+
+function useSmsTemplate(id) {
+  const t = getSmsTemplates().find(t => t.id === id);
+  if (!t) return;
+  setSmsTab('messages');
+  openSmsCompose();
+  document.getElementById('c-body').value = t.body;
+  updateSmsCharCount();
+}
+
+function deleteSmsTemplate(id) {
+  storeSmsTemplates(getSmsTemplates().filter(t => t.id !== id));
+  TMIAdmin.toast('Template deleted');
+  renderSmsTemplates();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+// Render initial topbar (Email / Campaigns is the default view)
+renderTopbarActions('email');
+
+// Load email campaigns immediately
+loadCampaigns();
+// SMS loads lazily on first tab switch
+</script>
+</body>
+</html>

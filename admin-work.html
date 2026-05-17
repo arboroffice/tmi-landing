@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Work — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+/* Page-level tab bar */
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px;}
+.tab-btn{font-size:13px;font-weight:500;padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--ink-2);font-family:inherit;transition:color 0.15s,border-color 0.15s;margin-bottom:-1px;}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+.tab-btn:hover:not(.active){color:var(--ink);}
+
+/* Project panel inner tabs */
+.ptab {
+  background: none;
+  border: none;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+.ptab.active { color: var(--ink); border-bottom-color: var(--ink); }
+.ptab:hover:not(.active) { color: var(--ink); }
+
+/* Context blocks */
+.ctx-block {
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.ctx-block-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.prd-section { margin-bottom: 20px; }
+.prd-section label { display: block; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+.prd-section textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  font-family: var(--sans, system-ui);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  color: var(--ink);
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.prd-section textarea:focus { outline: none; border-color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Work</span></div>
+      <div class="topbar-actions" id="topbar-actions">
+        <!-- rendered by renderTopbarActions() -->
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- Page-level tab bar -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('projects',this)">Projects</button>
+        <button class="tab-btn" onclick="switchTab('invoices',this)">Invoices</button>
+      </div>
+
+      <!-- PROJECTS TAB PANEL -->
+      <div id="tab-projects" class="tab-panel">
+        <div class="sec-head">
+          <h1>Projects</h1>
+          <span class="filter-count" id="proj-count"></span>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="proj-search" placeholder="Search projects..." oninput="projRenderView()"/>
+          </div>
+          <select class="filter-select" id="proj-filter-status" onchange="projRenderView()">
+            <option value="">All statuses</option>
+            <option value="scoping">Scoping</option>
+            <option value="active">Active</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <!-- Table view -->
+        <div id="proj-table-view">
+          <div class="card">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>Project</th><th>Client</th><th>Status</th><th>Value</th><th>Start</th><th>End</th><th></th>
+                </tr></thead>
+                <tbody id="proj-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Board view -->
+        <div id="proj-board-view" style="display:none">
+          <div class="kanban" id="proj-kanban-board"></div>
+        </div>
+      </div>
+
+      <!-- INVOICES TAB PANEL -->
+      <div id="tab-invoices" class="tab-panel" style="display:none">
+        <!-- Summary bar -->
+        <div class="stats-row" id="inv-stats" style="grid-template-columns:repeat(4,1fr)"></div>
+
+        <div class="sec-head" style="margin-top:8px">
+          <h1>Invoices</h1>
+          <span class="filter-count" id="inv-count"></span>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="inv-search" placeholder="Search invoice #, client..." oninput="invRenderTable()"/>
+          </div>
+          <select class="filter-select" id="inv-filter-status" onchange="invRenderTable()">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="viewed">Viewed</option>
+            <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>Invoice #</th><th>Client</th><th>Amount</th><th>Status</th><th>Due</th><th>Created</th><th></th>
+              </tr></thead>
+              <tbody id="inv-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PROJECT SLIDE PANEL ===================== -->
+<div class="panel-overlay" id="proj-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('proj-panel')"></div>
+  <div class="panel" style="max-width:720px;">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-proj-name">Project</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="projEditCurrent()">Edit</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="projDelete()">Delete</button>
+      </div>
+    </div>
+    <div class="panel-tabs" id="proj-tabs" style="display:flex;gap:0;border-bottom:1px solid var(--line);margin:0;">
+      <button class="ptab active" data-tab="overview" onclick="projSwitchTab('overview')">Overview</button>
+      <button class="ptab" data-tab="context" onclick="projSwitchTab('context')">Context</button>
+      <button class="ptab" data-tab="prd" onclick="projSwitchTab('prd')">PRD</button>
+      <button class="ptab" data-tab="share" onclick="projSwitchTab('share')">Share</button>
+    </div>
+    <div class="panel-body" style="padding:0;">
+      <!-- OVERVIEW tab -->
+      <div id="proj-tab-overview" class="proj-tab-pane" style="padding:20px 24px;">
+        <div class="detail-grid" id="panel-proj-details"></div>
+        <div class="panel-sep"></div>
+        <div class="panel-sec-label">Description</div>
+        <p id="panel-proj-desc" style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-top:8px;white-space:pre-wrap;"></p>
+        <div class="panel-sep"></div>
+        <div class="panel-sec-label">Update Status</div>
+        <select class="form-input" id="panel-proj-status" style="margin-top:8px;max-width:200px" onchange="projUpdateStatus()">
+          <option value="scoping">Scoping</option>
+          <option value="active">Active</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <!-- CONTEXT tab -->
+      <div id="proj-tab-context" class="proj-tab-pane" style="display:none;padding:20px 24px;">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.55;">Paste any raw input here - voice recording transcripts, meeting notes, Claude chat exports, requirements from a client. This becomes the source of truth for building the PRD.</p>
+        <div id="proj-context-blocks"></div>
+        <button class="btn btn-ghost btn-sm" onclick="projAddContextBlock()" style="margin-top:4px;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add context block
+        </button>
+      </div>
+
+      <!-- PRD tab -->
+      <div id="proj-tab-prd" class="proj-tab-pane" style="display:none;padding:20px 24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <span style="font-size:13px;color:var(--muted);">Structure the PRD from your context.</span>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" id="proj-btn-gen-prd" onclick="projGeneratePRD()">Generate Draft from Context</button>
+            <button class="btn btn-primary btn-sm" onclick="projSavePRD()">Save PRD</button>
+          </div>
+        </div>
+        <div class="prd-section"><label>Overview</label><textarea id="prd-overview" rows="2" placeholder="One or two sentences. What is this project?"></textarea></div>
+        <div class="prd-section"><label>Problem Statement</label><textarea id="prd-problem" rows="3" placeholder="What problem are we solving? For whom?"></textarea></div>
+        <div class="prd-section"><label>Goals &amp; Success Metrics</label><textarea id="prd-goals" rows="3" placeholder="What does success look like? Include measurable outcomes."></textarea></div>
+        <div class="prd-section"><label>User Stories</label><textarea id="prd-stories" rows="4" placeholder="As a [role], I want [feature] so that [benefit].&#10;As a [role], I want [feature] so that [benefit]."></textarea></div>
+        <div class="prd-section"><label>Functional Requirements</label><textarea id="prd-requirements" rows="5" placeholder="What must the system do? Number each requirement."></textarea></div>
+        <div class="prd-section"><label>Non-Functional Requirements</label><textarea id="prd-nonfunc" rows="3" placeholder="Performance, security, scalability, browser support, etc."></textarea></div>
+        <div class="prd-section"><label>Out of Scope</label><textarea id="prd-outofscope" rows="2" placeholder="What are we explicitly NOT building?"></textarea></div>
+        <div class="prd-section"><label>Tech Notes for Dev Team</label><textarea id="prd-tech" rows="3" placeholder="Stack constraints, API details, integrations, known issues."></textarea></div>
+        <div class="prd-section"><label>Acceptance Criteria</label><textarea id="prd-criteria" rows="4" placeholder="How do we know it's done? Define done for each major feature."></textarea></div>
+        <div id="proj-prd-gen-status" style="font-size:12px;color:var(--muted);margin-top:8px;display:none;"></div>
+      </div>
+
+      <!-- SHARE tab -->
+      <div id="proj-tab-share" class="proj-tab-pane" style="display:none;padding:20px 24px;">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.55;">Share a read-only PRD link with your dev team. No login required - just send the link.</p>
+        <div style="background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;font-size:13px;color:var(--ink-2);word-break:break-all;margin-bottom:16px;" id="proj-share-url-display">-</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="projCopyPRDLink()">Copy Link</button>
+          <a id="proj-btn-open-prd" href="#" target="_blank" class="btn btn-ghost btn-sm">Open in new tab</a>
+        </div>
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);">
+          <div class="panel-sec-label" style="margin-bottom:10px;">Before sharing</div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.55;">Make sure you've saved the PRD (PRD tab &rarr; Save PRD). The shared link always shows the last saved version.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PROJECT ADD/EDIT MODAL ===================== -->
+<div class="modal-overlay" id="proj-add-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title" id="proj-modal-title-text">New Project</h2>
+      <button class="modal-x" onclick="projCloseModal()">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Project Name</label>
+      <input class="form-input" id="proj-f-name" placeholder="Project name" required/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="proj-f-status">
+          <option value="scoping">Scoping</option>
+          <option value="active">Active</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Value ($)</label>
+        <input class="form-input" id="proj-f-value" type="number" step="0.01" placeholder="0.00"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Start Date</label>
+        <input class="form-input" id="proj-f-start" type="date"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">End Date</label>
+        <input class="form-input" id="proj-f-end" type="date"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-input" id="proj-f-desc" rows="3" placeholder="What are we building?"></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="projCloseModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="projSave()">Save Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== INVOICE SLIDE PANEL ===================== -->
+<div class="panel-overlay" id="inv-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('inv-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-inv-num">Invoice</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="invCopyShareLink()">Copy Link</button>
+        <button class="btn btn-ghost btn-sm" onclick="invPanelEdit()">Edit</button>
+        <button class="btn btn-ghost btn-sm" onclick="invMarkPaid()">Mark Paid</button>
+        <button class="btn btn-ghost btn-sm" onclick="invMarkOverdue()">Mark Overdue</button>
+        <button class="btn btn-danger btn-sm" onclick="invDelete()">Delete</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid" id="panel-inv-details"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Line Items</div>
+      <div id="panel-inv-line-items" style="margin-top:12px"></div>
+      <div id="panel-inv-total-row" style="margin-top:12px;display:none">
+        <div class="proposal-total">
+          <span class="proposal-total-label">Total</span>
+          <span class="proposal-total-val" id="panel-inv-total-val"></span>
+        </div>
+      </div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Notes</div>
+      <p id="panel-inv-notes" style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-top:8px;white-space:pre-wrap;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== INVOICE ADD/EDIT MODAL ===================== -->
+<div class="modal-overlay" id="inv-add-modal">
+  <div class="modal" style="max-width:680px;width:100%">
+    <div class="modal-hd">
+      <h2 class="modal-title" id="inv-modal-title-text">New Invoice</h2>
+      <button class="modal-x" onclick="invCloseModal()">&times;</button>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Client Name <span style="color:var(--red)">*</span></label>
+        <input class="form-input" id="inv-f-client" placeholder="Client or company name" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Invoice #</label>
+        <input class="form-input" id="inv-f-number" placeholder="INV-001"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Due Date</label>
+        <input class="form-input" id="inv-f-due" type="date"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="inv-f-status">
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="overdue">Overdue</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <label class="form-label" style="margin:0">Line Items</label>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="invAddLineItem()">+ Add Line Item</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 72px 96px 40px;gap:6px;margin-bottom:6px;padding:0 2px">
+        <span style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em">Description</span>
+        <span style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em">Qty</span>
+        <span style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em">Unit Price</span>
+        <span></span>
+      </div>
+      <div id="inv-line-items-list"></div>
+      <div id="inv-li-total-row" style="display:none;margin-top:12px">
+        <div class="proposal-total">
+          <span class="proposal-total-label">Total</span>
+          <span class="proposal-total-val" id="inv-li-total-val">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="inv-f-notes" rows="2" placeholder="Payment instructions, terms..."></textarea>
+    </div>
+
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="invCloseModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="invSave()">Save Invoice</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('work');
+
+// =====================================================================
+// PAGE TAB SWITCHING
+// =====================================================================
+let invoicesLoaded = false;
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = '';
+  btn.classList.add('active');
+  if (name === 'invoices' && !invoicesLoaded) { invoicesLoaded = true; invLoad(); }
+  renderTopbarActions(name);
+}
+
+function renderTopbarActions(tab) {
+  const el = document.getElementById('topbar-actions');
+  if (tab === 'projects') {
+    el.innerHTML = `
+      <button class="btn btn-ghost btn-sm" id="proj-view-toggle" onclick="projToggleView()">Board view</button>
+      <button class="btn btn-primary btn-sm" onclick="projOpenAddModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Project
+      </button>
+    `;
+    // Restore board toggle label state
+    const tog = document.getElementById('proj-view-toggle');
+    if (tog) tog.textContent = projBoardMode ? 'Table view' : 'Board view';
+  } else {
+    el.innerHTML = `
+      <button class="btn btn-primary btn-sm" onclick="invOpenAddModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Invoice
+      </button>
+    `;
+  }
+}
+
+// =====================================================================
+// PROJECTS
+// =====================================================================
+let projAllProjects = [];
+let projCurrentProject = null;
+let projEditId = null;
+let projBoardMode = false;
+let projContextBlocks = [];
+
+const PROJ_CONTEXT_TYPES = [
+  { value: 'voice_note', label: 'Voice Note / Transcript' },
+  { value: 'meeting_notes', label: 'Meeting Notes' },
+  { value: 'chat_export', label: 'Claude / Chat Export' },
+  { value: 'requirement', label: 'Requirements Doc' },
+  { value: 'prd_draft', label: 'PRD Draft' },
+  { value: 'other', label: 'Other' },
+];
+
+function projEscAttr(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// --- Context blocks ---
+function projRenderContextBlocks() {
+  const container = document.getElementById('proj-context-blocks');
+  if (!projContextBlocks.length) {
+    container.innerHTML = `<div style="font-size:13px;color:var(--muted);padding:20px 0;text-align:center;">No context added yet. Click below to add your first block.</div>`;
+    return;
+  }
+  container.innerHTML = projContextBlocks.map((block) => `
+    <div class="ctx-block" id="proj-block-${block.id}">
+      <div class="ctx-block-head">
+        <select class="form-input" style="max-width:200px;font-size:12px;padding:5px 10px;" onchange="projUpdateBlockType('${block.id}', this.value)">
+          ${PROJ_CONTEXT_TYPES.map(t => `<option value="${t.value}" ${block.type === t.value ? 'selected' : ''}>${t.label}</option>`).join('')}
+        </select>
+        <input class="form-input" style="flex:1;font-size:12px;padding:5px 10px;" placeholder="Label (optional)" value="${(block.label || '').replace(/"/g, '&quot;')}" oninput="projUpdateBlockLabel('${block.id}', this.value)"/>
+        <button class="btn btn-ghost btn-sm" style="padding:4px 8px;flex-shrink:0;color:var(--muted);" onclick="projRemoveContextBlock('${block.id}')" title="Remove">&#x2715;</button>
+      </div>
+      <textarea style="width:100%;min-height:120px;resize:vertical;font-family:var(--sans,system-ui);font-size:13px;line-height:1.6;padding:10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);box-sizing:border-box;" placeholder="Paste your content here..." oninput="projUpdateBlockContent('${block.id}', this.value)">${projEscAttr(block.content || '')}</textarea>
+    </div>
+  `).join('');
+}
+
+function projAddContextBlock() {
+  projContextBlocks.push({ id: Date.now().toString(), type: 'other', label: '', content: '' });
+  projRenderContextBlocks();
+}
+
+function projUpdateBlockType(id, val) { const b = projContextBlocks.find(b => b.id === id); if (b) b.type = val; }
+function projUpdateBlockLabel(id, val) { const b = projContextBlocks.find(b => b.id === id); if (b) b.label = val; }
+function projUpdateBlockContent(id, val) { const b = projContextBlocks.find(b => b.id === id); if (b) b.content = val; }
+function projRemoveContextBlock(id) {
+  projContextBlocks = projContextBlocks.filter(b => b.id !== id);
+  projRenderContextBlocks();
+}
+
+// --- PRD fields ---
+const PRD_FIELDS = ['overview','problem','goals','stories','requirements','nonfunc','outofscope','tech','criteria'];
+
+function projLoadPRDFields(prd) {
+  PRD_FIELDS.forEach(f => {
+    const el = document.getElementById('prd-' + f);
+    if (el) el.value = (prd && prd[f]) || '';
+  });
+}
+
+function projGetPRDValues() {
+  const prd = {};
+  PRD_FIELDS.forEach(f => {
+    const el = document.getElementById('prd-' + f);
+    if (el) prd[f] = el.value.trim();
+  });
+  return prd;
+}
+
+async function projSavePRD() {
+  if (!projCurrentProject) return;
+  const notesData = { context: projContextBlocks, prd: projGetPRDValues() };
+  const res = await TMIAdmin.api('/api/projects', 'PUT', { id: projCurrentProject.id, notes: JSON.stringify(notesData) });
+  if (res) {
+    projCurrentProject.notes = JSON.stringify(notesData);
+    TMIAdmin.toast('PRD saved');
+  }
+}
+
+async function projSaveContext() {
+  if (!projCurrentProject) return;
+  let existing = {};
+  try { existing = JSON.parse(projCurrentProject.notes || '{}'); } catch(e) {}
+  const notesData = { ...existing, context: projContextBlocks };
+  const res = await TMIAdmin.api('/api/projects', 'PUT', { id: projCurrentProject.id, notes: JSON.stringify(notesData) });
+  if (res) { projCurrentProject.notes = JSON.stringify(notesData); }
+}
+
+async function projGeneratePRD() {
+  if (!projCurrentProject) return;
+  if (!projContextBlocks.length || !projContextBlocks.some(b => b.content.trim())) {
+    TMIAdmin.toast('Add some context first', 'error');
+    projSwitchTab('context');
+    return;
+  }
+
+  const btn = document.getElementById('proj-btn-gen-prd');
+  const status = document.getElementById('proj-prd-gen-status');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  status.style.display = '';
+  status.textContent = 'Calling Claude API...';
+
+  const contextText = projContextBlocks
+    .filter(b => b.content.trim())
+    .map(b => `[${b.label || b.type}]\n${b.content}`)
+    .join('\n\n---\n\n');
+
+  try {
+    const res = await TMIAdmin.api('/api/prd-generate', 'POST', {
+      project_name: projCurrentProject.name,
+      context: contextText,
+    });
+
+    if (res && res.prd) {
+      projLoadPRDFields(res.prd);
+      status.textContent = 'Draft generated. Review and edit before saving.';
+      TMIAdmin.toast('PRD draft generated');
+    } else if (res && res.error) {
+      status.textContent = res.error;
+      TMIAdmin.toast(res.error, 'error');
+    }
+  } catch(e) {
+    status.textContent = 'Generation failed. Check ANTHROPIC_API_KEY is set in Vercel env.';
+    TMIAdmin.toast('Generation failed', 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Generate Draft from Context';
+}
+
+function projCopyPRDLink() {
+  if (!projCurrentProject) return;
+  const url = `${window.location.origin}/prd-view.html?id=${projCurrentProject.id}`;
+  navigator.clipboard.writeText(url).then(() => TMIAdmin.toast('Link copied'));
+}
+
+// --- Project panel inner tab switching ---
+function projSwitchTab(tab) {
+  document.querySelectorAll('.proj-tab-pane').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.ptab').forEach(el => el.classList.remove('active'));
+  document.getElementById('proj-tab-' + tab).style.display = '';
+  document.querySelector(`.ptab[data-tab="${tab}"]`).classList.add('active');
+}
+
+// --- Projects list ---
+async function projLoad() {
+  projAllProjects = await TMIAdmin.api('/api/projects') || [];
+  projRenderView();
+}
+
+function projClientName(p) {
+  const c = p.clients?.contacts || p.contacts;
+  if (!c) return '-';
+  return `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.company || '-';
+}
+
+function projFiltered() {
+  const q = document.getElementById('proj-search').value.toLowerCase();
+  const st = document.getElementById('proj-filter-status').value;
+  return projAllProjects.filter(p => {
+    if (st && p.status !== st) return false;
+    if (q && !`${p.name} ${projClientName(p)}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function projRenderView() {
+  projBoardMode ? projRenderBoard() : projRenderTable();
+}
+
+function projRenderTable() {
+  const rows = projFiltered();
+  document.getElementById('proj-count').textContent = `${rows.length} project${rows.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('proj-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">&#128194;</div><h3>No projects</h3><p>Create your first project above.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(p => `
+    <tr onclick="projOpenPanel('${p.id}')">
+      <td class="td-name">${p.name}</td>
+      <td>${projClientName(p)}</td>
+      <td>${TMIAdmin.badge(p.status)}</td>
+      <td>${p.value ? '$' + parseFloat(p.value).toLocaleString() : '<span class="td-muted">-</span>'}</td>
+      <td class="td-muted">${p.start_date ? TMIAdmin.fmt(p.start_date) : '-'}</td>
+      <td class="td-muted">${p.end_date ? TMIAdmin.fmt(p.end_date) : '-'}</td>
+      <td class="td-action"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();projOpenPanel('${p.id}')">View</button></td>
+    </tr>
+  `).join('');
+}
+
+function projRenderBoard() {
+  const stages = ['scoping', 'active', 'delivered', 'cancelled'];
+  const rows = projFiltered();
+  document.getElementById('proj-count').textContent = `${rows.length} project${rows.length !== 1 ? 's' : ''}`;
+  document.getElementById('proj-kanban-board').innerHTML = stages.map(stage => {
+    const cols = rows.filter(p => p.status === stage);
+    return `
+      <div class="kanban-col">
+        <div class="kanban-col-head">
+          <span class="kanban-col-title">${stage}</span>
+          <span class="kanban-count">${cols.length}</span>
+        </div>
+        <div class="kanban-cards">
+          ${cols.map(p => `
+            <div class="kanban-card" onclick="projOpenPanel('${p.id}')">
+              <div class="kanban-card-name">${p.name}</div>
+              <div class="kanban-card-meta">${projClientName(p)}</div>
+              ${p.value ? `<div class="kanban-card-val">$${parseFloat(p.value).toLocaleString()}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function projToggleView() {
+  projBoardMode = !projBoardMode;
+  document.getElementById('proj-table-view').style.display = projBoardMode ? 'none' : '';
+  document.getElementById('proj-board-view').style.display = projBoardMode ? '' : 'none';
+  const tog = document.getElementById('proj-view-toggle');
+  if (tog) tog.textContent = projBoardMode ? 'Table view' : 'Board view';
+  projRenderView();
+}
+
+function projOpenPanel(id) {
+  projSwitchTab('overview');
+  projCurrentProject = projAllProjects.find(p => p.id === id);
+  if (!projCurrentProject) return;
+  const p = projCurrentProject;
+  document.getElementById('panel-proj-name').textContent = p.name;
+  document.getElementById('panel-proj-desc').textContent = p.description || '-';
+  document.getElementById('panel-proj-status').value = p.status;
+  document.getElementById('panel-proj-details').innerHTML = `
+    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(p.status)}</div></div>
+    <div class="detail-item"><div class="detail-label">Client</div><div class="detail-val">${projClientName(p)}</div></div>
+    <div class="detail-item"><div class="detail-label">Value</div><div class="detail-val">${p.value ? '$' + parseFloat(p.value).toLocaleString() : '-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Created</div><div class="detail-val">${TMIAdmin.fmt(p.created_at)}</div></div>
+    <div class="detail-item"><div class="detail-label">Start</div><div class="detail-val">${p.start_date ? TMIAdmin.fmt(p.start_date) : '-'}</div></div>
+    <div class="detail-item"><div class="detail-label">End</div><div class="detail-val">${p.end_date ? TMIAdmin.fmt(p.end_date) : '-'}</div></div>
+  `;
+
+  // Load notes data (context + PRD)
+  let notesData = {};
+  try { notesData = JSON.parse(p.notes || '{}'); } catch(e) {}
+  projContextBlocks = notesData.context || [];
+  projRenderContextBlocks();
+  projLoadPRDFields(notesData.prd || {});
+
+  // Share tab URL
+  const shareUrl = `${window.location.origin}/prd-view.html?id=${p.id}`;
+  const shareDisplay = document.getElementById('proj-share-url-display');
+  const openBtn = document.getElementById('proj-btn-open-prd');
+  if (shareDisplay) shareDisplay.textContent = shareUrl;
+  if (openBtn) openBtn.href = shareUrl;
+
+  TMIAdmin.openPanel('proj-panel');
+}
+
+function projEditCurrent() {
+  if (!projCurrentProject) return;
+  TMIAdmin.closePanel('proj-panel');
+  projEditId = projCurrentProject.id;
+  document.getElementById('proj-modal-title-text').textContent = 'Edit Project';
+  document.getElementById('proj-f-name').value = projCurrentProject.name;
+  document.getElementById('proj-f-status').value = projCurrentProject.status;
+  document.getElementById('proj-f-value').value = projCurrentProject.value || '';
+  document.getElementById('proj-f-start').value = projCurrentProject.start_date || '';
+  document.getElementById('proj-f-end').value = projCurrentProject.end_date || '';
+  document.getElementById('proj-f-desc').value = projCurrentProject.description || '';
+  document.getElementById('proj-add-modal').classList.add('open');
+}
+
+async function projUpdateStatus() {
+  if (!projCurrentProject) return;
+  const status = document.getElementById('panel-proj-status').value;
+  const res = await TMIAdmin.api('/api/projects', 'PUT', { id: projCurrentProject.id, status });
+  if (res) { projCurrentProject.status = status; TMIAdmin.toast('Status updated'); await projLoad(); }
+}
+
+async function projDelete() {
+  if (!projCurrentProject) return;
+  const ok = await TMIAdmin.confirm('Delete this project?', false);
+  if (!ok) return;
+  const res = await TMIAdmin.api('/api/projects', 'DELETE', { id: projCurrentProject.id });
+  if (res) { TMIAdmin.toast('Deleted'); TMIAdmin.closePanel('proj-panel'); await projLoad(); }
+}
+
+function projOpenAddModal() {
+  projEditId = null;
+  document.getElementById('proj-modal-title-text').textContent = 'New Project';
+  ['proj-f-name','proj-f-value','proj-f-start','proj-f-end','proj-f-desc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('proj-f-status').value = 'scoping';
+  document.getElementById('proj-add-modal').classList.add('open');
+}
+
+function projCloseModal() {
+  document.getElementById('proj-add-modal').classList.remove('open');
+  projEditId = null;
+}
+
+async function projSave() {
+  const name = document.getElementById('proj-f-name').value.trim();
+  if (!name) { TMIAdmin.toast('Name required', 'error'); return; }
+  const payload = {
+    name,
+    status: document.getElementById('proj-f-status').value,
+    value: parseFloat(document.getElementById('proj-f-value').value) || null,
+    start_date: document.getElementById('proj-f-start').value || null,
+    end_date: document.getElementById('proj-f-end').value || null,
+    description: document.getElementById('proj-f-desc').value || null,
+  };
+  if (projEditId) payload.id = projEditId;
+  const method = projEditId ? 'PUT' : 'POST';
+  const res = await TMIAdmin.api('/api/projects', method, payload);
+  if (res) {
+    TMIAdmin.toast(projEditId ? 'Project updated' : 'Project created');
+    projCloseModal();
+    await projLoad();
+  }
+}
+
+// =====================================================================
+// INVOICES
+// =====================================================================
+let invAllInvoices = [];
+let invCurrentInvoice = null;
+let invEditId = null;
+let invLineItems = [];
+
+async function invLoad() {
+  invAllInvoices = await TMIAdmin.api('/api/invoices') || [];
+  invRenderStats();
+  invRenderTable();
+  invSuggestNextNumber();
+}
+
+function invRenderStats() {
+  const total = invAllInvoices.reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+  const paid = invAllInvoices.filter(i => i.status === 'paid').reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+  const pending = invAllInvoices.filter(i => i.status === 'pending').reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+  const overdue = invAllInvoices.filter(i => i.status === 'overdue').length;
+  document.getElementById('inv-stats').innerHTML = `
+    <div class="stat-box"><div class="stat-label">Total Invoiced</div><div class="stat-val">${TMIAdmin.currency(total)}</div></div>
+    <div class="stat-box"><div class="stat-label">Collected</div><div class="stat-val" style="color:var(--green)">${TMIAdmin.currency(paid)}</div></div>
+    <div class="stat-box"><div class="stat-label">Outstanding</div><div class="stat-val">${TMIAdmin.currency(pending)}</div></div>
+    <div class="stat-box"><div class="stat-label">Overdue</div><div class="stat-val" style="color:var(--red)">${overdue}</div></div>
+  `;
+}
+
+function invClientName(inv) {
+  if (inv.client_name) return inv.client_name;
+  const c = inv.clients?.contacts || inv.contacts;
+  if (!c) return '-';
+  return `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.company || '-';
+}
+
+function invRenderTable() {
+  const q = document.getElementById('inv-search').value.toLowerCase();
+  const st = document.getElementById('inv-filter-status').value;
+  const rows = invAllInvoices.filter(i => {
+    if (st && i.status !== st) return false;
+    const name = invClientName(i).toLowerCase();
+    if (q && !`${i.number || ''} ${name}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('inv-count').textContent = `${rows.length} invoice${rows.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('inv-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">&#x1F9FE;</div><h3>No invoices</h3><p>Create your first invoice above.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(i => `
+    <tr onclick="invOpenPanel('${i.id}')">
+      <td class="td-name">${i.number || '-'}</td>
+      <td>${invClientName(i)}</td>
+      <td style="font-weight:600">${TMIAdmin.currency(parseFloat(i.amount || 0))}</td>
+      <td>${TMIAdmin.badge(i.status)}</td>
+      <td class="td-muted">${i.due_date ? TMIAdmin.fmt(i.due_date) : '-'}</td>
+      <td class="td-muted">${TMIAdmin.fmt(i.created_at)}</td>
+      <td class="td-action"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();invOpenPanel('${i.id}')">View</button></td>
+    </tr>
+  `).join('');
+}
+
+function invOpenPanel(id) {
+  invCurrentInvoice = invAllInvoices.find(i => i.id === id);
+  if (!invCurrentInvoice) return;
+  const i = invCurrentInvoice;
+  document.getElementById('panel-inv-num').textContent = i.number || 'Invoice';
+  document.getElementById('panel-inv-notes').textContent = i.notes || '-';
+
+  document.getElementById('panel-inv-details').innerHTML = `
+    <div class="detail-item"><div class="detail-label">Client</div><div class="detail-val">${invClientName(i)}</div></div>
+    <div class="detail-item"><div class="detail-label">Amount</div><div class="detail-val" style="font-size:20px;font-weight:700">${TMIAdmin.currency(parseFloat(i.amount || 0))}</div></div>
+    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(i.status)}</div></div>
+    <div class="detail-item"><div class="detail-label">Due Date</div><div class="detail-val">${i.due_date ? TMIAdmin.fmt(i.due_date) : '-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Created</div><div class="detail-val">${TMIAdmin.fmt(i.created_at)}</div></div>
+    ${i.paid_at ? `<div class="detail-item"><div class="detail-label">Paid</div><div class="detail-val">${TMIAdmin.fmt(i.paid_at)}</div></div>` : ''}
+  `;
+
+  const items = i.line_items || [];
+  const panelLI = document.getElementById('panel-inv-line-items');
+  if (items.length) {
+    panelLI.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 52px 88px 88px;gap:4px 8px;font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line)">
+        <span>Description</span><span>Qty</span><span>Unit Price</span><span style="text-align:right">Line Total</span>
+      </div>
+      ${items.map(li => {
+        const qty = parseFloat(li.qty || li.quantity || 1);
+        const price = parseFloat(li.price || li.unit_price || li.amount || 0);
+        const lineTotal = qty * price;
+        return `<div style="display:grid;grid-template-columns:1fr 52px 88px 88px;gap:4px 8px;font-size:14px;padding:5px 0;border-bottom:1px solid var(--line)">
+          <span style="color:var(--ink)">${li.desc || li.description || '-'}</span>
+          <span style="color:var(--ink-2)">${qty}</span>
+          <span style="color:var(--ink-2)">${TMIAdmin.currency(price)}</span>
+          <span style="font-weight:600;color:var(--ink);text-align:right">${TMIAdmin.currency(lineTotal)}</span>
+        </div>`;
+      }).join('')}
+    `;
+  } else {
+    panelLI.innerHTML = '<span style="font-size:13px;color:var(--ink-3)">No line items.</span>';
+  }
+
+  const totalRow = document.getElementById('panel-inv-total-row');
+  if (i.amount != null) {
+    totalRow.style.display = 'block';
+    document.getElementById('panel-inv-total-val').textContent = TMIAdmin.currency(parseFloat(i.amount));
+  } else {
+    totalRow.style.display = 'none';
+  }
+
+  TMIAdmin.openPanel('inv-panel');
+}
+
+function invPanelEdit() {
+  if (!invCurrentInvoice) return;
+  TMIAdmin.closePanel('inv-panel');
+  invOpenAddModal(invCurrentInvoice);
+}
+
+async function invMarkPaid() {
+  if (!invCurrentInvoice) return;
+  const res = await TMIAdmin.api('/api/invoices', 'PUT', { id: invCurrentInvoice.id, status: 'paid' });
+  if (res) { TMIAdmin.toast('Marked as paid'); TMIAdmin.closePanel('inv-panel'); await invLoad(); }
+}
+
+async function invMarkOverdue() {
+  if (!invCurrentInvoice) return;
+  const res = await TMIAdmin.api('/api/invoices', 'PUT', { id: invCurrentInvoice.id, status: 'overdue' });
+  if (res) { TMIAdmin.toast('Marked as overdue'); TMIAdmin.closePanel('inv-panel'); await invLoad(); }
+}
+
+async function invDelete() {
+  if (!invCurrentInvoice) return;
+  const ok = await TMIAdmin.confirm('Delete this invoice?', true);
+  if (!ok) return;
+  const res = await TMIAdmin.api('/api/invoices', 'DELETE', { id: invCurrentInvoice.id });
+  if (res) { TMIAdmin.toast('Deleted'); TMIAdmin.closePanel('inv-panel'); await invLoad(); }
+}
+
+function invCopyShareLink() {
+  if (!invCurrentInvoice) return;
+  const url = `${window.location.origin}/invoice-view.html?id=${invCurrentInvoice.id}`;
+  navigator.clipboard.writeText(url).then(() => TMIAdmin.toast('Link copied to clipboard'));
+}
+
+function invSuggestNextNumber() {
+  if (invEditId) return;
+  const nums = invAllInvoices
+    .map(i => i.number || '')
+    .filter(n => /^INV-\d+$/.test(n))
+    .map(n => parseInt(n.replace('INV-', ''), 10));
+  const next = nums.length ? Math.max(...nums) + 1 : 1;
+  const field = document.getElementById('inv-f-number');
+  if (field && !field.value) field.placeholder = `INV-${String(next).padStart(3, '0')}`;
+}
+
+// --- Line Items ---
+function invAddLineItem() {
+  invLineItems.push({ desc: '', qty: 1, price: 0 });
+  invRenderLineItems();
+}
+
+function invRemoveLineItem(i) {
+  invLineItems.splice(i, 1);
+  invRenderLineItems();
+}
+
+function invEscAttr(s) {
+  return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function invRenderLineItems() {
+  const list = document.getElementById('inv-line-items-list');
+  if (!invLineItems.length) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--ink-3);padding:4px 0">No line items yet. Click "+ Add Line Item" to begin.</div>';
+    document.getElementById('inv-li-total-row').style.display = 'none';
+    return;
+  }
+  list.innerHTML = invLineItems.map((item, i) => `
+    <div style="display:grid;grid-template-columns:1fr 72px 96px 40px;gap:6px;margin-bottom:6px;align-items:center">
+      <input class="form-input" style="font-size:13px" value="${invEscAttr(item.desc)}" placeholder="Description" oninput="invLineItems[${i}].desc=this.value"/>
+      <input class="form-input" style="font-size:13px;text-align:center" type="number" min="1" value="${item.qty}" placeholder="1" oninput="invLineItems[${i}].qty=parseFloat(this.value)||1;invRecalcTotal()"/>
+      <input class="form-input" style="font-size:13px;text-align:right" type="number" min="0" step="0.01" value="${item.price || ''}" placeholder="0.00" oninput="invLineItems[${i}].price=parseFloat(this.value)||0;invRecalcTotal()"/>
+      <button type="button" class="btn btn-ghost btn-sm" style="color:var(--red);padding:0 8px;font-size:16px;line-height:1" onclick="invRemoveLineItem(${i})">&times;</button>
+    </div>
+  `).join('');
+  invRecalcTotal();
+}
+
+function invRecalcTotal() {
+  const total = invLineItems.reduce((s, li) => s + (parseFloat(li.qty) || 1) * (parseFloat(li.price) || 0), 0);
+  const row = document.getElementById('inv-li-total-row');
+  row.style.display = invLineItems.length ? 'block' : 'none';
+  document.getElementById('inv-li-total-val').textContent = TMIAdmin.currency(total);
+}
+
+// --- Invoice Modal ---
+function invOpenAddModal(invoice) {
+  invEditId = invoice ? invoice.id : null;
+  invLineItems = [];
+
+  if (invoice) {
+    document.getElementById('inv-modal-title-text').textContent = 'Edit Invoice';
+    document.getElementById('inv-f-client').value = invClientName(invoice);
+    document.getElementById('inv-f-number').value = invoice.number || '';
+    document.getElementById('inv-f-due').value = invoice.due_date || '';
+    document.getElementById('inv-f-status').value = invoice.status || 'pending';
+    document.getElementById('inv-f-notes').value = invoice.notes || '';
+    const items = invoice.line_items || [];
+    invLineItems = items.map(li => ({
+      desc: li.desc || li.description || '',
+      qty: parseFloat(li.qty || li.quantity || 1),
+      price: parseFloat(li.price || li.unit_price || li.amount || 0),
+    }));
+  } else {
+    document.getElementById('inv-modal-title-text').textContent = 'New Invoice';
+    ['inv-f-client','inv-f-number','inv-f-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('inv-f-due').value = '';
+    document.getElementById('inv-f-status').value = 'pending';
+    const nums = invAllInvoices
+      .map(i => i.number || '')
+      .filter(n => /^INV-\d+$/.test(n))
+      .map(n => parseInt(n.replace('INV-', ''), 10));
+    const next = nums.length ? Math.max(...nums) + 1 : 1;
+    document.getElementById('inv-f-number').placeholder = `INV-${String(next).padStart(3, '0')}`;
+  }
+
+  invRenderLineItems();
+  document.getElementById('inv-add-modal').classList.add('open');
+}
+
+function invCloseModal() {
+  document.getElementById('inv-add-modal').classList.remove('open');
+  invEditId = null;
+  invLineItems = [];
+}
+
+async function invSave() {
+  const clientVal = document.getElementById('inv-f-client').value.trim();
+  if (!clientVal) { TMIAdmin.toast('Client name is required', 'error'); return; }
+
+  const total = invLineItems.reduce((s, li) => s + (parseFloat(li.qty) || 1) * (parseFloat(li.price) || 0), 0);
+  const numberField = document.getElementById('inv-f-number');
+  const numberVal = numberField.value.trim() || numberField.placeholder;
+
+  const payload = {
+    client_name: clientVal,
+    number: numberVal || null,
+    due_date: document.getElementById('inv-f-due').value || null,
+    status: document.getElementById('inv-f-status').value,
+    line_items: invLineItems.map(li => ({
+      desc: li.desc,
+      qty: parseFloat(li.qty) || 1,
+      price: parseFloat(li.price) || 0,
+    })),
+    amount: total || null,
+    notes: document.getElementById('inv-f-notes').value.trim() || null,
+  };
+  if (invEditId) payload.id = invEditId;
+  const method = invEditId ? 'PUT' : 'POST';
+  const res = await TMIAdmin.api('/api/invoices', method, payload);
+  if (res) {
+    TMIAdmin.toast(invEditId ? 'Invoice updated' : 'Invoice created');
+    invCloseModal();
+    await invLoad();
+  }
+}
+
+// =====================================================================
+// INIT
+// =====================================================================
+renderTopbarActions('projects');
+projLoad();
+</script>
+</body>
+</html>

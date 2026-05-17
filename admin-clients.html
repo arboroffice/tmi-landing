@@ -6,16 +6,38 @@
 <title>Clients — TMI Admin</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="stylesheet" href="admin.css"/>
+<style>
+  .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto;}
+  .tab-btn{padding:10px 18px;font-size:13px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-family:inherit;white-space:nowrap;transition:color 0.15s,border-color 0.15s;}
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+
+  /* Health cards */
+  .health-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:900px){.health-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:600px){.health-grid{grid-template-columns:1fr;}}
+  .health-card{background:var(--surface,#fff);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:10px;transition:box-shadow 0.15s;}
+  .health-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.07);}
+  .health-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .health-card-name{font-size:16px;font-weight:600;color:var(--ink);line-height:1.2;}
+  .health-card-company{font-size:13px;color:var(--ink-2);margin-top:2px;}
+  .health-badge{font-size:11px;font-weight:600;letter-spacing:0.05em;padding:3px 10px;border-radius:999px;white-space:nowrap;flex-shrink:0;}
+  .health-badge.healthy{background:#dcfce7;color:#166534;}
+  .health-badge.watch{background:#fef9c3;color:#854d0e;}
+  .health-badge.at-risk{background:#fee2e2;color:#991b1b;}
+  .health-card-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;}
+  .health-card-row .label{color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-size:10px;}
+  .health-card-row .val{color:var(--ink-2);font-weight:500;}
+  .health-card-row .val.overdue{color:var(--red,#ef4444);font-weight:700;}
+  .health-plan-tag{display:inline-block;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);background:var(--bg-alt,#f5f5f7);border-radius:4px;padding:2px 8px;}
+</style>
 </head>
 <body>
 <div class="layout">
-
   <div id="sidebar-root"></div>
-
   <div class="main">
     <div class="topbar">
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Clients</span></div>
-      <div class="topbar-actions">
+      <div class="topbar-actions" id="clients-topbar-actions">
         <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Export CSV</button>
         <button class="btn btn-primary btn-sm" onclick="openAddModal()">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -26,41 +48,65 @@
     <div class="content">
       <div class="sec-head">
         <h1>Clients</h1>
-        <span class="filter-count" id="client-count"></span>
       </div>
 
-      <div class="filter-bar">
-        <div class="search-wrap">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="search" id="search" placeholder="Search name, company, email..." oninput="renderTable()"/>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('list')">Clients</button>
+        <button class="tab-btn" onclick="switchTab('health')">Health</button>
+      </div>
+
+      <!-- Clients Tab -->
+      <div id="tab-list">
+        <div class="sec-head" style="margin-bottom:12px">
+          <span class="filter-count" id="client-count"></span>
         </div>
-        <select class="filter-select" id="filter-status" onchange="renderTable()">
-          <option value="">All statuses</option>
-          <option value="active">Active</option><option value="paused">Paused</option><option value="churned">Churned</option>
-        </select>
-        <select class="filter-select" id="filter-audience" onchange="renderTable()">
-          <option value="">All audiences</option>
-          <option value="physical">Physical</option><option value="online">Online</option><option value="fotf">FOTF</option>
-        </select>
-      </div>
-
-      <!-- MRR Summary -->
-      <div id="mrr-bar" style="display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 22px;margin-bottom:16px;display:flex;gap:32px;flex-wrap:wrap;">
-        <div><div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Total MRR</div><div style="font-size:24px;font-family:var(--serif);font-weight:700" id="mrr-total">—</div></div>
-        <div><div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Active</div><div style="font-size:24px;font-family:var(--serif);font-weight:700" id="mrr-active-count">—</div></div>
-        <div><div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Paused</div><div style="font-size:24px;font-family:var(--serif);font-weight:700" id="mrr-paused">—</div></div>
-      </div>
-
-      <div class="card">
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>Company</th><th>Contact</th><th>Email</th><th>Audience</th><th>Niche</th>
-              <th>Status</th><th>Plan</th><th>MRR</th><th>Started</th>
-            </tr></thead>
-            <tbody id="clients-tbody"></tbody>
-          </table>
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="search" placeholder="Search name, company, email..." oninput="renderTable()"/>
+          </div>
+          <select class="filter-select" id="filter-status" onchange="renderTable()">
+            <option value="">All statuses</option>
+            <option value="active">Active</option><option value="paused">Paused</option><option value="churned">Churned</option>
+          </select>
+          <select class="filter-select" id="filter-audience" onchange="renderTable()">
+            <option value="">All audiences</option>
+            <option value="physical">Physical</option><option value="online">Online</option><option value="fotf">FOTF</option>
+          </select>
         </div>
+        <div id="mrr-bar" style="display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 22px;margin-bottom:16px;display:flex;gap:32px;flex-wrap:wrap;">
+          <div><div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Total MRR</div><div style="font-size:24px;font-family:var(--serif);font-weight:700" id="mrr-total">—</div></div>
+          <div><div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Active</div><div style="font-size:24px;font-family:var(--serif);font-weight:700" id="mrr-active-count">—</div></div>
+          <div><div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Paused</div><div style="font-size:24px;font-family:var(--serif);font-weight:700" id="mrr-paused">—</div></div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>Company</th><th>Contact</th><th>Email</th><th>Audience</th><th>Niche</th>
+                <th>Status</th><th>Plan</th><th>MRR</th><th>Started</th>
+              </tr></thead>
+              <tbody id="clients-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Tab -->
+      <div id="tab-health" style="display:none">
+        <div class="stats-row" id="health-stats" style="grid-template-columns:repeat(4,1fr)"></div>
+        <div class="sec-head" style="margin-top:8px;margin-bottom:12px">
+          <span class="filter-count" id="health-count"></span>
+        </div>
+        <div class="filter-bar">
+          <select class="filter-select" id="filter-health" onchange="ch_renderCards()">
+            <option value="">All clients</option>
+            <option value="healthy">Healthy</option>
+            <option value="watch">Watch</option>
+            <option value="at-risk">At Risk</option>
+          </select>
+        </div>
+        <div class="health-grid" id="health-grid"></div>
       </div>
     </div>
   </div>
@@ -165,7 +211,6 @@
 </div>
 
 <div id="toast-root"></div>
-
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
@@ -173,195 +218,141 @@ TMIAdmin.initSidebar('clients');
 
 let allClients = [];
 let currentClient = null;
+let healthLoaded = false;
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['list','health'][i] === tab));
+  document.getElementById('tab-list').style.display   = tab === 'list'   ? '' : 'none';
+  document.getElementById('tab-health').style.display  = tab === 'health' ? '' : 'none';
+  document.getElementById('clients-topbar-actions').style.display = tab === 'list' ? '' : 'none';
+  if (tab === 'health' && !healthLoaded) { healthLoaded = true; ch_loadData(); }
+}
 
 function onAudienceChange() {
   const aud = document.getElementById('f-audience').value;
   const niches = aud ? TMIAdmin.niches[aud] : [...TMIAdmin.niches.physical, ...TMIAdmin.niches.online, ...TMIAdmin.niches.fotf];
   const sel = document.getElementById('f-niche');
-  sel.innerHTML = `<option value="">Select niche</option>` + (niches || []).map(n => `<option>${n}</option>`).join('');
+  sel.innerHTML = `<option value="">Select niche</option>` + (niches||[]).map(n=>`<option>${n}</option>`).join('');
 }
 
 async function loadClients() {
   const data = await TMIAdmin.api('/api/clients');
   if (!data) return;
   allClients = data;
-
-  // MRR summary
   const active = data.filter(c => c.status === 'active');
-  const mrr = active.reduce((s, c) => s + (parseFloat(c.mrr) || 0), 0);
+  const mrr = active.reduce((s,c) => s+(parseFloat(c.mrr)||0),0);
   document.getElementById('mrr-total').textContent = TMIAdmin.currency(mrr);
   document.getElementById('mrr-active-count').textContent = active.length;
-  document.getElementById('mrr-paused').textContent = data.filter(c => c.status === 'paused').length;
+  document.getElementById('mrr-paused').textContent = data.filter(c => c.status==='paused').length;
   document.getElementById('mrr-bar').style.display = 'flex';
-
   renderTable();
 }
 
 function renderTable() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const st = document.getElementById('filter-status').value;
+  const q   = document.getElementById('search').value.toLowerCase();
+  const st  = document.getElementById('filter-status').value;
   const aud = document.getElementById('filter-audience').value;
-
   const filtered = allClients.filter(cl => {
-    const c = cl.contacts || {};
-    const text = [c.first_name, c.last_name, c.email, c.company].filter(Boolean).join(' ').toLowerCase();
+    const c = cl.contacts||{};
+    const text = [c.first_name,c.last_name,c.email,c.company].filter(Boolean).join(' ').toLowerCase();
     if (q && !text.includes(q)) return false;
-    if (st && cl.status !== st) return false;
-    if (aud && c.audience !== aud) return false;
+    if (st && cl.status!==st) return false;
+    if (aud && c.audience!==aud) return false;
     return true;
   });
-
-  document.getElementById('client-count').textContent = `${filtered.length} client${filtered.length !== 1 ? 's' : ''}`;
-
+  document.getElementById('client-count').textContent = `${filtered.length} client${filtered.length!==1?'s':''}`;
   const tbody = document.getElementById('clients-tbody');
   if (!filtered.length) {
     tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><div class="empty-icon">💼</div><h3>No clients found</h3><p>Add your first client or convert a lead.</p></td></tr>`;
     return;
   }
-
   tbody.innerHTML = filtered.map(cl => {
-    const c = cl.contacts || {};
-    const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || '—';
+    const c = cl.contacts||{};
+    const name = [c.first_name,c.last_name].filter(Boolean).join(' ') || '—';
     return `<tr onclick="openPanel(${JSON.stringify(cl).replace(/"/g,'&quot;')})">
-      <td class="td-name">${c.company || '—'}</td>
+      <td class="td-name">${c.company||'—'}</td>
       <td>${name}</td>
-      <td style="color:var(--ink-2)">${c.email || '—'}</td>
-      <td>${c.audience ? TMIAdmin.badge(c.audience) : '—'}</td>
-      <td class="td-muted">${c.niche || '—'}</td>
+      <td style="color:var(--ink-2)">${c.email||'—'}</td>
+      <td>${c.audience?TMIAdmin.badge(c.audience):'—'}</td>
+      <td class="td-muted">${c.niche||'—'}</td>
       <td>${TMIAdmin.badge(cl.status)}</td>
-      <td class="td-muted">${cl.plan || '—'}</td>
-      <td style="font-weight:500;color:var(--ink)">${cl.mrr ? TMIAdmin.currency(cl.mrr) : '—'}</td>
-      <td class="td-muted">${cl.start_date ? TMIAdmin.fmt(cl.start_date) : '—'}</td>
+      <td class="td-muted">${cl.plan||'—'}</td>
+      <td style="font-weight:500;color:var(--ink)">${cl.mrr?TMIAdmin.currency(cl.mrr):'—'}</td>
+      <td class="td-muted">${cl.start_date?TMIAdmin.fmt(cl.start_date):'—'}</td>
     </tr>`;
   }).join('');
 }
 
 async function openPanel(cl) {
   currentClient = cl;
-  const c = cl.contacts || {};
-  const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || '—';
+  const c = cl.contacts||{};
+  const name = [c.first_name,c.last_name].filter(Boolean).join(' ') || '—';
   document.getElementById('panel-name').textContent = name;
-  document.getElementById('pd-status').innerHTML = TMIAdmin.badge(cl.status);
-  document.getElementById('pd-plan').textContent = cl.plan || '—';
-  document.getElementById('pd-email').innerHTML = c.email ? `<a href="mailto:${c.email}" style="color:var(--blue)">${c.email}</a>` : '—';
-  document.getElementById('pd-phone').textContent = c.phone || '—';
-  document.getElementById('pd-company').textContent = c.company || '—';
-  document.getElementById('pd-title').textContent = c.title || '—';
-  document.getElementById('pd-audience').innerHTML = c.audience ? TMIAdmin.badge(c.audience) : '—';
-  document.getElementById('pd-niche').textContent = c.niche || '—';
-  document.getElementById('pd-mrr').textContent = cl.mrr ? TMIAdmin.currency(cl.mrr) : '—';
-  document.getElementById('pd-owner').textContent = cl.owner || '—';
-  document.getElementById('pd-start').textContent = cl.start_date ? TMIAdmin.fmt(cl.start_date) : '—';
+  document.getElementById('pd-status').innerHTML  = TMIAdmin.badge(cl.status);
+  document.getElementById('pd-plan').textContent   = cl.plan||'—';
+  document.getElementById('pd-email').innerHTML    = c.email?`<a href="mailto:${c.email}" style="color:var(--blue)">${c.email}</a>`:'—';
+  document.getElementById('pd-phone').textContent  = c.phone||'—';
+  document.getElementById('pd-company').textContent = c.company||'—';
+  document.getElementById('pd-title').textContent  = c.title||'—';
+  document.getElementById('pd-audience').innerHTML = c.audience?TMIAdmin.badge(c.audience):'—';
+  document.getElementById('pd-niche').textContent  = c.niche||'—';
+  document.getElementById('pd-mrr').textContent    = cl.mrr?TMIAdmin.currency(cl.mrr):'—';
+  document.getElementById('pd-owner').textContent  = cl.owner||'—';
+  document.getElementById('pd-start').textContent  = cl.start_date?TMIAdmin.fmt(cl.start_date):'—';
   document.getElementById('pd-created').textContent = TMIAdmin.fmt(cl.created_at);
-  document.getElementById('pd-notes').textContent = cl.notes || '—';
+  document.getElementById('pd-notes').textContent  = cl.notes||'—';
   document.getElementById('client-activity-feed').innerHTML = '';
-  document.getElementById('pd-health').innerHTML = '<div style="font-size:13px;color:var(--muted);padding:4px 0">Computing health...</div>';
+  document.getElementById('pd-health').innerHTML   = '<div style="font-size:13px;color:var(--muted);padding:4px 0">Computing health...</div>';
   TMIAdmin.openPanel('client-panel');
-
-  // Fetch activities and compute health score
   let lastActivityDate = null;
   if (cl.contact_id) {
     const activities = await TMIAdmin.api(`/api/activities?contact_id=${cl.contact_id}`);
-    if (activities && activities.length > 0) {
-      // activities assumed sorted newest first
-      lastActivityDate = new Date(activities[0].created_at);
-    }
+    if (activities && activities.length > 0) lastActivityDate = new Date(activities[0].created_at);
     TMIAdmin.renderActivityPanel(cl.contact_id, 'client-activity-feed');
   }
-
   renderHealthPanel(cl, lastActivityDate);
 }
 
 function renderHealthPanel(cl, lastActivityDate) {
   const el = document.getElementById('pd-health');
   if (!el) return;
-
-  // Score algorithm (max 100)
   let score = 0;
   const signals = [];
   const now = new Date();
-
-  // +30 if status is active
-  if (cl.status === 'active') {
-    score += 30;
-    signals.push({ text: 'Status: Active', positive: true });
-  } else if (cl.status === 'paused') {
-    signals.push({ text: 'Status: Paused', positive: false });
-  } else if (cl.status === 'churned') {
-    signals.push({ text: 'Status: Churned', positive: false });
-  }
-
-  // Last contact scoring (+20 within 14 days, +10 within 30 days)
+  if (cl.status === 'active') { score += 30; signals.push({ text:'Status: Active', positive:true }); }
+  else if (cl.status === 'paused') signals.push({ text:'Status: Paused', positive:false });
+  else if (cl.status === 'churned') signals.push({ text:'Status: Churned', positive:false });
   if (lastActivityDate) {
-    const daysSince = Math.floor((now - lastActivityDate) / (1000 * 60 * 60 * 24));
-    if (daysSince <= 14) {
-      score += 20;
-      signals.push({ text: `Last contact: ${daysSince <= 1 ? 'today' : daysSince + ' days ago'}`, positive: true });
-    } else if (daysSince <= 30) {
-      score += 10;
-      signals.push({ text: `Last contact: ${daysSince} days ago`, positive: null });
-    } else {
-      signals.push({ text: `Last contact: ${daysSince} days ago`, positive: false });
-    }
-  } else {
-    signals.push({ text: 'No activity recorded', positive: false });
-  }
-
-  // Client tenure scoring (+15 if >90 days, +8 if >30 days)
+    const daysSince = Math.floor((now-lastActivityDate)/(1000*60*60*24));
+    if (daysSince<=14) { score+=20; signals.push({ text:`Last contact: ${daysSince<=1?'today':daysSince+' days ago'}`, positive:true }); }
+    else if (daysSince<=30) { score+=10; signals.push({ text:`Last contact: ${daysSince} days ago`, positive:null }); }
+    else signals.push({ text:`Last contact: ${daysSince} days ago`, positive:false });
+  } else signals.push({ text:'No activity recorded', positive:false });
   if (cl.start_date) {
-    const daysClient = Math.floor((now - new Date(cl.start_date)) / (1000 * 60 * 60 * 24));
-    if (daysClient >= 90) {
-      score += 15;
-      const months = Math.floor(daysClient / 30);
-      signals.push({ text: `Client for ${months} month${months !== 1 ? 's' : ''}`, positive: true });
-    } else if (daysClient >= 30) {
-      score += 8;
-      const months = Math.floor(daysClient / 30);
-      signals.push({ text: `Client for ${months} month${months !== 1 ? 's' : ''}`, positive: null });
-    } else {
-      signals.push({ text: `New client (${daysClient} day${daysClient !== 1 ? 's' : ''})`, positive: null });
-    }
+    const daysClient = Math.floor((now-new Date(cl.start_date))/(1000*60*60*24));
+    if (daysClient>=90) { score+=15; const months=Math.floor(daysClient/30); signals.push({ text:`Client for ${months} month${months!==1?'s':''}`, positive:true }); }
+    else if (daysClient>=30) { score+=8; const months=Math.floor(daysClient/30); signals.push({ text:`Client for ${months} month${months!==1?'s':''}`, positive:null }); }
+    else signals.push({ text:`New client (${daysClient} day${daysClient!==1?'s':''})`, positive:null });
   }
-
   score = Math.min(100, score);
-
-  // Badge class
   let badgeClass, badgeLabel;
-  if (score >= 70) {
-    badgeClass = 'score-hot';
-    badgeLabel = 'Healthy';
-  } else if (score >= 40) {
-    badgeClass = 'score-warm';
-    badgeLabel = 'Fair';
-  } else {
-    badgeClass = 'score-cold';
-    badgeLabel = 'At Risk';
-  }
-
-  // Signal color helper
-  function signalColor(positive) {
-    if (positive === true)  return 'var(--green, #22c55e)';
-    if (positive === false) return 'var(--red, #ef4444)';
-    return 'var(--muted)';
-  }
-
+  if (score>=70) { badgeClass='score-hot'; badgeLabel='Healthy'; }
+  else if (score>=40) { badgeClass='score-warm'; badgeLabel='Fair'; }
+  else { badgeClass='score-cold'; badgeLabel='At Risk'; }
+  function signalColor(p) { if(p===true)return'var(--green,#22c55e)'; if(p===false)return'var(--red,#ef4444)'; return'var(--muted)'; }
   el.innerHTML = `
     <div class="panel-sec-label">Health</div>
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">
-      <span class="score-badge ${badgeClass}" style="font-size:13px;padding:4px 12px;border-radius:999px;font-weight:600">${score} — ${badgeLabel}</span>
+      <span class="score-badge ${badgeClass}" style="font-size:13px;padding:4px 12px;border-radius:999px;font-weight:600">${score} - ${badgeLabel}</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:5px">
-      ${signals.slice(0, 3).map(s => `
-        <div style="font-size:12px;color:${signalColor(s.positive)};display:flex;align-items:center;gap:6px">
-          <span style="font-size:9px">${s.positive === true ? '▲' : s.positive === false ? '▼' : '●'}</span>
-          ${s.text}
-        </div>`).join('')}
+      ${signals.slice(0,3).map(s=>`<div style="font-size:12px;color:${signalColor(s.positive)};display:flex;align-items:center;gap:6px"><span style="font-size:9px">${s.positive===true?'▲':s.positive===false?'▼':'●'}</span>${s.text}</div>`).join('')}
     </div>`;
 }
 
 async function logClientActivity() {
   if (!currentClient?.contact_id) return;
-  const type = prompt('Type (call / email / note / meeting):', 'note');
+  const type = prompt('Type (call / email / note / meeting):','note');
   if (!type) return;
   const title = prompt('Summary:');
   if (!title) return;
@@ -375,9 +366,7 @@ function openAddModal() {
   document.getElementById('edit-id').value = '';
   document.getElementById('modal-title').textContent = 'Add Client';
   document.getElementById('save-btn').textContent = 'Save Client';
-  ['first','last','email','phone','company','title','notes','mrr','owner','plan'].forEach(f => {
-    document.getElementById('f-' + f).value = '';
-  });
+  ['first','last','email','phone','company','title','notes','mrr','owner','plan'].forEach(f => { document.getElementById('f-'+f).value=''; });
   document.getElementById('f-status').value = 'active';
   document.getElementById('f-audience').value = '';
   document.getElementById('f-start').value = new Date().toISOString().split('T')[0];
@@ -387,92 +376,60 @@ function openAddModal() {
 
 function editFromPanel() {
   if (!currentClient) return;
-  const cl = currentClient;
-  const c = cl.contacts || {};
+  const cl = currentClient, c = cl.contacts||{};
   TMIAdmin.closePanel('client-panel');
   document.getElementById('edit-id').value = cl.id;
   document.getElementById('modal-title').textContent = 'Edit Client';
   document.getElementById('save-btn').textContent = 'Update Client';
-  document.getElementById('f-first').value = c.first_name || '';
-  document.getElementById('f-last').value = c.last_name || '';
-  document.getElementById('f-email').value = c.email || '';
-  document.getElementById('f-phone').value = c.phone || '';
-  document.getElementById('f-company').value = c.company || '';
-  document.getElementById('f-title').value = c.title || '';
-  document.getElementById('f-audience').value = c.audience || '';
+  document.getElementById('f-first').value   = c.first_name||'';
+  document.getElementById('f-last').value    = c.last_name||'';
+  document.getElementById('f-email').value   = c.email||'';
+  document.getElementById('f-phone').value   = c.phone||'';
+  document.getElementById('f-company').value = c.company||'';
+  document.getElementById('f-title').value   = c.title||'';
+  document.getElementById('f-audience').value = c.audience||'';
   onAudienceChange();
-  setTimeout(() => { document.getElementById('f-niche').value = c.niche || ''; }, 50);
-  document.getElementById('f-status').value = cl.status || 'active';
-  document.getElementById('f-plan').value = cl.plan || '';
-  document.getElementById('f-mrr').value = cl.mrr || '';
-  document.getElementById('f-start').value = cl.start_date || '';
-  document.getElementById('f-owner').value = cl.owner || '';
-  document.getElementById('f-notes').value = cl.notes || '';
+  setTimeout(()=>{ document.getElementById('f-niche').value=c.niche||''; },50);
+  document.getElementById('f-status').value = cl.status||'active';
+  document.getElementById('f-plan').value   = cl.plan||'';
+  document.getElementById('f-mrr').value    = cl.mrr||'';
+  document.getElementById('f-start').value  = cl.start_date||'';
+  document.getElementById('f-owner').value  = cl.owner||'';
+  document.getElementById('f-notes').value  = cl.notes||'';
   TMIAdmin.openModal('client-modal');
 }
 
 async function saveClient() {
   const id = document.getElementById('edit-id').value;
   const firstName = document.getElementById('f-first').value.trim();
-  if (!firstName) { TMIAdmin.toast('First name is required', 'error'); return; }
-
+  if (!firstName) { TMIAdmin.toast('First name is required','error'); return; }
   const payload = {
-    contact: {
-      first_name: firstName,
-      last_name: document.getElementById('f-last').value.trim(),
-      email: document.getElementById('f-email').value.trim(),
-      phone: document.getElementById('f-phone').value.trim(),
-      company: document.getElementById('f-company').value.trim(),
-      title: document.getElementById('f-title').value.trim(),
-      audience: document.getElementById('f-audience').value,
-      niche: document.getElementById('f-niche').value
-    },
-    client: {
-      status: document.getElementById('f-status').value,
-      plan: document.getElementById('f-plan').value.trim(),
-      mrr: parseFloat(document.getElementById('f-mrr').value) || null,
-      start_date: document.getElementById('f-start').value || null,
-      owner: document.getElementById('f-owner').value.trim(),
-      notes: document.getElementById('f-notes').value.trim()
-    }
+    contact: { first_name:firstName, last_name:document.getElementById('f-last').value.trim(), email:document.getElementById('f-email').value.trim(), phone:document.getElementById('f-phone').value.trim(), company:document.getElementById('f-company').value.trim(), title:document.getElementById('f-title').value.trim(), audience:document.getElementById('f-audience').value, niche:document.getElementById('f-niche').value },
+    client:  { status:document.getElementById('f-status').value, plan:document.getElementById('f-plan').value.trim(), mrr:parseFloat(document.getElementById('f-mrr').value)||null, start_date:document.getElementById('f-start').value||null, owner:document.getElementById('f-owner').value.trim(), notes:document.getElementById('f-notes').value.trim() }
   };
   if (id) payload.client.id = id;
-
   const btn = document.getElementById('save-btn');
-  btn.disabled = true; btn.textContent = 'Saving...';
-  const res = await TMIAdmin.api('/api/clients', id ? 'PUT' : 'POST', payload);
-  btn.disabled = false; btn.textContent = id ? 'Update Client' : 'Save Client';
-
-  if (res) {
-    TMIAdmin.toast(id ? 'Client updated' : 'Client added');
-    TMIAdmin.closeModal('client-modal');
-    await loadClients();
-  }
+  btn.disabled=true; btn.textContent='Saving...';
+  const res = await TMIAdmin.api('/api/clients', id?'PUT':'POST', payload);
+  btn.disabled=false; btn.textContent=id?'Update Client':'Save Client';
+  if (res) { TMIAdmin.toast(id?'Client updated':'Client added'); TMIAdmin.closeModal('client-modal'); await loadClients(); }
 }
 
 async function deleteFromPanel() {
   if (!currentClient) return;
   const ok = await TMIAdmin.confirm('Delete this client? This cannot be undone.');
   if (!ok) return;
-  const res = await TMIAdmin.api(`/api/clients?id=${currentClient.id}`, 'DELETE');
-  if (res) {
-    TMIAdmin.toast('Client deleted');
-    TMIAdmin.closePanel('client-panel');
-    await loadClients();
-  }
+  const res = await TMIAdmin.api(`/api/clients?id=${currentClient.id}`,'DELETE');
+  if (res) { TMIAdmin.toast('Client deleted'); TMIAdmin.closePanel('client-panel'); await loadClients(); }
 }
 
 function getFilteredClients() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const st = document.getElementById('filter-status').value;
+  const q   = document.getElementById('search').value.toLowerCase();
+  const st  = document.getElementById('filter-status').value;
   const aud = document.getElementById('filter-audience').value;
   return allClients.filter(cl => {
-    const c = cl.contacts || {};
-    const text = [c.first_name, c.last_name, c.email, c.company].filter(Boolean).join(' ').toLowerCase();
-    if (q && !text.includes(q)) return false;
-    if (st && cl.status !== st) return false;
-    if (aud && c.audience !== aud) return false;
-    return true;
+    const c=cl.contacts||{}; const text=[c.first_name,c.last_name,c.email,c.company].filter(Boolean).join(' ').toLowerCase();
+    if(q&&!text.includes(q))return false; if(st&&cl.status!==st)return false; if(aud&&c.audience!==aud)return false; return true;
   });
 }
 
@@ -480,25 +437,95 @@ function exportCSV() {
   const filtered = getFilteredClients();
   const headers = ['Name','Email','Company','Plan','MRR','Status','Start Date'];
   const rows = filtered.map(cl => {
-    const c = cl.contacts || {};
-    const name = [c.first_name, c.last_name].filter(Boolean).join(' ');
-    return [
-      name,
-      c.email || '',
-      c.company || '',
-      cl.plan || '',
-      cl.mrr || '',
-      cl.status || '',
-      cl.start_date ? new Date(cl.start_date).toLocaleDateString() : ''
-    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+    const c=cl.contacts||{}; const name=[c.first_name,c.last_name].filter(Boolean).join(' ');
+    return [name,c.email||'',c.company||'',cl.plan||'',cl.mrr||'',cl.status||'',cl.start_date?new Date(cl.start_date).toLocaleDateString():''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
   });
-  const csv = [headers.join(','), ...rows].join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const date = new Date().toISOString().split('T')[0];
-  a.href = url; a.download = `clients-${date}.csv`;
-  a.click(); URL.revokeObjectURL(url);
+  const csv=[headers.join(','),...rows].join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); const date=new Date().toISOString().split('T')[0];
+  a.href=url; a.download=`clients-${date}.csv`; a.click(); URL.revokeObjectURL(url);
+}
+
+// ── Client Health Tab ─────────────────────────────────────────────────────────
+
+let ch_enrichedClients = [];
+
+async function ch_loadData() {
+  const [clients, invoices] = await Promise.all([
+    allClients.length ? Promise.resolve(allClients) : TMIAdmin.api('/api/clients'),
+    TMIAdmin.api('/api/invoices')
+  ]);
+  const clientList = allClients.length ? allClients : (clients||[]);
+  const inv = invoices||[];
+  const now = new Date();
+  const active = clientList.filter(c => c.status==='active');
+  ch_enrichedClients = active.map(client => {
+    const clientInvoices = inv.filter(i => i.client_id===client.id);
+    let lastInvoiceDate=null;
+    clientInvoices.forEach(i => { const d=new Date(i.created_at); if(!lastInvoiceDate||d>lastInvoiceDate)lastInvoiceDate=d; });
+    const hasOverdue = clientInvoices.some(i => i.status==='overdue');
+    const overdueAmount = clientInvoices.filter(i=>i.status==='overdue').reduce((s,i)=>s+parseFloat(i.amount||0),0);
+    let score=100; const reasons=[];
+    if (lastInvoiceDate) { const days=Math.floor((now-lastInvoiceDate)/(1000*60*60*24)); if(days>=60){score-=30;reasons.push(`No invoice in ${days} days`);} }
+    else { score-=30; reasons.push('No invoices on record'); }
+    if (hasOverdue) { score-=30; reasons.push(`Overdue invoice: ${TMIAdmin.currency(overdueAmount)}`); }
+    if (client.status!=='active') { score-=20; reasons.push(`Status: ${client.status}`); }
+    score=Math.max(0,score);
+    let healthLabel,healthClass;
+    if(score>=80){healthLabel='Healthy';healthClass='healthy';}
+    else if(score>=50){healthLabel='Watch';healthClass='watch';}
+    else{healthLabel='At Risk';healthClass='at-risk';}
+    let monthsActive=null;
+    if(client.start_date){const ms=now-new Date(client.start_date);monthsActive=Math.floor(ms/(1000*60*60*24*30));}
+    return {...client,score,healthLabel,healthClass,lastInvoiceDate,lastInvoice:clientInvoices.length?clientInvoices.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0]:null,hasOverdue,overdueAmount,monthsActive,reasons};
+  });
+  ch_enrichedClients.sort((a,b)=>a.score-b.score);
+  ch_renderStats();
+  ch_renderCards();
+}
+
+function ch_renderStats() {
+  const healthy=ch_enrichedClients.filter(c=>c.healthClass==='healthy').length;
+  const watch=ch_enrichedClients.filter(c=>c.healthClass==='watch').length;
+  const atRisk=ch_enrichedClients.filter(c=>c.healthClass==='at-risk').length;
+  document.getElementById('health-stats').innerHTML=`
+    <div class="stat-box"><div class="stat-label">Active Clients</div><div class="stat-val">${ch_enrichedClients.length}</div></div>
+    <div class="stat-box"><div class="stat-label">Healthy</div><div class="stat-val" style="color:var(--green,#22c55e)">${healthy}</div></div>
+    <div class="stat-box"><div class="stat-label">Watch</div><div class="stat-val" style="color:var(--yellow,#f59e0b)">${watch}</div></div>
+    <div class="stat-box"><div class="stat-label">At Risk</div><div class="stat-val" style="color:var(--red,#ef4444)">${atRisk}</div></div>
+  `;
+}
+
+function ch_renderCards() {
+  const filterHealth = document.getElementById('filter-health').value;
+  const filtered = filterHealth ? ch_enrichedClients.filter(c=>c.healthClass===filterHealth) : ch_enrichedClients;
+  document.getElementById('health-count').textContent = `${filtered.length} client${filtered.length!==1?'s':''}`;
+  const grid = document.getElementById('health-grid');
+  if (!filtered.length) {
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">❤️</div><h3>No clients match this filter</h3><p>Try a different health status.</p></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(client => {
+    const c=client.contacts||{};
+    const name=[c.first_name,c.last_name].filter(Boolean).join(' ')||'—';
+    const company=c.company||'—';
+    const lastInvStr=client.lastInvoice?`${TMIAdmin.fmt(client.lastInvoice.created_at)} &middot; ${TMIAdmin.badge(client.lastInvoice.status)}`:'No invoices';
+    const startStr=client.start_date?`${TMIAdmin.fmt(client.start_date)}${client.monthsActive!==null?` &middot; ${client.monthsActive} mo`:''}` :'—';
+    const overdueRow=client.hasOverdue?`<div class="health-card-row"><span class="label">Overdue</span><span class="val overdue">${TMIAdmin.currency(client.overdueAmount)}</span></div>`:'';
+    return `<div class="health-card">
+      <div class="health-card-top">
+        <div><div class="health-card-name">${name}</div><div class="health-card-company">${company}</div></div>
+        <span class="health-badge ${client.healthClass}">${client.healthLabel}</span>
+      </div>
+      ${client.plan?`<div><span class="health-plan-tag">${client.plan}</span></div>`:''}
+      <div class="health-card-row"><span class="label">Started</span><span class="val">${startStr}</span></div>
+      <div class="health-card-row"><span class="label">Last Invoice</span><span class="val">${lastInvStr}</span></div>
+      ${overdueRow}
+      <div style="border-top:1px solid var(--line);padding-top:10px;margin-top:2px">
+        <a onclick="switchTab('list')" style="cursor:pointer;font-size:12px;color:var(--ink-2);text-decoration:none;display:inline-flex;align-items:center;gap:5px">View All <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 loadClients();

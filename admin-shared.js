@@ -220,56 +220,34 @@ const TMIAdmin = (() => {
   <nav class="sb-nav">
     <div class="sb-group-label">Overview</div>
     ${navItem('dashboard', 'Dashboard', I.dashboard)}
-    ${navItem('revenue', 'Revenue', I.revenue)}
-    ${navItem('analytics', 'Analytics', I.analytics)}
+    ${navItem('reports', 'Reports', I.revenue)}
     <div class="sb-group-label">Sales</div>
-    ${navItem('pipeline', 'Pipeline', I.pipeline)}
-    ${navItem('audits', 'Audits', I.audits)}
-    ${navItem('bookings', 'Bookings', I.bookings)}
-    ${navItem('applications', 'Applications', I.apps, true)}
-    ${navItem('followups', 'Follow-ups', I.followup, true)}
+    ${navItem('sales', 'Sales', I.pipeline)}
+    ${navItem('inbox', 'Inbox', I.apps, true)}
     ${navItem('leads', 'Leads', I.leads)}
     ${navItem('proposals', 'Proposals', I.proposals)}
     <div class="sb-group-label">Clients</div>
     ${navItem('clients', 'Clients', I.clients)}
-    ${navItem('client-health', 'Client Health', I.clientHealth)}
-    ${navItem('projects', 'Projects', I.projects)}
-    ${navItem('invoices', 'Invoices', I.invoices)}
+    ${navItem('work', 'Work', I.projects)}
     ${navItem('onboarding', 'Onboarding', I.onboarding)}
     <div class="sb-group-label">People</div>
-    ${navItem('contacts', 'Contacts', I.contacts)}
-    ${navItem('partners', 'Partners', I.partners)}
-    ${navItem('activity', 'Activity', I.activity)}
+    ${navItem('people', 'People', I.contacts)}
     <div class="sb-group-label">Comms</div>
-    ${navItem('email', 'Email', I.email)}
-    ${navItem('sms', 'SMS', I.sms)}
+    ${navItem('comms', 'Comms', I.email)}
     <div class="sb-group-label">Content</div>
-    ${navItem('content', 'Field Notes', I.content)}
-    ${navItem('content-ideas', 'Social Ideas', I.ideas)}
-    ${navItem('content-compose', 'Compose', I.content)}
-    ${navItem('content-calendar', 'Calendar', I.rituals)}
-    ${navItem('brand-plan', 'Brand Plan', I.identity)}
+    ${navItem('content-hub', 'Content Hub', I.content)}
     <div class="sb-group-label">FOTF</div>
     ${navItem('fotf-dashboard', 'Home', I.fotf)}
-    ${navItem('fotf-newsletter', 'Newsletter', I.newsletter)}
-    ${navItem('fotf-issues', 'Issues', I.newsletter)}
-    ${navItem('fotf-community', 'Community', I.community)}
-    ${navItem('fotf-stories', 'Stories', I.stories)}
-    ${navItem('fotf-glass-box', 'Glass Box', I.glassBox)}
-    ${navItem('fotf-stage-letters', 'Stage Letters', I.stageLetters)}
-    ${navItem('fotf-rituals', 'Rituals', I.rituals)}
-    ${navItem('fotf-identity', 'Identity', I.identity)}
-    ${navItem('fotf-library', 'Library', I.library)}
+    ${navItem('fotf-editorial', 'Editorial', I.newsletter)}
+    ${navItem('fotf-community-hub', 'Community', I.community)}
+    ${navItem('fotf-resources', 'Resources', I.library)}
     ${navItem('fotf-growth', 'Growth', I.growth_fotf)}
     <div class="sb-group-label">City Leads</div>
-    ${navItem('city-dashboard', 'Overview', I.cityPin)}
-    ${navItem('cities', 'Cities', I.cityMap)}
-    ${navItem('city-roster', 'Roster', I.team)}
+    ${navItem('city-leads', 'City Leads', I.cityPin)}
     ${navItem('city-businesses', 'Businesses', I.clients)}
     ${navItem('city-money', 'Money', I.cityMoney)}
     <div class="sb-group-label">Plans</div>
-    ${navItem('financial-model', 'Financial Model', I.revenue)}
-    ${navItem('retention-plan', 'Retention Plan', I.clientHealth)}
+    ${navItem('plans', 'Plans', I.revenue)}
     <div class="sb-sep"></div>
     ${navItem('team', 'Team', I.team)}
     ${navItem('settings', 'Settings', I.settings)}
@@ -296,7 +274,7 @@ const TMIAdmin = (() => {
         { page: 'dashboard', label: 'Home',    icon: I.dashboard },
         { page: 'leads',     label: 'Leads',   icon: I.leads     },
         { page: 'clients',   label: 'Clients', icon: I.clients   },
-        { page: 'email',     label: 'Comms',   icon: I.email     },
+        { page: 'comms',     label: 'Comms',   icon: I.email     },
       ];
 
       const nav = document.createElement('nav');
@@ -317,59 +295,37 @@ const TMIAdmin = (() => {
       // More sheet
       const groups = [
         { label: 'Overview', items: [
-          { page:'revenue',   label:'Revenue',    icon:I.revenue },
-          { page:'analytics', label:'Analytics',  icon:I.analytics || I.revenue },
+          { page:'reports', label:'Reports', icon:I.revenue },
         ]},
         { label: 'Sales', items: [
-          { page:'pipeline',     label:'Pipeline',     icon:I.pipeline },
-          { page:'audits',       label:'Audits',       icon:I.audits },
-          { page:'bookings',     label:'Bookings',     icon:I.bookings },
-          { page:'applications', label:'Applications', icon:I.apps, badge:'applications' },
-          { page:'followups',    label:'Follow-ups',   icon:I.followup, badge:'followups' },
-          { page:'proposals',    label:'Proposals',    icon:I.proposals },
+          { page:'sales',     label:'Sales',     icon:I.pipeline },
+          { page:'inbox',     label:'Inbox',     icon:I.apps, badge:'inbox' },
+          { page:'proposals', label:'Proposals', icon:I.proposals },
         ]},
         { label: 'Clients', items: [
-          { page:'client-health', label:'Client Health', icon:I.clientHealth },
-          { page:'projects',      label:'Projects',      icon:I.projects },
-          { page:'invoices',      label:'Invoices',      icon:I.invoices },
-          { page:'onboarding',    label:'Onboarding',    icon:I.onboarding },
+          { page:'work',       label:'Work',       icon:I.projects },
+          { page:'onboarding', label:'Onboarding', icon:I.onboarding },
         ]},
         { label: 'People', items: [
-          { page:'contacts',  label:'Contacts',  icon:I.contacts },
-          { page:'partners',  label:'Partners',  icon:I.partners },
-          { page:'activity',  label:'Activity',  icon:I.activity },
-        ]},
-        { label: 'Comms', items: [
-          { page:'sms', label:'SMS', icon:I.sms },
+          { page:'people', label:'People', icon:I.contacts },
         ]},
         { label: 'Content', items: [
-          { page:'content',       label:'Field Notes',  icon:I.content },
-          { page:'content-ideas', label:'Social Ideas', icon:I.ideas },
-          { page:'brand-plan',    label:'Brand Plan',   icon:I.identity },
+          { page:'content-hub', label:'Content Hub', icon:I.content },
         ]},
         { label: 'FOTF', items: [
-          { page:'fotf-dashboard',     label:'Home',          icon:I.fotf },
-          { page:'fotf-newsletter',    label:'Newsletter',    icon:I.newsletter },
-          { page:'fotf-issues',        label:'Issues',        icon:I.newsletter },
-          { page:'fotf-community',     label:'Community',     icon:I.community },
-          { page:'fotf-stories',       label:'Stories',       icon:I.stories },
-          { page:'fotf-glass-box',     label:'Glass Box',     icon:I.glassBox },
-          { page:'fotf-stage-letters', label:'Stage Letters', icon:I.stageLetters },
-          { page:'fotf-rituals',       label:'Rituals',       icon:I.rituals },
-          { page:'fotf-library',       label:'Library',       icon:I.library },
-          { page:'fotf-growth',        label:'Growth',        icon:I.growth_fotf },
-          { page:'fotf-identity',      label:'Identity',      icon:I.identity },
+          { page:'fotf-dashboard',     label:'Home',      icon:I.fotf },
+          { page:'fotf-editorial',     label:'Editorial', icon:I.newsletter },
+          { page:'fotf-community-hub', label:'Community', icon:I.community },
+          { page:'fotf-resources',     label:'Resources', icon:I.library },
+          { page:'fotf-growth',        label:'Growth',    icon:I.growth_fotf },
         ]},
         { label: 'City Leads', items: [
-          { page:'city-dashboard',  label:'Overview',   icon:I.cityPin },
-          { page:'cities',          label:'Cities',     icon:I.cityMap },
-          { page:'city-roster',     label:'Roster',     icon:I.team },
+          { page:'city-leads',      label:'City Leads', icon:I.cityPin },
           { page:'city-businesses', label:'Businesses', icon:I.clients },
           { page:'city-money',      label:'Money',      icon:I.cityMoney },
         ]},
         { label: 'Plans', items: [
-          { page:'financial-model', label:'Financial Model', icon:I.revenue },
-          { page:'retention-plan',  label:'Retention Plan',  icon:I.clientHealth },
+          { page:'plans', label:'Plans', icon:I.revenue },
         ]},
         { label: 'System', items: [
           { page:'team',     label:'Team',     icon:I.team },
@@ -421,13 +377,10 @@ const TMIAdmin = (() => {
         const newApps = Array.isArray(apps) ? apps.filter(a => a.status === 'new').length : 0;
         const now = new Date();
         const overdueFu = Array.isArray(fu) ? fu.filter(f => !f.completed && new Date(f.due_at) < now).length : 0;
-        if (newApps > 0) {
-          const el = document.getElementById('sb-badge-applications');
-          if (el) { el.textContent = newApps; el.style.display = 'inline-flex'; }
-        }
-        if (overdueFu > 0) {
-          const el = document.getElementById('sb-badge-followups');
-          if (el) { el.textContent = overdueFu; el.style.display = 'inline-flex'; }
+        const total = newApps + overdueFu;
+        if (total > 0) {
+          const el = document.getElementById('sb-badge-inbox');
+          if (el) { el.textContent = total; el.style.display = 'inline-flex'; }
         }
       } catch {}
     },

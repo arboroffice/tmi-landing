@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Inbox — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto;}
+  .tab-btn{padding:10px 18px;font-size:13px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-family:inherit;white-space:nowrap;transition:color 0.15s,border-color 0.15s;}
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+
+  /* Follow-ups calendar */
+  .cal-shell{display:none;}
+  .cal-shell.active{display:block;}
+  .list-shell{display:block;}
+  .list-shell.hidden{display:none;}
+  .cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .cal-nav-title{font-size:16px;font-weight:600;flex:1;}
+  .cal-nav .btn{padding:4px 10px;font-size:13px;}
+  .cal-day-labels{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:1px;}
+  .cal-day-label{text-align:center;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+  .cal-cell.today{background:#fafafa;border:1px solid var(--chart-dark);}
+  .cal-cell.other-month .cal-cell-head{color:#ccc;}
+  .cal-item.type-call{background:#dbeafe;color:#1e40af;}
+  .cal-item.type-email{background:var(--chart);color:var(--ink);}
+  .cal-item.type-meeting{background:#dcfce7;color:#166534;}
+  .cal-item.type-task{background:var(--bg-alt,#f5f5f7);color:var(--ink);border:1px solid var(--line);}
+  .cal-item.type-sms{background:#f3e8ff;color:#6b21a8;}
+  .cal-item.overdue{background:#fee2e2 !important;color:#991b1b !important;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Inbox</span></div>
+      <div class="topbar-actions" id="topbar-actions-area"></div>
+    </div>
+    <div class="content">
+      <div class="sec-head"><h1>Inbox</h1></div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('apps')">Applications</button>
+        <button class="tab-btn" onclick="switchTab('followups')">Follow-ups</button>
+      </div>
+
+      <!-- Applications Tab -->
+      <div id="tab-apps">
+        <div class="sec-head" style="margin-bottom:12px">
+          <span class="filter-count" id="app-count"></span>
+          <div style="display:inline-flex;gap:2px;background:var(--bg);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:2px;margin-left:12px">
+            <button id="app-btn-list" class="btn btn-sm" style="background:var(--chart);color:var(--ink)" onclick="appSetView('list')">List</button>
+            <button id="app-btn-board" class="btn btn-sm" onclick="appSetView('board')">Board</button>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="app-search" placeholder="Search name, email, company..." oninput="appRenderTable()"/>
+          </div>
+          <select class="filter-select" id="app-filter-status" onchange="appRenderTable()">
+            <option value="">All statuses</option>
+            <option value="new">New</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="accepted">Accepted</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <select class="filter-select" id="app-filter-audience" onchange="appRenderTable()">
+            <option value="">All audiences</option>
+            <option value="physical">Physical</option>
+            <option value="online">Online</option>
+            <option value="fotf">FOTF</option>
+          </select>
+        </div>
+        <div class="card" id="app-list-view">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Email</th><th>Company</th><th>Audience</th><th>Status</th><th>Received</th><th></th></tr></thead>
+              <tbody id="app-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="app-board-view" style="display:none"></div>
+      </div>
+
+      <!-- Follow-ups Tab -->
+      <div id="tab-followups" style="display:none">
+        <div class="sec-head" style="margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="filter-count" id="fu-count"></span>
+            <div style="display:flex;gap:4px;align-items:center">
+              <button class="btn btn-ghost btn-sm active" id="fu-btn-list" onclick="fuSetView('list')">List</button>
+              <button class="btn btn-ghost btn-sm" id="fu-btn-cal" onclick="fuSetView('calendar')">Calendar</button>
+            </div>
+            <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" id="show-done" onchange="fuOnViewUpdate()"/> Show completed
+            </label>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="fu-search" placeholder="Search tasks..." oninput="fuOnViewUpdate()"/>
+          </div>
+          <select class="filter-select" id="fu-filter-type" onchange="fuOnViewUpdate()">
+            <option value="">All types</option>
+            <option value="call">Call</option>
+            <option value="email">Email</option>
+            <option value="sms">SMS</option>
+            <option value="meeting">Meeting</option>
+            <option value="task">Task</option>
+          </select>
+          <select class="filter-select" id="fu-filter-priority" onchange="fuOnViewUpdate()">
+            <option value="">All priorities</option>
+            <option value="high">High</option>
+            <option value="normal">Normal</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="list-shell" id="fu-list-shell">
+          <div class="card">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th style="width:32px"></th>
+                  <th>Task</th><th>Contact</th><th>Type</th><th>Priority</th><th>Due</th><th></th>
+                </tr></thead>
+                <tbody id="fu-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="cal-shell" id="fu-cal-shell">
+          <div class="card" style="padding:20px">
+            <div class="cal-nav">
+              <button class="btn btn-ghost btn-sm" onclick="calPrev()">&#8592;</button>
+              <div class="cal-nav-title" id="cal-title"></div>
+              <button class="btn btn-ghost btn-sm" onclick="calNext()">&#8594;</button>
+            </div>
+            <div class="cal-day-labels">
+              <div class="cal-day-label">Sun</div><div class="cal-day-label">Mon</div><div class="cal-day-label">Tue</div>
+              <div class="cal-day-label">Wed</div><div class="cal-day-label">Thu</div><div class="cal-day-label">Fri</div>
+              <div class="cal-day-label">Sat</div>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Application Panel -->
+<div class="panel-overlay" id="app-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('app-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="app-panel-name">Application</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-reject" onclick="appReject()">Reject</button>
+        <button class="btn btn-primary btn-sm" id="btn-accept" onclick="appAccept()">Accept &rarr; Lead</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid" id="app-panel-details"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Message</div>
+      <p id="app-panel-message" style="font-size:14px;color:var(--ink-2);line-height:1.65;"></p>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label" style="margin-bottom:8px">Rating</div>
+      <div id="app-panel-rating" style="display:flex;gap:4px;margin-bottom:16px;cursor:pointer">
+        <span class="star" data-n="1" onclick="appSetRating(1)" style="font-size:22px;color:var(--line);transition:color 0.1s;user-select:none">&#9733;</span>
+        <span class="star" data-n="2" onclick="appSetRating(2)" style="font-size:22px;color:var(--line);transition:color 0.1s;user-select:none">&#9733;</span>
+        <span class="star" data-n="3" onclick="appSetRating(3)" style="font-size:22px;color:var(--line);transition:color 0.1s;user-select:none">&#9733;</span>
+        <span class="star" data-n="4" onclick="appSetRating(4)" style="font-size:22px;color:var(--line);transition:color 0.1s;user-select:none">&#9733;</span>
+        <span class="star" data-n="5" onclick="appSetRating(5)" style="font-size:22px;color:var(--line);transition:color 0.1s;user-select:none">&#9733;</span>
+      </div>
+      <div class="panel-sec-label">Notes</div>
+      <textarea class="form-input" id="app-panel-notes" rows="3" placeholder="Internal notes..." style="margin-top:8px;"></textarea>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="appSaveNotes()">Save Notes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Follow-up Add/Edit Modal -->
+<div class="modal-overlay" id="fu-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title" id="fu-modal-title">Add Task</h2>
+      <button class="modal-x" onclick="fuCloseModal()">&times;</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Title</label>
+        <input class="form-input" id="fu-f-title" placeholder="Task title" required/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-input" id="fu-f-type">
+          <option value="task">Task</option><option value="call">Call</option>
+          <option value="email">Email</option><option value="sms">SMS</option><option value="meeting">Meeting</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select class="form-input" id="fu-f-priority">
+          <option value="normal">Normal</option><option value="high">High</option><option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Due Date &amp; Time</label>
+      <input class="form-input" id="fu-f-due" type="datetime-local"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="fu-f-notes" rows="3" placeholder="Optional notes..."></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="fuCloseModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="fuSaveTask()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('inbox');
+
+let fuLoaded = false;
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['apps','followups'][i] === tab));
+  document.getElementById('tab-apps').style.display      = tab === 'apps'      ? '' : 'none';
+  document.getElementById('tab-followups').style.display  = tab === 'followups' ? '' : 'none';
+
+  const actionsArea = document.getElementById('topbar-actions-area');
+  if (tab === 'followups') {
+    actionsArea.innerHTML = `<button class="btn btn-primary btn-sm" onclick="fuOpenAddModal()"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Task</button>`;
+    if (!fuLoaded) { fuLoaded = true; fuLoadTasks(); }
+  } else {
+    actionsArea.innerHTML = '';
+  }
+}
+
+// ── Applications ──────────────────────────────────────────────────────────────
+
+let allApps = [];
+let currentApp = null;
+let appViewMode = 'list';
+
+async function appLoad() {
+  allApps = await TMIAdmin.api('/api/applications') || [];
+  appRenderTable();
+}
+
+function appRenderTable() {
+  const q   = document.getElementById('app-search').value.toLowerCase();
+  const st  = document.getElementById('app-filter-status').value;
+  const aud = document.getElementById('app-filter-audience').value;
+  const rows = allApps.filter(a => {
+    if (st && a.status!==st) return false;
+    if (aud && a.audience!==aud) return false;
+    if (q && !`${a.name} ${a.email} ${a.company||''}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('app-count').textContent = `${rows.length} application${rows.length!==1?'s':''}`;
+  if (appViewMode === 'board') { appRenderBoard(rows); return; }
+  const tbody = document.getElementById('app-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📬</div><h3>No applications</h3><p>Funnel submissions will appear here.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(a => `
+    <tr onclick="appOpenPanel('${a.id}')">
+      <td class="td-name">${a.name}</td>
+      <td>${a.email}</td>
+      <td>${a.company||'<span class="td-muted">-</span>'}</td>
+      <td>${a.audience?TMIAdmin.badge(a.audience):'<span class="td-muted">-</span>'}${a.niche?` <span style="font-size:11px;color:var(--muted)">${a.niche}</span>`:''}</td>
+      <td>${TMIAdmin.badge(a.status)}</td>
+      <td class="td-muted">${TMIAdmin.fmt(a.created_at)}</td>
+      <td class="td-action"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();appOpenPanel('${a.id}')">View</button></td>
+    </tr>
+  `).join('');
+}
+
+function appOpenPanel(id) {
+  currentApp = allApps.find(a => a.id === id);
+  if (!currentApp) return;
+  const a = currentApp;
+  document.getElementById('app-panel-name').textContent = a.name;
+  document.getElementById('app-panel-message').textContent = a.message || 'No message provided.';
+  document.getElementById('app-panel-notes').value = a.notes || '';
+  appRenderRating(a.rating || 0);
+  const isDone = a.status==='accepted'||a.status==='rejected';
+  document.getElementById('btn-accept').disabled = isDone;
+  document.getElementById('btn-reject').disabled = isDone;
+  document.getElementById('app-panel-details').innerHTML = `
+    <div class="detail-item"><div class="detail-label">Email</div><div class="detail-val">${a.email}</div></div>
+    <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-val">${a.phone||'-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Company</div><div class="detail-val">${a.company||'-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Source</div><div class="detail-val">${a.source||'funnel'}</div></div>
+    <div class="detail-item"><div class="detail-label">Audience</div><div class="detail-val">${a.audience?TMIAdmin.badge(a.audience):'-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Niche</div><div class="detail-val">${a.niche||'-'}</div></div>
+    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(a.status)}</div></div>
+    <div class="detail-item"><div class="detail-label">Received</div><div class="detail-val">${TMIAdmin.fmt(a.created_at)}</div></div>
+  `;
+  TMIAdmin.openPanel('app-panel');
+}
+
+async function appAccept() {
+  if (!currentApp) return;
+  const res = await TMIAdmin.api('/api/applications', 'POST', { application_id: currentApp.id, action: 'accept' });
+  if (res) { TMIAdmin.toast('Accepted and created as lead'); TMIAdmin.closePanel('app-panel'); await appLoad(); }
+}
+
+async function appReject() {
+  if (!currentApp) return;
+  const ok = await TMIAdmin.confirm('Mark as rejected?', false);
+  if (!ok) return;
+  const res = await TMIAdmin.api('/api/applications', 'POST', { application_id: currentApp.id, action: 'reject' });
+  if (res) { TMIAdmin.toast('Marked as rejected'); TMIAdmin.closePanel('app-panel'); await appLoad(); }
+}
+
+async function appSaveNotes() {
+  if (!currentApp) return;
+  const notes = document.getElementById('app-panel-notes').value;
+  await TMIAdmin.api('/api/applications', 'PUT', { id: currentApp.id, notes });
+  TMIAdmin.toast('Notes saved'); currentApp.notes = notes;
+}
+
+function appRenderRating(val) {
+  document.querySelectorAll('#app-panel-rating .star').forEach(s => {
+    s.style.color = parseInt(s.dataset.n) <= val ? 'var(--chart)' : 'var(--line)';
+  });
+}
+
+async function appSetRating(n) {
+  if (!currentApp) return;
+  appRenderRating(n); currentApp.rating = n;
+  const idx = allApps.findIndex(a => a.id === currentApp.id);
+  if (idx >= 0) allApps[idx].rating = n;
+  await TMIAdmin.api('/api/applications', 'PUT', { id: currentApp.id, rating: n });
+  TMIAdmin.toast(`Rated ${n} star${n!==1?'s':''}`);
+}
+
+function appSetView(mode) {
+  appViewMode = mode;
+  document.getElementById('app-list-view').style.display  = mode === 'list'  ? '' : 'none';
+  document.getElementById('app-board-view').style.display = mode === 'board' ? '' : 'none';
+  const btnL = document.getElementById('app-btn-list');
+  const btnB = document.getElementById('app-btn-board');
+  if (mode === 'list') {
+    btnL.classList.add('active'); btnL.style.background='var(--chart)'; btnL.style.color='var(--ink)';
+    btnB.classList.remove('active'); btnB.style.background=''; btnB.style.color='';
+  } else {
+    btnB.classList.add('active'); btnB.style.background='var(--chart)'; btnB.style.color='var(--ink)';
+    btnL.classList.remove('active'); btnL.style.background=''; btnL.style.color='';
+  }
+  appRenderTable();
+}
+
+function appRenderBoard(rows) {
+  const STAGES = [{ key:'new',label:'New'},{ key:'reviewed',label:'Reviewed'},{ key:'accepted',label:'Accepted'},{ key:'rejected',label:'Rejected'}];
+  const byStage = {};
+  STAGES.forEach(s => { byStage[s.key]=[]; });
+  rows.forEach(a => { const key = a.status&&byStage[a.status]!==undefined?a.status:'new'; byStage[key].push(a); });
+  const ratingStars = (val) => [1,2,3,4,5].map(n=>`<span style="font-size:13px;color:${n<=val?'var(--chart)':'var(--line)'}">&#9733;</span>`).join('');
+  document.getElementById('app-board-view').innerHTML = `<div class="kanban">${STAGES.map(stage => {
+    const apps = byStage[stage.key];
+    const cards = apps.length ? apps.map(a=>`<div class="kanban-card" onclick="appOpenPanel('${a.id}')">
+      <div class="kanban-card-name">${a.name}</div>
+      ${a.company?`<div class="kanban-card-meta">${a.company}</div>`:''}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+        ${a.audience?TMIAdmin.badge(a.audience):'<span></span>'}
+        ${a.rating?`<span style="white-space:nowrap">${ratingStars(a.rating)}</span>`:''}
+      </div>
+    </div>`).join('') : `<div style="padding:8px 2px;font-size:12px;color:var(--muted);text-align:center">No applications</div>`;
+    return `<div class="kanban-col"><div class="kanban-col-head"><span class="kanban-col-title">${stage.label}</span><span class="kanban-count">${apps.length}</span></div><div class="kanban-cards">${cards}</div></div>`;
+  }).join('')}</div>`;
+}
+
+// ── Follow-ups ────────────────────────────────────────────────────────────────
+
+let allTasks = [];
+let fuEditId = null;
+let fuCurrentView = 'list';
+let calYear, calMonth;
+(function(){ const now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth(); })();
+
+async function fuLoadTasks() {
+  allTasks = await TMIAdmin.api('/api/followups') || [];
+  fuOnViewUpdate();
+}
+
+function fuIsOverdue(task) { return !task.completed && new Date(task.due_at) < new Date(); }
+
+function fuFiltered() {
+  const q = document.getElementById('fu-search').value.toLowerCase();
+  const type = document.getElementById('fu-filter-type').value;
+  const pri  = document.getElementById('fu-filter-priority').value;
+  const showDone = document.getElementById('show-done').checked;
+  return allTasks.filter(t => {
+    if (!showDone && t.completed) return false;
+    if (type && t.type!==type) return false;
+    if (pri && t.priority!==pri) return false;
+    if (q && !t.title.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function fuSetView(v) {
+  fuCurrentView = v;
+  document.getElementById('fu-btn-list').classList.toggle('active', v==='list');
+  document.getElementById('fu-btn-cal').classList.toggle('active', v==='calendar');
+  document.getElementById('fu-list-shell').classList.toggle('hidden', v!=='list');
+  document.getElementById('fu-cal-shell').classList.toggle('active', v==='calendar');
+  fuOnViewUpdate();
+}
+
+function fuOnViewUpdate() {
+  if (fuCurrentView==='list') fuRenderTable(); else fuRenderCalendar();
+}
+
+function fuRenderTable() {
+  const rows = fuFiltered();
+  document.getElementById('fu-count').textContent = `${rows.length} task${rows.length!==1?'s':''}`;
+  const tbody = document.getElementById('fu-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">&#9989;</div><h3>Queue is clear</h3><p>No pending follow-ups.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(t => {
+    const overdue = fuIsOverdue(t);
+    const contact = t.contacts||{};
+    const contactName = contact.first_name ? `${contact.first_name} ${contact.last_name||''}`.trim() : '-';
+    return `<tr style="${t.completed?'opacity:0.5':''}">
+      <td><div class="checklist-check ${t.completed?'done':''}" onclick="fuToggleDone('${t.id}',${!t.completed})"></div></td>
+      <td class="td-name">${t.title}${overdue?' <span class="badge badge-overdue" style="font-size:10px">overdue</span>':''}</td>
+      <td class="td-muted">${contactName}</td>
+      <td>${TMIAdmin.badge(t.type)}</td>
+      <td>${TMIAdmin.badge(t.priority)}</td>
+      <td style="font-size:12px;${overdue?'color:var(--red);font-weight:600':''}">${TMIAdmin.fmt(t.due_at)}</td>
+      <td class="td-action">
+        <button class="btn btn-ghost btn-sm" onclick="fuOpenEdit('${t.id}')">Edit</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red);margin-left:4px" onclick="fuDeleteTask('${t.id}')">Del</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} fuRenderCalendar(); }
+function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} fuRenderCalendar(); }
+
+function fuRenderCalendar() {
+  const tasks = fuFiltered();
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const monthTasks = tasks.filter(t => { if(!t.due_at)return false; const d=new Date(t.due_at); return d.getFullYear()===calYear&&d.getMonth()===calMonth; });
+  document.getElementById('fu-count').textContent = `${monthTasks.length} task${monthTasks.length!==1?'s':''} this month`;
+  const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-title').textContent = `${monthNames[calMonth]} ${calYear}`;
+  const taskMap = {};
+  tasks.forEach(t => {
+    if(!t.due_at)return; const d=new Date(t.due_at);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if(!taskMap[key])taskMap[key]=[];
+    taskMap[key].push(t);
+  });
+  const firstDay=new Date(calYear,calMonth,1); const lastDay=new Date(calYear,calMonth+1,0);
+  const startDow=firstDay.getDay(); const daysInMonth=lastDay.getDate();
+  const prevMonthLast=new Date(calYear,calMonth,0).getDate();
+  const cells=[];
+  for(let i=startDow-1;i>=0;i--) cells.push({day:prevMonthLast-i,currentMonth:false,dateStr:null});
+  for(let d=1;d<=daysInMonth;d++) { const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; cells.push({day:d,currentMonth:true,dateStr}); }
+  const trailing=7-(cells.length%7); if(trailing<7) for(let d=1;d<=trailing;d++) cells.push({day:d,currentMonth:false,dateStr:null});
+  document.getElementById('cal-grid').innerHTML = cells.map(cell => {
+    const isToday=cell.dateStr===todayStr;
+    const cellTasks=cell.dateStr?(taskMap[cell.dateStr]||[]):[];
+    const items=cellTasks.map(t => {
+      const overdue=fuIsOverdue(t); let typeClass=`type-${t.type||'task'}`; if(overdue)typeClass='overdue';
+      const label=t.title.length>22?t.title.slice(0,21)+'…':t.title;
+      return `<div class="cal-item ${typeClass}" onclick="fuOpenEdit('${t.id}')" title="${t.title.replace(/"/g,'&quot;')}">${label}</div>`;
+    }).join('');
+    return `<div class="cal-cell ${isToday?'today':''} ${!cell.currentMonth?'other-month':''}"><div class="cal-cell-head">${cell.day}</div>${items}</div>`;
+  }).join('');
+}
+
+async function fuToggleDone(id, completed) {
+  const res = await TMIAdmin.api('/api/followups', 'PUT', { id, completed });
+  if (res) { const t=allTasks.find(t=>t.id===id); if(t){t.completed=completed;t.completed_at=completed?new Date().toISOString():null;} fuOnViewUpdate(); TMIAdmin.toast(completed?'Marked complete':'Reopened'); }
+}
+
+function fuOpenAddModal() {
+  fuEditId = null;
+  document.getElementById('fu-modal-title').textContent = 'Add Task';
+  document.getElementById('fu-f-title').value = '';
+  document.getElementById('fu-f-type').value = 'task';
+  document.getElementById('fu-f-priority').value = 'normal';
+  document.getElementById('fu-f-notes').value = '';
+  const d=new Date(); d.setDate(d.getDate()+1); d.setHours(9,0,0,0);
+  document.getElementById('fu-f-due').value = d.toISOString().slice(0,16);
+  document.getElementById('fu-modal').classList.add('open');
+}
+
+function fuOpenEdit(id) {
+  const t=allTasks.find(t=>t.id===id); if(!t)return;
+  fuEditId=id;
+  document.getElementById('fu-modal-title').textContent = 'Edit Task';
+  document.getElementById('fu-f-title').value = t.title;
+  document.getElementById('fu-f-type').value = t.type;
+  document.getElementById('fu-f-priority').value = t.priority;
+  document.getElementById('fu-f-notes').value = t.notes||'';
+  document.getElementById('fu-f-due').value = t.due_at?t.due_at.slice(0,16):'';
+  document.getElementById('fu-modal').classList.add('open');
+}
+
+function fuCloseModal() { document.getElementById('fu-modal').classList.remove('open'); }
+
+async function fuSaveTask() {
+  const title=document.getElementById('fu-f-title').value.trim();
+  const due_at=document.getElementById('fu-f-due').value;
+  if(!title||!due_at){TMIAdmin.toast('Title and due date required','error');return;}
+  const payload={title,type:document.getElementById('fu-f-type').value,priority:document.getElementById('fu-f-priority').value,notes:document.getElementById('fu-f-notes').value,due_at:new Date(due_at).toISOString()};
+  if(fuEditId)payload.id=fuEditId;
+  const res=await TMIAdmin.api('/api/followups',fuEditId?'PUT':'POST',payload);
+  if(res){TMIAdmin.toast(fuEditId?'Task updated':'Task added');fuCloseModal();await fuLoadTasks();}
+}
+
+async function fuDeleteTask(id) {
+  const ok=await TMIAdmin.confirm('Delete this task?',false); if(!ok)return;
+  const res=await TMIAdmin.api('/api/followups','DELETE',{id});
+  if(res){TMIAdmin.toast('Deleted');await fuLoadTasks();}
+}
+
+appLoad();
+</script>
+</body>
+</html>

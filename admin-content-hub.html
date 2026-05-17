@@ -1,0 +1,1216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Content — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+/* ── Tab bar ─────────────────────────────────────────────────── */
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px;}
+.tab-btn{font-size:13px;font-weight:500;padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--ink-2);font-family:inherit;transition:color 0.15s,border-color 0.15s;margin-bottom:-1px;}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+.tab-btn:hover:not(.active){color:var(--ink);}
+
+/* ── Field Notes (articles) tab ──────────────────────────────── */
+.cal-item{font-size:10px;padding:2px 6px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;cursor:pointer;font-weight:500;}
+.cal-item.idea{background:#f5f5f7;color:var(--muted);}
+.cal-item.writing{background:#dbeafe;color:#1d4ed8;}
+.cal-item.ready{background:#dcfce7;color:#15803d;}
+.cal-item.published{background:#E4FF97;color:#2d4a00;}
+
+/* ── Social Ideas (kanban) tab ───────────────────────────────── */
+.world-pill{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border-radius:999px;}
+.wp-online{background:#dbeafe;color:#1d4ed8;}
+.wp-physical{background:#fed7aa;color:#c2410c;}
+.wp-intersection{background:#ede9fe;color:#6d28d9;}
+.wp-mission{background:#E4FF97;color:#0a0b14;}
+
+.world-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;}
+.world-tab{font-size:12px;padding:5px 16px;border-radius:999px;border:1px solid var(--line);cursor:pointer;background:none;color:var(--ink-2);font-family:inherit;transition:background 0.1s,color 0.1s,border-color 0.1s;}
+.world-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+.ki-filters{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap;}
+.ki-search{flex:1;min-width:180px;max-width:280px;position:relative;}
+.ki-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);}
+.ki-search input{width:100%;padding:7px 10px 7px 32px;border:1px solid var(--line);border-radius:6px;font-size:13px;font-family:inherit;background:var(--surface);color:var(--ink);outline:none;}
+.ki-search input:focus{border-color:var(--ink);}
+.ki-sel{font-size:12px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;font-family:inherit;background:var(--surface);color:var(--ink-2);outline:none;cursor:pointer;}
+.ki-count{font-size:12px;color:var(--muted);margin-left:auto;}
+
+.nn-panel{border:1px solid var(--line);border-radius:8px;margin-bottom:20px;overflow:hidden;}
+.nn-panel summary{padding:12px 18px;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none;}
+.nn-panel summary::-webkit-details-marker{display:none;}
+.nn-panel summary::after{content:'▾';font-size:14px;color:var(--muted);}
+.nn-panel[open] summary::after{content:'▴';}
+.nn-body{padding:16px 18px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;}
+.nn-item{font-size:13px;color:var(--ink-2);line-height:1.4;display:flex;gap:8px;}
+.nn-item::before{content:'—';color:var(--chart);flex-shrink:0;font-weight:700;}
+
+.kanban-wrap{display:flex;gap:14px;overflow-x:auto;padding-bottom:24px;min-height:calc(100vh - 420px);}
+.kanban-wrap::-webkit-scrollbar{height:6px;}
+.kanban-wrap::-webkit-scrollbar-track{background:var(--bg-alt);}
+.kanban-wrap::-webkit-scrollbar-thumb{background:var(--line-strong,rgba(0,0,0,0.15));border-radius:3px;}
+
+.k-col{flex:0 0 260px;display:flex;flex-direction:column;background:var(--bg-alt);border-radius:8px;overflow:hidden;min-height:120px;}
+.k-col-hd{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);}
+.k-col-title{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-2);}
+.k-col-count{font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;background:rgba(0,0,0,0.06);color:var(--ink-2);}
+
+.k-col-hd[data-s="idea"]{border-top:3px solid #86868b;}
+.k-col-hd[data-s="scripted"]{border-top:3px solid #3b82f6;}
+.k-col-hd[data-s="filming"]{border-top:3px solid #f97316;}
+.k-col-hd[data-s="editing"]{border-top:3px solid #8b5cf6;}
+.k-col-hd[data-s="scheduled"]{border-top:3px solid #22c55e;}
+.k-col-hd[data-s="posted"]{border-top:3px solid #E4FF97;}
+
+.k-col-body{flex:1;padding:8px;display:flex;flex-direction:column;gap:6px;transition:background 0.15s;}
+.k-col-body.drag-over{background:rgba(228,255,151,0.18);outline:2px dashed #c8e86b;outline-offset:-4px;border-radius:4px;}
+
+.k-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:11px 13px;cursor:grab;transition:box-shadow 0.15s,transform 0.1s;user-select:none;}
+.k-card:hover{box-shadow:0 2px 10px rgba(0,0,0,0.09);transform:translateY(-1px);}
+.k-card.dragging{opacity:0.45;cursor:grabbing;}
+.k-card-title{font-size:13px;font-weight:600;color:var(--ink);line-height:1.35;margin-bottom:5px;}
+.k-card-sub{font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.3;}
+.k-card-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-top:4px;}
+.series-tag{font-size:10px;color:var(--muted);font-style:italic;}
+.k-compose-btn{font-size:10px;font-weight:600;letter-spacing:0.04em;color:var(--ink-2);border:1px solid var(--line);border-radius:4px;padding:2px 8px;background:none;cursor:pointer;text-decoration:none;transition:background 0.1s,color 0.1s,border-color 0.1s;}
+.k-compose-btn:hover{background:var(--chart);color:#0a0b14;border-color:var(--chart);}
+.k-col-empty{padding:20px 12px;text-align:center;font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:6px;margin:0;}
+
+/* ── Ideas detail panel ──────────────────────────────────────── */
+.panel-overlay{position:fixed;inset:0;z-index:400;pointer-events:none;}
+.panel-overlay.open{pointer-events:auto;}
+.panel-overlay.open .panel-backdrop{opacity:1;}
+.panel-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.18);opacity:0;transition:opacity 0.2s;cursor:pointer;}
+.panel{position:absolute;top:0;right:0;bottom:0;width:380px;background:var(--surface,#fff);box-shadow:-4px 0 32px rgba(0,0,0,0.12);display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.25s cubic-bezier(.4,0,.2,1);}
+.panel-overlay.open .panel{transform:translateX(0);}
+.panel-hd{padding:20px 24px 16px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.panel-hd h3{font-size:16px;font-weight:700;color:var(--ink);line-height:1.3;margin:0;}
+.panel-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;flex-shrink:0;line-height:1;}
+.panel-body{flex:1;overflow-y:auto;padding:20px 24px;}
+.pf{margin-bottom:16px;}
+.pf-label{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.pf-val{font-size:14px;color:var(--ink);line-height:1.5;}
+.pf-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
+.fmt-tag{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg-alt);color:var(--ink-2);}
+.panel-ft{padding:16px 24px;border-top:1px solid var(--line);display:flex;gap:8px;}
+
+.fmt-checks{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.fmt-check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);cursor:pointer;}
+.fmt-check input{margin:0;cursor:pointer;}
+.plat-checks{display:flex;flex-wrap:wrap;gap:8px;}
+.plat-check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);cursor:pointer;}
+.plat-check input{margin:0;cursor:pointer;}
+
+/* ── Calendar tab ────────────────────────────────────────────── */
+.cal-nav{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.cal-month-label{font-size:22px;font-weight:700;color:var(--ink);min-width:200px;}
+.cal-nav-btn{background:none;border:1px solid var(--line);border-radius:6px;padding:6px 14px;font-size:14px;cursor:pointer;color:var(--ink-2);font-family:inherit;transition:background 0.1s;}
+.cal-nav-btn:hover{background:var(--bg-alt);}
+.cal-today-btn{font-size:12px;color:var(--muted);padding:6px 12px;border:1px solid var(--line);border-radius:999px;cursor:pointer;background:none;font-family:inherit;transition:background 0.1s;}
+.cal-today-btn:hover{background:var(--bg-alt);}
+
+.cal-plat-filters{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
+.cal-plat-btn{font-size:11px;padding:4px 12px;border-radius:999px;border:2px solid transparent;cursor:pointer;font-family:inherit;font-weight:600;background:none;transition:all 0.1s;}
+.cal-plat-btn.plat-all{border-color:var(--line);color:var(--ink-2);}
+.cal-plat-btn.plat-all.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.cal-plat-btn.plat-tiktok{border-color:#fecaca;color:#991b1b;}
+.cal-plat-btn.plat-tiktok.active{background:#fee2e2;border-color:#fca5a5;}
+.cal-plat-btn.plat-instagram{border-color:#ddd6fe;color:#6d28d9;}
+.cal-plat-btn.plat-instagram.active{background:#ede9fe;border-color:#c4b5fd;}
+.cal-plat-btn.plat-linkedin{border-color:#bfdbfe;color:#1d4ed8;}
+.cal-plat-btn.plat-linkedin.active{background:#dbeafe;border-color:#93c5fd;}
+.cal-plat-btn.plat-youtube{border-color:#fecaca;color:#b91c1c;}
+.cal-plat-btn.plat-youtube.active{background:#fee2e2;border-color:#fca5a5;}
+
+.post-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.post-cal-dow{background:var(--bg-alt);padding:8px 10px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);text-align:center;}
+.post-cal-day{background:#fff;min-height:100px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:background 0.1s;position:relative;}
+.post-cal-day:hover{background:#fafafa;}
+.post-cal-day.other-month{background:var(--bg-alt);}
+.post-cal-day.other-month .post-cal-date{color:var(--muted);}
+.post-cal-day.is-today{background:#fffff0;}
+.post-cal-day.is-today .post-cal-date{background:var(--ink);color:#fff;border-radius:999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.post-cal-date{font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:4px;line-height:1;}
+.post-cal-chips{display:flex;flex-direction:column;gap:2px;flex:1;}
+.post-cal-chip{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.chip-tiktok{background:#fee2e2;color:#991b1b;}
+.chip-instagram{background:#ede9fe;color:#6d28d9;}
+.chip-linkedin{background:#dbeafe;color:#1d4ed8;}
+.chip-youtube{background:#fef2f2;color:#b91c1c;}
+.chip-draft{background:var(--bg-alt);color:var(--muted);}
+.post-cal-more{font-size:10px;color:var(--muted);padding:0 7px;}
+
+.cal-stats{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.cal-stat{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 18px;display:flex;flex-direction:column;gap:2px;min-width:100px;}
+.cal-stat-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+.cal-stat-val{font-size:22px;font-weight:700;color:var(--ink);}
+
+/* Day detail panel - calendar tab uses same .panel-overlay classes but different IDs */
+.post-item{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px;}
+.post-item-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.post-platform-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot-tiktok{background:#ef4444;}
+.dot-instagram{background:#8b5cf6;}
+.dot-linkedin{background:#3b82f6;}
+.dot-youtube{background:#dc2626;}
+.post-platform-label{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-2);}
+.post-status-chip{font-size:10px;padding:2px 8px;border-radius:999px;background:var(--bg-alt);color:var(--muted);margin-left:auto;}
+.post-idea-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.post-preview{font-size:12px;color:var(--ink-2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.post-item-foot{display:flex;gap:8px;margin-top:10px;}
+.panel-add-btn{width:100%;margin-top:4px;}
+
+@media(max-width:768px){
+  .post-cal-grid{grid-template-columns:repeat(7,1fr);}
+  .post-cal-day{min-height:60px;padding:4px 6px;}
+  .post-cal-chip{display:none;}
+  .post-cal-date{font-size:12px;}
+  .panel{width:100%;}
+}
+@media(max-width:640px){.panel{width:100%;}.nn-body{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Content</span></div>
+      <div class="topbar-actions" id="topbar-actions">
+        <!-- rendered by renderTopbarActions() -->
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="sec-head" style="margin-bottom:0">
+        <h1>Content</h1>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="tab-bar" style="margin-top:16px">
+        <button class="tab-btn active" onclick="switchTab('articles',this)">Field Notes</button>
+        <button class="tab-btn" onclick="switchTab('ideas',this)">Social Ideas</button>
+        <button class="tab-btn" onclick="switchTab('calendar',this)">Calendar</button>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           TAB: FIELD NOTES (articles)
+      ══════════════════════════════════════════════════════════ -->
+      <div id="tab-articles" class="tab-panel">
+
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="art-search" placeholder="Search articles..." oninput="artRenderView()"/>
+          </div>
+          <select class="filter-select" id="art-filter-status" onchange="artRenderView()">
+            <option value="">All statuses</option>
+            <option value="idea">Idea</option>
+            <option value="writing">Writing</option>
+            <option value="ready">Ready</option>
+            <option value="published">Published</option>
+          </select>
+          <select class="filter-select" id="art-filter-cat" onchange="artRenderView()">
+            <option value="">All categories</option>
+            <option>Operations</option>
+            <option>The Trades</option>
+            <option>AI &amp; Tech</option>
+            <option>Finance</option>
+            <option>Leadership</option>
+          </select>
+          <span class="filter-count" id="art-count"></span>
+        </div>
+
+        <!-- Calendar view (default) -->
+        <div id="art-calendar-view">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:4px">
+            <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:6px 0">Sun</div>
+            <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:6px 0">Mon</div>
+            <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:6px 0">Tue</div>
+            <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:6px 0">Wed</div>
+            <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:6px 0">Thu</div>
+            <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:6px 0">Fri</div>
+            <div style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:6px 0">Sat</div>
+          </div>
+          <div id="art-cal-grid"></div>
+        </div>
+
+        <!-- List view (hidden) -->
+        <div id="art-list-view" style="display:none">
+          <div class="card">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>Title</th><th>Category</th><th>Status</th><th>Publish Date</th><th>File</th><th></th>
+                </tr></thead>
+                <tbody id="art-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /tab-articles -->
+
+      <!-- ══════════════════════════════════════════════════════════
+           TAB: SOCIAL IDEAS (kanban)
+      ══════════════════════════════════════════════════════════ -->
+      <div id="tab-ideas" class="tab-panel" style="display:none">
+
+        <!-- Stats -->
+        <div class="stats-row" style="grid-template-columns:repeat(6,1fr);margin-bottom:20px;">
+          <div class="stat-box"><div class="stat-label">Total</div><div class="stat-val" id="idea-s-total">—</div></div>
+          <div class="stat-box"><div class="stat-label">Idea</div><div class="stat-val" id="idea-s-idea">—</div></div>
+          <div class="stat-box"><div class="stat-label">Scripted</div><div class="stat-val" id="idea-s-scripted">—</div></div>
+          <div class="stat-box"><div class="stat-label">Filming</div><div class="stat-val" id="idea-s-filming">—</div></div>
+          <div class="stat-box"><div class="stat-label">Editing</div><div class="stat-val" id="idea-s-editing">—</div></div>
+          <div class="stat-box"><div class="stat-label">Posted</div><div class="stat-val" id="idea-s-posted">—</div></div>
+        </div>
+
+        <!-- Non-negotiables -->
+        <details class="nn-panel">
+          <summary>Non-Negotiables</summary>
+          <div class="nn-body">
+            <div class="nn-item">Never finish the If I Owned a list - always end abruptly, tease the next one</div>
+            <div class="nn-item">Start mid-thought - never "hello", "hey", or "what is up"</div>
+            <div class="nn-item">End abruptly - no CTA, no sign-off, no "follow for more"</div>
+            <div class="nn-item">Never say "leverage AI" - say "when the system is built to capture this"</div>
+            <div class="nn-item">No em dashes - use regular dashes or restructure the sentence</div>
+            <div class="nn-item">Never say "Not theory. Not hype." - banned phrase</div>
+            <div class="nn-item">Never teach the mechanism - show the result</div>
+            <div class="nn-item">Never soften a take - state it clean and move on</div>
+            <div class="nn-item">Written for operators and field managers - not tech people</div>
+            <div class="nn-item">Real numbers and specific scenarios - not abstractions</div>
+          </div>
+        </details>
+
+        <!-- World tabs + filters -->
+        <div class="world-tabs">
+          <button class="world-tab active" onclick="ideaSetWorld('',this)">All</button>
+          <button class="world-tab" onclick="ideaSetWorld('online',this)">Online World</button>
+          <button class="world-tab" onclick="ideaSetWorld('physical',this)">Physical World</button>
+          <button class="world-tab" onclick="ideaSetWorld('intersection',this)">Intersection</button>
+          <button class="world-tab" onclick="ideaSetWorld('mission',this)">Mission</button>
+        </div>
+
+        <div class="ki-filters">
+          <div class="ki-search">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+            <input id="idea-ki-q" placeholder="Search ideas..." oninput="ideaRenderKanban()"/>
+          </div>
+          <select class="ki-sel" id="idea-ki-series" onchange="ideaRenderKanban()">
+            <option value="">All series</option>
+            <option value="if-i-owned">If I Owned a</option>
+            <option value="400k">$400k Series</option>
+            <option value="ai-reaction">AI Tool Reaction</option>
+            <option value="build-series">Build Series</option>
+            <option value="founder">Founder Series</option>
+            <option value="confessional">Confessional Series</option>
+          </select>
+          <span class="ki-count" id="idea-ki-count"></span>
+        </div>
+
+        <!-- Kanban -->
+        <div class="kanban-wrap" id="idea-kanban-wrap">
+          <!-- columns injected by JS -->
+        </div>
+
+      </div><!-- /tab-ideas -->
+
+      <!-- ══════════════════════════════════════════════════════════
+           TAB: CALENDAR (social posts)
+      ══════════════════════════════════════════════════════════ -->
+      <div id="tab-calendar" class="tab-panel" style="display:none">
+
+        <!-- Stats row -->
+        <div class="cal-stats" id="cal-stats-row">
+          <div class="cal-stat"><div class="cal-stat-label">This Month</div><div class="cal-stat-val" id="cs-total">—</div></div>
+          <div class="cal-stat" style="border-top:3px solid #ef4444"><div class="cal-stat-label">TikTok</div><div class="cal-stat-val" id="cs-tiktok">—</div></div>
+          <div class="cal-stat" style="border-top:3px solid #8b5cf6"><div class="cal-stat-label">Instagram</div><div class="cal-stat-val" id="cs-instagram">—</div></div>
+          <div class="cal-stat" style="border-top:3px solid #3b82f6"><div class="cal-stat-label">LinkedIn</div><div class="cal-stat-val" id="cs-linkedin">—</div></div>
+          <div class="cal-stat" style="border-top:3px solid #dc2626"><div class="cal-stat-label">YouTube</div><div class="cal-stat-val" id="cs-youtube">—</div></div>
+        </div>
+
+        <!-- Nav + filters -->
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="calPrevMonth()">&#8592;</button>
+          <div class="cal-month-label" id="cal-month-label">—</div>
+          <button class="cal-nav-btn" onclick="calNextMonth()">&#8594;</button>
+          <button class="cal-today-btn" onclick="calGoToday()">Today</button>
+          <div class="cal-plat-filters">
+            <button class="cal-plat-btn plat-all active" data-plat="" onclick="calSetPlat(this)">All</button>
+            <button class="cal-plat-btn plat-tiktok" data-plat="tiktok" onclick="calSetPlat(this)">TikTok</button>
+            <button class="cal-plat-btn plat-instagram" data-plat="instagram" onclick="calSetPlat(this)">Instagram</button>
+            <button class="cal-plat-btn plat-linkedin" data-plat="linkedin" onclick="calSetPlat(this)">LinkedIn</button>
+            <button class="cal-plat-btn plat-youtube" data-plat="youtube" onclick="calSetPlat(this)">YouTube</button>
+          </div>
+        </div>
+
+        <!-- Calendar grid -->
+        <div class="post-cal-grid" id="cal-post-grid">
+          <!-- Injected by JS -->
+        </div>
+
+      </div><!-- /tab-calendar -->
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ════════════════════════════════════════════════════════════════
+     MODAL: Add/Edit Article (Field Notes tab)
+════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="art-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title" id="art-modal-title">Add Article</h2>
+      <button class="modal-x" onclick="artCloseModal()">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input class="form-input" id="art-f-title" placeholder="Article title" required/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-input" id="art-f-cat">
+          <option value="">Uncategorized</option>
+          <option>Operations</option>
+          <option>The Trades</option>
+          <option>AI &amp; Tech</option>
+          <option>Finance</option>
+          <option>Leadership</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="art-f-status">
+          <option value="idea">Idea</option>
+          <option value="writing">Writing</option>
+          <option value="ready">Ready</option>
+          <option value="published">Published</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Publish Date</label>
+        <input class="form-input" id="art-f-date" type="date"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Filename</label>
+        <input class="form-input" id="art-f-file" placeholder="article-slug.html"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="art-f-notes" rows="2" placeholder="Angle, notes..."></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="artCloseModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="artSaveItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     PANEL: Social Idea detail (Ideas tab)
+════════════════════════════════════════════════════════════════ -->
+<div class="panel-overlay" id="idea-detail-panel">
+  <div class="panel-backdrop" onclick="ideaClosePanel()"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h3 id="idea-dp-title">Idea</h3>
+      <button class="panel-close" onclick="ideaClosePanel()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="panel-body" id="idea-dp-body"></div>
+    <div class="panel-ft">
+      <a class="btn btn-primary btn-sm" id="idea-dp-compose">Compose →</a>
+      <button class="btn btn-ghost btn-sm" id="idea-dp-edit" onclick="ideaEditFromPanel()">Edit</button>
+      <button class="btn btn-ghost btn-sm" style="color:var(--red,#ef4444);margin-left:auto" id="idea-dp-delete" onclick="ideaDeleteFromPanel()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     MODAL: Add/Edit Social Idea (Ideas tab)
+════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="ci-modal">
+  <div class="modal" style="max-width:600px;padding:28px;max-height:90vh;overflow-y:auto">
+    <div class="modal-hd">
+      <h3 class="modal-title" id="ci-modal-title">Add Idea</h3>
+      <button class="modal-x" onclick="TMIAdmin.closeModal('ci-modal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <input type="hidden" id="ci-id"/>
+
+    <div class="form-group">
+      <label class="form-label">Title <span style="color:var(--red,#ef4444)">*</span></label>
+      <input class="form-input" id="ci-title" placeholder="The idea in one line"/>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">World</label>
+        <select class="form-input" id="ci-world">
+          <option value="">— Select world —</option>
+          <option value="online">Online World</option>
+          <option value="physical">Physical World</option>
+          <option value="intersection">Intersection</option>
+          <option value="mission">Mission</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="ci-status-field">
+          <option value="idea">Idea</option>
+          <option value="scripted">Scripted</option>
+          <option value="filming">Filming</option>
+          <option value="editing">Editing</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="posted">Posted</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Territory</label>
+        <input class="form-input" id="ci-territory" placeholder="e.g. The System Working Unseen"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Series</label>
+        <select class="form-input" id="ci-series-field">
+          <option value="">None</option>
+          <option value="if-i-owned">If I Owned a</option>
+          <option value="400k">$400k Series</option>
+          <option value="ai-reaction">AI Tool Reaction</option>
+          <option value="build-series">Build Series</option>
+          <option value="founder">Founder Series</option>
+          <option value="confessional">Confessional Series</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Format</label>
+      <div class="fmt-checks">
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="raw-moment"/> Raw Moment</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="reality-clip"/> Reality Clip</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="build-document"/> Build Document</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="confessional"/> Confessional</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="controversial-take"/> Controversial Take</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="reaction"/> Reaction</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="interview"/> Interview</label>
+        <label class="fmt-check"><input type="checkbox" name="fmt" value="founder-talking-head"/> Founder Talking Head</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Platforms</label>
+      <div class="plat-checks">
+        <label class="plat-check"><input type="checkbox" name="plat" value="tiktok"/> TikTok</label>
+        <label class="plat-check"><input type="checkbox" name="plat" value="instagram"/> Instagram</label>
+        <label class="plat-check"><input type="checkbox" name="plat" value="linkedin"/> LinkedIn</label>
+        <label class="plat-check"><input type="checkbox" name="plat" value="youtube"/> YouTube</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Hook / Caption</label>
+      <textarea class="form-input" id="ci-hook" rows="2" placeholder="Opening line or on-screen text" style="resize:vertical"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="ci-notes" rows="3" placeholder="Scene details, angles, specific numbers, references..." style="resize:vertical"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Scheduled At</label>
+        <input class="form-input" type="datetime-local" id="ci-scheduled-at"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Post URL</label>
+        <input class="form-input" id="ci-post-url" placeholder="https://tiktok.com/..."/>
+      </div>
+    </div>
+
+    <div class="modal-ft" style="margin-top:8px">
+      <button class="btn btn-ghost btn-sm" id="ci-delete-btn" onclick="ideaDeleteFromModal()" style="display:none;color:var(--red,#ef4444)">Delete</button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('ci-modal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="ideaSave()">Save Idea</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     PANEL: Day detail (Calendar tab)
+════════════════════════════════════════════════════════════════ -->
+<div class="panel-overlay" id="day-panel">
+  <div class="panel-backdrop" onclick="calClosePanel()"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h3 id="cal-dp-date">Posts</h3>
+      <button class="panel-close" onclick="calClosePanel()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="panel-body" id="cal-dp-body"></div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('content-hub');
+
+// ══════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ══════════════════════════════════════════════════════════════════
+let ideasLoaded = false;
+let calendarLoaded = false;
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = '';
+  btn.classList.add('active');
+  if (name === 'ideas' && !ideasLoaded) { ideasLoaded = true; ideaLoad(); }
+  if (name === 'calendar' && !calendarLoaded) { calendarLoaded = true; calLoad(); }
+  renderTopbarActions(name);
+}
+
+function renderTopbarActions(tab) {
+  const el = document.getElementById('topbar-actions');
+  if (tab === 'articles') {
+    el.innerHTML = `
+      <button class="btn btn-ghost btn-sm" id="art-view-toggle" onclick="artToggleView()">List view</button>
+      <button class="btn btn-primary btn-sm" onclick="artOpenAddModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Article
+      </button>`;
+  } else if (tab === 'ideas') {
+    el.innerHTML = `
+      <button class="btn btn-ghost btn-sm" onclick="window.location='/admin-content-compose'">Compose</button>
+      <button class="btn btn-primary btn-sm" onclick="ideaOpenNew()">+ Add Idea</button>`;
+  } else if (tab === 'calendar') {
+    el.innerHTML = `
+      <a href="/admin-content-compose" class="btn btn-primary btn-sm">+ Compose</a>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FIELD NOTES TAB (articles)
+// ══════════════════════════════════════════════════════════════════
+let artAllItems = [];
+let artEditId = null;
+let artCalMode = true;
+let artCalYear, artCalMonth;
+
+async function artLoad() {
+  artAllItems = await TMIAdmin.api('/api/content') || [];
+  artRenderView();
+}
+
+function artFiltered() {
+  const q = document.getElementById('art-search').value.toLowerCase();
+  const st = document.getElementById('art-filter-status').value;
+  const cat = document.getElementById('art-filter-cat').value;
+  return artAllItems.filter(i => {
+    if (st && i.status !== st) return false;
+    if (cat && i.category !== cat) return false;
+    if (q && !i.title.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function artRenderView() {
+  artCalMode ? artRenderCalendar() : artRenderList();
+}
+
+function artRenderCalendar() {
+  const rows = artFiltered();
+  document.getElementById('art-count').textContent = `${rows.length} article${rows.length !== 1 ? 's' : ''}`;
+
+  const now = new Date();
+  if (!artCalYear) artCalYear = now.getFullYear();
+  if (!artCalMonth) artCalMonth = now.getMonth();
+
+  const first = new Date(artCalYear, artCalMonth, 1);
+  const last = new Date(artCalYear, artCalMonth + 1, 0);
+  const startDay = first.getDay();
+
+  const byDate = {};
+  rows.forEach(i => {
+    if (i.publish_date) {
+      const d = i.publish_date.slice(0, 10);
+      if (!byDate[d]) byDate[d] = [];
+      byDate[d].push(i);
+    }
+  });
+
+  let html = '';
+  let dayCount = 0;
+  html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">';
+
+  for (let i = 0; i < startDay; i++) {
+    html += `<div style="min-height:80px;background:var(--bg);border-radius:4px;padding:6px 8px"></div>`;
+    dayCount++;
+  }
+
+  for (let d = 1; d <= last.getDate(); d++) {
+    const dateStr = `${artCalYear}-${String(artCalMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const isToday = dateStr === new Date().toISOString().slice(0, 10);
+    const items = byDate[dateStr] || [];
+    html += `
+      <div style="min-height:80px;background:var(--surface);border-radius:4px;padding:6px 8px;border:1px solid ${isToday ? 'var(--ink)' : 'var(--line)'}">
+        <div style="font-size:10px;color:${isToday ? 'var(--ink)' : 'var(--muted)'};font-weight:${isToday ? '700' : '400'};margin-bottom:4px">${d}</div>
+        ${items.map(i => `<div class="cal-item ${i.status}" onclick="artOpenEdit('${i.id}')" title="${i.title}">${i.title}</div>`).join('')}
+        <div style="font-size:9px;color:var(--line);cursor:pointer;margin-top:2px" onclick="artOpenAddOnDate('${dateStr}')">+</div>
+      </div>
+    `;
+    dayCount++;
+  }
+
+  while (dayCount % 7 !== 0) {
+    html += `<div style="min-height:80px;background:var(--bg);border-radius:4px;padding:6px 8px"></div>`;
+    dayCount++;
+  }
+  html += '</div>';
+
+  const monthName = new Date(artCalYear, artCalMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+  document.getElementById('art-cal-grid').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <button class="btn btn-ghost btn-sm" onclick="artCalNav(-1)">&larr;</button>
+      <span style="font-size:14px;font-weight:600">${monthName}</span>
+      <button class="btn btn-ghost btn-sm" onclick="artCalNav(1)">&rarr;</button>
+    </div>
+    ${html}
+  `;
+}
+
+function artCalNav(dir) {
+  artCalMonth += dir;
+  if (artCalMonth > 11) { artCalMonth = 0; artCalYear++; }
+  if (artCalMonth < 0) { artCalMonth = 11; artCalYear--; }
+  artRenderCalendar();
+}
+
+function artRenderList() {
+  const rows = artFiltered();
+  document.getElementById('art-count').textContent = `${rows.length} article${rows.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('art-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">✍️</div><h3>No articles</h3><p>Add your first article idea above.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(i => `
+    <tr onclick="artOpenEdit('${i.id}')">
+      <td class="td-name">${i.title}</td>
+      <td class="td-muted">${i.category || '-'}</td>
+      <td>${TMIAdmin.badge(i.status)}</td>
+      <td class="td-muted">${i.publish_date ? TMIAdmin.fmt(i.publish_date) : '-'}</td>
+      <td>${i.filename ? `<a href="${i.filename}" target="_blank" style="color:var(--blue);font-size:12px">${i.filename}</a>` : '<span class="td-muted">-</span>'}</td>
+      <td class="td-action">
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();artOpenEdit('${i.id}')">Edit</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red);margin-left:4px" onclick="event.stopPropagation();artDeleteItem('${i.id}')">Del</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function artToggleView() {
+  artCalMode = !artCalMode;
+  document.getElementById('art-calendar-view').style.display = artCalMode ? '' : 'none';
+  document.getElementById('art-list-view').style.display = artCalMode ? 'none' : '';
+  const btn = document.getElementById('art-view-toggle');
+  if (btn) btn.textContent = artCalMode ? 'List view' : 'Calendar view';
+  artRenderView();
+}
+
+function artOpenAddModal() {
+  artEditId = null;
+  document.getElementById('art-modal-title').textContent = 'Add Article';
+  ['art-f-title','art-f-date','art-f-file','art-f-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('art-f-cat').value = '';
+  document.getElementById('art-f-status').value = 'idea';
+  document.getElementById('art-modal').classList.add('open');
+}
+
+function artOpenAddOnDate(dateStr) {
+  artOpenAddModal();
+  document.getElementById('art-f-date').value = dateStr;
+  document.getElementById('art-f-status').value = 'writing';
+}
+
+function artOpenEdit(id) {
+  const item = artAllItems.find(i => i.id === id);
+  if (!item) return;
+  artEditId = id;
+  document.getElementById('art-modal-title').textContent = 'Edit Article';
+  document.getElementById('art-f-title').value = item.title;
+  document.getElementById('art-f-cat').value = item.category || '';
+  document.getElementById('art-f-status').value = item.status;
+  document.getElementById('art-f-date').value = item.publish_date || '';
+  document.getElementById('art-f-file').value = item.filename || '';
+  document.getElementById('art-f-notes').value = item.notes || '';
+  document.getElementById('art-modal').classList.add('open');
+}
+
+function artCloseModal() { document.getElementById('art-modal').classList.remove('open'); artEditId = null; }
+
+async function artSaveItem() {
+  const title = document.getElementById('art-f-title').value.trim();
+  if (!title) { TMIAdmin.toast('Title required', 'error'); return; }
+  const payload = {
+    title,
+    category: document.getElementById('art-f-cat').value || null,
+    status: document.getElementById('art-f-status').value,
+    publish_date: document.getElementById('art-f-date').value || null,
+    filename: document.getElementById('art-f-file').value || null,
+    notes: document.getElementById('art-f-notes').value || null,
+  };
+  if (artEditId) payload.id = artEditId;
+  const method = artEditId ? 'PUT' : 'POST';
+  const res = await TMIAdmin.api('/api/content', method, payload);
+  if (res) {
+    TMIAdmin.toast(artEditId ? 'Article updated' : 'Article added');
+    artCloseModal();
+    await artLoad();
+  }
+}
+
+async function artDeleteItem(id) {
+  const ok = await TMIAdmin.confirm('Delete this article?', false);
+  if (!ok) return;
+  const res = await TMIAdmin.api('/api/content', 'DELETE', { id });
+  if (res) { TMIAdmin.toast('Deleted'); await artLoad(); }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SOCIAL IDEAS TAB (kanban)
+// ══════════════════════════════════════════════════════════════════
+const IDEA_STATUSES = ['idea','scripted','filming','editing','scheduled','posted'];
+const IDEA_STATUS_LABELS = { idea:'Idea', scripted:'Scripted', filming:'Filming', editing:'Editing', scheduled:'Scheduled', posted:'Posted' };
+const IDEA_WORLD_LABELS  = { online:'Online', physical:'Physical', intersection:'Intersection', mission:'Mission' };
+const IDEA_SERIES_LABELS = { 'if-i-owned':'If I Owned a', '400k':'$400k', 'ai-reaction':'AI Reaction', 'build-series':'Build Series', founder:'Founder', confessional:'Confessional' };
+const IDEA_FMT_LABELS    = { 'raw-moment':'Raw Moment', 'reality-clip':'Reality Clip', 'build-document':'Build Doc', 'confessional':'Confessional', 'controversial-take':'Hot Take', 'reaction':'Reaction', 'interview':'Interview', 'founder-talking-head':'Talking Head' };
+
+let ideaAll = [];
+let ideaWorldFilter = '';
+let ideaPanelIdea = null;
+let ideaDraggedId = null;
+
+async function ideaLoad() {
+  ideaAll = await TMIAdmin.api('/api/content-ideas') || [];
+  ideaUpdateStats();
+  ideaBuildKanban();
+  ideaRenderKanban();
+}
+
+function ideaUpdateStats() {
+  document.getElementById('idea-s-total').textContent = ideaAll.length;
+  ['idea','scripted','filming','editing','posted'].forEach(s => {
+    const el = document.getElementById('idea-s-' + s);
+    if (el) el.textContent = ideaAll.filter(i => i.status === s).length;
+  });
+}
+
+function ideaBuildKanban() {
+  const wrap = document.getElementById('idea-kanban-wrap');
+  wrap.innerHTML = IDEA_STATUSES.map(s => `
+    <div class="k-col">
+      <div class="k-col-hd" data-s="${s}">
+        <span class="k-col-title">${IDEA_STATUS_LABELS[s]}</span>
+        <span class="k-col-count" id="idea-count-${s}">0</span>
+      </div>
+      <div class="k-col-body" id="idea-col-${s}"></div>
+    </div>`).join('');
+
+  IDEA_STATUSES.forEach(s => {
+    const body = document.getElementById('idea-col-' + s);
+    body.addEventListener('dragover', e => { e.preventDefault(); body.classList.add('drag-over'); });
+    body.addEventListener('dragleave', () => body.classList.remove('drag-over'));
+    body.addEventListener('drop', async e => {
+      e.preventDefault();
+      body.classList.remove('drag-over');
+      if (!ideaDraggedId) return;
+      const idea = ideaAll.find(i => i.id === ideaDraggedId);
+      if (!idea || idea.status === s) { ideaDraggedId = null; return; }
+      const prev = idea.status;
+      idea.status = s;
+      ideaDraggedId = null;
+      ideaUpdateStats();
+      ideaRenderKanban();
+      const ok = await TMIAdmin.api('/api/content-ideas', 'PUT', { id: idea.id, status: s });
+      if (!ok) { idea.status = prev; ideaUpdateStats(); ideaRenderKanban(); }
+      else TMIAdmin.toast('Moved to ' + IDEA_STATUS_LABELS[s]);
+    });
+  });
+}
+
+function ideaRenderKanban() {
+  const q = document.getElementById('idea-ki-q').value.toLowerCase();
+  const series = document.getElementById('idea-ki-series').value;
+
+  const filtered = ideaAll.filter(i => {
+    if (ideaWorldFilter && i.world !== ideaWorldFilter) return false;
+    if (series && i.series !== series) return false;
+    if (q && !i.title.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const total = filtered.filter(i => IDEA_STATUSES.includes(i.status)).length;
+  document.getElementById('idea-ki-count').textContent = total + ' idea' + (total !== 1 ? 's' : '');
+
+  IDEA_STATUSES.forEach(s => {
+    const cards = filtered.filter(i => i.status === s);
+    document.getElementById('idea-count-' + s).textContent = cards.length;
+    const body = document.getElementById('idea-col-' + s);
+    if (!cards.length) {
+      body.innerHTML = `<p class="k-col-empty">Drop here</p>`;
+      return;
+    }
+    body.innerHTML = cards.map(idea => ideaCardHtml(idea)).join('');
+    body.querySelectorAll('.k-card').forEach(card => {
+      const id = card.dataset.id;
+      card.addEventListener('dragstart', e => {
+        ideaDraggedId = id;
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => card.classList.add('dragging'), 0);
+      });
+      card.addEventListener('dragend', () => { card.classList.remove('dragging'); });
+      card.addEventListener('click', e => {
+        if (e.target.closest('.k-compose-btn')) return;
+        ideaOpenPanel(ideaAll.find(i => i.id === id));
+      });
+    });
+  });
+}
+
+function ideaCardHtml(i) {
+  const wc = i.world ? `wp-${i.world}` : '';
+  const series = i.series ? `<span class="series-tag">${IDEA_SERIES_LABELS[i.series] || i.series}</span>` : '';
+  const world = i.world ? `<span class="world-pill ${wc}">${IDEA_WORLD_LABELS[i.world]}</span>` : '';
+  return `<div class="k-card" data-id="${i.id}" draggable="true">
+    <div class="k-card-title">${i.title}</div>
+    ${i.territory ? `<div class="k-card-sub">${i.territory}</div>` : ''}
+    <div class="k-card-foot">
+      ${world}${series}
+      <a class="k-compose-btn" href="/admin-content-compose?idea=${i.id}">Compose →</a>
+    </div>
+  </div>`;
+}
+
+function ideaSetWorld(w, btn) {
+  ideaWorldFilter = w;
+  document.querySelectorAll('.world-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ideaRenderKanban();
+}
+
+function ideaOpenPanel(idea) {
+  if (!idea) return;
+  ideaPanelIdea = idea;
+  document.getElementById('idea-dp-title').textContent = idea.title;
+  document.getElementById('idea-dp-compose').href = '/admin-content-compose?idea=' + idea.id;
+  const fmts = (idea.formats || []).map(f => `<span class="fmt-tag">${IDEA_FMT_LABELS[f] || f}</span>`).join('');
+  const plats = (idea.platforms || []).join(', ') || '-';
+  document.getElementById('idea-dp-body').innerHTML = `
+    ${idea.world ? `<div class="pf"><div class="pf-label">World</div><div class="pf-val"><span class="world-pill wp-${idea.world}">${IDEA_WORLD_LABELS[idea.world]}</span></div></div>` : ''}
+    ${idea.territory ? `<div class="pf"><div class="pf-label">Territory</div><div class="pf-val">${idea.territory}</div></div>` : ''}
+    ${idea.series ? `<div class="pf"><div class="pf-label">Series</div><div class="pf-val">${IDEA_SERIES_LABELS[idea.series] || idea.series}</div></div>` : ''}
+    <div class="pf"><div class="pf-label">Status</div><div class="pf-val">${TMIAdmin.badge(idea.status)}</div></div>
+    ${fmts ? `<div class="pf"><div class="pf-label">Formats</div><div class="pf-tags">${fmts}</div></div>` : ''}
+    <div class="pf"><div class="pf-label">Platforms</div><div class="pf-val">${plats}</div></div>
+    ${idea.hook ? `<div class="pf"><div class="pf-label">Hook</div><div class="pf-val" style="font-style:italic">${idea.hook}</div></div>` : ''}
+    ${idea.notes ? `<div class="pf"><div class="pf-label">Notes</div><div class="pf-val">${idea.notes}</div></div>` : ''}
+    ${idea.scheduled_at ? `<div class="pf"><div class="pf-label">Scheduled</div><div class="pf-val">${TMIAdmin.fmt(idea.scheduled_at)}</div></div>` : ''}
+    ${idea.post_url ? `<div class="pf"><div class="pf-label">Live Post</div><div class="pf-val"><a href="${idea.post_url}" target="_blank" style="color:var(--ink);text-decoration:underline">View →</a></div></div>` : ''}
+  `;
+  document.getElementById('idea-detail-panel').classList.add('open');
+}
+
+function ideaClosePanel() {
+  document.getElementById('idea-detail-panel').classList.remove('open');
+  ideaPanelIdea = null;
+}
+
+function ideaEditFromPanel() {
+  const idea = ideaPanelIdea;
+  ideaClosePanel();
+  ideaOpenEdit(idea);
+}
+
+async function ideaDeleteFromPanel() {
+  if (!ideaPanelIdea) return;
+  const ok = await TMIAdmin.confirm('Delete "' + ideaPanelIdea.title + '"?');
+  if (!ok) return;
+  await TMIAdmin.api(`/api/content-ideas?id=${ideaPanelIdea.id}`, 'DELETE');
+  ideaClosePanel();
+  TMIAdmin.toast('Idea deleted');
+  await ideaLoad();
+}
+
+function ideaOpenNew() {
+  document.getElementById('ci-id').value = '';
+  document.getElementById('ci-modal-title').textContent = 'Add Idea';
+  document.getElementById('ci-delete-btn').style.display = 'none';
+  ideaClearForm();
+  TMIAdmin.openModal('ci-modal');
+}
+
+function ideaOpenEdit(idea) {
+  document.getElementById('ci-id').value = idea.id;
+  document.getElementById('ci-modal-title').textContent = 'Edit Idea';
+  document.getElementById('ci-delete-btn').style.display = 'block';
+  ideaFillForm(idea);
+  TMIAdmin.openModal('ci-modal');
+}
+
+function ideaClearForm() {
+  ['ci-title','ci-hook','ci-notes','ci-territory','ci-post-url','ci-scheduled-at'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ci-world').value = '';
+  document.getElementById('ci-status-field').value = 'idea';
+  document.getElementById('ci-series-field').value = '';
+  document.querySelectorAll('input[name="fmt"],input[name="plat"]').forEach(cb => cb.checked = false);
+}
+
+function ideaFillForm(i) {
+  document.getElementById('ci-title').value = i.title || '';
+  document.getElementById('ci-world').value = i.world || '';
+  document.getElementById('ci-status-field').value = i.status || 'idea';
+  document.getElementById('ci-territory').value = i.territory || '';
+  document.getElementById('ci-series-field').value = i.series || '';
+  document.getElementById('ci-hook').value = i.hook || '';
+  document.getElementById('ci-notes').value = i.notes || '';
+  document.getElementById('ci-post-url').value = i.post_url || '';
+  document.getElementById('ci-scheduled-at').value = i.scheduled_at ? i.scheduled_at.slice(0,16) : '';
+  document.querySelectorAll('input[name="fmt"]').forEach(cb => cb.checked = (i.formats || []).includes(cb.value));
+  document.querySelectorAll('input[name="plat"]').forEach(cb => cb.checked = (i.platforms || []).includes(cb.value));
+}
+
+function ideaGetFormData() {
+  const formats = [...document.querySelectorAll('input[name="fmt"]:checked')].map(c => c.value);
+  const platforms = [...document.querySelectorAll('input[name="plat"]:checked')].map(c => c.value);
+  return {
+    title: document.getElementById('ci-title').value.trim(),
+    world: document.getElementById('ci-world').value || null,
+    status: document.getElementById('ci-status-field').value,
+    territory: document.getElementById('ci-territory').value.trim() || null,
+    series: document.getElementById('ci-series-field').value || null,
+    hook: document.getElementById('ci-hook').value.trim() || null,
+    notes: document.getElementById('ci-notes').value.trim() || null,
+    post_url: document.getElementById('ci-post-url').value.trim() || null,
+    scheduled_at: document.getElementById('ci-scheduled-at').value || null,
+    formats: formats.length ? formats : null,
+    platforms: platforms.length ? platforms : null,
+  };
+}
+
+async function ideaSave() {
+  const id = document.getElementById('ci-id').value;
+  const body = ideaGetFormData();
+  if (!body.title) { TMIAdmin.toast('Title required', 'error'); return; }
+  if (id) body.id = id;
+  const result = await TMIAdmin.api('/api/content-ideas', id ? 'PUT' : 'POST', body);
+  if (!result) return;
+  TMIAdmin.closeModal('ci-modal');
+  TMIAdmin.toast(id ? 'Idea updated' : 'Idea added');
+  await ideaLoad();
+}
+
+async function ideaDeleteFromModal() {
+  const id = document.getElementById('ci-id').value;
+  if (!id) return;
+  const ok = await TMIAdmin.confirm('Delete this idea permanently?');
+  if (!ok) return;
+  await TMIAdmin.api(`/api/content-ideas?id=${id}`, 'DELETE');
+  TMIAdmin.closeModal('ci-modal');
+  TMIAdmin.toast('Idea deleted');
+  await ideaLoad();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CALENDAR TAB (social posts)
+// ══════════════════════════════════════════════════════════════════
+const CAL_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CAL_DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const CAL_PLATFORM_COLORS = { tiktok:'chip-tiktok', instagram:'chip-instagram', linkedin:'chip-linkedin', youtube:'chip-youtube' };
+const CAL_DOT_COLORS = { tiktok:'dot-tiktok', instagram:'dot-instagram', linkedin:'dot-linkedin', youtube:'dot-youtube' };
+const CAL_PLATFORM_LABELS = { tiktok:'TikTok', instagram:'Instagram', linkedin:'LinkedIn', youtube:'YouTube' };
+
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let calPosts = [];
+let calPlatFilter = '';
+
+async function calLoad() {
+  const monthStr = calYear + '-' + String(calMonth + 1).padStart(2, '0');
+  document.getElementById('cal-month-label').textContent = CAL_MONTHS[calMonth] + ' ' + calYear;
+  calPosts = await TMIAdmin.api(`/api/content-posts?month=${monthStr}`) || [];
+  calUpdateStats();
+  calRenderGrid();
+}
+
+function calUpdateStats() {
+  document.getElementById('cs-total').textContent = calPosts.length;
+  ['tiktok','instagram','linkedin','youtube'].forEach(p => {
+    const el = document.getElementById('cs-' + p);
+    if (el) el.textContent = calPosts.filter(post => post.platform === p).length;
+  });
+}
+
+function calPrevMonth() {
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  calLoad();
+}
+function calNextMonth() {
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  calLoad();
+}
+function calGoToday() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  calLoad();
+}
+function calSetPlat(btn) {
+  document.querySelectorAll('.cal-plat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  calPlatFilter = btn.dataset.plat;
+  calRenderGrid();
+}
+
+function calRenderGrid() {
+  const grid = document.getElementById('cal-post-grid');
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
+  const today = new Date();
+
+  const filteredPosts = calPlatFilter ? calPosts.filter(p => p.platform === calPlatFilter) : calPosts;
+
+  const byDay = {};
+  filteredPosts.forEach(p => {
+    if (!p.scheduled_at) return;
+    const d = new Date(p.scheduled_at);
+    if (d.getFullYear() === calYear && d.getMonth() === calMonth) {
+      const day = d.getDate();
+      if (!byDay[day]) byDay[day] = [];
+      byDay[day].push(p);
+    }
+  });
+
+  let html = CAL_DAYS.map(d => `<div class="post-cal-dow">${d}</div>`).join('');
+
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="post-cal-day other-month"><div class="post-cal-date">${daysInPrevMonth - i}</div></div>`;
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const isToday = today.getDate() === day && today.getMonth() === calMonth && today.getFullYear() === calYear;
+    const dayPosts = byDay[day] || [];
+    const chips = dayPosts.slice(0, 3).map(p => {
+      const cc = CAL_PLATFORM_COLORS[p.platform] || 'chip-draft';
+      const title = p.content_ideas?.title || p.platform || 'Post';
+      return `<div class="post-cal-chip ${cc}" onclick="event.stopPropagation();calOpenDay(${day})">${title.slice(0,28)}</div>`;
+    }).join('');
+    const more = dayPosts.length > 3 ? `<div class="post-cal-more">+${dayPosts.length - 3} more</div>` : '';
+
+    html += `<div class="post-cal-day${isToday ? ' is-today' : ''}" onclick="calOpenDay(${day})">
+      <div class="post-cal-date">${day}</div>
+      <div class="post-cal-chips">${chips}${more}</div>
+    </div>`;
+  }
+
+  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+  const remaining = totalCells - firstDay - daysInMonth;
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="post-cal-day other-month"><div class="post-cal-date">${i}</div></div>`;
+  }
+
+  grid.innerHTML = html;
+}
+
+function calOpenDay(day) {
+  const date = new Date(calYear, calMonth, day);
+  const label = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  document.getElementById('cal-dp-date').textContent = label;
+
+  const dayPosts = calPosts.filter(p => {
+    if (!p.scheduled_at) return false;
+    const d = new Date(p.scheduled_at);
+    return d.getDate() === day && d.getMonth() === calMonth && d.getFullYear() === calYear;
+  });
+
+  const body = document.getElementById('cal-dp-body');
+  if (!dayPosts.length) {
+    body.innerHTML = `
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">No posts scheduled.</div>
+      <a href="/admin-content-compose" class="btn btn-primary btn-sm panel-add-btn">+ Compose Post</a>`;
+  } else {
+    body.innerHTML = dayPosts.map(p => {
+      const dot = CAL_DOT_COLORS[p.platform] || '';
+      const platLabel = CAL_PLATFORM_LABELS[p.platform] || p.platform || 'Post';
+      const title = p.content_ideas?.title || '-';
+      const preview = p.content_body || '';
+      const time = p.scheduled_at ? new Date(p.scheduled_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+      return `<div class="post-item">
+        <div class="post-item-head">
+          <div class="post-platform-dot ${dot}"></div>
+          <span class="post-platform-label">${platLabel}</span>
+          ${time ? `<span style="font-size:11px;color:var(--muted)">${time}</span>` : ''}
+          <span class="post-status-chip">${p.status}</span>
+        </div>
+        <div class="post-idea-title">${title}</div>
+        ${preview ? `<div class="post-preview">${preview}</div>` : ''}
+        <div class="post-item-foot">
+          <a href="/admin-content-compose" class="btn btn-ghost btn-sm">Edit</a>
+          <button class="btn btn-ghost btn-sm" style="color:var(--red,#ef4444)" onclick="calDeletePost('${p.id}')">Delete</button>
+        </div>
+      </div>`;
+    }).join('') + `<a href="/admin-content-compose" class="btn btn-ghost btn-sm panel-add-btn" style="width:100%;text-align:center;display:block;margin-top:4px">+ Add Another</a>`;
+  }
+
+  document.getElementById('day-panel').classList.add('open');
+}
+
+function calClosePanel() {
+  document.getElementById('day-panel').classList.remove('open');
+}
+
+async function calDeletePost(id) {
+  const ok = await TMIAdmin.confirm('Delete this post?');
+  if (!ok) return;
+  await TMIAdmin.api(`/api/content-posts?id=${id}`, 'DELETE');
+  TMIAdmin.toast('Post deleted');
+  calClosePanel();
+  await calLoad();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+renderTopbarActions('articles');
+artLoad();
+</script>
+</body>
+</html>

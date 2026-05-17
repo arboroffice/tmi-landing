@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Reports — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto;}
+  .tab-btn{padding:10px 18px;font-size:13px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-family:inherit;white-space:nowrap;transition:color 0.15s,border-color 0.15s;}
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Reports</span></div>
+    </div>
+    <div class="content">
+      <div class="sec-head"><h1>Reports</h1></div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('revenue')">Revenue</button>
+        <button class="tab-btn" onclick="switchTab('analytics')">Analytics</button>
+      </div>
+
+      <!-- Revenue Tab -->
+      <div id="tab-revenue">
+        <div class="stats-row" id="rev-stats"></div>
+        <div class="card" style="margin-top:20px">
+          <div class="card-head"><span class="card-title">MRR Trend</span><span class="card-sub" id="mrr-trend-sub"></span></div>
+          <div id="mrr-trend-body" style="padding:20px 24px 8px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
+        <div class="grid-2" style="margin-top:20px">
+          <div class="card">
+            <div class="card-head"><span class="card-title">Monthly Recurring Revenue</span><span class="card-sub" id="mrr-total"></span></div>
+            <div id="mrr-list" style="padding:4px 0"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><span class="card-title">Pipeline Value by Stage</span></div>
+            <div id="pipeline-list" style="padding:20px"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px">
+          <div class="card-head"><span class="card-title">Invoice History</span><a href="/admin-work" class="btn btn-ghost btn-sm">View all</a></div>
+          <div id="inv-history"></div>
+        </div>
+        <div class="card" style="margin-top:20px">
+          <div class="card-head"><span class="card-title">Open Proposals</span><a href="/admin-proposals" class="btn btn-ghost btn-sm">View all</a></div>
+          <div id="prop-open"></div>
+        </div>
+      </div>
+
+      <!-- Analytics Tab -->
+      <div id="tab-analytics" style="display:none">
+        <div class="card" style="margin-top:20px">
+          <div class="card-head"><span class="card-title">Pipeline Funnel</span><span class="card-sub" id="funnel-sub"></span></div>
+          <div id="funnel-body" style="padding:20px 24px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
+        <div class="card" style="margin-top:20px">
+          <div class="card-head"><span class="card-title">Deal Velocity</span><span class="card-sub">Avg days per stage</span></div>
+          <div id="velocity-body" style="padding:20px 24px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
+        <div class="grid-2" style="margin-top:20px">
+          <div class="card">
+            <div class="card-head"><span class="card-title">Revenue Forecast</span><span class="card-sub">Pipeline-weighted</span></div>
+            <div id="forecast-body" style="padding:24px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><span class="card-title">Invoices at a Glance</span></div>
+            <div id="invoices-glance" style="padding:24px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:20px">
+          <div class="card">
+            <div class="card-head"><span class="card-title">Lead Sources</span></div>
+            <div id="sources-body" style="padding:20px 24px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><span class="card-title">Top Niches</span></div>
+            <div id="niches-body" style="padding:20px 24px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('reports');
+
+let analyticsLoaded = false;
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['revenue','analytics'][i] === tab));
+  document.getElementById('tab-revenue').style.display    = tab === 'revenue'   ? '' : 'none';
+  document.getElementById('tab-analytics').style.display  = tab === 'analytics' ? '' : 'none';
+  if (tab === 'analytics' && !analyticsLoaded) { analyticsLoaded = true; loadAnalytics(); }
+}
+
+// ── Revenue ───────────────────────────────────────────────────────────────────
+
+function renderTrendChart(clients) {
+  const body = document.getElementById('mrr-trend-body');
+  const sub  = document.getElementById('mrr-trend-sub');
+  if (!body) return;
+  const months = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleString('en-US', { month: 'short' }) });
+  }
+  const values = months.map(m => {
+    const monthEnd = new Date(m.year, m.month + 1, 0, 23, 59, 59);
+    let total = 0;
+    (clients || []).forEach(c => {
+      if (c.status !== 'active') return;
+      const startDate = c.start_date ? new Date(c.start_date) : null;
+      if (!startDate || startDate <= monthEnd) total += parseFloat(c.mrr || 0);
+    });
+    return total;
+  });
+  const maxVal = Math.max(...values);
+  if (maxVal === 0) {
+    body.innerHTML = `<div style="padding:24px 0;text-align:center;font-size:13px;color:var(--muted)">No MRR data yet.</div>`;
+    return;
+  }
+  sub.textContent = 'Last 6 months';
+  const maxBarH = 180;
+  body.innerHTML = `<div class="rev-chart-wrap">${months.map((m,i) => {
+    const val = values[i];
+    const heightPx = Math.max(4, Math.round((val / maxVal) * maxBarH));
+    const displayVal = val >= 1000 ? `$${(val/1000).toFixed(1)}k` : (val > 0 ? `$${val.toLocaleString()}` : '');
+    return `<div class="rev-bar-col"><div class="rev-bar-val">${displayVal}</div><div class="rev-bar" style="height:${heightPx}px"></div><div class="rev-bar-label">${m.label}</div></div>`;
+  }).join('')}</div>`;
+}
+
+async function loadRevenue() {
+  const [clients, leads, invoices, proposals] = await Promise.all([
+    TMIAdmin.api('/api/clients'),
+    TMIAdmin.api('/api/leads'),
+    TMIAdmin.api('/api/invoices'),
+    TMIAdmin.api('/api/proposals'),
+  ]);
+
+  renderTrendChart(clients || []);
+
+  const activeClients = (clients || []).filter(c => c.status === 'active');
+  const mrr = activeClients.reduce((s, c) => s + parseFloat(c.mrr || 0), 0);
+  const invoicePaid = (invoices || []).filter(i => i.status === 'paid').reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+  const invoiceOutstanding = (invoices || []).filter(i => ['pending','viewed','overdue'].includes(i.status)).reduce((s, i) => s + parseFloat(i.amount || 0), 0);
+  const pipelineValue = (leads || []).filter(l => !['won','lost'].includes(l.status)).reduce((s, l) => s + parseFloat(l.value || 0), 0);
+
+  document.getElementById('rev-stats').innerHTML = `
+    <div class="stat-box"><div class="stat-label">MRR</div><div class="stat-val">$${mrr.toLocaleString()}</div><div class="stat-delta">${activeClients.length} active clients</div></div>
+    <div class="stat-box"><div class="stat-label">ARR</div><div class="stat-val">$${(mrr*12).toLocaleString()}</div><div class="stat-delta">Annualized</div></div>
+    <div class="stat-box"><div class="stat-label">Collected</div><div class="stat-val" style="color:var(--green)">$${invoicePaid.toLocaleString()}</div><div class="stat-delta">All paid invoices</div></div>
+    <div class="stat-box"><div class="stat-label">Outstanding</div><div class="stat-val">$${invoiceOutstanding.toLocaleString()}</div><div class="stat-delta">Pipeline: $${pipelineValue.toLocaleString()}</div></div>
+  `;
+
+  const sorted = activeClients.sort((a, b) => parseFloat(b.mrr||0) - parseFloat(a.mrr||0));
+  document.getElementById('mrr-total').textContent = `$${mrr.toLocaleString()}/mo`;
+  document.getElementById('mrr-list').innerHTML = sorted.length ? sorted.map(c => {
+    const pct = mrr > 0 ? Math.round(parseFloat(c.mrr||0)/mrr*100) : 0;
+    const name = c.contacts ? `${c.contacts.first_name||''} ${c.contacts.last_name||''}`.trim() || c.contacts.company || 'Unknown' : 'Unknown';
+    return `<div style="padding:12px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px">
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${name}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${c.plan||''}</div>
+      <div style="height:4px;background:var(--line);border-radius:2px;margin-top:8px"><div style="height:4px;background:var(--chart);border-radius:2px;width:${pct}%"></div></div></div>
+      <div style="text-align:right;flex-shrink:0"><div style="font-size:14px;font-weight:700">$${parseFloat(c.mrr||0).toLocaleString()}</div><div style="font-size:11px;color:var(--muted)">${pct}%</div></div>
+    </div>`;
+  }).join('') : '<div style="padding:20px;text-align:center;font-size:13px;color:var(--muted)">No active clients yet.</div>';
+
+  const stages = ['new','contacted','qualified','proposal'];
+  document.getElementById('pipeline-list').innerHTML = stages.map(stage => {
+    const sl = (leads||[]).filter(l => l.status === stage);
+    const val = sl.reduce((s,l) => s+parseFloat(l.value||0),0);
+    return `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div><div style="font-size:13px;font-weight:500">${stage.charAt(0).toUpperCase()+stage.slice(1)}</div><div style="font-size:11px;color:var(--muted)">${sl.length} lead${sl.length!==1?'s':''}</div></div>
+      <div style="font-size:14px;font-weight:700">$${val.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+
+  const recentInv = (invoices||[]).slice(0,10);
+  document.getElementById('inv-history').innerHTML = recentInv.length ? recentInv.map(i => {
+    const name = i.clients?.contacts || i.contacts;
+    const displayName = name ? `${name.first_name||''} ${name.last_name||''}`.trim() || name.company || '-' : '-';
+    return `<div style="padding:12px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px">
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${i.number||'Invoice'} - ${displayName}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${TMIAdmin.fmt(i.created_at)}</div></div>
+      <div style="display:flex;align-items:center;gap:12px">${TMIAdmin.badge(i.status)}<div style="font-size:14px;font-weight:700">$${parseFloat(i.amount).toLocaleString()}</div></div>
+    </div>`;
+  }).join('') : '<div style="padding:20px;text-align:center;font-size:13px;color:var(--muted)">No invoices yet.</div>';
+
+  const openProps = (proposals||[]).filter(p => ['draft','sent','viewed'].includes(p.status));
+  document.getElementById('prop-open').innerHTML = openProps.length ? openProps.map(p => {
+    const name = p.contacts ? `${p.contacts.first_name||''} ${p.contacts.last_name||''}`.trim() || p.contacts.company || '-' : '-';
+    return `<div style="padding:12px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px">
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${p.title}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${name} &middot; ${TMIAdmin.fmt(p.created_at)}</div></div>
+      <div style="display:flex;align-items:center;gap:12px">${TMIAdmin.badge(p.status)}<div style="font-size:14px;font-weight:700">${p.total?'$'+parseFloat(p.total).toLocaleString():'-'}</div></div>
+    </div>`;
+  }).join('') : '<div style="padding:20px;text-align:center;font-size:13px;color:var(--muted)">No open proposals.</div>';
+}
+
+// ── Analytics ─────────────────────────────────────────────────────────────────
+
+const FUNNEL_STAGES = ['new','contacted','qualified','proposal','won','lost'];
+const STAGE_PROBS   = { new:0.05, contacted:0.15, qualified:0.35, proposal:0.60, won:1.0, lost:0 };
+
+function barChart(items, maxCount) {
+  if (!items.length) return `<div style="font-size:13px;color:var(--muted);padding:8px 0">No data yet.</div>`;
+  const max = maxCount || Math.max(...items.map(i => i.count), 1);
+  return items.map(item => {
+    const pct = Math.max(item.count ? 2 : 0, Math.round(item.count / max * 100));
+    return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="width:120px;font-size:12px;color:var(--ink-2);text-overflow:ellipsis;overflow:hidden;white-space:nowrap;flex-shrink:0">${item.label}</div>
+      <div style="flex:1;height:6px;background:var(--line);border-radius:999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${item.color||'var(--chart)'};border-radius:999px;transition:width 0.4s ease"></div></div>
+      <div style="width:28px;font-size:12px;color:var(--muted);text-align:right;flex-shrink:0">${item.count}</div>
+    </div>`;
+  }).join('');
+}
+
+async function loadAnalytics() {
+  const [leads, clients, contacts, invoices] = await Promise.all([
+    TMIAdmin.api('/api/leads'),
+    TMIAdmin.api('/api/clients'),
+    TMIAdmin.api('/api/contacts'),
+    TMIAdmin.api('/api/invoices'),
+  ]);
+  const now = new Date();
+
+  // Pipeline Funnel
+  const counts = {};
+  FUNNEL_STAGES.forEach(s => counts[s] = 0);
+  (leads||[]).forEach(l => { if (counts[l.status] !== undefined) counts[l.status]++; });
+  const totalLeads = (leads||[]).length;
+  document.getElementById('funnel-sub').textContent = `${totalLeads} total lead${totalLeads!==1?'s':''}`;
+  const activeFunnel = ['new','contacted','qualified','proposal'];
+  const convRates = [];
+  for (let i = 0; i < activeFunnel.length - 1; i++) {
+    const from = activeFunnel[i], to = activeFunnel[i+1];
+    convRates.push({ from, to, rate: counts[from]>0?Math.round(counts[to]/counts[from]*100):0 });
+  }
+  const proposalToWon  = counts['proposal']>0?Math.round(counts['won']/counts['proposal']*100):0;
+  const proposalToLost = counts['proposal']>0?Math.round(counts['lost']/counts['proposal']*100):0;
+  const funnelMax = Math.max(...FUNNEL_STAGES.map(s=>counts[s]),1);
+  const STAGE_COLORS = { new:'#dbeafe',contacted:'#ede9fe',qualified:'#fef9c3',proposal:'#ffedd5',won:'#dcfce7',lost:'#f3f4f6' };
+  document.getElementById('funnel-body').innerHTML = `
+    <div style="margin-bottom:24px">${FUNNEL_STAGES.map(stage => {
+      const c = counts[stage];
+      const pct = Math.max(c?2:0, Math.round(c/funnelMax*100));
+      return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:90px;font-size:12px;color:var(--ink-2);text-transform:capitalize;flex-shrink:0">${stage}</div>
+        <div style="flex:1;height:8px;background:var(--line);border-radius:999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${STAGE_COLORS[stage]};border-radius:999px;border:1px solid rgba(0,0,0,0.06)"></div></div>
+        <div style="width:28px;font-size:13px;font-weight:600;color:var(--ink);text-align:right;flex-shrink:0">${c}</div>
+      </div>`;
+    }).join('')}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;padding-top:16px;border-top:1px solid var(--line)">
+      ${convRates.map(r=>`<div style="background:var(--bg-alt);border-radius:6px;padding:10px 14px;min-width:120px"><div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${r.from} → ${r.to}</div><div style="font-size:20px;font-weight:700;color:var(--ink)">${r.rate}%</div></div>`).join('')}
+      <div style="background:var(--bg-alt);border-radius:6px;padding:10px 14px;min-width:120px"><div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Proposal → Won</div><div style="font-size:20px;font-weight:700;color:var(--ink)">${proposalToWon}%</div></div>
+      <div style="background:var(--bg-alt);border-radius:6px;padding:10px 14px;min-width:120px"><div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Proposal → Lost</div><div style="font-size:20px;font-weight:700;color:var(--ink)">${proposalToLost}%</div></div>
+    </div>`;
+
+  // Deal Velocity
+  const vStages = ['new','contacted','qualified','proposal'];
+  const stageAvgDays = {};
+  vStages.forEach(stage => {
+    const sl = (leads||[]).filter(l => l.status === stage);
+    if (!sl.length) { stageAvgDays[stage]=null; return; }
+    const diffs = sl.map(l => Math.max(0, Math.round((new Date(l.updated_at||now)-new Date(l.created_at||now))/(1000*60*60*24))));
+    stageAvgDays[stage] = Math.round(diffs.reduce((a,b)=>a+b,0)/diffs.length);
+  });
+  const maxDays = Math.max(...Object.values(stageAvgDays).filter(v=>v!==null), 1);
+  document.getElementById('velocity-body').innerHTML = vStages.map(stage => {
+    const days = stageAvgDays[stage];
+    const pct = days!==null ? Math.max(days?3:0, Math.round(days/maxDays*100)) : 0;
+    return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div style="width:90px;font-size:12px;color:var(--ink-2);text-transform:capitalize;flex-shrink:0">${stage}</div>
+      <div style="flex:1;height:6px;background:var(--line);border-radius:999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--chart);border-radius:999px"></div></div>
+      <div style="width:64px;font-size:12px;color:var(--muted);text-align:right;flex-shrink:0">${days!==null?days+'d avg':'No data'}</div>
+    </div>`;
+  }).join('');
+
+  // Revenue Forecast
+  const activeClients = (clients||[]).filter(c => c.status==='active');
+  const totalMrr = activeClients.reduce((s,c)=>s+(parseFloat(c.mrr)||0),0);
+  const avgDealSize = activeClients.length>0?totalMrr/activeClients.length:0;
+  const activeLeads = (leads||[]).filter(l => !['won','lost'].includes(l.status));
+  let weightedPipeline = 0;
+  activeLeads.forEach(l => { weightedPipeline += (parseFloat(l.value)||avgDealSize) * (STAGE_PROBS[l.status]||0); });
+  const stageRows = Object.keys(STAGE_PROBS).filter(s=>s!=='lost').map(stage => {
+    const sl = activeLeads.filter(l => l.status===stage);
+    const val = sl.reduce((s,l)=>s+(parseFloat(l.value)||avgDealSize),0);
+    return { stage, count:sl.length, val, weighted:val*(STAGE_PROBS[stage]||0) };
+  });
+  document.getElementById('forecast-body').innerHTML = `
+    <div style="margin-bottom:24px;text-align:center;padding:20px;background:var(--bg-alt);border-radius:8px">
+      <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Weighted Pipeline</div>
+      <div style="font-size:40px;font-weight:700;color:var(--ink);letter-spacing:-0.02em">$${Math.round(weightedPipeline).toLocaleString()}</div>
+      ${avgDealSize>0?`<div style="font-size:12px;color:var(--muted);margin-top:6px">Avg deal: $${Math.round(avgDealSize).toLocaleString()}/mo MRR</div>`:''}
+    </div>
+    <div>${stageRows.filter(r=>r.count>0).map(r=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)">
+        <div style="flex:1;font-size:13px;color:var(--ink-2);text-transform:capitalize">${r.stage} <span style="color:var(--muted);font-size:11px">(${Math.round((STAGE_PROBS[r.stage]||0)*100)}%)</span></div>
+        <div style="font-size:12px;color:var(--muted)">${r.count} lead${r.count!==1?'s':''}</div>
+        <div style="font-size:13px;font-weight:600;color:var(--ink);min-width:64px;text-align:right">$${Math.round(r.weighted).toLocaleString()}</div>
+      </div>`).join('')}
+      ${stageRows.every(r=>r.count===0)?`<div style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0">No active leads in pipeline.</div>`:''}
+    </div>`;
+
+  // Invoices at a Glance
+  const yearStart = new Date(now.getFullYear(),0,1);
+  const paidThisYear = (invoices||[]).filter(i => {
+    if (i.status!=='paid') return false;
+    const d = i.paid_at||i.updated_at||i.created_at;
+    return d && new Date(d)>=yearStart;
+  });
+  const paidYTD = paidThisYear.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+  const overdueInvs = (invoices||[]).filter(i => i.status==='overdue'||(i.status==='pending'&&i.due_date&&new Date(i.due_date)<now));
+  const overdueAmt = overdueInvs.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+  const outstandingInvs = (invoices||[]).filter(i => ['pending','viewed'].includes(i.status)&&!(i.due_date&&new Date(i.due_date)<now));
+  const outstandingAmt = outstandingInvs.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+  document.getElementById('invoices-glance').innerHTML = `<div style="display:grid;gap:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-alt);border-radius:8px">
+      <div><div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Paid YTD</div><div style="font-size:22px;font-weight:700;color:var(--ink)">$${paidYTD.toLocaleString()}</div></div>
+      <div style="font-size:12px;color:var(--muted)">${paidThisYear.length} invoice${paidThisYear.length!==1?'s':''}</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-alt);border-radius:8px">
+      <div><div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Outstanding</div><div style="font-size:22px;font-weight:700;color:var(--ink)">$${outstandingAmt.toLocaleString()}</div></div>
+      <div style="font-size:12px;color:var(--muted)">${outstandingInvs.length} pending</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:${overdueInvs.length>0?'rgba(239,68,68,0.07)':'var(--bg-alt)'};border-radius:8px;${overdueInvs.length>0?'border:1px solid rgba(239,68,68,0.18)':''}">
+      <div><div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:${overdueInvs.length>0?'rgba(239,68,68,0.7)':'var(--muted)'};margin-bottom:4px">Overdue</div><div style="font-size:22px;font-weight:700;color:${overdueInvs.length>0?'rgb(239,68,68)':'var(--ink)'}">$${overdueAmt.toLocaleString()}</div></div>
+      <div style="font-size:12px;color:${overdueInvs.length>0?'rgba(239,68,68,0.8)':'var(--muted)'}">${overdueInvs.length} overdue</div>
+    </div>
+  </div>`;
+
+  // Lead Sources
+  const sourceCounts = {};
+  (leads||[]).forEach(l => { const src=l.source||'Unknown'; sourceCounts[src]=(sourceCounts[src]||0)+1; });
+  const sourceItems = Object.entries(sourceCounts).sort((a,b)=>b[1]-a[1]).map(([label,count])=>({label,count}));
+  document.getElementById('sources-body').innerHTML = sourceItems.length ? barChart(sourceItems) : `<div style="font-size:13px;color:var(--muted);padding:8px 0">No leads yet.</div>`;
+
+  // Top Niches
+  const nicheCounts = {};
+  (contacts||[]).forEach(c => { if(c.niche) nicheCounts[c.niche]=(nicheCounts[c.niche]||0)+1; });
+  (leads||[]).forEach(l => { if(l.niche) nicheCounts[l.niche]=(nicheCounts[l.niche]||0)+1; });
+  const nicheItems = Object.entries(nicheCounts).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([label,count])=>({label,count}));
+  document.getElementById('niches-body').innerHTML = nicheItems.length ? barChart(nicheItems) : `<div style="font-size:13px;color:var(--muted);padding:8px 0">No niche data yet.</div>`;
+}
+
+loadRevenue();
+</script>
+</body>
+</html>

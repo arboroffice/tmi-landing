@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>People — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+/* ── Tabs ── */
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px;}
+.tab-btn{font-size:13px;font-weight:500;padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--ink-2);font-family:inherit;transition:color 0.15s,border-color 0.15s;margin-bottom:-1px;}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+.tab-btn:hover:not(.active){color:var(--ink);}
+
+/* ── Activity timeline (from admin-activity.html) ── */
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);position:relative;}
+.tl-item:last-child{border-bottom:none;}
+.tl-dot-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:3px;}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.tl-dot.call{background:#3b82f6;}
+.tl-dot.email{background:#E4FF97;border:1px solid #b5cc50;}
+.tl-dot.note{background:#9ca3af;}
+.tl-dot.meeting{background:#22c55e;}
+.tl-dot.sms{background:#a855f7;}
+.tl-dot.task{background:#f97316;}
+.tl-line{width:1px;flex:1;background:var(--line);margin-top:6px;}
+.tl-body{flex:1;min-width:0;}
+.tl-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;line-height:1.3;}
+.tl-body-text{font-size:13px;color:var(--ink-2);line-height:1.5;margin-bottom:8px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.tl-meta{display:flex;gap:12px;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap;}
+.tl-meta a{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;}
+.tl-meta a:hover{color:var(--ink);}
+.tl-type-badge{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:2px 7px;border-radius:999px;font-weight:500;flex-shrink:0;}
+.tl-type-badge.call{background:#dbeafe;color:#1e40af;}
+.tl-type-badge.email{background:#E4FF97;color:#3a5400;}
+.tl-type-badge.note{background:#f3f4f6;color:#374151;}
+.tl-type-badge.meeting{background:#dcfce7;color:#15803d;}
+.tl-type-badge.sms{background:#f5f3ff;color:#6d28d9;}
+.tl-type-badge.task{background:#fff7ed;color:#c2410c;}
+.load-more-wrap{text-align:center;padding:24px 0;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">People</span></div>
+      <div class="topbar-actions" id="topbar-actions">
+        <!-- populated by switchTab -->
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="sec-head">
+        <h1>People</h1>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('contacts',this)">Contacts</button>
+        <button class="tab-btn" onclick="switchTab('partners',this)">Partners</button>
+        <button class="tab-btn" onclick="switchTab('activity',this)">Activity</button>
+      </div>
+
+      <!-- ════════════════════ CONTACTS TAB ════════════════════ -->
+      <div class="tab-panel" id="tab-contacts">
+
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="search" placeholder="Search name, email, company..." oninput="renderContactsTable()"/>
+          </div>
+          <select class="filter-select" id="filter-audience" onchange="renderContactsTable()">
+            <option value="">All audiences</option>
+            <option value="physical">Physical</option>
+            <option value="online">Online</option>
+            <option value="fotf">FOTF</option>
+          </select>
+          <select class="filter-select" id="filter-niche" onchange="renderContactsTable()">
+            <option value="">All niches</option>
+          </select>
+          <span class="filter-count" id="contact-count"></span>
+        </div>
+
+        <div id="bulk-toolbar" style="display:none;position:sticky;top:0;background:var(--chart);padding:8px 16px;border-radius:var(--r-sm);display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:13px;font-weight:500;color:var(--ink)">
+          <span id="bulk-count">0 selected</span>
+          <button class="btn btn-ghost btn-sm" onclick="bulkExportCSV()">Export CSV</button>
+          <button class="btn btn-ghost btn-sm" onclick="bulkEmail()">Email Selected</button>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="clearSelection()">Clear</button>
+        </div>
+
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th style="width:36px"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"/></th>
+                <th>Name</th><th>Email</th><th>Phone</th><th>Company</th>
+                <th>Audience</th><th>Niche</th><th>Added</th>
+              </tr></thead>
+              <tbody id="contacts-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /tab-contacts -->
+
+      <!-- ════════════════════ PARTNERS TAB ════════════════════ -->
+      <div class="tab-panel" id="tab-partners" style="display:none">
+
+        <div class="stats-row" id="partners-stats" style="grid-template-columns:repeat(3,1fr)"></div>
+
+        <div class="sec-head" style="margin-top:8px">
+          <span class="filter-count" id="partners-count"></span>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="partners-search" placeholder="Search name, company, email..." oninput="renderPartnersTable()"/>
+          </div>
+          <select class="filter-select" id="filter-partner-status" onchange="renderPartnersTable()">
+            <option value="">All statuses</option>
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="qualified">Qualified</option>
+            <option value="won">Won (Active)</option>
+            <option value="lost">Lost</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>Name</th><th>Company</th><th>Partner Type</th><th>Industries</th><th>Status</th><th>Date Applied</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="partners-tbody">
+                <tr><td colspan="7" style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /tab-partners -->
+
+      <!-- ════════════════════ ACTIVITY TAB ════════════════════ -->
+      <div class="tab-panel" id="tab-activity" style="display:none">
+
+        <div class="sec-head">
+          <span class="filter-count" id="act-count"></span>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="act-search" placeholder="Search activity titles..." oninput="renderActivityFeed()"/>
+          </div>
+          <select class="filter-select" id="act-type" onchange="renderActivityFeed()">
+            <option value="">All types</option>
+            <option value="call">Call</option>
+            <option value="email">Email</option>
+            <option value="note">Note</option>
+            <option value="meeting">Meeting</option>
+            <option value="sms">SMS</option>
+            <option value="task">Task</option>
+          </select>
+        </div>
+
+        <div class="card" style="padding:0 24px;">
+          <div class="timeline" id="act-timeline">
+            <div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Select the Activity tab to load.</div>
+          </div>
+        </div>
+
+        <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+          <button class="btn btn-ghost btn-sm" onclick="actLoadMore()">Load more</button>
+        </div>
+      </div><!-- /tab-activity -->
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ════════════ CONTACTS: Add/Edit Modal ════════════ -->
+<div class="modal-overlay" id="contact-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 class="modal-title" id="modal-title">Add Contact</h2>
+      <button class="modal-x" onclick="TMIAdmin.closeModal('contact-modal')">&times;</button>
+    </div>
+    <input type="hidden" id="edit-id"/>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">First Name *</label><input class="form-input" id="f-first" placeholder="First"/></div>
+      <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="f-last" placeholder="Last"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-email" type="email" placeholder="email@company.com"/></div>
+      <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="f-phone" placeholder="+1 555 000 0000"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Company</label><input class="form-input" id="f-company" placeholder="Company name"/></div>
+      <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="f-title" placeholder="Job title"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Audience</label>
+        <select class="form-input" id="f-audience" onchange="onAudienceChange()">
+          <option value="">Select audience</option>
+          <option value="physical">Physical</option>
+          <option value="online">Online</option>
+          <option value="fotf">FOTF</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Niche</label>
+        <select class="form-input" id="f-niche"><option value="">Select niche</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="f-notes" rows="3"></textarea></div>
+    <div class="form-group"><label class="form-label">Tags</label><input class="form-input" id="f-tags" placeholder="comma-separated tags"/></div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="TMIAdmin.closeModal('contact-modal')">Cancel</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveContact()">Save Contact</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ CONTACTS: Detail Panel ════════════ -->
+<div class="panel-overlay" id="contact-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('contact-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-name">—</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editFromPanel()">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteFromPanel()">Delete</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Email</div><div class="detail-val" id="pd-email">—</div></div>
+        <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-val" id="pd-phone">—</div></div>
+        <div class="detail-item"><div class="detail-label">Company</div><div class="detail-val" id="pd-company">—</div></div>
+        <div class="detail-item"><div class="detail-label">Title</div><div class="detail-val" id="pd-title">—</div></div>
+        <div class="detail-item"><div class="detail-label">Audience</div><div class="detail-val" id="pd-audience">—</div></div>
+        <div class="detail-item"><div class="detail-label">Niche</div><div class="detail-val" id="pd-niche">—</div></div>
+        <div class="detail-item"><div class="detail-label">Added</div><div class="detail-val" id="pd-created">—</div></div>
+      </div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Notes</div>
+      <div id="pd-notes" style="font-size:14px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap;">—</div>
+      <div id="pd-tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
+      <div class="panel-sep"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a id="pd-email-link" href="#" class="btn btn-ghost btn-sm">Send Email</a>
+        <button class="btn btn-primary btn-sm" onclick="addAsLead()">Add as Lead</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PARTNERS: Detail Panel ════════════ -->
+<div class="panel-overlay" id="partner-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('partner-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="partner-panel-name">—</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closePanel('partner-panel')">Close</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid" id="panel-detail-grid"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Partner Notes</div>
+      <div id="panel-notes-parsed" style="margin-top:10px;display:flex;flex-direction:column;gap:10px;"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Update Status</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+        <select class="form-input" id="panel-status-select" style="flex:1">
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="qualified">Qualified</option>
+          <option value="won">Won (Active)</option>
+          <option value="lost">Lost</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="savePartnerStatus()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ ACTIVITY: Add Activity Modal ════════════ -->
+<div class="modal-overlay" id="act-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hd">
+      <h3 class="modal-title">Add Activity</h3>
+      <button class="modal-x" onclick="TMIAdmin.closeModal('act-modal')">&times;</button>
+    </div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+      <div class="form-group">
+        <label class="form-label">Type <span style="color:var(--red)">*</span></label>
+        <select class="form-input" id="a-type">
+          <option value="note">Note</option>
+          <option value="call">Call</option>
+          <option value="email">Email</option>
+          <option value="meeting">Meeting</option>
+          <option value="sms">SMS</option>
+          <option value="task">Task</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact (name or ID)</label>
+        <input type="text" class="form-input" id="a-contact" placeholder="Search contact name..."/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Title <span style="color:var(--red)">*</span></label>
+        <input type="text" class="form-input" id="a-title" placeholder="Brief description..."/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Body</label>
+        <textarea class="form-input" id="a-body" style="min-height:100px" placeholder="Notes, details, outcome..."></textarea>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('act-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveActivity()">Save Activity</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('people');
+
+/* ──────────────────────────────────────────
+   TAB SWITCHING
+────────────────────────────────────────── */
+let partnersLoaded = false;
+let activityLoaded = false;
+
+const TOPBAR_ACTIONS = {
+  contacts: `
+    <button class="btn btn-ghost btn-sm" onclick="exportCSV(allContacts)">Export CSV</button>
+    <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Contact
+    </button>`,
+  partners: ``,
+  activity: `<button class="btn btn-primary btn-sm" onclick="openAddActivity()">+ Add Activity</button>`
+};
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = '';
+  btn.classList.add('active');
+  document.getElementById('topbar-actions').innerHTML = TOPBAR_ACTIONS[name] || '';
+  if (name === 'partners' && !partnersLoaded) { partnersLoaded = true; loadPartners(); }
+  if (name === 'activity' && !activityLoaded) { activityLoaded = true; actReload(); }
+}
+
+/* ──────────────────────────────────────────
+   CONTACTS
+────────────────────────────────────────── */
+let allContacts = [];
+let currentContact = null;
+let selectedIds = new Set();
+
+// Build niche filter
+const allNiches = [...TMIAdmin.niches.physical, ...TMIAdmin.niches.online, ...TMIAdmin.niches.fotf];
+const nicheFilter = document.getElementById('filter-niche');
+allNiches.forEach(n => { nicheFilter.innerHTML += `<option>${n}</option>`; });
+
+function onAudienceChange() {
+  const aud = document.getElementById('f-audience').value;
+  const niches = aud ? TMIAdmin.niches[aud] : allNiches;
+  const sel = document.getElementById('f-niche');
+  sel.innerHTML = `<option value="">Select niche</option>` + niches.map(n => `<option>${n}</option>`).join('');
+}
+
+async function loadContacts() {
+  const data = await TMIAdmin.api('/api/contacts');
+  if (data) { allContacts = data; renderContactsTable(); }
+}
+
+function renderContactsTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const aud = document.getElementById('filter-audience').value;
+  const niche = document.getElementById('filter-niche').value;
+
+  const filtered = allContacts.filter(c => {
+    const text = [c.first_name, c.last_name, c.email, c.company].filter(Boolean).join(' ').toLowerCase();
+    if (q && !text.includes(q)) return false;
+    if (aud && c.audience !== aud) return false;
+    if (niche && c.niche !== niche) return false;
+    return true;
+  });
+
+  document.getElementById('contact-count').textContent = `${filtered.length} contact${filtered.length !== 1 ? 's' : ''}`;
+
+  const tbody = document.getElementById('contacts-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><div class="empty-icon">👤</div><h3>No contacts found</h3><p>Add contacts manually or they'll appear as leads are created.</p></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(c => {
+    const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || '—';
+    const checked = selectedIds.has(String(c.id)) ? 'checked' : '';
+    return `<tr onclick="openContactPanel(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+      <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" value="${c.id}" ${checked} onchange="onRowCheck()"/></td>
+      <td class="td-name">${name}</td>
+      <td style="color:var(--ink-2)">${c.email || '—'}</td>
+      <td class="td-muted">${c.phone || '—'}</td>
+      <td>${c.company || '—'}</td>
+      <td>${c.audience ? TMIAdmin.badge(c.audience) : '—'}</td>
+      <td class="td-muted">${c.niche || '—'}</td>
+      <td class="td-muted">${TMIAdmin.fmt(c.created_at)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function openContactPanel(contact) {
+  currentContact = contact;
+  const name = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || '—';
+  document.getElementById('panel-name').textContent = name;
+  document.getElementById('pd-email').innerHTML = contact.email ? `<a href="mailto:${contact.email}" style="color:var(--blue)">${contact.email}</a>` : '—';
+  document.getElementById('pd-phone').textContent = contact.phone || '—';
+  document.getElementById('pd-company').textContent = contact.company || '—';
+  document.getElementById('pd-title').textContent = contact.title || '—';
+  document.getElementById('pd-audience').innerHTML = contact.audience ? TMIAdmin.badge(contact.audience) : '—';
+  document.getElementById('pd-niche').textContent = contact.niche || '—';
+  document.getElementById('pd-created').textContent = TMIAdmin.fmt(contact.created_at);
+  document.getElementById('pd-notes').textContent = contact.notes || '—';
+  const tagsEl = document.getElementById('pd-tags');
+  if (contact.tags) {
+    tagsEl.innerHTML = contact.tags.split(',').filter(t => t.trim()).map(t =>
+      `<span style="font-size:11px;padding:2px 8px;background:var(--bg-alt);border-radius:999px;color:var(--ink-2)">${t.trim()}</span>`
+    ).join('');
+  } else {
+    tagsEl.innerHTML = '';
+  }
+  const emailLink = document.getElementById('pd-email-link');
+  emailLink.href = contact.email ? `mailto:${contact.email}` : '#';
+  TMIAdmin.openPanel('contact-panel');
+}
+
+function openAddModal() {
+  document.getElementById('edit-id').value = '';
+  document.getElementById('modal-title').textContent = 'Add Contact';
+  document.getElementById('save-btn').textContent = 'Save Contact';
+  ['first','last','email','phone','company','title','notes','tags'].forEach(f => {
+    document.getElementById('f-' + f).value = '';
+  });
+  document.getElementById('f-audience').value = '';
+  onAudienceChange();
+  TMIAdmin.openModal('contact-modal');
+}
+
+function editFromPanel() {
+  if (!currentContact) return;
+  const c = currentContact;
+  TMIAdmin.closePanel('contact-panel');
+  document.getElementById('edit-id').value = c.id;
+  document.getElementById('modal-title').textContent = 'Edit Contact';
+  document.getElementById('save-btn').textContent = 'Update Contact';
+  document.getElementById('f-first').value = c.first_name || '';
+  document.getElementById('f-last').value = c.last_name || '';
+  document.getElementById('f-email').value = c.email || '';
+  document.getElementById('f-phone').value = c.phone || '';
+  document.getElementById('f-company').value = c.company || '';
+  document.getElementById('f-title').value = c.title || '';
+  document.getElementById('f-audience').value = c.audience || '';
+  onAudienceChange();
+  setTimeout(() => { document.getElementById('f-niche').value = c.niche || ''; }, 50);
+  document.getElementById('f-notes').value = c.notes || '';
+  document.getElementById('f-tags').value = c.tags || '';
+  TMIAdmin.openModal('contact-modal');
+}
+
+async function saveContact() {
+  const id = document.getElementById('edit-id').value;
+  const firstName = document.getElementById('f-first').value.trim();
+  if (!firstName) { TMIAdmin.toast('First name is required', 'error'); return; }
+
+  const payload = {
+    first_name: firstName,
+    last_name: document.getElementById('f-last').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    phone: document.getElementById('f-phone').value.trim(),
+    company: document.getElementById('f-company').value.trim(),
+    title: document.getElementById('f-title').value.trim(),
+    audience: document.getElementById('f-audience').value,
+    niche: document.getElementById('f-niche').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    tags: document.getElementById('f-tags').value.trim()
+  };
+  if (id) payload.id = id;
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  const res = await TMIAdmin.api('/api/contacts', id ? 'PUT' : 'POST', payload);
+  btn.disabled = false; btn.textContent = id ? 'Update Contact' : 'Save Contact';
+
+  if (res) {
+    TMIAdmin.toast(id ? 'Contact updated' : 'Contact added');
+    TMIAdmin.closeModal('contact-modal');
+    await loadContacts();
+  }
+}
+
+async function deleteFromPanel() {
+  if (!currentContact) return;
+  const ok = await TMIAdmin.confirm('Delete this contact? Any linked leads or clients will also be removed.');
+  if (!ok) return;
+  const res = await TMIAdmin.api(`/api/contacts?id=${currentContact.id}`, 'DELETE');
+  if (res) {
+    TMIAdmin.toast('Contact deleted');
+    TMIAdmin.closePanel('contact-panel');
+    await loadContacts();
+  }
+}
+
+function addAsLead() {
+  if (currentContact) {
+    sessionStorage.setItem('prefill_contact', JSON.stringify(currentContact));
+    window.location.href = '/admin-leads';
+  }
+}
+
+function toggleSelectAll(cb) {
+  const checks = document.querySelectorAll('.row-check');
+  checks.forEach(c => { c.checked = cb.checked; });
+  selectedIds.clear();
+  if (cb.checked) checks.forEach(c => selectedIds.add(String(c.value)));
+  updateBulkToolbar();
+}
+
+function onRowCheck() {
+  selectedIds.clear();
+  document.querySelectorAll('.row-check:checked').forEach(c => selectedIds.add(String(c.value)));
+  const allChecks = document.querySelectorAll('.row-check');
+  document.getElementById('select-all').checked = allChecks.length > 0 && selectedIds.size === allChecks.length;
+  updateBulkToolbar();
+}
+
+function updateBulkToolbar() {
+  const bar = document.getElementById('bulk-toolbar');
+  const count = selectedIds.size;
+  bar.style.display = count > 0 ? 'flex' : 'none';
+  document.getElementById('bulk-count').textContent = `${count} selected`;
+}
+
+function clearSelection() {
+  selectedIds.clear();
+  document.querySelectorAll('.row-check').forEach(c => { c.checked = false; });
+  document.getElementById('select-all').checked = false;
+  updateBulkToolbar();
+}
+
+function exportCSV(contacts) {
+  const headers = ['Name','Email','Phone','Company','Audience','Niche','Added'];
+  const rows = contacts.map(c => [
+    [c.first_name, c.last_name].filter(Boolean).join(' '),
+    c.email || '',
+    c.phone || '',
+    c.company || '',
+    c.audience || '',
+    c.niche || '',
+    TMIAdmin.fmt(c.created_at)
+  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'contacts.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function bulkExportCSV() {
+  exportCSV(allContacts.filter(c => selectedIds.has(String(c.id))));
+}
+
+function bulkEmail() {
+  const emails = allContacts.filter(c => selectedIds.has(String(c.id)) && c.email).map(c => c.email);
+  if (!emails.length) { TMIAdmin.toast('No email addresses in selection', 'error'); return; }
+  window.location.href = `mailto:?bcc=${encodeURIComponent(emails.join(','))}`;
+}
+
+/* ──────────────────────────────────────────
+   PARTNERS
+────────────────────────────────────────── */
+let allPartners = [];
+let currentPartner = null;
+
+async function loadPartners() {
+  const data = await TMIAdmin.api('/api/leads');
+  if (!data) return;
+  allPartners = data.filter(l => l.source === 'partner-form');
+  renderPartnerStats();
+  renderPartnersTable();
+}
+
+function renderPartnerStats() {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const newThisMonth = allPartners.filter(l => l.created_at && new Date(l.created_at) >= startOfMonth).length;
+  const active = allPartners.filter(l => l.status === 'won' || l.status === 'qualified').length;
+  document.getElementById('partners-stats').innerHTML = `
+    <div class="stat-box"><div class="stat-label">Total Partners</div><div class="stat-val">${allPartners.length}</div></div>
+    <div class="stat-box"><div class="stat-label">New This Month</div><div class="stat-val">${newThisMonth}</div></div>
+    <div class="stat-box"><div class="stat-label">Active Partners</div><div class="stat-val" style="color:var(--green,#22c55e)">${active}</div></div>
+  `;
+}
+
+function parsePartnerNotes(notes) {
+  if (!notes) return {};
+  const result = {};
+  const lines = notes.split('\n');
+  lines.forEach(line => {
+    const idx = line.indexOf(':');
+    if (idx === -1) return;
+    const key = line.slice(0, idx).trim();
+    const val = line.slice(idx + 1).trim();
+    if (key && val) result[key] = val;
+  });
+  return result;
+}
+
+function getPartnersFiltered() {
+  const q = document.getElementById('partners-search').value.toLowerCase();
+  const st = document.getElementById('filter-partner-status').value;
+  return allPartners.filter(l => {
+    const c = l.contacts || {};
+    const text = [c.first_name, c.last_name, c.email, c.company, l.name, l.email].filter(Boolean).join(' ').toLowerCase();
+    if (q && !text.includes(q)) return false;
+    if (st && l.status !== st) return false;
+    return true;
+  });
+}
+
+function renderPartnersTable() {
+  const filtered = getPartnersFiltered();
+  document.getElementById('partners-count').textContent = `${filtered.length} partner${filtered.length !== 1 ? 's' : ''}`;
+
+  const tbody = document.getElementById('partners-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🤝</div><h3>No partners yet</h3><p>Partner form submissions will appear here.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(l => {
+    const c = l.contacts || {};
+    const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || l.name || '—';
+    const company = c.company || '—';
+    const parsed = parsePartnerNotes(l.notes);
+    const partnerType = parsed['Partner type'] || parsed['Partner Type'] || '—';
+    const industries = parsed['Industries'] || '—';
+    const data = JSON.stringify(l).replace(/"/g, '&quot;');
+    return `<tr onclick="openPartnerPanel(${data})" style="cursor:pointer">
+      <td class="td-name">${name}</td>
+      <td>${company}</td>
+      <td class="td-muted">${partnerType}</td>
+      <td class="td-muted" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${industries}">${industries}</td>
+      <td>${TMIAdmin.badge(l.status)}</td>
+      <td class="td-muted">${TMIAdmin.fmt(l.created_at)}</td>
+      <td class="td-action">
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPartnerPanel(${data})">View</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openPartnerPanel(lead) {
+  currentPartner = lead;
+  const c = lead.contacts || {};
+  const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || lead.name || '—';
+  document.getElementById('partner-panel-name').textContent = name;
+
+  document.getElementById('panel-detail-grid').innerHTML = `
+    <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val">${TMIAdmin.badge(lead.status)}</div></div>
+    <div class="detail-item"><div class="detail-label">Company</div><div class="detail-val">${c.company || '—'}</div></div>
+    <div class="detail-item"><div class="detail-label">Email</div><div class="detail-val">${c.email ? `<a href="mailto:${c.email}" style="color:var(--blue)">${c.email}</a>` : '—'}</div></div>
+    <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-val">${c.phone || lead.phone || '—'}</div></div>
+    <div class="detail-item"><div class="detail-label">Applied</div><div class="detail-val">${TMIAdmin.fmt(lead.created_at)}</div></div>
+  `;
+
+  const parsed = parsePartnerNotes(lead.notes);
+  const notesEl = document.getElementById('panel-notes-parsed');
+  if (Object.keys(parsed).length) {
+    notesEl.innerHTML = Object.entries(parsed).map(([key, val]) => `
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">${key}</div>
+        <div style="font-size:14px;color:var(--ink-2);line-height:1.5">${val}</div>
+      </div>
+    `).join('<div style="height:1px;background:var(--line);margin:2px 0"></div>');
+  } else if (lead.notes) {
+    notesEl.innerHTML = `<div style="font-size:14px;color:var(--ink-2);line-height:1.6;white-space:pre-wrap">${lead.notes}</div>`;
+  } else {
+    notesEl.innerHTML = `<div style="font-size:13px;color:var(--muted)">No notes.</div>`;
+  }
+
+  document.getElementById('panel-status-select').value = lead.status || 'new';
+  TMIAdmin.openPanel('partner-panel');
+}
+
+async function savePartnerStatus() {
+  if (!currentPartner) return;
+  const status = document.getElementById('panel-status-select').value;
+  const c = currentPartner.contacts || {};
+  const res = await TMIAdmin.api('/api/leads', 'PUT', {
+    lead: { id: currentPartner.id, status },
+    contact: { first_name: c.first_name || 'Partner' }
+  });
+  if (res) {
+    TMIAdmin.toast('Status updated');
+    currentPartner.status = status;
+    await loadPartners();
+    TMIAdmin.closePanel('partner-panel');
+  }
+}
+
+/* ──────────────────────────────────────────
+   ACTIVITY
+────────────────────────────────────────── */
+const ACT_PAGE_SIZE = 200;
+let activities = [];
+let actPage = 1;
+let actTotal = 0;
+
+function truncate(str, n) {
+  if (!str) return '';
+  return str.length > n ? str.slice(0, n) + '...' : str;
+}
+
+function renderActivityFeed() {
+  const q = (document.getElementById('act-search').value || '').toLowerCase();
+  const type = document.getElementById('act-type').value;
+
+  let filtered = activities;
+  if (type) filtered = filtered.filter(a => a.type === type);
+  if (q) filtered = filtered.filter(a => (a.title || '').toLowerCase().includes(q) || (a.body || '').toLowerCase().includes(q));
+
+  document.getElementById('act-count').textContent = `${filtered.length} activit${filtered.length !== 1 ? 'ies' : 'y'}`;
+
+  if (!filtered.length) {
+    document.getElementById('act-timeline').innerHTML =
+      `<div style="padding:40px;text-align:center;color:var(--muted);font-size:13px">No activities found.</div>`;
+    return;
+  }
+
+  document.getElementById('act-timeline').innerHTML = filtered.map((a, i) => {
+    const isLast = i === filtered.length - 1;
+    const typeClass = a.type || 'note';
+    const contactLink = a.contacts
+      ? `<a href="admin-contacts.html?id=${a.contact_id}">${a.contacts.first_name || ''} ${a.contacts.last_name || ''}</a>${a.contacts.company ? ` · ${a.contacts.company}` : ''}`
+      : '';
+    return `<div class="tl-item">
+      <div class="tl-dot-wrap">
+        <div class="tl-dot ${typeClass}"></div>
+        ${!isLast ? '<div class="tl-line"></div>' : ''}
+      </div>
+      <div class="tl-body">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:4px;flex-wrap:wrap">
+          <div class="tl-title" style="flex:1">${a.title || '(no title)'}</div>
+          <span class="tl-type-badge ${typeClass}">${typeClass}</span>
+        </div>
+        ${a.body ? `<div class="tl-body-text">${truncate(a.body, 120)}</div>` : ''}
+        <div class="tl-meta">
+          ${contactLink ? `<span>${contactLink}</span>` : ''}
+          <span>${TMIAdmin.reltime(a.created_at)}</span>
+          <span style="color:var(--line-strong)">${TMIAdmin.fmt(a.created_at)}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function actLoadMore() {
+  actPage++;
+  actReload(true);
+}
+
+async function openAddActivity() {
+  document.getElementById('a-type').value = 'note';
+  document.getElementById('a-contact').value = '';
+  document.getElementById('a-title').value = '';
+  document.getElementById('a-body').value = '';
+  TMIAdmin.openModal('act-modal');
+}
+
+async function saveActivity() {
+  const title = document.getElementById('a-title').value.trim();
+  if (!title) return TMIAdmin.toast('Title is required', 'error');
+  const data = await TMIAdmin.api('/api/activities', 'POST', {
+    type: document.getElementById('a-type').value,
+    title,
+    body: document.getElementById('a-body').value.trim(),
+    contact_search: document.getElementById('a-contact').value.trim() || null,
+  });
+  if (!data) return;
+  TMIAdmin.closeModal('act-modal');
+  TMIAdmin.toast('Activity added');
+  await actReload();
+}
+
+async function actReload(append = false) {
+  const offset = append ? (actPage - 1) * ACT_PAGE_SIZE : 0;
+  if (!append) { actPage = 1; }
+  const result = await TMIAdmin.api(`/api/activities?limit=${ACT_PAGE_SIZE}&offset=${offset}`) || [];
+  if (append) {
+    activities = activities.concat(Array.isArray(result) ? result : (result.data || []));
+  } else {
+    activities = Array.isArray(result) ? result : (result.data || result || []);
+    actTotal = result.total || activities.length;
+  }
+  document.getElementById('load-more-wrap').style.display =
+    activities.length < actTotal ? '' : 'none';
+  renderActivityFeed();
+}
+
+/* ──────────────────────────────────────────
+   INIT — set initial topbar actions, load contacts
+────────────────────────────────────────── */
+document.getElementById('topbar-actions').innerHTML = TOPBAR_ACTIONS.contacts;
+loadContacts();
+</script>
+</body>
+</html>

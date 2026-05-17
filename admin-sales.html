@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sales — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  /* ── Tab bar ──────────────────────────────────────────────────────────────── */
+  .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px;}
+  .tab-btn{font-size:13px;font-weight:500;padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--ink-2);font-family:inherit;transition:color 0.15s,border-color 0.15s;margin-bottom:-1px;}
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+  .tab-btn:hover:not(.active){color:var(--ink);}
+
+  /* ── Pipeline (from admin-pipeline.html) ─────────────────────────────────── */
+  .pipeline-board{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:flex-start;}
+  .pipe-col{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;}
+  .pipe-col-head{padding:14px 14px 10px;border-bottom:1px solid var(--line);position:relative;}
+  .pipe-col-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;background:var(--chart);}
+  .pipe-col-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--ink-2);display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
+  .pipe-col-count{font-size:11px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:2px 7px;border-radius:999px;}
+  .pipe-cards{padding:10px;display:flex;flex-direction:column;gap:8px;min-height:120px;}
+  .pipe-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;cursor:pointer;transition:box-shadow 0.15s,border-color 0.15s;}
+  .pipe-card:hover{box-shadow:0 2px 10px rgba(0,0,0,0.09);border-color:var(--line-strong);}
+  .pipe-card[draggable=true]{cursor:grab;}
+  .pipe-card[draggable=true]:active{cursor:grabbing;}
+  .pipe-card.dragging{opacity:0.45;box-shadow:0 8px 24px rgba(0,0,0,0.15);}
+  .pipe-card-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pipe-card-company{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;}
+  .pipe-card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+  .pipe-card-source{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:2px 6px;border-radius:4px;}
+  .pipe-card-days{font-size:10px;color:var(--muted);}
+  .pipe-col.drop-over .pipe-cards{background:rgba(228,255,151,0.18);border-radius:0 0 var(--r) var(--r);}
+  .pipe-empty{padding:16px 8px;font-size:12px;color:var(--muted);text-align:center;font-style:italic;}
+  .pipe-signed-note{font-size:10px;color:var(--muted);text-align:center;padding:4px 0 8px;letter-spacing:0.06em;}
+  @media(max-width:1100px){.pipeline-board{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:768px){.pipeline-board{grid-template-columns:1fr 1fr;}}
+  @media(max-width:480px){.pipeline-board{grid-template-columns:1fr;}}
+
+  /* ── Audits (from admin-audits.html) ─────────────────────────────────────── */
+  .dep-bar-wrap{display:flex;align-items:center;gap:8px;}
+  .dep-bar-track{flex:1;height:6px;background:var(--line-strong);border-radius:3px;overflow:hidden;}
+  .dep-bar-fill{height:100%;border-radius:3px;transition:width 0.4s;}
+  .dep-bar-fill.critical{background:var(--red);}
+  .dep-bar-fill.high{background:var(--amber);}
+  .dep-bar-fill.moderate{background:#eab308;}
+  .dep-bar-fill.low{background:var(--green);}
+  .cat-score-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .cat-score-label{font-size:12px;color:var(--ink-2);width:130px;flex-shrink:0;}
+  .cat-score-track{flex:1;height:8px;background:var(--line-strong);border-radius:4px;overflow:hidden;}
+  .cat-score-bar{height:100%;background:var(--chart);border-radius:4px;transition:width 0.4s;}
+  .cat-score-val{font-size:11px;font-weight:600;color:var(--ink-2);width:28px;text-align:right;flex-shrink:0;}
+  .answers-wrap{font-size:13px;color:var(--ink-2);line-height:1.6;}
+  .answer-row{padding:8px 0;border-bottom:1px solid var(--line);}
+  .answer-row:last-child{border-bottom:none;}
+  .answer-q{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+  .answer-a{font-size:13px;color:var(--ink);}
+  .tier-chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:#e0f2fe;color:#0369a1;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Sales</span></div>
+      <div class="topbar-actions" id="topbar-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-refresh-pipeline" onclick="loadAll()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="width:13px;height:13px"><polyline points="23 4 23 10 17 10" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" stroke-linecap="round"/></svg>
+          Refresh
+        </button>
+        <button class="btn btn-ghost btn-sm" id="btn-export-audits" onclick="exportCSV()" style="display:none">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('pipeline',this)">Pipeline</button>
+        <button class="tab-btn" onclick="switchTab('audits',this)">Audits</button>
+        <button class="tab-btn" onclick="switchTab('bookings',this)">Bookings</button>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- TAB: PIPELINE                                                       -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="tab-pipeline" class="tab-panel">
+
+        <div class="sec-head">
+          <h1>Pipeline</h1>
+          <span class="filter-count" id="pipe-count"></span>
+        </div>
+
+        <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+          <div class="stat-box">
+            <div class="stat-label">Total in Pipeline</div>
+            <div class="stat-val" id="stat-total">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Conversion Rate</div>
+            <div class="stat-val" id="stat-conv">—</div>
+            <div class="stat-delta" id="stat-conv-sub"></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Avg Days to Close</div>
+            <div class="stat-val" id="stat-avg-days">—</div>
+            <div class="stat-delta">Won leads only</div>
+          </div>
+        </div>
+
+        <div class="pipeline-board" id="pipeline-board"></div>
+
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- TAB: AUDITS                                                         -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="tab-audits" class="tab-panel" style="display:none">
+
+        <div class="sec-head">
+          <h1>Audits</h1>
+          <span class="filter-count" id="audit-count"></span>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="audit-search" placeholder="Search name, email, company..." oninput="renderAuditsTable()"/>
+          </div>
+          <select class="filter-select" id="filter-tier" onchange="renderAuditsTable()">
+            <option value="">All tiers</option>
+            <option value="tier1">Just Starting Out</option>
+            <option value="tier2">Growing Fast</option>
+            <option value="tier3">Ready To Scale</option>
+            <option value="tier4">Scaling Hard</option>
+            <option value="tier5">Multi Crew / Multi Location</option>
+            <option value="tier6">Hitting $10 Million</option>
+            <option value="tier7">Above $10 Million</option>
+          </select>
+          <select class="filter-select" id="filter-audit-status" onchange="renderAuditsTable()">
+            <option value="">All statuses</option>
+            <option value="new">New</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="scoped">Scoped</option>
+            <option value="booked">Booked</option>
+            <option value="signed">Signed</option>
+          </select>
+        </div>
+
+        <div class="stats-row" id="audits-stats-row">
+          <div class="stat-box">
+            <div class="stat-label">Total Audits</div>
+            <div class="stat-val" id="audit-stat-total">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Avg Dependency Score</div>
+            <div class="stat-val" id="audit-stat-avg-dep">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Most Common Tier</div>
+            <div class="stat-val" id="audit-stat-top-tier" style="font-size:16px;margin-top:4px;">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Unreviewed</div>
+            <div class="stat-val" id="audit-stat-new">—</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>Name / Company</th>
+                <th>Industry</th>
+                <th>Tier</th>
+                <th>Dep Score</th>
+                <th>Composite</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr></thead>
+              <tbody id="audits-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- TAB: BOOKINGS                                                       -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="tab-bookings" class="tab-panel" style="display:none">
+
+        <div class="stats-row" id="bookings-stats" style="grid-template-columns:repeat(3,1fr)"></div>
+
+        <div class="sec-head" style="margin-top:8px">
+          <h1>Bookings</h1>
+          <span class="filter-count" id="bookings-count"></span>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="bookings-search" placeholder="Search name or email..." oninput="renderBookingsTable()"/>
+          </div>
+          <select class="filter-select" id="filter-source" onchange="renderBookingsTable()">
+            <option value="">All sources</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>Name</th><th>Company</th><th>Email</th><th>Phone</th><th>Source</th><th>Booked Date</th><th>Days Since Booked</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="bookings-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /.content -->
+  </div><!-- /.main -->
+</div><!-- /.layout -->
+
+<!-- ── Audit detail panel (slide-in) ────────────────────────────────────────── -->
+<div class="panel-overlay" id="audit-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('audit-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-name">Audit</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closePanel('audit-panel')">Close</button>
+      </div>
+    </div>
+    <div class="panel-body">
+
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Email</div><div class="detail-val" id="pd-email">—</div></div>
+        <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-val" id="pd-phone">—</div></div>
+        <div class="detail-item"><div class="detail-label">Industry</div><div class="detail-val" id="pd-industry">—</div></div>
+        <div class="detail-item"><div class="detail-label">Tier</div><div class="detail-val" id="pd-tier">—</div></div>
+        <div class="detail-item"><div class="detail-label">Pain Group</div><div class="detail-val" id="pd-pain">—</div></div>
+        <div class="detail-item"><div class="detail-label">Submitted</div><div class="detail-val" id="pd-date">—</div></div>
+        <div class="detail-item"><div class="detail-label">Composite Score</div><div class="detail-val" id="pd-composite">—</div></div>
+        <div class="detail-item"><div class="detail-label">Dep Score</div><div class="detail-val" id="pd-dep">—</div></div>
+      </div>
+
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Category Scores</div>
+      <div id="pd-cat-scores" style="margin-bottom:4px;"></div>
+
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Answers</div>
+      <div id="pd-answers" class="answers-wrap"></div>
+
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Notes</div>
+      <textarea class="form-input" id="pd-notes" rows="3" placeholder="Internal notes..." style="margin-bottom:12px;"></textarea>
+
+      <div class="panel-sec-label" style="margin-top:0">Status</div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:6px;">
+        <select class="form-input" id="pd-status-select" style="flex:1;">
+          <option value="new">New</option>
+          <option value="reviewed">Reviewed</option>
+          <option value="scoped">Scoped</option>
+          <option value="booked">Booked</option>
+          <option value="signed">Signed</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="saveAudit()">Save</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('sales');
+
+// ── Lazy-load flags ────────────────────────────────────────────────────────────
+let auditsLoaded   = false;
+let bookingsLoaded = false;
+
+// ── Tab switching ──────────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = '';
+  btn.classList.add('active');
+
+  // Swap topbar action buttons
+  document.getElementById('btn-refresh-pipeline').style.display = (name === 'pipeline') ? '' : 'none';
+  document.getElementById('btn-export-audits').style.display    = (name === 'audits')   ? '' : 'none';
+
+  // Lazy-load data on first switch
+  if (name === 'audits'   && !auditsLoaded)   loadAudits();
+  if (name === 'bookings' && !bookingsLoaded) loadBookings();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PIPELINE
+// ══════════════════════════════════════════════════════════════════════════════
+const STAGES = [
+  { key: 'new',       label: 'New',       statuses: ['new'] },
+  { key: 'qualified', label: 'Qualified', statuses: ['qualified', 'contacted'] },
+  { key: 'proposal',  label: 'Proposal',  statuses: ['proposal'] },
+  { key: 'booked',    label: 'Booked',    statuses: ['booked'] },
+  { key: 'signed',    label: 'Signed',    statuses: ['won'], isClients: true }
+];
+
+const STATUS_TO_STAGE = {};
+STAGES.forEach(s => s.statuses.forEach(st => { STATUS_TO_STAGE[st] = s.key; }));
+
+const STAGE_TO_STATUS = {
+  new:       'new',
+  qualified: 'qualified',
+  proposal:  'proposal',
+  booked:    'booked',
+  signed:    'won'
+};
+
+let allPipeLeads   = [];
+let allClients     = [];
+let dragId         = null;
+
+async function loadAll() {
+  const [leads, clients] = await Promise.all([
+    TMIAdmin.api('/api/leads'),
+    TMIAdmin.api('/api/clients')
+  ]);
+  allPipeLeads = Array.isArray(leads)   ? leads   : [];
+  allClients   = Array.isArray(clients) ? clients : [];
+  renderBoard();
+  renderPipeStats();
+}
+
+function daysAgo(dateStr) {
+  if (!dateStr) return null;
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+}
+
+function daysBetween(start, end) {
+  if (!start || !end) return null;
+  return Math.max(0, Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 86400000));
+}
+
+function leadName(l) {
+  const c = l.contacts || {};
+  return [c.first_name, c.last_name].filter(Boolean).join(' ') || l.title || 'Unknown';
+}
+
+function leadCompany(l) {
+  const c = l.contacts || {};
+  return c.company || '';
+}
+
+function clientName(cl) {
+  const c = cl.contacts || {};
+  return [c.first_name, c.last_name].filter(Boolean).join(' ') || c.company || 'Unknown';
+}
+
+function clientCompany(cl) {
+  const c = cl.contacts || {};
+  return c.company || '';
+}
+
+function renderPipeStats() {
+  const total = allPipeLeads.length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('pipe-count').textContent = `${total} lead${total !== 1 ? 's' : ''}`;
+
+  const won = allPipeLeads.filter(l => l.status === 'won');
+  const conv = total > 0 ? Math.round((won.length / total) * 100) : 0;
+  document.getElementById('stat-conv').textContent = conv + '%';
+  document.getElementById('stat-conv-sub').textContent = `${won.length} won of ${total}`;
+
+  const closedDays = won
+    .map(l => daysBetween(l.created_at, l.updated_at))
+    .filter(d => d !== null && d >= 0);
+  const avgDays = closedDays.length > 0
+    ? Math.round(closedDays.reduce((a, b) => a + b, 0) / closedDays.length)
+    : null;
+  document.getElementById('stat-avg-days').textContent = avgDays !== null ? avgDays + 'd' : '—';
+}
+
+function renderBoard() {
+  const board = document.getElementById('pipeline-board');
+
+  const byStage = {};
+  STAGES.forEach(s => { byStage[s.key] = []; });
+  allPipeLeads.forEach(l => {
+    const stage = STATUS_TO_STAGE[l.status];
+    if (stage && byStage[stage] !== undefined) byStage[stage].push(l);
+    else if (!stage) byStage['new'].push(l);
+  });
+
+  board.innerHTML = STAGES.map(stage => {
+    const isSignedCol = stage.isClients;
+    const leads   = byStage[stage.key] || [];
+    const clients = isSignedCol ? (Array.isArray(allClients) ? allClients.filter(c => c.status === 'active') : []) : [];
+    const totalCount = isSignedCol ? clients.length : leads.length;
+
+    let cardsHtml = '';
+
+    if (!isSignedCol) {
+      if (leads.length) {
+        cardsHtml = leads.map(l => {
+          const name    = leadName(l);
+          const company = leadCompany(l);
+          const source  = l.source || '';
+          const days    = daysAgo(l.created_at);
+          const daysStr = days !== null ? (days === 0 ? 'Today' : `${days}d`) : '';
+          return `<div class="pipe-card" draggable="true"
+            data-id="${l.id}"
+            data-stage="${stage.key}"
+            onclick="goToLead()"
+            ondragstart="onDragStart(event,'${l.id}')"
+            ondragend="onDragEnd(event)">
+            <div class="pipe-card-name">${name}</div>
+            ${company ? `<div class="pipe-card-company">${company}</div>` : ''}
+            <div class="pipe-card-foot">
+              ${source ? `<span class="pipe-card-source">${source}</span>` : '<span></span>'}
+              <span class="pipe-card-days">${daysStr}</span>
+            </div>
+          </div>`;
+        }).join('');
+      } else {
+        cardsHtml = `<div class="pipe-empty">No leads</div>`;
+      }
+    } else {
+      if (clients.length) {
+        cardsHtml = clients.map(cl => {
+          const name    = clientName(cl);
+          const company = clientCompany(cl);
+          const days    = daysAgo(cl.created_at);
+          const daysStr = days !== null ? (days === 0 ? 'Today' : `${days}d`) : '';
+          return `<div class="pipe-card"
+            onclick="goToClient()"
+            style="cursor:pointer;border-left:3px solid var(--green);">
+            <div class="pipe-card-name">${name}</div>
+            ${company ? `<div class="pipe-card-company">${company}</div>` : ''}
+            <div class="pipe-card-foot">
+              <span class="pipe-card-source">${cl.plan || 'client'}</span>
+              <span class="pipe-card-days">${daysStr}</span>
+            </div>
+          </div>`;
+        }).join('');
+      } else {
+        cardsHtml = `<div class="pipe-empty">No active clients</div>`;
+      }
+    }
+
+    return `<div class="pipe-col" id="stage-${stage.key}"
+      ondragover="onDragOver(event,'${stage.key}')"
+      ondragleave="onDragLeave(event,'${stage.key}')"
+      ondrop="onDrop(event,'${stage.key}')">
+      <div class="pipe-col-head">
+        <div class="pipe-col-accent"></div>
+        <div class="pipe-col-title">
+          ${stage.label}
+          <span class="pipe-col-count">${totalCount}</span>
+        </div>
+      </div>
+      <div class="pipe-cards" id="cards-${stage.key}">
+        ${cardsHtml}
+        ${isSignedCol ? `<div class="pipe-signed-note">Active clients only</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function goToLead()   { window.location.href = '/admin-leads';   }
+function goToClient() { window.location.href = '/admin-clients'; }
+
+// ── Drag and Drop ──────────────────────────────────────────────────────────────
+function onDragStart(e, leadId) {
+  dragId = leadId;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.classList.add('dragging');
+}
+
+function onDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.pipe-col.drop-over').forEach(el => el.classList.remove('drop-over'));
+}
+
+function onDragOver(e, stageKey) {
+  const stage = STAGES.find(s => s.key === stageKey);
+  if (!stage || stage.isClients) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.getElementById('stage-' + stageKey)?.classList.add('drop-over');
+}
+
+function onDragLeave(e, stageKey) {
+  const col = document.getElementById('stage-' + stageKey);
+  if (col && !col.contains(e.relatedTarget)) {
+    col.classList.remove('drop-over');
+  }
+}
+
+async function onDrop(e, stageKey) {
+  e.preventDefault();
+  const col = document.getElementById('stage-' + stageKey);
+  col?.classList.remove('drop-over');
+
+  const stage = STAGES.find(s => s.key === stageKey);
+  if (!stage || stage.isClients || !dragId) return;
+
+  const lead = allPipeLeads.find(l => String(l.id) === String(dragId));
+  if (!lead) return;
+
+  const newStatus = STAGE_TO_STATUS[stageKey];
+  if (lead.status === newStatus) return;
+
+  lead.status = newStatus;
+  renderBoard();
+  renderPipeStats();
+
+  const res = await TMIAdmin.api('/api/leads', 'PUT', {
+    lead: { id: lead.id, status: newStatus },
+    contact: { first_name: (lead.contacts || {}).first_name || 'Lead' }
+  });
+
+  if (res) {
+    TMIAdmin.toast(`Moved to ${stage.label}`);
+  } else {
+    await loadAll();
+  }
+
+  dragId = null;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// AUDITS
+// ══════════════════════════════════════════════════════════════════════════════
+const TIERS = {
+  tier1: 'Just Starting Out',
+  tier2: 'Growing Fast',
+  tier3: 'Ready To Scale',
+  tier4: 'Scaling Hard',
+  tier5: 'Multi Crew / Multi Location',
+  tier6: 'Hitting $10 Million',
+  tier7: 'Above $10 Million'
+};
+
+const CAT_LABELS = {
+  leads:   'Lead & Sales',
+  ops:     'Operations',
+  people:  'People & Systems',
+  finance: 'Finance & Admin',
+  comms:   'Communication'
+};
+
+const AUDIT_STATUS_BADGE = {
+  new:      'badge-new',
+  reviewed: 'badge-contacted',
+  scoped:   'badge-qualified',
+  booked:   'badge-proposal',
+  signed:   'badge-won'
+};
+
+let allAudits    = [];
+let currentAudit = null;
+
+function depClass(pct) {
+  if (pct >= 70) return 'critical';
+  if (pct >= 45) return 'high';
+  if (pct >= 20) return 'moderate';
+  return 'low';
+}
+
+function depBadgeClass(pct) {
+  if (pct >= 70) return 'badge-failed';
+  if (pct >= 45) return 'badge-proposal';
+  if (pct >= 20) return 'badge-qualified';
+  return 'badge-won';
+}
+
+function depLabel(pct) {
+  if (pct >= 70) return 'critical';
+  if (pct >= 45) return 'high';
+  if (pct >= 20) return 'moderate';
+  return 'low';
+}
+
+async function loadAudits() {
+  const data = await TMIAdmin.api('/api/audits');
+  if (data) {
+    allAudits = Array.isArray(data) ? data : [];
+    auditsLoaded = true;
+    renderAuditsStats();
+    renderAuditsTable();
+  }
+}
+
+function getAuditsFiltered() {
+  const q      = document.getElementById('audit-search').value.toLowerCase();
+  const tier   = document.getElementById('filter-tier').value;
+  const status = document.getElementById('filter-audit-status').value;
+
+  return allAudits.filter(a => {
+    if (tier && a.tier !== tier) return false;
+    if (status && (a.status || 'new') !== status) return false;
+    if (q) {
+      const haystack = [a.name, a.company, a.email].filter(Boolean).join(' ').toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderAuditsStats() {
+  const total = allAudits.length;
+  document.getElementById('audit-stat-total').textContent = total;
+
+  const unreviewed = allAudits.filter(a => !a.status || a.status === 'new').length;
+  document.getElementById('audit-stat-new').textContent = unreviewed;
+
+  if (total > 0) {
+    const avgDep = Math.round(allAudits.reduce((s, a) => s + (a.dep_pct || 0), 0) / total);
+    document.getElementById('audit-stat-avg-dep').textContent = avgDep + '%';
+
+    const tierCounts = {};
+    allAudits.forEach(a => { if (a.tier) tierCounts[a.tier] = (tierCounts[a.tier] || 0) + 1; });
+    const topTier = Object.entries(tierCounts).sort((a, b) => b[1] - a[1])[0];
+    document.getElementById('audit-stat-top-tier').textContent = topTier ? TIERS[topTier[0]] || topTier[0] : '—';
+  }
+}
+
+function renderAuditsTable() {
+  const filtered = getAuditsFiltered();
+  document.getElementById('audit-count').textContent = `${filtered.length} audit${filtered.length !== 1 ? 's' : ''}`;
+
+  const tbody = document.getElementById('audits-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><h3>No audits found</h3><p>Audit submissions will appear here.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(a => {
+    const dep    = typeof a.dep_pct === 'number' ? a.dep_pct : null;
+    const depHtml = dep !== null
+      ? `<div class="dep-bar-wrap">
+           <div class="dep-bar-track"><div class="dep-bar-fill ${depClass(dep)}" style="width:${dep}%"></div></div>
+           <span class="badge ${depBadgeClass(dep)}" style="font-size:10px">${dep}% ${depLabel(dep)}</span>
+         </div>`
+      : '—';
+    const comp        = typeof a.composite_score === 'number' ? a.composite_score.toFixed(1) : '—';
+    const status      = a.status || 'new';
+    const statusBadge = `<span class="badge ${AUDIT_STATUS_BADGE[status] || 'badge-new'}">${status}</span>`;
+    const tierLabel   = TIERS[a.tier] || a.tier || '—';
+
+    return `<tr onclick="openAuditPanel(${JSON.stringify(a).replace(/"/g, '&quot;')})">
+      <td>
+        <div class="td-name">${a.name || '—'}</div>
+        <div class="td-muted">${a.company || ''}</div>
+      </td>
+      <td class="td-muted">${a.industry || '—'}</td>
+      <td><span class="tier-chip" style="font-size:10px">${tierLabel}</span></td>
+      <td style="min-width:180px">${depHtml}</td>
+      <td class="td-muted">${comp}</td>
+      <td class="td-muted">${TMIAdmin.fmt(a.created_at)}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
+function openAuditPanel(audit) {
+  currentAudit = audit;
+
+  document.getElementById('panel-name').textContent = audit.name || 'Audit';
+  document.getElementById('pd-email').innerHTML = audit.email
+    ? `<a href="mailto:${audit.email}" style="color:var(--blue)">${audit.email}</a>` : '—';
+  document.getElementById('pd-phone').textContent     = audit.phone    || '—';
+  document.getElementById('pd-industry').textContent  = audit.industry || '—';
+  document.getElementById('pd-tier').textContent      = TIERS[audit.tier] || audit.tier || '—';
+  document.getElementById('pd-pain').textContent      = audit.pain_group || '—';
+  document.getElementById('pd-date').textContent      = TMIAdmin.fmt(audit.created_at);
+  document.getElementById('pd-composite').textContent = typeof audit.composite_score === 'number'
+    ? audit.composite_score.toFixed(1) : '—';
+
+  const dep = typeof audit.dep_pct === 'number' ? audit.dep_pct : null;
+  document.getElementById('pd-dep').innerHTML = dep !== null
+    ? `<span class="badge ${depBadgeClass(dep)}">${dep}% ${depLabel(dep)}</span>` : '—';
+
+  // Category scores
+  const catEl   = document.getElementById('pd-cat-scores');
+  const cats    = audit.cat_scores && typeof audit.cat_scores === 'object' ? audit.cat_scores : {};
+  const catKeys = Object.keys(CAT_LABELS);
+  catEl.innerHTML = catKeys.map(key => {
+    const val   = cats[key] !== undefined ? Number(cats[key]) : null;
+    const label = CAT_LABELS[key];
+    const pct   = val !== null ? Math.min(100, Math.round(val * 10)) : 0;
+    return `<div class="cat-score-row">
+      <div class="cat-score-label">${label}</div>
+      <div class="cat-score-track"><div class="cat-score-bar" style="width:${pct}%"></div></div>
+      <div class="cat-score-val">${val !== null ? val : '—'}</div>
+    </div>`;
+  }).join('');
+
+  // Answers
+  const answersEl  = document.getElementById('pd-answers');
+  const answers    = audit.answers && typeof audit.answers === 'object' ? audit.answers : {};
+  const answerKeys = Object.keys(answers);
+  if (answerKeys.length) {
+    answersEl.innerHTML = answerKeys.map(k => `
+      <div class="answer-row">
+        <div class="answer-q">${k.replace(/_/g, ' ')}</div>
+        <div class="answer-a">${answers[k] !== null && answers[k] !== undefined ? answers[k] : '—'}</div>
+      </div>`).join('');
+  } else {
+    answersEl.textContent = 'No answers recorded.';
+  }
+
+  document.getElementById('pd-notes').value         = audit.notes || '';
+  document.getElementById('pd-status-select').value = audit.status || 'new';
+
+  TMIAdmin.openPanel('audit-panel');
+}
+
+async function saveAudit() {
+  if (!currentAudit) return;
+  const notes  = document.getElementById('pd-notes').value;
+  const status = document.getElementById('pd-status-select').value;
+
+  const res = await TMIAdmin.api('/api/audits', 'PATCH', {
+    id: currentAudit.id,
+    notes,
+    status
+  });
+
+  if (res) {
+    TMIAdmin.toast('Audit updated');
+    const idx = allAudits.findIndex(a => a.id === currentAudit.id);
+    if (idx >= 0) { allAudits[idx].notes = notes; allAudits[idx].status = status; }
+    currentAudit.notes  = notes;
+    currentAudit.status = status;
+    renderAuditsTable();
+  }
+}
+
+function exportCSV() {
+  const filtered = getAuditsFiltered();
+  const headers  = ['Name', 'Company', 'Email', 'Phone', 'Industry', 'Tier', 'Dep Score', 'Composite', 'Pain Group', 'Status', 'Date'];
+  const rows = filtered.map(a => [
+    a.name     || '',
+    a.company  || '',
+    a.email    || '',
+    a.phone    || '',
+    a.industry || '',
+    TIERS[a.tier] || a.tier || '',
+    typeof a.dep_pct         === 'number' ? a.dep_pct + '%'              : '',
+    typeof a.composite_score === 'number' ? a.composite_score.toFixed(1) : '',
+    a.pain_group || '',
+    a.status     || 'new',
+    a.created_at ? new Date(a.created_at).toLocaleDateString() : ''
+  ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+  const csv  = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `audits-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// BOOKINGS
+// ══════════════════════════════════════════════════════════════════════════════
+let allLeads    = [];
+let allBookings = [];
+
+// Populate source filter (runs immediately — DOM element exists on load)
+TMIAdmin.sources.forEach(s => {
+  document.getElementById('filter-source').innerHTML += `<option>${s}</option>`;
+});
+
+async function loadBookings() {
+  const data = await TMIAdmin.api('/api/leads');
+  if (!data) return;
+  allLeads    = data;
+  allBookings = data.filter(l => l.status === 'booked');
+  bookingsLoaded = true;
+  renderBookingsStats();
+  renderBookingsTable();
+}
+
+function renderBookingsStats() {
+  const now          = new Date();
+  const startOfWeek  = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const thisWeek  = allBookings.filter(l => l.booked_at && new Date(l.booked_at) >= startOfWeek).length;
+  const thisMonth = allBookings.filter(l => l.booked_at && new Date(l.booked_at) >= startOfMonth).length;
+
+  document.getElementById('bookings-stats').innerHTML = `
+    <div class="stat-box"><div class="stat-label">Total Booked Calls</div><div class="stat-val">${allBookings.length}</div></div>
+    <div class="stat-box"><div class="stat-label">Booked This Week</div><div class="stat-val">${thisWeek}</div></div>
+    <div class="stat-box"><div class="stat-label">Booked This Month</div><div class="stat-val">${thisMonth}</div></div>
+  `;
+}
+
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function daysBadgeHtml(days) {
+  if (days === null) return '<span class="td-muted">—</span>';
+  let color, label;
+  if (days < 3) {
+    color = 'var(--green, #22c55e)';
+    label = days === 0 ? 'Today' : days === 1 ? '1 day' : `${days} days`;
+  } else if (days <= 7) {
+    color = 'var(--yellow, #f59e0b)';
+    label = `${days} days`;
+  } else {
+    color = 'var(--red, #ef4444)';
+    label = `${days} days`;
+  }
+  return `<span style="font-weight:600;color:${color}">${label}</span>`;
+}
+
+function getBookingsFiltered() {
+  const q   = document.getElementById('bookings-search').value.toLowerCase();
+  const src = document.getElementById('filter-source').value;
+  return allBookings.filter(l => {
+    const c    = l.contacts || {};
+    const text = [c.first_name, c.last_name, c.email, l.email].filter(Boolean).join(' ').toLowerCase();
+    if (q && !text.includes(q)) return false;
+    if (src && l.source !== src) return false;
+    return true;
+  });
+}
+
+function renderBookingsTable() {
+  const filtered = getBookingsFiltered();
+  document.getElementById('bookings-count').textContent = `${filtered.length} booking${filtered.length !== 1 ? 's' : ''}`;
+
+  const tbody = document.getElementById('bookings-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📅</div><h3>No booked calls</h3><p>Leads that book a strategy call will appear here.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(l => {
+    const c       = l.contacts || {};
+    const name    = [c.first_name, c.last_name].filter(Boolean).join(' ') || l.name || '—';
+    const email   = c.email   || l.email   || '—';
+    const phone   = c.phone   || l.phone   || '—';
+    const company = c.company || '—';
+    const days    = daysSince(l.booked_at);
+    return `<tr>
+      <td class="td-name">${name}</td>
+      <td>${company}</td>
+      <td style="color:var(--ink-2)">${email}</td>
+      <td class="td-muted">${phone}</td>
+      <td class="td-muted">${l.source || '—'}</td>
+      <td class="td-muted">${l.booked_at ? TMIAdmin.fmt(l.booked_at) : '—'}</td>
+      <td>${daysBadgeHtml(days)}</td>
+      <td class="td-action" style="white-space:nowrap">
+        <a href="/admin-leads" class="btn btn-ghost btn-sm">View Lead</a>
+        <button class="btn btn-ghost btn-sm" style="margin-left:4px" onclick="markComplete('${l.id}')">Mark Complete</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function markComplete(id) {
+  const lead = allBookings.find(l => l.id === id);
+  if (!lead) return;
+  const c  = lead.contacts || {};
+  const ok = await TMIAdmin.confirm('Mark this call as complete? This will move the lead to "qualified".');
+  if (!ok) return;
+  const res = await TMIAdmin.api('/api/leads', 'PUT', {
+    lead:    { id, status: 'qualified' },
+    contact: { first_name: c.first_name || 'Lead' }
+  });
+  if (res) {
+    TMIAdmin.toast('Call marked complete — lead moved to qualified');
+    await loadBookings();
+  }
+}
+
+// ── Bootstrap: load pipeline immediately (default tab) ────────────────────────
+loadAll();
+</script>
+</body>
+</html>
