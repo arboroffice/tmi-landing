@@ -3,6 +3,7 @@
   "trailingSlash": false,
   "redirects": [
     { "source": "/", "has": [{"type": "host", "value": "admin.tmitechai.com"}], "destination": "/admin", "permanent": false },
+    { "source": "/", "has": [{"type": "host", "value": "cityleads.tmitechai.com"}], "destination": "/cityleads/index", "permanent": false },
     { "source": "/stratum", "destination": "/", "permanent": true },
     { "source": "/platform", "destination": "/", "permanent": true },
     { "source": "/os", "destination": "/", "permanent": true },
@@ -243,7 +244,12 @@
       "destination": "/admin"
     },
     {
-      "source": "/(.*)",
+      "source": "/cityleads/(.*)",
+      "has": [{"type": "host", "value": "cityleads.tmitechai.com"}],
+      "destination": "/cityleads/$1"
+    },
+    {
+      "source": "/(.+)",
       "has": [{"type": "host", "value": "cityleads.tmitechai.com"}],
       "destination": "/cityleads/$1"
     }
