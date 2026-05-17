@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Office Hours | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.person-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px;}
+@media(max-width:520px){.person-cards{grid-template-columns:1fr;}}
+.person-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px 16px;text-align:center;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;}
+.person-card:hover{border-color:var(--ink-2);box-shadow:0 2px 12px rgba(0,0,0,0.07);}
+.person-card.selected{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink);}
+.person-avatar{width:64px;height:64px;border-radius:50%;background:var(--bg);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;margin:0 auto 12px;color:var(--ink);}
+.person-name{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.person-role{font-size:12px;color:var(--muted);margin-bottom:8px;}
+.person-topics{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:10px;}
+.person-topic{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11px;color:var(--ink-2);}
+.person-avail{font-size:12px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:5px;justify-content:center;}
+.person-avail-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.booking-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;}
+.booking-card-title{font-family:var(--serif);font-size:22px;font-weight:400;margin:0 0 6px;}
+.booking-card-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.type-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0;}
+@media(max-width:440px){.type-cards{grid-template-columns:1fr;}}
+.type-card{border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:12px;cursor:pointer;transition:all 0.12s;text-align:center;}
+.type-card:hover{border-color:var(--ink-2);}
+.type-card.active{border-color:var(--ink);background:var(--ink);color:#fff;}
+.type-card-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.type-card-min{font-size:11px;opacity:0.65;}
+.upcoming-booking{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;}
+.booking-date-block{background:var(--ink);color:#fff;border-radius:var(--r-sm);padding:8px 12px;text-align:center;flex-shrink:0;min-width:52px;}
+.booking-date-month{font-size:9px;letter-spacing:0.15em;text-transform:uppercase;opacity:0.7;}
+.booking-date-day{font-size:22px;font-weight:700;line-height:1.1;}
+.booking-body{flex:1;}
+.booking-who{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.booking-time{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.booking-type-tag{display:inline-block;background:var(--chart);color:var(--ink);padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;}
+.time-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+@media(max-width:380px){.time-slots{grid-template-columns:repeat(2,1fr);}}
+.time-slot{padding:10px;border:1px solid var(--line-strong);border-radius:var(--r-sm);text-align:center;font-size:13px;cursor:pointer;transition:all 0.12s;background:none;font-family:inherit;color:var(--ink-2);min-height:44px;}
+.time-slot:hover{border-color:var(--ink-2);color:var(--ink);}
+.time-slot.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.time-slot.unavailable{opacity:0.35;cursor:not-allowed;text-decoration:line-through;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Office Hours</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="sec-head" style="margin-bottom:6px;">
+        <h1>Book Time With Us</h1>
+      </div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:24px;">We block time every week for city leads. Use it.</p>
+
+      <!-- Person cards -->
+      <div class="person-cards">
+        <div class="person-card selected" id="person-mia" onclick="selectPerson('mia')">
+          <div class="person-avatar" style="background:#fee2e2;color:#b91c1c;">MA</div>
+          <div class="person-name">Mia</div>
+          <div class="person-role">Head of City Growth</div>
+          <div class="person-topics">
+            <span class="person-topic">Strategy</span>
+            <span class="person-topic">Playbook</span>
+            <span class="person-topic">Content</span>
+          </div>
+          <div class="person-avail"><span class="person-avail-dot"></span>Available this week</div>
+        </div>
+        <div class="person-card" id="person-tyler" onclick="selectPerson('tyler')">
+          <div class="person-avatar" style="background:#dbeafe;color:#1d4ed8;">TK</div>
+          <div class="person-name">Tyler</div>
+          <div class="person-role">Sales Director</div>
+          <div class="person-topics">
+            <span class="person-topic">Deals</span>
+            <span class="person-topic">Handoffs</span>
+            <span class="person-topic">Closing</span>
+          </div>
+          <div class="person-avail"><span class="person-avail-dot"></span>3 slots left</div>
+        </div>
+      </div>
+
+      <!-- Booking form -->
+      <div class="booking-card" id="booking-form">
+        <div class="booking-card-title" id="form-person-name">Book time with Mia</div>
+        <div class="booking-card-sub" id="form-person-sub">Strategy, playbook questions, and content review</div>
+
+        <div class="form-group">
+          <label class="form-label">Session Type</label>
+          <div class="type-cards" id="type-cards">
+            <div class="type-card active" onclick="selectType(this,'quick')">
+              <div class="type-card-title">Quick Question</div>
+              <div class="type-card-min">15 min</div>
+            </div>
+            <div class="type-card" onclick="selectType(this,'strategy')">
+              <div class="type-card-title">Strategy Call</div>
+              <div class="type-card-min">30 min</div>
+            </div>
+            <div class="type-card" onclick="selectType(this,'deal')">
+              <div class="type-card-title">Deal Review</div>
+              <div class="type-card-min">45 min</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input class="form-input" type="date" id="booking-date" min="2026-05-18"/>
+        </div>
+
+        <div class="form-group" id="slots-wrap" style="display:none;">
+          <label class="form-label">Available Times</label>
+          <div class="time-slots" id="time-slots"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">What do you want to cover?</label>
+          <textarea class="form-input" id="booking-notes" rows="3" placeholder="Give a quick summary so we can come prepared..."></textarea>
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="submitBooking()">Request Time</button>
+      </div>
+
+      <!-- Upcoming bookings -->
+      <div style="margin-top:32px;">
+        <div class="sec-head" style="margin-bottom:12px;">
+          <h1 style="font-size:18px;">Upcoming Bookings</h1>
+        </div>
+
+        <div class="upcoming-booking">
+          <div class="booking-date-block">
+            <div class="booking-date-month">May</div>
+            <div class="booking-date-day">20</div>
+          </div>
+          <div class="booking-body">
+            <div class="booking-who">Strategy Call with Mia</div>
+            <div class="booking-time">Tuesday, 10:00am - 10:30am CT</div>
+            <span class="booking-type-tag">Strategy Call</span>
+          </div>
+        </div>
+
+        <div class="upcoming-booking">
+          <div class="booking-date-block">
+            <div class="booking-date-month">May</div>
+            <div class="booking-date-day">23</div>
+          </div>
+          <div class="booking-body">
+            <div class="booking-who">Deal Review with Tyler</div>
+            <div class="booking-time">Friday, 2:00pm - 2:45pm CT</div>
+            <span class="booking-type-tag">Deal Review</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-office-hours');
+
+let selectedPerson = 'mia';
+let selectedType = 'quick';
+let selectedSlot = null;
+
+const PERSON_INFO = {
+  mia: { name: 'Mia', sub: 'Strategy, playbook questions, and content review' },
+  tyler: { name: 'Tyler', sub: 'Deals, handoffs, and closing questions' },
+};
+
+const SLOTS = {
+  quick:    ['9:00am','9:30am','10:00am','11:00am','1:00pm','1:30pm','2:00pm','3:00pm','3:30pm'],
+  strategy: ['9:00am','10:00am','11:00am','1:00pm','2:00pm','3:00pm','4:00pm'],
+  deal:     ['9:00am','10:00am','1:00pm','2:00pm','3:00pm'],
+};
+
+const UNAVAILABLE = ['10:00am','2:00pm'];
+
+// Set min date to tomorrow
+const tomorrow = new Date('2026-05-18');
+document.getElementById('booking-date').valueAsDate = tomorrow;
+showSlots();
+
+document.getElementById('booking-date').addEventListener('change', showSlots);
+
+function selectPerson(p) {
+  selectedPerson = p;
+  document.getElementById('person-mia').classList.toggle('selected', p === 'mia');
+  document.getElementById('person-tyler').classList.toggle('selected', p === 'tyler');
+  document.getElementById('form-person-name').textContent = 'Book time with ' + PERSON_INFO[p].name;
+  document.getElementById('form-person-sub').textContent = PERSON_INFO[p].sub;
+}
+
+function selectType(el, type) {
+  selectedType = type;
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  showSlots();
+}
+
+function showSlots() {
+  const dateVal = document.getElementById('booking-date').value;
+  if (!dateVal) { document.getElementById('slots-wrap').style.display = 'none'; return; }
+  document.getElementById('slots-wrap').style.display = 'block';
+  const slots = SLOTS[selectedType] || SLOTS.quick;
+  selectedSlot = null;
+  document.getElementById('time-slots').innerHTML = slots.map(s => {
+    const na = UNAVAILABLE.includes(s);
+    return `<button class="time-slot${na ? ' unavailable' : ''}" onclick="${na ? '' : `pickSlot(this,'${s}')`}" ${na ? 'disabled' : ''}>${s}</button>`;
+  }).join('');
+}
+
+function pickSlot(el, slot) {
+  selectedSlot = slot;
+  document.querySelectorAll('.time-slot').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function submitBooking() {
+  const date = document.getElementById('booking-date').value;
+  const notes = document.getElementById('booking-notes').value.trim();
+  if (!date) { CL.toast('Pick a date', 'error'); return; }
+  if (!selectedSlot) { CL.toast('Pick a time slot', 'error'); return; }
+  if (!notes) { CL.toast('Add what you want to cover', 'error'); return; }
+  CL.toast('Request sent. We\'ll confirm within a few hours.');
+  document.getElementById('booking-notes').value = '';
+  selectedSlot = null;
+  document.querySelectorAll('.time-slot').forEach(b => b.classList.remove('active'));
+}
+</script>
+</body>
+</html>

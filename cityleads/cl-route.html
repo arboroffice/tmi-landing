@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Today's Route | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.route-hero{background:var(--ink);border-radius:var(--r);padding:20px;margin-bottom:16px;color:#fff;}
+.route-hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.route-hero-title{font-family:var(--serif);font-size:22px;font-weight:400;color:#fff;margin:0;}
+.route-hero-sub{font-size:12px;color:rgba(255,255,255,0.55);margin-top:2px;}
+.route-stats{display:flex;gap:24px;margin-top:4px;}
+.route-stat{text-align:left;}
+.route-stat-val{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--chart);line-height:1;}
+.route-stat-label{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;letter-spacing:0.1em;text-transform:uppercase;}
+
+.map-placeholder{width:100%;height:220px;background:#e4e6ea;border-radius:var(--r);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;margin-bottom:16px;overflow:hidden;position:relative;}
+.map-placeholder iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.map-placeholder-label{font-size:13px;color:var(--muted);z-index:1;}
+
+.stops-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.stops-head h2{font-family:var(--serif);font-size:18px;font-weight:400;margin:0;letter-spacing:-0.01em;}
+
+.stop-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:8px;display:flex;gap:12px;cursor:pointer;transition:background 0.1s;}
+.stop-item:hover,.stop-item:active{background:var(--bg);}
+.stop-item.current{border-color:var(--chart);box-shadow:0 0 0 2px rgba(228,255,151,0.4);}
+.stop-item.done{opacity:0.5;}
+.stop-num{width:32px;height:32px;border-radius:50%;background:var(--chart);color:var(--ink);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.stop-item.done .stop-num{background:var(--green);color:#fff;}
+.stop-item.current .stop-num{background:var(--chart);animation:pulse 1.8s ease infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(228,255,151,0.5);}50%{box-shadow:0 0 0 6px rgba(228,255,151,0);}}
+.stop-body{flex:1;min-width:0;}
+.stop-name{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2;margin-bottom:2px;}
+.stop-type{font-size:12px;color:var(--muted);}
+.stop-address{font-size:12px;color:var(--ink-2);margin-top:4px;}
+.stop-meta{display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap;}
+.stop-dist{font-size:11px;color:var(--muted);}
+.stop-action-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--ink-2);}
+.stop-action-tag.first-visit{background:#dbeafe;border-color:#bfdbfe;color:#1d4ed8;}
+.stop-action-tag.follow-up{background:#fef9c3;border-color:#fde68a;color:#854d0e;}
+.stop-action-tag.proposal{background:#dcfce7;border-color:#bbf7d0;color:#15803d;}
+.stop-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;}
+.stop-status.done{color:var(--green);}
+.stop-status.current{color:var(--ink);}
+.stop-status.upcoming{color:var(--muted);}
+
+.add-stop-row{display:flex;gap:8px;margin-bottom:20px;}
+
+.nav-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;background:var(--chart);border:none;border-radius:var(--r);font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;transition:background 0.15s;margin-top:8px;min-height:52px;text-decoration:none;}
+.nav-btn:hover{background:var(--chart-dark);}
+.nav-btn svg{width:18px;height:18px;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Today's Route</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="optimizeRoute()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Optimize
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Hero -->
+      <div class="route-hero">
+        <div class="route-hero-top">
+          <div>
+            <div class="route-hero-title">Today's Route</div>
+            <div class="route-hero-sub" id="route-city-date">Austin, TX &middot; May 17, 2026</div>
+          </div>
+          <svg width="28" height="28" fill="none" stroke="rgba(255,255,255,0.4)" viewBox="0 0 24 24" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="route-stats">
+          <div class="route-stat">
+            <div class="route-stat-val" id="total-stops">5</div>
+            <div class="route-stat-label">Stops</div>
+          </div>
+          <div class="route-stat">
+            <div class="route-stat-val" id="drive-time">1h 22m</div>
+            <div class="route-stat-label">Drive Time</div>
+          </div>
+          <div class="route-stat">
+            <div class="route-stat-val" id="stops-done">1</div>
+            <div class="route-stat-label">Done</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div class="map-placeholder" id="map-container">
+        <svg width="32" height="32" fill="none" stroke="var(--muted)" viewBox="0 0 24 24" stroke-width="1.2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="2" x2="8" y2="18" stroke-linecap="round"/><line x1="16" y1="6" x2="16" y2="22" stroke-linecap="round"/></svg>
+        <div class="map-placeholder-label">Route map</div>
+      </div>
+
+      <!-- Stops -->
+      <div class="stops-head">
+        <h2>Stops</h2>
+        <div style="font-size:12px;color:var(--muted)" id="progress-label">1 of 5 complete</div>
+      </div>
+
+      <div id="stop-list"></div>
+
+      <div class="add-stop-row">
+        <button class="btn btn-ghost btn-full" onclick="addStop()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/></svg>
+          Add Stop
+        </button>
+      </div>
+
+      <a id="nav-link" class="nav-btn" href="#" onclick="startNav(event)">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        Start Navigation in Google Maps
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add Stop Modal -->
+<div class="modal-overlay" id="add-stop-modal">
+  <div class="modal">
+    <div class="modal-grip"></div>
+    <div class="modal-hd">
+      <h2 class="modal-title">Add a Stop</h2>
+      <button class="modal-x" onclick="CL.closeModal('add-stop-modal')">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Business Name</label>
+      <input class="form-input" id="stop-biz-name" placeholder="e.g. Apex HVAC" type="text"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Address</label>
+      <input class="form-input" id="stop-address" placeholder="123 Main St, Austin TX" type="text"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Planned Action</label>
+      <select class="form-input" id="stop-action">
+        <option value="first-visit">First Visit</option>
+        <option value="follow-up">Follow-Up</option>
+        <option value="proposal">Deliver Proposal</option>
+      </select>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-primary btn-full" onclick="saveStop()">Add Stop</button>
+      <button class="btn btn-ghost btn-full" onclick="CL.closeModal('add-stop-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-route');
+
+const STOPS = [
+  { id:1, name:'Apex HVAC',          type:'HVAC',           address:'1402 Rundberg Ln, Austin TX', dist:'Start', action:'follow-up',   status:'done' },
+  { id:2, name:'Lone Star Concrete',  type:'Concrete',       address:'6210 N Lamar Blvd, Austin TX', dist:'3.2 mi', action:'follow-up', status:'current' },
+  { id:3, name:'Travis Electric',     type:'Electrician',    address:'8801 Research Blvd, Austin TX', dist:'1.8 mi', action:'first-visit', status:'upcoming' },
+  { id:4, name:'Silverline Roofing',  type:'Roofing',        address:'2312 W Braker Ln, Austin TX', dist:'2.4 mi', action:'follow-up',  status:'upcoming' },
+  { id:5, name:'Hill Country Plumbing',type:'Plumbing',      address:'4500 Airport Blvd, Austin TX', dist:'4.1 mi', action:'proposal',   status:'upcoming' },
+];
+
+let stops = [...STOPS];
+
+const ACTION_LABELS = { 'first-visit':'First Visit', 'follow-up':'Follow-Up', 'proposal':'Deliver Proposal' };
+const STATUS_ICONS = {
+  done:     `<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg> Done`,
+  current:  `<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="4" fill="currentColor"/></svg> Current`,
+  upcoming: `<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg> Upcoming`,
+};
+
+function renderStops() {
+  const doneCount = stops.filter(s => s.status === 'done').length;
+  document.getElementById('total-stops').textContent = stops.length;
+  document.getElementById('stops-done').textContent = doneCount;
+  document.getElementById('progress-label').textContent = doneCount + ' of ' + stops.length + ' complete';
+
+  document.getElementById('stop-list').innerHTML = stops.map((s, i) => `
+    <div class="stop-item ${s.status}" id="stop-${s.id}">
+      <div class="stop-num">${s.status === 'done' ? '<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg>' : (i + 1)}</div>
+      <div class="stop-body">
+        <div class="stop-name">${s.name}</div>
+        <div class="stop-type">${s.type}</div>
+        <div class="stop-address">${s.address}</div>
+        <div class="stop-meta">
+          <span class="stop-dist">${s.dist}</span>
+          <span class="stop-action-tag ${s.action}">${ACTION_LABELS[s.action]}</span>
+          <span class="stop-status ${s.status}">${STATUS_ICONS[s.status]}</span>
+        </div>
+      </div>
+      ${s.status !== 'done' ? `<button class="btn btn-sm btn-ghost" style="flex-shrink:0" onclick="markStopDone(${s.id})">Done</button>` : ''}
+    </div>`).join('');
+}
+
+function markStopDone(id) {
+  const s = stops.find(x => x.id === id);
+  s.status = 'done';
+  const next = stops.find(x => x.status === 'upcoming');
+  if (next) next.status = 'current';
+  CL.toast(s.name + ' marked done');
+  renderStops();
+}
+
+function optimizeRoute() {
+  CL.toast('Route optimized - shortest path applied');
+}
+
+function addStop() {
+  document.getElementById('stop-biz-name').value = '';
+  document.getElementById('stop-address').value = '';
+  CL.openModal('add-stop-modal');
+}
+
+function saveStop() {
+  const name = document.getElementById('stop-biz-name').value.trim();
+  const addr = document.getElementById('stop-address').value.trim();
+  const action = document.getElementById('stop-action').value;
+  if (!name) { CL.toast('Enter a business name', 'error'); return; }
+  const newStop = { id: Date.now(), name, type:'', address: addr || 'No address', dist:'—', action, status: 'upcoming' };
+  stops.push(newStop);
+  CL.closeModal('add-stop-modal');
+  CL.toast(name + ' added to route');
+  renderStops();
+}
+
+function startNav(e) {
+  e.preventDefault();
+  const addrs = stops.map(s => encodeURIComponent(s.address)).join('/');
+  window.open('https://www.google.com/maps/dir/' + addrs, '_blank');
+}
+
+renderStops();
+</script>
+</body>
+</html>

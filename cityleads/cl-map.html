@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>City Map | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+  .map-wrap { position:relative; flex:1; overflow:hidden; display:flex; flex-direction:column; }
+  #map { width:100%; height:100%; }
+  .map-search-bar { position:absolute; top:12px; left:12px; right:12px; z-index:10; }
+  .map-search-bar svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--muted); pointer-events:none; }
+  .map-search-bar input { width:100%; padding:12px 40px 12px 36px; border:none; outline:none; font-size:14px; background:transparent; color:var(--ink); }
+  .map-filter-btn { position:absolute; top:12px; right:12px; z-index:10; display:none; }
+  .pin-sheet { position:fixed; bottom:0; left:0; right:0; z-index:200; transform:translateY(100%); transition:transform 0.3s cubic-bezier(.2,.8,.2,1); background:var(--surface); border-radius:20px 20px 0 0; padding:0 0 calc(16px + var(--safe-bottom)) 0; max-height:60vh; overflow-y:auto; }
+  .pin-sheet.open { transform:translateY(0); }
+  .pin-sheet-grip { width:36px; height:4px; background:var(--line-strong); border-radius:2px; margin:12px auto 0; }
+  .pin-sheet-body { padding:16px 20px; }
+  .pin-sheet-name { font-family:var(--serif); font-size:22px; font-weight:400; letter-spacing:-0.02em; margin:0 0 4px; }
+  .pin-sheet-meta { display:flex; align-items:center; gap:8px; margin-bottom:14px; font-size:13px; color:var(--muted); flex-wrap:wrap; }
+  .pin-sheet-row { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--ink-2); margin-bottom:8px; }
+  .pin-sheet-row svg { width:15px; height:15px; color:var(--muted); flex-shrink:0; }
+  .pin-sheet-actions { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+  .map-filter-overlay { position:fixed; inset:0; z-index:300; display:none; }
+  .map-filter-overlay.open { display:block; }
+  .map-filter-bg { position:absolute; inset:0; background:rgba(0,0,0,0.4); }
+  .map-filter-sheet { position:absolute; bottom:0; left:0; right:0; background:var(--surface); border-radius:20px 20px 0 0; padding:20px 20px calc(20px + var(--safe-bottom)); }
+  .map-filter-sheet h3 { font-family:var(--serif); font-size:20px; font-weight:400; margin:0 0 16px; }
+  .filter-section-label { font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; }
+  .filter-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .filter-chip { padding:8px 14px; border:1px solid var(--line-strong); border-radius:999px; font-size:13px; cursor:pointer; transition:all 0.12s; color:var(--ink-2); background:none; min-height:36px; font-family:inherit; }
+  .filter-chip.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .pin-sheet-overlay-bg { position:fixed; inset:0; z-index:199; display:none; }
+  .pin-sheet-overlay-bg.open { display:block; }
+  @media(min-width:769px){
+    .map-filter-btn { display:flex; }
+    .pin-sheet { max-width:420px; left:auto; border-radius:var(--r-lg) var(--r-lg) 0 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span class="page" id="city-label">Austin, TX</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openFilterSheet()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><line x1="4" y1="6" x2="20" y2="6" stroke-linecap="round"/><line x1="8" y1="12" x2="16" y2="12" stroke-linecap="round"/><line x1="11" y1="18" x2="13" y2="18" stroke-linecap="round"/></svg>
+          Filter
+        </button>
+      </div>
+    </div>
+
+    <div class="map-wrap">
+      <div class="map-search-bar card">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+        <input type="search" id="map-search-input" placeholder="Search your city..." autocomplete="off" oninput="onMapSearch(this.value)"/>
+      </div>
+      <div id="map"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Pin bottom sheet -->
+<div class="pin-sheet-overlay-bg" id="pin-bg" onclick="closePinSheet()"></div>
+<div class="pin-sheet" id="pin-sheet">
+  <div class="pin-sheet-grip"></div>
+  <div class="pin-sheet-body">
+    <div class="pin-sheet-meta">
+      <span id="ps-type" style="font-weight:500;color:var(--ink)"></span>
+      <span id="ps-stage"></span>
+      <span id="ps-score"></span>
+    </div>
+    <div class="pin-sheet-name" id="ps-name"></div>
+    <div class="pin-sheet-row">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-linecap="round"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="ps-owner"></span>
+    </div>
+    <div class="pin-sheet-row">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.37 2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 15.2z" stroke-linecap="round"/></svg>
+      <a id="ps-phone" href="#" style="color:var(--blue)"></a>
+    </div>
+    <div class="pin-sheet-actions">
+      <button class="btn btn-primary btn-full" onclick="saveToList()">Save to My List</button>
+      <button class="btn btn-ghost btn-full" onclick="logVisit()">Log Visit</button>
+      <a id="ps-profile-link" href="#" class="btn btn-ghost btn-full">View Profile</a>
+    </div>
+  </div>
+</div>
+
+<!-- Filter sheet -->
+<div class="map-filter-overlay" id="filter-overlay">
+  <div class="map-filter-bg" onclick="closeFilterSheet()"></div>
+  <div class="map-filter-sheet">
+    <h3>Filter Map</h3>
+    <p class="filter-section-label">Business Type</p>
+    <div class="filter-chips" id="type-chips">
+      <button class="filter-chip active" data-val="">All Types</button>
+      <button class="filter-chip" data-val="HVAC">HVAC</button>
+      <button class="filter-chip" data-val="Plumbing">Plumbing</button>
+      <button class="filter-chip" data-val="Roofing">Roofing</button>
+      <button class="filter-chip" data-val="Electrician">Electrician</button>
+      <button class="filter-chip" data-val="Landscaping">Landscaping</button>
+      <button class="filter-chip" data-val="Construction">Construction</button>
+      <button class="filter-chip" data-val="Painting">Painting</button>
+      <button class="filter-chip" data-val="Concrete">Concrete</button>
+    </div>
+    <p class="filter-section-label">Pipeline Stage</p>
+    <div class="filter-chips" id="stage-chips">
+      <button class="filter-chip active" data-val="">All Stages</button>
+      <button class="filter-chip" data-val="seed">Seed</button>
+      <button class="filter-chip" data-val="met_owner">Met Owner</button>
+      <button class="filter-chip" data-val="warm">Warm</button>
+      <button class="filter-chip" data-val="audit_booked">Audit Booked</button>
+      <button class="filter-chip" data-val="closed">Closed</button>
+    </div>
+    <p class="filter-section-label">Score</p>
+    <div class="filter-chips" id="score-chips">
+      <button class="filter-chip active" data-val="">All Scores</button>
+      <button class="filter-chip" data-val="hot">Hot</button>
+      <button class="filter-chip" data-val="warm">Warm</button>
+      <button class="filter-chip" data-val="cold">Cold</button>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="applyFilters()">Apply Filters</button>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-map');
+
+// Map state
+let map = null;
+let markers = [];
+let activeFilters = { type: '', stage: '', score: '' };
+let activeBusiness = null;
+
+// Sample businesses for demo
+const DEMO_BUSINESSES = [
+  { id:'b1', name:'Austin HVAC Pros', type:'HVAC', owner:'Mike Torres', phone:'(512) 555-0101', stage:'warm', score:'hot', lat:30.2672, lng:-97.7431 },
+  { id:'b2', name:'Capital Plumbing Co', type:'Plumbing', owner:'Sarah Chen', phone:'(512) 555-0202', stage:'met_owner', score:'warm', lat:30.2750, lng:-97.7380 },
+  { id:'b3', name:'Lone Star Roofing', type:'Roofing', owner:'James Polk', phone:'(512) 555-0303', stage:'seed', score:'cold', lat:30.2600, lng:-97.7500 },
+  { id:'b4', name:'Hill Country Electric', type:'Electrician', owner:'Dana Webb', phone:'(512) 555-0404', stage:'audit_booked', score:'hot', lat:30.2800, lng:-97.7300 },
+  { id:'b5', name:'Green Leaf Landscaping', type:'Landscaping', owner:'Carlos Reyes', phone:'(512) 555-0505', stage:'proposal_sent', score:'warm', lat:30.2550, lng:-97.7600 },
+];
+
+function initMap() {
+  const cityLat = 30.2672;
+  const cityLng = -97.7431;
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: cityLat, lng: cityLng },
+    zoom: 13,
+    disableDefaultUI: true,
+    zoomControl: true,
+    styles: [
+      { featureType:'poi', elementType:'labels', stylers:[{ visibility:'off' }] },
+    ]
+  });
+  renderMarkers(DEMO_BUSINESSES);
+}
+
+function pinColor(score) {
+  if (score === 'hot') return '#ef4444';
+  if (score === 'warm') return '#f59e0b';
+  return '#9ca3af';
+}
+
+function renderMarkers(businesses) {
+  markers.forEach(m => m.setMap(null));
+  markers = [];
+  businesses.forEach(biz => {
+    const marker = new google.maps.Marker({
+      position: { lat: biz.lat, lng: biz.lng },
+      map,
+      title: biz.name,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 9,
+        fillColor: pinColor(biz.score),
+        fillOpacity: 1,
+        strokeColor: '#fff',
+        strokeWeight: 2,
+      }
+    });
+    marker.addListener('click', () => openPinSheet(biz));
+    markers.push(marker);
+  });
+}
+
+function openPinSheet(biz) {
+  activeBusiness = biz;
+  document.getElementById('ps-name').textContent = biz.name;
+  document.getElementById('ps-type').textContent = biz.type;
+  document.getElementById('ps-stage').innerHTML = CL.stageBadge(biz.stage);
+  document.getElementById('ps-score').innerHTML = CL.scoreDot(biz.score);
+  document.getElementById('ps-owner').textContent = biz.owner;
+  const phoneEl = document.getElementById('ps-phone');
+  phoneEl.textContent = biz.phone;
+  phoneEl.href = 'tel:' + biz.phone.replace(/\D/g,'');
+  document.getElementById('ps-profile-link').href = 'cl-business.html?id=' + biz.id;
+  document.getElementById('pin-sheet').classList.add('open');
+  document.getElementById('pin-bg').classList.add('open');
+}
+
+function closePinSheet() {
+  document.getElementById('pin-sheet').classList.remove('open');
+  document.getElementById('pin-bg').classList.remove('open');
+  activeBusiness = null;
+}
+
+function saveToList() {
+  if (!activeBusiness) return;
+  CL.toast(activeBusiness.name + ' saved to My List');
+  closePinSheet();
+}
+
+function logVisit() {
+  if (!activeBusiness) return;
+  window.location.href = 'cl-business.html?id=' + activeBusiness.id + '&action=log-visit';
+}
+
+function openFilterSheet() {
+  document.getElementById('filter-overlay').classList.add('open');
+}
+
+function closeFilterSheet() {
+  document.getElementById('filter-overlay').classList.remove('open');
+}
+
+function applyFilters() {
+  closeFilterSheet();
+  const filtered = DEMO_BUSINESSES.filter(b => {
+    if (activeFilters.type && b.type !== activeFilters.type) return false;
+    if (activeFilters.stage && b.stage !== activeFilters.stage) return false;
+    if (activeFilters.score && b.score !== activeFilters.score) return false;
+    return true;
+  });
+  renderMarkers(filtered);
+  CL.toast('Filter applied — ' + filtered.length + ' pins showing');
+}
+
+function onMapSearch(q) {
+  if (!q) { renderMarkers(DEMO_BUSINESSES); return; }
+  const lq = q.toLowerCase();
+  const filtered = DEMO_BUSINESSES.filter(b =>
+    b.name.toLowerCase().includes(lq) ||
+    b.type.toLowerCase().includes(lq) ||
+    b.owner.toLowerCase().includes(lq)
+  );
+  renderMarkers(filtered);
+}
+
+// Chip toggle logic
+document.getElementById('type-chips').addEventListener('click', e => {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  document.querySelectorAll('#type-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activeFilters.type = chip.dataset.val;
+});
+document.getElementById('stage-chips').addEventListener('click', e => {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  document.querySelectorAll('#stage-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activeFilters.stage = chip.dataset.val;
+});
+document.getElementById('score-chips').addEventListener('click', e => {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  document.querySelectorAll('#score-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activeFilters.score = chip.dataset.val;
+});
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_MAPS_KEY&callback=initMap" async defer></script>
+</body>
+</html>

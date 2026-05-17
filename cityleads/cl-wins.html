@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Win Stories | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.win-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:12px;}
+.win-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.win-avatar{width:36px;height:36px;border-radius:50%;background:var(--ink);color:var(--chart);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;letter-spacing:0;}
+.win-author-info{flex:1;}
+.win-author{font-size:13px;font-weight:600;color:var(--ink);}
+.win-city{font-size:12px;color:var(--muted);}
+.win-biz-type{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:3px 8px;background:var(--bg);border-radius:999px;border:1px solid var(--line);}
+.win-headline{font-family:var(--serif);font-size:17px;font-weight:400;color:var(--ink);margin-bottom:10px;line-height:1.3;}
+.win-story{font-size:14px;color:var(--ink-2);line-height:1.65;margin-bottom:12px;}
+.win-stage{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.win-stage-label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);}
+.win-lesson{background:var(--chart);border-radius:var(--r-sm);padding:12px 14px;margin-top:4px;}
+.win-lesson-label{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;font-weight:700;color:var(--ink);margin-bottom:4px;opacity:0.6;}
+.win-lesson-text{font-size:13px;font-weight:600;color:var(--ink);line-height:1.5;}
+.filter-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;}
+.chip{padding:7px 14px;border-radius:999px;border:1px solid var(--line-strong);font-size:12px;cursor:pointer;background:none;color:var(--ink-2);font-family:inherit;transition:all 0.12s;min-height:36px;}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+/* Share modal form */
+.win-form-stage{display:flex;flex-wrap:wrap;gap:6px;}
+.stage-pill{padding:7px 14px;border-radius:999px;border:1px solid var(--line-strong);font-size:12px;cursor:pointer;background:none;color:var(--ink-2);font-family:inherit;transition:all 0.12s;min-height:36px;}
+.stage-pill.sel{background:var(--ink);color:#fff;border-color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Win Stories</span>
+      </div>
+      <div class="topbar-actions">
+        <span style="font-size:12px;color:var(--muted);" id="win-count"></span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="filter-chips" id="filter-chips">
+        <button class="chip active" onclick="setFilter(this,'all')">All</button>
+        <button class="chip" onclick="setFilter(this,'my-city')">My City</button>
+        <button class="chip" onclick="setFilter(this,'this-month')">This Month</button>
+        <button class="chip" onclick="setFilter(this,'hvac')">HVAC</button>
+        <button class="chip" onclick="setFilter(this,'roofing')">Roofing</button>
+        <button class="chip" onclick="setFilter(this,'plumbing')">Plumbing</button>
+        <button class="chip" onclick="setFilter(this,'construction')">Construction</button>
+      </div>
+
+      <div id="wins-list"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Share Your Win Modal -->
+<div class="modal-overlay" id="share-modal">
+  <div class="modal">
+    <div class="modal-grip"></div>
+    <div class="modal-hd">
+      <h2 class="modal-title">Share Your Win</h2>
+      <button class="modal-x" onclick="CL.closeModal('share-modal')">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Headline</label>
+      <input class="form-input" id="w-headline" placeholder="e.g. Walked in cold, signed in 2 weeks"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Your Story (2–3 sentences)</label>
+      <textarea class="form-input" id="w-story" rows="4" placeholder="What happened? What did you do? What was the moment it clicked?"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">The Lesson</label>
+      <input class="form-input" id="w-lesson" placeholder="What would you tell someone in the same situation?"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Deal Stage Reached</label>
+      <div class="win-form-stage" id="stage-pills">
+        <button class="stage-pill" onclick="selStage(this,'warm')">Warm</button>
+        <button class="stage-pill" onclick="selStage(this,'audit_booked')">Audit Booked</button>
+        <button class="stage-pill" onclick="selStage(this,'proposal_sent')">Proposal Sent</button>
+        <button class="stage-pill" onclick="selStage(this,'closed')">Closed</button>
+        <button class="stage-pill" onclick="selStage(this,'support_active')">Support Active</button>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-primary btn-full" onclick="submitWin()">Share Win</button>
+      <button class="btn btn-ghost btn-full" onclick="CL.closeModal('share-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="btn-fab" onclick="CL.openModal('share-modal')" title="Share Your Win">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/></svg>
+</button>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-wins');
+
+const WINS = [
+  {
+    id:1, initials:'MR', city:'Austin, TX', industry:'hvac', bizType:'HVAC',
+    headline:'Walked in at 8am, owner offered coffee and his cell number in one visit',
+    story:'Found a small HVAC shop on a street I drive every morning. Walked in, owner was already at his desk at 8am. We talked for 45 minutes about how he handles dispatch. He said he does it all in his head and has 12 techs. Told him what we do — he asked when he could see it.',
+    stage:'warm', stageLabel:'Warm', month:'may',
+    lesson:'Early morning walk-ins hit different. Owners are there before the chaos starts and actually have time to talk.'
+  },
+  {
+    id:2, initials:'JT', city:'Denver, CO', industry:'roofing', bizType:'Roofing',
+    headline:'Second visit, he had his bookkeeper in the room — closed 3 weeks later',
+    story:'First visit was surface level. He was interested but vague. I came back with a one-page overview of what the build looks like for roofing specifically. He had his bookkeeper there. She\'s the one who asked the hard questions about job costing. Answered all of them. They signed a month later.',
+    stage:'closed', stageLabel:'Closed', month:'may',
+    lesson:'If they bring someone else to the second meeting, that\'s a buying signal. Prepare for harder questions.'
+  },
+  {
+    id:3, initials:'SL', city:'Houston, TX', industry:'plumbing', bizType:'Plumbing',
+    headline:'He said "we\'ve tried apps before" — I asked what happened and that opened everything',
+    story:'Walk-in at a plumbing supply shop, talked to the owner for 20 minutes. He threw the "we\'ve tried apps before" line at me early. Instead of defending TMI, I asked what happened. He talked for 10 minutes about how the crew never used it. That conversation is what made him trust me.',
+    stage:'audit_booked', stageLabel:'Audit Booked', month:'april',
+    lesson:'When they say they\'ve tried something before, get curious instead of defensive. It buys you the whole conversation.'
+  },
+  {
+    id:4, initials:'KP', city:'Phoenix, AZ', industry:'construction', bizType:'Construction',
+    headline:'He was leaving for a job site — I walked with him to his truck and got the number',
+    story:'Owner was already in his hard hat when I walked in. Said he had 5 minutes. I asked my three questions while walking with him to his truck. By the time he started it, he had given me his cell and said to call him Friday. Sometimes you just have to move at their speed.',
+    stage:'warm', stageLabel:'Warm', month:'april',
+    lesson:'Don\'t try to slow someone down. Match their energy and move with them. You can have a full conversation in 4 minutes.'
+  },
+  {
+    id:5, initials:'AR', city:'Dallas, TX', industry:'hvac', bizType:'HVAC',
+    headline:'Third walk-in, he finally sat down — consistency is the whole game',
+    story:'First visit he was too busy. Second visit I left my name. Third visit he recognized me, laughed, and said "alright, come in." We talked for 30 minutes. He said he appreciates that I kept showing up. Audit is booked.',
+    stage:'audit_booked', stageLabel:'Audit Booked', month:'may',
+    lesson:'Most people give up after one visit. The third or fourth time you show up, you\'ve already beaten 90% of the competition.'
+  },
+];
+
+let activeFilter = 'all';
+let selectedStage = '';
+
+function setFilter(btn, filter) {
+  document.querySelectorAll('#filter-chips .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilter = filter;
+  renderWins();
+}
+
+function getFiltered() {
+  if (activeFilter === 'all') return WINS;
+  if (activeFilter === 'my-city') return WINS.filter(w => w.city.includes('Austin') || w.city.includes('TX'));
+  if (activeFilter === 'this-month') return WINS.filter(w => w.month === 'may');
+  return WINS.filter(w => w.industry === activeFilter);
+}
+
+function renderWins() {
+  const wins = getFiltered();
+  document.getElementById('win-count').textContent = wins.length + ' stories';
+  const list = document.getElementById('wins-list');
+  if (!wins.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🏆</div><h3>No stories yet for this filter</h3><p>Change the filter or share your own win.</p></div>`;
+    return;
+  }
+  list.innerHTML = wins.map(w => `
+    <div class="win-card">
+      <div class="win-header">
+        <div class="win-avatar">${w.initials}</div>
+        <div class="win-author-info">
+          <div class="win-author">City Lead ${w.initials}</div>
+          <div class="win-city">${w.city}</div>
+        </div>
+        <span class="win-biz-type">${w.bizType}</span>
+      </div>
+      <div class="win-headline">${w.headline}</div>
+      <div class="win-story">${w.story}</div>
+      <div class="win-stage">
+        <span class="win-stage-label">Reached:</span>
+        ${CL.stageBadge(w.stage)}
+      </div>
+      <div class="win-lesson">
+        <div class="win-lesson-label">Lesson</div>
+        <div class="win-lesson-text">${w.lesson}</div>
+      </div>
+    </div>`).join('');
+}
+
+function selStage(btn, stage) {
+  document.querySelectorAll('#stage-pills .stage-pill').forEach(p => p.classList.remove('sel'));
+  btn.classList.add('sel');
+  selectedStage = stage;
+}
+
+function submitWin() {
+  const headline = document.getElementById('w-headline').value.trim();
+  const story = document.getElementById('w-story').value.trim();
+  const lesson = document.getElementById('w-lesson').value.trim();
+  if (!headline || !story || !lesson || !selectedStage) {
+    CL.toast('Please fill in all fields and select a stage.', 'error');
+    return;
+  }
+  CL.closeModal('share-modal');
+  CL.toast('Win submitted! The team will review it.');
+  document.getElementById('w-headline').value = '';
+  document.getElementById('w-story').value = '';
+  document.getElementById('w-lesson').value = '';
+  document.querySelectorAll('#stage-pills .stage-pill').forEach(p => p.classList.remove('sel'));
+  selectedStage = '';
+}
+
+renderWins();
+</script>
+</body>
+</html>

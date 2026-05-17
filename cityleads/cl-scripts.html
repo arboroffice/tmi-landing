@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Scripts &amp; Templates | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.channel-tabs{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:2px;gap:2px;margin-bottom:20px;overflow-x:auto;}
+.ch-tab{flex:0 0 auto;padding:8px 16px;border-radius:4px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--muted);font-family:inherit;transition:all 0.12s;min-height:40px;white-space:nowrap;}
+.ch-tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+.script-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;overflow:hidden;}
+.script-card-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:8px;justify-content:space-between;}
+.script-card-title{font-size:14px;font-weight:700;color:var(--ink);line-height:1.3;flex:1;}
+.script-when{font-size:11px;color:var(--muted);padding:3px 10px;background:var(--bg);border:1px solid var(--line);border-radius:999px;white-space:nowrap;flex-shrink:0;}
+.script-body{padding:16px;}
+.script-text{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;font-size:14px;color:var(--ink);line-height:1.7;font-family:var(--serif);margin-bottom:12px;white-space:pre-wrap;}
+.script-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.copy-btn{position:relative;}
+.copied-flash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--green);color:#fff;border-radius:var(--r-sm);font-size:12px;font-weight:700;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.copied-flash.show{opacity:1;}
+/* Customize modal */
+.ai-result{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;font-size:14px;color:var(--ink);line-height:1.7;font-family:var(--serif);margin-top:16px;white-space:pre-wrap;min-height:80px;}
+.loading-dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--muted);margin:0 2px;animation:dot-pulse 1.2s infinite;}
+.loading-dots span:nth-child(2){animation-delay:0.2s;}
+.loading-dots span:nth-child(3){animation-delay:0.4s;}
+@keyframes dot-pulse{0%,80%,100%{transform:scale(0.6);opacity:0.4;}40%{transform:scale(1);opacity:1;}}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Scripts &amp; Templates</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="channel-tabs" id="channel-tabs">
+        <button class="ch-tab active" onclick="setChannel(this,'texts')">Texts</button>
+        <button class="ch-tab" onclick="setChannel(this,'emails')">Emails</button>
+        <button class="ch-tab" onclick="setChannel(this,'voicemails')">Voicemails</button>
+        <button class="ch-tab" onclick="setChannel(this,'walkin')">Walk-In</button>
+      </div>
+
+      <div id="scripts-list"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Customize Modal -->
+<div class="modal-overlay" id="customize-modal">
+  <div class="modal">
+    <div class="modal-grip"></div>
+    <div class="modal-hd">
+      <h2 class="modal-title">Personalize This Script</h2>
+      <button class="modal-x" onclick="CL.closeModal('customize-modal')">&times;</button>
+    </div>
+    <div id="customize-context-title" style="font-size:13px;color:var(--muted);margin-bottom:16px;"></div>
+    <div class="form-group">
+      <label class="form-label">Owner's First Name</label>
+      <input class="form-input" id="cust-name" placeholder="e.g. Mike"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">What did you last talk about?</label>
+      <textarea class="form-input" id="cust-context" rows="3" placeholder="e.g. He mentioned dispatch issues and doing invoices manually on Sunday nights"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Business type</label>
+      <input class="form-input" id="cust-biz" placeholder="e.g. HVAC, Plumbing, Roofing..."/>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-primary btn-full" onclick="generateCustom()">Generate Personalized Version</button>
+      <button class="btn btn-ghost btn-full" onclick="CL.closeModal('customize-modal')">Cancel</button>
+    </div>
+    <div id="ai-result-wrap" style="display:none;margin-top:16px;">
+      <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Personalized Script</div>
+      <div class="ai-result" id="ai-result-text"></div>
+      <button class="btn btn-ghost btn-full" style="margin-top:12px;" onclick="copyAiResult()">Copy Personalized Version</button>
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-scripts');
+
+const SCRIPTS = {
+  texts: [
+    {
+      title: 'First follow-up text after walk-in',
+      when: 'Same day or next morning',
+      text: `Hey [Name] — it was good meeting you today. I'm the one from TMI who stopped by. No pressure at all — just wanted to make sure you had my number if you think of anything. I'll check back in next week.
+
+- [Your Name]`,
+    },
+    {
+      title: 'Follow-up after 5 days of silence',
+      when: '5–7 days after first contact',
+      text: `Hey [Name] — [Your Name] again from TMI. Quick check-in. You mentioned [specific pain] when we talked — we just helped a similar [business type] company tackle exactly that. Happy to show you what it looked like when you have 15 minutes.`,
+    },
+    {
+      title: 'Confirming a second visit',
+      when: '24 hours before second visit',
+      text: `Hey [Name] — just confirming tomorrow at [time] works for me to swing by. Looking forward to it. Let me know if anything changes.`,
+    },
+    {
+      title: 'After no response to two follow-ups',
+      when: '10+ days of silence',
+      text: `Hey [Name] — I'll keep this short. I know you're busy. If the timing's off right now, no problem — just let me know and I'll check back in a few months. If you're still curious, I'm around. Either way works.`,
+    },
+    {
+      title: 'Warm check-in (owner you like)',
+      when: 'Weekly touch for a warm prospect',
+      text: `Hey [Name] — saw [something relevant, e.g. "you guys are busy out there / a job site in the area"]. Not trying to rush anything — just staying on your radar. Hope the week's going well.`,
+    },
+  ],
+  emails: [
+    {
+      title: 'First email after walk-in (no cell number)',
+      when: 'When you only have an email address',
+      text: `Subject: Stopped by today — [Your Name] from TMI
+
+Hi [Name],
+
+I stopped by [Business Name] earlier today and had a chance to introduce myself briefly. [Insert what they mentioned / what you observed about the business.]
+
+I work with trade companies in the area — specifically around [pain area: scheduling, job costing, invoicing, etc.]. We've been building tools that help [business type] owners get visibility into where jobs stand without adding more admin overhead.
+
+Not trying to pitch anything over email. Just wanted to follow up with a note so you have my info. If you'd like to see what we've built, I'm happy to come back and walk through it in 15 minutes.
+
+[Your Name]
+TMI City Lead — [Your City]
+[Your Phone]`,
+    },
+    {
+      title: 'Sending the TMI overview before a second visit',
+      when: 'Night before or morning of second visit',
+      text: `Subject: Quick overview before tomorrow
+
+Hi [Name],
+
+Looking forward to seeing you tomorrow at [time].
+
+I put together a quick one-pager on what TMI actually builds for [business type] companies — figured it'd give you something to look at ahead of time so we can spend our time on what matters most to you.
+
+[Attach or link overview — ask your TMI contact for the current version]
+
+See you tomorrow.
+
+[Your Name]`,
+    },
+    {
+      title: 'After the audit is booked',
+      when: 'Immediately after audit is confirmed',
+      text: `Subject: Audit confirmed — here's what to expect
+
+Hi [Name],
+
+The audit with the TMI team is confirmed for [date/time]. You'll hear from [Mia / Tyler] to confirm the details.
+
+The audit is about 20 minutes. They'll walk through how your current ops work and show you exactly what the build would look like for a company your size. No commitment required.
+
+Thanks for making the time — this one's worth it.
+
+[Your Name]`,
+    },
+  ],
+  voicemails: [
+    {
+      title: 'First voicemail after walk-in',
+      when: 'If they don\'t pick up after walk-in',
+      text: `"Hi [Name] — this is [Your Name], I stopped by [Business Name] earlier today. Just wanted to leave my number so you have it — [Your Number]. I'll also shoot you a text. Have a good one."`,
+    },
+    {
+      title: 'Follow-up voicemail (second attempt)',
+      when: 'Second call attempt, 5+ days later',
+      text: `"Hey [Name] — [Your Name] from TMI. I know you're busy — I'll keep this short. I work with a few [business type] companies in the area and I think what we're building would be worth 15 minutes of your time. Call or text me back when you get a chance — [Your Number]. No rush."`,
+    },
+    {
+      title: 'Final voicemail (third attempt)',
+      when: 'If you\'ve left two messages with no response',
+      text: `"Hey [Name] — [Your Name] one more time. I'm not going to keep calling — I know how it is. If the timing's off, no problem at all. If you ever want to pick this up, you have my number. Take care."`,
+    },
+  ],
+  walkin: [
+    {
+      title: 'Cold open — first words through the door',
+      when: 'Entering a business you\'ve never visited',
+      text: `"Hey — I'm [Name], I work with a local company called TMI. We work with [trade] businesses in [City]. Is the owner around? I'm not here to sell anything today — just want to introduce myself."`,
+    },
+    {
+      title: 'Handling the gatekeeper ("He\'s not in")',
+      when: 'Front desk, receptionist, or employee answers',
+      text: `"No problem — is there a good time I can catch him? I'm going to be in the area a few times this week. I'll swing back."
+
+[Get a specific time. If they won't give one: "What time does he usually come in?" Write down the answer and show up then.]`,
+    },
+    {
+      title: 'The transition from small talk to business',
+      when: '3–5 minutes into a conversation that\'s going well',
+      text: `"Can I ask — what's the biggest thing slowing you down right now? In the business, I mean."
+
+[Then stop talking. Let them answer. Don't fill the silence.]`,
+    },
+    {
+      title: 'Getting off the lot when they say "just send me something"',
+      when: 'When they try to end the conversation with a brush-off',
+      text: `"I can do that — but honestly, a one-pager doesn't do it justice. What I'd rather do is come back for 15 minutes and show you specifically what it looks like for a [business type] company your size. Would [day] or [day] work?"
+
+[Offer two specific options. Don't ask "when are you free." Give them a choice.]`,
+    },
+    {
+      title: 'Ending the visit with a next step locked in',
+      when: 'Closing out a good first visit',
+      text: `"I appreciate the time — this was helpful. Before I go, can I grab your cell so I can follow up directly? And would [day] or [day] work to come back and show you what the build actually looks like?"`,
+    },
+  ],
+};
+
+let activeChannel = 'texts';
+let customizeTarget = null;
+
+function setChannel(btn, channel) {
+  document.querySelectorAll('.ch-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  activeChannel = channel;
+  renderScripts();
+}
+
+function renderScripts() {
+  const scripts = SCRIPTS[activeChannel] || [];
+  const list = document.getElementById('scripts-list');
+  list.innerHTML = scripts.map((s, i) => `
+    <div class="script-card">
+      <div class="script-card-head">
+        <div class="script-card-title">${s.title}</div>
+        <span class="script-when">${s.when}</span>
+      </div>
+      <div class="script-body">
+        <div class="script-text" id="script-text-${i}">${s.text}</div>
+        <div class="script-actions">
+          <button class="btn btn-ghost btn-sm copy-btn" onclick="copyScript(${i}, this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+            <span class="copied-flash" id="copied-${i}">Copied!</span>
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="openCustomize(${i})">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="14" height="14"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke-linecap="round"/></svg>
+            Customize with AI
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function copyScript(idx, btn) {
+  const text = document.getElementById('script-text-' + idx).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const flash = document.getElementById('copied-' + idx);
+    flash.classList.add('show');
+    setTimeout(() => flash.classList.remove('show'), 1800);
+  });
+}
+
+function openCustomize(idx) {
+  customizeTarget = SCRIPTS[activeChannel][idx];
+  document.getElementById('customize-context-title').textContent = 'Customizing: ' + customizeTarget.title;
+  document.getElementById('cust-name').value = '';
+  document.getElementById('cust-context').value = '';
+  document.getElementById('cust-biz').value = '';
+  document.getElementById('ai-result-wrap').style.display = 'none';
+  CL.openModal('customize-modal');
+}
+
+function generateCustom() {
+  const name = document.getElementById('cust-name').value.trim() || '[Name]';
+  const context = document.getElementById('cust-context').value.trim();
+  const biz = document.getElementById('cust-biz').value.trim() || 'trade';
+  const wrap = document.getElementById('ai-result-wrap');
+  const result = document.getElementById('ai-result-text');
+
+  wrap.style.display = 'block';
+  result.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div>`;
+
+  setTimeout(() => {
+    let custom = customizeTarget.text
+      .replace(/\[Name\]/g, name)
+      .replace(/\[business type\]/g, biz)
+      .replace(/\[Business Name\]/g, biz + ' Co.');
+    if (context) {
+      custom = custom.replace(/\[specific pain\]/, context.split(' ').slice(0,8).join(' ') + '...');
+      custom = custom.replace(/\[Insert what they mentioned.*?\]/, context + '.');
+    }
+    result.textContent = custom;
+  }, 900);
+}
+
+function copyAiResult() {
+  const text = document.getElementById('ai-result-text').textContent;
+  navigator.clipboard.writeText(text).then(() => CL.toast('Copied!'));
+}
+
+renderScripts();
+</script>
+</body>
+</html>

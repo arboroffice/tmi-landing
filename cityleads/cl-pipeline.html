@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Pipeline Board | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.view-toggle{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:2px;gap:2px;}
+.vt-btn{padding:6px 14px;border-radius:4px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:none;color:var(--muted);font-family:inherit;transition:all 0.12s;min-height:32px;}
+.vt-btn.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+.filter-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.chip{padding:6px 14px;border-radius:999px;border:1px solid var(--line-strong);font-size:12px;cursor:pointer;background:none;color:var(--ink-2);font-family:inherit;transition:all 0.12s;min-height:36px;}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.kanban-card-days{font-size:11px;color:var(--muted);margin-top:2px;}
+.kanban-card-days.urgent{color:#ef4444;}
+.list-val{font-weight:600;color:var(--ink);}
+.pipeline-col-header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:0 2px 12px;}
+.pipeline-col-header h2{font-family:var(--serif);font-size:20px;font-weight:400;margin:0;}
+#board-view .stats-row{grid-template-columns:repeat(3,1fr);}
+@media(min-width:769px){#board-view .stats-row{grid-template-columns:repeat(3,1fr);}}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Pipeline Board</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="view-toggle">
+          <button class="vt-btn active" id="btn-board" onclick="setView('board')">Board</button>
+          <button class="vt-btn" id="btn-list" onclick="setView('list')">List</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stats strip -->
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-box">
+          <div class="stat-label">Total Pipeline</div>
+          <div class="stat-val" id="stat-total">$0</div>
+          <div class="stat-delta pos">Across all stages</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Closed This Month</div>
+          <div class="stat-val" id="stat-month">0</div>
+          <div class="stat-delta pos" id="stat-month-val"></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Avg Days to Close</div>
+          <div class="stat-val" id="stat-avg">--</div>
+          <div class="stat-delta">From seed to closed</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+        <div class="filter-chips" id="score-chips" style="margin-bottom:0;">
+          <button class="chip active" onclick="filterScore(this,'all')">All</button>
+          <button class="chip" onclick="filterScore(this,'hot')">Hot</button>
+          <button class="chip" onclick="filterScore(this,'warm')">Warm</button>
+          <button class="chip" onclick="filterScore(this,'cold')">Cold</button>
+        </div>
+        <select class="filter-select" id="stage-filter" onchange="renderCurrent()" style="min-width:140px;margin-bottom:0;">
+          <option value="all">All Stages</option>
+          <option value="early">Early (Seed - Problem ID'd)</option>
+          <option value="mid">Mid (Warm - Proposal)</option>
+          <option value="closed">Closed & Live</option>
+        </select>
+      </div>
+
+      <!-- Board view -->
+      <div id="board-view">
+        <div class="kanban" id="kanban-root"></div>
+      </div>
+
+      <!-- List view -->
+      <div id="list-view" style="display:none;">
+        <div class="card">
+          <div class="tbl-wrap">
+            <table id="pipeline-table">
+              <thead>
+                <tr>
+                  <th>Business</th>
+                  <th>Owner</th>
+                  <th>Stage</th>
+                  <th>Days in Stage</th>
+                  <th>Est. Value</th>
+                  <th>Last Activity</th>
+                </tr>
+              </thead>
+              <tbody id="pipeline-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-pipeline');
+
+const DEALS = [
+  { id:1, biz:'Apex HVAC',            owner:'Mike Ruiz',      stage:'warm',               days:4,  value:8500,  score:'hot',  last:'Walked site Tue' },
+  { id:2, biz:'Silverline Roofing',   owner:'Dan Ashby',      stage:'proposal_sent',      days:2,  value:11000, score:'hot',  last:'Sent proposal Wed' },
+  { id:3, biz:'Travis Electric',      owner:'Sarah Kim',      stage:'audit_booked',       days:1,  value:7200,  score:'hot',  last:'Audit Mon 10am' },
+  { id:4, biz:'Lone Star Concrete',   owner:'Diego Vega',     stage:'problem_identified', days:6,  value:9400,  score:'warm', last:'2nd visit Thu' },
+  { id:5, biz:'Hill Country HVAC',    owner:'Todd Mills',     stage:'second_visit',       days:3,  value:6800,  score:'warm', last:'Texted Fri' },
+  { id:6, biz:'Cedar Park Plumbing',  owner:'Ray Santos',     stage:'met_owner',          days:8,  value:5500,  score:'warm', last:'Walked in Mon' },
+  { id:7, biz:'Austin Painting Co',   owner:'Jim Holt',       stage:'seed',               days:12, value:4200,  score:'cold', last:'Found Tue' },
+  { id:8, biz:'Rio Grande Electric',  owner:'Carlos Mora',    stage:'closed',             days:0,  value:12000, score:'hot',  last:'Signed May 1' },
+  { id:9, biz:'Badlands Pipeline',    owner:'Pete Okafor',    stage:'build_live',         days:14, value:15000, score:'hot',  last:'Onboarding' },
+  { id:10, biz:'SkyHigh Roofing',     owner:'Amy Chen',       stage:'support_active',     days:45, value:7800,  score:'warm', last:'Check-in call' },
+  { id:11, biz:'Summit HVAC',         owner:'Ron Burke',      stage:'expansion',          days:90, value:18000, score:'hot',  last:'Upsell convo' },
+  { id:12, biz:'Redrock Plumbing',    owner:'Frank Diaz',     stage:'seed',               days:2,  value:3800,  score:'cold', last:'Added today' },
+  { id:13, biz:'Liberty Landscaping', owner:'Ben Walsh',      stage:'met_owner',          days:5,  value:4900,  score:'warm', last:'Business card' },
+];
+
+let activeScore = 'all';
+let activeView = 'board';
+
+function filterScore(btn, score) {
+  document.querySelectorAll('#score-chips .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  activeScore = score;
+  renderCurrent();
+}
+
+function getFiltered() {
+  const stageFilter = document.getElementById('stage-filter').value;
+  const earlyStages = ['seed','met_owner','second_visit','problem_identified'];
+  const midStages = ['warm','audit_booked','proposal_sent'];
+  const closedStages = ['closed','build_live','support_active','expansion'];
+
+  return DEALS.filter(d => {
+    if (activeScore !== 'all' && d.score !== activeScore) return false;
+    if (stageFilter === 'early' && !earlyStages.includes(d.stage)) return false;
+    if (stageFilter === 'mid' && !midStages.includes(d.stage)) return false;
+    if (stageFilter === 'closed' && !closedStages.includes(d.stage)) return false;
+    return true;
+  });
+}
+
+function setView(v) {
+  activeView = v;
+  document.getElementById('board-view').style.display = v === 'board' ? '' : 'none';
+  document.getElementById('list-view').style.display = v === 'list' ? '' : 'none';
+  document.getElementById('btn-board').classList.toggle('active', v === 'board');
+  document.getElementById('btn-list').classList.toggle('active', v === 'list');
+  renderCurrent();
+}
+
+function renderCurrent() {
+  const deals = getFiltered();
+  updateStats(deals);
+  if (activeView === 'board') renderBoard(deals);
+  else renderList(deals);
+}
+
+function updateStats(deals) {
+  const total = deals.reduce((s,d) => s + d.value, 0);
+  document.getElementById('stat-total').textContent = CL.currency(total);
+  const closed = deals.filter(d => d.stage === 'closed');
+  document.getElementById('stat-month').textContent = closed.length;
+  document.getElementById('stat-month-val').textContent = CL.currency(closed.reduce((s,d) => s+d.value,0)) + ' value';
+  document.getElementById('stat-avg').textContent = '18d';
+}
+
+function renderBoard(deals) {
+  const root = document.getElementById('kanban-root');
+  root.innerHTML = CL.stages.map(s => {
+    const cards = deals.filter(d => d.stage === s.id);
+    return `
+    <div class="kanban-col">
+      <div class="kanban-col-head">
+        <span class="kanban-col-title">${s.label}</span>
+        <span class="kanban-count">${cards.length}</span>
+      </div>
+      <div class="kanban-cards">
+        ${cards.length ? cards.map(d => `
+          <div class="kanban-card" onclick="window.location='cl-business.html?id=${d.id}'">
+            <div style="display:flex;gap:6px;align-items:flex-start;">
+              ${CL.scoreDot(d.score)}
+              <div style="flex:1;min-width:0;">
+                <div class="kanban-card-name">${d.biz}</div>
+                <div class="kanban-card-meta">${d.owner}</div>
+              </div>
+            </div>
+            <div class="kanban-card-days ${d.days > 7 ? 'urgent' : ''}">${d.days}d in stage</div>
+            <div class="kanban-card-val">${CL.currency(d.value)}</div>
+          </div>`).join('') : `<div style="padding:12px 8px;font-size:12px;color:var(--muted);text-align:center;">Empty</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderList(deals) {
+  const tbody = document.getElementById('pipeline-tbody');
+  tbody.innerHTML = deals.map(d => `
+    <tr onclick="window.location='cl-business.html?id=${d.id}'">
+      <td>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${CL.scoreDot(d.score)}
+          <span class="td-name">${d.biz}</span>
+        </div>
+      </td>
+      <td>${d.owner}</td>
+      <td>${CL.stageBadge(d.stage)}</td>
+      <td class="${d.days > 7 ? '' : ''}">${d.days}d</td>
+      <td class="list-val">${CL.currency(d.value)}</td>
+      <td class="td-muted">${d.last}</td>
+    </tr>`).join('');
+}
+
+renderCurrent();
+</script>
+</body>
+</html>

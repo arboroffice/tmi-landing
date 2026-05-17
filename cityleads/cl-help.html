@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Help | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.help-chat-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;margin-bottom:24px;}
+.help-chat-head{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+.help-ai-icon{width:32px;height:32px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.help-ai-icon svg{width:15px;height:15px;color:var(--chart);}
+.help-chat-name{font-size:13px;font-weight:600;color:var(--ink);}
+.help-chat-status{font-size:11px;color:var(--green);display:flex;align-items:center;gap:4px;}
+.help-status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.help-messages{padding:14px;max-height:360px;overflow-y:auto;}
+.help-msg-wrap{display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;}
+.help-msg-wrap.user{flex-direction:row-reverse;}
+.help-ai-bubble{background:var(--bg);border:1px solid var(--line);border-radius:14px;border-top-left-radius:3px;padding:10px 14px;font-size:14px;color:var(--ink-2);line-height:1.55;max-width:82%;}
+.help-user-bubble{background:var(--ink);color:#fff;border-radius:14px;border-top-right-radius:3px;padding:10px 14px;font-size:14px;line-height:1.5;max-width:82%;}
+.help-user-icon{width:28px;height:28px;border-radius:50%;background:var(--chart);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink);flex-shrink:0;}
+.small-ai-icon{width:28px;height:28px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.small-ai-icon svg{width:13px;height:13px;color:var(--chart);}
+.help-input-row{padding:10px 12px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:flex-end;}
+.help-input-row textarea{flex:1;border:1px solid var(--line-strong);border-radius:16px;padding:8px 12px;font-size:14px;outline:none;resize:none;min-height:38px;max-height:100px;background:var(--bg);font-family:inherit;line-height:1.4;}
+.help-input-row textarea:focus{border-color:var(--ink-2);}
+.help-send{width:38px;height:38px;border-radius:50%;background:var(--chart);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;}
+.help-send:hover{background:var(--chart-dark);}
+.help-send svg{width:14px;height:14px;color:var(--ink);}
+
+/* FAQ */
+.faq-section{margin-bottom:20px;}
+.faq-section-title{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:12px;}
+.faq-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:8px;overflow:hidden;}
+.faq-q{padding:14px 16px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none;transition:background 0.1s;}
+.faq-q:hover{background:var(--bg);}
+.faq-q svg{width:16px;height:16px;color:var(--muted);flex-shrink:0;transition:transform 0.2s;}
+.faq-item.open .faq-q svg{transform:rotate(180deg);}
+.faq-a{padding:0 16px;max-height:0;overflow:hidden;transition:max-height 0.25s ease,padding 0.2s;}
+.faq-item.open .faq-a{padding:0 16px 14px;max-height:400px;}
+.faq-a p{font-size:14px;color:var(--ink-2);line-height:1.65;margin:0;}
+.quick-links{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px;}
+@media(max-width:380px){.quick-links{grid-template-columns:1fr;}}
+.quick-link{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:border-color 0.15s,background 0.15s;}
+.quick-link:hover{border-color:var(--ink-2);background:var(--bg);}
+.quick-link svg{width:18px;height:18px;color:var(--muted);}
+.quick-link-label{font-size:13px;font-weight:600;color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Help</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="sec-head" style="margin-bottom:20px;">
+        <h1>Help</h1>
+      </div>
+
+      <!-- Help chat -->
+      <div class="help-chat-wrap">
+        <div class="help-chat-head">
+          <div class="help-ai-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="help-chat-name">TMI Help</div>
+            <div class="help-chat-status"><span class="help-status-dot"></span>Online</div>
+          </div>
+        </div>
+
+        <div class="help-messages" id="help-messages">
+          <div class="help-msg-wrap">
+            <div class="small-ai-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke-linecap="round"/></svg></div>
+            <div class="help-ai-bubble">Hi! Ask me anything about how to use the app. I can walk you through any feature, explain how commissions work, or help you troubleshoot something.</div>
+          </div>
+        </div>
+
+        <div class="help-input-row">
+          <textarea id="help-input" rows="1" placeholder="Ask a question..." onkeydown="handleHelpEnter(event)" oninput="autoResize(this)"></textarea>
+          <button class="help-send" onclick="sendHelp()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13" stroke-linecap="round"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="faq-section">
+        <div class="faq-section-title">Frequently Asked Questions</div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            How do I log a visit?
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-a"><p>Go to Quick Capture from the bottom nav or the "Capture" tab. Select the business you visited, choose the visit type (Walk-In, Call, etc.), add what happened, and hit Log Visit. The visit will appear in your Visits history and update the business timeline automatically.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            How do I hand off a lead?
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-a"><p>Open the business profile and tap "Handoff to Sales." Fill in what you know about the owner, what problem they have, and what you've already discussed. Tyler gets notified immediately and will pick it up from there. You can track the handoff status in the Handoffs section.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            When does my commission get paid?
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-a"><p>Commission is paid on the 1st of the month following the month a deal goes live (not just closed — fully onboarded). Referral bonus for deals your contacts bring in pays at the same time. You can see all pending and paid amounts in My Earnings.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            How do I change my assigned city?
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-a"><p>City assignments are managed by the admin team. Book office hours with Mia to discuss a city change request. In most cases it takes 2–4 weeks to transition depending on pipeline status in your current city.</p></div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            What counts as a qualifying visit?
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="6 9 12 15 18 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-a"><p>Any in-person contact at the business location. Phone calls and emails count as follow-up activity but not as visits. The business must have 3 or more employees and operate in the trades, construction, or field services. Log it the same day — retroactive logging is flagged for review.</p></div>
+        </div>
+
+      </div>
+
+      <!-- Quick links -->
+      <div class="faq-section-title">Quick Links</div>
+      <div class="quick-links">
+        <a href="cl-playbook.html" class="quick-link">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span class="quick-link-label">Playbook</span>
+        </a>
+        <a href="cl-scripts.html" class="quick-link">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13" stroke-linecap="round"/><line x1="16" y1="17" x2="8" y2="17" stroke-linecap="round"/></svg>
+          <span class="quick-link-label">Scripts</span>
+        </a>
+        <a href="cl-bug.html" class="quick-link">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M8 2h8M9 8h6M12 2v6M9 14v2M15 14v2M12 22v-4" stroke-linecap="round"/><path d="M20 13v1a8 8 0 0 1-16 0v-1a8 8 0 0 1 16 0z" stroke-linecap="round"/></svg>
+          <span class="quick-link-label">Report a Bug</span>
+        </a>
+        <a href="cl-suggest.html" class="quick-link">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round"/><line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-linecap="round" stroke-width="2"/></svg>
+          <span class="quick-link-label">Suggest a Feature</span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-help');
+
+const HELP_RESPONSES = {
+  'visit': 'To log a visit: go to Quick Capture in the bottom nav, pick the business, choose Walk-In, fill in what happened, and tap Log Visit. It shows up in your history immediately.',
+  'handoff': 'To hand off a lead: open the business profile, tap "Handoff to Sales," fill in the owner details and what you know, and submit. Tyler gets notified right away.',
+  'commission': 'Commission pays on the 1st of the month after a deal goes live. You can see all earnings — pending and paid — in the My Earnings section.',
+  'city': 'City changes are handled by admin. Book time with Mia in Office Hours to request one. It usually takes 2-4 weeks depending on your current pipeline.',
+  'default': 'Good question. For anything you can\'t find here, book office hours with Mia or Tyler — they respond same day. Or report a bug if something is broken and we\'ll fix it fast.',
+};
+
+function getHelpResponse(text) {
+  const t = text.toLowerCase();
+  if (t.includes('visit') || t.includes('log')) return HELP_RESPONSES.visit;
+  if (t.includes('handoff') || t.includes('lead') || t.includes('refer')) return HELP_RESPONSES.handoff;
+  if (t.includes('commission') || t.includes('pay') || t.includes('earn')) return HELP_RESPONSES.commission;
+  if (t.includes('city') || t.includes('change') || t.includes('move')) return HELP_RESPONSES.city;
+  return HELP_RESPONSES.default;
+}
+
+function sendHelp() {
+  const input = document.getElementById('help-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const msgs = document.getElementById('help-messages');
+  const user = CL.getUser();
+  const initials = CL.initials(user?.user_metadata?.full_name || 'You');
+
+  const userWrap = document.createElement('div');
+  userWrap.className = 'help-msg-wrap user';
+  userWrap.innerHTML = `<div class="help-user-icon">${initials}</div><div class="help-user-bubble">${text.replace(/</g,'&lt;')}</div>`;
+  msgs.appendChild(userWrap);
+  input.value = '';
+  input.style.height = 'auto';
+  msgs.scrollTop = 999999;
+
+  setTimeout(() => {
+    const aiWrap = document.createElement('div');
+    aiWrap.className = 'help-msg-wrap';
+    aiWrap.innerHTML = `<div class="small-ai-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2" stroke-linecap="round"/></svg></div><div class="help-ai-bubble">${getHelpResponse(text)}</div>`;
+    msgs.appendChild(aiWrap);
+    msgs.scrollTop = 999999;
+  }, 700);
+}
+
+function handleHelpEnter(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendHelp();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  item.classList.toggle('open');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>City Lead Login | TMI</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+</head>
+<body>
+
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="../logo.svg" alt="TMI"/>
+      <div>
+        <div class="login-logo-text">TMI Technology</div>
+        <div class="login-logo-sub">City Leads</div>
+      </div>
+    </div>
+
+    <h1 class="login-title">City Lead Login</h1>
+    <p class="login-sub">Sign in to manage your territory, log visits, and track your pipeline.</p>
+
+    <div class="login-error" id="login-error">Incorrect email or password. Try again.</div>
+
+    <form id="login-form" onsubmit="handleSubmit(event)">
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-input" id="email" type="email" placeholder="you@example.com" autocomplete="email" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-input" id="password" type="password" placeholder="••••••••" autocomplete="current-password" required/>
+      </div>
+      <button class="btn btn-primary btn-full btn-lg" type="submit" id="submit-btn">
+        Sign In
+      </button>
+    </form>
+
+    <p style="margin-top:24px;font-size:13px;color:var(--muted);text-align:center;">
+      Admin? <a href="/admin" style="color:var(--ink);font-weight:500;">Sign in to TMI Admin</a>
+    </p>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+  // Redirect if already logged in
+  if (CL.getSession()) {
+    const role = CL.getRole();
+    window.location.replace(role === 'admin' ? 'cl-admin.html' : 'cl-lead-home.html');
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const pass  = document.getElementById('password').value;
+    const btn   = document.getElementById('submit-btn');
+    const err   = document.getElementById('login-error');
+
+    err.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+
+    CL.handleLogin(email, pass)
+      .then(() => {
+        const role = CL.getRole();
+        window.location.replace(role === 'admin' ? 'cl-admin.html' : 'cl-lead-home.html');
+      })
+      .catch(() => {
+        err.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      });
+  }
+
+  // CL.handleLogin stub — real implementation connects to Supabase auth
+  if (!CL.handleLogin) {
+    CL.handleLogin = async function(email, pass) {
+      const sb = CL.initSupabase();
+      if (!sb) throw new Error('No Supabase');
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) throw error;
+      CL.setSession(data.session ? { user: data.user } : null);
+    };
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Admin Dashboard | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>TMI City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Admin Dashboard</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="location.reload()">Refresh</button>
+        <button class="btn btn-primary btn-sm" onclick="location.href='cl-add-lead.html'">+ Add City Lead</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Total Cities</div>
+          <div class="stat-val" id="stat-cities">Loading...</div>
+          <div class="stat-delta pos" id="stat-cities-delta">+2 this month</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Active City Leads</div>
+          <div class="stat-val" id="stat-leads">Loading...</div>
+          <div class="stat-delta pos" id="stat-leads-delta">3 onboarding</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Businesses</div>
+          <div class="stat-val" id="stat-businesses">Loading...</div>
+          <div class="stat-delta pos" id="stat-biz-delta">+47 this month</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Total Deals Closed</div>
+          <div class="stat-val" id="stat-closed">Loading...</div>
+          <div class="stat-delta pos" id="stat-closed-delta">+8 this month</div>
+        </div>
+      </div>
+
+      <!-- Grid 2 -->
+      <div class="grid-2" style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:20px;">
+
+        <!-- Cities This Month -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Cities This Month</span>
+            <a href="cl-cities.html" class="btn btn-ghost btn-sm">View All</a>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>City</th>
+                  <th>Lead</th>
+                  <th>Businesses</th>
+                  <th>Warm</th>
+                  <th>Closed</th>
+                </tr>
+              </thead>
+              <tbody id="cities-tbody">
+                <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Top City Leads -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Top City Leads</span>
+              <a href="cl-roster.html" class="btn btn-ghost btn-sm">Roster</a>
+            </div>
+            <ul class="biz-list" id="top-leads-list" style="border-radius:0">
+              <li class="biz-item"><div class="biz-avatar">--</div><div class="biz-body"><div class="biz-name">Loading...</div></div></li>
+            </ul>
+          </div>
+
+          <!-- Needs Attention -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Needs Attention</span>
+              <span class="card-sub" style="font-size:11px;color:var(--red)">Stuck &gt;14 days</span>
+            </div>
+            <ul class="biz-list" id="attention-list" style="border-radius:0">
+              <li class="biz-item"><div class="biz-avatar">--</div><div class="biz-body"><div class="biz-name">Loading...</div></div></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Recent Handoffs -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Recent Handoffs</span>
+          <span class="card-sub">Last 30 days</span>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Business</th>
+                <th>City</th>
+                <th>Lead</th>
+                <th>Stage</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="handoffs-tbody">
+              <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-admin', { adminOnly: true });
+
+// Mock data render
+const cities = [
+  { city:'Austin, TX',      lead:'Jordan M.',  biz:38, warm:9, closed:4 },
+  { city:'Denver, CO',      lead:'Taylor R.',  biz:27, warm:6, closed:3 },
+  { city:'Nashville, TN',   lead:'Chris W.',   biz:22, warm:4, closed:2 },
+  { city:'Phoenix, AZ',     lead:'Alex P.',    biz:19, warm:3, closed:1 },
+  { city:'Charlotte, NC',   lead:'Sam B.',     biz:15, warm:2, closed:1 },
+];
+
+const topLeads = [
+  { name:'Jordan M.', city:'Austin, TX',    deals:4, earnings:'$3,200' },
+  { name:'Taylor R.', city:'Denver, CO',    deals:3, earnings:'$2,400' },
+  { name:'Chris W.',  city:'Nashville, TN', deals:2, earnings:'$1,600' },
+  { name:'Alex P.',   city:'Phoenix, AZ',   deals:1, earnings:'$800'   },
+  { name:'Sam B.',    city:'Charlotte, NC', deals:1, earnings:'$800'   },
+];
+
+const attention = [
+  { name:'Apex HVAC',          city:'Austin',    days:21, stage:'warm' },
+  { name:'Regal Electric',     city:'Denver',    days:18, stage:'met_owner' },
+  { name:'Summit Plumbing',    city:'Nashville', days:16, stage:'second_visit' },
+  { name:'Desert Roofing Co.', city:'Phoenix',   days:15, stage:'problem_identified' },
+];
+
+const handoffs = [
+  { biz:'Lone Star HVAC',    city:'Austin, TX',    lead:'Jordan M.', stage:'closed',        date:'May 14, 2026' },
+  { biz:'Mile High Electric',city:'Denver, CO',    lead:'Taylor R.', stage:'build_live',     date:'May 12, 2026' },
+  { biz:'Music City Plumb.', city:'Nashville, TN', lead:'Chris W.',  stage:'proposal_sent',  date:'May 10, 2026' },
+  { biz:'Sun Valley HVAC',   city:'Phoenix, AZ',   lead:'Alex P.',   stage:'closed',         date:'May 8, 2026'  },
+  { biz:'CLT Concrete',      city:'Charlotte, NC', lead:'Sam B.',    stage:'audit_booked',   date:'May 6, 2026'  },
+];
+
+document.getElementById('stat-cities').textContent       = '24';
+document.getElementById('stat-leads').textContent        = '18';
+document.getElementById('stat-businesses').textContent   = '412';
+document.getElementById('stat-closed').textContent       = '57';
+
+document.getElementById('cities-tbody').innerHTML = cities.map(c => `
+  <tr onclick="location.href='cl-cities.html'">
+    <td class="td-name">${c.city}</td>
+    <td>${c.lead}</td>
+    <td>${c.biz}</td>
+    <td>${c.warm}</td>
+    <td>${c.closed}</td>
+  </tr>`).join('');
+
+document.getElementById('top-leads-list').innerHTML = topLeads.map((l, i) => `
+  <li class="biz-item">
+    <div class="biz-avatar" style="background:var(--chart);color:var(--ink);font-weight:700">${i+1}</div>
+    <div class="biz-body">
+      <div class="biz-name">${l.name}</div>
+      <div class="biz-meta">${l.city} &middot; ${l.deals} deals</div>
+    </div>
+    <div class="biz-right" style="font-weight:600;color:var(--ink)">${l.earnings}</div>
+  </li>`).join('');
+
+document.getElementById('attention-list').innerHTML = attention.map(a => `
+  <li class="biz-item">
+    <div class="heat-bar ${a.days > 20 ? 'hot' : 'warm'}" style="height:36px;margin-right:0"></div>
+    <div class="biz-body">
+      <div class="biz-name">${a.name}</div>
+      <div class="biz-meta">${a.city} &middot; ${CL.stageBadge(a.stage)}</div>
+    </div>
+    <div class="biz-right"><span style="font-size:12px;font-weight:600;color:${a.days>20?'var(--red)':'var(--amber)'}">${a.days}d ago</span></div>
+  </li>`).join('');
+
+document.getElementById('handoffs-tbody').innerHTML = handoffs.map(h => `
+  <tr>
+    <td class="td-name">${h.biz}</td>
+    <td>${h.city}</td>
+    <td>${h.lead}</td>
+    <td>${CL.stageBadge(h.stage)}</td>
+    <td class="td-muted">${h.date}</td>
+  </tr>`).join('');
+
+// Desktop: expand grid to 2 columns
+if (window.innerWidth >= 769) {
+  document.querySelector('.grid-2').style.gridTemplateColumns = '1fr 1fr';
+}
+window.addEventListener('resize', () => {
+  document.querySelector('.grid-2').style.gridTemplateColumns = window.innerWidth >= 769 ? '1fr 1fr' : '1fr';
+});
+</script>
+</body>
+</html>

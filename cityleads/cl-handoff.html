@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Hand Off to Team | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.intro-band{background:var(--ink);border-radius:var(--r);padding:18px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;}
+.intro-band svg{width:22px;height:22px;color:var(--chart);flex-shrink:0;margin-top:1px;}
+.intro-band-text{color:rgba(255,255,255,0.8);font-size:14px;line-height:1.6;}
+.intro-band-text strong{color:#fff;}
+
+.ready-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden;transition:box-shadow 0.15s;}
+.ready-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.08);}
+.ready-card-body{padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.rc-avatar{width:44px;height:44px;border-radius:12px;background:var(--chart);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--ink);flex-shrink:0;}
+.rc-info{flex:1;min-width:0;}
+.rc-name{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+.rc-meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.rc-last{font-size:11px;color:var(--muted);margin-top:3px;}
+.rc-action{flex-shrink:0;}
+
+.handoff-history-label{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:28px 0 12px;display:flex;align-items:center;gap:8px;}
+.handoff-history-label::after{content:'';flex:1;height:1px;background:var(--line);}
+
+.ho-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;}
+.ho-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.ho-biz{font-size:14px;font-weight:600;color:var(--ink);}
+.ho-assignee{font-size:11px;color:var(--muted);}
+.ho-date{font-size:11px;color:var(--muted);white-space:nowrap;}
+.ho-note{font-size:13px;color:var(--ink-2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.ho-footer{display:flex;align-items:center;gap:8px;margin-top:8px;}
+
+/* Modal overrides for handoff form */
+.assign-radios{display:flex;gap:10px;margin-top:8px;}
+.assign-radio{flex:1;cursor:pointer;}
+.assign-radio input{display:none;}
+.assign-radio-label{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px;border:1.5px solid var(--line-strong);border-radius:var(--r-sm);transition:all 0.12s;cursor:pointer;}
+.assign-radio input:checked + .assign-radio-label{border-color:var(--ink);background:var(--ink);color:#fff;}
+.assign-radio-label .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;background:var(--bg);color:var(--ink-2);margin-bottom:2px;}
+.assign-radio input:checked + .assign-radio-label .avatar{background:rgba(255,255,255,0.15);color:#fff;}
+.assign-radio-name{font-size:13px;font-weight:600;}
+.assign-radio-role{font-size:10px;opacity:0.6;}
+
+.urgency-radios{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.urg-opt{flex:1;min-width:80px;}
+.urg-opt input{display:none;}
+.urg-opt-label{display:block;padding:10px;text-align:center;border:1.5px solid var(--line-strong);border-radius:var(--r-sm);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.12s;white-space:nowrap;}
+.urg-opt input:checked + .urg-opt-label{border-color:var(--chart);background:var(--chart);color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Hand Off to Team</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Intro band -->
+      <div class="intro-band">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><polyline points="9 18 15 12 9 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="intro-band-text">When a business owner is ready, push them to <strong>Mia</strong> or <strong>Tyler</strong> to close the deal. Your job is to warm them up and get them to this moment.</div>
+      </div>
+
+      <!-- Ready to hand off -->
+      <div class="sec-head">
+        <h1 style="font-family:var(--serif);font-size:18px;font-weight:400;margin:0;">Ready to Hand Off</h1>
+        <span style="font-size:13px;color:var(--muted);" id="ready-count"></span>
+      </div>
+      <div id="ready-list"></div>
+
+      <!-- Recent handoffs -->
+      <div class="handoff-history-label">Recent Handoffs</div>
+      <div id="history-list"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Handoff Modal -->
+<div class="modal-overlay" id="handoff-modal">
+  <div class="modal">
+    <div class="modal-grip"></div>
+    <div class="modal-hd">
+      <h2 class="modal-title">Hand Off</h2>
+      <button class="modal-x" onclick="CL.closeModal('handoff-modal')">&times;</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Business</label>
+      <input type="text" class="form-input" id="ho-biz" readonly style="background:var(--bg);color:var(--ink-2);"/>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes for the team <span style="color:var(--red)">*</span></label>
+      <textarea class="form-input" id="ho-notes" rows="4" placeholder="What do Mia or Tyler need to know? What was the owner's main pain point? Any objections already addressed?"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Assign to</label>
+      <div class="assign-radios">
+        <label class="assign-radio">
+          <input type="radio" name="assignee" value="mia" checked/>
+          <div class="assign-radio-label">
+            <div class="avatar">M</div>
+            <div class="assign-radio-name">Mia</div>
+            <div class="assign-radio-role">Closer</div>
+          </div>
+        </label>
+        <label class="assign-radio">
+          <input type="radio" name="assignee" value="tyler"/>
+          <div class="assign-radio-label">
+            <div class="avatar">T</div>
+            <div class="assign-radio-name">Tyler</div>
+            <div class="assign-radio-role">Closer</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Urgency</label>
+      <div class="urgency-radios">
+        <label class="urg-opt">
+          <input type="radio" name="urgency" value="this_week"/>
+          <div class="urg-opt-label">This Week</div>
+        </label>
+        <label class="urg-opt">
+          <input type="radio" name="urgency" value="this_month" checked/>
+          <div class="urg-opt-label">This Month</div>
+        </label>
+        <label class="urg-opt">
+          <input type="radio" name="urgency" value="when_possible"/>
+          <div class="urg-opt-label">When Possible</div>
+        </label>
+      </div>
+    </div>
+
+    <div class="modal-ft">
+      <button class="btn btn-primary btn-lg btn-full" onclick="submitHandoff()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="9 18 15 12 9 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Send Handoff
+      </button>
+      <button class="btn btn-ghost btn-full" onclick="CL.closeModal('handoff-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-handoff');
+
+const READY = [
+  { id:1, name:'Travis Electric',   owner:'James Kowalski', type:'Electrician', stage:'warm',         lastVisit:'May 17',  lastNote:'Owner met, confirmed interest in field tracking. Wants a demo.' },
+  { id:2, name:'Apex HVAC',         owner:'Mike Hernandez', type:'HVAC',        stage:'audit_booked', lastVisit:'May 17',  lastNote:'Audit booked. Very warm. Budget conversation went well.' },
+  { id:3, name:'Lone Star Concrete',owner:'Diego Ruiz',     type:'Concrete',    stage:'warm',         lastVisit:'May 15',  lastNote:'Scaling to 8 crews. Asked about enterprise pricing.' },
+];
+
+const HISTORY = [
+  { id:10, biz:'Hill Country HVAC',  assignee:'Mia',   date:'May 14', urgency:'This Week',  status:'in_progress', note:'Owner confirmed budget. Wants to start before summer busy season.' },
+  { id:11, biz:'Sunset Plumbing',    assignee:'Tyler', date:'May 12', urgency:'This Month', status:'won',         note:'Had two good visits. Owner tired of spreadsheets. Referred us himself.' },
+  { id:12, biz:'Rio Grande Roofing', assignee:'Mia',   date:'May 10', urgency:'This Month', status:'in_progress', note:'Owner asked for proposal after second visit. Positive on pricing.' },
+  { id:13, biz:'Precision Welding',  assignee:'Tyler', date:'May 8',  urgency:'When Possible', status:'lost',     note:'Owner decided to wait until Q3. Keep in pipeline.' },
+];
+
+let pendingBiz = null;
+
+document.getElementById('ready-count').textContent = READY.length + ' businesses';
+
+function openHandoff(biz) {
+  pendingBiz = biz;
+  document.getElementById('ho-biz').value = biz.name;
+  document.getElementById('ho-notes').value = '';
+  CL.openModal('handoff-modal');
+}
+
+function submitHandoff() {
+  const notes = document.getElementById('ho-notes').value.trim();
+  if (!notes) { CL.toast('Notes are required', 'error'); document.getElementById('ho-notes').focus(); return; }
+  const assignee = document.querySelector('input[name="assignee"]:checked')?.value || 'mia';
+  const urgency  = document.querySelector('input[name="urgency"]:checked')?.value  || 'this_month';
+  const name = assignee === 'mia' ? 'Mia' : 'Tyler';
+  CL.closeModal('handoff-modal');
+  CL.toast(pendingBiz.name + ' handed off to ' + name);
+  // Remove from ready list
+  const idx = READY.findIndex(r => r.id === pendingBiz.id);
+  if (idx > -1) READY.splice(idx, 1);
+  HISTORY.unshift({
+    id: Date.now(), biz: pendingBiz.name, assignee: name,
+    date: 'Today', urgency: urgency.replace(/_/g,' '),
+    status:'in_progress', note: notes,
+  });
+  document.getElementById('ready-count').textContent = READY.length + ' businesses';
+  renderReady();
+  renderHistory();
+  pendingBiz = null;
+}
+
+function stageLabel(stage) {
+  const map = { warm:'Warm', audit_booked:'Audit Booked', proposal_sent:'Proposal Sent' };
+  return map[stage] || stage;
+}
+
+function statusBadge(status) {
+  const map = {
+    in_progress: { bg:'#dbeafe', color:'#1d4ed8', label:'In Progress' },
+    won:         { bg:'#dcfce7', color:'#15803d', label:'Won' },
+    lost:        { bg:'#f3f4f6', color:'#6b7280', label:'Lost' },
+  };
+  const s = map[status] || map['in_progress'];
+  return `<span style="display:inline-flex;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;background:${s.bg};color:${s.color}">${s.label}</span>`;
+}
+
+function renderReady() {
+  const list = document.getElementById('ready-list');
+  if (!READY.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon" style="font-size:32px">🤝</div><h3>No businesses ready yet</h3><p>Keep visiting. When a business owner is warm, they'll show up here.</p></div>`;
+    return;
+  }
+  list.innerHTML = READY.map(r => `
+    <div class="ready-card">
+      <div class="ready-card-body">
+        <div class="rc-avatar">${CL.initials(r.name)}</div>
+        <div class="rc-info">
+          <div class="rc-name">${r.name}</div>
+          <div class="rc-meta">
+            <span>${r.owner}</span>
+            <span style="color:var(--line-strong)">·</span>
+            <span>${r.type}</span>
+            <span style="color:var(--line-strong)">·</span>
+            ${CL.stageBadge(r.stage)}
+          </div>
+          <div class="rc-last">Last visit: ${r.lastVisit}</div>
+        </div>
+        <div class="rc-action">
+          <button class="btn btn-primary btn-sm" onclick="openHandoff(${JSON.stringify(r).replace(/"/g,'&quot;')})">Hand Off &rarr;</button>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--line);padding:10px 16px;background:var(--bg);font-size:12px;color:var(--ink-2);line-height:1.5;border-radius:0 0 var(--r) var(--r);">${r.lastNote}</div>
+    </div>`).join('');
+}
+
+function renderHistory() {
+  document.getElementById('history-list').innerHTML = HISTORY.map(h => `
+    <div class="ho-item">
+      <div class="ho-top">
+        <div>
+          <div class="ho-biz">${h.biz}</div>
+          <div class="ho-assignee">Assigned to ${h.assignee} &bull; ${h.urgency}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          ${statusBadge(h.status)}
+          <div class="ho-date" style="margin-top:4px;">${h.date}</div>
+        </div>
+      </div>
+      <div class="ho-note">${h.note}</div>
+    </div>`).join('');
+}
+
+renderReady();
+renderHistory();
+</script>
+</body>
+</html>

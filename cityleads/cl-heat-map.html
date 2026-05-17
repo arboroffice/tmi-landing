@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Heat Map | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.heat-intro{background:var(--ink);border-radius:var(--r);padding:16px;margin-bottom:16px;font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5;display:flex;align-items:flex-start;gap:10px;}
+.heat-intro svg{width:18px;height:18px;color:var(--chart);flex-shrink:0;margin-top:1px;}
+
+.filter-chips{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin-bottom:16px;}
+.filter-chip{padding:8px 14px;border:1px solid var(--line-strong);border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink-2);white-space:nowrap;min-height:36px;transition:all 0.12s;font-family:inherit;}
+.filter-chip:hover{background:var(--bg);}
+.filter-chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.filter-chip.hot{background:#fee2e2;border-color:#fecaca;color:#b91c1c;}
+.filter-chip.hot.active{background:#b91c1c;color:#fff;}
+.filter-chip.warm{background:#fef9c3;border-color:#fde68a;color:#854d0e;}
+.filter-chip.warm.active{background:#854d0e;color:#fff;}
+.filter-chip.cold{background:#f3f4f6;border-color:#e5e7eb;color:#6b7280;}
+.filter-chip.cold.active{background:#6b7280;color:#fff;}
+.filter-chip.going-cold{background:#ffedd5;border-color:#fed7aa;color:#c2410c;}
+.filter-chip.going-cold.active{background:#c2410c;color:#fff;}
+
+.sort-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;}
+.sort-label{font-size:11px;color:var(--muted);}
+.sort-select{padding:6px 28px 6px 10px;border:1px solid var(--line-strong);border-radius:var(--r-sm);font-size:12px;outline:none;background:var(--surface);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2386868b' d='M8 10.5L3 5.5h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:14px;cursor:pointer;color:var(--ink-2);min-height:36px;}
+
+.heat-label-tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;margin-top:4px;}
+.heat-label-tag.hot{background:#fee2e2;color:#b91c1c;}
+.heat-label-tag.warm{background:#fef9c3;color:#854d0e;}
+.heat-label-tag.going-cold{background:#ffedd5;color:#c2410c;}
+.heat-label-tag.cold{background:#f3f4f6;color:#6b7280;}
+
+.heat-count{font-size:12px;color:var(--muted);margin-bottom:12px;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Heat Map</span>
+      </div>
+      <div class="topbar-actions">
+        <span style="font-size:12px;color:var(--muted)" id="hot-count-badge"></span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="heat-intro">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Based on your last contact dates, here's who to visit next. Hot means you have momentum - don't let it cool.</span>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="filter-chips">
+        <button class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">All</button>
+        <button class="filter-chip hot" data-filter="hot" onclick="setFilter('hot',this)">Hot</button>
+        <button class="filter-chip warm" data-filter="warm" onclick="setFilter('warm',this)">Warm</button>
+        <button class="filter-chip cold" data-filter="cold" onclick="setFilter('cold',this)">Cold</button>
+        <button class="filter-chip going-cold" data-filter="going-cold" onclick="setFilter('going-cold',this)">Going Cold</button>
+      </div>
+
+      <!-- Sort row -->
+      <div class="sort-row">
+        <span class="sort-label" id="heat-count-label">All contacts</span>
+        <select class="sort-select" id="sort-select" onchange="renderList()">
+          <option value="hottest">Hottest First</option>
+          <option value="going-cold">Going Cold First</option>
+          <option value="recent">Most Recent</option>
+        </select>
+      </div>
+
+      <!-- Heat list -->
+      <div id="heat-list"></div>
+
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-heat-map');
+
+const CONTACTS = [
+  { id:1, biz:'Apex HVAC',           owner:'Mike Tran',       type:'HVAC',        lastType:'Visit',  lastDate:'2026-05-16', days:1,  heat:'hot',       label:'On fire - close this week' },
+  { id:2, biz:'Lone Star Concrete',  owner:'Diego Ruiz',      type:'Concrete',    lastType:'Call',   lastDate:'2026-05-15', days:2,  heat:'hot',       label:'On fire - close this week' },
+  { id:3, biz:'Travis Electric',     owner:'Sarah Webb',      type:'Electrician', lastType:'Visit',  lastDate:'2026-05-14', days:3,  heat:'warm',      label:'Warm - book audit' },
+  { id:4, biz:'Silverline Roofing',  owner:'James Park',      type:'Roofing',     lastType:'Text',   lastDate:'2026-05-12', days:5,  heat:'warm',      label:'Warm - book audit' },
+  { id:5, biz:'Hill Country HVAC',   owner:'Tom Garza',       type:'HVAC',        lastType:'Email',  lastDate:'2026-05-10', days:7,  heat:'warm',      label:'Warm - book audit' },
+  { id:6, biz:'Cedar Park Plumbing', owner:'Carl Moss',       type:'Plumbing',    lastType:'Visit',  lastDate:'2026-05-06', days:11, heat:'going-cold', label:'Getting cold - check in' },
+  { id:7, biz:'Austin Painting Co',  owner:'Keisha Brown',    type:'Painting',    lastType:'Call',   lastDate:'2026-05-04', days:13, heat:'going-cold', label:'Getting cold - check in' },
+  { id:8, biz:'Brazos Welding',      owner:'Luis Herrera',    type:'Welding',     lastType:'Visit',  lastDate:'2026-04-28', days:19, heat:'cold',       label:'Cold - re-engage' },
+  { id:9, biz:'Capitol Landscaping', owner:'Roy Nguyen',      type:'Landscaping', lastType:'Email',  lastDate:'2026-04-22', days:25, heat:'cold',       label:'Cold - re-engage' },
+  { id:10, biz:'Mesa Roofing',       owner:'Sam Wills',       type:'Roofing',     lastType:'Visit',  lastDate:'2026-04-10', days:37, heat:'cold',       label:'Cold - re-engage' },
+];
+
+const HEAT_ORDER = { hot: 0, warm: 1, 'going-cold': 2, cold: 3 };
+
+let activeFilter = 'all';
+
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  const sort = document.getElementById('sort-select').value;
+
+  let list = activeFilter === 'all' ? [...CONTACTS] : CONTACTS.filter(c => c.heat === activeFilter);
+
+  if (sort === 'hottest') list.sort((a, b) => HEAT_ORDER[a.heat] - HEAT_ORDER[b.heat] || a.days - b.days);
+  else if (sort === 'going-cold') list.sort((a, b) => b.days - a.days);
+  else list.sort((a, b) => a.days - b.days);
+
+  const hot = CONTACTS.filter(c => c.heat === 'hot').length;
+  document.getElementById('hot-count-badge').textContent = hot + ' hot';
+  document.getElementById('heat-count-label').textContent = list.length + ' contact' + (list.length !== 1 ? 's' : '');
+
+  if (!list.length) {
+    document.getElementById('heat-list').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🌡</div>
+        <h3>No contacts here yet</h3>
+        <p>Log visits and interactions to start tracking relationship heat.</p>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('heat-list').innerHTML = list.map(c => {
+    const daysClass = c.days >= 14 ? 'hot' : c.days >= 7 ? 'warm' : 'cold';
+    const barClass = c.heat === 'hot' ? 'hot' : c.heat === 'warm' ? 'warm' : 'cold';
+    return `
+      <div class="heat-card" onclick="viewContact(${c.id})">
+        <div class="heat-bar ${barClass}"></div>
+        <div class="heat-body">
+          <div class="heat-name">${c.biz}</div>
+          <div class="heat-meta">${c.owner} &middot; ${c.type}</div>
+          <div class="heat-meta">Last: ${c.lastType} &middot; ${CL.fmt(c.lastDate)}</div>
+          <span class="heat-label-tag ${c.heat}">${c.label}</span>
+        </div>
+        <div class="heat-days ${daysClass}">${c.days}d</div>
+      </div>`;
+  }).join('');
+}
+
+function viewContact(id) {
+  const c = CONTACTS.find(x => x.id === id);
+  window.location.href = 'cl-conversation.html?business=' + encodeURIComponent(c.biz);
+}
+
+renderList();
+</script>
+</body>
+</html>

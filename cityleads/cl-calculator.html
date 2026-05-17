@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Commission Calculator | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.calc-tabs{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:2px;gap:2px;margin-bottom:24px;}
+.calc-tab{flex:1;padding:9px 14px;border-radius:4px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--muted);font-family:inherit;transition:all 0.12s;min-height:40px;text-align:center;}
+.calc-tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+.calc-panel{display:none;}
+.calc-panel.active{display:block;}
+.range-wrap{margin:8px 0 20px;}
+.range-wrap input[type=range]{width:100%;height:6px;-webkit-appearance:none;background:var(--line-strong);border-radius:3px;outline:none;cursor:pointer;}
+.range-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--ink);cursor:pointer;}
+.range-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;}
+.calc-input-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.dollar-prefix{font-size:20px;font-weight:600;color:var(--ink-2);}
+.calc-result-section{margin-top:24px;}
+.path-section{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-top:20px;}
+.path-section h3{font-family:var(--serif);font-size:17px;font-weight:400;margin:0 0 14px;}
+.path-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);}
+.path-row:last-child{border-bottom:none;}
+.path-label{font-size:13px;color:var(--ink-2);}
+.path-val{font-size:14px;font-weight:700;color:var(--green);}
+.projection-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+.proj-box{background:var(--bg);border-radius:var(--r-sm);padding:14px;text-align:center;}
+.proj-label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.proj-val{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);}
+.earn-calc-note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Commission Calculator</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="sec-head" style="margin-bottom:20px;">
+        <h1>What will you earn?</h1>
+      </div>
+
+      <div class="calc-tabs">
+        <button class="calc-tab active" onclick="switchTab('referral',this)">Referral Deal</button>
+        <button class="calc-tab" onclick="switchTab('support',this)">Monthly Support</button>
+      </div>
+
+      <!-- Referral panel -->
+      <div class="calc-panel active" id="panel-referral">
+        <label class="form-label">Deal Size</label>
+        <div class="calc-input-row">
+          <span class="dollar-prefix">$</span>
+          <input class="form-input" type="number" id="deal-size-input" value="8000" min="500" max="50000" oninput="syncSlider(this.value); calcReferral()" style="font-size:20px;font-weight:600;max-width:180px;"/>
+        </div>
+        <div class="range-wrap">
+          <input type="range" id="deal-size-slider" min="500" max="50000" step="500" value="8000" oninput="syncInput(this.value); calcReferral()"/>
+          <div class="range-labels"><span>$500</span><span>$25k</span><span>$50k</span></div>
+        </div>
+
+        <div class="calc-result" id="ref-result">
+          <div class="calc-result-label">Your Commission (10%)</div>
+          <div class="calc-result-val" id="ref-val">$800</div>
+          <div class="calc-result-sub">One-time referral payout</div>
+        </div>
+
+        <div class="path-section" style="margin-top:16px;">
+          <h3>Over 12 months</h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">How many deals at this size do you need?</p>
+          <div class="path-row">
+            <span class="path-label">3 deals / month &rarr;</span>
+            <span class="path-val" id="ref-3mo"></span>
+          </div>
+          <div class="path-row">
+            <span class="path-label">5 deals / month &rarr;</span>
+            <span class="path-val" id="ref-5mo"></span>
+          </div>
+          <div class="path-row">
+            <span class="path-label">10 deals / month &rarr;</span>
+            <span class="path-val" id="ref-10mo"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly support panel -->
+      <div class="calc-panel" id="panel-support">
+        <label class="form-label">Number of Active Clients</label>
+        <div class="calc-input-row">
+          <input class="form-input" type="number" id="clients-input" value="5" min="1" max="100" oninput="calcSupport()" style="font-size:20px;font-weight:600;max-width:120px;"/>
+          <span style="font-size:16px;color:var(--ink-2);font-weight:500;">clients</span>
+        </div>
+        <p class="earn-calc-note">Each active client you introduced earns you $150/month indefinitely as long as they stay on the platform.</p>
+
+        <div class="calc-result" id="sup-result">
+          <div class="calc-result-label">Monthly Recurring Income</div>
+          <div class="calc-result-val" id="sup-val">$750</div>
+          <div class="calc-result-sub">Every month, automatically</div>
+        </div>
+
+        <div class="projection-row">
+          <div class="proj-box">
+            <div class="proj-label">Quarterly</div>
+            <div class="proj-val" id="sup-quarterly">$2,250</div>
+          </div>
+          <div class="proj-box">
+            <div class="proj-label">Annual</div>
+            <div class="proj-val" id="sup-annual">$9,000</div>
+          </div>
+        </div>
+
+        <div class="path-section" style="margin-top:16px;">
+          <h3>Your path to $10,000/month</h3>
+          <div class="path-row">
+            <span class="path-label">Support only (67 clients)</span>
+            <span class="path-val">$10,050/mo</span>
+          </div>
+          <div class="path-row">
+            <span class="path-label">20 clients + 2 referrals/mo</span>
+            <span class="path-val">~$8,000/mo</span>
+          </div>
+          <div class="path-row">
+            <span class="path-label">30 clients + 1 referral/mo</span>
+            <span class="path-val">~$9,200/mo</span>
+          </div>
+          <div class="path-row">
+            <span class="path-label">40 clients (support only)</span>
+            <span class="path-val">$6,000/mo</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-calculator');
+
+function switchTab(panel, btn) {
+  document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.calc-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + panel).classList.add('active');
+}
+
+function syncSlider(val) {
+  document.getElementById('deal-size-slider').value = val;
+}
+function syncInput(val) {
+  document.getElementById('deal-size-input').value = val;
+}
+
+function calcReferral() {
+  const size = parseInt(document.getElementById('deal-size-input').value) || 0;
+  const cut = Math.round(size * 0.10);
+  document.getElementById('ref-val').textContent = CL.currency(cut);
+
+  const fmt = v => CL.currency(v) + '/mo';
+  document.getElementById('ref-3mo').textContent  = fmt(cut * 3);
+  document.getElementById('ref-5mo').textContent  = fmt(cut * 5);
+  document.getElementById('ref-10mo').textContent = fmt(cut * 10);
+}
+
+function calcSupport() {
+  const clients = parseInt(document.getElementById('clients-input').value) || 0;
+  const monthly = clients * 150;
+  document.getElementById('sup-val').textContent       = CL.currency(monthly);
+  document.getElementById('sup-quarterly').textContent = CL.currency(monthly * 3);
+  document.getElementById('sup-annual').textContent    = CL.currency(monthly * 12);
+}
+
+calcReferral();
+calcSupport();
+</script>
+</body>
+</html>

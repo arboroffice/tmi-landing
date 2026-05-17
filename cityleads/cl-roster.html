@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>City Lead Roster | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>Admin</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">City Lead Roster</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" id="export-btn">Export</button>
+        <a href="cl-add-lead.html" class="btn btn-primary btn-sm">+ Add City Lead</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="filter-bar">
+        <div class="filter-row">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+            <input type="text" id="search-input" placeholder="Search name or city..." oninput="filterRoster()"/>
+          </div>
+          <select class="filter-select" id="status-filter" onchange="filterRoster()">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+        <span class="filter-count" id="row-count">18 city leads</span>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table id="roster-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>City</th>
+                <th>Assigned</th>
+                <th>Businesses</th>
+                <th>Visits/Mo</th>
+                <th>Warm</th>
+                <th>Closed</th>
+                <th>Earnings</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="roster-tbody">
+              <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- Detail Panel -->
+<div class="panel-overlay" id="lead-panel">
+  <div class="panel-bg" onclick="CL.closePanel('lead-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-name">City Lead</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="CL.closePanel('lead-panel')">Close</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid" id="panel-details">
+        <!-- filled by JS -->
+      </div>
+
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Business Overview</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;" id="panel-stats">
+        <!-- filled by JS -->
+      </div>
+
+      <div class="panel-sep"></div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn btn-ghost btn-full" onclick="CL.toast('Edit lead (coming soon)', 'info')">Edit Lead Info</button>
+        <button class="btn btn-ghost btn-full" onclick="CL.toast('Message sent', 'success')">Send Message</button>
+        <button class="btn btn-danger btn-full" id="panel-deactivate-btn">Deactivate Lead</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<a href="cl-add-lead.html" class="btn-fab" title="Add City Lead">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/></svg>
+</a>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-roster', { adminOnly: true });
+
+const LEADS = [
+  { id:1, name:'Jordan Martinez', city:'Austin, TX',    assigned:'Jan 2026', biz:38, visits:42, warm:9,  closed:4,  earnings:3200,  status:'active'   },
+  { id:2, name:'Taylor Rhodes',   city:'Denver, CO',    assigned:'Feb 2026', biz:27, visits:31, warm:6,  closed:3,  earnings:2400,  status:'active'   },
+  { id:3, name:'Chris Wallace',   city:'Nashville, TN', assigned:'Feb 2026', biz:22, visits:28, warm:4,  closed:2,  earnings:1600,  status:'active'   },
+  { id:4, name:'Alex Park',       city:'Phoenix, AZ',   assigned:'Mar 2026', biz:19, visits:22, warm:3,  closed:1,  earnings:800,   status:'active'   },
+  { id:5, name:'Sam Brooks',      city:'Charlotte, NC', assigned:'Mar 2026', biz:15, visits:18, warm:2,  closed:1,  earnings:800,   status:'active'   },
+  { id:6, name:'Dana Kim',        city:'Tampa, FL',     assigned:'Apr 2026', biz:8,  visits:10, warm:1,  closed:0,  earnings:0,     status:'active'   },
+  { id:7, name:'Morgan Lee',      city:'Atlanta, GA',   assigned:'Apr 2026', biz:6,  visits:7,  warm:0,  closed:0,  earnings:0,     status:'active'   },
+  { id:8, name:'Riley Chen',      city:'Columbus, OH',  assigned:'May 2026', biz:3,  visits:4,  warm:0,  closed:0,  earnings:0,     status:'active'   },
+  { id:9, name:'Casey Hughes',    city:'Dallas, TX',    assigned:'Dec 2025', biz:0,  visits:0,  warm:0,  closed:0,  earnings:0,     status:'inactive' },
+];
+
+let filtered = [...LEADS];
+let activeLead = null;
+
+function renderRoster(data) {
+  const tbody = document.getElementById('roster-tbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px">No results.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(l => `
+    <tr onclick="openPanel(${l.id})">
+      <td class="td-name">${l.name}</td>
+      <td>${l.city}</td>
+      <td class="td-muted">${l.assigned}</td>
+      <td>${l.biz}</td>
+      <td>${l.visits}</td>
+      <td>${l.warm}</td>
+      <td>${l.closed}</td>
+      <td style="font-weight:600">${l.earnings ? CL.currency(l.earnings) : '—'}</td>
+      <td><span class="badge badge-${l.status}">${l.status}</span></td>
+    </tr>`).join('');
+  document.getElementById('row-count').textContent = data.length + ' city leads';
+}
+
+function filterRoster() {
+  const q  = document.getElementById('search-input').value.toLowerCase();
+  const st = document.getElementById('status-filter').value;
+  filtered = LEADS.filter(l =>
+    (!q  || l.name.toLowerCase().includes(q) || l.city.toLowerCase().includes(q)) &&
+    (!st || l.status === st)
+  );
+  renderRoster(filtered);
+}
+
+function openPanel(id) {
+  activeLead = LEADS.find(l => l.id === id);
+  if (!activeLead) return;
+  document.getElementById('panel-name').textContent = activeLead.name;
+  document.getElementById('panel-details').innerHTML = `
+    <div><div class="detail-label">City</div><div class="detail-val">${activeLead.city}</div></div>
+    <div><div class="detail-label">Status</div><div class="detail-val"><span class="badge badge-${activeLead.status}">${activeLead.status}</span></div></div>
+    <div><div class="detail-label">Assigned</div><div class="detail-val">${activeLead.assigned}</div></div>
+    <div><div class="detail-label">Total Earnings</div><div class="detail-val" style="font-weight:600">${activeLead.earnings ? CL.currency(activeLead.earnings) : '—'}</div></div>`;
+  document.getElementById('panel-stats').innerHTML = `
+    <div style="background:var(--bg);border-radius:var(--r-sm);padding:12px;text-align:center;">
+      <div style="font-family:var(--serif);font-size:24px;font-weight:700">${activeLead.biz}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">Businesses</div>
+    </div>
+    <div style="background:var(--bg);border-radius:var(--r-sm);padding:12px;text-align:center;">
+      <div style="font-family:var(--serif);font-size:24px;font-weight:700">${activeLead.warm}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">Warm Leads</div>
+    </div>
+    <div style="background:var(--bg);border-radius:var(--r-sm);padding:12px;text-align:center;">
+      <div style="font-family:var(--serif);font-size:24px;font-weight:700">${activeLead.closed}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">Deals Closed</div>
+    </div>`;
+  document.getElementById('panel-deactivate-btn').textContent = activeLead.status === 'active' ? 'Deactivate Lead' : 'Reactivate Lead';
+  document.getElementById('panel-deactivate-btn').onclick = async () => {
+    const confirmed = await CL.confirm(`Are you sure you want to ${activeLead.status === 'active' ? 'deactivate' : 'reactivate'} ${activeLead.name}?`);
+    if (confirmed) { CL.toast(`${activeLead.name} updated`); CL.closePanel('lead-panel'); }
+  };
+  CL.openPanel('lead-panel');
+}
+
+document.getElementById('export-btn').onclick = () => CL.toast('Export coming soon', 'info');
+
+renderRoster(filtered);
+</script>
+</body>
+</html>

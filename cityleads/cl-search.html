@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Search Businesses | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+  .search-hero { padding:12px 16px 0; }
+  .search-hero .search-wrap input { font-size:16px; padding:13px 12px 13px 40px; border-radius:var(--r); }
+  .source-tabs { display:flex; border-bottom:1px solid var(--line); background:var(--surface); }
+  .source-tab { flex:1; padding:12px 8px; text-align:center; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:color 0.15s, border-color 0.15s; background:none; border-top:none; border-left:none; border-right:none; font-family:inherit; }
+  .source-tab.active { color:var(--ink); border-bottom-color:var(--ink); }
+  .type-pills { display:flex; gap:8px; overflow-x:auto; padding:12px 16px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .type-pills::-webkit-scrollbar { display:none; }
+  .type-pill { flex-shrink:0; padding:7px 14px; border:1px solid var(--line-strong); border-radius:999px; font-size:13px; cursor:pointer; white-space:nowrap; background:none; color:var(--ink-2); font-family:inherit; transition:all 0.12s; min-height:36px; }
+  .type-pill.active { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .results-count { font-size:12px; color:var(--muted); padding:0 16px 8px; }
+  .biz-list-wrap { background:var(--surface); border-radius:var(--r); overflow:hidden; }
+  @media(min-width:769px){
+    .search-hero { padding:0 0 12px; }
+    .source-tabs { border-radius:var(--r) var(--r) 0 0; }
+    .type-pills { padding:12px 0; }
+    .results-count { padding:0 0 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span class="page">Search</span>
+      </div>
+      <div class="topbar-actions">
+        <a href="cl-add-business.html" class="btn btn-primary btn-sm">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/></svg>
+          Add
+        </a>
+      </div>
+    </div>
+
+    <div class="content" style="padding-top:0;padding-left:0;padding-right:0;">
+      <div class="search-hero" style="padding:12px 16px 0;">
+        <div class="search-wrap" style="margin-bottom:0;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+          <input type="search" id="main-search" placeholder="Search businesses, owners, addresses..." autofocus autocomplete="off" oninput="onSearch(this.value)" style="font-size:16px;padding:13px 12px 13px 40px;border-radius:var(--r);"/>
+        </div>
+      </div>
+
+      <!-- Source tabs -->
+      <div class="source-tabs" style="margin-top:12px;">
+        <button class="source-tab active" data-src="mylist" onclick="setSource('mylist',this)">My List</button>
+        <button class="source-tab" data-src="city" onclick="setSource('city',this)">All in City</button>
+        <button class="source-tab" data-src="google" onclick="setSource('google',this)">Google Maps</button>
+      </div>
+
+      <!-- Type filter pills -->
+      <div class="type-pills" id="type-pills">
+        <button class="type-pill active" data-type="" onclick="setType('',this)">All</button>
+        <button class="type-pill" data-type="HVAC" onclick="setType('HVAC',this)">HVAC</button>
+        <button class="type-pill" data-type="Plumbing" onclick="setType('Plumbing',this)">Plumbing</button>
+        <button class="type-pill" data-type="Roofing" onclick="setType('Roofing',this)">Roofing</button>
+        <button class="type-pill" data-type="Electrician" onclick="setType('Electrician',this)">Electrician</button>
+        <button class="type-pill" data-type="Landscaping" onclick="setType('Landscaping',this)">Landscaping</button>
+        <button class="type-pill" data-type="Painting" onclick="setType('Painting',this)">Painting</button>
+        <button class="type-pill" data-type="Construction" onclick="setType('Construction',this)">Construction</button>
+        <button class="type-pill" data-type="Concrete" onclick="setType('Concrete',this)">Concrete</button>
+        <button class="type-pill" data-type="Welding" onclick="setType('Welding',this)">Welding</button>
+        <button class="type-pill" data-type="Heavy Equipment" onclick="setType('Heavy Equipment',this)">Heavy Equipment</button>
+      </div>
+
+      <div style="padding:0 16px;" id="results-area">
+        <div class="results-count" id="results-count"></div>
+
+        <!-- Empty state (shown when no query) -->
+        <div class="empty-state" id="empty-initial">
+          <div class="empty-icon">🔍</div>
+          <h3>Find a business</h3>
+          <p>Search by business name, owner name, or street address</p>
+        </div>
+
+        <!-- No results -->
+        <div class="empty-state" id="empty-noresults" style="display:none;">
+          <div class="empty-icon">😶</div>
+          <h3>No results</h3>
+          <p>Try a different search term or add the business manually.</p>
+          <a href="cl-add-business.html" class="btn btn-primary">Add Manually</a>
+        </div>
+
+        <!-- Results list -->
+        <div class="biz-list-wrap" id="results-list" style="display:none;">
+          <ul class="biz-list" id="biz-list"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAB: Add Business -->
+<a href="cl-add-business.html" class="btn-fab" title="Add Business Manually">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="24" height="24"><line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/></svg>
+</a>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-search');
+
+let currentSource = 'mylist';
+let currentType = '';
+let currentQuery = '';
+
+const DEMO_BUSINESSES = [
+  { id:'b1', name:'Austin HVAC Pros', type:'HVAC', owner:'Mike Torres', address:'1420 S Lamar Blvd, Austin, TX', stage:'warm', score:'hot' },
+  { id:'b2', name:'Capital Plumbing Co', type:'Plumbing', owner:'Sarah Chen', address:'890 E 6th St, Austin, TX', stage:'met_owner', score:'warm' },
+  { id:'b3', name:'Lone Star Roofing', type:'Roofing', owner:'James Polk', address:'3301 Bee Caves Rd, Austin, TX', stage:'seed', score:'cold' },
+  { id:'b4', name:'Hill Country Electric', type:'Electrician', owner:'Dana Webb', address:'4512 Burnet Rd, Austin, TX', stage:'audit_booked', score:'hot' },
+  { id:'b5', name:'Green Leaf Landscaping', type:'Landscaping', owner:'Carlos Reyes', address:'701 W Oltorf St, Austin, TX', stage:'proposal_sent', score:'warm' },
+  { id:'b6', name:'Precision Painting LLC', type:'Painting', owner:'Tom Garcia', address:'2200 Manor Rd, Austin, TX', stage:'seed', score:'cold' },
+  { id:'b7', name:'Cornerstone Concrete', type:'Concrete', owner:'Linda Park', address:'5800 Airport Blvd, Austin, TX', stage:'second_visit', score:'warm' },
+  { id:'b8', name:'Apex Construction Group', type:'Construction', owner:'Brett Wilson', address:'1100 E Riverside Dr, Austin, TX', stage:'warm', score:'hot' },
+];
+
+function CL_searchBusinesses(query) {
+  if (!query && !currentType) return [];
+  const lq = (query || '').toLowerCase();
+  return DEMO_BUSINESSES.filter(b => {
+    const matchType = !currentType || b.type === currentType;
+    const matchQ = !lq || b.name.toLowerCase().includes(lq) || b.owner.toLowerCase().includes(lq) || b.address.toLowerCase().includes(lq);
+    return matchType && matchQ;
+  });
+}
+
+function renderResults(results) {
+  const listEl = document.getElementById('biz-list');
+  const countEl = document.getElementById('results-count');
+  const listWrap = document.getElementById('results-list');
+  const emptyNR = document.getElementById('empty-noresults');
+  const emptyInit = document.getElementById('empty-initial');
+
+  emptyInit.style.display = 'none';
+
+  if (results.length === 0) {
+    listWrap.style.display = 'none';
+    emptyNR.style.display = 'block';
+    countEl.textContent = '';
+    return;
+  }
+
+  emptyNR.style.display = 'none';
+  listWrap.style.display = 'block';
+  countEl.textContent = results.length + ' result' + (results.length !== 1 ? 's' : '');
+
+  listEl.innerHTML = results.map(b => `
+    <a class="biz-item" href="cl-business.html?id=${b.id}">
+      <div class="biz-avatar" style="background:${avatarBg(b.stage)};color:#fff;">${CL.initials(b.name)}</div>
+      <div class="biz-body">
+        <div class="biz-name">${b.name}</div>
+        <div class="biz-meta">${b.type} &middot; ${b.address}</div>
+      </div>
+      <div class="biz-right">
+        ${CL.scoreDot(b.score)}
+        ${CL.stageBadge(b.stage)}
+      </div>
+    </a>
+  `).join('');
+}
+
+function avatarBg(stage) {
+  const map = { seed:'#9ca3af', met_owner:'#3b82f6', second_visit:'#8b5cf6', warm:'#f59e0b', audit_booked:'#ec4899', closed:'#22c55e', expansion:'#E4FF97' };
+  return map[stage] || '#9ca3af';
+}
+
+function onSearch(val) {
+  currentQuery = val;
+  if (!val && !currentType) {
+    document.getElementById('empty-initial').style.display = 'block';
+    document.getElementById('empty-noresults').style.display = 'none';
+    document.getElementById('results-list').style.display = 'none';
+    document.getElementById('results-count').textContent = '';
+    return;
+  }
+  const results = CL_searchBusinesses(val);
+  renderResults(results);
+}
+
+function setSource(src, el) {
+  currentSource = src;
+  document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (currentQuery || currentType) onSearch(currentQuery);
+}
+
+function setType(type, el) {
+  currentType = type;
+  document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  if (currentQuery || currentType) {
+    document.getElementById('empty-initial').style.display = 'none';
+    renderResults(CL_searchBusinesses(currentQuery));
+  } else {
+    document.getElementById('empty-initial').style.display = 'block';
+    document.getElementById('results-list').style.display = 'none';
+    document.getElementById('empty-noresults').style.display = 'none';
+    document.getElementById('results-count').textContent = '';
+  }
+}
+</script>
+</body>
+</html>

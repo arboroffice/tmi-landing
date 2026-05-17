@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Leaderboard | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.metric-tabs{display:flex;gap:0;border:1px solid var(--line-strong);border-radius:var(--r-sm);overflow:hidden;margin-bottom:16px;}
+.metric-tab{flex:1;padding:10px 6px;font-size:12px;font-weight:600;text-align:center;cursor:pointer;background:none;border:none;border-right:1px solid var(--line-strong);font-family:inherit;color:var(--ink-2);transition:all 0.12s;min-height:44px;}
+.metric-tab:last-child{border-right:none;}
+.metric-tab.active{background:var(--ink);color:#fff;}
+.time-filter{display:flex;gap:6px;margin-bottom:20px;}
+.time-btn{padding:7px 14px;border:1px solid var(--line-strong);border-radius:999px;font-size:12px;cursor:pointer;background:none;font-family:inherit;color:var(--ink-2);transition:all 0.12s;min-height:36px;}
+.time-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.lb-list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:16px;}
+.lb-item{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:14px 16px;}
+.lb-item:last-child{border-bottom:none;}
+.lb-item.me{background:#fffef0;}
+.lb-rank{width:28px;text-align:center;font-size:15px;font-weight:700;color:var(--muted);flex-shrink:0;line-height:1;}
+.lb-rank.first{color:var(--amber);}
+.lb-rank.second{color:var(--ink-2);}
+.lb-rank.third{color:#cd7c2e;}
+.lb-avatar{width:38px;height:38px;border-radius:50%;background:var(--bg);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--ink-2);flex-shrink:0;}
+.lb-body{flex:1;min-width:0;}
+.lb-name{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2;}
+.lb-city{font-size:12px;color:var(--muted);margin-top:1px;}
+.lb-val{font-size:18px;font-weight:700;color:var(--ink);flex-shrink:0;text-align:right;}
+.lb-val-label{font-size:10px;color:var(--muted);text-align:right;margin-top:1px;font-weight:400;}
+.medal-first{font-size:18px;}
+.medal-second{font-size:16px;}
+.medal-third{font-size:16px;}
+.your-rank-card{background:var(--ink);color:#fff;border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+.yr-rank{font-family:var(--serif);font-size:32px;font-weight:700;color:var(--chart);flex-shrink:0;line-height:1;width:40px;text-align:center;}
+.yr-body{flex:1;}
+.yr-name{font-size:15px;font-weight:600;margin-bottom:2px;}
+.yr-city{font-size:12px;opacity:0.6;}
+.yr-val{font-size:22px;font-weight:700;color:var(--chart);flex-shrink:0;text-align:right;}
+.yr-val-label{font-size:10px;opacity:0.6;text-align:right;margin-top:1px;}
+.lb-tagline{font-size:14px;color:var(--muted);text-align:center;padding:16px 20px;line-height:1.5;font-style:italic;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Leaderboard</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="sec-head" style="margin-bottom:16px;">
+        <h1>Leaderboard</h1>
+      </div>
+
+      <!-- Metric tabs -->
+      <div class="metric-tabs">
+        <button class="metric-tab active" onclick="setMetric('visits',this)">Visits</button>
+        <button class="metric-tab" onclick="setMetric('handoffs',this)">Handoffs</button>
+        <button class="metric-tab" onclick="setMetric('deals',this)">Deals</button>
+        <button class="metric-tab" onclick="setMetric('earnings',this)">Earnings</button>
+      </div>
+
+      <!-- Time filter -->
+      <div class="time-filter">
+        <button class="time-btn active" onclick="setTime('week',this)">This Week</button>
+        <button class="time-btn" onclick="setTime('month',this)">This Month</button>
+        <button class="time-btn" onclick="setTime('all',this)">All Time</button>
+      </div>
+
+      <!-- Your rank (sticky-style, top) -->
+      <div class="your-rank-card" id="your-rank-card">
+        <div class="yr-rank" id="yr-rank">#4</div>
+        <div class="yr-body">
+          <div class="yr-name">You · Austin, TX</div>
+          <div class="yr-city">Keep pushing - 3 more visits to move up</div>
+        </div>
+        <div>
+          <div class="yr-val" id="yr-val">18</div>
+          <div class="yr-val-label" id="yr-val-label">visits</div>
+        </div>
+      </div>
+
+      <!-- Leaderboard list -->
+      <div class="lb-list" id="lb-list"></div>
+
+      <p class="lb-tagline">Competition is how we get better. See you at the top.</p>
+
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-leaderboard');
+
+const DATA = {
+  visits: {
+    week: [
+      { name:'Jake R.', city:'Houston, TX', val:31, avatar:'JR', color:'#fee2e2', tc:'#b91c1c' },
+      { name:'Sofia L.', city:'Dallas, TX', val:27, avatar:'SL', color:'#dcfce7', tc:'#15803d' },
+      { name:'Marcus T.', city:'San Antonio, TX', val:22, avatar:'MT', color:'#ede9fe', tc:'#6d28d9' },
+      { name:'You', city:'Austin, TX', val:18, avatar:'ME', color:'var(--chart)', tc:'var(--ink)', me:true },
+      { name:'Priya N.', city:'Phoenix, AZ', val:14, avatar:'PN', color:'#dbeafe', tc:'#1d4ed8' },
+      { name:'Carlos R.', city:'Denver, CO', val:12, avatar:'CR', color:'#fef9c3', tc:'#854d0e' },
+      { name:'Leah M.', city:'Seattle, WA', val:9, avatar:'LM', color:'#ffedd5', tc:'#c2410c' },
+    ],
+    label: 'visits',
+  },
+  handoffs: {
+    week: [
+      { name:'Tyler B.', city:'Houston, TX', val:8, avatar:'TB', color:'#fee2e2', tc:'#b91c1c' },
+      { name:'Jake R.', city:'Dallas, TX', val:6, avatar:'JR', color:'#dcfce7', tc:'#15803d' },
+      { name:'You', city:'Austin, TX', val:5, avatar:'ME', color:'var(--chart)', tc:'var(--ink)', me:true },
+      { name:'Sofia L.', city:'San Antonio, TX', val:4, avatar:'SL', color:'#ede9fe', tc:'#6d28d9' },
+      { name:'Marcus T.', city:'Phoenix, AZ', val:3, avatar:'MT', color:'#dbeafe', tc:'#1d4ed8' },
+      { name:'Carlos R.', city:'Denver, CO', val:2, avatar:'CR', color:'#fef9c3', tc:'#854d0e' },
+    ],
+    label: 'handoffs',
+  },
+  deals: {
+    week: [
+      { name:'Sofia L.', city:'Dallas, TX', val:3, avatar:'SL', color:'#dcfce7', tc:'#15803d' },
+      { name:'Jake R.', city:'Houston, TX', val:2, avatar:'JR', color:'#fee2e2', tc:'#b91c1c' },
+      { name:'You', city:'Austin, TX', val:2, avatar:'ME', color:'var(--chart)', tc:'var(--ink)', me:true },
+      { name:'Marcus T.', city:'Phoenix, AZ', val:1, avatar:'MT', color:'#ede9fe', tc:'#6d28d9' },
+      { name:'Priya N.', city:'Seattle, WA', val:1, avatar:'PN', color:'#dbeafe', tc:'#1d4ed8' },
+    ],
+    label: 'deals',
+  },
+  earnings: {
+    week: [
+      { name:'Sofia L.', city:'Dallas, TX', val:'$3,200', avatar:'SL', color:'#dcfce7', tc:'#15803d' },
+      { name:'Jake R.', city:'Houston, TX', val:'$2,800', avatar:'JR', color:'#fee2e2', tc:'#b91c1c' },
+      { name:'You', city:'Austin, TX', val:'$2,200', avatar:'ME', color:'var(--chart)', tc:'var(--ink)', me:true },
+      { name:'Marcus T.', city:'Phoenix, AZ', val:'$1,400', avatar:'MT', color:'#ede9fe', tc:'#6d28d9' },
+      { name:'Carlos R.', city:'Denver, CO', val:'$900', avatar:'CR', color:'#fef9c3', tc:'#854d0e' },
+    ],
+    label: 'earned',
+  },
+};
+
+let metric = 'visits';
+let time = 'week';
+
+const MEDALS = ['🥇','🥈','🥉'];
+const RANK_CLASSES = ['first','second','third'];
+
+function render() {
+  const d = DATA[metric] || DATA.visits;
+  const entries = d.week; // use same data for all time periods for demo
+  const label = d.label;
+  const meIdx = entries.findIndex(e => e.me);
+  const meEntry = entries[meIdx];
+
+  // Your rank card
+  document.getElementById('yr-rank').textContent = '#' + (meIdx + 1);
+  document.getElementById('yr-val').textContent = meEntry ? meEntry.val : '-';
+  document.getElementById('yr-val-label').textContent = label;
+
+  const list = document.getElementById('lb-list');
+  list.innerHTML = entries.map((e, i) => {
+    const rankDisplay = i < 3 ? `<span class="${['medal-first','medal-second','medal-third'][i]}">${MEDALS[i]}</span>` : `<span>${i+1}</span>`;
+    return `
+    <div class="lb-item${e.me ? ' me' : ''}">
+      <div class="lb-rank ${RANK_CLASSES[i] || ''}">${rankDisplay}</div>
+      <div class="lb-avatar" style="background:${e.color};color:${e.tc};">${e.avatar}</div>
+      <div class="lb-body">
+        <div class="lb-name">${e.name}${e.me ? ' (you)' : ''}</div>
+        <div class="lb-city">${e.city}</div>
+      </div>
+      <div>
+        <div class="lb-val">${e.val}</div>
+        <div class="lb-val-label">${label}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setMetric(m, btn) {
+  metric = m;
+  document.querySelectorAll('.metric-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function setTime(t, btn) {
+  time = t;
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

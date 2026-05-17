@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Add Business | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+  .form-section { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:20px; margin-bottom:16px; }
+  .form-section-title { font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); font-weight:600; margin-bottom:16px; }
+  .score-radio-group { display:flex; gap:8px; }
+  .score-radio { display:none; }
+  .score-label { flex:1; padding:10px; border:1px solid var(--line-strong); border-radius:var(--r-sm); text-align:center; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.12s; color:var(--ink-2); min-height:44px; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .score-label.hot { }
+  .score-radio:checked + .score-label { border-color:transparent; font-weight:600; }
+  #score-hot:checked + .score-label { background:#fee2e2; color:#b91c1c; border-color:#fca5a5; }
+  #score-warm:checked + .score-label { background:#fef9c3; color:#854d0e; border-color:#fde047; }
+  #score-cold:checked + .score-label { background:#f3f4f6; color:#6b7280; border-color:#d1d5db; }
+  .submit-wrap { padding-bottom:calc(var(--bottom-nav-h) + var(--safe-bottom) + 16px); }
+  @media(min-width:769px){
+    .submit-wrap { padding-bottom:24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <a href="cl-my-list.html" style="color:var(--muted);display:flex;align-items:center;gap:4px;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><polyline points="15 18 9 12 15 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          My List
+        </a>
+        <span style="color:var(--line-strong);margin:0 4px;">/</span>
+        <span class="page">Add Business</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <form id="add-biz-form" onsubmit="handleSubmit(event)" novalidate>
+
+        <!-- Business Info -->
+        <div class="form-section">
+          <div class="form-section-title">Business Info</div>
+          <div class="form-group">
+            <label class="form-label" for="biz-name">Business Name <span style="color:var(--red);">*</span></label>
+            <input class="form-input" id="biz-name" type="text" placeholder="Acme HVAC LLC" required autocomplete="organization"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="biz-type">Business Type <span style="color:var(--red);">*</span></label>
+            <select class="form-input" id="biz-type" required>
+              <option value="">Select a type...</option>
+              <option value="HVAC">HVAC</option>
+              <option value="Plumbing">Plumbing</option>
+              <option value="Roofing">Roofing</option>
+              <option value="Electrician">Electrician</option>
+              <option value="Landscaping">Landscaping</option>
+              <option value="Painting">Painting</option>
+              <option value="Construction">Construction</option>
+              <option value="Concrete">Concrete</option>
+              <option value="Welding">Welding</option>
+              <option value="Pipeline">Pipeline</option>
+              <option value="Heavy Equipment">Heavy Equipment</option>
+              <option value="Manufacturing">Manufacturing</option>
+              <option value="Mining">Mining</option>
+              <option value="Oil &amp; Gas">Oil &amp; Gas</option>
+              <option value="Agriculture">Agriculture</option>
+              <option value="Home Service">Home Service</option>
+              <option value="Auto Repair">Auto Repair</option>
+              <option value="Pest Control">Pest Control</option>
+              <option value="Cleaning">Cleaning</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="biz-address">Street Address</label>
+            <input class="form-input" id="biz-address" type="text" placeholder="123 Main St" autocomplete="street-address"/>
+          </div>
+          <div class="form-row" style="grid-template-columns:2fr 1fr 1fr;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="biz-city">City</label>
+              <input class="form-input" id="biz-city" type="text" placeholder="Austin" autocomplete="address-level2"/>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="biz-state">State</label>
+              <input class="form-input" id="biz-state" type="text" placeholder="TX" maxlength="2" autocomplete="address-level1"/>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="biz-zip">Zip</label>
+              <input class="form-input" id="biz-zip" type="text" placeholder="78704" maxlength="10" autocomplete="postal-code"/>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:12px;margin-bottom:0;">
+            <label class="form-label" for="biz-website">Website</label>
+            <input class="form-input" id="biz-website" type="url" placeholder="https://example.com" autocomplete="url"/>
+          </div>
+        </div>
+
+        <!-- Owner Info -->
+        <div class="form-section">
+          <div class="form-section-title">Owner Info</div>
+          <div class="form-group">
+            <label class="form-label" for="owner-name">Owner Name</label>
+            <input class="form-input" id="owner-name" type="text" placeholder="First Last" autocomplete="name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="owner-phone">Phone</label>
+            <input class="form-input" id="owner-phone" type="tel" placeholder="(555) 000-0000" autocomplete="tel"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="owner-email">Email</label>
+            <input class="form-input" id="owner-email" type="email" placeholder="owner@business.com" autocomplete="email"/>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="owner-linkedin">LinkedIn URL</label>
+            <input class="form-input" id="owner-linkedin" type="url" placeholder="https://linkedin.com/in/..."/>
+          </div>
+        </div>
+
+        <!-- Status -->
+        <div class="form-section">
+          <div class="form-section-title">Status</div>
+          <div class="form-group">
+            <label class="form-label" for="biz-stage">Pipeline Stage</label>
+            <select class="form-input" id="biz-stage">
+              <option value="seed" selected>Seed</option>
+              <option value="met_owner">Met Owner</option>
+              <option value="second_visit">2nd Visit</option>
+              <option value="problem_identified">Problem ID'd</option>
+              <option value="warm">Warm</option>
+              <option value="audit_booked">Audit Booked</option>
+              <option value="proposal_sent">Proposal Sent</option>
+              <option value="closed">Closed</option>
+              <option value="build_live">Build Live</option>
+              <option value="support_active">Support Active</option>
+              <option value="expansion">Expansion</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Score</label>
+            <div class="score-radio-group">
+              <input type="radio" class="score-radio" name="score" id="score-hot" value="hot"/>
+              <label class="score-label" for="score-hot">
+                <span class="score-dot hot"></span> Hot
+              </label>
+              <input type="radio" class="score-radio" name="score" id="score-warm" value="warm"/>
+              <label class="score-label" for="score-warm">
+                <span class="score-dot warm"></span> Warm
+              </label>
+              <input type="radio" class="score-radio" name="score" id="score-cold" value="cold" checked/>
+              <label class="score-label" for="score-cold">
+                <span class="score-dot cold"></span> Cold
+              </label>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="biz-notes">Notes</label>
+            <textarea class="form-input" id="biz-notes" placeholder="Any initial notes about this business..."></textarea>
+          </div>
+        </div>
+
+        <div class="submit-wrap">
+          <div id="form-error" style="background:#fee2e2;color:#b91c1c;padding:12px 14px;border-radius:var(--r-sm);font-size:13px;margin-bottom:12px;display:none;"></div>
+          <button class="btn btn-primary btn-full btn-lg" type="submit" id="submit-btn">Save Business</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-add-business');
+
+function handleSubmit(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('form-error');
+  errEl.style.display = 'none';
+
+  const name = document.getElementById('biz-name').value.trim();
+  const type = document.getElementById('biz-type').value;
+
+  if (!name) {
+    errEl.textContent = 'Business name is required.';
+    errEl.style.display = 'block';
+    document.getElementById('biz-name').focus();
+    return;
+  }
+  if (!type) {
+    errEl.textContent = 'Please select a business type.';
+    errEl.style.display = 'block';
+    document.getElementById('biz-type').focus();
+    return;
+  }
+
+  const scoreEl = document.querySelector('input[name="score"]:checked');
+  const newBiz = {
+    id: 'b' + Date.now(),
+    name,
+    type,
+    address: document.getElementById('biz-address').value.trim(),
+    city: document.getElementById('biz-city').value.trim(),
+    state: document.getElementById('biz-state').value.trim(),
+    zip: document.getElementById('biz-zip').value.trim(),
+    website: document.getElementById('biz-website').value.trim(),
+    owner: document.getElementById('owner-name').value.trim(),
+    phone: document.getElementById('owner-phone').value.trim(),
+    email: document.getElementById('owner-email').value.trim(),
+    linkedin: document.getElementById('owner-linkedin').value.trim(),
+    stage: document.getElementById('biz-stage').value,
+    score: scoreEl ? scoreEl.value : 'cold',
+    notes: document.getElementById('biz-notes').value.trim(),
+    added: new Date().toISOString(),
+    lastVisit: null,
+  };
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  // Simulate save delay
+  setTimeout(() => {
+    // In production: await CL.api('businesses').insert(newBiz)
+    CL.toast(newBiz.name + ' added to your list');
+    window.location.href = 'cl-business.html?id=' + newBiz.id + '&new=1';
+  }, 600);
+}
+</script>
+</body>
+</html>

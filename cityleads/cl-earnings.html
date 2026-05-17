@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>My Earnings | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.earnings-item{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:default;}
+.earnings-item:first-child{border-radius:var(--r) var(--r) 0 0;}
+.earnings-item:last-child{border-bottom:none;border-radius:0 0 var(--r) var(--r);}
+.earn-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.earn-icon.referral{background:#dcfce7;}
+.earn-icon.support{background:#dbeafe;}
+.earn-body{flex:1;min-width:0;}
+.earn-biz{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2;}
+.earn-type{font-size:12px;color:var(--muted);margin-top:2px;}
+.earn-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.earn-amount{font-size:16px;font-weight:700;color:#16a34a;}
+.earn-date{font-size:11px;color:var(--muted);}
+.info-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:20px;}
+.info-card-head{background:var(--bg);padding:14px 16px;border-bottom:1px solid var(--line);}
+.info-card-head h3{font-family:var(--serif);font-size:17px;font-weight:400;margin:0;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);gap:8px;}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-size:13px;color:var(--ink-2);}
+.info-val{font-size:13px;font-weight:600;color:var(--ink);text-align:right;}
+.month-select-wrap{display:flex;align-items:center;gap:8px;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">My Earnings</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="month-select-wrap">
+          <select class="filter-select" id="month-select" onchange="renderEarnings()" style="margin-bottom:0;">
+            <option value="2026-05">May 2026</option>
+            <option value="2026-04">April 2026</option>
+            <option value="2026-03">March 2026</option>
+            <option value="2026-02">February 2026</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Total Earned</div>
+          <div class="stat-val" id="stat-total">$0</div>
+          <div class="stat-delta pos">All time</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">This Month</div>
+          <div class="stat-val" id="stat-month">$0</div>
+          <div class="stat-delta pos" id="stat-month-delta"></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Pending</div>
+          <div class="stat-val" id="stat-pending">$0</div>
+          <div class="stat-delta">Awaiting payout</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Next Payout</div>
+          <div class="stat-val" id="stat-payout">Jun 15</div>
+          <div class="stat-delta">15th of each month</div>
+        </div>
+      </div>
+
+      <!-- Earnings list -->
+      <div class="sec-head">
+        <h1 id="list-heading">May 2026</h1>
+        <div class="sec-head-right">
+          <span style="font-size:13px;color:var(--muted);" id="list-count"></span>
+        </div>
+      </div>
+
+      <div class="card" id="earnings-list"></div>
+
+      <!-- How it works -->
+      <div class="info-card">
+        <div class="info-card-head">
+          <h3>How earnings work</h3>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Referral commission</div>
+          <div class="info-val">10% of first deal value</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Monthly support fee</div>
+          <div class="info-val">$150 per client / month</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Payout schedule</div>
+          <div class="info-val">15th of each month</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Minimum payout</div>
+          <div class="info-val">$50</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Payment method</div>
+          <div class="info-val">Direct deposit or check</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Questions?</div>
+          <div class="info-val" style="font-size:12px;">accounting@tmi-technology.com</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-earnings');
+
+const ALL_EARNINGS = [
+  { id:1, biz:'Apex HVAC',            type:'referral', amount:850,  status:'pending', month:'2026-05', date:'May 12' },
+  { id:2, biz:'Travis Electric',       type:'referral', amount:720,  status:'pending', month:'2026-05', date:'May 9' },
+  { id:3, biz:'Badlands Pipeline',     type:'support',  amount:150,  status:'pending', month:'2026-05', date:'May 1' },
+  { id:4, biz:'SkyHigh Roofing',       type:'support',  amount:150,  status:'pending', month:'2026-05', date:'May 1' },
+  { id:5, biz:'Summit HVAC',           type:'support',  amount:150,  status:'pending', month:'2026-05', date:'May 1' },
+  { id:6, biz:'Rio Grande Electric',   type:'referral', amount:1200, status:'paid',    month:'2026-04', date:'Apr 15' },
+  { id:7, biz:'Lone Star Concrete',    type:'referral', amount:940,  status:'paid',    month:'2026-04', date:'Apr 8' },
+  { id:8, biz:'Badlands Pipeline',     type:'support',  amount:150,  status:'paid',    month:'2026-04', date:'Apr 1' },
+  { id:9, biz:'SkyHigh Roofing',       type:'support',  amount:150,  status:'paid',    month:'2026-04', date:'Apr 1' },
+  { id:10, biz:'Cedar Park Plumbing',  type:'referral', amount:550,  status:'paid',    month:'2026-03', date:'Mar 22' },
+  { id:11, biz:'Hill Country HVAC',    type:'referral', amount:680,  status:'paid',    month:'2026-03', date:'Mar 14' },
+];
+
+const MONTH_LABELS = {
+  '2026-05': 'May 2026',
+  '2026-04': 'April 2026',
+  '2026-03': 'March 2026',
+  '2026-02': 'February 2026',
+};
+
+function renderEarnings() {
+  const month = document.getElementById('month-select').value;
+  const items = ALL_EARNINGS.filter(e => e.month === month);
+  const allTime = ALL_EARNINGS.reduce((s,e) => s + e.amount, 0);
+  const thisMonth = ALL_EARNINGS.filter(e => e.month === '2026-05').reduce((s,e) => s + e.amount, 0);
+  const pending = ALL_EARNINGS.filter(e => e.status === 'pending').reduce((s,e) => s + e.amount, 0);
+
+  document.getElementById('stat-total').textContent = CL.currency(allTime);
+  document.getElementById('stat-month').textContent = CL.currency(thisMonth);
+  document.getElementById('stat-month-delta').textContent = ALL_EARNINGS.filter(e => e.month === '2026-05').length + ' transactions';
+  document.getElementById('stat-pending').textContent = CL.currency(pending);
+  document.getElementById('list-heading').textContent = MONTH_LABELS[month] || month;
+  document.getElementById('list-count').textContent = items.length + ' transactions';
+
+  const list = document.getElementById('earnings-list');
+  if (!items.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">💸</div><h3>No earnings this month</h3><p>Close a deal or support an active client to earn.</p></div>`;
+    return;
+  }
+  list.innerHTML = items.map(e => `
+    <div class="earnings-item">
+      <div class="earn-icon ${e.type}">
+        ${e.type === 'referral' ? '🤝' : '🔄'}
+      </div>
+      <div class="earn-body">
+        <div class="earn-biz">${e.biz}</div>
+        <div class="earn-type">${e.type === 'referral' ? 'Referral Commission' : 'Monthly Support'}</div>
+      </div>
+      <div class="earn-right">
+        <div class="earn-amount">+${CL.currency(e.amount)}</div>
+        <span class="badge badge-${e.status}">${e.status.charAt(0).toUpperCase() + e.status.slice(1)}</span>
+        <div class="earn-date">${e.date}</div>
+      </div>
+    </div>`).join('');
+}
+
+renderEarnings();
+</script>
+</body>
+</html>

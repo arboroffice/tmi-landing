@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Add City Lead | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <a href="cl-roster.html" style="color:var(--muted);">Roster</a>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Add City Lead</span>
+      </div>
+      <div class="topbar-actions">
+        <a href="cl-roster.html" class="btn btn-ghost btn-sm">Cancel</a>
+      </div>
+    </div>
+
+    <div class="content">
+      <div style="max-width:640px;margin:0 auto;">
+
+        <div class="sec-head">
+          <h1 style="font-family:var(--serif);font-size:22px;font-weight:400;margin:0;">Onboard New City Lead</h1>
+        </div>
+
+        <form id="add-lead-form" onsubmit="handleSubmit(event)">
+
+          <div class="card" style="padding:20px;margin-bottom:16px;">
+            <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;font-weight:600;">Personal Info</div>
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="first-name">First Name</label>
+                <input class="form-input" id="first-name" type="text" placeholder="Jordan" required/>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="last-name">Last Name</label>
+                <input class="form-input" id="last-name" type="text" placeholder="Martinez" required/>
+              </div>
+            </div>
+            <div style="height:12px"></div>
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="email">Email Address</label>
+                <input class="form-input" id="email" type="email" placeholder="jordan@example.com" required/>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="phone">Phone Number</label>
+                <input class="form-input" id="phone" type="tel" placeholder="(512) 555-0100"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:20px;margin-bottom:16px;">
+            <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;font-weight:600;">Territory</div>
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="city">City</label>
+                <input class="form-input" id="city" type="text" placeholder="Austin" required/>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="state">State</label>
+                <select class="form-input" id="state" required>
+                  <option value="">Select state</option>
+                  <option>AL</option><option>AK</option><option>AZ</option><option>AR</option>
+                  <option>CA</option><option>CO</option><option>CT</option><option>DE</option>
+                  <option>FL</option><option>GA</option><option>HI</option><option>ID</option>
+                  <option>IL</option><option>IN</option><option>IA</option><option>KS</option>
+                  <option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+                  <option>MA</option><option>MI</option><option>MN</option><option>MS</option>
+                  <option>MO</option><option>MT</option><option>NE</option><option>NV</option>
+                  <option>NH</option><option>NJ</option><option>NM</option><option>NY</option>
+                  <option>NC</option><option>ND</option><option>OH</option><option>OK</option>
+                  <option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+                  <option>SD</option><option>TN</option><option selected>TX</option><option>UT</option>
+                  <option>VT</option><option>VA</option><option>WA</option><option>WV</option>
+                  <option>WI</option><option>WY</option>
+                </select>
+              </div>
+            </div>
+            <div style="height:12px"></div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" for="territory">Assigned Territory Description</label>
+              <input class="form-input" id="territory" type="text" placeholder="e.g. Central Austin, North Loop to 183"/>
+              <div class="form-hint">Optional - describe the exact zone or zip codes covered</div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:20px;margin-bottom:20px;">
+            <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;font-weight:600;">Notes</div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" for="notes">Internal Notes</label>
+              <textarea class="form-input" id="notes" placeholder="Referral source, background, anything the team should know..."></textarea>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-full btn-lg" type="submit" id="submit-btn">
+            Create City Lead Account
+          </button>
+        </form>
+
+        <!-- What happens next -->
+        <div style="margin-top:32px;padding:24px 20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);">
+          <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;font-weight:600;">What happens next</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--chart);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">1</div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;">Account created</div>
+                <div style="font-size:13px;color:var(--muted);">A new city lead account is provisioned and linked to their territory.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--chart);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">2</div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;">Welcome email sent</div>
+                <div style="font-size:13px;color:var(--muted);">They receive login credentials and a welcome message with their first steps.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:flex-start;">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--chart);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">3</div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;">Training playbook unlocked</div>
+                <div style="font-size:13px;color:var(--muted);">Full access to the City Lead playbook, scripts, and objection handling guides.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:32px"></div>
+
+      </div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-add-lead', { adminOnly: true });
+
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Creating account...';
+
+  const data = {
+    firstName:  document.getElementById('first-name').value.trim(),
+    lastName:   document.getElementById('last-name').value.trim(),
+    email:      document.getElementById('email').value.trim(),
+    phone:      document.getElementById('phone').value.trim(),
+    city:       document.getElementById('city').value.trim(),
+    state:      document.getElementById('state').value,
+    territory:  document.getElementById('territory').value.trim(),
+    notes:      document.getElementById('notes').value.trim(),
+  };
+
+  // Simulate async create
+  setTimeout(() => {
+    CL.toast(`${data.firstName} ${data.lastName} added as a City Lead`);
+    setTimeout(() => { window.location.href = 'cl-roster.html'; }, 1200);
+  }, 800);
+}
+</script>
+</body>
+</html>

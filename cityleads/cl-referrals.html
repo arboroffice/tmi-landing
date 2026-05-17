@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Referrals | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.ref-intro{background:var(--ink);border-radius:var(--r);padding:16px;margin-bottom:20px;font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;display:flex;gap:10px;align-items:flex-start;}
+.ref-intro svg{color:var(--chart);width:18px;height:18px;flex-shrink:0;margin-top:1px;}
+
+.ref-chain{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+.ref-chain-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;}
+.ref-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;min-width:0;}
+.ref-node{display:flex;flex-direction:column;min-width:0;}
+.ref-node-label{font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+.ref-node-name{font-size:13px;font-weight:600;color:var(--ink);line-height:1.2;}
+.ref-node-type{font-size:11px;color:var(--muted);}
+.ref-arrow{color:var(--chart);flex-shrink:0;margin-top:14px;}
+.ref-status-col{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.ref-date{font-size:11px;color:var(--muted);}
+.ref-notes{font-size:12px;color:var(--ink-2);background:var(--bg);padding:8px 10px;border-radius:var(--r-sm);line-height:1.5;}
+.ref-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+
+.connector-highlight{background:var(--chart);color:var(--ink);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;}
+
+.badge-introduced{background:#dbeafe;color:#1d4ed8;}
+.badge-meeting-set{background:#ede9fe;color:#6d28d9;}
+.badge-warm-ref{background:#fef9c3;color:#854d0e;}
+.badge-closed-ref{background:#dcfce7;color:#15803d;}
+
+.top-connector{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.tc-rank{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink);width:28px;text-align:center;flex-shrink:0;}
+.tc-body{flex:1;min-width:0;}
+.tc-name{font-size:14px;font-weight:600;color:var(--ink);}
+.tc-biz{font-size:12px;color:var(--muted);}
+.tc-count{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--chart);flex-shrink:0;}
+
+.sec-label{font-family:var(--serif);font-size:18px;font-weight:400;color:var(--ink);margin:0 0 12px;letter-spacing:-0.01em;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Referrals</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="ref-intro">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.98 2.98 0 0 0 18 8a3 3 0 1 0-3-3c0 .24.04.47.09.7L8.04 9.81A3 3 0 0 0 6 9a3 3 0 0 0 0 6c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65a3 3 0 1 0 3-3z"/></svg>
+        <span>When a business owner refers you to someone they know, track it here. It tells you who your best connectors are - and those relationships are worth protecting.</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Total Referrals</div>
+          <div class="stat-val" id="total-refs">6</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Active Chains</div>
+          <div class="stat-val" id="active-chains">4</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Deals from Referrals</div>
+          <div class="stat-val" id="deals-from-refs" style="color:var(--green)">1</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Best Connector</div>
+          <div class="stat-val" style="font-size:14px;font-weight:700;line-height:1.3;margin-top:2px">Mike T.</div>
+        </div>
+      </div>
+
+      <!-- Top Connectors -->
+      <div class="sec-label">Top Connectors</div>
+      <div id="connectors-list" style="margin-bottom:24px"></div>
+
+      <!-- Referral chains -->
+      <div class="sec-head" style="margin-bottom:12px">
+        <div class="sec-label" style="margin:0">All Referrals</div>
+        <div class="sec-head-right">
+          <select class="filter-select" id="status-filter" onchange="renderReferrals()">
+            <option value="all">All Status</option>
+            <option value="introduced">Introduced</option>
+            <option value="meeting-set">Meeting Set</option>
+            <option value="warm">Warm</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="referral-list"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Log Referral Modal -->
+<div class="modal-overlay" id="ref-modal">
+  <div class="modal">
+    <div class="modal-grip"></div>
+    <div class="modal-hd">
+      <h2 class="modal-title">Log Referral</h2>
+      <button class="modal-x" onclick="CL.closeModal('ref-modal')">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">From Business</label>
+      <select class="form-input" id="ref-from">
+        <option value="">Select source...</option>
+        <option>Apex HVAC (Mike Tran)</option>
+        <option>Lone Star Concrete (Diego Ruiz)</option>
+        <option>Travis Electric (Sarah Webb)</option>
+        <option>Silverline Roofing (James Park)</option>
+        <option>Hill Country HVAC (Tom Garza)</option>
+        <option>Cedar Park Plumbing (Carl Moss)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">To Business</label>
+      <select class="form-input" id="ref-to-type" onchange="toggleNewContact()">
+        <option value="existing">Existing Contact</option>
+        <option value="new">New Contact</option>
+      </select>
+    </div>
+    <div id="ref-to-existing" class="form-group">
+      <select class="form-input" id="ref-to-existing-sel">
+        <option value="">Select business...</option>
+        <option>Lone Star Concrete (Diego Ruiz)</option>
+        <option>Travis Electric (Sarah Webb)</option>
+        <option>Silverline Roofing (James Park)</option>
+        <option>Austin Painting Co (Keisha Brown)</option>
+        <option>Cedar Park Plumbing (Carl Moss)</option>
+      </select>
+    </div>
+    <div id="ref-to-new" class="form-group" style="display:none">
+      <input class="form-input" id="ref-to-new-name" placeholder="Business name / Owner name" type="text"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <select class="form-input" id="ref-status">
+        <option value="introduced">Introduced</option>
+        <option value="meeting-set">Meeting Set</option>
+        <option value="warm">Warm</option>
+        <option value="closed">Closed</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="ref-notes" placeholder="How did this come up? What did they say about the referral?" rows="3"></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-primary btn-full" onclick="saveReferral()">Log Referral</button>
+      <button class="btn btn-ghost btn-full" onclick="CL.closeModal('ref-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<button class="btn-fab" onclick="CL.openModal('ref-modal')" title="Log Referral">
+  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/></svg>
+</button>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-referrals');
+
+let REFERRALS = [
+  { id:1, from:'Apex HVAC', fromOwner:'Mike Tran', fromType:'HVAC', to:'Cedar Park Plumbing', toOwner:'Carl Moss', toType:'Plumbing', status:'warm', date:'2026-05-10', notes:'Mike mentioned Carl is his go-to plumber. Said "tell him I sent you and he\'ll at least talk to you." Called Carl - he\'s open to a conversation.' },
+  { id:2, from:'Apex HVAC', fromOwner:'Mike Tran', fromType:'HVAC', to:'Brazos Welding', toOwner:'Luis Herrera', toType:'Welding', status:'introduced', date:'2026-05-13', notes:'Mike gave Luis my number. Luis does custom fab work, 3-person shop, says he tracks jobs on paper.' },
+  { id:3, from:'Lone Star Concrete', fromOwner:'Diego Ruiz', fromType:'Concrete', to:'Summit Concrete TX', toOwner:'Ray Deleon', toType:'Concrete', status:'meeting-set', date:'2026-05-14', notes:'Diego knows Ray from a supplier event. Set up a call for next Tuesday. Diego said "Ray has the same problems I have, probably worse."' },
+  { id:4, from:'Travis Electric', fromOwner:'Sarah Webb', fromType:'Electrician', to:'Westside Auto Repair', toOwner:'Frank Kim', toType:'Auto Repair', status:'introduced', date:'2026-05-08', notes:'Sarah mentioned her husband uses Westside. Left a card there. Owner Frank was friendly, said to come back when not busy.' },
+  { id:5, from:'Silverline Roofing', fromOwner:'James Park', fromType:'Roofing', to:'AllStar Painting ATX', toOwner:'Kevin Cho', toType:'Painting', status:'closed', date:'2026-04-20', notes:'James referred Kevin. Kevin closed in 3 weeks. First referral-to-close. Key because James saw the product and vouched hard.' },
+  { id:6, from:'Apex HVAC', fromOwner:'Mike Tran', fromType:'HVAC', to:'Capital Landscaping', toOwner:'Roy Nguyen', toType:'Landscaping', status:'warm', date:'2026-05-02', notes:'Mike and Roy are in the same business owners group. Mentioned me at a meeting. Roy reached out directly - good signal.' },
+];
+
+const STATUS_BADGE = {
+  introduced:   `<span class="badge badge-introduced">Introduced</span>`,
+  'meeting-set':`<span class="badge badge-meeting-set">Meeting Set</span>`,
+  warm:         `<span class="badge badge-warm">Warm</span>`,
+  closed:       `<span class="badge badge-closed">Closed</span>`,
+};
+
+function getConnectors() {
+  const counts = {};
+  REFERRALS.forEach(r => {
+    const key = r.from + '|' + r.fromOwner;
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  return Object.entries(counts)
+    .map(([k, n]) => { const [biz, owner] = k.split('|'); return { biz, owner, count: n }; })
+    .sort((a, b) => b.count - a.count);
+}
+
+function renderConnectors() {
+  const conns = getConnectors();
+  document.getElementById('connectors-list').innerHTML = conns.map((c, i) => `
+    <div class="top-connector">
+      <div class="tc-rank">${i + 1}</div>
+      <div class="tc-body">
+        <div class="tc-name">${c.owner}</div>
+        <div class="tc-biz">${c.biz}</div>
+      </div>
+      <div class="tc-count">${c.count}</div>
+    </div>`).join('');
+}
+
+function renderReferrals() {
+  const filter = document.getElementById('status-filter').value;
+  let list = filter === 'all' ? REFERRALS : REFERRALS.filter(r => r.status === filter);
+
+  document.getElementById('total-refs').textContent = REFERRALS.length;
+  document.getElementById('active-chains').textContent = REFERRALS.filter(r => r.status !== 'closed').length;
+  document.getElementById('deals-from-refs').textContent = REFERRALS.filter(r => r.status === 'closed').length;
+
+  if (!list.length) {
+    document.getElementById('referral-list').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🤝</div>
+        <h3>No referrals yet</h3>
+        <p>When an owner introduces you to someone, tap + to track it.</p>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('referral-list').innerHTML = list.map(r => `
+    <div class="ref-chain" id="ref-${r.id}">
+      <div class="ref-chain-top">
+        <div class="ref-flow">
+          <div class="ref-node">
+            <span class="ref-node-label">From</span>
+            <span class="ref-node-name">${r.from}</span>
+            <span class="ref-node-type">${r.fromOwner} &middot; ${r.fromType}</span>
+          </div>
+          <div class="ref-arrow">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="9 18 15 12 9 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="ref-node">
+            <span class="ref-node-label">To</span>
+            <span class="ref-node-name">${r.to}</span>
+            <span class="ref-node-type">${r.toOwner} &middot; ${r.toType}</span>
+          </div>
+        </div>
+        <div class="ref-status-col">
+          ${STATUS_BADGE[r.status]}
+          <span class="ref-date">${CL.fmt(r.date)}</span>
+        </div>
+      </div>
+      ${r.notes ? `<div class="ref-notes">${r.notes}</div>` : ''}
+      <div class="ref-actions">
+        <button class="btn btn-ghost btn-sm" onclick="updateStatus(${r.id})">Update Status</button>
+        <a class="btn btn-ghost btn-sm" href="cl-conversation.html?business=${encodeURIComponent(r.to)}">View Convo</a>
+      </div>
+    </div>`).join('');
+}
+
+function updateStatus(id) {
+  const r = REFERRALS.find(x => x.id === id);
+  const STATUSES = ['introduced','meeting-set','warm','closed'];
+  const idx = STATUSES.indexOf(r.status);
+  const next = STATUSES[(idx + 1) % STATUSES.length];
+  r.status = next;
+  CL.toast(`${r.to} updated to ${next}`);
+  renderReferrals();
+}
+
+function toggleNewContact() {
+  const isNew = document.getElementById('ref-to-type').value === 'new';
+  document.getElementById('ref-to-existing').style.display = isNew ? 'none' : 'block';
+  document.getElementById('ref-to-new').style.display = isNew ? 'block' : 'none';
+}
+
+function saveReferral() {
+  const from = document.getElementById('ref-from').value;
+  const isNew = document.getElementById('ref-to-type').value === 'new';
+  const to = isNew
+    ? document.getElementById('ref-to-new-name').value.trim()
+    : document.getElementById('ref-to-existing-sel').value;
+  const status = document.getElementById('ref-status').value;
+  const notes = document.getElementById('ref-notes').value.trim();
+  if (!from) { CL.toast('Select source business', 'error'); return; }
+  if (!to) { CL.toast('Select or enter destination business', 'error'); return; }
+  const parts = from.match(/^(.+?)\s+\((.+)\)$/) || [null, from, ''];
+  REFERRALS.unshift({ id: Date.now(), from: parts[1], fromOwner: parts[2], fromType:'', to, toOwner:'', toType:'', status, date: new Date().toISOString().slice(0,10), notes });
+  CL.closeModal('ref-modal');
+  CL.toast('Referral logged');
+  renderConnectors();
+  renderReferrals();
+}
+
+renderConnectors();
+renderReferrals();
+</script>
+</body>
+</html>

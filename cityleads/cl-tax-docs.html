@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Tax Documents | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.year-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;overflow:hidden;}
+.year-card-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:var(--bg);}
+.year-label{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink);}
+.year-total{font-size:13px;color:var(--ink-2);}
+.year-total strong{color:var(--green);font-weight:700;}
+.doc-row{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);gap:12px;}
+.doc-row:last-child{border-bottom:none;}
+.doc-icon-wrap{width:36px;height:36px;border-radius:8px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
+.doc-info{flex:1;min-width:0;}
+.doc-name{font-size:14px;font-weight:600;color:var(--ink);}
+.doc-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.info-banner{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r);padding:14px 16px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;}
+.info-banner-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.info-banner-text{font-size:13px;color:#1e40af;line-height:1.55;}
+.info-banner-text a{color:#1d4ed8;text-decoration:underline;}
+.doc-unavail{display:flex;align-items:center;gap:8px;padding:14px 18px;font-size:13px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Tax Documents</span>
+      </div>
+    </div>
+
+    <div class="content" id="main-content">
+
+      <div class="info-banner">
+        <div class="info-banner-icon">ℹ️</div>
+        <div class="info-banner-text">
+          1099s are issued by January 31 for the prior year. If you earned $600 or more in a calendar year, you'll receive a 1099-NEC. Contact <a href="mailto:accounting@tmi-technology.com">accounting@tmi-technology.com</a> with any questions.
+        </div>
+      </div>
+
+      <div id="docs-root"></div>
+
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-tax-docs');
+
+const TAX_DATA = [
+  {
+    year: 2025,
+    total: 14320,
+    docs: [
+      { name:'1099-NEC', sub:'Independent Contractor Income', available:true, file:'tmi-1099-nec-2025.pdf' },
+      { name:'Earnings Summary', sub:'Monthly breakdown of all transactions', available:true, file:'tmi-earnings-summary-2025.pdf' },
+    ]
+  },
+  {
+    year: 2024,
+    total: 8750,
+    docs: [
+      { name:'1099-NEC', sub:'Independent Contractor Income', available:true, file:'tmi-1099-nec-2024.pdf' },
+      { name:'Earnings Summary', sub:'Monthly breakdown of all transactions', available:true, file:'tmi-earnings-summary-2024.pdf' },
+    ]
+  },
+  {
+    year: 2023,
+    total: 2100,
+    docs: [
+      { name:'1099-NEC', sub:'Income below $600 — no 1099 issued', available:false },
+      { name:'Earnings Summary', sub:'Monthly breakdown of all transactions', available:true, file:'tmi-earnings-summary-2023.pdf' },
+    ]
+  },
+];
+
+function fakeDownload(filename) {
+  CL.toast('Downloading ' + filename + '...');
+}
+
+const root = document.getElementById('docs-root');
+root.innerHTML = TAX_DATA.map(y => `
+  <div class="year-card">
+    <div class="year-card-head">
+      <div class="year-label">${y.year}</div>
+      <div class="year-total">Total Earned: <strong>${CL.currency(y.total)}</strong></div>
+    </div>
+    ${y.docs.map(d => d.available ? `
+      <div class="doc-row">
+        <div class="doc-icon-wrap">📄</div>
+        <div class="doc-info">
+          <div class="doc-name">${d.name}</div>
+          <div class="doc-sub">${d.sub}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="fakeDownload('${d.file}')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-linecap="round"/><polyline points="7 10 12 15 17 10" stroke-linecap="round"/><line x1="12" y1="15" x2="12" y2="3" stroke-linecap="round"/></svg>
+          Download
+        </button>
+      </div>` : `
+      <div class="doc-unavail">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-linecap="round" stroke-width="2"/></svg>
+        ${d.name} — ${d.sub}
+      </div>`).join('')}
+  </div>`).join('');
+</script>
+</body>
+</html>

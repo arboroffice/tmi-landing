@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Business Card Scanner | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.scanner-wrap{position:relative;width:100%;aspect-ratio:3/2;background:#0d0e1a;border-radius:var(--r);overflow:hidden;margin-bottom:20px;display:flex;align-items:center;justify-content:center;min-height:220px;}
+.scanner-feed{position:absolute;inset:0;background:linear-gradient(135deg,#0d1117 0%,#1a1f2e 100%);}
+.scanner-corners{position:absolute;inset:24px;pointer-events:none;}
+.scanner-corner{position:absolute;width:28px;height:28px;border-color:var(--chart);border-style:solid;border-width:0;}
+.scanner-corner.tl{top:0;left:0;border-top-width:3px;border-left-width:3px;border-radius:3px 0 0 0;}
+.scanner-corner.tr{top:0;right:0;border-top-width:3px;border-right-width:3px;border-radius:0 3px 0 0;}
+.scanner-corner.bl{bottom:0;left:0;border-bottom-width:3px;border-left-width:3px;border-radius:0 0 0 3px;}
+.scanner-corner.br{bottom:0;right:0;border-bottom-width:3px;border-right-width:3px;border-radius:0 0 3px 0;}
+.scanner-line{position:absolute;left:24px;right:24px;height:2px;background:linear-gradient(90deg,transparent,var(--chart),transparent);border-radius:1px;animation:scan-sweep 2s ease-in-out infinite;top:24px;}
+@keyframes scan-sweep{0%{top:24px;opacity:1;}100%{top:calc(100% - 24px);opacity:0.4;}}
+.scanner-instruction{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:0.08em;}
+.scanner-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.scanner-icon svg{opacity:0.15;}
+.scanner-icon p{color:rgba(255,255,255,0.25);font-size:12px;margin-top:8px;letter-spacing:0.06em;}
+
+.scan-btn{background:var(--chart);color:var(--ink);font-size:17px;font-weight:700;border:none;border-radius:var(--r-sm);min-height:56px;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.15s;margin-bottom:16px;}
+.scan-btn:hover{background:var(--chart-dark);}
+.scan-btn.scanning{background:var(--ink);color:var(--chart);animation:pulse-scan 0.8s ease-in-out infinite alternate;}
+@keyframes pulse-scan{from{opacity:0.8;}to{opacity:1;}}
+.scan-btn svg{width:20px;height:20px;}
+
+.manual-link{display:block;text-align:center;font-size:14px;color:var(--muted);padding:8px;transition:color 0.15s;}
+.manual-link:hover{color:var(--ink);}
+
+.extracted-card{background:var(--surface);border:2px solid var(--chart);border-radius:var(--r);overflow:hidden;margin-bottom:20px;display:none;}
+.extracted-card.show{display:block;}
+.extracted-card-head{background:var(--ink);padding:14px 16px;display:flex;align-items:center;gap:10px;}
+.extracted-card-icon{width:36px;height:36px;background:var(--chart);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.extracted-card-label{font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:3px;}
+.extracted-card-biz{font-size:16px;font-weight:600;color:#fff;}
+.extracted-card-body{padding:16px;}
+.confidence-banner{background:#fef9c3;border-radius:var(--r-sm);padding:10px 14px;margin-bottom:16px;font-size:12px;color:#854d0e;display:flex;align-items:center;gap:8px;}
+.confidence-banner svg{width:14px;height:14px;flex-shrink:0;}
+.field-edit{display:flex;flex-direction:column;gap:12px;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Scan Business Card</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Camera viewfinder -->
+      <div class="scanner-wrap" id="scanner-wrap">
+        <div class="scanner-feed"></div>
+        <div class="scanner-corners">
+          <div class="scanner-corner tl"></div>
+          <div class="scanner-corner tr"></div>
+          <div class="scanner-corner bl"></div>
+          <div class="scanner-corner br"></div>
+        </div>
+        <div class="scanner-line" id="scan-line"></div>
+        <div class="scanner-icon">
+          <svg width="64" height="64" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="1.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          <p>Camera preview</p>
+        </div>
+        <div class="scanner-instruction">Point camera at business card</div>
+      </div>
+
+      <!-- Scan button -->
+      <button class="scan-btn" id="scan-btn" onclick="triggerScan()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8h10M7 12h10M7 16h10" stroke-linecap="round"/></svg>
+        Scan Card
+      </button>
+
+      <a href="cl-add-business.html" class="manual-link">Or type manually &rarr;</a>
+
+      <!-- Extracted fields (shown after scan) -->
+      <div class="extracted-card" id="extracted-card">
+        <div class="extracted-card-head">
+          <div class="extracted-card-icon">
+            <svg width="18" height="18" fill="none" stroke="var(--ink)" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="extracted-card-label">Card scanned</div>
+            <div class="extracted-card-biz" id="extracted-biz-name">Reading...</div>
+          </div>
+        </div>
+        <div class="extracted-card-body">
+          <div class="confidence-banner">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-linecap="round" stroke-width="2.5"/></svg>
+            Review and correct before saving
+          </div>
+          <div class="field-edit">
+            <div class="form-group" style="margin:0">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-input" id="f-name" value=""/>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">Title</label>
+              <input type="text" class="form-input" id="f-title" value=""/>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">Company</label>
+              <input type="text" class="form-input" id="f-company" value=""/>
+            </div>
+            <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="form-group" style="margin:0">
+                <label class="form-label">Phone</label>
+                <input type="tel" class="form-input" id="f-phone" value=""/>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" id="f-email" value=""/>
+              </div>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">Website</label>
+              <input type="url" class="form-input" id="f-website" value=""/>
+            </div>
+          </div>
+          <div style="height:20px;"></div>
+          <button class="btn btn-primary btn-full btn-lg" onclick="saveBusiness()">Save as New Business</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:10px;" onclick="resetScanner()">Scan Another Card</button>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-scanner');
+
+// Simulated OCR result
+const MOCK_CARD = {
+  name: 'Mike Trevino',
+  title: 'Owner / Master Plumber',
+  company: 'Trevino Plumbing LLC',
+  phone: '(512) 448-7711',
+  email: 'mike@trevinoPlumbing.com',
+  website: 'www.trevinoplumbing.com',
+};
+
+let scanning = false;
+
+function triggerScan() {
+  if (scanning) return;
+  scanning = true;
+  const btn = document.getElementById('scan-btn');
+  btn.classList.add('scanning');
+  btn.textContent = 'Scanning...';
+
+  setTimeout(() => {
+    showExtracted(MOCK_CARD);
+    btn.classList.remove('scanning');
+    btn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="20" height="20"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8h10M7 12h10M7 16h10" stroke-linecap="round"/></svg>Scan Card`;
+    scanning = false;
+  }, 1800);
+}
+
+function showExtracted(card) {
+  document.getElementById('f-name').value     = card.name;
+  document.getElementById('f-title').value    = card.title;
+  document.getElementById('f-company').value  = card.company;
+  document.getElementById('f-phone').value    = card.phone;
+  document.getElementById('f-email').value    = card.email;
+  document.getElementById('f-website').value  = card.website;
+  document.getElementById('extracted-biz-name').textContent = card.company;
+  document.getElementById('extracted-card').classList.add('show');
+  document.getElementById('extracted-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  CL.toast('Card scanned — review fields below');
+}
+
+function saveBusiness() {
+  const company = document.getElementById('f-company').value.trim();
+  if (!company) { CL.toast('Company name is required', 'error'); return; }
+  CL.toast(company + ' saved to My List');
+  setTimeout(() => location.href = 'cl-my-list.html', 1200);
+}
+
+function resetScanner() {
+  document.getElementById('extracted-card').classList.remove('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>All Businesses | TMI City Leads Admin</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+  .tbl-wrap { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; }
+  .tbl-biz-name { font-weight:500; color:var(--ink); }
+  .tbl-meta { font-size:12px; color:var(--muted); display:block; }
+  .tbl-city-lead { display:flex; align-items:center; gap:6px; }
+  .tbl-cl-avatar { width:24px; height:24px; border-radius:50%; background:var(--bg); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:var(--ink-2); flex-shrink:0; }
+  @media(max-width:768px){
+    .tbl-wrap { display:none; }
+    .mobile-biz-list { display:block; }
+  }
+  @media(min-width:769px){
+    .mobile-biz-list { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span class="page">All Businesses</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="exportData()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><polyline points="8 17 12 21 16 17" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="12" x2="12" y2="21" stroke-linecap="round"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" stroke-linecap="round"/></svg>
+          Export
+        </button>
+        <a href="cl-add-business.html" class="btn btn-primary btn-sm">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/></svg>
+          Add
+        </a>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Stats row -->
+      <div class="stats-row" id="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Total Businesses</div>
+          <div class="stat-val" id="stat-total">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Hot Leads</div>
+          <div class="stat-val" id="stat-hot" style="color:#ef4444;">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Warm Leads</div>
+          <div class="stat-val" id="stat-warm" style="color:#f59e0b;">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Ready to Close</div>
+          <div class="stat-val" id="stat-close" style="color:#22c55e;">—</div>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="filter-row">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+            <input type="search" placeholder="Search businesses, owners..." oninput="filterTable()" id="q-search"/>
+          </div>
+        </div>
+        <div class="filter-row" style="flex-wrap:wrap;">
+          <select class="filter-select" id="city-filter" onchange="filterTable()">
+            <option value="">All Cities</option>
+            <option value="Austin, TX">Austin, TX</option>
+            <option value="Houston, TX">Houston, TX</option>
+            <option value="Dallas, TX">Dallas, TX</option>
+            <option value="Denver, CO">Denver, CO</option>
+            <option value="Phoenix, AZ">Phoenix, AZ</option>
+          </select>
+          <select class="filter-select" id="lead-filter" onchange="filterTable()">
+            <option value="">All City Leads</option>
+            <option value="Jordan Kim">Jordan Kim</option>
+            <option value="Alex Rivera">Alex Rivera</option>
+            <option value="Sam Patel">Sam Patel</option>
+            <option value="Casey Morgan">Casey Morgan</option>
+          </select>
+          <select class="filter-select" id="stage-filter" onchange="filterTable()">
+            <option value="">All Stages</option>
+            <option value="seed">Seed</option>
+            <option value="met_owner">Met Owner</option>
+            <option value="second_visit">2nd Visit</option>
+            <option value="warm">Warm</option>
+            <option value="audit_booked">Audit Booked</option>
+            <option value="proposal_sent">Proposal Sent</option>
+            <option value="closed">Closed</option>
+            <option value="build_live">Build Live</option>
+            <option value="support_active">Support Active</option>
+            <option value="expansion">Expansion</option>
+          </select>
+          <select class="filter-select" id="score-filter" onchange="filterTable()">
+            <option value="">All Scores</option>
+            <option value="hot">Hot</option>
+            <option value="warm">Warm</option>
+            <option value="cold">Cold</option>
+          </select>
+          <span class="filter-count" id="filter-count"></span>
+        </div>
+      </div>
+
+      <!-- Desktop table -->
+      <div class="tbl-wrap">
+        <div class="tbl-wrap" style="border:none;border-radius:0;">
+          <div class="tbl-wrap" style="border-radius:var(--r);overflow:hidden;border:none;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Business</th>
+                  <th>Type</th>
+                  <th>City</th>
+                  <th>City Lead</th>
+                  <th>Owner</th>
+                  <th>Stage</th>
+                  <th>Score</th>
+                  <th>Last Visit</th>
+                  <th>Added</th>
+                </tr>
+              </thead>
+              <tbody id="biz-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile list -->
+      <div class="mobile-biz-list">
+        <div style="background:var(--surface);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);">
+          <ul class="biz-list" id="biz-mobile-list"></ul>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state" style="display:none;">
+        <div class="empty-icon">🏢</div>
+        <h3>No businesses found</h3>
+        <p>Try adjusting your filters or add the first business.</p>
+        <a href="cl-add-business.html" class="btn btn-primary">Add Business</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-master-businesses', { adminOnly: true });
+
+const DEMO_DATA = [
+  { id:'b1', name:'Austin HVAC Pros', type:'HVAC', city:'Austin, TX', lead:'Jordan Kim', owner:'Mike Torres', stage:'warm', score:'hot', lastVisit:'2026-05-10', added:'2026-04-01' },
+  { id:'b2', name:'Capital Plumbing Co', type:'Plumbing', city:'Austin, TX', lead:'Jordan Kim', owner:'Sarah Chen', stage:'met_owner', score:'warm', lastVisit:'2026-05-15', added:'2026-04-10' },
+  { id:'b3', name:'Lone Star Roofing', type:'Roofing', city:'Austin, TX', lead:'Jordan Kim', owner:'James Polk', stage:'seed', score:'cold', lastVisit:'2026-04-20', added:'2026-03-15' },
+  { id:'b4', name:'Hill Country Electric', type:'Electrician', city:'Austin, TX', lead:'Jordan Kim', owner:'Dana Webb', stage:'audit_booked', score:'hot', lastVisit:'2026-05-16', added:'2026-04-05' },
+  { id:'b5', name:'Green Leaf Landscaping', type:'Landscaping', city:'Austin, TX', lead:'Jordan Kim', owner:'Carlos Reyes', stage:'proposal_sent', score:'warm', lastVisit:'2026-05-12', added:'2026-04-20' },
+  { id:'b6', name:'Houston Pipe Works', type:'Plumbing', city:'Houston, TX', lead:'Alex Rivera', owner:'Linda Park', stage:'second_visit', score:'warm', lastVisit:'2026-05-08', added:'2026-04-18' },
+  { id:'b7', name:'Bayou Concrete LLC', type:'Concrete', city:'Houston, TX', lead:'Alex Rivera', owner:'Brett Wilson', stage:'warm', score:'hot', lastVisit:'2026-05-03', added:'2026-03-30' },
+  { id:'b8', name:'Mile High HVAC', type:'HVAC', city:'Denver, CO', lead:'Sam Patel', owner:'Kevin Brooks', stage:'closed', score:'hot', lastVisit:'2026-04-28', added:'2026-03-01' },
+  { id:'b9', name:'Rocky Roofing Co', type:'Roofing', city:'Denver, CO', lead:'Sam Patel', owner:'Tina Fox', stage:'build_live', score:'hot', lastVisit:'2026-05-01', added:'2026-02-15' },
+  { id:'b10', name:'Desert Electric PHX', type:'Electrician', city:'Phoenix, AZ', lead:'Casey Morgan', owner:'Nate Cruz', stage:'seed', score:'cold', lastVisit:'2026-04-15', added:'2026-04-14' },
+  { id:'b11', name:'Dallas Construction Group', type:'Construction', city:'Dallas, TX', lead:'Alex Rivera', owner:'Paul Adams', stage:'problem_identified', score:'warm', lastVisit:'2026-05-06', added:'2026-03-20' },
+  { id:'b12', name:'Lone Star Pipeline Svcs', type:'Pipeline', city:'Dallas, TX', lead:'Alex Rivera', owner:'Rosa Martinez', stage:'warm', score:'hot', lastVisit:'2026-05-14', added:'2026-03-25' },
+];
+
+function renderStats(data) {
+  document.getElementById('stat-total').textContent = data.length;
+  document.getElementById('stat-hot').textContent = data.filter(b => b.score === 'hot').length;
+  document.getElementById('stat-warm').textContent = data.filter(b => b.score === 'warm').length;
+  document.getElementById('stat-close').textContent = data.filter(b => ['audit_booked','proposal_sent'].includes(b.stage)).length;
+}
+
+function filterTable() {
+  const q = document.getElementById('q-search').value.toLowerCase();
+  const city = document.getElementById('city-filter').value;
+  const lead = document.getElementById('lead-filter').value;
+  const stage = document.getElementById('stage-filter').value;
+  const score = document.getElementById('score-filter').value;
+
+  let results = DEMO_DATA.filter(b => {
+    if (city && b.city !== city) return false;
+    if (lead && b.lead !== lead) return false;
+    if (stage && b.stage !== stage) return false;
+    if (score && b.score !== score) return false;
+    if (q && !b.name.toLowerCase().includes(q) && !b.owner.toLowerCase().includes(q) && !b.city.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  renderStats(results);
+  renderTable(results);
+  document.getElementById('filter-count').textContent = results.length + ' businesses';
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('biz-tbody');
+  const mobileList = document.getElementById('biz-mobile-list');
+  const emptyEl = document.getElementById('empty-state');
+  const tblWrap = document.querySelector('.tbl-wrap');
+  const mobileBizList = document.querySelector('.mobile-biz-list');
+
+  if (data.length === 0) {
+    if (tblWrap) tblWrap.style.display = 'none';
+    if (mobileBizList) mobileBizList.style.display = 'none';
+    emptyEl.style.display = 'block';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  if (tblWrap) tblWrap.style.display = 'block';
+  if (mobileBizList) mobileBizList.style.display = 'block';
+
+  tbody.innerHTML = data.map(b => `
+    <tr onclick="window.location='cl-business.html?id=${b.id}'">
+      <td><span class="tbl-biz-name">${b.name}</span></td>
+      <td>${b.type}</td>
+      <td>${b.city}</td>
+      <td>
+        <div class="tbl-city-lead">
+          <div class="tbl-cl-avatar">${CL.initials(b.lead)}</div>
+          ${b.lead}
+        </div>
+      </td>
+      <td>${b.owner}</td>
+      <td>${CL.stageBadge(b.stage)}</td>
+      <td>${CL.scoreDot(b.score)}</td>
+      <td class="td-muted">${CL.fmt(b.lastVisit)}</td>
+      <td class="td-muted">${CL.fmt(b.added)}</td>
+    </tr>
+  `).join('');
+
+  mobileList.innerHTML = data.map(b => `
+    <a class="biz-item" href="cl-business.html?id=${b.id}">
+      <div class="biz-avatar" style="background:#f3f4f6;color:#6b7280;">${CL.initials(b.name)}</div>
+      <div class="biz-body">
+        <div class="biz-name">${b.name}</div>
+        <div class="biz-meta">${b.type} &middot; ${b.city} &middot; ${b.lead}</div>
+      </div>
+      <div class="biz-right">
+        ${CL.stageBadge(b.stage)}
+        ${CL.scoreDot(b.score)}
+      </div>
+    </a>
+  `).join('');
+}
+
+function exportData() {
+  CL.toast('Export started - check your downloads', 'info');
+  // In production: generate CSV from filtered data
+}
+
+// Init
+filterTable();
+</script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Quick Capture | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+.qc-biz-selector{position:relative;margin-bottom:20px;}
+.qc-biz-selector input{padding-left:40px;}
+.qc-biz-selector .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);}
+.qc-biz-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r-sm);box-shadow:0 4px 20px rgba(0,0,0,0.12);z-index:50;max-height:220px;overflow-y:auto;display:none;}
+.qc-biz-dropdown.open{display:block;}
+.qc-biz-opt{padding:12px 14px;font-size:14px;color:var(--ink-2);cursor:pointer;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;transition:background 0.1s;}
+.qc-biz-opt:last-child{border-bottom:none;}
+.qc-biz-opt:hover,.qc-biz-opt:active{background:var(--bg);color:var(--ink);}
+.qc-biz-opt .biz-initials{width:32px;height:32px;border-radius:8px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.qc-biz-opt.new-biz{color:var(--ink);font-weight:600;}
+.qc-biz-opt.new-biz svg{color:var(--muted);}
+.qc-selected-biz{display:none;background:var(--ink);color:#fff;border-radius:var(--r-sm);padding:12px 14px;align-items:center;gap:10px;margin-bottom:20px;}
+.qc-selected-biz.show{display:flex;}
+.qc-selected-biz-name{font-size:14px;font-weight:600;flex:1;}
+.qc-selected-biz-sub{font-size:11px;opacity:0.55;margin-top:2px;}
+.qc-selected-biz-clear{background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;transition:background 0.1s;}
+.qc-selected-biz-clear:hover{background:rgba(255,255,255,0.1);color:#fff;}
+
+.chip-row{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:20px;}
+.chip-row::-webkit-scrollbar{display:none;}
+.chip{flex:0 0 auto;padding:10px 16px;border-radius:999px;border:1px solid var(--line-strong);font-size:13px;font-weight:500;cursor:pointer;background:none;color:var(--ink-2);transition:all 0.12s;min-height:44px;display:inline-flex;align-items:center;gap:6px;}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.chip svg{width:14px;height:14px;}
+
+.voice-btn{width:100%;min-height:80px;border:2px dashed var(--line-strong);border-radius:var(--r);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;font-size:14px;font-weight:500;color:var(--ink-2);transition:all 0.15s;margin-bottom:20px;}
+.voice-btn:hover,.voice-btn:active{border-color:var(--ink);color:var(--ink);background:var(--bg);}
+.voice-btn.recording{border-color:#ef4444;color:#ef4444;background:#fef2f2;animation:pulse-border 1.2s ease-in-out infinite;}
+.voice-btn svg{width:28px;height:28px;}
+@keyframes pulse-border{0%,100%{border-color:#ef4444;}50%{border-color:#fca5a5;}}
+
+.note-textarea{width:100%;min-height:120px;padding:14px;border:1px solid var(--line-strong);border-radius:var(--r-sm);font-size:16px;line-height:1.6;resize:none;outline:none;background:var(--surface);color:var(--ink);transition:border-color 0.15s,box-shadow 0.15s;display:block;margin-bottom:20px;}
+.note-textarea:focus{border-color:#666;box-shadow:0 0 0 3px rgba(0,0,0,0.05);}
+
+.photo-btn{display:flex;align-items:center;gap:10px;padding:14px 16px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--ink-2);width:100%;text-align:left;transition:background 0.1s,color 0.1s;min-height:52px;margin-bottom:20px;}
+.photo-btn:hover{background:var(--bg);color:var(--ink);}
+.photo-btn svg{flex-shrink:0;color:var(--muted);}
+.photo-thumb-row{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:4px;}
+.photo-thumb{width:64px;height:64px;border-radius:var(--r-sm);background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);flex-shrink:0;position:relative;overflow:hidden;}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;}
+
+.tag-section-label{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:10px;}
+.tag-chip{padding:10px 16px;border-radius:999px;border:1px solid var(--line-strong);font-size:13px;font-weight:500;cursor:pointer;background:none;color:var(--ink-2);transition:all 0.12s;min-height:44px;display:inline-flex;align-items:center;}
+.tag-chip.active.hot{background:#fee2e2;color:#b91c1c;border-color:#fca5a5;}
+.tag-chip.active.green{background:#dcfce7;color:#15803d;border-color:#86efac;}
+.tag-chip.active.amber{background:#fef9c3;color:#854d0e;border-color:#fde68a;}
+.tag-chip.active.blue{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd;}
+.tag-chip.active.purple{background:#ede9fe;color:#6d28d9;border-color:#c4b5fd;}
+
+.log-btn{background:var(--chart);color:var(--ink);font-weight:700;font-size:17px;border-radius:var(--r-sm);width:100%;min-height:56px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background 0.15s;margin-top:8px;letter-spacing:0.01em;}
+.log-btn:hover{background:var(--chart-dark);}
+.log-btn svg{width:20px;height:20px;}
+
+.section-divider{height:1px;background:var(--line);margin:4px 0 20px;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Quick Capture</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="location.href='cl-scanner.html'">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" stroke-linecap="round"/></svg>
+          Scan Card
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Business Selector -->
+      <div class="form-label">Who did you visit?</div>
+      <div class="qc-biz-selector">
+        <svg class="search-icon" width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+        <input type="text" class="form-input" id="biz-search" placeholder="Search your businesses..." autocomplete="off" oninput="handleBizSearch(this.value)" onfocus="openBizDropdown()"/>
+        <div class="qc-biz-dropdown" id="biz-dropdown">
+          <div class="qc-biz-opt new-biz" onclick="newBusiness()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/></svg>
+            + New Business
+          </div>
+        </div>
+      </div>
+      <div class="qc-selected-biz" id="selected-biz">
+        <div class="qc-biz-opt biz-initials" id="sel-initials" style="width:36px;height:36px;border-radius:9px;background:var(--chart);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink);flex-shrink:0;border:none;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="qc-selected-biz-name" id="sel-name"></div>
+          <div class="qc-selected-biz-sub" id="sel-sub"></div>
+        </div>
+        <button class="qc-selected-biz-clear" onclick="clearBiz()" title="Change business">&times;</button>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Visit Type -->
+      <div class="form-label">Visit type</div>
+      <div class="chip-row" id="visit-type-chips">
+        <button class="chip" data-type="Walk-in" onclick="selectType(this)">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-linecap="round"/><circle cx="12" cy="10" r="3"/></svg>
+          Walk-in
+        </button>
+        <button class="chip" data-type="Coffee" onclick="selectType(this)">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" stroke-linecap="round"/><line x1="6" y1="1" x2="6" y2="4" stroke-linecap="round"/><line x1="10" y1="1" x2="10" y2="4" stroke-linecap="round"/><line x1="14" y1="1" x2="14" y2="4" stroke-linecap="round"/></svg>
+          Coffee
+        </button>
+        <button class="chip" data-type="Call" onclick="selectType(this)">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.5 2 2 0 0 1 3.6 1.3h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.09 6.09l1.86-1.86a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke-linecap="round"/></svg>
+          Call
+        </button>
+        <button class="chip" data-type="Text" onclick="selectType(this)">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round"/></svg>
+          Text
+        </button>
+        <button class="chip" data-type="Email" onclick="selectType(this)">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6" stroke-linecap="round"/></svg>
+          Email
+        </button>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Voice Note -->
+      <div class="form-label">Voice note</div>
+      <button class="voice-btn" id="voice-btn" onclick="toggleRecording()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke-linecap="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke-linecap="round"/><line x1="12" y1="19" x2="12" y2="23" stroke-linecap="round"/><line x1="8" y1="23" x2="16" y2="23" stroke-linecap="round"/></svg>
+        <span id="voice-label">Hold to record</span>
+      </button>
+
+      <!-- Text Note -->
+      <div class="form-label">What happened?</div>
+      <textarea class="note-textarea" id="visit-note" placeholder="What happened? What did they say? Any objections? Next step?" autofocus></textarea>
+
+      <div class="section-divider"></div>
+
+      <!-- Photos -->
+      <div class="form-label">Photos</div>
+      <button class="photo-btn" onclick="addPhoto()">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke-linecap="round"/><circle cx="12" cy="13" r="4"/></svg>
+        Add photos (business card, signage, notes)
+      </button>
+      <div class="photo-thumb-row" id="photo-row" style="display:none;"></div>
+
+      <div class="section-divider"></div>
+
+      <!-- Quick Tags -->
+      <div class="form-label">Quick tags</div>
+      <div class="capture-tag-row" id="tag-chips">
+        <button class="tag-chip hot" data-tag="Hot lead" onclick="toggleTag(this)">Hot lead</button>
+        <button class="tag-chip" data-tag="Not interested" onclick="toggleTag(this)">Not interested</button>
+        <button class="tag-chip amber" data-tag="Follow up needed" onclick="toggleTag(this)">Follow up needed</button>
+        <button class="tag-chip blue" data-tag="Ask for referral" onclick="toggleTag(this)">Ask for referral</button>
+        <button class="tag-chip green" data-tag="Ready to close" onclick="toggleTag(this)">Ready to close</button>
+      </div>
+
+      <div style="height:8px;"></div>
+
+      <!-- Log Visit -->
+      <button class="log-btn" id="log-btn" onclick="logVisit()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Log Visit
+      </button>
+
+      <div style="height:16px;"></div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-quick-capture');
+
+// ── Mock businesses ─────────────────────────────────────────────────────────
+const BIZ_LIST = [
+  { id:1, name:'Apex HVAC',           type:'HVAC',        stage:'warm' },
+  { id:2, name:'Silverline Roofing',  type:'Roofing',     stage:'problem_identified' },
+  { id:3, name:'Travis Electric',     type:'Electrician', stage:'second_visit' },
+  { id:4, name:'Cedar Park Plumbing', type:'Plumbing',    stage:'met_owner' },
+  { id:5, name:'Lone Star Concrete',  type:'Concrete',    stage:'seed' },
+  { id:6, name:'Hill Country HVAC',   type:'HVAC',        stage:'audit_booked' },
+  { id:7, name:'Austin Painting Co',  type:'Painting',    stage:'warm' },
+  { id:8, name:'Capital Landscaping', type:'Landscaping', stage:'met_owner' },
+];
+
+let selectedBiz = null;
+let selectedType = null;
+let selectedTags = [];
+let isRecording = false;
+let photoCount = 0;
+
+function handleBizSearch(val) {
+  const dropdown = document.getElementById('biz-dropdown');
+  const filtered = val.length > 0
+    ? BIZ_LIST.filter(b => b.name.toLowerCase().includes(val.toLowerCase()))
+    : BIZ_LIST;
+  renderDropdown(filtered, val);
+  dropdown.classList.add('open');
+}
+
+function openBizDropdown() {
+  if (selectedBiz) return;
+  const dropdown = document.getElementById('biz-dropdown');
+  renderDropdown(BIZ_LIST, '');
+  dropdown.classList.add('open');
+  document.addEventListener('click', closeBizOnOutside, { once: true });
+}
+
+function closeBizOnOutside(e) {
+  const wrapper = document.querySelector('.qc-biz-selector');
+  if (!wrapper.contains(e.target)) {
+    document.getElementById('biz-dropdown').classList.remove('open');
+  }
+}
+
+function renderDropdown(list, query) {
+  const dropdown = document.getElementById('biz-dropdown');
+  const newItem = `<div class="qc-biz-opt new-biz" onclick="newBusiness()"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round"/></svg>+ New Business</div>`;
+  const items = list.slice(0, 8).map(b => `
+    <div class="qc-biz-opt" onclick="selectBiz(${b.id})">
+      <div class="biz-initials">${CL.initials(b.name)}</div>
+      <div><div style="font-size:14px;font-weight:500;color:var(--ink)">${b.name}</div><div style="font-size:11px;color:var(--muted)">${b.type} &bull; ${CL.stageBadge(b.stage)}</div></div>
+    </div>`).join('');
+  dropdown.innerHTML = newItem + items;
+}
+
+function selectBiz(id) {
+  const biz = BIZ_LIST.find(b => b.id === id);
+  if (!biz) return;
+  selectedBiz = biz;
+  document.getElementById('biz-search').style.display = 'none';
+  document.getElementById('biz-dropdown').classList.remove('open');
+  const selEl = document.getElementById('selected-biz');
+  selEl.classList.add('show');
+  document.getElementById('sel-initials').textContent = CL.initials(biz.name);
+  document.getElementById('sel-name').textContent = biz.name;
+  document.getElementById('sel-sub').textContent = biz.type;
+}
+
+function clearBiz() {
+  selectedBiz = null;
+  document.getElementById('selected-biz').classList.remove('show');
+  const inp = document.getElementById('biz-search');
+  inp.style.display = '';
+  inp.value = '';
+  inp.focus();
+}
+
+function newBusiness() {
+  document.getElementById('biz-dropdown').classList.remove('open');
+  location.href = 'cl-add-business.html';
+}
+
+function selectType(btn) {
+  document.querySelectorAll('#visit-type-chips .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  selectedType = btn.dataset.type;
+}
+
+function toggleTag(btn) {
+  btn.classList.toggle('active');
+  const tag = btn.dataset.tag;
+  if (selectedTags.includes(tag)) {
+    selectedTags = selectedTags.filter(t => t !== tag);
+  } else {
+    selectedTags.push(tag);
+  }
+}
+
+function toggleRecording() {
+  const btn = document.getElementById('voice-btn');
+  const lbl = document.getElementById('voice-label');
+  isRecording = !isRecording;
+  btn.classList.toggle('recording', isRecording);
+  lbl.textContent = isRecording ? 'Recording... tap to stop' : 'Hold to record';
+  if (!isRecording) CL.toast('Voice note saved');
+}
+
+function addPhoto() {
+  photoCount++;
+  const row = document.getElementById('photo-row');
+  row.style.display = 'flex';
+  const thumb = document.createElement('div');
+  thumb.className = 'photo-thumb';
+  thumb.textContent = 'Photo ' + photoCount;
+  row.appendChild(thumb);
+  CL.toast('Photo added');
+}
+
+function logVisit() {
+  if (!selectedBiz) {
+    CL.toast('Pick a business first', 'error');
+    document.getElementById('biz-search').focus();
+    return;
+  }
+  if (!selectedType) {
+    CL.toast('Select a visit type', 'error');
+    return;
+  }
+  const note = document.getElementById('visit-note').value.trim();
+  const btn = document.getElementById('log-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  // Simulate save
+  setTimeout(() => {
+    CL.toast('Visit logged for ' + selectedBiz.name);
+    // Reset form
+    clearBiz();
+    document.querySelectorAll('#visit-type-chips .chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('#tag-chips .tag-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('visit-note').value = '';
+    document.getElementById('photo-row').style.display = 'none';
+    document.getElementById('photo-row').innerHTML = '';
+    selectedType = null; selectedTags = []; photoCount = 0; isRecording = false;
+    btn.disabled = false;
+    btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg>Log Visit';
+  }, 800);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Money | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+  .tab-bar{display:flex;gap:4px;background:var(--bg);border-radius:var(--r-sm);padding:3px;margin-bottom:20px;width:fit-content;}
+  .tab-btn{padding:8px 18px;border-radius:4px;font-size:13px;font-weight:500;cursor:pointer;background:none;border:none;color:var(--ink-2);transition:all 0.15s;font-family:inherit;min-height:36px;}
+  .tab-btn.active{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>Admin</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Money</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="CL.toast('Export coming soon','info')">Export</button>
+        <button class="btn btn-primary btn-sm" onclick="CL.toast('Payout issued','success')">Issue Payout</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-val" id="stat-total-rev">$57,600</div>
+          <div class="stat-delta pos">+$12,800 this month</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">This Month</div>
+          <div class="stat-val" id="stat-month-rev">$12,800</div>
+          <div class="stat-delta pos">+18% vs last month</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Pending Payouts</div>
+          <div class="stat-val" id="stat-pending" style="color:var(--amber)">$4,800</div>
+          <div class="stat-delta">6 leads waiting</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Paid Out</div>
+          <div class="stat-val" id="stat-paid">$8,800</div>
+          <div class="stat-delta pos">All time</div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-deals" onclick="switchTab('deals')">Deals</button>
+        <button class="tab-btn" id="tab-payouts" onclick="switchTab('payouts')">Payouts</button>
+      </div>
+
+      <!-- Deals tab -->
+      <div id="view-deals">
+        <div class="filter-bar">
+          <div class="filter-row">
+            <div class="search-wrap">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+              <input type="text" id="deals-search" placeholder="Search business or city..." oninput="filterDeals()"/>
+            </div>
+            <select class="filter-select" id="deals-date" onchange="filterDeals()">
+              <option value="">All Time</option>
+              <option>This Month</option>
+              <option>Last Month</option>
+              <option>Last 90 Days</option>
+            </select>
+            <select class="filter-select" id="deals-lead" onchange="filterDeals()">
+              <option value="">All Leads</option>
+              <option>Jordan M.</option><option>Taylor R.</option><option>Chris W.</option>
+              <option>Alex P.</option><option>Sam B.</option>
+            </select>
+          </div>
+          <span class="filter-count" id="deals-count">18 deals</span>
+        </div>
+
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Business</th>
+                  <th>City</th>
+                  <th>City Lead</th>
+                  <th>Deal Size</th>
+                  <th>Commission</th>
+                  <th>Stage</th>
+                  <th>Date Closed</th>
+                </tr>
+              </thead>
+              <tbody id="deals-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payouts tab -->
+      <div id="view-payouts" style="display:none">
+        <div class="filter-bar">
+          <div class="filter-row">
+            <div class="search-wrap">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+              <input type="text" id="payouts-search" placeholder="Search city lead..." oninput="filterPayouts()"/>
+            </div>
+            <select class="filter-select" id="payouts-date" onchange="filterPayouts()">
+              <option value="">All Time</option>
+              <option>This Month</option>
+              <option>Last Month</option>
+              <option>Last 90 Days</option>
+            </select>
+            <select class="filter-select" id="payouts-lead" onchange="filterPayouts()">
+              <option value="">All Leads</option>
+              <option>Jordan M.</option><option>Taylor R.</option><option>Chris W.</option>
+              <option>Alex P.</option><option>Sam B.</option>
+            </select>
+          </div>
+          <span class="filter-count" id="payouts-count">12 payouts</span>
+        </div>
+
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>City Lead</th>
+                  <th>Amount</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th class="td-action">Action</th>
+                </tr>
+              </thead>
+              <tbody id="payouts-tbody">
+                <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-money', { adminOnly: true });
+
+const DEALS = [
+  { biz:'Lone Star HVAC',       city:'Austin, TX',    lead:'Jordan M.', size:3200, comm:800,  stage:'closed',        date:'May 14, 2026' },
+  { biz:'Mile High Electric',   city:'Denver, CO',    lead:'Taylor R.', size:3200, comm:800,  stage:'build_live',     date:'May 12, 2026' },
+  { biz:'Music City Plumbing',  city:'Nashville, TN', lead:'Chris W.',  size:3200, comm:800,  stage:'proposal_sent',  date:'May 10, 2026' },
+  { biz:'Sun Valley HVAC',      city:'Phoenix, AZ',   lead:'Alex P.',   size:3200, comm:800,  stage:'closed',         date:'May 8, 2026'  },
+  { biz:'CLT Concrete',         city:'Charlotte, NC', lead:'Sam B.',    size:3200, comm:800,  stage:'audit_booked',   date:'May 6, 2026'  },
+  { biz:'Barton Hills Roofing', city:'Austin, TX',    lead:'Jordan M.', size:3200, comm:800,  stage:'closed',         date:'Apr 28, 2026' },
+  { biz:'Rocky Mtn Mechanical', city:'Denver, CO',    lead:'Taylor R.', size:3200, comm:800,  stage:'closed',         date:'Apr 22, 2026' },
+  { biz:'Opryland Services',    city:'Nashville, TN', lead:'Chris W.',  size:3200, comm:800,  stage:'closed',         date:'Apr 15, 2026' },
+  { biz:'Mesa Welding',         city:'Phoenix, AZ',   lead:'Alex P.',   size:3200, comm:800,  stage:'closed',         date:'Apr 10, 2026' },
+  { biz:'South Park HVAC',      city:'Charlotte, NC', lead:'Sam B.',    size:3200, comm:800,  stage:'closed',         date:'Apr 5, 2026'  },
+];
+
+const PAYOUTS = [
+  { lead:'Jordan M.', amount:1600, type:'referral',        status:'pending', date:'May 14, 2026' },
+  { lead:'Taylor R.', amount:1600, type:'referral',        status:'pending', date:'May 12, 2026' },
+  { lead:'Chris W.',  amount:800,  type:'referral',        status:'pending', date:'May 10, 2026' },
+  { lead:'Alex P.',   amount:800,  type:'referral',        status:'pending', date:'May 8, 2026'  },
+  { lead:'Sam B.',    amount:800,  type:'referral',        status:'pending', date:'May 6, 2026'  },
+  { lead:'Jordan M.', amount:400,  type:'monthly support', status:'paid',    date:'May 1, 2026'  },
+  { lead:'Taylor R.', amount:400,  type:'monthly support', status:'paid',    date:'May 1, 2026'  },
+  { lead:'Chris W.',  amount:400,  type:'monthly support', status:'paid',    date:'May 1, 2026'  },
+  { lead:'Jordan M.', amount:800,  type:'referral',        status:'paid',    date:'Apr 28, 2026' },
+  { lead:'Taylor R.', amount:800,  type:'referral',        status:'paid',    date:'Apr 22, 2026' },
+  { lead:'Chris W.',  amount:800,  type:'referral',        status:'paid',    date:'Apr 15, 2026' },
+  { lead:'Alex P.',   amount:800,  type:'referral',        status:'paid',    date:'Apr 10, 2026' },
+];
+
+let dealsFiltered = [...DEALS];
+let payoutsFiltered = [...PAYOUTS];
+
+function renderDeals(data) {
+  const tbody = document.getElementById('deals-tbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">No deals found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td class="td-name">${d.biz}</td>
+      <td>${d.city}</td>
+      <td>${d.lead}</td>
+      <td style="font-weight:600">${CL.currency(d.size)}</td>
+      <td style="color:var(--green);font-weight:600">${CL.currency(d.comm)}</td>
+      <td>${CL.stageBadge(d.stage)}</td>
+      <td class="td-muted">${d.date}</td>
+    </tr>`).join('');
+  document.getElementById('deals-count').textContent = data.length + ' deals';
+}
+
+function renderPayouts(data) {
+  const tbody = document.getElementById('payouts-tbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">No payouts found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td class="td-name">${p.lead}</td>
+      <td style="font-weight:600">${CL.currency(p.amount)}</td>
+      <td style="text-transform:capitalize">${p.type}</td>
+      <td><span class="badge badge-${p.status}">${p.status}</span></td>
+      <td class="td-muted">${p.date}</td>
+      <td class="td-action">
+        ${p.status === 'pending' ? `<button class="btn btn-primary btn-sm" onclick="CL.toast('Paid out to ${p.lead}')">Pay Now</button>` : '<span style="color:var(--muted);font-size:12px">Paid</span>'}
+      </td>
+    </tr>`).join('');
+  document.getElementById('payouts-count').textContent = data.length + ' payouts';
+}
+
+function filterDeals() {
+  const q    = document.getElementById('deals-search').value.toLowerCase();
+  const lead = document.getElementById('deals-lead').value;
+  dealsFiltered = DEALS.filter(d =>
+    (!q    || d.biz.toLowerCase().includes(q) || d.city.toLowerCase().includes(q)) &&
+    (!lead || d.lead === lead)
+  );
+  renderDeals(dealsFiltered);
+}
+
+function filterPayouts() {
+  const q    = document.getElementById('payouts-search').value.toLowerCase();
+  const lead = document.getElementById('payouts-lead').value;
+  payoutsFiltered = PAYOUTS.filter(p =>
+    (!q    || p.lead.toLowerCase().includes(q)) &&
+    (!lead || p.lead === lead)
+  );
+  renderPayouts(payoutsFiltered);
+}
+
+function switchTab(tab) {
+  document.getElementById('view-deals').style.display   = tab === 'deals'   ? 'block' : 'none';
+  document.getElementById('view-payouts').style.display = tab === 'payouts' ? 'block' : 'none';
+  document.getElementById('tab-deals').classList.toggle('active',   tab === 'deals');
+  document.getElementById('tab-payouts').classList.toggle('active', tab === 'payouts');
+}
+
+renderDeals(dealsFiltered);
+renderPayouts(payoutsFiltered);
+</script>
+</body>
+</html>

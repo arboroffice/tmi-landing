@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>All Cities | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>Admin</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">All Cities</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" id="export-btn">Export CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddCity()">+ Add City</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="filter-bar">
+        <div class="filter-row">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+            <input type="text" id="search-input" placeholder="Search city..." oninput="filterTable()"/>
+          </div>
+          <select class="filter-select" id="state-filter" onchange="filterTable()">
+            <option value="">All States</option>
+            <option>TX</option><option>CO</option><option>TN</option><option>AZ</option>
+            <option>NC</option><option>FL</option><option>GA</option><option>OH</option>
+          </select>
+          <select class="filter-select" id="lead-filter" onchange="filterTable()">
+            <option value="">All Leads</option>
+            <option>Jordan M.</option><option>Taylor R.</option><option>Chris W.</option>
+            <option>Alex P.</option><option>Sam B.</option><option>Unassigned</option>
+          </select>
+        </div>
+        <span class="filter-count" id="row-count">24 cities</span>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table id="cities-table">
+            <thead>
+              <tr>
+                <th style="cursor:pointer" onclick="sortTable(0)">City <span class="sort-arrow">&#8597;</span></th>
+                <th style="cursor:pointer" onclick="sortTable(1)">State <span class="sort-arrow">&#8597;</span></th>
+                <th>City Lead</th>
+                <th style="cursor:pointer" onclick="sortTable(3)">Businesses <span class="sort-arrow">&#8597;</span></th>
+                <th style="cursor:pointer" onclick="sortTable(4)">Warm Leads <span class="sort-arrow">&#8597;</span></th>
+                <th style="cursor:pointer" onclick="sortTable(5)">Deals Closed <span class="sort-arrow">&#8597;</span></th>
+                <th style="cursor:pointer" onclick="sortTable(6)">Revenue <span class="sort-arrow">&#8597;</span></th>
+                <th>Last Activity</th>
+              </tr>
+            </thead>
+            <tbody id="cities-tbody">
+              <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- Add City Modal -->
+<div class="modal-overlay" id="add-city-modal">
+  <div class="modal">
+    <div class="modal-grip"></div>
+    <div class="modal-hd">
+      <h2 class="modal-title">Add City</h2>
+      <button class="modal-x" onclick="CL.closeModal('add-city-modal')">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">City Name</label>
+      <input class="form-input" type="text" placeholder="e.g. Austin"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">State</label>
+        <select class="form-input">
+          <option value="">Select state</option>
+          <option>TX</option><option>CO</option><option>TN</option><option>AZ</option>
+          <option>NC</option><option>FL</option><option>GA</option><option>OH</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Assign City Lead</label>
+        <select class="form-input">
+          <option value="">Unassigned</option>
+          <option>Jordan M.</option><option>Taylor R.</option><option>Chris W.</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-full" onclick="CL.closeModal('add-city-modal')">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="CL.toast('City added');CL.closeModal('add-city-modal')">Add City</button>
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-cities', { adminOnly: true });
+
+const ALL_CITIES = [
+  { city:'Austin',     state:'TX', lead:'Jordan M.',  biz:38, warm:9,  closed:4,  rev:12800, last:'2 hours ago' },
+  { city:'Denver',     state:'CO', lead:'Taylor R.',  biz:27, warm:6,  closed:3,  rev:9600,  last:'5 hours ago' },
+  { city:'Nashville',  state:'TN', lead:'Chris W.',   biz:22, warm:4,  closed:2,  rev:6400,  last:'Yesterday'   },
+  { city:'Phoenix',    state:'AZ', lead:'Alex P.',    biz:19, warm:3,  closed:1,  rev:3200,  last:'2 days ago'  },
+  { city:'Charlotte',  state:'NC', lead:'Sam B.',     biz:15, warm:2,  closed:1,  rev:3200,  last:'3 days ago'  },
+  { city:'Dallas',     state:'TX', lead:'Unassigned', biz:0,  warm:0,  closed:0,  rev:0,     last:'—'           },
+  { city:'Tampa',      state:'FL', lead:'Unassigned', biz:0,  warm:0,  closed:0,  rev:0,     last:'—'           },
+  { city:'Atlanta',    state:'GA', lead:'Unassigned', biz:0,  warm:0,  closed:0,  rev:0,     last:'—'           },
+  { city:'Columbus',   state:'OH', lead:'Unassigned', biz:0,  warm:0,  closed:0,  rev:0,     last:'—'           },
+  { city:'San Antonio',state:'TX', lead:'Unassigned', biz:0,  warm:0,  closed:0,  rev:0,     last:'—'           },
+];
+
+let filtered = [...ALL_CITIES];
+
+function renderTable(data) {
+  const tbody = document.getElementById('cities-tbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No cities match your filters.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(c => `
+    <tr onclick="CL.toast('Opening ${c.city}...')">
+      <td class="td-name">${c.city}</td>
+      <td>${c.state}</td>
+      <td>${c.lead === 'Unassigned' ? '<span style="color:var(--muted)">Unassigned</span>' : c.lead}</td>
+      <td>${c.biz || '—'}</td>
+      <td>${c.warm || '—'}</td>
+      <td>${c.closed || '—'}</td>
+      <td>${c.rev ? CL.currency(c.rev) : '—'}</td>
+      <td class="td-muted">${c.last}</td>
+    </tr>`).join('');
+  document.getElementById('row-count').textContent = data.length + ' cities';
+}
+
+function filterTable() {
+  const q    = document.getElementById('search-input').value.toLowerCase();
+  const st   = document.getElementById('state-filter').value;
+  const lead = document.getElementById('lead-filter').value;
+  filtered = ALL_CITIES.filter(c =>
+    (!q    || c.city.toLowerCase().includes(q)) &&
+    (!st   || c.state === st) &&
+    (!lead || c.lead === lead)
+  );
+  renderTable(filtered);
+}
+
+let sortCol = -1, sortAsc = true;
+function sortTable(col) {
+  if (sortCol === col) sortAsc = !sortAsc;
+  else { sortCol = col; sortAsc = true; }
+  const keys = ['city','state',null,'biz','warm','closed','rev'];
+  const key = keys[col];
+  if (!key) return;
+  filtered.sort((a,b) => {
+    const va = a[key], vb = b[key];
+    if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return sortAsc ? va - vb : vb - va;
+  });
+  renderTable(filtered);
+}
+
+function openAddCity() { CL.openModal('add-city-modal'); }
+
+document.getElementById('export-btn').onclick = () => CL.toast('CSV export coming soon', 'info');
+
+renderTable(filtered);
+</script>
+</body>
+</html>
