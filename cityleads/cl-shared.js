@@ -77,6 +77,9 @@ const CL = (() => {
     suggest:   `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round"/><line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-linecap="round" stroke-width="2"/></svg>`,
     scan:      `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8h10M7 12h10M7 16h10" stroke-linecap="round"/></svg>`,
     objection: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round"/><line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round"/></svg>`,
+    mic:       `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke-linecap="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke-linecap="round"/><line x1="12" y1="19" x2="12" y2="23" stroke-linecap="round"/><line x1="8" y1="23" x2="16" y2="23" stroke-linecap="round"/></svg>`,
+    findings:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke-linecap="round"/></svg>`,
+    referLead: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linecap="round"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14" stroke-linecap="round"/><line x1="23" y1="11" x2="17" y2="11" stroke-linecap="round"/></svg>`,
   };
 
   // ── City Lead sidebar nav ──────────────────────────────────────────────
@@ -91,8 +94,10 @@ const CL = (() => {
     { id:'cl-add-business', label:'Add Business',  icon:'add',    href:'cl-add-business.html' },
     { group: 'Work' },
     { id:'cl-quick-capture', label:'Quick Capture', icon:'capture',  href:'cl-quick-capture.html', badge:true },
+    { id:'cl-recorder',      label:'Recorder',      icon:'mic',      href:'cl-recorder.html' },
     { id:'cl-activity',      label:'Activity',      icon:'visit',    href:'cl-activity.html' },
     { id:'cl-follow-ups',    label:'Follow-Ups',    icon:'followup', href:'cl-follow-ups.html', badge:true },
+    { id:'cl-findings',      label:'Findings',      icon:'findings', href:'cl-findings.html' },
     { group: 'Pipeline' },
     { id:'cl-pipeline', label:'Pipeline Board', icon:'pipeline', href:'cl-pipeline.html' },
     { id:'cl-earnings',  label:'Earnings',       icon:'earnings', href:'cl-earnings.html' },
@@ -104,6 +109,8 @@ const CL = (() => {
     { group: 'AI Tools' },
     { id:'cl-owner-lookup', label:'Owner Lookup', icon:'lookup', href:'cl-owner-lookup.html' },
     { id:'cl-ai-chat',      label:'AI Assistant', icon:'ai',     href:'cl-ai-chat.html' },
+    { group: 'Refer' },
+    { id:'cl-refer-lead', label:'Refer a City Lead', icon:'referLead', href:'cl-refer-lead.html' },
     { group: 'Account' },
     { id:'cl-settings', label:'Settings', icon:'settings', href:'cl-settings.html' },
     { id:'cl-help',     label:'Help',     icon:'help',     href:'cl-help.html' },
@@ -116,12 +123,14 @@ const CL = (() => {
     { id:'cl-cities',             label:'All Cities',        icon:'cities',    href:'cl-cities.html' },
     { id:'cl-money',              label:'Money',             icon:'money',     href:'cl-money.html' },
     { group: 'Team' },
-    { id:'cl-roster',    label:'City Lead Roster', icon:'team',  href:'cl-roster.html' },
-    { id:'cl-add-lead',  label:'Add City Lead',    icon:'add',   href:'cl-add-lead.html' },
-    { id:'cl-leaderboard',label:'Leaderboard',     icon:'trophy',href:'cl-leaderboard.html' },
+    { id:'cl-roster',     label:'City Lead Roster',  icon:'team',      href:'cl-roster.html' },
+    { id:'cl-add-lead',   label:'Add City Lead',     icon:'add',       href:'cl-add-lead.html' },
+    { id:'cl-leaderboard',label:'Leaderboard',        icon:'trophy',    href:'cl-leaderboard.html' },
+    { id:'cl-refer-lead', label:'Lead Referrals',     icon:'referLead', href:'cl-refer-lead.html' },
     { group: 'Businesses' },
-    { id:'cl-master-businesses', label:'All Businesses', icon:'list',   href:'cl-master-businesses.html' },
-    { id:'cl-owner-lookup',      label:'Owner Lookup',   icon:'lookup', href:'cl-owner-lookup.html' },
+    { id:'cl-master-businesses', label:'All Businesses', icon:'list',     href:'cl-master-businesses.html' },
+    { id:'cl-owner-lookup',      label:'Owner Lookup',   icon:'lookup',   href:'cl-owner-lookup.html' },
+    { id:'cl-findings',          label:'PRD Queue',       icon:'findings', href:'cl-findings.html' },
     { group: 'Tools' },
     { id:'cl-ai-chat',  label:'AI Assistant', icon:'ai',       href:'cl-ai-chat.html' },
     { id:'cl-settings', label:'Settings',     icon:'settings', href:'cl-settings.html' },
@@ -208,7 +217,7 @@ const CL = (() => {
       if (!root) return;
       const role = self.getRole();
       const nav = role === 'admin' ? ADMIN_NAV : LEAD_NAV;
-      const logoSub = role === 'admin' ? 'Admin' : 'City Lead';
+      const logoSub = 'City Leads';
       root.innerHTML = `
 <aside class="sidebar">
   <div class="sb-brand">
