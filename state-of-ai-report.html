@@ -140,6 +140,33 @@
   .reveal{opacity:0;transform:translateY(18px);transition:opacity 0.7s ease,transform 0.7s cubic-bezier(.2,.7,.2,1);}
   .reveal.in{opacity:1;transform:translateY(0);}
 
+  /* Gate overlay */
+  .gate{position:fixed;inset:0;z-index:999;background:var(--bg-deep);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;transition:opacity 0.5s ease;}
+  .gate.hidden{opacity:0;pointer-events:none;}
+  .gate-brand{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:15px;font-weight:700;color:#fff;margin-bottom:56px;}
+  .gate-brand img{height:24px;width:auto;}
+  .gate-label{font-family:var(--sans);font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:20px;text-align:center;}
+  .gate-question{font-family:var(--serif);font-size:clamp(26px,3.5vw,44px);font-weight:400;color:#fff;text-align:center;margin:0 0 48px;max-width:22ch;line-height:1.15;letter-spacing:-0.02em;}
+  .gate-options{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;max-width:760px;}
+  .gate-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:4px;padding:36px 32px;cursor:pointer;transition:background 0.2s,border-color 0.2s,transform 0.2s;text-align:left;}
+  .gate-card:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.22);transform:translateY(-2px);}
+  .gate-card-kicker{font-family:var(--sans);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--chart);margin-bottom:14px;}
+  .gate-card-title{font-family:var(--serif);font-size:clamp(20px,2vw,26px);color:#fff;font-weight:400;margin:0 0 12px;line-height:1.15;}
+  .gate-card-desc{font-family:var(--sans);font-size:13px;color:rgba(255,255,255,0.45);line-height:1.65;}
+  .gate-card-cta{display:inline-flex;align-items:center;gap:8px;margin-top:24px;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--chart);letter-spacing:0.06em;}
+
+  /* Report toggle bar */
+  .report-toggle{background:var(--bg);border-bottom:1px solid var(--line);display:flex;position:sticky;top:56px;z-index:50;}
+  .rtog-btn{flex:1;padding:16px 24px;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;background:none;border:none;color:var(--muted);border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
+  .rtog-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+  .rtog-btn:hover:not(.active){color:var(--ink-2);}
+
+  /* Content visibility */
+  .content-physical,.content-online{display:none;}
+  .content-shared{display:block;}
+  body.mode-physical .content-physical{display:block;}
+  body.mode-online .content-online{display:block;}
+
   @media(max-width:640px){
     .report-hero{padding:80px 0 48px;}
     .container-report{padding:0 20px;}
@@ -147,10 +174,32 @@
     .summary-box{padding:24px 20px;}
     .callout{padding:24px 20px;}
     .finding-stat{font-size:clamp(36px,10vw,56px);}
+    .gate-options{grid-template-columns:1fr;max-width:420px;}
+    .gate-card{padding:28px 24px;}
   }
 </style>
 </head>
 <body>
+
+<div class="gate" id="gate">
+  <div class="gate-brand"><img src="logo.svg" alt="TMI" style="filter:brightness(0) invert(1);height:24px;width:auto;"/> TMI</div>
+  <div class="gate-label">State of AI Report &mdash; 2025</div>
+  <h2 class="gate-question">What type of business do you have?</h2>
+  <div class="gate-options">
+    <button class="gate-card" data-mode="physical">
+      <div class="gate-card-kicker">Physical Economy</div>
+      <h3 class="gate-card-title">Field Operations, Trades &amp; Industry</h3>
+      <p class="gate-card-desc">Construction, HVAC, oil &amp; gas, manufacturing, field service, and physical-world operations.</p>
+      <span class="gate-card-cta">View Physical Report &rarr;</span>
+    </button>
+    <button class="gate-card" data-mode="online">
+      <div class="gate-card-kicker">Online Business</div>
+      <h3 class="gate-card-title">Coaches, Creators &amp; Online Operators</h3>
+      <p class="gate-card-desc">Coaching, consulting, course creation, e-commerce, and digital-first businesses.</p>
+      <span class="gate-card-cta">View Online Report &rarr;</span>
+    </button>
+  </div>
+</div>
 
 <header class="article-header">
   <div class="article-header-inner">
@@ -176,6 +225,11 @@
   </div>
 </section>
 
+<div class="report-toggle" id="report-toggle">
+  <button class="rtog-btn" data-mode="physical">Physical Economy</button>
+  <button class="rtog-btn" data-mode="online">Online Business</button>
+</div>
+
 <div class="container-report">
 
   <div class="summary-box reveal">
@@ -191,6 +245,7 @@
     </ul>
   </div>
 
+  <div class="content-physical">
   <!-- ── Section 1: Physical Economy ── -->
   <span class="section-label reveal">Section 01 &mdash; Physical Economy</span>
 
@@ -278,6 +333,9 @@
     </div>
   </div>
 
+  </div><!-- /content-physical -->
+
+  <div class="content-online">
   <!-- ── Section 2: Online Business ── -->
   <span class="section-label reveal">Section 02 &mdash; Online Business</span>
 
@@ -314,6 +372,8 @@
       <p>The result is launch burnout. The second launch is harder than the first. The third gets skipped. A business that should be running two or three launches per year runs one, then goes quiet for six months. The automation exists to change this. What's missing is the implementation - building the system once so it runs every time without the founder's hands on it.</p>
     </div>
   </div>
+
+  </div><!-- /content-online -->
 
   <!-- ── Section 3: The Implementation Gap ── -->
   <span class="section-label reveal">Section 03 &mdash; The Implementation Gap</span>
@@ -381,6 +441,32 @@
 </footer>
 
 <script>
+function selectMode(mode) {
+  sessionStorage.setItem('tmi-report-mode', mode);
+  document.body.className = document.body.className.replace(/\bmode-\w+\b/g, '').trim();
+  document.body.classList.add('mode-' + mode);
+  document.querySelectorAll('.rtog-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  const gate = document.getElementById('gate');
+  gate.classList.add('hidden');
+  setTimeout(() => { gate.style.display = 'none'; }, 520);
+}
+
+document.querySelectorAll('.gate-card').forEach(card => {
+  card.addEventListener('click', () => selectMode(card.dataset.mode));
+});
+
+document.querySelectorAll('.rtog-btn').forEach(btn => {
+  btn.addEventListener('click', () => selectMode(btn.dataset.mode));
+});
+
+const savedMode = sessionStorage.getItem('tmi-report-mode');
+if (savedMode) {
+  document.getElementById('gate').style.display = 'none';
+  selectMode(savedMode);
+}
+
 const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
 }, { threshold: 0.06 });
