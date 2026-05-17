@@ -139,6 +139,36 @@
   .mission-point-body { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.65; }
   .mission-point-body strong { color: #fff; font-weight: 600; display: block; margin-bottom: 2px; }
 
+  /* FRAMEWORK */
+  .framework-section { background: var(--bg-dark); padding: 100px 0; }
+  .framework-inner { max-width: 960px; margin: 0 auto; }
+  .framework-label { font-family: var(--sans); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.35); display: flex; align-items: center; gap: 10px; margin-bottom: 48px; }
+  .framework-label::before { content: ""; display: block; width: 20px; height: 1px; background: var(--chart); opacity: 0.6; }
+  .framework-steps { display: grid; grid-template-columns: repeat(6,1fr); gap: 2px; margin-bottom: 64px; }
+  .framework-step { background: rgba(255,255,255,0.04); padding: 32px 20px; border-radius: 2px; text-align: center; transition: background 0.2s; }
+  .framework-step:hover { background: rgba(255,255,255,0.08); }
+  .framework-step-num { font-family: var(--sans); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--chart); margin-bottom: 12px; opacity: 0.8; }
+  .framework-step-word { font-family: var(--serif); font-size: clamp(18px,2vw,26px); font-weight: 400; color: #fff; letter-spacing: -0.01em; margin-bottom: 10px; }
+  .framework-step-desc { font-family: var(--sans); font-size: 12px; color: rgba(255,255,255,0.38); line-height: 1.55; }
+  .framework-cta { font-family: var(--serif); font-size: clamp(22px,2.5vw,36px); font-weight: 400; color: rgba(255,255,255,0.7); line-height: 1.4; max-width: 600px; }
+  .framework-cta em { color: var(--chart); font-style: italic; }
+  @media(max-width:900px) { .framework-steps { grid-template-columns: repeat(3,1fr); } }
+  @media(max-width:560px) { .framework-steps { grid-template-columns: repeat(2,1fr); } }
+
+  /* DELIVERY PROCESS */
+  .process-section { background: var(--bg-alt); padding: 100px 0; }
+  .process-header { margin-bottom: 56px; }
+  .process-header h2 { font-family: var(--serif); font-size: clamp(30px,3.5vw,52px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; margin-top: 20px; max-width: 22ch; }
+  .process-header p { font-size: 16px; color: var(--ink-2); line-height: 1.65; margin-top: 16px; max-width: 52ch; }
+  .process-list { display: flex; flex-direction: column; }
+  .process-item { display: grid; grid-template-columns: 72px 1fr; align-items: start; gap: 32px; padding: 32px 0; border-top: 1px solid var(--line); }
+  .process-item:last-child { border-bottom: 1px solid var(--line); }
+  .process-num { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); padding-top: 4px; }
+  .process-body { }
+  .process-name { font-family: var(--serif); font-size: clamp(20px,2vw,28px); font-weight: 400; color: var(--ink); letter-spacing: -0.01em; margin-bottom: 8px; }
+  .process-desc { font-size: 15px; color: var(--ink-2); line-height: 1.65; max-width: 64ch; }
+  @media(max-width:640px) { .process-item { grid-template-columns: 48px 1fr; gap: 20px; } }
+
   /* CTA */
   .about-cta { background: var(--bg-alt); padding: 100px 0; }
   .about-cta-inner { max-width: 640px; margin: 0 auto; text-align: center; }
@@ -404,6 +434,134 @@
 </section>
 
 
+
+<!-- FRAMEWORK -->
+<section class="framework-section">
+  <div class="container">
+    <div class="framework-inner reveal">
+      <div class="framework-label">How we work</div>
+      <div class="framework-steps">
+        <div class="framework-step">
+          <div class="framework-step-num">01</div>
+          <div class="framework-step-word">Listen</div>
+          <div class="framework-step-desc">We learn the operation before we touch anything.</div>
+        </div>
+        <div class="framework-step">
+          <div class="framework-step-num">02</div>
+          <div class="framework-step-word">Map</div>
+          <div class="framework-step-desc">We find exactly where time and money are leaking.</div>
+        </div>
+        <div class="framework-step">
+          <div class="framework-step-num">03</div>
+          <div class="framework-step-word">Build</div>
+          <div class="framework-step-desc">Custom systems built for your workflows, not ours.</div>
+        </div>
+        <div class="framework-step">
+          <div class="framework-step-num">04</div>
+          <div class="framework-step-word">Launch</div>
+          <div class="framework-step-desc">Installed, tested, and running inside your operation.</div>
+        </div>
+        <div class="framework-step">
+          <div class="framework-step-num">05</div>
+          <div class="framework-step-word">Optimize</div>
+          <div class="framework-step-desc">Thirty days of tuning until the system runs clean.</div>
+        </div>
+        <div class="framework-step">
+          <div class="framework-step-num">06</div>
+          <div class="framework-step-word">Expand</div>
+          <div class="framework-step-desc">We stay in. Every build compounds on the last one.</div>
+        </div>
+      </div>
+      <p class="framework-cta">This is not a project that ends at delivery. <em>Every build is the foundation for the next one.</em></p>
+    </div>
+  </div>
+</section>
+
+<!-- DELIVERY PROCESS -->
+<section class="process-section">
+  <div class="container">
+    <div class="process-header reveal">
+      <div class="eyebrow"><span class="dot"></span>The Delivery System</div>
+      <h2>Step by step. Every time.</h2>
+      <p>Every TMI engagement follows the same sequence. You know exactly what happens next — and so does your team.</p>
+    </div>
+    <div class="process-list">
+
+      <div class="process-item reveal">
+        <div class="process-num">01</div>
+        <div class="process-body">
+          <div class="process-name">Audit Call</div>
+          <div class="process-desc">One call to map the operation. We find where the time and money are leaking before we propose anything. This is the door into every engagement — nothing gets built until the audit is done.</div>
+        </div>
+      </div>
+
+      <div class="process-item reveal">
+        <div class="process-num">02</div>
+        <div class="process-body">
+          <div class="process-name">Business Mapping</div>
+          <div class="process-desc">We document the full operation — workflows, tools, team structure, data sources, and the three to five highest-leverage places to build. This becomes the blueprint everything else is built from.</div>
+        </div>
+      </div>
+
+      <div class="process-item reveal">
+        <div class="process-num">03</div>
+        <div class="process-body">
+          <div class="process-name">Workflow Selection</div>
+          <div class="process-desc">We agree on what gets built first. Prioritized by ROI, implementation speed, and what the team is ready to absorb. Scope is fixed before build begins. No scope creep, no surprises.</div>
+        </div>
+      </div>
+
+      <div class="process-item reveal">
+        <div class="process-num">04</div>
+        <div class="process-body">
+          <div class="process-name">System Build</div>
+          <div class="process-desc">We build. Custom agents, automations, integrations — all of it wired into the tools and workflows your operation already runs. Built for the way your team actually works, not for how a product manager imagines they do.</div>
+        </div>
+      </div>
+
+      <div class="process-item reveal">
+        <div class="process-num">05</div>
+        <div class="process-body">
+          <div class="process-name">Testing</div>
+          <div class="process-desc">Every system is tested against real operational scenarios before it goes live. Edge cases, failure modes, the things that break at 6am on a Tuesday — we find them before your team does.</div>
+        </div>
+      </div>
+
+      <div class="process-item reveal">
+        <div class="process-num">06</div>
+        <div class="process-body">
+          <div class="process-name">Team Training</div>
+          <div class="process-desc">We train the people who will run it. Hands-on, not slides. Field teams, office teams, managers — whoever needs to know the system learns it before launch. Adoption is part of the build.</div>
+        </div>
+      </div>
+
+      <div class="process-item reveal">
+        <div class="process-num">07</div>
+        <div class="process-body">
+          <div class="process-name">Launch</div>
+          <div class="process-desc">The system goes live with TMI alongside it. We are in the operation during launch — monitoring, adjusting, and making sure the first week runs clean. No handing over documentation and disappearing.</div>
+        </div>
+      </div>
+
+      <div class="process-item reveal">
+        <div class="process-num">08</div>
+        <div class="process-body">
+          <div class="process-name">30-Day Optimization</div>
+          <div class="process-desc">The first thirty days after launch are where the system gets dialed in. Real usage surfaces things staging never does. We tune, adjust, and improve until the system runs the way the operation needs it to.</div>
+        </div>
+      </div>
+
+      <div class="process-item reveal">
+        <div class="process-num">09</div>
+        <div class="process-body">
+          <div class="process-name">Monthly Support</div>
+          <div class="process-desc">Most clients stay on retainer. The system keeps running, TMI keeps improving it, and every new build compresses the time and cost of the next one. The infrastructure compounds. That is the point.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
 
 <!-- MISSION -->
 <section class="mission-section">
