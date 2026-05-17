@@ -42,7 +42,7 @@
         <span class="page">My Earnings</span>
       </div>
       <div class="topbar-actions">
-        <div class="month-select-wrap">
+        <div class="month-select-wrap" id="month-select-wrap">
           <select class="filter-select" id="month-select" onchange="renderEarnings()" style="margin-bottom:0;">
             <option value="2026-05">May 2026</option>
             <option value="2026-04">April 2026</option>
@@ -53,8 +53,16 @@
       </div>
     </div>
 
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="showEarnTab('earnings')">Earnings</button>
+      <button class="tab-btn" onclick="showEarnTab('calculator')">Calculator</button>
+      <button class="tab-btn" onclick="showEarnTab('taxdocs')">Tax Docs</button>
+    </div>
+
     <div class="content">
 
+      <!-- ── Earnings tab ── -->
+      <div id="tab-earnings">
       <!-- Stats -->
       <div class="stats-row">
         <div class="stat-box">
@@ -120,6 +128,69 @@
         </div>
       </div>
 
+      </div><!-- end tab-earnings -->
+
+      <!-- ── Calculator tab ── -->
+      <div id="tab-calculator" style="display:none;">
+        <p style="font-size:14px;color:var(--ink-2);margin-bottom:20px;line-height:1.6;">Plug in a deal size and see what you'd earn. Commission structure is based on your current tier.</p>
+        <div class="card" style="padding:20px;margin-bottom:16px;">
+          <div class="form-group">
+            <label class="form-label">Deal size (monthly value)</label>
+            <input class="form-input" id="calc-deal" type="number" placeholder="e.g. 3000" oninput="calcEarnings()" style="font-size:22px;height:56px;"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deal type</label>
+            <select class="form-input" id="calc-type" onchange="calcEarnings()">
+              <option value="new_referral">New referral (first deal)</option>
+              <option value="monthly">Monthly support client</option>
+            </select>
+          </div>
+        </div>
+        <div class="card" id="calc-result" style="padding:20px;display:none;">
+          <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;">Your earnings breakdown</div>
+          <div id="calc-rows"></div>
+          <div style="border-top:2px solid var(--ink);margin-top:12px;padding-top:12px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:14px;font-weight:700;color:var(--ink);">Total you earn</span>
+            <span style="font-size:28px;font-weight:700;color:#16a34a;font-family:var(--serif);" id="calc-total">$0</span>
+          </div>
+        </div>
+        <div class="info-card" style="margin-top:20px;">
+          <div class="info-card-head"><h3>Commission rates</h3></div>
+          <div class="info-row"><div class="info-label">New referral (first deal)</div><div class="info-val">10% of deal value</div></div>
+          <div class="info-row"><div class="info-label">Monthly support client</div><div class="info-val">$150 / month, per client</div></div>
+          <div class="info-row"><div class="info-label">Payout</div><div class="info-val">15th of each month</div></div>
+        </div>
+      </div>
+
+      <!-- ── Tax Docs tab ── -->
+      <div id="tab-taxdocs" style="display:none;">
+        <p style="font-size:14px;color:var(--ink-2);margin-bottom:20px;line-height:1.6;">Download your earnings records for tax filing. 1099 forms are issued in January for the prior year.</p>
+        <div class="card" style="padding:0;margin-bottom:16px;overflow:hidden;">
+          <div style="padding:14px 16px;background:var(--bg);border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);">2026 (Year to Date)</div>
+          <div class="info-row"><div class="info-label">Total earned</div><div class="info-val">$6,550</div></div>
+          <div class="info-row"><div class="info-label">Referral commissions</div><div class="info-val">$4,040</div></div>
+          <div class="info-row"><div class="info-label">Monthly support</div><div class="info-val">$2,510</div></div>
+          <div class="info-row"><div class="info-label">Transactions</div><div class="info-val">11</div></div>
+          <div class="info-row">
+            <div class="info-label">Earnings statement</div>
+            <button class="btn btn-ghost btn-sm" onclick="CL.toast('Downloading earnings CSV...')">Download CSV</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:14px 16px;background:var(--bg);border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);">2025 (Full Year)</div>
+          <div class="info-row"><div class="info-label">Total earned</div><div class="info-val">$14,280</div></div>
+          <div class="info-row">
+            <div class="info-label">1099-NEC form</div>
+            <button class="btn btn-ghost btn-sm" onclick="CL.toast('Downloading 1099...')">Download PDF</button>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Earnings statement</div>
+            <button class="btn btn-ghost btn-sm" onclick="CL.toast('Downloading earnings CSV...')">Download CSV</button>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:16px;line-height:1.6;">Questions about your taxes or 1099? Email <a href="mailto:accounting@tmi-technology.com" style="color:var(--ink);">accounting@tmi-technology.com</a></p>
+      </div>
+
     </div>
   </div>
 </div>
@@ -127,6 +198,38 @@
 <script src="cl-shared.js"></script>
 <script>
 CL.initPage('cl-earnings');
+
+// Tab switching
+const EARN_TABS = ['earnings','calculator','taxdocs'];
+function showEarnTab(id) {
+  EARN_TABS.forEach(t => { document.getElementById('tab-'+t).style.display = t === id ? '' : 'none'; });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => { b.classList.toggle('active', EARN_TABS[i] === id); });
+  document.getElementById('month-select-wrap').style.display = id === 'earnings' ? '' : 'none';
+}
+
+// Calculator
+function calcEarnings() {
+  const deal = parseFloat(document.getElementById('calc-deal').value);
+  const type = document.getElementById('calc-type').value;
+  if (!deal || deal <= 0) { document.getElementById('calc-result').style.display = 'none'; return; }
+  let rows = [], total = 0;
+  if (type === 'new_referral') {
+    const comm = deal * 0.10;
+    rows.push({ label:'Referral commission (10%)', val:comm });
+    total = comm;
+  } else {
+    rows.push({ label:'Monthly support fee (per client)', val:150 });
+    rows.push({ label:'Annual value (12 months)', val:150 * 12 });
+    total = 150;
+  }
+  document.getElementById('calc-rows').innerHTML = rows.map(r => `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-size:13px;color:var(--ink-2);">${r.label}</span>
+      <span style="font-size:15px;font-weight:600;color:var(--ink);">${CL.currency(r.val)}</span>
+    </div>`).join('');
+  document.getElementById('calc-total').textContent = CL.currency(total);
+  document.getElementById('calc-result').style.display = 'block';
+}
 
 const ALL_EARNINGS = [
   { id:1, biz:'Apex HVAC',            type:'referral', amount:850,  status:'pending', month:'2026-05', date:'May 12' },

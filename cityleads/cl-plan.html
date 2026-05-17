@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Plan | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+/* Route */
+.route-stop{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;}
+.stop-num{width:28px;height:28px;border-radius:50%;background:var(--bg);border:2px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:var(--ink-2);}
+.stop-num.current{background:var(--chart);border-color:var(--chart);color:var(--ink);}
+.stop-num.done{background:var(--ink);border-color:var(--ink);color:#fff;}
+.stop-body{flex:1;min-width:0;}
+.stop-biz{font-size:14px;font-weight:700;color:var(--ink);}
+.stop-addr{font-size:12px;color:var(--muted);margin-top:2px;}
+.stop-action{font-size:12px;color:var(--ink-2);margin-top:6px;font-style:italic;}
+.stop-controls{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.stop-controls .btn{font-size:11px;padding:6px 12px;min-height:34px;}
+.route-summary{background:var(--bg);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;display:flex;gap:24px;flex-wrap:wrap;}
+.route-summary-item{font-size:13px;color:var(--ink-2);}
+.route-summary-item strong{color:var(--ink);font-weight:700;}
+
+/* Week */
+.week-day{margin-bottom:24px;}
+.week-day-head{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.week-day-head.today{color:var(--ink);}
+.week-day-head .today-pill{background:var(--chart);color:var(--ink);padding:2px 8px;border-radius:999px;font-size:10px;}
+.week-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.week-item-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.week-item-dot.visit{background:#3b82f6;}
+.week-item-dot.followup{background:#f59e0b;}
+.week-item-dot.handoff{background:#10b981;}
+.week-item-dot.task{background:var(--muted);}
+.week-item-body{flex:1;font-size:13px;color:var(--ink);}
+.week-item-time{font-size:11px;color:var(--muted);white-space:nowrap;}
+
+/* Targets */
+.target-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;}
+.target-rank{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.target-biz{font-size:15px;font-weight:700;color:var(--ink);}
+.target-why{font-size:13px;color:var(--ink-2);margin-top:6px;line-height:1.5;}
+.target-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.target-tag{padding:3px 9px;border-radius:999px;background:var(--bg);font-size:11px;color:var(--muted);border:1px solid var(--line);}
+.target-actions{display:flex;gap:6px;margin-top:12px;}
+
+/* City intel */
+.intel-stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center;}
+.intel-val{font-size:28px;font-weight:700;color:var(--ink);font-family:var(--serif);}
+.intel-label{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.12em;}
+.industry-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.industry-bar-fill{height:8px;border-radius:4px;background:var(--chart);flex-shrink:0;}
+.industry-bar-label{font-size:13px;color:var(--ink-2);flex:1;}
+.industry-bar-count{font-size:12px;font-weight:600;color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Plan</span>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="showTab('route')">Route Today</button>
+      <button class="tab-btn" onclick="showTab('week')">This Week</button>
+      <button class="tab-btn" onclick="showTab('targets')">Target Builder</button>
+      <button class="tab-btn" onclick="showTab('intel')">City Intel</button>
+    </div>
+
+    <div class="content">
+
+      <!-- ── Route Today ── -->
+      <div id="tab-route">
+        <div class="route-summary">
+          <div class="route-summary-item"><strong>6</strong> stops planned</div>
+          <div class="route-summary-item"><strong>~22 mi</strong> total drive</div>
+          <div class="route-summary-item"><strong>~3.5 hrs</strong> estimated</div>
+          <div class="route-summary-item"><strong>2 of 6</strong> done</div>
+        </div>
+
+        <div id="route-list"></div>
+
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="btn btn-primary" onclick="CL.toast('Opening in Maps...')">Open in Maps</button>
+          <button class="btn btn-ghost" onclick="addStop()">+ Add Stop</button>
+        </div>
+      </div>
+
+      <!-- ── This Week ── -->
+      <div id="tab-week" style="display:none;">
+        <div id="week-view"></div>
+      </div>
+
+      <!-- ── Target Builder ── -->
+      <div id="tab-targets" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.5;margin:0;">AI picks your next 10 targets based on what's been working in your city.</p>
+          <button class="btn btn-primary btn-sm" onclick="refreshTargets()">Refresh Targets</button>
+        </div>
+        <div id="target-list"></div>
+      </div>
+
+      <!-- ── City Intel ── -->
+      <div id="tab-intel" style="display:none;">
+        <div class="sec-head"><h1>Austin, TX</h1></div>
+
+        <div class="stats-row" style="margin-bottom:24px;">
+          <div class="intel-stat"><div class="intel-val">978K</div><div class="intel-label">Population</div></div>
+          <div class="intel-stat"><div class="intel-val">28,400</div><div class="intel-label">Small Businesses</div></div>
+          <div class="intel-stat"><div class="intel-val">4,200</div><div class="intel-label">Trades Companies</div></div>
+          <div class="intel-stat"><div class="intel-val">12%</div><div class="intel-label">YoY Growth</div></div>
+        </div>
+
+        <div class="sec-head"><h2 style="font-size:15px;">Top Industries by Business Count</h2></div>
+        <div class="card" style="padding:16px;" id="industry-bars"></div>
+
+        <div class="sec-head" style="margin-top:24px;"><h2 style="font-size:15px;">Market Notes</h2></div>
+        <div class="card" style="padding:16px;">
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-bottom:12px;">Austin's construction and trades sector is growing at 12% YoY driven by population growth and the tech office boom. HVAC, electrical, and plumbing businesses are scaling fast — most have 5-15 techs and are running on spreadsheets or nothing.</p>
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-bottom:12px;">Key pain points: scheduling is the #1 complaint. Most use text/WhatsApp to dispatch. Job costing is done on paper or in Excel at the end of the month.</p>
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.65;">Best neighborhoods to work: East Austin (HVAC, plumbing), South Congress corridor (painting, landscaping), Cedar Park/Round Rock (construction, concrete).</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-plan');
+
+const TABS = ['route','week','targets','intel'];
+function showTab(id) {
+  TABS.forEach(t => { document.getElementById('tab-'+t).style.display = t === id ? '' : 'none'; });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => { b.classList.toggle('active', TABS[i] === id); });
+}
+
+// Route data
+const STOPS = [
+  { num:1, biz:'Apex HVAC',        addr:'1420 E 6th St, Austin', action:'Second visit — ask for demo time', status:'done' },
+  { num:2, biz:'Travis Electric',  addr:'3801 S Congress Ave',   action:'Follow up with James (owner)', status:'done' },
+  { num:3, biz:'Lone Star Concrete', addr:'6700 Manor Rd',       action:'Third visit — push for audit booking', status:'current' },
+  { num:4, biz:'Cedar Park Plumbing', addr:'Cedar Park, TX',     action:'First visit — cold walk-in', status:'upcoming' },
+  { num:5, biz:'Silverline Roofing', addr:'4200 N Lamar Blvd',   action:'Drop off one-pager, get owner name', status:'upcoming' },
+  { num:6, biz:'Austin Painting Co', addr:'South Austin area',   action:'Check if owner is in today', status:'upcoming' },
+];
+
+document.getElementById('route-list').innerHTML = STOPS.map(s => `
+  <div class="route-stop">
+    <div class="stop-num ${s.status}">${s.status === 'done' ? '✓' : s.num}</div>
+    <div class="stop-body">
+      <div class="stop-biz">${s.biz}</div>
+      <div class="stop-addr">${s.addr}</div>
+      <div class="stop-action">${s.action}</div>
+      ${s.status !== 'done' ? `<div class="stop-controls">
+        <button class="btn btn-primary" onclick="markStopDone(${s.num})">Mark Done</button>
+        <button class="btn btn-ghost" onclick="window.open('https://maps.google.com?q=${encodeURIComponent(s.addr)}')">Navigate</button>
+        <button class="btn btn-ghost" onclick="CL.toast('Removed from route')">Remove</button>
+      </div>` : ''}
+    </div>
+  </div>`).join('');
+
+function markStopDone(num) { CL.toast('Stop ' + num + ' marked done'); }
+function addStop() { CL.toast('Add stop — coming soon'); }
+
+// Week data
+const WEEK = [
+  { day:'Sunday, May 17', today:true, items:[
+    { type:'visit',   text:'Lone Star Concrete — 3rd visit', time:'10:00 am' },
+    { type:'followup',text:'Travis Electric — send calendar link', time:'11:30 am' },
+  ]},
+  { day:'Monday, May 18', today:false, items:[
+    { type:'visit',   text:'Cedar Park Plumbing — cold walk-in', time:'9:00 am' },
+    { type:'visit',   text:'Silverline Roofing — drop off one-pager', time:'11:00 am' },
+  ]},
+  { day:'Tuesday, May 19', today:false, items:[
+    { type:'task',    text:'Follow up with Apex HVAC via text', time:'AM' },
+    { type:'followup',text:'Austin Painting Co — email check-in', time:'Afternoon' },
+  ]},
+  { day:'Wednesday, May 20', today:false, items:[
+    { type:'visit',   text:'Hill Country HVAC — demo call 10am', time:'10:00 am' },
+    { type:'handoff', text:'SkyHigh Roofing — send to Mia', time:'2:00 pm' },
+  ]},
+  { day:'Thursday, May 21', today:false, items:[
+    { type:'task',    text:'Plan next week\'s route', time:'End of day' },
+  ]},
+];
+
+document.getElementById('week-view').innerHTML = WEEK.map(d => `
+  <div class="week-day">
+    <div class="week-day-head ${d.today ? 'today' : ''}">
+      ${d.day} ${d.today ? '<span class="today-pill">Today</span>' : ''}
+    </div>
+    ${d.items.length
+      ? d.items.map(item => `
+        <div class="week-item">
+          <div class="week-item-dot ${item.type}"></div>
+          <div class="week-item-body">${item.text}</div>
+          <div class="week-item-time">${item.time}</div>
+        </div>`).join('')
+      : `<div style="font-size:13px;color:var(--muted);padding:8px 0;">Nothing scheduled</div>`}
+  </div>`).join('');
+
+// Targets
+const TARGETS = [
+  { rank:1, biz:'Peak Performance HVAC', addr:'East Austin', why:'6 techs, growing fast, owner active on LinkedIn. Your best Austin HVAC comp (Apex) came from a similar profile.', tags:['HVAC','6 techs','East Austin'] },
+  { rank:2, biz:'Capital Plumbing Services', addr:'North Austin', why:'12 crew members, job costing complaints visible on Yelp reviews. Owner name: Dan R. Check if LinkedIn shows a direct number.', tags:['Plumbing','12 crew','North Austin'] },
+  { rank:3, biz:'Longhorn Electric Co', addr:'Round Rock', why:'Referral from Travis Electric\'s owner. Same stage as Travis was when you first approached.', tags:['Electrical','Referral','Round Rock'] },
+  { rank:4, biz:'Verde Landscaping', addr:'South Congress', why:'45 employees. Their Instagram shows 3 active crews. No job tracking app visible from their site.', tags:['Landscaping','45 employees'] },
+  { rank:5, biz:'Texas Commercial Roofing', addr:'Cedar Park', why:'2 Glassdoor complaints about "communication chaos." Owner posts on Facebook — try a DM after a walk-in.', tags:['Roofing','Cedar Park'] },
+];
+
+function renderTargets() {
+  document.getElementById('target-list').innerHTML = TARGETS.map(t => `
+    <div class="target-card">
+      <div class="target-rank">#${t.rank} suggested target</div>
+      <div class="target-biz">${t.biz}</div>
+      <div style="font-size:12px;color:var(--muted);">${t.addr}</div>
+      <div class="target-why">${t.why}</div>
+      <div class="target-tags">${t.tags.map(tag => `<span class="target-tag">${tag}</span>`).join('')}</div>
+      <div class="target-actions">
+        <button class="btn btn-primary btn-sm" onclick="CL.toast('${t.biz} added to My List')">Add to My List</button>
+        <button class="btn btn-ghost btn-sm" onclick="CL.toast('Skip noted — won\'t suggest again')">Skip</button>
+      </div>
+    </div>`).join('');
+}
+
+function refreshTargets() {
+  CL.toast('Refreshing targets with AI...');
+  setTimeout(() => { CL.toast('Targets updated'); }, 1500);
+}
+
+renderTargets();
+
+// City intel industries
+const INDUSTRIES = [
+  { label:'HVAC', count:820, pct:100 },
+  { label:'Plumbing', count:680, pct:83 },
+  { label:'Electrician', count:610, pct:74 },
+  { label:'Construction', count:590, pct:72 },
+  { label:'Landscaping', count:430, pct:52 },
+  { label:'Roofing', count:380, pct:46 },
+  { label:'Painting', count:320, pct:39 },
+  { label:'Concrete', count:210, pct:26 },
+];
+document.getElementById('industry-bars').innerHTML = INDUSTRIES.map(i => `
+  <div class="industry-bar">
+    <div class="industry-bar-label">${i.label}</div>
+    <div class="industry-bar-fill" style="width:${Math.max(i.pct*1.8, 20)}px;"></div>
+    <div class="industry-bar-count">${i.count}</div>
+  </div>`).join('');
+</script>
+</body>
+</html>

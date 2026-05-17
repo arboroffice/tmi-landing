@@ -49,12 +49,14 @@
       </div>
     </div>
 
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="showSettingsTab('settings')">Settings</button>
+      <button class="tab-btn" onclick="showSettingsTab('bug')">Report Bug</button>
+      <button class="tab-btn" onclick="showSettingsTab('suggest')">Suggest Feature</button>
+    </div>
+
     <div class="content">
-
-      <div class="sec-head" style="margin-bottom:20px;">
-        <h1>Settings</h1>
-      </div>
-
+      <div id="tab-settings">
       <!-- Profile -->
       <div class="settings-section">
         <div class="settings-section-head">
@@ -177,6 +179,59 @@
           </button>
         </div>
       </div>
+      </div><!-- end tab-settings -->
+
+      <!-- ── Bug Report ── -->
+      <div id="tab-bug" style="display:none;">
+        <p style="font-size:14px;color:var(--ink-2);margin-bottom:20px;line-height:1.6;">Something broken? Tell us what happened and we'll fix it fast.</p>
+        <div class="settings-section">
+          <div class="settings-section-body">
+            <div class="form-group">
+              <label class="form-label">What page were you on?</label>
+              <input class="form-input" id="bug-page" type="text" placeholder="e.g. My List, Quick Capture..."/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">What happened?</label>
+              <textarea class="form-input" id="bug-desc" rows="4" placeholder="Describe what you were doing and what went wrong..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">How often does it happen?</label>
+              <select class="form-input" id="bug-freq">
+                <option value="once">Just happened once</option>
+                <option value="sometimes">Happens sometimes</option>
+                <option value="always">Happens every time</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="submitBug()">Submit Bug Report</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Suggest Feature ── -->
+      <div id="tab-suggest" style="display:none;">
+        <p style="font-size:14px;color:var(--ink-2);margin-bottom:20px;line-height:1.6;">Have an idea that would make your job easier? We build based on what city leads actually need.</p>
+        <div class="settings-section">
+          <div class="settings-section-body">
+            <div class="form-group">
+              <label class="form-label">Your idea (one sentence)</label>
+              <input class="form-input" id="suggest-title" type="text" placeholder="e.g. Add a way to batch-send follow-ups"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Why would this help you?</label>
+              <textarea class="form-input" id="suggest-why" rows="4" placeholder="Describe the problem it solves or the time it would save..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">How important is this to you?</label>
+              <select class="form-input" id="suggest-priority">
+                <option value="nice">Nice to have</option>
+                <option value="important">Important</option>
+                <option value="critical">Critical — blocking my work</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="submitSuggest()">Submit Suggestion</button>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -219,6 +274,29 @@ function saveNotif(el, key) {
 async function confirmLogout() {
   const ok = await CL.confirm('Log out of TMI City Leads?', false);
   if (ok) CL.logout();
+}
+
+// Tab switching
+const SETTINGS_TABS = ['settings','bug','suggest'];
+function showSettingsTab(id) {
+  SETTINGS_TABS.forEach(t => { document.getElementById('tab-'+t).style.display = t === id ? '' : 'none'; });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => { b.classList.toggle('active', SETTINGS_TABS[i] === id); });
+}
+
+function submitBug() {
+  const desc = document.getElementById('bug-desc').value.trim();
+  if (!desc) { CL.toast('Describe what happened', 'error'); return; }
+  CL.toast('Bug report submitted — thanks!');
+  document.getElementById('bug-page').value = '';
+  document.getElementById('bug-desc').value = '';
+}
+
+function submitSuggest() {
+  const title = document.getElementById('suggest-title').value.trim();
+  if (!title) { CL.toast('Add a one-sentence idea', 'error'); return; }
+  CL.toast('Suggestion submitted — thanks!');
+  document.getElementById('suggest-title').value = '';
+  document.getElementById('suggest-why').value = '';
 }
 </script>
 </body>

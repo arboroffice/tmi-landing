@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Follow-Up Inbox | TMI City Leads</title>
+<title>Follow-Ups | TMI City Leads</title>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
 <link rel="stylesheet" href="cl.css"/>
 <style>
@@ -43,6 +43,39 @@
 .empty-section svg{opacity:0.25;}
 
 .section-spacer{height:28px;}
+
+/* Handoffs */
+.ho-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;}
+.ho-header{display:flex;align-items:flex-start;gap:10px;justify-content:space-between;margin-bottom:10px;}
+.ho-biz{font-size:15px;font-weight:700;color:var(--ink);}
+.ho-biz-type{font-size:12px;color:var(--muted);margin-top:2px;}
+.ho-assignee{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);margin-bottom:8px;}
+.ho-assignee-avatar{width:22px;height:22px;border-radius:50%;background:var(--chart);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ink);}
+.ho-notes{font-size:13px;color:var(--ink-2);line-height:1.55;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:10px;}
+.ho-urgency{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+.ho-urgency.this_week{background:#fee2e2;color:#b91c1c;}
+.ho-urgency.this_month{background:var(--chart);color:var(--ink);}
+.ho-urgency.when_possible{background:var(--bg);color:var(--muted);border:1px solid var(--line);}
+
+/* Referrals */
+.ref-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;}
+.ref-flow{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.ref-biz{font-size:13px;font-weight:700;color:var(--ink);padding:5px 12px;background:var(--bg);border-radius:999px;border:1px solid var(--line);}
+.ref-arrow{color:var(--muted);font-size:16px;}
+.ref-status-badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+.ref-status-badge.introduced{background:var(--bg);color:var(--muted);border:1px solid var(--line);}
+.ref-status-badge.warm{background:var(--chart);color:var(--ink);}
+.ref-status-badge.closed{background:#dcfce7;color:#166534;}
+
+/* Relationships */
+.rel-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;}
+.rel-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.rel-dot.birthday{background:#f59e0b;}
+.rel-dot.personal{background:#3b82f6;}
+.rel-dot.anniversary{background:#8b5cf6;}
+.rel-biz{font-size:14px;font-weight:700;color:var(--ink);}
+.rel-note{font-size:13px;color:var(--ink-2);margin-top:4px;line-height:1.5;}
+.rel-date{font-size:11px;color:var(--muted);margin-top:4px;}
 </style>
 </head>
 <body>
@@ -55,15 +88,24 @@
       <div class="topbar-crumb">
         <span>City Leads</span>
         <span style="color:var(--line-strong);margin:0 2px">/</span>
-        <span class="page">Follow-Up Inbox</span>
+        <span class="page">Follow-Ups</span>
       </div>
       <div class="topbar-actions">
         <span style="font-size:12px;color:var(--muted);" id="pending-count"></span>
       </div>
     </div>
 
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="showFUTab('followups')">Follow-Ups</button>
+      <button class="tab-btn" onclick="showFUTab('handoffs')">Handoffs</button>
+      <button class="tab-btn" onclick="showFUTab('referrals')">Referrals</button>
+      <button class="tab-btn" onclick="showFUTab('relationships')">Relationships</button>
+    </div>
+
     <div class="content">
 
+      <!-- ── Follow-Ups tab ── -->
+      <div id="tab-followups">
       <!-- Due Today -->
       <div class="fu-section-label due-today">
         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14" stroke-linecap="round"/></svg>
@@ -81,6 +123,28 @@
         <span id="upcoming-count" style="font-size:11px;font-weight:400;color:var(--muted);"></span>
       </div>
       <div id="upcoming-list"></div>
+      </div><!-- end tab-followups -->
+
+      <!-- ── Handoffs tab ── -->
+      <div id="tab-handoffs" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:13px;color:var(--muted);">Businesses ready to close — pushed to Mia or Tyler.</div>
+          <a href="cl-business.html" class="btn btn-primary btn-sm">+ New Handoff</a>
+        </div>
+        <div id="handoff-list"></div>
+      </div>
+
+      <!-- ── Referrals tab ── -->
+      <div id="tab-referrals" style="display:none;">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Owner-to-owner referrals you've set up.</div>
+        <div id="referral-list"></div>
+      </div>
+
+      <!-- ── Relationships tab ── -->
+      <div id="tab-relationships" style="display:none;">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Birthdays, family details, and personal notes. Remember the person, not just the prospect.</div>
+        <div id="rel-list"></div>
+      </div>
 
     </div>
   </div>
@@ -228,6 +292,76 @@ function markDone(id) {
 }
 
 renderAll();
+
+// Tab switching
+const FU_TABS = ['followups','handoffs','referrals','relationships'];
+function showFUTab(id) {
+  FU_TABS.forEach(t => { document.getElementById('tab-'+t).style.display = t === id ? '' : 'none'; });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => { b.classList.toggle('active', FU_TABS[i] === id); });
+}
+
+// Handoffs
+const HANDOFFS = [
+  { biz:'Lone Star Concrete', type:'Concrete', assignee:'Mia', urgency:'this_week', notes:'Diego is ready to move. He mentioned budget approval last week. He needs to see the scheduling module specifically. Great fit.', date:'May 15' },
+  { biz:'Travis Electric', type:'Electrician', assignee:'Tyler', urgency:'this_month', notes:'James (owner) wants a demo after meeting with his office manager. 12 techs, growing. Main interest: dispatch + job tracking.', date:'May 13' },
+  { biz:'SkyHigh Roofing', type:'Roofing', assignee:'Mia', urgency:'when_possible', notes:'Carlos is interested but not urgent. Good candidate for Q3. He mentioned cash flow is tight right now.', date:'May 10' },
+];
+
+document.getElementById('handoff-list').innerHTML = HANDOFFS.length
+  ? HANDOFFS.map(h => `
+    <div class="ho-card">
+      <div class="ho-header">
+        <div><div class="ho-biz">${h.biz}</div><div class="ho-biz-type">${h.type}</div></div>
+        <span class="ho-urgency ${h.urgency}">${h.urgency.replace('_',' ')}</span>
+      </div>
+      <div class="ho-assignee">
+        <div class="ho-assignee-avatar">${h.assignee[0]}</div>
+        Assigned to ${h.assignee} · ${h.date}
+      </div>
+      <div class="ho-notes">${h.notes}</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="CL.toast('Opening business profile...')">View Profile</button>
+        <button class="btn btn-ghost btn-sm" onclick="CL.toast('Status updated')">Mark Won</button>
+      </div>
+    </div>`).join('')
+  : `<div class="empty-state"><div class="empty-icon">🎯</div><h3>No handoffs yet</h3><p>When a business is ready to close, add a handoff from their profile.</p></div>`;
+
+// Referrals
+const REFERRALS = [
+  { from:'Apex HVAC', to:'Peak Performance HVAC', date:'May 16', status:'warm', notes:'Mike (Apex) gave me Robert\'s number directly. Called yesterday, he\'s expecting me Thursday.' },
+  { from:'Travis Electric', to:'Longhorn Electric Co', date:'May 12', status:'introduced', notes:'James mentioned his cousin runs an electrical business in Round Rock. Got the number but haven\'t called yet.' },
+  { from:'Lone Star Concrete', to:'Capital Concrete', date:'May 5', status:'closed', notes:'Diego referred us directly. Capital Concrete signed last week.' },
+];
+
+document.getElementById('referral-list').innerHTML = REFERRALS.map(r => `
+  <div class="ref-card">
+    <div class="ref-flow">
+      <span class="ref-biz">${r.from}</span>
+      <span class="ref-arrow">→</span>
+      <span class="ref-biz">${r.to}</span>
+      <span class="ref-status-badge ${r.status}">${r.status}</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${r.date}</div>
+    <div style="font-size:13px;color:var(--ink-2);line-height:1.5;">${r.notes}</div>
+  </div>`).join('');
+
+// Relationships
+const RELS = [
+  { biz:'Apex HVAC', owner:'Mike', type:'birthday', dot:'birthday', note:'Mike\'s birthday: June 14. Wife\'s name: Linda. Two kids — older one plays baseball.', date:'Birthday in 28 days' },
+  { biz:'Lone Star Concrete', owner:'Diego', type:'personal', dot:'personal', note:'Diego mentioned he\'s coaching his son\'s little league team this spring. Ask about the team next visit.', date:'Added May 15' },
+  { biz:'Travis Electric', owner:'James', type:'personal', dot:'personal', note:'James served in the Army — was stationed at Fort Hood. Has a dog named Bear. Very proud of his crew culture.', date:'Added May 13' },
+  { biz:'Hill Country HVAC', owner:'Tom', type:'anniversary', dot:'anniversary', note:'Business anniversary: 11 years this July. Would be a great hook for a check-in text.', date:'Anniversary in 47 days' },
+];
+
+document.getElementById('rel-list').innerHTML = RELS.map(r => `
+  <div class="rel-item">
+    <div class="rel-dot ${r.dot}"></div>
+    <div>
+      <div class="rel-biz">${r.biz} — ${r.owner}</div>
+      <div class="rel-note">${r.note}</div>
+      <div class="rel-date">${r.date}</div>
+    </div>
+  </div>`).join('');
 </script>
 </body>
 </html>

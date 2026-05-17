@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Learn | TMI City Leads</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="cl.css"/>
+<style>
+/* Playbook */
+.pb-section{margin-bottom:32px;}
+.pb-section h2{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--ink);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line);}
+.pb-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:8px;}
+.pb-item h3{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.pb-item p{font-size:13px;color:var(--ink-2);line-height:1.6;margin:0;}
+.pb-item .example{margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:4px;font-size:13px;color:var(--ink-2);border-left:3px solid var(--chart);font-style:italic;line-height:1.55;}
+
+/* Win stories */
+.win-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.win-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+.win-icon{width:36px;height:36px;border-radius:10px;background:var(--chart);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.win-title{font-size:15px;font-weight:700;color:var(--ink);}
+.win-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+.win-story{font-size:14px;color:var(--ink-2);line-height:1.65;margin-bottom:12px;}
+.win-lesson{background:var(--bg);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--ink);border-left:3px solid var(--chart);}
+.win-lesson strong{display:block;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+
+/* Scripts */
+.script-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.script-head{padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.script-head h3{font-size:13px;font-weight:700;color:var(--ink);margin:0;}
+.script-body{padding:16px;display:none;}
+.script-body.open{display:block;}
+.script-text{font-size:14px;color:var(--ink-2);line-height:1.7;background:var(--bg);padding:14px;border-radius:var(--r-sm);font-style:italic;}
+.script-note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;}
+.copy-btn{font-size:11px;padding:5px 10px;border-radius:var(--r-sm);border:1px solid var(--line-strong);background:none;cursor:pointer;color:var(--ink-2);min-height:28px;transition:all 0.12s;}
+.copy-btn:hover{background:var(--ink);color:var(--chart);}
+
+/* Objections */
+.obj-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.obj-head{padding:12px 16px;cursor:pointer;user-select:none;}
+.obj-objection{font-size:14px;font-weight:700;color:var(--red,#ef4444);margin-bottom:4px;}
+.obj-body{padding:0 16px 16px;display:none;}
+.obj-body.open{display:block;}
+.obj-response{font-size:14px;color:var(--ink-2);line-height:1.7;font-style:italic;background:var(--bg);padding:12px 14px;border-radius:var(--r-sm);}
+.obj-tip{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <span>City Leads</span>
+        <span style="color:var(--line-strong);margin:0 2px">/</span>
+        <span class="page">Learn</span>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="showTab('playbook')">Playbook</button>
+      <button class="tab-btn" onclick="showTab('wins')">Win Stories</button>
+      <button class="tab-btn" onclick="showTab('scripts')">Scripts</button>
+      <button class="tab-btn" onclick="showTab('objections')">Objections</button>
+    </div>
+
+    <div class="content">
+
+      <!-- ── Playbook ── -->
+      <div id="tab-playbook">
+        <div class="pb-section">
+          <h2>Who to target</h2>
+          <div class="pb-item">
+            <h3>The right business</h3>
+            <p>Trades and field service companies with 4-50 employees. Owner-operated. They have crews in the field every day. They're busy enough to have problems but not so big they have a full IT department already.</p>
+          </div>
+          <div class="pb-item">
+            <h3>The right owner</h3>
+            <p>Owners who are clearly still in the business — you see their truck out front, they're at the shop, they answer the phone. Avoid absentee owners or holding companies. The person who feels the pain every day is who you want.</p>
+          </div>
+          <div class="pb-item">
+            <h3>Best industries</h3>
+            <p>HVAC, plumbing, electrical, roofing, landscaping, painting, concrete, welding, heavy equipment. Not restaurants. Not retail. Not office businesses.</p>
+          </div>
+        </div>
+
+        <div class="pb-section">
+          <h2>The walk-in</h2>
+          <div class="pb-item">
+            <h3>What to say walking in</h3>
+            <p>Ask for the owner by name if you have it. If not, ask "Is the owner or manager around?" When you meet them:</p>
+            <div class="example">"Hey, my name is [Name], I work with a tech company called TMI — we help trades businesses like yours get their scheduling and job tracking off spreadsheets. I'm not here to pitch anything today, I just had a quick question about how you're running things — do you have two minutes?"</div>
+          </div>
+          <div class="pb-item">
+            <h3>What NOT to say</h3>
+            <p>Don't say "software." Don't say "AI." Don't say "solution" or "platform." Don't start with a feature list. You're having a conversation, not giving a demo. The goal of visit one is to find out if they have a problem worth solving.</p>
+          </div>
+          <div class="pb-item">
+            <h3>The diagnostic question</h3>
+            <p>After small talk, ask: "How do you currently keep track of what your crews are doing each day?" Their answer tells you everything. If they say "text messages" or "we just figure it out" — that's your opening.</p>
+          </div>
+        </div>
+
+        <div class="pb-section">
+          <h2>When a lead is warm</h2>
+          <div class="pb-item">
+            <h3>Signals to look for</h3>
+            <p>They asked follow-up questions. They said "yeah that's actually a problem for us." They invited you back. They mentioned a specific pain more than once. They asked about price.</p>
+          </div>
+          <div class="pb-item">
+            <h3>The handoff signal</h3>
+            <p>When an owner says "I'd want to see how this actually works" or asks "what would it cost?" — that's your cue to set up the audit with Mia or Tyler. Do not try to demo it yourself. Say: "That's exactly where I'd bring in our team — they do a 20-minute audit and walk you through exactly what it would look like for your operation."</p>
+          </div>
+        </div>
+
+        <div class="pb-section">
+          <h2>Privacy rules</h2>
+          <div class="pb-item">
+            <h3>What stays private</h3>
+            <p>Don't share owner details with anyone outside TMI. Don't post photos of the inside of a business without permission. Don't share deal sizes or client names on social. Everything you log in this app stays inside TMI.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Win Stories ── -->
+      <div id="tab-wins" style="display:none;">
+        <p style="font-size:14px;color:var(--ink-2);margin-bottom:20px;line-height:1.6;">Real wins from other city leads. What worked, what didn't, and the lesson.</p>
+        <div id="win-list"></div>
+        <button class="btn btn-ghost" style="width:100%;margin-top:8px;" onclick="CL.toast('Write your win story — coming soon')">+ Share a Win</button>
+      </div>
+
+      <!-- ── Scripts ── -->
+      <div id="tab-scripts">
+        <p style="font-size:14px;color:var(--ink-2);margin-bottom:20px;line-height:1.6;">Copy-paste scripts for texts, emails, and voicemails. Tap any header to expand.</p>
+        <div id="script-list"></div>
+      </div>
+
+      <!-- ── Objections ── -->
+      <div id="tab-objections">
+        <p style="font-size:14px;color:var(--ink-2);margin-bottom:20px;line-height:1.6;">When owners push back. Tap to see what to say.</p>
+        <div id="obj-list"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="cl-shared.js"></script>
+<script>
+CL.initPage('cl-learn');
+
+const TABS = ['playbook','wins','scripts','objections'];
+function showTab(id) {
+  TABS.forEach(t => { document.getElementById('tab-'+t).style.display = t === id ? '' : 'none'; });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => { b.classList.toggle('active', TABS[i] === id); });
+}
+
+// Win stories
+const WINS = [
+  {
+    icon:'🔥', city:'Austin, TX', lead:'Jordan M.',
+    title:'Cold walk-in to closed deal in 11 days',
+    story:'Walked into an HVAC shop on a Tuesday. The owner was arguing on the phone about a tech who didn\'t show up to a job. I waited 5 minutes, asked one question: "How do you track where your techs are right now?" He said "we have no idea, that\'s why I\'m on the phone." Handed it to Mia on Thursday. Closed the following Friday.',
+    lesson:'The best time to walk in is when they\'re visibly in pain. Don\'t reschedule for later.',
+    stage:'Closed',
+    type:'HVAC',
+  },
+  {
+    icon:'💡', city:'Dallas, TX', lead:'Keisha P.',
+    title:'Third visit, different question, whole conversation changed',
+    story:'First two visits went nowhere. The owner was polite but busy. Third time I asked differently — not "how do you schedule" but "what\'s the most annoying thing about running your crew this week?" He talked for 15 minutes. I just listened. Set the audit at the end of that same conversation.',
+    lesson:'Change the question, not the pitch. Most owners will tell you exactly what\'s wrong if you ask about this week, not systems in general.',
+    stage:'Audit Booked',
+    type:'Plumbing',
+  },
+  {
+    icon:'🤝', city:'Houston, TX', lead:'Carlos V.',
+    title:'One referral turned into three leads in the same block',
+    story:'Closed a painting company. Owner mentioned his neighbor (roofing) had the same scheduling problem. Walked next door same day. That owner referred me to a concrete guy two blocks over. All three ended up in the pipeline within two weeks.',
+    lesson:'Always ask: "Do you know any other owners around here who run the same kind of business?" Referrals from warm owners close faster than cold walk-ins.',
+    stage:'Expansion',
+    type:'Painting',
+  },
+];
+
+document.getElementById('win-list').innerHTML = WINS.map(w => `
+  <div class="win-card">
+    <div class="win-head">
+      <div class="win-icon">${w.icon}</div>
+      <div>
+        <div class="win-title">${w.title}</div>
+        <div class="win-meta">${w.city} · ${w.type} · Stage: ${w.stage}</div>
+      </div>
+    </div>
+    <div class="win-story">${w.story}</div>
+    <div class="win-lesson"><strong>The lesson</strong>${w.lesson}</div>
+  </div>`).join('');
+
+// Scripts
+const SCRIPTS = [
+  {
+    title:'Cold walk-in intro (verbal)',
+    text:`"Hey, my name is [Name] — I work with a company called TMI, we help trades businesses with their scheduling and job tracking. I'm not here to sell anything today, I just had a quick question about how you're running things. Is the owner around by any chance?"`,
+    note:'If they ask what TMI is: "We build software for field operations — specifically for contractors and trades companies. We work with HVAC, plumbing, roofing companies mostly." Keep it one sentence.',
+  },
+  {
+    title:'First text after meeting',
+    text:`"Hey [Name], it was great meeting you today — I'm [Your Name] from TMI. Sent you an email with a quick overview. No rush, just wanted to make sure it didn't get buried. Let me know if you have any questions."`,
+    note:'Send within 2 hours of the visit. Subject line for the email: "Quick follow-up from today."',
+  },
+  {
+    title:'Voicemail (owner not available)',
+    text:`"Hey [Name], this is [Your Name] from TMI — I stopped by earlier and didn't catch you in. I work with a few other [industry] companies in [city] and wanted to ask you a quick question about how you're tracking your crews. I'll try you again later this week, or feel free to call me back at [number]. Thanks."`,
+    note:'Keep it under 25 seconds. No sales language. Make it sound like a question, not a pitch.',
+  },
+  {
+    title:'Follow-up text (no response)',
+    text:`"Hey [Name] — just checking in. I know you're probably slammed. I had one quick question about your scheduling setup — totally fine if this week isn't great. Just let me know when's a good time."`,
+    note:'Use after 3+ days of silence. Never guilt-trip or say "I haven\'t heard back from you."',
+  },
+  {
+    title:'Setting up the audit',
+    text:`"Hey [Name] — based on what you described, I think it\'d be worth having our team do a quick 20-minute audit of your current setup. No sales pitch — they just walk you through what a system built for your operation would actually look like. Does [day] work, or is [other day] better?"`,
+    note:'Two options only. Don\'t ask open-ended "when works for you." Give them two specific choices.',
+  },
+];
+
+document.getElementById('script-list').innerHTML = SCRIPTS.map((s,i) => `
+  <div class="script-card">
+    <div class="script-head" onclick="toggleScript(${i})">
+      <h3>${s.title}</h3>
+      <button class="copy-btn" onclick="event.stopPropagation();copyScript('${i}')">Copy</button>
+    </div>
+    <div class="script-body" id="script-body-${i}">
+      <div class="script-text">${s.text}</div>
+      <div class="script-note">${s.note}</div>
+    </div>
+  </div>`).join('');
+
+function toggleScript(i) {
+  const el = document.getElementById('script-body-'+i);
+  el.classList.toggle('open');
+}
+
+const scriptTexts = SCRIPTS.map(s => s.text);
+function copyScript(i) {
+  navigator.clipboard.writeText(scriptTexts[i]).then(() => CL.toast('Copied to clipboard'));
+}
+
+// Objections
+const OBJECTIONS = [
+  {
+    obj:`"We're not really looking for new software right now."`,
+    response:`"Totally makes sense — I'm not trying to add to your plate. I'm just curious: when you say that, is it more of a timing thing, or more that you haven't seen something that actually fits your operation?"`,
+    tip:'You\'re not arguing. You\'re learning why. The answer will tell you whether to stay in the conversation or move on.',
+  },
+  {
+    obj:`"We already have something for that."`,
+    response:`"Good to know — what do you use? I ask because a lot of the owners I talk to end up using two or three tools and they don\'t really talk to each other. Is that something you run into?"`,
+    tip:'Most owners using "something" means a mix of ServiceTitan, QuickBooks, and text messages. Ask what they use and listen.',
+  },
+  {
+    obj:`"I don't have time for this right now."`,
+    response:`"I get it — I\'ll keep it quick. One question: how are your techs letting you know when a job is done? [Pause.] I\'ll come back at a better time if now\'s not good."`,
+    tip:'The one-question close. If they answer, you\'re in a conversation. If they don\'t, take the out gracefully and come back.',
+  },
+  {
+    obj:`"How much does it cost?"`,
+    response:`"Honest answer — it depends on your operation. That\'s actually why we do the audit first. It\'s a 20-minute call where we look at your setup and tell you exactly what makes sense for your size. No cost to the audit, and you get a clear picture either way."`,
+    tip:'Never give a number on the spot. Redirect to the audit. A number without context just gives them something to say no to.',
+  },
+  {
+    obj:`"We're a small operation, I don't think we need this."`,
+    response:`"That\'s actually when it matters most. When you\'re growing from 4 techs to 8, the scheduling stuff starts to break down — you\'re not big enough to have a dispatcher but you\'re too big to run everything in your head. Does that sound familiar at all?"`,
+    tip:'Reframe "small" as exactly the stage where the system pays off. The pain is real — you\'re just naming it.',
+  },
+  {
+    obj:`"Send me some information."`,
+    response:`"For sure — what\'s your email? And just so I can send you the right thing — is the main thing you\'re trying to get better on the scheduling side, or more the job tracking / billing side?"`,
+    tip:'Always follow the info request with a qualifying question. It keeps the conversation going and helps you send something relevant.',
+  },
+];
+
+document.getElementById('obj-list').innerHTML = OBJECTIONS.map((o,i) => `
+  <div class="obj-card">
+    <div class="obj-head" onclick="toggleObj(${i})">
+      <div class="obj-objection">"${o.obj.replace(/^"|"$/g,'')}"</div>
+    </div>
+    <div class="obj-body" id="obj-body-${i}">
+      <div class="obj-response">${o.response}</div>
+      <div class="obj-tip">${o.tip}</div>
+    </div>
+  </div>`).join('');
+
+function toggleObj(i) {
+  document.getElementById('obj-body-'+i).classList.toggle('open');
+}
+</script>
+</body>
+</html>
