@@ -12,15 +12,12 @@
 <div class="login-page">
   <div class="login-card">
     <div class="login-logo">
-      <img src="../logo.svg" alt="TMI"/>
-      <div>
-        <div class="login-logo-text">TMI Technology</div>
-        <div class="login-logo-sub">City Leads</div>
-      </div>
+      <div class="login-wordmark">TMI</div>
+      <div class="login-logo-sub">City Leads</div>
     </div>
 
-    <h1 class="login-title">City Lead Login</h1>
-    <p class="login-sub">Sign in to manage your territory, log visits, and track your pipeline.</p>
+    <h1 class="login-title">Sign in</h1>
+    <p class="login-sub">Manage your territory, log visits, and track your pipeline.</p>
 
     <div class="login-error" id="login-error">Incorrect email or password. Try again.</div>
 
@@ -37,6 +34,8 @@
         Sign In
       </button>
     </form>
+
+    <button class="demo-btn" onclick="demoLogin()">Demo login &rarr;</button>
 
     <p style="margin-top:24px;font-size:13px;color:var(--muted);text-align:center;">
       Admin? <a href="/admin" style="color:var(--ink);font-weight:500;">Sign in to TMI Admin</a>
@@ -78,6 +77,11 @@
   CL.handleLogin = async function(email, pass) {
     CL.setSession({ user: { email: email, user_metadata: { role: 'admin' } } });
   };
+
+  function demoLogin() {
+    CL.setSession({ user: { email: 'demo@tmi-technology.com', user_metadata: { role: 'admin' } } });
+    window.location.replace('cl-admin.html');
+  }
 </script>
 </body>
 </html>
