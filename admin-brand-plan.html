@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Brand Plan — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+.bp-jump-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:36px}
+.bp-jump-btn{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink-2);cursor:pointer;transition:all 0.15s;font-family:inherit;text-decoration:none}
+.bp-jump-btn:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bp-section{margin-bottom:60px}
+.bp-section-label{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:block}
+.bp-headline{font-size:32px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;margin-bottom:10px;line-height:1.1}
+.bp-subhead{font-size:14px;color:var(--ink-2);line-height:1.65;max-width:680px;margin-bottom:28px}
+.bp-content-types{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.bp-type-card{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:20px 16px}
+.bp-type-num{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.bp-type-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;letter-spacing:0.02em}
+.bp-type-desc{font-size:12px;color:var(--ink-2);line-height:1.55}
+.skit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.skit-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:24px}
+.skit-tag{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.skit-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:10px;letter-spacing:-0.01em}
+.skit-premise{font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:8px}
+.skit-format{font-size:11px;color:var(--muted);margin-bottom:16px}
+.skit-footer{display:flex;gap:8px;align-items:center}
+.cadence-table{width:100%;border-collapse:collapse}
+.cadence-table th{text-align:left;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);padding:10px 16px;border-bottom:1px solid var(--line);font-weight:500}
+.cadence-table td{padding:14px 16px;font-size:13px;color:var(--ink-2);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.55}
+.cadence-table td:first-child{font-weight:600;color:var(--ink);white-space:nowrap}
+.cadence-table tr:last-child td{border-bottom:none}
+.funnel-bars{display:flex;flex-direction:column;gap:14px}
+.funnel-bar-row{display:flex;align-items:center;gap:16px}
+.funnel-bar-label{width:140px;font-size:12px;font-weight:600;color:var(--ink);flex-shrink:0}
+.funnel-bar-track{flex:1;height:38px;background:var(--bg-alt);border-radius:4px;overflow:hidden}
+.funnel-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:700;color:var(--ink)}
+.funnel-bar-fill.tof{background:var(--chart)}
+.funnel-bar-fill.mof{background:rgba(228,255,151,0.5)}
+.funnel-bar-fill.bof{background:rgba(228,255,151,0.2);border:1px solid var(--chart)}
+.funnel-bar-sub{width:110px;font-size:11px;color:var(--muted);flex-shrink:0;text-align:right}
+.series-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.series-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px}
+.series-num{font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.series-name{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px;letter-spacing:-0.01em}
+.series-desc{font-size:12px;color:var(--ink-2);line-height:1.6;margin-bottom:16px}
+.signal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.signal-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.signal-card strong{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.signal-card p{font-size:12px;color:var(--ink-2);line-height:1.6;margin:0}
+.source-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px}
+.source-block{background:var(--bg-alt);border-radius:6px;padding:16px 18px}
+.source-block-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.source-block-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.source-block-desc{font-size:12px;color:var(--ink-2);line-height:1.55}
+@media(max-width:960px){.bp-content-types{grid-template-columns:repeat(2,1fr)}.series-grid{grid-template-columns:repeat(2,1fr)}.signal-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.bp-content-types{grid-template-columns:1fr}.skit-grid{grid-template-columns:1fr}.series-grid{grid-template-columns:1fr}.signal-grid{grid-template-columns:1fr}.funnel-bar-sub{display:none}.funnel-bar-label{width:90px}.source-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <a href="/admin-dashboard">TMI Admin</a>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg>
+        <a href="/admin-content">Content</a>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="page">Brand Plan</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">Print</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="bp-jump-nav">
+        <a href="#the-one-line" class="bp-jump-btn">The One Line</a>
+        <a href="#content-types" class="bp-jump-btn">Content Types</a>
+        <a href="#skit-series" class="bp-jump-btn">Skit Series</a>
+        <a href="#cadence" class="bp-jump-btn">Cadence</a>
+        <a href="#funnel" class="bp-jump-btn">Funnel</a>
+        <a href="#netflix-model" class="bp-jump-btn">Netflix Model</a>
+        <a href="#series" class="bp-jump-btn">Series</a>
+        <a href="#community" class="bp-jump-btn">Community</a>
+        <a href="#success" class="bp-jump-btn">Success Signals</a>
+      </div>
+
+      <!-- The One Line -->
+      <section class="bp-section" id="the-one-line">
+        <span class="bp-section-label">TMI Brand Account Plan</span>
+        <div class="bp-headline">The Network.<br>Not the Show.</div>
+        <p class="bp-subhead">TMI is not a brand account. It is a media network for people who build, fix, and run physical operations. Every post, skit, and story is sourced from the field and built to make the right people feel seen.</p>
+
+        <div class="card" style="padding:28px 32px">
+          <div class="panel-sec-label" style="margin-top:0">What the TMI Account Is</div>
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:16px">A distribution channel, a recruiting tool, and a proof-of-work engine - running at the same time. When someone watches TMI content, they should feel like they found the people who understand their world. Not a tech company explaining the trades. Not a consulting firm doing thought leadership. The operators.</p>
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:28px">The account runs on three pillars: <strong style="color:var(--ink)">Real footage from real operations.</strong> <strong style="color:var(--ink)">Skits that make field operators laugh and nod.</strong> <strong style="color:var(--ink)">Results that make owners pick up the phone.</strong></p>
+
+          <div class="panel-sec-label">How Content Gets Made</div>
+          <div class="source-grid">
+            <div class="source-block">
+              <div class="source-block-label">Source</div>
+              <div class="source-block-name">Mia + Tyler + City Leads</div>
+              <div class="source-block-desc">Tag raw footage, ideas, wins, and field moments in real time. No scheduling required from the field team.</div>
+            </div>
+            <div class="source-block">
+              <div class="source-block-label">Process</div>
+              <div class="source-block-name">Content Team Reviews</div>
+              <div class="source-block-desc">Tags routed to content team. Clips edited, skits scripted, carousels built. Ready to post in 24-48 hours.</div>
+            </div>
+            <div class="source-block">
+              <div class="source-block-label">Output</div>
+              <div class="source-block-name">Cross-Platform Distribution</div>
+              <div class="source-block-desc">Posted to Instagram, TikTok, LinkedIn, YouTube on cadence. One source, five formats, one brand voice.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Content Types -->
+      <section class="bp-section" id="content-types">
+        <span class="bp-section-label">What We Make</span>
+        <div class="bp-headline">The Five Content Types</div>
+        <p class="bp-subhead">Every piece of TMI content is one of five types. Mix these across the week. Never let the account go more than three days without an IN THE FIELD or SKIT post.</p>
+        <div class="bp-content-types">
+          <div class="bp-type-card">
+            <div class="bp-type-num">Type 01</div>
+            <div class="bp-type-name">IN THE FIELD</div>
+            <div class="bp-type-desc">Raw, real footage from job sites and operations. Truck cabs, dispatch floors, equipment yards. The world most content doesn't show.</div>
+          </div>
+          <div class="bp-type-card">
+            <div class="bp-type-num">Type 02</div>
+            <div class="bp-type-name">THE BUILD</div>
+            <div class="bp-type-desc">How the AI systems get built. Screen recordings, walkthroughs, the before and after of a real client operation going from paper to automated.</div>
+          </div>
+          <div class="bp-type-card">
+            <div class="bp-type-num">Type 03</div>
+            <div class="bp-type-name">THE RESULT</div>
+            <div class="bp-type-desc">Client wins, transformations, real numbers. What changed in the first 30 days. What the owner said when billing automated and cash flow moved.</div>
+          </div>
+          <div class="bp-type-card">
+            <div class="bp-type-num">Type 04</div>
+            <div class="bp-type-name">THE MOVEMENT</div>
+            <div class="bp-type-desc">Culture, positioning, manifesto content. Who this is for. What we're building. Why the trades deserve better than generic SaaS sold by people who never dispatched a crew.</div>
+          </div>
+          <div class="bp-type-card">
+            <div class="bp-type-num">Type 05</div>
+            <div class="bp-type-name">THE SKITS</div>
+            <div class="bp-type-desc">Scripted short-form comedy and drama about the real experience of running a trades or field service company. Makes operators laugh because it is exactly their situation.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Skit Series -->
+      <section class="bp-section" id="skit-series">
+        <span class="bp-section-label">Scripted Content</span>
+        <div class="bp-headline">The Skit Series</div>
+        <p class="bp-subhead">Recurring characters, recurring situations. Build audience by making the same people laugh about a different version of the same problem every week.</p>
+
+        <div class="skit-grid">
+
+          <div class="skit-card">
+            <div class="skit-tag">Series A</div>
+            <div class="skit-title">City Lead vs. Sales Rep</div>
+            <div class="skit-premise">A TMI city lead who knows every HVAC owner in the metro vs. a startup SaaS sales rep who just wants to book a demo. Same world, completely different relationship to it. Recurring characters, escalating tension each episode. The city lead never pitches. The sales rep never stops.</div>
+            <div class="skit-format">Format: 30-60s skit · Recurring characters · Comedy</div>
+            <div class="skit-footer">
+              <button class="btn btn-ghost btn-sm" onclick="copyText('City Lead vs. Sales Rep — Series A.\n\nPremise: A TMI city lead who knows every HVAC owner in the metro vs. a startup SaaS sales rep trying to book a demo. Same world, completely different relationship to it.\n\nFormat: 30-60s scripted skit, recurring characters, escalating tension each episode.\n\nTone: The city lead never pitches. The sales rep never stops.')">Copy Brief</button>
+              <button class="btn btn-primary btn-sm" onclick="saveIdea('City Lead vs. Sales Rep', 'Series A skit. City lead who knows every HVAC owner in the metro vs startup SaaS sales rep trying to book a demo. 30-60s recurring character format. Escalating tension per episode.')">Save as Idea</button>
+            </div>
+          </div>
+
+          <div class="skit-card">
+            <div class="skit-tag">Series B</div>
+            <div class="skit-title">AI Did It While I Was...</div>
+            <div class="skit-premise">Owner is doing something completely unrelated - fishing, asleep, at their kid's soccer game - and gets a notification that a job was dispatched, an invoice collected, or a renewal locked. Cut to what would have taken three phone calls and a dispatcher's afternoon. Tone: disbelief shading into joy.</div>
+            <div class="skit-format">Format: 15-30s · Relatable moment · Automation win</div>
+            <div class="skit-footer">
+              <button class="btn btn-ghost btn-sm" onclick="copyText('AI Did It While I Was... — Series B.\n\nPremise: Owner is somewhere else entirely (fishing, kid\'s game, asleep). Gets a notification that the AI handled a dispatch, invoice, or renewal. Cut to what that would have taken without it.\n\nFormat: 15-30s. Split screen or cut-away. Tone: disbelief into joy.\n\nEach episode: new owner, new scenario, same punchline.')">Copy Brief</button>
+              <button class="btn btn-primary btn-sm" onclick="saveIdea('AI Did It While I Was...', 'Series B skit. Owner away doing something unrelated gets notification AI handled business. 15-30s split format. Disbelief into joy tone.')">Save as Idea</button>
+            </div>
+          </div>
+
+          <div class="skit-card">
+            <div class="skit-tag">Series C</div>
+            <div class="skit-title">Business Owner Bingo</div>
+            <div class="skit-premise">Bingo card format - squares are things every field service owner has said, heard, or dealt with. "We've always done it this way." "The guys won't use it." "We need to hire another dispatcher." When the owner calls Bingo, they call TMI. Run as a recurring carousel or short-form video with a punchline ending.</div>
+            <div class="skit-format">Format: Carousel or short video · Relatable pain · CTA punchline</div>
+            <div class="skit-footer">
+              <button class="btn btn-ghost btn-sm" onclick="copyText('Business Owner Bingo — Series C.\n\nPremise: Bingo card of things every field service owner has said, heard, or dealt with.\n\nExample squares: \"We\'ve always done it this way\" / \"The guys won\'t use it\" / \"Need another dispatcher\" / \"I\'ll look into it after the busy season\" / \"That\'s not how we do it here\"\n\nWhen they call Bingo, they call TMI. Carousel or short video. New card each episode.')">Copy Brief</button>
+              <button class="btn btn-primary btn-sm" onclick="saveIdea('Business Owner Bingo', 'Series C. Bingo card of relatable operator pain points and phrases. New card each episode. Carousel or short video with CTA punchline.')">Save as Idea</button>
+            </div>
+          </div>
+
+          <div class="skit-card">
+            <div class="skit-tag">Series D</div>
+            <div class="skit-title">What TMI Does, Explained To...</div>
+            <div class="skit-premise">Same explanation of TMI delivered to completely different people: a 70-year-old plumbing company owner, a 24-year-old city lead, a VC who doesn't understand field service, a dispatcher worried about their job, a foreman who's heard "we're getting AI" before. Same concept, completely different conversation every episode.</div>
+            <div class="skit-format">Format: 30-60s · Recurring concept · New character per episode</div>
+            <div class="skit-footer">
+              <button class="btn btn-ghost btn-sm" onclick="copyText('What TMI Does, Explained To... — Series D.\n\nPremise: Same explanation of TMI, delivered to different characters each episode.\n\nCharacter ideas: 70yo plumbing company owner / 24yo city lead / VC who doesn\'t understand field service / dispatcher worried about their job / skeptical foreman / owner\'s spouse who handles the books / new hire on day one.\n\nFormat: 30-60s. New character per episode, same concept, completely different conversation.')">Copy Brief</button>
+              <button class="btn btn-primary btn-sm" onclick="saveIdea('What TMI Does, Explained To...', 'Series D. TMI explanation delivered to a different character each episode. 30-60s. Recurring concept, new persona - veteran owner, city lead, VC, worried dispatcher, skeptical foreman.')">Save as Idea</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Cadence -->
+      <section class="bp-section" id="cadence">
+        <span class="bp-section-label">Distribution</span>
+        <div class="bp-headline">Posting Cadence</div>
+        <p class="bp-subhead">Volume is table stakes. Consistency is the variable. These are minimums, not targets. Miss a day on Instagram and it costs reach for the rest of the week.</p>
+
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="cadence-table">
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Frequency</th>
+                <th>Primary Content Mix</th>
+                <th>Best Windows</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Instagram</td>
+                <td>Daily (7x/week)</td>
+                <td>Reels from field footage and skits. Stories for behind-the-scenes, polls, and the unglamorous stuff.</td>
+                <td>6-8am, 12-2pm, 7-9pm local</td>
+              </tr>
+              <tr>
+                <td>TikTok</td>
+                <td>3-5x/week</td>
+                <td>Best performing Reels repurposed. Skits lead. Comment replies turned into content. Operator response videos.</td>
+                <td>7-9am, 6-9pm</td>
+              </tr>
+              <tr>
+                <td>LinkedIn</td>
+                <td>3x/week</td>
+                <td>THE RESULT and THE BUILD posts. Longer-form text from Mia on the business of building AI for field companies.</td>
+                <td>Tue-Thu, 8-10am</td>
+              </tr>
+              <tr>
+                <td>YouTube</td>
+                <td>Weekly</td>
+                <td>Full Build walkthroughs (10-20 min). City Lead Diaries episodes. Operator interviews. Long-form content that compounds.</td>
+                <td>Thu or Fri, 9am</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Funnel -->
+      <section class="bp-section" id="funnel">
+        <span class="bp-section-label">Content Strategy</span>
+        <div class="bp-headline">Funnel Breakdown</div>
+        <p class="bp-subhead">Every piece of content is assigned a funnel layer before it goes live. If 80% of what you post is TOF, the audience grows but doesn't convert. If 80% is BOF, you're pitching to people who aren't warm yet.</p>
+
+        <div class="card" style="padding:28px 32px">
+          <div class="funnel-bars" style="margin-bottom:28px">
+            <div class="funnel-bar-row">
+              <div class="funnel-bar-label">Top of Funnel</div>
+              <div class="funnel-bar-track">
+                <div class="funnel-bar-fill tof" style="width:50%">50%</div>
+              </div>
+              <div class="funnel-bar-sub">Awareness &amp; reach</div>
+            </div>
+            <div class="funnel-bar-row">
+              <div class="funnel-bar-label">Middle of Funnel</div>
+              <div class="funnel-bar-track">
+                <div class="funnel-bar-fill mof" style="width:35%">35%</div>
+              </div>
+              <div class="funnel-bar-sub">Trust &amp; education</div>
+            </div>
+            <div class="funnel-bar-row">
+              <div class="funnel-bar-label">Bottom of Funnel</div>
+              <div class="funnel-bar-track">
+                <div class="funnel-bar-fill bof" style="width:15%">15%</div>
+              </div>
+              <div class="funnel-bar-sub">Conversion &amp; CTA</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+            <div>
+              <div style="font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">TOF - 50%</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.65">Skits, field footage, relatable moments. Hook new people. No pitch. No ask. Just content worth watching and sharing.</div>
+            </div>
+            <div>
+              <div style="font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">MOF - 35%</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.65">Build walkthroughs, before/after results, field data, operator stories. Build trust and show exactly how the work gets done.</div>
+            </div>
+            <div>
+              <div style="font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">BOF - 15%</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.65">Specific ROI proof, application CTAs, testimonials with numbers. One in seven posts should ask for something. Not more.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Netflix Model -->
+      <section class="bp-section" id="netflix-model">
+        <span class="bp-section-label">The Strategy</span>
+        <div class="bp-headline">The Netflix Model</div>
+        <div class="card" style="padding:28px 32px">
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:18px">Netflix doesn't publish random movies and hope people come back. It builds franchises, recurring characters, and serialized worlds. Audiences return because they know the next episode is coming.</p>
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:18px">TMI runs on the same model. Instead of posting individual pieces of content, we build recurring series that people follow. City Lead Diaries gives them a character. Business Owner Bingo gives them something to share. AI Did It While I Was gives them something to screenshot and send their dispatcher.</p>
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:0">When someone discovers TMI, they don't find one good post. They find an archive of a world they want to live in. That is the retention play. One-off viral content builds reach. Serialized content builds audience. The goal is both.</p>
+        </div>
+      </section>
+
+      <!-- Series -->
+      <section class="bp-section" id="series">
+        <span class="bp-section-label">Recurring Programming</span>
+        <div class="bp-headline">Series on the TMI Account</div>
+        <p class="bp-subhead">Six anchored series run simultaneously. Mix through the week. Each builds a separate audience segment that overlaps on the TMI brand.</p>
+
+        <div class="series-grid">
+          <div class="series-card">
+            <div class="series-num">Series 01</div>
+            <div class="series-name">The Build Series</div>
+            <div class="series-desc">Full walkthroughs of real client builds. From the intake call to the first automated invoice. What the system looked like, what the owner said, what changed in week one.</div>
+            <button class="btn btn-ghost btn-sm" onclick="saveIdea('The Build Series - Episode Idea', 'Build Series episode. Document a real client system from intake to first automated result. Show the before, the build, the first week.')">Save Idea</button>
+          </div>
+          <div class="series-card">
+            <div class="series-num">Series 02</div>
+            <div class="series-name">City Lead Diaries</div>
+            <div class="series-desc">A week in the life of a TMI city lead. Meetings, cold walks into shops, driving the market, what they're hearing from operators. Real footage, real conversations, no script.</div>
+            <button class="btn btn-ghost btn-sm" onclick="saveIdea('City Lead Diaries - Episode Idea', 'City Lead Diaries episode. A week in the life of a TMI city lead. Real footage, real conversations with operators in the market.')">Save Idea</button>
+          </div>
+          <div class="series-card">
+            <div class="series-num">Series 03</div>
+            <div class="series-name">The Unsexy Business Series</div>
+            <div class="series-desc">Features on the unglamorous side of field operations - dispatch at 5am, the invoice that bounced, the crew that went to the wrong site. What these moments cost and how to stop them.</div>
+            <button class="btn btn-ghost btn-sm" onclick="saveIdea('The Unsexy Business Series - Episode Idea', 'Unsexy Business Series episode. Feature on unglamorous operational moments: dispatch failures, bounced invoices, crew errors and what they actually cost.')">Save Idea</button>
+          </div>
+          <div class="series-card">
+            <div class="series-num">Series 04</div>
+            <div class="series-name">Before and After</div>
+            <div class="series-desc">Clean split format. What the operation looked like before TMI. What it looks like now. Numbers where possible. Owner on camera where they're willing. Raw and honest.</div>
+            <button class="btn btn-ghost btn-sm" onclick="saveIdea('Before and After - Episode Idea', 'Before and After episode. Show a real client operation before and after TMI. Numbers, owner on camera, honest comparison.')">Save Idea</button>
+          </div>
+          <div class="series-card">
+            <div class="series-num">Series 05</div>
+            <div class="series-name">AI Did It While I Was...</div>
+            <div class="series-desc">Short-form recurring skit. Owner is somewhere else entirely. The AI handles the business. Cut together as: what the AI did vs. what the owner was doing at the same moment. 15-30 seconds.</div>
+            <button class="btn btn-ghost btn-sm" onclick="saveIdea('AI Did It While I Was... - Episode Idea', 'AI Did It While I Was episode. Owner away, AI handles dispatch/invoice/renewal. Split screen format showing both sides simultaneously. 15-30s.')">Save Idea</button>
+          </div>
+          <div class="series-card">
+            <div class="series-num">Series 06</div>
+            <div class="series-name">Business Owner Bingo</div>
+            <div class="series-desc">Recurring relatable pain format. New bingo card each episode with fresh phrases from the field. Carousel or short video. Ends with the punchline and the CTA.</div>
+            <button class="btn btn-ghost btn-sm" onclick="saveIdea('Business Owner Bingo - Episode Idea', 'Business Owner Bingo episode. New bingo card of relatable operator pain points. Carousel or short video with CTA punchline at the end.')">Save Idea</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:24px 28px;margin-top:20px">
+          <div class="panel-sec-label" style="margin-top:0">The Crossover Episode</div>
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:0">Once a quarter: a City Lead from Diaries meets a client from Before and After. Or a build from the Build Series becomes the result in an Unsexy Business Episode. Crossovers signal depth - the audience rewards it because it proves the universe is real. Every crossover gets a timestamp callback to the earlier episode.</p>
+        </div>
+      </section>
+
+      <!-- Community -->
+      <section class="bp-section" id="community">
+        <span class="bp-section-label">Identity</span>
+        <div class="bp-headline">Community &amp; Cult Layer</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+          <div class="card" style="padding:24px 28px">
+            <div class="panel-sec-label" style="margin-top:0">Community Identity</div>
+            <p style="font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:12px">The people who follow TMI know they're part of something. Not a fan club - a perspective. They build real things. They run physical operations. They are tired of being sold software by people who have never dispatched a crew or written a service agreement at midnight.</p>
+            <p style="font-size:14px;color:var(--ink-2);line-height:1.7"><strong style="color:var(--ink)">Language that defines the group:</strong> operators, builders, the field, physical work, real companies.<br><strong style="color:var(--ink)">Language to avoid:</strong> hustlers, entrepreneurs as a type, the grind.</p>
+          </div>
+          <div class="card" style="padding:24px 28px">
+            <div class="panel-sec-label" style="margin-top:0">The Cult Layer</div>
+            <p style="font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:12px">Every strong media brand has something that makes the core audience feel special. For TMI it is access - to how the systems get built, to what other operators are actually dealing with, to the honest version of what AI does and doesn't do for field companies.</p>
+            <p style="font-size:14px;color:var(--ink-2);line-height:1.7">The cult layer is the Field Notes newsletter, the FOTF community, and the behind-the-scenes of city lead operations. It is what you get when you go deeper than the Instagram feed.</p>
+          </div>
+        </div>
+
+        <div class="card" style="padding:24px 28px">
+          <div class="panel-sec-label" style="margin-top:0">Experiential Marketing</div>
+          <p style="font-size:14px;color:var(--ink-2);line-height:1.7;margin-bottom:0">TMI city leads are not just sales. They are the experiential marketing layer. A city lead walking into a plumbing shop in Dallas is a content moment, a relationship moment, and a distribution moment simultaneously. Document these. Run them as City Lead Diaries content. The physical presence of TMI in a market is part of the brand - and it is content that no SaaS company can replicate.</p>
+        </div>
+      </section>
+
+      <!-- Success Signals -->
+      <section class="bp-section" id="success">
+        <span class="bp-section-label">Metrics</span>
+        <div class="bp-headline">Success Signals</div>
+        <p class="bp-subhead">Vanity metrics are follower counts and likes. These are the signals that tell you whether the brand is actually working.</p>
+
+        <div class="signal-grid">
+          <div class="signal-card">
+            <strong>DM volume from right people</strong>
+            <p>Operators, owners, and field managers reaching out. Not "is this free?" but people who already understand what TMI does and want to know if they qualify.</p>
+          </div>
+          <div class="signal-card">
+            <strong>Application source attribution</strong>
+            <p>What percentage of applications reference content. "Saw your reel." "Followed you for three months." "Sent your video to my partner." Track this in every intake call.</p>
+          </div>
+          <div class="signal-card">
+            <strong>Content saves and shares</strong>
+            <p>Saves on Instagram and TikTok beat likes by 10x as a signal. Shares mean they sent it to someone specific. That is the real score. Watch these weekly.</p>
+          </div>
+          <div class="signal-card">
+            <strong>Comment quality</strong>
+            <p>Are operators tagging the person this is clearly for? Are people commenting that this is exactly their situation? Are competitors watching and saying nothing?</p>
+          </div>
+          <div class="signal-card">
+            <strong>City lead warm market rate</strong>
+            <p>When a city lead walks into a shop and the owner already knows TMI, the content is working. Track this as a field data point every week across markets.</p>
+          </div>
+          <div class="signal-card">
+            <strong>Field Notes subscriber growth</strong>
+            <p>Social content drives newsletter subscribers. Newsletter subscribers book calls at 3-5x the rate of cold traffic. Connect these two metrics every week without fail.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('brand-plan');
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    TMIAdmin.toast('Copied to clipboard');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    TMIAdmin.toast('Copied to clipboard');
+  });
+}
+
+async function saveIdea(title, notes) {
+  const res = await TMIAdmin.api('/api/content-ideas', 'POST', {
+    title,
+    status: 'idea',
+    notes
+  });
+  if (res) {
+    TMIAdmin.toast('Saved as content idea');
+  }
+}
+</script>
+</body>
+</html>

@@ -229,6 +229,7 @@ const TMIAdmin = (() => {
     ${navItem('content-ideas', 'Social Ideas', I.ideas)}
     ${navItem('content-compose', 'Compose', I.content)}
     ${navItem('content-calendar', 'Calendar', I.rituals)}
+    ${navItem('brand-plan', 'Brand Plan', I.identity)}
     <div class="sb-group-label">FOTF</div>
     ${navItem('fotf-dashboard', 'Home', I.fotf)}
     ${navItem('fotf-newsletter', 'Newsletter', I.newsletter)}
@@ -305,6 +306,7 @@ const TMIAdmin = (() => {
         { label: 'Content', items: [
           { page:'content',       label:'Field Notes',   icon:I.content },
           { page:'content-ideas', label:'Social Ideas',  icon:I.ideas },
+          { page:'brand-plan',    label:'Brand Plan',    icon:I.identity },
         ]},
         { label: 'FOTF', items: [
           { page:'fotf-dashboard',  label:'Home',       icon:I.fotf },
