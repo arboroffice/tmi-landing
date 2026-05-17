@@ -1,8 +1,8 @@
 /* TMI City Leads — shared auth, Supabase client, sidebar, utilities */
 
 const CL = (() => {
-  const SB_URL  = 'https://YOUR_SUPABASE_PROJECT.supabase.co';
-  const SB_KEY  = 'YOUR_SUPABASE_ANON_KEY';
+  const SB_URL  = 'https://nxvymsgwohpzntfbwmqt.supabase.co';
+  const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54dnltc2d3b2hwem50ZmJ3bXF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNDYxNDUsImV4cCI6MjA5MzgyMjE0NX0.Wx-gzfZUbrwrhWnvdRRiNqNp7_m034NOKUenVBIBx-8';
   const SESSION_KEY = 'cl_session';
 
   const PIPELINE_STAGES = [

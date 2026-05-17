@@ -243,14 +243,9 @@
       "destination": "/admin"
     },
     {
-      "source": "/",
+      "source": "/(.*)",
       "has": [{"type": "host", "value": "cityleads.tmitechai.com"}],
-      "destination": "/cityleads/index"
-    },
-    {
-      "source": "/:path*",
-      "has": [{"type": "host", "value": "cityleads.tmitechai.com"}],
-      "destination": "/cityleads/:path*"
+      "destination": "/cityleads/$1"
     }
   ]
 }
