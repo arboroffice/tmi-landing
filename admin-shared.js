@@ -15,7 +15,17 @@ const TMIAdmin = (() => {
 
   // ── Icons ─────────────────────────────────────────────────────────────────
   const I = {
-    dashboard: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
+    dashboard:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
+    pipeline:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="3" width="4" height="18" rx="1"/><rect x="10" y="3" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="10" rx="1"/></svg>`,
+    audits:       `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4" stroke-linecap="round"/></svg>`,
+    clientHealth: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+    partners:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.98 2.98 0 0 0 18 8a3 3 0 1 0-3-3c0 .24.04.47.09.7L8.04 9.81A3 3 0 0 0 6 9a3 3 0 0 0 0 6c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65a3 3 0 1 0 3-3z"/></svg>`,
+    activity:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    bookings:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke-linecap="round"/><circle cx="12" cy="15" r="1.5" fill="currentColor"/></svg>`,
+    team:         `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M6 20v-1a6 6 0 0 1 12 0v1"/><circle cx="20" cy="8" r="3"/><path stroke-linecap="round" d="M23 20v-1a4 4 0 0 0-3-3.87"/></svg>`,
+    glassBox:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12" stroke-linecap="round"/></svg>`,
+    stageLetters: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6" stroke-linecap="round"/></svg>`,
+    stories:      `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h8M8 14h5" stroke-linecap="round"/></svg>`,
     revenue:   `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" stroke-linecap="round" stroke-linejoin="round"/><polyline points="16 7 22 7 22 13" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     apps:      `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" stroke-linecap="round"/></svg>`,
     followup:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14" stroke-linecap="round"/></svg>`,
@@ -39,7 +49,10 @@ const TMIAdmin = (() => {
     identity:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="8" r="6"/><path stroke-linecap="round" d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`,
     library:   `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
     growth_fotf:`<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path stroke-linecap="round" d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14" stroke-linecap="round"/><line x1="23" y1="11" x2="17" y2="11" stroke-linecap="round"/></svg>`,
-    analytics: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><line x1="18" y1="20" x2="18" y2="10" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="4" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="14" stroke-linecap="round"/></svg>`
+    analytics:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><line x1="18" y1="20" x2="18" y2="10" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="4" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="14" stroke-linecap="round"/></svg>`,
+    cityPin:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+    cityMap:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18" stroke-linecap="round"/><line x1="16" y1="6" x2="16" y2="22" stroke-linecap="round"/></svg>`,
+    cityMoney:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="1" y="4" width="22" height="16" rx="2"/><circle cx="12" cy="12" r="4"/><path d="M6 12h.01M18 12h.01" stroke-linecap="round" stroke-width="2.5"/></svg>`
   };
 
   function navItem(page, label, icon, badge) {
@@ -210,17 +223,23 @@ const TMIAdmin = (() => {
     ${navItem('revenue', 'Revenue', I.revenue)}
     ${navItem('analytics', 'Analytics', I.analytics)}
     <div class="sb-group-label">Sales</div>
+    ${navItem('pipeline', 'Pipeline', I.pipeline)}
+    ${navItem('audits', 'Audits', I.audits)}
+    ${navItem('bookings', 'Bookings', I.bookings)}
     ${navItem('applications', 'Applications', I.apps, true)}
     ${navItem('followups', 'Follow-ups', I.followup, true)}
     ${navItem('leads', 'Leads', I.leads)}
     ${navItem('proposals', 'Proposals', I.proposals)}
     <div class="sb-group-label">Clients</div>
     ${navItem('clients', 'Clients', I.clients)}
+    ${navItem('client-health', 'Client Health', I.clientHealth)}
     ${navItem('projects', 'Projects', I.projects)}
     ${navItem('invoices', 'Invoices', I.invoices)}
     ${navItem('onboarding', 'Onboarding', I.onboarding)}
     <div class="sb-group-label">People</div>
     ${navItem('contacts', 'Contacts', I.contacts)}
+    ${navItem('partners', 'Partners', I.partners)}
+    ${navItem('activity', 'Activity', I.activity)}
     <div class="sb-group-label">Comms</div>
     ${navItem('email', 'Email', I.email)}
     ${navItem('sms', 'SMS', I.sms)}
@@ -233,12 +252,23 @@ const TMIAdmin = (() => {
     <div class="sb-group-label">FOTF</div>
     ${navItem('fotf-dashboard', 'Home', I.fotf)}
     ${navItem('fotf-newsletter', 'Newsletter', I.newsletter)}
+    ${navItem('fotf-issues', 'Issues', I.newsletter)}
     ${navItem('fotf-community', 'Community', I.community)}
+    ${navItem('fotf-stories', 'Stories', I.stories)}
+    ${navItem('fotf-glass-box', 'Glass Box', I.glassBox)}
+    ${navItem('fotf-stage-letters', 'Stage Letters', I.stageLetters)}
     ${navItem('fotf-rituals', 'Rituals', I.rituals)}
     ${navItem('fotf-identity', 'Identity', I.identity)}
     ${navItem('fotf-library', 'Library', I.library)}
     ${navItem('fotf-growth', 'Growth', I.growth_fotf)}
+    <div class="sb-group-label">City Leads</div>
+    ${navItem('city-dashboard', 'Overview', I.cityPin)}
+    ${navItem('cities', 'Cities', I.cityMap)}
+    ${navItem('city-roster', 'Roster', I.team)}
+    ${navItem('city-businesses', 'Businesses', I.clients)}
+    ${navItem('city-money', 'Money', I.cityMoney)}
     <div class="sb-sep"></div>
+    ${navItem('team', 'Team', I.team)}
     ${navItem('settings', 'Settings', I.settings)}
   </nav>
   <div class="sb-foot">
@@ -288,36 +318,47 @@ const TMIAdmin = (() => {
           { page:'analytics', label:'Analytics',  icon:I.analytics || I.revenue },
         ]},
         { label: 'Sales', items: [
+          { page:'pipeline',     label:'Pipeline',     icon:I.pipeline },
+          { page:'audits',       label:'Audits',       icon:I.audits },
+          { page:'bookings',     label:'Bookings',     icon:I.bookings },
           { page:'applications', label:'Applications', icon:I.apps, badge:'applications' },
           { page:'followups',    label:'Follow-ups',   icon:I.followup, badge:'followups' },
           { page:'proposals',    label:'Proposals',    icon:I.proposals },
         ]},
         { label: 'Clients', items: [
-          { page:'projects',    label:'Projects',    icon:I.projects },
-          { page:'invoices',    label:'Invoices',    icon:I.invoices },
-          { page:'onboarding',  label:'Onboarding',  icon:I.onboarding },
+          { page:'client-health', label:'Client Health', icon:I.clientHealth },
+          { page:'projects',      label:'Projects',      icon:I.projects },
+          { page:'invoices',      label:'Invoices',      icon:I.invoices },
+          { page:'onboarding',    label:'Onboarding',    icon:I.onboarding },
         ]},
         { label: 'People', items: [
-          { page:'contacts', label:'Contacts', icon:I.contacts },
+          { page:'contacts',  label:'Contacts',  icon:I.contacts },
+          { page:'partners',  label:'Partners',  icon:I.partners },
+          { page:'activity',  label:'Activity',  icon:I.activity },
         ]},
         { label: 'Comms', items: [
           { page:'sms', label:'SMS', icon:I.sms },
         ]},
         { label: 'Content', items: [
-          { page:'content',       label:'Field Notes',   icon:I.content },
-          { page:'content-ideas', label:'Social Ideas',  icon:I.ideas },
-          { page:'brand-plan',    label:'Brand Plan',    icon:I.identity },
+          { page:'content',       label:'Field Notes',  icon:I.content },
+          { page:'content-ideas', label:'Social Ideas', icon:I.ideas },
+          { page:'brand-plan',    label:'Brand Plan',   icon:I.identity },
         ]},
         { label: 'FOTF', items: [
-          { page:'fotf-dashboard',  label:'Home',       icon:I.fotf },
-          { page:'fotf-newsletter', label:'Newsletter', icon:I.newsletter },
-          { page:'fotf-community',  label:'Community',  icon:I.community },
-          { page:'fotf-rituals',    label:'Rituals',    icon:I.rituals },
-          { page:'fotf-library',    label:'Library',    icon:I.library },
-          { page:'fotf-growth',     label:'Growth',     icon:I.growth_fotf },
-          { page:'fotf-identity',   label:'Identity',   icon:I.identity },
+          { page:'fotf-dashboard',     label:'Home',          icon:I.fotf },
+          { page:'fotf-newsletter',    label:'Newsletter',    icon:I.newsletter },
+          { page:'fotf-issues',        label:'Issues',        icon:I.newsletter },
+          { page:'fotf-community',     label:'Community',     icon:I.community },
+          { page:'fotf-stories',       label:'Stories',       icon:I.stories },
+          { page:'fotf-glass-box',     label:'Glass Box',     icon:I.glassBox },
+          { page:'fotf-stage-letters', label:'Stage Letters', icon:I.stageLetters },
+          { page:'fotf-rituals',       label:'Rituals',       icon:I.rituals },
+          { page:'fotf-library',       label:'Library',       icon:I.library },
+          { page:'fotf-growth',        label:'Growth',        icon:I.growth_fotf },
+          { page:'fotf-identity',      label:'Identity',      icon:I.identity },
         ]},
         { label: 'System', items: [
+          { page:'team',     label:'Team',     icon:I.team },
           { page:'settings', label:'Settings', icon:I.settings },
         ]},
       ];

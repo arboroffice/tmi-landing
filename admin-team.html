@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Team — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+@media (max-width: 900px) { .team-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .team-grid { grid-template-columns: 1fr; } }
+.team-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+.team-card.add-card { border-style: dashed; cursor: pointer; align-items: center; justify-content: center; min-height: 160px; text-align: center; transition: background 0.15s, border-color 0.15s; color: var(--muted); }
+.team-card.add-card:hover { background: var(--bg-alt); border-color: var(--ink-2); color: var(--ink-2); }
+.team-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; letter-spacing: 0.02em; flex-shrink: 0; }
+.team-name { font-size: 15px; font-weight: 600; color: var(--ink); }
+.team-email { font-size: 13px; color: var(--muted); }
+.team-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.role-note { background: var(--bg-alt); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 16px 20px; font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+.role-note strong { color: var(--ink); font-weight: 600; }
+.add-icon { width: 32px; height: 32px; border-radius: 50%; border: 1.5px dashed currentColor; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <a href="/admin-dashboard">TMI Admin</a>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="page">Team</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="showInviteToast()">+ Invite</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="sec-head">
+        <h1>Team</h1>
+      </div>
+
+      <div class="team-grid">
+
+        <!-- Mia Louviere — Owner -->
+        <div class="team-card">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="team-avatar">ML</div>
+            <div>
+              <div class="team-name">Mia Louviere</div>
+              <div class="team-email">mia@elianatech.com</div>
+            </div>
+          </div>
+          <div class="team-badges">
+            <span class="badge" style="background:#fef3c7;color:#92400e">Owner</span>
+            <span class="badge" style="background:#dcfce7;color:#15803d">Active</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted)">Full access to all admin areas</div>
+        </div>
+
+        <!-- Add member placeholder -->
+        <div class="team-card add-card" onclick="showInviteToast()">
+          <div class="add-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <div style="font-size:14px;font-weight:500">Invite a team member</div>
+          <div style="font-size:12px;margin-top:2px">Coming soon</div>
+        </div>
+
+      </div>
+
+      <div class="role-note">
+        <strong>Role-based access is coming.</strong> Once team invites are enabled, you'll be able to assign roles — Admin, Editor, Viewer — and control which pages and data each team member can see. Invites will be sent by email and require a password setup.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('team');
+
+function showInviteToast() {
+  TMIAdmin.toast('Team invites coming soon — this feature is in development.', 'info');
+}
+</script>
+</body>
+</html>

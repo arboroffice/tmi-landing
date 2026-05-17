@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Activity — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.tl-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); position: relative; }
+.tl-item:last-child { border-bottom: none; }
+.tl-dot-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; padding-top: 3px; }
+.tl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.tl-dot.call    { background: #3b82f6; }
+.tl-dot.email   { background: #E4FF97; border: 1px solid #b5cc50; }
+.tl-dot.note    { background: #9ca3af; }
+.tl-dot.meeting { background: #22c55e; }
+.tl-dot.sms     { background: #a855f7; }
+.tl-dot.task    { background: #f97316; }
+.tl-line { width: 1px; flex: 1; background: var(--line); margin-top: 6px; }
+.tl-body { flex: 1; min-width: 0; }
+.tl-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; line-height: 1.3; }
+.tl-body-text { font-size: 13px; color: var(--ink-2); line-height: 1.5; margin-bottom: 8px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tl-meta { display: flex; gap: 12px; align-items: center; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.tl-meta a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px; }
+.tl-meta a:hover { color: var(--ink); }
+.tl-type-badge { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; font-weight: 500; flex-shrink: 0; }
+.tl-type-badge.call    { background: #dbeafe; color: #1e40af; }
+.tl-type-badge.email   { background: #E4FF97; color: #3a5400; }
+.tl-type-badge.note    { background: #f3f4f6; color: #374151; }
+.tl-type-badge.meeting { background: #dcfce7; color: #15803d; }
+.tl-type-badge.sms     { background: #f5f3ff; color: #6d28d9; }
+.tl-type-badge.task    { background: #fff7ed; color: #c2410c; }
+.load-more-wrap { text-align: center; padding: 24px 0; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb">
+        <a href="/admin-dashboard">TMI Admin</a>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="page">Activity</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openAddActivity()">+ Add Activity</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="sec-head">
+        <h1>Activity Feed</h1>
+        <span class="filter-count" id="act-count"></span>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="act-search" placeholder="Search activity titles..." oninput="renderFeed()"/>
+        </div>
+        <select class="filter-select" id="act-type" onchange="renderFeed()">
+          <option value="">All types</option>
+          <option value="call">Call</option>
+          <option value="email">Email</option>
+          <option value="note">Note</option>
+          <option value="meeting">Meeting</option>
+          <option value="sms">SMS</option>
+          <option value="task">Task</option>
+        </select>
+      </div>
+
+      <div class="card" style="padding: 0 24px;">
+        <div class="timeline" id="act-timeline">
+          <div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Loading...</div>
+        </div>
+      </div>
+
+      <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+        <button class="btn btn-ghost btn-sm" onclick="loadMore()">Load more</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add Activity Modal -->
+<div class="modal-overlay" id="act-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hd">
+      <h3 class="modal-title">Add Activity</h3>
+      <button class="modal-x" onclick="TMIAdmin.closeModal('act-modal')">&times;</button>
+    </div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+      <div class="form-group">
+        <label class="form-label">Type <span style="color:var(--red)">*</span></label>
+        <select class="form-input" id="a-type">
+          <option value="note">Note</option>
+          <option value="call">Call</option>
+          <option value="email">Email</option>
+          <option value="meeting">Meeting</option>
+          <option value="sms">SMS</option>
+          <option value="task">Task</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact (name or ID)</label>
+        <input type="text" class="form-input" id="a-contact" placeholder="Search contact name..."/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Title <span style="color:var(--red)">*</span></label>
+        <input type="text" class="form-input" id="a-title" placeholder="Brief description..."/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Body</label>
+        <textarea class="form-input" id="a-body" style="min-height:100px" placeholder="Notes, details, outcome..."></textarea>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('act-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveActivity()">Save Activity</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('activity');
+
+const PAGE_SIZE = 200;
+let activities = [];
+let page = 1;
+let total = 0;
+
+function truncate(str, n) {
+  if (!str) return '';
+  return str.length > n ? str.slice(0, n) + '...' : str;
+}
+
+function renderFeed() {
+  const q = (document.getElementById('act-search').value || '').toLowerCase();
+  const type = document.getElementById('act-type').value;
+
+  let filtered = activities;
+  if (type) filtered = filtered.filter(a => a.type === type);
+  if (q) filtered = filtered.filter(a => (a.title || '').toLowerCase().includes(q) || (a.body || '').toLowerCase().includes(q));
+
+  document.getElementById('act-count').textContent = `${filtered.length} activit${filtered.length !== 1 ? 'ies' : 'y'}`;
+
+  if (!filtered.length) {
+    document.getElementById('act-timeline').innerHTML =
+      `<div style="padding:40px;text-align:center;color:var(--muted);font-size:13px">No activities found.</div>`;
+    return;
+  }
+
+  document.getElementById('act-timeline').innerHTML = filtered.map((a, i) => {
+    const isLast = i === filtered.length - 1;
+    const typeClass = a.type || 'note';
+    const contactLink = a.contacts
+      ? `<a href="admin-contacts.html?id=${a.contact_id}">${a.contacts.first_name || ''} ${a.contacts.last_name || ''}</a>${a.contacts.company ? ` · ${a.contacts.company}` : ''}`
+      : '';
+    return `<div class="tl-item">
+      <div class="tl-dot-wrap">
+        <div class="tl-dot ${typeClass}"></div>
+        ${!isLast ? '<div class="tl-line"></div>' : ''}
+      </div>
+      <div class="tl-body">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:4px;flex-wrap:wrap">
+          <div class="tl-title" style="flex:1">${a.title || '(no title)'}</div>
+          <span class="tl-type-badge ${typeClass}">${typeClass}</span>
+        </div>
+        ${a.body ? `<div class="tl-body-text">${truncate(a.body, 120)}</div>` : ''}
+        <div class="tl-meta">
+          ${contactLink ? `<span>${contactLink}</span>` : ''}
+          <span>${TMIAdmin.reltime(a.created_at)}</span>
+          <span style="color:var(--line-strong)">${TMIAdmin.fmt(a.created_at)}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadMore() {
+  page++;
+  reload(true);
+}
+
+async function openAddActivity() {
+  document.getElementById('a-type').value = 'note';
+  document.getElementById('a-contact').value = '';
+  document.getElementById('a-title').value = '';
+  document.getElementById('a-body').value = '';
+  TMIAdmin.openModal('act-modal');
+}
+
+async function saveActivity() {
+  const title = document.getElementById('a-title').value.trim();
+  if (!title) return TMIAdmin.toast('Title is required', 'error');
+  const data = await TMIAdmin.api('/api/activities', 'POST', {
+    type: document.getElementById('a-type').value,
+    title,
+    body: document.getElementById('a-body').value.trim(),
+    contact_search: document.getElementById('a-contact').value.trim() || null,
+  });
+  if (!data) return;
+  TMIAdmin.closeModal('act-modal');
+  TMIAdmin.toast('Activity added');
+  await reload();
+}
+
+async function reload(append = false) {
+  const offset = append ? (page - 1) * PAGE_SIZE : 0;
+  if (!append) { page = 1; }
+  const result = await TMIAdmin.api(`/api/activities?limit=${PAGE_SIZE}&offset=${offset}`) || [];
+  if (append) {
+    activities = activities.concat(Array.isArray(result) ? result : (result.data || []));
+  } else {
+    activities = Array.isArray(result) ? result : (result.data || result || []);
+    total = result.total || activities.length;
+  }
+  document.getElementById('load-more-wrap').style.display =
+    activities.length < total ? '' : 'none';
+  renderFeed();
+}
+
+reload();
+</script>
+</body>
+</html>
