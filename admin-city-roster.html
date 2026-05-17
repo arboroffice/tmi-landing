@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>City Lead Roster — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+  .roster-card{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:12px;}
+  .roster-card-head{display:flex;align-items:flex-start;gap:14px;}
+  .roster-avatar{width:44px;height:44px;border-radius:50%;background:var(--bg-alt);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--ink-2);flex-shrink:0;text-transform:uppercase;}
+  .roster-info{flex:1;min-width:0;}
+  .roster-name{font-size:14px;font-weight:700;color:var(--ink);}
+  .roster-city{font-size:12px;color:var(--muted);}
+  .roster-stats{display:flex;gap:0;border-top:1px solid var(--line);padding-top:12px;}
+  .roster-stat{flex:1;text-align:center;padding:0 4px;}
+  .roster-stat:not(:last-child){border-right:1px solid var(--line);}
+  .roster-stat-val{font-size:18px;font-weight:700;color:var(--ink);}
+  .roster-stat-label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-top:2px;}
+  .roster-actions{display:flex;gap:8px;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><a href="/admin-city-dashboard">City Leads</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Roster</span></div>
+      <div class="topbar-actions">
+        <a href="/admin-city-add" class="btn btn-primary btn-sm">+ Add City Lead</a>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="sec-head">
+        <h1>City Lead Roster</h1>
+        <span class="filter-count" id="lead-count"></span>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search name, city..." oninput="renderGrid()"/>
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderGrid()">
+          <option value="">All</option>
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div class="roster-grid" id="roster-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Panel -->
+<div class="panel-overlay" id="lead-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('lead-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-name">City Lead</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closePanel('lead-panel')">Close</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Email</div><div class="detail-val" id="pd-email">—</div></div>
+        <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-val" id="pd-phone">—</div></div>
+        <div class="detail-item"><div class="detail-label">City</div><div class="detail-val" id="pd-city">—</div></div>
+        <div class="detail-item"><div class="detail-label">Territory</div><div class="detail-val" id="pd-territory">—</div></div>
+        <div class="detail-item"><div class="detail-label">Status</div><div class="detail-val" id="pd-status">—</div></div>
+        <div class="detail-item"><div class="detail-label">Added</div><div class="detail-val" id="pd-date">—</div></div>
+      </div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Notes</div>
+      <textarea class="form-input" id="pd-notes" rows="4" placeholder="Notes about this city lead..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <select class="form-input" id="pd-status-select" style="flex:1">
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="saveLead()">Save</button>
+      </div>
+      <div class="panel-sep"></div>
+      <div style="display:flex;gap:8px">
+        <a id="pd-biz-link" href="#" class="btn btn-ghost btn-sm">View Businesses</a>
+        <a id="pd-edit-link" href="#" class="btn btn-ghost btn-sm">Edit Lead</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('city-roster');
+
+let allLeads = [];
+let allBiz   = [];
+let currentLead = null;
+
+async function loadData() {
+  const [leads, biz] = await Promise.all([
+    TMIAdmin.api('/api/city-leads'),
+    TMIAdmin.api('/api/city-businesses'),
+  ]);
+  if (leads) allLeads = leads;
+  if (biz)   allBiz   = biz;
+  renderGrid();
+}
+
+function getFiltered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  return allLeads.filter(l => {
+    if (status && l.status !== status) return false;
+    if (q) {
+      const hay = [l.name, l.city, l.state, l.email].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderGrid() {
+  const filtered = getFiltered();
+  document.getElementById('lead-count').textContent = `${filtered.length} lead${filtered.length !== 1 ? 's' : ''}`;
+
+  const grid = document.getElementById('roster-grid');
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📍</div><h3>No city leads</h3><p><a href="/admin-city-add">Add your first city lead →</a></p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(l => {
+    const bizList = allBiz.filter(b => b.city_lead_id === l.id);
+    const signed  = bizList.filter(b => ['closed','build-live','support-active','expansion'].includes(b.stage)).length;
+    const active  = bizList.filter(b => ['support-active','expansion'].includes(b.stage)).length;
+    const initials = TMIAdmin.initials(l.name?.split(' ')[0], l.name?.split(' ')[1]);
+    return `<div class="roster-card">
+      <div class="roster-card-head">
+        <div class="roster-avatar">${initials}</div>
+        <div class="roster-info">
+          <div class="roster-name">${l.name}</div>
+          <div class="roster-city">${l.city}${l.state ? ', ' + l.state : ''}</div>
+          <div style="margin-top:4px">${TMIAdmin.badge(l.status || 'pending')}</div>
+        </div>
+      </div>
+      <div class="roster-stats">
+        <div class="roster-stat"><div class="roster-stat-val">${bizList.length}</div><div class="roster-stat-label">Tracked</div></div>
+        <div class="roster-stat"><div class="roster-stat-val">${signed}</div><div class="roster-stat-label">Signed</div></div>
+        <div class="roster-stat"><div class="roster-stat-val">${active}</div><div class="roster-stat-label">Active</div></div>
+      </div>
+      <div class="roster-actions">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openPanel(${JSON.stringify(l).replace(/"/g,'&quot;')})">Details</button>
+        <a href="/admin-city-businesses?city_lead_id=${l.id}" class="btn btn-ghost btn-sm" style="flex:1">Businesses</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openPanel(lead) {
+  currentLead = lead;
+  document.getElementById('panel-name').textContent = lead.name;
+  document.getElementById('pd-email').innerHTML = lead.email
+    ? `<a href="mailto:${lead.email}" style="color:var(--blue)">${lead.email}</a>` : '—';
+  document.getElementById('pd-phone').textContent  = lead.phone || '—';
+  document.getElementById('pd-city').textContent   = [lead.city, lead.state].filter(Boolean).join(', ') || '—';
+  document.getElementById('pd-territory').textContent = lead.territory || '—';
+  document.getElementById('pd-status').innerHTML   = TMIAdmin.badge(lead.status || 'pending');
+  document.getElementById('pd-date').textContent   = TMIAdmin.fmt(lead.created_at);
+  document.getElementById('pd-notes').value        = lead.notes || '';
+  document.getElementById('pd-status-select').value = lead.status || 'active';
+  document.getElementById('pd-biz-link').href = `/admin-city-businesses?city_lead_id=${lead.id}`;
+  document.getElementById('pd-edit-link').href = `/admin-city-add?id=${lead.id}`;
+  TMIAdmin.openPanel('lead-panel');
+}
+
+async function saveLead() {
+  if (!currentLead) return;
+  const notes  = document.getElementById('pd-notes').value;
+  const status = document.getElementById('pd-status-select').value;
+  const res = await TMIAdmin.api('/api/city-leads', 'PATCH', { id: currentLead.id, notes, status });
+  if (res) {
+    TMIAdmin.toast('Saved');
+    const idx = allLeads.findIndex(l => l.id === currentLead.id);
+    if (idx >= 0) { allLeads[idx].notes = notes; allLeads[idx].status = status; }
+    currentLead.notes = notes;
+    currentLead.status = status;
+    renderGrid();
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>

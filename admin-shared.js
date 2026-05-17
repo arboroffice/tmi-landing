@@ -267,6 +267,9 @@ const TMIAdmin = (() => {
     ${navItem('city-roster', 'Roster', I.team)}
     ${navItem('city-businesses', 'Businesses', I.clients)}
     ${navItem('city-money', 'Money', I.cityMoney)}
+    <div class="sb-group-label">Plans</div>
+    ${navItem('financial-model', 'Financial Model', I.revenue)}
+    ${navItem('retention-plan', 'Retention Plan', I.clientHealth)}
     <div class="sb-sep"></div>
     ${navItem('team', 'Team', I.team)}
     ${navItem('settings', 'Settings', I.settings)}
@@ -356,6 +359,17 @@ const TMIAdmin = (() => {
           { page:'fotf-library',       label:'Library',       icon:I.library },
           { page:'fotf-growth',        label:'Growth',        icon:I.growth_fotf },
           { page:'fotf-identity',      label:'Identity',      icon:I.identity },
+        ]},
+        { label: 'City Leads', items: [
+          { page:'city-dashboard',  label:'Overview',   icon:I.cityPin },
+          { page:'cities',          label:'Cities',     icon:I.cityMap },
+          { page:'city-roster',     label:'Roster',     icon:I.team },
+          { page:'city-businesses', label:'Businesses', icon:I.clients },
+          { page:'city-money',      label:'Money',      icon:I.cityMoney },
+        ]},
+        { label: 'Plans', items: [
+          { page:'financial-model', label:'Financial Model', icon:I.revenue },
+          { page:'retention-plan',  label:'Retention Plan',  icon:I.clientHealth },
         ]},
         { label: 'System', items: [
           { page:'team',     label:'Team',     icon:I.team },

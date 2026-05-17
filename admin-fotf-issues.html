@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FOTF Issues — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .issue-num{font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;}
+  .cover-thumb{width:56px;height:40px;border-radius:4px;background-size:cover;background-position:center;background-color:var(--bg-alt);flex-shrink:0;}
+  .cover-thumb.empty{display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--line-strong);}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><a href="/admin-fotf-dashboard">FOTF</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Issues</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="TMIAdmin.openModal('issue-modal')">+ New Issue</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="sec-head">
+        <h1>FOTF Issues</h1>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search issues..." oninput="renderTable()"/>
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option value="draft">Draft</option>
+          <option value="writing">Writing</option>
+          <option value="ready">Ready</option>
+          <option value="published">Published</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:48px">#</th>
+              <th>Title</th>
+              <th>Theme</th>
+              <th>Status</th>
+              <th>Publish Date</th>
+              <th>Subscribers</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="issues-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Issue Modal -->
+<div class="modal-overlay" id="issue-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3 class="modal-title" id="issue-modal-title">New Issue</h3>
+      <button class="modal-close" onclick="closeIssueModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="issue-id"/>
+      <div class="form-row">
+        <label class="form-label">Issue Number</label>
+        <input type="number" class="form-input" id="issue-number" placeholder="e.g. 12"/>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Title</label>
+        <input type="text" class="form-input" id="issue-title" placeholder="Issue title..."/>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Theme / Hook</label>
+        <input type="text" class="form-input" id="issue-theme" placeholder="One-line theme or hook..."/>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="issue-status">
+          <option value="draft">Draft</option>
+          <option value="writing">Writing</option>
+          <option value="ready">Ready</option>
+          <option value="published">Published</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+      <div class="form-row grid-2">
+        <div>
+          <label class="form-label">Publish Date</label>
+          <input type="date" class="form-input" id="issue-publish-date"/>
+        </div>
+        <div>
+          <label class="form-label">Subscriber Count</label>
+          <input type="number" class="form-input" id="issue-subscribers" placeholder="0"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Cover Image URL</label>
+        <input type="url" class="form-input" id="issue-cover" placeholder="https://..."/>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input" id="issue-notes" rows="3" placeholder="Internal notes, content outline..."></textarea>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-sm" onclick="closeIssueModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveIssue()">Save Issue</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('fotf-issues');
+
+let allIssues = [];
+let editingId = null;
+
+async function loadIssues() {
+  const data = await TMIAdmin.api('/api/fotf-issues');
+  if (data) {
+    allIssues = Array.isArray(data) ? data : [];
+    renderTable();
+  }
+}
+
+function getFiltered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  return allIssues.filter(i => {
+    if (status && i.status !== status) return false;
+    if (q) {
+      const hay = [i.title, i.theme, String(i.issue_number || '')].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  const tbody = document.getElementById('issues-tbody');
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📰</div><h3>No issues yet</h3><p>Create your first FOTF issue.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(i => {
+    const coverHtml = i.cover_url
+      ? `<div class="cover-thumb" style="background-image:url('${i.cover_url}')"></div>`
+      : `<div class="cover-thumb empty">📄</div>`;
+    return `<tr>
+      <td><span class="issue-num">${i.issue_number != null ? '#' + i.issue_number : '—'}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:12px">
+          ${coverHtml}
+          <div>
+            <div class="td-name">${i.title || 'Untitled'}</div>
+            <div class="td-muted">${i.theme || ''}</div>
+          </div>
+        </div>
+      </td>
+      <td class="td-muted">${i.theme || '—'}</td>
+      <td>${TMIAdmin.badge(i.status || 'draft')}</td>
+      <td class="td-muted">${i.publish_date ? new Date(i.publish_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'}</td>
+      <td class="td-muted">${i.subscriber_count != null ? Number(i.subscriber_count).toLocaleString() : '—'}</td>
+      <td class="td-action">
+        <button class="btn btn-ghost btn-sm" onclick="editIssue(${JSON.stringify(i).replace(/"/g,'&quot;')})">Edit</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteIssue('${i.id}')">Delete</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function editIssue(issue) {
+  editingId = issue.id;
+  document.getElementById('issue-modal-title').textContent = 'Edit Issue';
+  document.getElementById('issue-id').value = issue.id;
+  document.getElementById('issue-number').value = issue.issue_number ?? '';
+  document.getElementById('issue-title').value = issue.title || '';
+  document.getElementById('issue-theme').value = issue.theme || '';
+  document.getElementById('issue-status').value = issue.status || 'draft';
+  document.getElementById('issue-publish-date').value = issue.publish_date ? issue.publish_date.split('T')[0] : '';
+  document.getElementById('issue-subscribers').value = issue.subscriber_count ?? '';
+  document.getElementById('issue-cover').value = issue.cover_url || '';
+  document.getElementById('issue-notes').value = issue.notes || '';
+  TMIAdmin.openModal('issue-modal');
+}
+
+function closeIssueModal() {
+  editingId = null;
+  document.getElementById('issue-modal-title').textContent = 'New Issue';
+  document.getElementById('issue-id').value = '';
+  document.getElementById('issue-number').value = '';
+  document.getElementById('issue-title').value = '';
+  document.getElementById('issue-theme').value = '';
+  document.getElementById('issue-status').value = 'draft';
+  document.getElementById('issue-publish-date').value = '';
+  document.getElementById('issue-subscribers').value = '';
+  document.getElementById('issue-cover').value = '';
+  document.getElementById('issue-notes').value = '';
+  TMIAdmin.closeModal('issue-modal');
+}
+
+async function saveIssue() {
+  const title = document.getElementById('issue-title').value.trim();
+  if (!title) { TMIAdmin.toast('Title required', 'error'); return; }
+
+  const payload = {
+    issue_number:     parseInt(document.getElementById('issue-number').value) || null,
+    title,
+    theme:            document.getElementById('issue-theme').value.trim() || null,
+    status:           document.getElementById('issue-status').value,
+    publish_date:     document.getElementById('issue-publish-date').value || null,
+    subscriber_count: parseInt(document.getElementById('issue-subscribers').value) || null,
+    cover_url:        document.getElementById('issue-cover').value.trim() || null,
+    notes:            document.getElementById('issue-notes').value.trim() || null,
+  };
+
+  let res;
+  if (editingId) {
+    res = await TMIAdmin.api('/api/fotf-issues', 'PATCH', { id: editingId, ...payload });
+    if (res) { TMIAdmin.toast('Issue updated'); const idx = allIssues.findIndex(i => i.id === editingId); if (idx >= 0) allIssues[idx] = res; }
+  } else {
+    res = await TMIAdmin.api('/api/fotf-issues', 'POST', payload);
+    if (res) { TMIAdmin.toast('Issue created'); allIssues.unshift(res); }
+  }
+
+  if (res) { closeIssueModal(); renderTable(); }
+}
+
+async function deleteIssue(id) {
+  if (!await TMIAdmin.confirm('Delete this issue? This cannot be undone.')) return;
+  const res = await TMIAdmin.api(`/api/fotf-issues?id=${id}`, 'DELETE');
+  if (res) { TMIAdmin.toast('Issue deleted'); allIssues = allIssues.filter(i => i.id !== id); renderTable(); }
+}
+
+loadIssues();
+</script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Financial Model — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .model-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
+  @media(max-width:768px){.model-grid{grid-template-columns:1fr;}}
+  .model-card{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:24px;}
+  .model-card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:var(--muted);margin-bottom:20px;}
+  .input-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .input-row:last-child{border-bottom:none;}
+  .input-label{font-size:13px;color:var(--ink-2);flex:1;}
+  .input-field{width:110px;flex-shrink:0;}
+  .input-field input{width:100%;text-align:right;padding:6px 10px;background:var(--bg-alt);border:1px solid var(--line);border-radius:6px;font-size:13px;font-family:inherit;color:var(--ink);outline:none;transition:border-color 0.15s;}
+  .input-field input:focus{border-color:var(--chart);background:var(--bg);}
+  .output-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);}
+  .output-row:last-child{border-bottom:none;}
+  .output-label{font-size:13px;color:var(--ink-2);}
+  .output-val{font-size:15px;font-weight:700;color:var(--ink);}
+  .output-val.highlight{color:var(--green,#16a34a);}
+  .output-val.warn{color:var(--amber,#d97706);}
+  .output-val.red{color:var(--red,#dc2626);}
+  .margin-bar-wrap{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);}
+  .margin-bar-label{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:8px;}
+  .margin-bar-track{height:12px;background:var(--bg-alt);border-radius:6px;overflow:hidden;border:1px solid var(--line);}
+  .margin-bar-fill{height:100%;border-radius:6px;background:var(--chart);transition:width 0.5s;}
+  .scenario-tabs{display:flex;gap:4px;background:var(--bg-alt);padding:3px;border-radius:8px;border:1px solid var(--line);margin-bottom:24px;width:fit-content;}
+  .scenario-tab{font-size:12px;padding:6px 16px;border:none;border-radius:6px;cursor:pointer;background:transparent;color:var(--ink-2);font-family:inherit;font-weight:500;transition:all 0.15s;}
+  .scenario-tab.active{background:var(--bg);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,0.1);}
+  .summary-bar{background:var(--bg-deep);border-radius:var(--r);padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-bottom:24px;}
+  .summary-item{text-align:center;}
+  .summary-val{font-size:24px;font-weight:700;color:var(--chart);}
+  .summary-label{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.5);margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Financial Model</span></div>
+    </div>
+
+    <div class="content">
+      <div class="sec-head">
+        <h1>Financial Model</h1>
+        <span style="font-size:13px;color:var(--muted)">Monthly math — adjust inputs, outputs update live</span>
+      </div>
+
+      <!-- Scenario tabs -->
+      <div class="scenario-tabs">
+        <button class="scenario-tab active" onclick="loadScenario('conservative')">Conservative</button>
+        <button class="scenario-tab" onclick="loadScenario('target')">Target</button>
+        <button class="scenario-tab" onclick="loadScenario('aggressive')">Aggressive</button>
+      </div>
+
+      <!-- Summary bar -->
+      <div class="summary-bar" id="summary-bar">
+        <div class="summary-item"><div class="summary-val" id="sum-mrr">—</div><div class="summary-label">MRR</div></div>
+        <div class="summary-item"><div class="summary-val" id="sum-margin">—</div><div class="summary-label">Gross Margin</div></div>
+        <div class="summary-item"><div class="summary-val" id="sum-founder">—</div><div class="summary-label">Founder Take-Home</div></div>
+        <div class="summary-item"><div class="summary-val" id="sum-clients">—</div><div class="summary-label">Active Clients</div></div>
+        <div class="summary-item"><div class="summary-val" id="sum-leads-needed">—</div><div class="summary-label">Leads / Month</div></div>
+      </div>
+
+      <div class="model-grid">
+
+        <!-- Inputs -->
+        <div>
+          <div class="model-card">
+            <div class="model-card-title">Sales Inputs</div>
+            <div class="input-row"><span class="input-label">Leads per month</span><div class="input-field"><input type="number" id="i-leads" min="1" oninput="recalc()"/></div></div>
+            <div class="input-row"><span class="input-label">Audit book rate (%)</span><div class="input-field"><input type="number" id="i-audit-rate" min="1" max="100" oninput="recalc()"/></div></div>
+            <div class="input-row"><span class="input-label">Close rate (%)</span><div class="input-field"><input type="number" id="i-close-rate" min="1" max="100" oninput="recalc()"/></div></div>
+            <div class="input-row"><span class="input-label">Avg deal size ($)</span><div class="input-field"><input type="number" id="i-deal-size" min="100" oninput="recalc()"/></div></div>
+            <div class="input-row"><span class="input-label">Avg MRR per client ($/mo)</span><div class="input-field"><input type="number" id="i-mrr-per-client" min="100" oninput="recalc()"/></div></div>
+          </div>
+
+          <div class="model-card" style="margin-top:16px">
+            <div class="model-card-title">Cost Inputs</div>
+            <div class="input-row"><span class="input-label">City lead payout (% of client MRR)</span><div class="input-field"><input type="number" id="i-city-lead-pct" min="0" max="50" oninput="recalc()"/></div></div>
+            <div class="input-row"><span class="input-label">Fulfillment cost per client ($/mo)</span><div class="input-field"><input type="number" id="i-fulfillment" min="0" oninput="recalc()"/></div></div>
+            <div class="input-row"><span class="input-label">Fixed overhead ($/mo)</span><div class="input-field"><input type="number" id="i-overhead" min="0" oninput="recalc()"/></div></div>
+            <div class="input-row"><span class="input-label">CAC - cost per lead ($)</span><div class="input-field"><input type="number" id="i-cac" min="0" oninput="recalc()"/></div></div>
+            <div class="input-row"><span class="input-label">Churn rate (%/mo)</span><div class="input-field"><input type="number" id="i-churn" min="0" max="50" oninput="recalc()"/></div></div>
+          </div>
+        </div>
+
+        <!-- Outputs -->
+        <div>
+          <div class="model-card">
+            <div class="model-card-title">Sales Funnel (monthly)</div>
+            <div class="output-row"><span class="output-label">Leads generated</span><span class="output-val" id="o-leads">—</span></div>
+            <div class="output-row"><span class="output-label">Audits booked</span><span class="output-val" id="o-audits">—</span></div>
+            <div class="output-row"><span class="output-label">New clients closed</span><span class="output-val" id="o-new-clients">—</span></div>
+            <div class="output-row"><span class="output-label">Clients churned</span><span class="output-val warn" id="o-churned">—</span></div>
+            <div class="output-row"><span class="output-label">Net new clients</span><span class="output-val" id="o-net-new">—</span></div>
+          </div>
+
+          <div class="model-card" style="margin-top:16px">
+            <div class="model-card-title">Revenue & Costs (at 12 months)</div>
+            <div class="output-row"><span class="output-label">Total active clients</span><span class="output-val" id="o-total-clients">—</span></div>
+            <div class="output-row"><span class="output-label">Monthly Recurring Revenue</span><span class="output-val highlight" id="o-mrr">—</span></div>
+            <div class="output-row"><span class="output-label">City lead payouts</span><span class="output-val warn" id="o-city-payouts">—</span></div>
+            <div class="output-row"><span class="output-label">Fulfillment cost</span><span class="output-val warn" id="o-fulfillment">—</span></div>
+            <div class="output-row"><span class="output-label">Sales/marketing cost</span><span class="output-val warn" id="o-sales-cost">—</span></div>
+            <div class="output-row"><span class="output-label">Fixed overhead</span><span class="output-val warn" id="o-overhead">—</span></div>
+            <div class="output-row" style="border-top:2px solid var(--line-strong);margin-top:4px;padding-top:14px">
+              <span class="output-label" style="font-weight:700;color:var(--ink)">Gross profit</span>
+              <span class="output-val highlight" id="o-gross-profit">—</span>
+            </div>
+            <div class="output-row"><span class="output-label">Gross margin</span><span class="output-val" id="o-margin-pct">—</span></div>
+
+            <div class="margin-bar-wrap">
+              <div class="margin-bar-label">Margin</div>
+              <div class="margin-bar-track"><div class="margin-bar-fill" id="margin-bar-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+
+          <div class="model-card" style="margin-top:16px;background:var(--bg-deep);">
+            <div class="model-card-title" style="color:rgba(255,255,255,0.5)">Founder Economics</div>
+            <div class="output-row" style="border-color:rgba(255,255,255,0.08)"><span class="output-label" style="color:rgba(255,255,255,0.6)">Monthly gross profit</span><span class="output-val" style="color:var(--chart)" id="o-founder-gross">—</span></div>
+            <div class="output-row" style="border-color:rgba(255,255,255,0.08)"><span class="output-label" style="color:rgba(255,255,255,0.6)">Estimated taxes (30%)</span><span class="output-val" style="color:rgba(255,255,255,0.4)" id="o-taxes">—</span></div>
+            <div class="output-row" style="border-color:rgba(255,255,255,0.08)"><span class="output-label" style="font-weight:700;color:#fff">Founder take-home</span><span class="output-val" style="color:var(--chart);font-size:20px" id="o-take-home">—</span></div>
+            <div class="output-row" style="border-color:rgba(255,255,255,0.08)"><span class="output-label" style="color:rgba(255,255,255,0.6)">Annual run rate</span><span class="output-val" style="color:var(--chart)" id="o-annual">—</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('financial-model');
+
+const SCENARIOS = {
+  conservative: {
+    leads: 10, auditRate: 40, closeRate: 30, dealSize: 4500, mrrPerClient: 1200,
+    cityLeadPct: 20, fulfillment: 300, overhead: 2000, cac: 50, churn: 5
+  },
+  target: {
+    leads: 25, auditRate: 50, closeRate: 40, dealSize: 6000, mrrPerClient: 1500,
+    cityLeadPct: 20, fulfillment: 300, overhead: 3000, cac: 40, churn: 3
+  },
+  aggressive: {
+    leads: 60, auditRate: 60, closeRate: 50, dealSize: 8000, mrrPerClient: 2000,
+    cityLeadPct: 20, fulfillment: 350, overhead: 4000, cac: 30, churn: 2
+  }
+};
+
+function loadScenario(key) {
+  const s = SCENARIOS[key];
+  if (!s) return;
+
+  document.querySelectorAll('.scenario-tab').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
+
+  document.getElementById('i-leads').value           = s.leads;
+  document.getElementById('i-audit-rate').value      = s.auditRate;
+  document.getElementById('i-close-rate').value      = s.closeRate;
+  document.getElementById('i-deal-size').value       = s.dealSize;
+  document.getElementById('i-mrr-per-client').value  = s.mrrPerClient;
+  document.getElementById('i-city-lead-pct').value   = s.cityLeadPct;
+  document.getElementById('i-fulfillment').value     = s.fulfillment;
+  document.getElementById('i-overhead').value        = s.overhead;
+  document.getElementById('i-cac').value             = s.cac;
+  document.getElementById('i-churn').value           = s.churn;
+  recalc();
+}
+
+function get(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+function fmtPct(n) { return Math.round(n) + '%'; }
+
+function recalc() {
+  const leads          = get('i-leads');
+  const auditRate      = get('i-audit-rate') / 100;
+  const closeRate      = get('i-close-rate') / 100;
+  const dealSize       = get('i-deal-size');
+  const mrrPerClient   = get('i-mrr-per-client');
+  const cityLeadPct    = get('i-city-lead-pct') / 100;
+  const fulfillmentPer = get('i-fulfillment');
+  const overhead       = get('i-overhead');
+  const cac            = get('i-cac');
+  const churnRate      = get('i-churn') / 100;
+
+  const audits    = Math.floor(leads * auditRate);
+  const newMonth  = Math.floor(audits * closeRate);
+  const salesCost = leads * cac;
+
+  // Simulate 12-month ramp
+  let clients = 0;
+  for (let m = 0; m < 12; m++) {
+    clients = clients * (1 - churnRate) + newMonth;
+  }
+  clients = Math.round(clients);
+
+  const mrr          = clients * mrrPerClient;
+  const churned      = Math.round(clients * churnRate);
+  const netNew       = newMonth - churned;
+  const cityPayouts  = Math.round(mrr * cityLeadPct);
+  const fulfillment  = Math.round(clients * fulfillmentPer);
+  const totalCosts   = cityPayouts + fulfillment + salesCost + overhead;
+  const grossProfit  = mrr - totalCosts;
+  const marginPct    = mrr > 0 ? (grossProfit / mrr) * 100 : 0;
+  const taxes        = Math.max(0, grossProfit * 0.30);
+  const takeHome     = Math.max(0, grossProfit - taxes);
+
+  // Funnel outputs
+  document.getElementById('o-leads').textContent       = leads;
+  document.getElementById('o-audits').textContent      = audits;
+  document.getElementById('o-new-clients').textContent = newMonth;
+  document.getElementById('o-churned').textContent     = churned;
+  document.getElementById('o-net-new').textContent     = netNew;
+
+  // Revenue outputs
+  document.getElementById('o-total-clients').textContent = clients;
+  document.getElementById('o-mrr').textContent           = fmt(mrr) + '/mo';
+  document.getElementById('o-city-payouts').textContent  = fmt(cityPayouts) + '/mo';
+  document.getElementById('o-fulfillment').textContent   = fmt(fulfillment) + '/mo';
+  document.getElementById('o-sales-cost').textContent    = fmt(salesCost) + '/mo';
+  document.getElementById('o-overhead').textContent      = fmt(overhead) + '/mo';
+  document.getElementById('o-gross-profit').textContent  = fmt(grossProfit) + '/mo';
+
+  const marginEl = document.getElementById('o-margin-pct');
+  marginEl.textContent = fmtPct(marginPct);
+  marginEl.className = 'output-val ' + (marginPct >= 50 ? 'highlight' : marginPct >= 30 ? 'warn' : 'red');
+
+  document.getElementById('margin-bar-fill').style.width = Math.max(0, Math.min(100, marginPct)) + '%';
+
+  // Founder
+  document.getElementById('o-founder-gross').textContent = fmt(grossProfit) + '/mo';
+  document.getElementById('o-taxes').textContent         = fmt(taxes) + '/mo';
+  document.getElementById('o-take-home').textContent     = fmt(takeHome) + '/mo';
+  document.getElementById('o-annual').textContent        = fmt(takeHome * 12) + '/yr';
+
+  // Summary bar
+  document.getElementById('sum-mrr').textContent          = fmt(mrr);
+  document.getElementById('sum-margin').textContent       = fmtPct(marginPct);
+  document.getElementById('sum-founder').textContent      = fmt(takeHome) + '/mo';
+  document.getElementById('sum-clients').textContent      = clients;
+  document.getElementById('sum-leads-needed').textContent = leads;
+}
+
+// Load target scenario on init
+document.getElementById('i-leads').value           = 25;
+document.getElementById('i-audit-rate').value      = 50;
+document.getElementById('i-close-rate').value      = 40;
+document.getElementById('i-deal-size').value       = 6000;
+document.getElementById('i-mrr-per-client').value  = 1500;
+document.getElementById('i-city-lead-pct').value   = 20;
+document.getElementById('i-fulfillment').value     = 300;
+document.getElementById('i-overhead').value        = 3000;
+document.getElementById('i-cac').value             = 40;
+document.getElementById('i-churn').value           = 3;
+recalc();
+</script>
+</body>
+</html>

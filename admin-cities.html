@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cities — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><a href="/admin-city-dashboard">City Leads</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Cities</span></div>
+      <div class="topbar-actions">
+        <a href="/admin-city-add" class="btn btn-primary btn-sm">+ Add City Lead</a>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="sec-head">
+        <h1>All Cities</h1>
+        <span class="filter-count" id="city-count"></span>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search city or state..." oninput="renderTable()"/>
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>City</th>
+              <th>State</th>
+              <th>City Lead</th>
+              <th>Status</th>
+              <th>Businesses</th>
+              <th>Signed</th>
+              <th>Added</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="cities-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('cities');
+
+let allLeads = [];
+let allBiz   = [];
+
+async function loadData() {
+  const [leads, biz] = await Promise.all([
+    TMIAdmin.api('/api/city-leads'),
+    TMIAdmin.api('/api/city-businesses'),
+  ]);
+  if (leads) allLeads = leads;
+  if (biz)   allBiz   = biz;
+  renderTable();
+}
+
+function getFiltered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  return allLeads.filter(l => {
+    if (status && l.status !== status) return false;
+    if (q) {
+      const hay = [l.city, l.state, l.name].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  document.getElementById('city-count').textContent = `${filtered.length} cit${filtered.length !== 1 ? 'ies' : 'y'}`;
+
+  const tbody = document.getElementById('cities-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🗺️</div><h3>No cities yet</h3><p><a href="/admin-city-add">Add your first city lead →</a></p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(l => {
+    const bizList = allBiz.filter(b => b.city_lead_id === l.id);
+    const signed  = bizList.filter(b => ['closed','build-live','support-active','expansion'].includes(b.stage)).length;
+    return `<tr>
+      <td class="td-name">${l.city || '—'}</td>
+      <td class="td-muted">${l.state || '—'}</td>
+      <td>
+        <div class="td-name">${l.name}</div>
+        <div class="td-muted">${l.email || ''}</div>
+      </td>
+      <td>${TMIAdmin.badge(l.status || 'pending')}</td>
+      <td class="td-muted">${bizList.length}</td>
+      <td class="td-muted">${signed}</td>
+      <td class="td-muted">${TMIAdmin.fmt(l.created_at)}</td>
+      <td class="td-action">
+        <a href="/admin-city-businesses?city_lead_id=${l.id}" class="btn btn-ghost btn-sm">Businesses</a>
+        <a href="/admin-city-add?id=${l.id}" class="btn btn-ghost btn-sm">Edit</a>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+loadData();
+</script>
+</body>
+</html>
