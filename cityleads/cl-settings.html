@@ -91,7 +91,7 @@
             </div>
             <div class="form-group">
               <label class="form-label">Email</label>
-              <input class="form-input" value="jordan@tmi-technology.com" type="email" readonly style="background:var(--bg);color:var(--muted);cursor:not-allowed;"/>
+              <input class="form-input" id="email-display" value="" type="email" readonly style="background:var(--bg);color:var(--muted);cursor:not-allowed;"/>
               <div class="form-hint">Email can't be changed. Contact admin.</div>
             </div>
             <div class="form-group">
@@ -100,7 +100,7 @@
             </div>
             <div class="form-group" style="margin-bottom:20px;">
               <label class="form-label">Assigned City</label>
-              <input class="form-input" value="Austin, TX" type="text" readonly style="background:var(--bg);color:var(--muted);cursor:not-allowed;"/>
+              <input class="form-input" id="city-display" value="" type="text" readonly style="background:var(--bg);color:var(--muted);cursor:not-allowed;"/>
               <div class="form-hint">City assignment is managed by your admin.</div>
             </div>
             <button class="btn btn-primary" onclick="saveProfile()">Save Profile</button>
@@ -241,33 +241,97 @@
 <script>
 CL.initPage('cl-settings');
 
-function saveProfile() {
+const EDIT_ICON = `<div style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface);"><svg width="10" height="10" fill="none" stroke="#fff" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>`;
+
+function setAvatar(name) {
+  const el = document.getElementById('avatar-circle');
+  el.innerHTML = CL.initials(name) + EDIT_ICON;
+}
+
+async function loadProfile() {
+  const user = CL.getUser();
+  if (!user) return;
+
+  document.getElementById('display-email').textContent = user.email;
+  document.getElementById('email-display').value = user.email;
+
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+
+  const { data: lead } = await CL.api('city_leads', {
+    eq: { id: clId }, select: 'first_name,last_name,name,phone,city,state', single: true
+  });
+  if (!lead) return;
+
+  const fname = lead.first_name || '';
+  const lname = lead.last_name || '';
+  const fullName = lead.name || (fname + ' ' + lname).trim() || user.email;
+
+  document.getElementById('fname').value = fname;
+  document.getElementById('lname').value = lname;
+  document.getElementById('phone').value = lead.phone || '';
+  document.getElementById('city-display').value = [lead.city, lead.state].filter(Boolean).join(', ') || '—';
+  document.getElementById('display-name').textContent = fullName;
+  setAvatar(fullName);
+
+  // Restore saved tone
+  const savedTone = localStorage.getItem('cl_tone');
+  if (savedTone) document.getElementById('tone-input').value = savedTone;
+
+  // Restore notification prefs
+  ['followup','wins','leaderboard','officehours'].forEach(key => {
+    const saved = localStorage.getItem('cl_notif_' + key);
+    if (saved !== null) {
+      const el = document.querySelector(`input[onchange*="'${key}'"]`);
+      if (el) el.checked = saved === '1';
+    }
+  });
+}
+loadProfile();
+
+async function saveProfile() {
   const fname = document.getElementById('fname').value.trim();
   const lname = document.getElementById('lname').value.trim();
+  const phone = document.getElementById('phone').value.trim();
   if (!fname || !lname) { CL.toast('Name is required', 'error'); return; }
+
+  const clId = CL.getCityLeadId();
+  const sb = CL.initSupabase();
+
+  const updates = { first_name: fname, last_name: lname, name: fname + ' ' + lname };
+  if (phone) updates.phone = phone;
+
+  const [leadRes] = await Promise.all([
+    clId ? sb.from('city_leads').update(updates).eq('id', clId) : Promise.resolve({}),
+    sb.auth.updateUser({ data: { full_name: fname + ' ' + lname } })
+  ]);
+
+  if (leadRes.error) { CL.toast('Save failed', 'error'); return; }
+
   document.getElementById('display-name').textContent = fname + ' ' + lname;
-  document.getElementById('avatar-circle').textContent = CL.initials(fname + ' ' + lname);
-  // Re-add the edit overlay icon
-  document.getElementById('avatar-circle').innerHTML = CL.initials(fname + ' ' + lname) + `<div style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface);"><svg width="10" height="10" fill="none" stroke="#fff" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>`;
+  setAvatar(fname + ' ' + lname);
   CL.toast('Profile saved');
 }
 
 function updateTonePreview() {
   const val = document.getElementById('tone-input').value.toLowerCase();
-  let preview = 'Hey Mike — Jordan here. Quick check-in. You mentioned you were buried last week — still want to find 20 minutes when you\'re clear? No pressure, just want to show you the one thing that usually makes this click.';
+  let preview = 'Hey Mike — still want to find 20 minutes when you\'re clear? No pressure, just want to show you the one thing that usually makes this click.';
   if (val.includes('humor') || val.includes('funny')) {
-    preview = 'Hey Mike — Jordan. Still thinking about that conversation we had. (The good kind of thinking, not the "this vendor won\'t leave me alone" kind.) Got 20 minutes this week?';
+    preview = 'Hey Mike. Still thinking about that conversation. (The good kind, not the "this vendor won\'t leave me alone" kind.) Got 20 minutes this week?';
   } else if (val.includes('formal') || val.includes('professional')) {
-    preview = 'Hello Mike — Jordan Rivera with TMI Technology. Following up on our previous conversation. I\'d welcome the opportunity to continue when you have availability. Would a brief 20-minute call work this week?';
+    preview = 'Hello Mike — following up on our previous conversation. I\'d welcome the opportunity to continue when you have availability. Would a brief 20-minute call work this week?';
   }
   document.getElementById('preview-text').textContent = preview;
 }
 
 function saveTone() {
+  const tone = document.getElementById('tone-input').value;
+  localStorage.setItem('cl_tone', tone);
   CL.toast('AI tone saved');
 }
 
 function saveNotif(el, key) {
+  localStorage.setItem('cl_notif_' + key, el.checked ? '1' : '0');
   CL.toast(el.checked ? 'Notifications on' : 'Notifications off');
 }
 
@@ -276,24 +340,39 @@ async function confirmLogout() {
   if (ok) CL.logout();
 }
 
-// Tab switching
 const SETTINGS_TABS = ['settings','bug','suggest'];
 function showSettingsTab(id) {
   SETTINGS_TABS.forEach(t => { document.getElementById('tab-'+t).style.display = t === id ? '' : 'none'; });
   document.querySelectorAll('.tab-btn').forEach((b,i) => { b.classList.toggle('active', SETTINGS_TABS[i] === id); });
 }
 
-function submitBug() {
+async function submitBug() {
   const desc = document.getElementById('bug-desc').value.trim();
   if (!desc) { CL.toast('Describe what happened', 'error'); return; }
+  const clId = CL.getCityLeadId();
+  const page = document.getElementById('bug-page').value.trim();
+  const freq = document.getElementById('bug-freq').value;
+  const note = `BUG REPORT\nPage: ${page || 'not specified'}\nFrequency: ${freq}\n\n${desc}`;
+  if (clId) {
+    const sb = CL.initSupabase();
+    await sb.from('city_personal_notes').insert({ city_lead_id: clId, note, tags: ['bug-report'] });
+  }
   CL.toast('Bug report submitted — thanks!');
   document.getElementById('bug-page').value = '';
   document.getElementById('bug-desc').value = '';
 }
 
-function submitSuggest() {
+async function submitSuggest() {
   const title = document.getElementById('suggest-title').value.trim();
   if (!title) { CL.toast('Add a one-sentence idea', 'error'); return; }
+  const clId = CL.getCityLeadId();
+  const why = document.getElementById('suggest-why').value.trim();
+  const priority = document.getElementById('suggest-priority').value;
+  const note = `FEATURE REQUEST [${priority}]\n${title}\n\n${why}`;
+  if (clId) {
+    const sb = CL.initSupabase();
+    await sb.from('city_personal_notes').insert({ city_lead_id: clId, note, tags: ['feature-request'] });
+  }
   CL.toast('Suggestion submitted — thanks!');
   document.getElementById('suggest-title').value = '';
   document.getElementById('suggest-why').value = '';
