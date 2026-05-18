@@ -46,7 +46,7 @@
   <div class="main">
     <div class="topbar">
       <div class="topbar-crumb">
-        <span class="page" id="city-label">Austin, TX</span>
+        <span class="page" id="city-label">My City</span>
       </div>
       <div class="topbar-actions">
         <button class="btn btn-ghost btn-sm" onclick="openFilterSheet()">
@@ -140,14 +140,8 @@ let markers = [];
 let activeFilters = { type: '', stage: '', score: '' };
 let activeBusiness = null;
 
-// Sample businesses for demo
-const DEMO_BUSINESSES = [
-  { id:'b1', name:'Austin HVAC Pros', type:'HVAC', owner:'Mike Torres', phone:'(512) 555-0101', stage:'warm', score:'hot', lat:30.2672, lng:-97.7431 },
-  { id:'b2', name:'Capital Plumbing Co', type:'Plumbing', owner:'Sarah Chen', phone:'(512) 555-0202', stage:'met_owner', score:'warm', lat:30.2750, lng:-97.7380 },
-  { id:'b3', name:'Lone Star Roofing', type:'Roofing', owner:'James Polk', phone:'(512) 555-0303', stage:'seed', score:'cold', lat:30.2600, lng:-97.7500 },
-  { id:'b4', name:'Hill Country Electric', type:'Electrician', owner:'Dana Webb', phone:'(512) 555-0404', stage:'audit_booked', score:'hot', lat:30.2800, lng:-97.7300 },
-  { id:'b5', name:'Green Leaf Landscaping', type:'Landscaping', owner:'Carlos Reyes', phone:'(512) 555-0505', stage:'proposal_sent', score:'warm', lat:30.2550, lng:-97.7600 },
-];
+// Businesses loaded from backend
+const DEMO_BUSINESSES = [];
 
 function initMap() {
   const cityLat = 30.2672;

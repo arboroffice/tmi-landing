@@ -38,12 +38,16 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    const { city_lead_id, business_name, contact_name, email, phone, industry, address, notes } = req.body || {};
+    const { city_lead_id, business_name, contact_name, email, phone, industry, address, notes,
+            owner_name, owner_phone, owner_email, owner_linkedin, website, google_place_id,
+            city, state, zip, lat, lng, score } = req.body || {};
     if (!business_name) return res.status(400).json({ error: 'business_name required' });
 
     const { data, error } = await db
       .from('city_businesses')
-      .insert({ city_lead_id, business_name, contact_name, email, phone, industry, address, notes, stage: 'seed' })
+      .insert({ city_lead_id, business_name, contact_name, email, phone, industry, address, notes,
+                owner_name, owner_phone, owner_email, owner_linkedin, website, google_place_id,
+                city, state, zip, lat, lng, score, stage: 'seed' })
       .select()
       .single();
     if (error) return res.status(500).json({ error: error.message });
@@ -53,7 +57,7 @@ module.exports = async (req, res) => {
   if (req.method === 'PATCH') {
     const { id, ...fields } = req.body || {};
     if (!id) return res.status(400).json({ error: 'id required' });
-    const allowed = ['business_name','contact_name','email','phone','industry','address','stage','notes','last_visit_at','deal_value','signed_at'];
+    const allowed = ['business_name','contact_name','email','phone','industry','address','stage','notes','last_visit_at','deal_value','signed_at','owner_name','owner_phone','owner_email','owner_linkedin','website','google_place_id','city','state','zip','lat','lng','score','commission'];
     const update = {};
     allowed.forEach(k => { if (fields[k] !== undefined) update[k] = fields[k]; });
 

@@ -136,11 +136,6 @@
           <label class="form-label">Business</label>
           <select class="form-input" id="note-biz-select">
             <option value="">Select business...</option>
-            <option value="1">Apex HVAC</option>
-            <option value="2">Travis Electric</option>
-            <option value="3">Lone Star Concrete</option>
-            <option value="4">Hill Country HVAC</option>
-            <option value="5">Cedar Park Plumbing</option>
           </select>
         </div>
 
@@ -188,15 +183,7 @@ function showTab(id) {
 }
 
 // Visit data
-const VISITS = [
-  { id:1, biz:'Apex HVAC', type:'walk_in', date:'2026-05-17', notes:'Spoke with Mike (owner). Receptive but wants to see it in action first. Asked about job costing for service calls. Follow up Thursday.', tags:['hot lead','decision maker'] },
-  { id:2, biz:'Travis Electric', type:'coffee', date:'2026-05-16', notes:'Coffee at Epoch Coffee. Sarah is the office manager, not the owner. James (owner) will be in Friday. Good vibes - they have 12 techs and are growing.', tags:['warm'] },
-  { id:3, biz:'Lone Star Concrete', type:'walk_in', date:'2026-05-15', notes:'Walked in cold. Diego (owner) was there. He is adding 2 more crews this month. Scheduling is already breaking down. Very interested.', tags:['hot lead','scheduling pain'] },
-  { id:4, biz:'Hill Country HVAC', type:'call', date:'2026-05-14', notes:'Quick call. Confirmed demo time for May 20 at 10am. He has 8 techs, been in business 11 years.', tags:['demo scheduled'] },
-  { id:5, biz:'Cedar Park Plumbing', type:'walk_in', date:'2026-05-12', notes:'First visit. Met the front desk only. Owner (Marcus) not in. Left card, got his phone number.', tags:['seed','contact made'] },
-  { id:6, biz:'Austin Painting Co', type:'email', date:'2026-05-11', notes:'Sent intro email with TMI overview deck. Subject: Quick question about your scheduling.', tags:['outreach'] },
-  { id:7, biz:'SkyHigh Roofing', type:'walk_in', date:'2026-05-10', notes:'Second visit. Talked to Carlos. He uses WhatsApp to coordinate crews - mentioned it is a nightmare. Wants to see the mobile app specifically.', tags:['warm','mobile focus'] },
-];
+const VISITS = [];
 
 const typeIcons = {
   walk_in: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-linecap="round"/><circle cx="12" cy="10" r="3"/></svg>`,
@@ -245,11 +232,11 @@ function processCard(e) {
   if (!file) return;
   CL.toast('Processing card...');
   setTimeout(() => {
-    document.getElementById('sc-biz').value = 'Peak Performance HVAC';
-    document.getElementById('sc-name').value = 'Robert Garza';
-    document.getElementById('sc-phone').value = '(512) 884-2201';
-    document.getElementById('sc-email').value = 'robert@peakperfhvac.com';
-    document.getElementById('sc-industry').value = 'HVAC';
+    document.getElementById('sc-biz').value = '';
+    document.getElementById('sc-name').value = '';
+    document.getElementById('sc-phone').value = '';
+    document.getElementById('sc-email').value = '';
+    document.getElementById('sc-industry').value = '';
     document.getElementById('scanned-result').style.display = 'block';
     CL.toast('Card scanned — review and save');
   }, 1200);

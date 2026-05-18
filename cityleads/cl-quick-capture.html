@@ -185,17 +185,22 @@
 <script>
 CL.initPage('cl-quick-capture');
 
-// ── Mock businesses ─────────────────────────────────────────────────────────
-const BIZ_LIST = [
-  { id:1, name:'Apex HVAC',           type:'HVAC',        stage:'warm' },
-  { id:2, name:'Silverline Roofing',  type:'Roofing',     stage:'problem_identified' },
-  { id:3, name:'Travis Electric',     type:'Electrician', stage:'second_visit' },
-  { id:4, name:'Cedar Park Plumbing', type:'Plumbing',    stage:'met_owner' },
-  { id:5, name:'Lone Star Concrete',  type:'Concrete',    stage:'seed' },
-  { id:6, name:'Hill Country HVAC',   type:'HVAC',        stage:'audit_booked' },
-  { id:7, name:'Austin Painting Co',  type:'Painting',    stage:'warm' },
-  { id:8, name:'Capital Landscaping', type:'Landscaping', stage:'met_owner' },
-];
+const BIZ_LIST = [];
+
+async function loadBusinesses() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const { data } = await CL.api('city_businesses', {
+    eq: { city_lead_id: clId },
+    select: 'id,business_name,industry,stage',
+    order: 'business_name', asc: true
+  });
+  if (data) {
+    BIZ_LIST.length = 0;
+    data.forEach(b => BIZ_LIST.push({ id: b.id, name: b.business_name, type: b.industry || '', stage: b.stage }));
+  }
+}
+loadBusinesses();
 
 let selectedBiz = null;
 let selectedType = null;
@@ -301,7 +306,7 @@ function addPhoto() {
   CL.toast('Photo added');
 }
 
-function logVisit() {
+async function logVisit() {
   if (!selectedBiz) {
     CL.toast('Pick a business first', 'error');
     document.getElementById('biz-search').focus();
@@ -315,20 +320,34 @@ function logVisit() {
   const btn = document.getElementById('log-btn');
   btn.disabled = true;
   btn.textContent = 'Saving...';
-  // Simulate save
-  setTimeout(() => {
-    CL.toast('Visit logged for ' + selectedBiz.name);
-    // Reset form
-    clearBiz();
-    document.querySelectorAll('#visit-type-chips .chip').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('#tag-chips .tag-chip').forEach(c => c.classList.remove('active'));
-    document.getElementById('visit-note').value = '';
-    document.getElementById('photo-row').style.display = 'none';
-    document.getElementById('photo-row').innerHTML = '';
-    selectedType = null; selectedTags = []; photoCount = 0; isRecording = false;
+
+  const sb = CL.initSupabase();
+  const now = new Date().toISOString();
+  const { error } = await sb.from('city_visits').insert({
+    city_lead_id: CL.getCityLeadId(),
+    business_id: selectedBiz.id,
+    visit_type: selectedType,
+    notes: note,
+    tags: selectedTags,
+    visited_at: now
+  });
+  if (error) {
+    CL.toast('Save failed: ' + error.message, 'error');
     btn.disabled = false;
-    btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg>Log Visit';
-  }, 800);
+    btn.textContent = 'Log Visit';
+    return;
+  }
+  await sb.from('city_businesses').update({ last_visit_at: now }).eq('id', selectedBiz.id);
+  CL.toast('Visit logged for ' + selectedBiz.name);
+  clearBiz();
+  document.querySelectorAll('#visit-type-chips .chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#tag-chips .tag-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('visit-note').value = '';
+  document.getElementById('photo-row').style.display = 'none';
+  document.getElementById('photo-row').innerHTML = '';
+  selectedType = null; selectedTags = []; photoCount = 0; isRecording = false;
+  btn.disabled = false;
+  btn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12" stroke-linecap="round" stroke-linejoin="round"/></svg>Log Visit';
 }
 </script>
 </body>

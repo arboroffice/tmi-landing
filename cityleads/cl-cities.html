@@ -40,11 +40,10 @@
           </select>
           <select class="filter-select" id="lead-filter" onchange="filterTable()">
             <option value="">All Leads</option>
-            <option>Jordan M.</option><option>Taylor R.</option><option>Chris W.</option>
-            <option>Alex P.</option><option>Sam B.</option><option>Unassigned</option>
+            <option>Unassigned</option>
           </select>
         </div>
-        <span class="filter-count" id="row-count">24 cities</span>
+        <span class="filter-count" id="row-count">0 cities</span>
       </div>
 
       <div class="card">
@@ -98,7 +97,6 @@
         <label class="form-label">Assign City Lead</label>
         <select class="form-input">
           <option value="">Unassigned</option>
-          <option>Jordan M.</option><option>Taylor R.</option><option>Chris W.</option>
         </select>
       </div>
     </div>
@@ -113,18 +111,7 @@
 <script>
 CL.initPage('cl-cities', { adminOnly: true });
 
-const ALL_CITIES = [
-  { city:'Austin',     state:'TX', lead:'Jordan M.',  biz:38, warm:9,  closed:4,  rev:12800, last:'2 hours ago' },
-  { city:'Denver',     state:'CO', lead:'Taylor R.',  biz:27, warm:6,  closed:3,  rev:9600,  last:'5 hours ago' },
-  { city:'Nashville',  state:'TN', lead:'Chris W.',   biz:22, warm:4,  closed:2,  rev:6400,  last:'Yesterday'   },
-  { city:'Phoenix',    state:'AZ', lead:'Alex P.',    biz:19, warm:3,  closed:1,  rev:3200,  last:'2 days ago'  },
-  { city:'Charlotte',  state:'NC', lead:'Sam B.',     biz:15, warm:2,  closed:1,  rev:3200,  last:'3 days ago'  },
-  { city:'Dallas',     state:'TX', lead:'Unassigned', biz:0,  warm:0,  closed:0,  rev:0,     last:'—'           },
-  { city:'Tampa',      state:'FL', lead:'Unassigned', biz:0,  warm:0,  closed:0,  rev:0,     last:'—'           },
-  { city:'Atlanta',    state:'GA', lead:'Unassigned', biz:0,  warm:0,  closed:0,  rev:0,     last:'—'           },
-  { city:'Columbus',   state:'OH', lead:'Unassigned', biz:0,  warm:0,  closed:0,  rev:0,     last:'—'           },
-  { city:'San Antonio',state:'TX', lead:'Unassigned', biz:0,  warm:0,  closed:0,  rev:0,     last:'—'           },
-];
+const ALL_CITIES = [];
 
 let filtered = [...ALL_CITIES];
 

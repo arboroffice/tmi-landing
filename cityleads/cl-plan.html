@@ -81,10 +81,10 @@
       <!-- ── Route Today ── -->
       <div id="tab-route">
         <div class="route-summary">
-          <div class="route-summary-item"><strong>6</strong> stops planned</div>
-          <div class="route-summary-item"><strong>~22 mi</strong> total drive</div>
-          <div class="route-summary-item"><strong>~3.5 hrs</strong> estimated</div>
-          <div class="route-summary-item"><strong>2 of 6</strong> done</div>
+          <div class="route-summary-item"><strong id="summary-stops">0</strong> stops planned</div>
+          <div class="route-summary-item"><strong id="summary-mi">--</strong> total drive</div>
+          <div class="route-summary-item"><strong id="summary-time">--</strong> estimated</div>
+          <div class="route-summary-item"><strong id="summary-done">0 of 0</strong> done</div>
         </div>
 
         <div id="route-list"></div>
@@ -111,23 +111,23 @@
 
       <!-- ── City Intel ── -->
       <div id="tab-intel" style="display:none;">
-        <div class="sec-head"><h1>Austin, TX</h1></div>
+        <div class="sec-head"><h1 id="intel-city-name">My City</h1></div>
 
         <div class="stats-row" style="margin-bottom:24px;">
-          <div class="intel-stat"><div class="intel-val">978K</div><div class="intel-label">Population</div></div>
-          <div class="intel-stat"><div class="intel-val">28,400</div><div class="intel-label">Small Businesses</div></div>
-          <div class="intel-stat"><div class="intel-val">4,200</div><div class="intel-label">Trades Companies</div></div>
-          <div class="intel-stat"><div class="intel-val">12%</div><div class="intel-label">YoY Growth</div></div>
+          <div class="intel-stat"><div class="intel-val" id="intel-pop">--</div><div class="intel-label">Population</div></div>
+          <div class="intel-stat"><div class="intel-val" id="intel-smb">--</div><div class="intel-label">Small Businesses</div></div>
+          <div class="intel-stat"><div class="intel-val" id="intel-trades">--</div><div class="intel-label">Trades Companies</div></div>
+          <div class="intel-stat"><div class="intel-val" id="intel-growth">--</div><div class="intel-label">YoY Growth</div></div>
         </div>
 
         <div class="sec-head"><h2 style="font-size:15px;">Top Industries by Business Count</h2></div>
-        <div class="card" style="padding:16px;" id="industry-bars"></div>
+        <div class="card" style="padding:16px;" id="industry-bars">
+          <div style="text-align:center;color:var(--muted);padding:24px;">No industry data yet.</div>
+        </div>
 
         <div class="sec-head" style="margin-top:24px;"><h2 style="font-size:15px;">Market Notes</h2></div>
         <div class="card" style="padding:16px;">
-          <p style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-bottom:12px;">Austin's construction and trades sector is growing at 12% YoY driven by population growth and the tech office boom. HVAC, electrical, and plumbing businesses are scaling fast — most have 5-15 techs and are running on spreadsheets or nothing.</p>
-          <p style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-bottom:12px;">Key pain points: scheduling is the #1 complaint. Most use text/WhatsApp to dispatch. Job costing is done on paper or in Excel at the end of the month.</p>
-          <p style="font-size:14px;color:var(--ink-2);line-height:1.65;">Best neighborhoods to work: East Austin (HVAC, plumbing), South Congress corridor (painting, landscaping), Cedar Park/Round Rock (construction, concrete).</p>
+          <p style="font-size:14px;color:var(--muted);text-align:center;padding:16px 0;">No market notes yet.</p>
         </div>
       </div>
 
@@ -146,82 +146,64 @@ function showTab(id) {
 }
 
 // Route data
-const STOPS = [
-  { num:1, biz:'Apex HVAC',        addr:'1420 E 6th St, Austin', action:'Second visit — ask for demo time', status:'done' },
-  { num:2, biz:'Travis Electric',  addr:'3801 S Congress Ave',   action:'Follow up with James (owner)', status:'done' },
-  { num:3, biz:'Lone Star Concrete', addr:'6700 Manor Rd',       action:'Third visit — push for audit booking', status:'current' },
-  { num:4, biz:'Cedar Park Plumbing', addr:'Cedar Park, TX',     action:'First visit — cold walk-in', status:'upcoming' },
-  { num:5, biz:'Silverline Roofing', addr:'4200 N Lamar Blvd',   action:'Drop off one-pager, get owner name', status:'upcoming' },
-  { num:6, biz:'Austin Painting Co', addr:'South Austin area',   action:'Check if owner is in today', status:'upcoming' },
-];
+const STOPS = [];
 
-document.getElementById('route-list').innerHTML = STOPS.map(s => `
-  <div class="route-stop">
-    <div class="stop-num ${s.status}">${s.status === 'done' ? '✓' : s.num}</div>
-    <div class="stop-body">
-      <div class="stop-biz">${s.biz}</div>
-      <div class="stop-addr">${s.addr}</div>
-      <div class="stop-action">${s.action}</div>
-      ${s.status !== 'done' ? `<div class="stop-controls">
-        <button class="btn btn-primary" onclick="markStopDone(${s.num})">Mark Done</button>
-        <button class="btn btn-ghost" onclick="window.open('https://maps.google.com?q=${encodeURIComponent(s.addr)}')">Navigate</button>
-        <button class="btn btn-ghost" onclick="CL.toast('Removed from route')">Remove</button>
-      </div>` : ''}
-    </div>
-  </div>`).join('');
+const routeListEl = document.getElementById('route-list');
+if (STOPS.length) {
+  routeListEl.innerHTML = STOPS.map(s => `
+    <div class="route-stop">
+      <div class="stop-num ${s.status}">${s.status === 'done' ? '✓' : s.num}</div>
+      <div class="stop-body">
+        <div class="stop-biz">${s.biz}</div>
+        <div class="stop-addr">${s.addr}</div>
+        <div class="stop-action">${s.action}</div>
+        ${s.status !== 'done' ? `<div class="stop-controls">
+          <button class="btn btn-primary" onclick="markStopDone(${s.num})">Mark Done</button>
+          <button class="btn btn-ghost" onclick="window.open('https://maps.google.com?q=${encodeURIComponent(s.addr)}')">Navigate</button>
+          <button class="btn btn-ghost" onclick="CL.toast('Removed from route')">Remove</button>
+        </div>` : ''}
+      </div>
+    </div>`).join('');
+} else {
+  routeListEl.innerHTML = `<div style="text-align:center;color:var(--muted);padding:32px;">No stops planned yet. Use + Add Stop to build your route.</div>`;
+}
 
 function markStopDone(num) { CL.toast('Stop ' + num + ' marked done'); }
 function addStop() { CL.toast('Add stop — coming soon'); }
 
 // Week data
-const WEEK = [
-  { day:'Sunday, May 17', today:true, items:[
-    { type:'visit',   text:'Lone Star Concrete — 3rd visit', time:'10:00 am' },
-    { type:'followup',text:'Travis Electric — send calendar link', time:'11:30 am' },
-  ]},
-  { day:'Monday, May 18', today:false, items:[
-    { type:'visit',   text:'Cedar Park Plumbing — cold walk-in', time:'9:00 am' },
-    { type:'visit',   text:'Silverline Roofing — drop off one-pager', time:'11:00 am' },
-  ]},
-  { day:'Tuesday, May 19', today:false, items:[
-    { type:'task',    text:'Follow up with Apex HVAC via text', time:'AM' },
-    { type:'followup',text:'Austin Painting Co — email check-in', time:'Afternoon' },
-  ]},
-  { day:'Wednesday, May 20', today:false, items:[
-    { type:'visit',   text:'Hill Country HVAC — demo call 10am', time:'10:00 am' },
-    { type:'handoff', text:'SkyHigh Roofing — send to Mia', time:'2:00 pm' },
-  ]},
-  { day:'Thursday, May 21', today:false, items:[
-    { type:'task',    text:'Plan next week\'s route', time:'End of day' },
-  ]},
-];
+const WEEK = [];
 
-document.getElementById('week-view').innerHTML = WEEK.map(d => `
-  <div class="week-day">
-    <div class="week-day-head ${d.today ? 'today' : ''}">
-      ${d.day} ${d.today ? '<span class="today-pill">Today</span>' : ''}
-    </div>
-    ${d.items.length
-      ? d.items.map(item => `
-        <div class="week-item">
-          <div class="week-item-dot ${item.type}"></div>
-          <div class="week-item-body">${item.text}</div>
-          <div class="week-item-time">${item.time}</div>
-        </div>`).join('')
-      : `<div style="font-size:13px;color:var(--muted);padding:8px 0;">Nothing scheduled</div>`}
-  </div>`).join('');
+const weekViewEl = document.getElementById('week-view');
+if (WEEK.length) {
+  weekViewEl.innerHTML = WEEK.map(d => `
+    <div class="week-day">
+      <div class="week-day-head ${d.today ? 'today' : ''}">
+        ${d.day} ${d.today ? '<span class="today-pill">Today</span>' : ''}
+      </div>
+      ${d.items.length
+        ? d.items.map(item => `
+          <div class="week-item">
+            <div class="week-item-dot ${item.type}"></div>
+            <div class="week-item-body">${item.text}</div>
+            <div class="week-item-time">${item.time}</div>
+          </div>`).join('')
+        : `<div style="font-size:13px;color:var(--muted);padding:8px 0;">Nothing scheduled</div>`}
+    </div>`).join('');
+} else {
+  weekViewEl.innerHTML = `<div style="text-align:center;color:var(--muted);padding:32px;">Nothing scheduled this week yet.</div>`;
+}
 
 // Targets
-const TARGETS = [
-  { rank:1, biz:'Peak Performance HVAC', addr:'East Austin', why:'6 techs, growing fast, owner active on LinkedIn. Your best Austin HVAC comp (Apex) came from a similar profile.', tags:['HVAC','6 techs','East Austin'] },
-  { rank:2, biz:'Capital Plumbing Services', addr:'North Austin', why:'12 crew members, job costing complaints visible on Yelp reviews. Owner name: Dan R. Check if LinkedIn shows a direct number.', tags:['Plumbing','12 crew','North Austin'] },
-  { rank:3, biz:'Longhorn Electric Co', addr:'Round Rock', why:'Referral from Travis Electric\'s owner. Same stage as Travis was when you first approached.', tags:['Electrical','Referral','Round Rock'] },
-  { rank:4, biz:'Verde Landscaping', addr:'South Congress', why:'45 employees. Their Instagram shows 3 active crews. No job tracking app visible from their site.', tags:['Landscaping','45 employees'] },
-  { rank:5, biz:'Texas Commercial Roofing', addr:'Cedar Park', why:'2 Glassdoor complaints about "communication chaos." Owner posts on Facebook — try a DM after a walk-in.', tags:['Roofing','Cedar Park'] },
-];
+const TARGETS = [];
 
 function renderTargets() {
-  document.getElementById('target-list').innerHTML = TARGETS.map(t => `
+  const targetList = document.getElementById('target-list');
+  if (!TARGETS.length) {
+    targetList.innerHTML = `<div style="text-align:center;color:var(--muted);padding:32px;">No targets yet. Hit Refresh Targets to generate suggestions.</div>`;
+    return;
+  }
+  targetList.innerHTML = TARGETS.map(t => `
     <div class="target-card">
       <div class="target-rank">#${t.rank} suggested target</div>
       <div class="target-biz">${t.biz}</div>
@@ -243,22 +225,7 @@ function refreshTargets() {
 renderTargets();
 
 // City intel industries
-const INDUSTRIES = [
-  { label:'HVAC', count:820, pct:100 },
-  { label:'Plumbing', count:680, pct:83 },
-  { label:'Electrician', count:610, pct:74 },
-  { label:'Construction', count:590, pct:72 },
-  { label:'Landscaping', count:430, pct:52 },
-  { label:'Roofing', count:380, pct:46 },
-  { label:'Painting', count:320, pct:39 },
-  { label:'Concrete', count:210, pct:26 },
-];
-document.getElementById('industry-bars').innerHTML = INDUSTRIES.map(i => `
-  <div class="industry-bar">
-    <div class="industry-bar-label">${i.label}</div>
-    <div class="industry-bar-fill" style="width:${Math.max(i.pct*1.8, 20)}px;"></div>
-    <div class="industry-bar-count">${i.count}</div>
-  </div>`).join('');
+const INDUSTRIES = [];
 </script>
 </body>
 </html>

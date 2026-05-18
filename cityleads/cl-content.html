@@ -96,9 +96,6 @@
             <label class="form-label">Business</label>
             <select class="form-input" id="upload-biz">
               <option value="">Select business...</option>
-              <option value="1">Apex HVAC</option>
-              <option value="2">Travis Electric</option>
-              <option value="3">Lone Star Concrete</option>
             </select>
           </div>
           <div class="form-group">
@@ -193,42 +190,35 @@ function cancelUpload() {
 }
 
 // Posts
-const POSTS = [
-  { img:'https://images.pexels.com/photos/3964736/pexels-photo-3964736.jpeg?auto=compress&cs=tinysrgb&w=600', platforms:['instagram'], caption:'Catching up with the Apex HVAC crew on a job in East Austin. These guys are running 8 techs and growing fast. Love the hustle. #Austin #HVAC #Trades', date:'May 15', likes:47 },
-  { img:'https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=600', platforms:['instagram','linkedin'], caption:'Third time visiting Lone Star Concrete this week. Diego and his crew are adding two more trucks this month. When operations scale this fast, the scheduling headaches start piling up. #Austin #Concrete #GrowthPains', date:'May 13', likes:91 },
-  { img:'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=600', platforms:['linkedin'], caption:'Great conversation with the team at Travis Electric today. 12 techs, 11 years in business, and still coordinating through text messages. There is a better way.', date:'May 11', likes:38 },
-];
+const POSTS = [];
 
-document.getElementById('post-list').innerHTML = POSTS.map(p => `
-  <div class="post-card">
-    <div class="post-img" style="background-image:url('${p.img}')"></div>
-    <div class="post-body">
-      <div class="post-platform">${p.platforms.map(pl => `<span class="platform-chip ${pl}">${pl}</span>`).join('')}</div>
-      <div class="post-caption">${p.caption}</div>
-      <div class="post-meta"><span>${p.date}</span><span>♥ ${p.likes} likes</span></div>
-    </div>
-  </div>`).join('');
+document.getElementById('post-list').innerHTML = POSTS.length
+  ? POSTS.map(p => `
+      <div class="post-card">
+        <div class="post-img" style="background-image:url('${p.img}')"></div>
+        <div class="post-body">
+          <div class="post-platform">${p.platforms.map(pl => `<span class="platform-chip ${pl}">${pl}</span>`).join('')}</div>
+          <div class="post-caption">${p.caption}</div>
+          <div class="post-meta"><span>${p.date}</span><span>♥ ${p.likes} likes</span></div>
+        </div>
+      </div>`).join('')
+  : `<div style="text-align:center;color:var(--muted);padding:40px 20px;">No posts yet. Upload photos from your visits and the team will create posts for your city.</div>`;
 
 // Chat
-const MESSAGES = [
-  { who:'Keisha', init:'K', time:'Yesterday 4:12 pm', text:'Anyone know a good intro line for concrete companies? I\'ve been walking in as "tech company" but getting a lot of blank looks.' },
-  { who:'Carlos', init:'C', time:'Yesterday 4:34 pm', text:'I say "we help construction businesses track crews and jobs without using 3 different spreadsheets" — that one lands better than anything software-y.' },
-  { who:'Jordan', init:'J', time:'Yesterday 4:51 pm', text:'Same. The spreadsheet line is gold. You can literally watch them react to it.' },
-  { who:'Mia', init:'M', time:'Yesterday 5:02 pm', text:'Saving this thread. Jordan and Carlos — you two should do a quick voice note for the playbook on this.' },
-  { who:'You', init:'Y', time:'Today 10:15 am', text:'New here — just got my first warm lead in Austin. HVAC company, 8 techs. What\'s the best next move after they ask "what would it cost?"', mine:true },
-  { who:'Keisha', init:'K', time:'Today 10:28 am', text:'Don\'t give a number! Redirect to the audit — "we do a 20-minute review of your operation and then you\'ll have a real number for your specific setup." Works every time.' },
-];
+const MESSAGES = [];
 
-document.getElementById('chat-messages').innerHTML = MESSAGES.map(m => `
-  <div class="chat-msg ${m.mine ? 'mine' : ''}">
-    ${!m.mine ? `<div class="chat-avatar">${m.init}</div>` : ''}
-    <div>
-      ${!m.mine ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${m.who} · ${m.time}</div>` : ''}
-      <div class="chat-bubble">${m.text}</div>
-      ${m.mine ? `<div style="font-size:10px;color:var(--muted);text-align:right;margin-top:3px;">${m.time}</div>` : ''}
-    </div>
-    ${m.mine ? `<div class="chat-avatar">${m.init}</div>` : ''}
-  </div>`).join('');
+document.getElementById('chat-messages').innerHTML = MESSAGES.length
+  ? MESSAGES.map(m => `
+      <div class="chat-msg ${m.mine ? 'mine' : ''}">
+        ${!m.mine ? `<div class="chat-avatar">${m.init}</div>` : ''}
+        <div>
+          ${!m.mine ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">${m.who} · ${m.time}</div>` : ''}
+          <div class="chat-bubble">${m.text}</div>
+          ${m.mine ? `<div style="font-size:10px;color:var(--muted);text-align:right;margin-top:3px;">${m.time}</div>` : ''}
+        </div>
+        ${m.mine ? `<div class="chat-avatar">${m.init}</div>` : ''}
+      </div>`).join('')
+  : `<div style="text-align:center;color:var(--muted);padding:32px 20px;">No messages yet. Say hello to the other city leads.</div>`;
 
 function sendMsg() {
   const input = document.getElementById('chat-input');
@@ -243,26 +233,22 @@ function sendMsg() {
 }
 
 // Office hours
-const SLOTS = [
-  { who:'Mia', init:'M', time:'Mon May 19 · 9:00 – 9:30 am', desc:'Pipeline coaching, deal strategy, handoff prep', booked:false },
-  { who:'Tyler', init:'T', time:'Mon May 19 · 2:00 – 2:30 pm', desc:'Pricing questions, proposal review, close strategy', booked:true },
-  { who:'Mia', init:'M', time:'Wed May 21 · 10:00 – 10:30 am', desc:'Pipeline coaching, deal strategy, handoff prep', booked:false },
-  { who:'Tyler', init:'T', time:'Thu May 22 · 3:00 – 3:30 pm', desc:'Pricing questions, proposal review, close strategy', booked:false },
-  { who:'Mia', init:'M', time:'Fri May 23 · 9:00 – 9:30 am', desc:'Pipeline coaching, deal strategy, handoff prep', booked:false },
-];
+const SLOTS = [];
 
-document.getElementById('oh-list').innerHTML = SLOTS.map(s => `
-  <div class="oh-slot ${s.booked ? 'booked' : ''}">
-    <div class="oh-avatar">${s.init}</div>
-    <div class="oh-body">
-      <div class="oh-who">${s.who}</div>
-      <div class="oh-time">${s.time}</div>
-      <div class="oh-desc">${s.desc}</div>
-    </div>
-    <button class="btn ${s.booked ? 'btn-ghost' : 'btn-primary'} btn-sm" onclick="bookSlot('${s.who}','${s.time}')">
-      ${s.booked ? 'Booked' : 'Book'}
-    </button>
-  </div>`).join('');
+document.getElementById('oh-list').innerHTML = SLOTS.length
+  ? SLOTS.map(s => `
+      <div class="oh-slot ${s.booked ? 'booked' : ''}">
+        <div class="oh-avatar">${s.init}</div>
+        <div class="oh-body">
+          <div class="oh-who">${s.who}</div>
+          <div class="oh-time">${s.time}</div>
+          <div class="oh-desc">${s.desc}</div>
+        </div>
+        <button class="btn ${s.booked ? 'btn-ghost' : 'btn-primary'} btn-sm" onclick="bookSlot('${s.who}','${s.time}')">
+          ${s.booked ? 'Booked' : 'Book'}
+        </button>
+      </div>`).join('')
+  : `<div style="text-align:center;color:var(--muted);padding:32px 20px;">No office hours scheduled this week.</div>`;
 
 function bookSlot(who, time) {
   CL.toast('Booked with ' + who + ' — ' + time);

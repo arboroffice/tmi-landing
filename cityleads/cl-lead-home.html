@@ -43,22 +43,22 @@
         <div class="stat-box">
           <div class="stat-label">My Businesses</div>
           <div class="stat-val" id="stat-biz">Loading...</div>
-          <div class="stat-delta pos">+5 this month</div>
+          <div class="stat-delta pos"></div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Visits This Week</div>
-          <div class="stat-val" id="stat-visits">Loading...</div>
+          <div class="stat-val" id="stat-visits">0</div>
           <div class="stat-delta">Goal: 15</div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Follow-Ups Due</div>
-          <div class="stat-val" id="stat-followups" style="color:var(--amber)">Loading...</div>
-          <div class="stat-delta neg">3 overdue</div>
+          <div class="stat-val" id="stat-followups" style="color:var(--amber)">0</div>
+          <div class="stat-delta"></div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Deals in Pipeline</div>
-          <div class="stat-val" id="stat-pipeline">Loading...</div>
-          <div class="stat-delta pos">2 near close</div>
+          <div class="stat-val" id="stat-pipeline">0</div>
+          <div class="stat-delta pos"></div>
         </div>
       </div>
 
@@ -110,58 +110,73 @@
 <script>
 CL.initPage('cl-lead-home');
 
-// Mock user data
-const user = { name: 'Jordan Martinez', city: 'Austin, TX', streak: 6 };
-document.getElementById('greeting-name').textContent = user.name;
-document.getElementById('greeting-city').textContent = user.city + ' Territory';
-document.getElementById('greeting-streak').textContent = user.streak + ' week';
+const user = CL.getUser();
+const fullName = user?.user_metadata?.full_name || 'City Lead';
+document.getElementById('greeting-name').textContent = fullName;
+document.getElementById('greeting-city').textContent = user?.user_metadata?.city ? 'Territory: ' + user.user_metadata.city : 'Your Territory';
+document.getElementById('greeting-streak').textContent = '—';
 
-document.getElementById('stat-biz').textContent       = '38';
-document.getElementById('stat-visits').textContent    = '11';
-document.getElementById('stat-followups').textContent = '7';
-document.getElementById('stat-pipeline').textContent  = '9';
+async function loadDashboard() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
 
-const followups = [
-  { name:'Apex HVAC',          lastContact:'May 10',  action:'Check in after proposal meeting',   overdue:true  },
-  { name:'Silverline Roofing', lastContact:'May 12',  action:'Follow up on audit results',         overdue:true  },
-  { name:'Travis Electric',    lastContact:'May 14',  action:'Schedule second visit',              overdue:false },
-  { name:'Cedar Park Plumb.',  lastContact:'May 15',  action:'Confirm owner is back from vacation',overdue:false },
-  { name:'Lone Star Concrete', lastContact:'May 15',  action:'Send pricing overview',              overdue:false },
-];
+  const startOfWeek = new Date();
+  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+  startOfWeek.setHours(0,0,0,0);
 
-document.getElementById('followup-list').innerHTML = followups.map(f => `
-  <div class="fu-card">
-    <div class="fu-header">
-      <div>
-        <div class="fu-biz">${f.name}</div>
-        <div class="fu-due">Last contact: ${f.lastContact}${f.overdue ? ' &mdash; <span style="color:var(--red)">Overdue</span>' : ''}</div>
+  const [bizRes, visitRes, fuRes] = await Promise.all([
+    CL.api('city_businesses', { eq: { city_lead_id: clId }, select: 'id,stage,deal_value' }),
+    CL.api('city_visits', { eq: { city_lead_id: clId }, select: 'id,visited_at' }),
+    CL.api('city_follow_ups', { eq: { city_lead_id: clId, completed: false }, select: 'id,title,due_at,business_id,city_businesses(business_name)', order: 'due_at', asc: true })
+  ]);
+
+  const bizData  = bizRes.data  || [];
+  const visitData = visitRes.data || [];
+  const fuData   = fuRes.data   || [];
+
+  const now = new Date();
+  const visitsThisWeek = visitData.filter(v => new Date(v.visited_at) >= startOfWeek).length;
+  const overdueCount   = fuData.filter(f => f.due_at && new Date(f.due_at) < now).length;
+  const ACTIVE_STAGES  = ['met_owner','second_visit','problem_identified','warm','audit_booked','proposal_sent'];
+  const pipelineCount  = bizData.filter(b => ACTIVE_STAGES.includes(b.stage)).length;
+
+  document.getElementById('stat-biz').textContent       = bizData.length;
+  document.getElementById('stat-visits').textContent    = visitsThisWeek;
+  document.getElementById('stat-followups').textContent = overdueCount;
+  document.getElementById('stat-pipeline').textContent  = pipelineCount;
+
+  // Follow-ups list (next 5)
+  const upcoming = fuData.slice(0, 5);
+  document.getElementById('followup-list').innerHTML = upcoming.length ? upcoming.map(f => {
+    const biz = f.city_businesses?.business_name || '—';
+    const due = f.due_at ? CL.fmt(f.due_at) : 'No date';
+    const isOverdue = f.due_at && new Date(f.due_at) < now;
+    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.title || biz}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">${biz} &bull; <span style="color:${isOverdue?'#ef4444':'var(--muted)'}">${due}</span></div>
       </div>
-    </div>
-    <div class="fu-message">${f.action}</div>
-    <div class="fu-actions">
-      <button class="btn btn-primary btn-sm" onclick="CL.toast('Visit logged for ${f.name}')">Log Visit</button>
-      <button class="btn btn-ghost btn-sm" onclick="CL.toast('Follow-up approved')">Approve</button>
-    </div>
-  </div>`).join('');
+    </div>`;
+  }).join('') : '<div style="text-align:center;color:var(--muted);padding:32px 20px;font-size:14px;">No follow-ups due</div>';
 
-const stages = [
-  { label:'Seed',        count:8,  id:'seed' },
-  { label:'Met Owner',   count:6,  id:'met_owner' },
-  { label:'2nd Visit',   count:4,  id:'second_visit' },
-  { label:'Problem ID',  count:3,  id:'problem_identified' },
-  { label:'Warm',        count:5,  id:'warm' },
-  { label:'Audit',       count:2,  id:'audit_booked' },
-  { label:'Proposal',    count:3,  id:'proposal_sent' },
-  { label:'Closed',      count:4,  id:'closed' },
-  { label:'Build Live',  count:2,  id:'build_live' },
-  { label:'Support',     count:1,  id:'support_active' },
-];
+  // Pipeline strip
+  const STRIP_STAGES = [
+    {id:'warm',label:'Warm'},{id:'audit_booked',label:'Audit Booked'},
+    {id:'proposal_sent',label:'Proposal'},{id:'closed',label:'Closed'}
+  ];
+  const counts = {};
+  bizData.forEach(b => { counts[b.stage] = (counts[b.stage]||0) + 1; });
+  const stripItems = STRIP_STAGES.map(s => {
+    const n = counts[s.id] || 0;
+    return `<div style="flex:0 0 auto;background:${n>0?'var(--ink)':'var(--bg)'};color:${n>0?'#fff':'var(--ink-2)'};border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:10px 14px;text-align:center;min-width:80px;">
+      <div style="font-size:22px;font-weight:700;">${n}</div>
+      <div style="font-size:11px;opacity:0.7;margin-top:2px;">${s.label}</div>
+    </div>`;
+  });
+  document.getElementById('pipeline-strip').innerHTML = stripItems.join('') || '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No businesses yet</div>';
+}
 
-document.getElementById('pipeline-strip').innerHTML = stages.map(s => `
-  <div style="flex:0 0 auto;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;min-width:72px;">
-    <div style="font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink)">${s.count}</div>
-    <div style="font-size:10px;color:var(--muted);letter-spacing:0.06em;margin-top:3px;white-space:nowrap">${s.label}</div>
-  </div>`).join('');
+loadDashboard();
 </script>
 </body>
 </html>

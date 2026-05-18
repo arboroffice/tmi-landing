@@ -167,25 +167,25 @@
         <p style="font-size:14px;color:var(--ink-2);margin-bottom:20px;line-height:1.6;">Download your earnings records for tax filing. 1099 forms are issued in January for the prior year.</p>
         <div class="card" style="padding:0;margin-bottom:16px;overflow:hidden;">
           <div style="padding:14px 16px;background:var(--bg);border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);">2026 (Year to Date)</div>
-          <div class="info-row"><div class="info-label">Total earned</div><div class="info-val">$6,550</div></div>
-          <div class="info-row"><div class="info-label">Referral commissions</div><div class="info-val">$4,040</div></div>
-          <div class="info-row"><div class="info-label">Monthly support</div><div class="info-val">$2,510</div></div>
-          <div class="info-row"><div class="info-label">Transactions</div><div class="info-val">11</div></div>
+          <div class="info-row"><div class="info-label">Total earned</div><div class="info-val">$0</div></div>
+          <div class="info-row"><div class="info-label">Referral commissions</div><div class="info-val">$0</div></div>
+          <div class="info-row"><div class="info-label">Monthly support</div><div class="info-val">$0</div></div>
+          <div class="info-row"><div class="info-label">Transactions</div><div class="info-val">0</div></div>
           <div class="info-row">
             <div class="info-label">Earnings statement</div>
-            <button class="btn btn-ghost btn-sm" onclick="CL.toast('Downloading earnings CSV...')">Download CSV</button>
+            <button class="btn btn-ghost btn-sm" onclick="CL.toast('No earnings to export yet')">Download CSV</button>
           </div>
         </div>
         <div class="card" style="padding:0;overflow:hidden;">
           <div style="padding:14px 16px;background:var(--bg);border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);">2025 (Full Year)</div>
-          <div class="info-row"><div class="info-label">Total earned</div><div class="info-val">$14,280</div></div>
+          <div class="info-row"><div class="info-label">Total earned</div><div class="info-val">$0</div></div>
           <div class="info-row">
             <div class="info-label">1099-NEC form</div>
-            <button class="btn btn-ghost btn-sm" onclick="CL.toast('Downloading 1099...')">Download PDF</button>
+            <button class="btn btn-ghost btn-sm" onclick="CL.toast('No 1099 on file yet')">Download PDF</button>
           </div>
           <div class="info-row">
             <div class="info-label">Earnings statement</div>
-            <button class="btn btn-ghost btn-sm" onclick="CL.toast('Downloading earnings CSV...')">Download CSV</button>
+            <button class="btn btn-ghost btn-sm" onclick="CL.toast('No earnings to export yet')">Download CSV</button>
           </div>
         </div>
         <p style="font-size:12px;color:var(--muted);margin-top:16px;line-height:1.6;">Questions about your taxes or 1099? Email <a href="mailto:accounting@tmi-technology.com" style="color:var(--ink);">accounting@tmi-technology.com</a></p>
@@ -231,19 +231,7 @@ function calcEarnings() {
   document.getElementById('calc-result').style.display = 'block';
 }
 
-const ALL_EARNINGS = [
-  { id:1, biz:'Apex HVAC',            type:'referral', amount:850,  status:'pending', month:'2026-05', date:'May 12' },
-  { id:2, biz:'Travis Electric',       type:'referral', amount:720,  status:'pending', month:'2026-05', date:'May 9' },
-  { id:3, biz:'Badlands Pipeline',     type:'support',  amount:150,  status:'pending', month:'2026-05', date:'May 1' },
-  { id:4, biz:'SkyHigh Roofing',       type:'support',  amount:150,  status:'pending', month:'2026-05', date:'May 1' },
-  { id:5, biz:'Summit HVAC',           type:'support',  amount:150,  status:'pending', month:'2026-05', date:'May 1' },
-  { id:6, biz:'Rio Grande Electric',   type:'referral', amount:1200, status:'paid',    month:'2026-04', date:'Apr 15' },
-  { id:7, biz:'Lone Star Concrete',    type:'referral', amount:940,  status:'paid',    month:'2026-04', date:'Apr 8' },
-  { id:8, biz:'Badlands Pipeline',     type:'support',  amount:150,  status:'paid',    month:'2026-04', date:'Apr 1' },
-  { id:9, biz:'SkyHigh Roofing',       type:'support',  amount:150,  status:'paid',    month:'2026-04', date:'Apr 1' },
-  { id:10, biz:'Cedar Park Plumbing',  type:'referral', amount:550,  status:'paid',    month:'2026-03', date:'Mar 22' },
-  { id:11, biz:'Hill Country HVAC',    type:'referral', amount:680,  status:'paid',    month:'2026-03', date:'Mar 14' },
-];
+const ALL_EARNINGS = [];
 
 const MONTH_LABELS = {
   '2026-05': 'May 2026',

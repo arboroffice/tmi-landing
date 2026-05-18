@@ -36,22 +36,22 @@
       <div class="stats-row">
         <div class="stat-box">
           <div class="stat-label">Total Revenue</div>
-          <div class="stat-val" id="stat-total-rev">$57,600</div>
-          <div class="stat-delta pos">+$12,800 this month</div>
+          <div class="stat-val" id="stat-total-rev">$0</div>
+          <div class="stat-delta pos"></div>
         </div>
         <div class="stat-box">
           <div class="stat-label">This Month</div>
-          <div class="stat-val" id="stat-month-rev">$12,800</div>
-          <div class="stat-delta pos">+18% vs last month</div>
+          <div class="stat-val" id="stat-month-rev">$0</div>
+          <div class="stat-delta pos"></div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Pending Payouts</div>
-          <div class="stat-val" id="stat-pending" style="color:var(--amber)">$4,800</div>
-          <div class="stat-delta">6 leads waiting</div>
+          <div class="stat-val" id="stat-pending" style="color:var(--amber)">$0</div>
+          <div class="stat-delta"></div>
         </div>
         <div class="stat-box">
           <div class="stat-label">Paid Out</div>
-          <div class="stat-val" id="stat-paid">$8,800</div>
+          <div class="stat-val" id="stat-paid">$0</div>
           <div class="stat-delta pos">All time</div>
         </div>
       </div>
@@ -78,11 +78,9 @@
             </select>
             <select class="filter-select" id="deals-lead" onchange="filterDeals()">
               <option value="">All Leads</option>
-              <option>Jordan M.</option><option>Taylor R.</option><option>Chris W.</option>
-              <option>Alex P.</option><option>Sam B.</option>
             </select>
           </div>
-          <span class="filter-count" id="deals-count">18 deals</span>
+          <span class="filter-count" id="deals-count">0 deals</span>
         </div>
 
         <div class="card">
@@ -123,11 +121,9 @@
             </select>
             <select class="filter-select" id="payouts-lead" onchange="filterPayouts()">
               <option value="">All Leads</option>
-              <option>Jordan M.</option><option>Taylor R.</option><option>Chris W.</option>
-              <option>Alex P.</option><option>Sam B.</option>
             </select>
           </div>
-          <span class="filter-count" id="payouts-count">12 payouts</span>
+          <span class="filter-count" id="payouts-count">0 payouts</span>
         </div>
 
         <div class="card">
@@ -159,33 +155,9 @@
 <script>
 CL.initPage('cl-money', { adminOnly: true });
 
-const DEALS = [
-  { biz:'Lone Star HVAC',       city:'Austin, TX',    lead:'Jordan M.', size:3200, comm:800,  stage:'closed',        date:'May 14, 2026' },
-  { biz:'Mile High Electric',   city:'Denver, CO',    lead:'Taylor R.', size:3200, comm:800,  stage:'build_live',     date:'May 12, 2026' },
-  { biz:'Music City Plumbing',  city:'Nashville, TN', lead:'Chris W.',  size:3200, comm:800,  stage:'proposal_sent',  date:'May 10, 2026' },
-  { biz:'Sun Valley HVAC',      city:'Phoenix, AZ',   lead:'Alex P.',   size:3200, comm:800,  stage:'closed',         date:'May 8, 2026'  },
-  { biz:'CLT Concrete',         city:'Charlotte, NC', lead:'Sam B.',    size:3200, comm:800,  stage:'audit_booked',   date:'May 6, 2026'  },
-  { biz:'Barton Hills Roofing', city:'Austin, TX',    lead:'Jordan M.', size:3200, comm:800,  stage:'closed',         date:'Apr 28, 2026' },
-  { biz:'Rocky Mtn Mechanical', city:'Denver, CO',    lead:'Taylor R.', size:3200, comm:800,  stage:'closed',         date:'Apr 22, 2026' },
-  { biz:'Opryland Services',    city:'Nashville, TN', lead:'Chris W.',  size:3200, comm:800,  stage:'closed',         date:'Apr 15, 2026' },
-  { biz:'Mesa Welding',         city:'Phoenix, AZ',   lead:'Alex P.',   size:3200, comm:800,  stage:'closed',         date:'Apr 10, 2026' },
-  { biz:'South Park HVAC',      city:'Charlotte, NC', lead:'Sam B.',    size:3200, comm:800,  stage:'closed',         date:'Apr 5, 2026'  },
-];
+const DEALS = [];
 
-const PAYOUTS = [
-  { lead:'Jordan M.', amount:1600, type:'referral',        status:'pending', date:'May 14, 2026' },
-  { lead:'Taylor R.', amount:1600, type:'referral',        status:'pending', date:'May 12, 2026' },
-  { lead:'Chris W.',  amount:800,  type:'referral',        status:'pending', date:'May 10, 2026' },
-  { lead:'Alex P.',   amount:800,  type:'referral',        status:'pending', date:'May 8, 2026'  },
-  { lead:'Sam B.',    amount:800,  type:'referral',        status:'pending', date:'May 6, 2026'  },
-  { lead:'Jordan M.', amount:400,  type:'monthly support', status:'paid',    date:'May 1, 2026'  },
-  { lead:'Taylor R.', amount:400,  type:'monthly support', status:'paid',    date:'May 1, 2026'  },
-  { lead:'Chris W.',  amount:400,  type:'monthly support', status:'paid',    date:'May 1, 2026'  },
-  { lead:'Jordan M.', amount:800,  type:'referral',        status:'paid',    date:'Apr 28, 2026' },
-  { lead:'Taylor R.', amount:800,  type:'referral',        status:'paid',    date:'Apr 22, 2026' },
-  { lead:'Chris W.',  amount:800,  type:'referral',        status:'paid',    date:'Apr 15, 2026' },
-  { lead:'Alex P.',   amount:800,  type:'referral',        status:'paid',    date:'Apr 10, 2026' },
-];
+const PAYOUTS = [];
 
 let dealsFiltered = [...DEALS];
 let payoutsFiltered = [...PAYOUTS];

@@ -74,18 +74,9 @@
         <div class="filter-row" style="flex-wrap:wrap;">
           <select class="filter-select" id="city-filter" onchange="filterTable()">
             <option value="">All Cities</option>
-            <option value="Austin, TX">Austin, TX</option>
-            <option value="Houston, TX">Houston, TX</option>
-            <option value="Dallas, TX">Dallas, TX</option>
-            <option value="Denver, CO">Denver, CO</option>
-            <option value="Phoenix, AZ">Phoenix, AZ</option>
           </select>
           <select class="filter-select" id="lead-filter" onchange="filterTable()">
             <option value="">All City Leads</option>
-            <option value="Jordan Kim">Jordan Kim</option>
-            <option value="Alex Rivera">Alex Rivera</option>
-            <option value="Sam Patel">Sam Patel</option>
-            <option value="Casey Morgan">Casey Morgan</option>
           </select>
           <select class="filter-select" id="stage-filter" onchange="filterTable()">
             <option value="">All Stages</option>
@@ -156,20 +147,7 @@
 <script>
 CL.initPage('cl-master-businesses', { adminOnly: true });
 
-const DEMO_DATA = [
-  { id:'b1', name:'Austin HVAC Pros', type:'HVAC', city:'Austin, TX', lead:'Jordan Kim', owner:'Mike Torres', stage:'warm', score:'hot', lastVisit:'2026-05-10', added:'2026-04-01' },
-  { id:'b2', name:'Capital Plumbing Co', type:'Plumbing', city:'Austin, TX', lead:'Jordan Kim', owner:'Sarah Chen', stage:'met_owner', score:'warm', lastVisit:'2026-05-15', added:'2026-04-10' },
-  { id:'b3', name:'Lone Star Roofing', type:'Roofing', city:'Austin, TX', lead:'Jordan Kim', owner:'James Polk', stage:'seed', score:'cold', lastVisit:'2026-04-20', added:'2026-03-15' },
-  { id:'b4', name:'Hill Country Electric', type:'Electrician', city:'Austin, TX', lead:'Jordan Kim', owner:'Dana Webb', stage:'audit_booked', score:'hot', lastVisit:'2026-05-16', added:'2026-04-05' },
-  { id:'b5', name:'Green Leaf Landscaping', type:'Landscaping', city:'Austin, TX', lead:'Jordan Kim', owner:'Carlos Reyes', stage:'proposal_sent', score:'warm', lastVisit:'2026-05-12', added:'2026-04-20' },
-  { id:'b6', name:'Houston Pipe Works', type:'Plumbing', city:'Houston, TX', lead:'Alex Rivera', owner:'Linda Park', stage:'second_visit', score:'warm', lastVisit:'2026-05-08', added:'2026-04-18' },
-  { id:'b7', name:'Bayou Concrete LLC', type:'Concrete', city:'Houston, TX', lead:'Alex Rivera', owner:'Brett Wilson', stage:'warm', score:'hot', lastVisit:'2026-05-03', added:'2026-03-30' },
-  { id:'b8', name:'Mile High HVAC', type:'HVAC', city:'Denver, CO', lead:'Sam Patel', owner:'Kevin Brooks', stage:'closed', score:'hot', lastVisit:'2026-04-28', added:'2026-03-01' },
-  { id:'b9', name:'Rocky Roofing Co', type:'Roofing', city:'Denver, CO', lead:'Sam Patel', owner:'Tina Fox', stage:'build_live', score:'hot', lastVisit:'2026-05-01', added:'2026-02-15' },
-  { id:'b10', name:'Desert Electric PHX', type:'Electrician', city:'Phoenix, AZ', lead:'Casey Morgan', owner:'Nate Cruz', stage:'seed', score:'cold', lastVisit:'2026-04-15', added:'2026-04-14' },
-  { id:'b11', name:'Dallas Construction Group', type:'Construction', city:'Dallas, TX', lead:'Alex Rivera', owner:'Paul Adams', stage:'problem_identified', score:'warm', lastVisit:'2026-05-06', added:'2026-03-20' },
-  { id:'b12', name:'Lone Star Pipeline Svcs', type:'Pipeline', city:'Dallas, TX', lead:'Alex Rivera', owner:'Rosa Martinez', stage:'warm', score:'hot', lastVisit:'2026-05-14', added:'2026-03-25' },
-];
+const DEMO_DATA = [];
 
 function renderStats(data) {
   document.getElementById('stat-total').textContent = data.length;

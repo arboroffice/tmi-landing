@@ -229,24 +229,14 @@ const params = new URLSearchParams(window.location.search);
 const bizId = params.get('id') || 'b1';
 const action = params.get('action');
 
-// Demo data
-const BIZ_DATA = {
-  b1: { id:'b1', name:'Austin HVAC Pros', type:'HVAC', owner:'Mike Torres', phone:'(512) 555-0101', email:'mike@austinhvac.com', linkedin:'https://linkedin.com/in/miketorres', address:'1420 S Lamar Blvd', city:'Austin', state:'TX', zip:'78704', website:'austinhvac.com', stage:'warm', score:'hot', added:'2026-04-01', lastVisit:'2026-05-10', googlePlace:'ChIJabc123' },
-  b2: { id:'b2', name:'Capital Plumbing Co', type:'Plumbing', owner:'Sarah Chen', phone:'(512) 555-0202', email:'sarah@capitalplumbing.com', linkedin:'', address:'890 E 6th St', city:'Austin', state:'TX', zip:'78702', website:'capitalplumbing.com', stage:'met_owner', score:'warm', added:'2026-04-10', lastVisit:'2026-05-15', googlePlace:'' },
-};
+// Business data (loaded from backend)
+const BIZ_DATA = {};
 
-const biz = BIZ_DATA[bizId] || BIZ_DATA['b1'];
+const biz = BIZ_DATA[bizId] || { id: bizId, name:'Unknown Business', type:'', owner:'', phone:'', email:'', linkedin:'', address:'', city:'', state:'', zip:'', website:'', stage:'seed', score:'cold', added:'', lastVisit:'', googlePlace:'' };
 
-const DEMO_VISITS = [
-  { id:'v1', type:'Walk-in', notes:'Met Mike at the front desk. He mentioned they have 4 trucks and are looking for a dispatch solution.', date:'2026-05-10', dot:'chart' },
-  { id:'v2', type:'Coffee', notes:'Had coffee at Jo\'s Coffee. He introduced me to his operations manager Dave.', date:'2026-04-22', dot:'blue' },
-  { id:'v3', type:'Call', notes:'Quick check-in call. Left a voicemail.', date:'2026-04-10', dot:'chart' },
-];
+const DEMO_VISITS = [];
 
-const DEMO_FU = [
-  { id:'f1', status:'pending', due:'2026-05-18', message:'Hey Mike - wanted to follow up on our conversation last week. Happy to walk you through how the dispatch side works when you have 20 minutes. What does your schedule look like this week?' },
-  { id:'f2', status:'sent', due:'2026-05-02', message:'Mike, great meeting you at Jo\'s. Sending over that overview doc I mentioned. Let me know if you have questions.' },
-];
+const DEMO_FU = [];
 
 const notes = [];
 

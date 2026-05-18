@@ -156,43 +156,7 @@ CL.initPage('cl-follow-ups');
 
 const TODAY = new Date('2026-05-17');
 
-const FOLLOWUPS = [
-  {
-    id:1, biz:'Apex HVAC', type:'HVAC', daysAgo:7,
-    dueLabel:'Overdue 2 days', dueClass:'overdue',
-    message:`Hi Mike — checking back in after our last conversation. You mentioned you\'re evaluating options before your busy season kicks off. Happy to walk through what the audit looks like — takes about 20 minutes and you\'ll have a clear picture of what the build would actually fix. When\'s a good time this week?`,
-  },
-  {
-    id:2, biz:'Silverline Roofing', type:'Roofing', daysAgo:5,
-    dueLabel:'Overdue 1 day', dueClass:'overdue',
-    message:`Hey — following up on the audit results we discussed. I know you had questions about the job costing module specifically. I can send over a one-pager showing how it works for roofing operations if that helps move things forward.`,
-  },
-  {
-    id:3, biz:'Travis Electric', type:'Electrician', daysAgo:3,
-    dueLabel:'Today', dueClass:'today',
-    message:`Hi Sarah — just checking in. Last time we talked you mentioned James wanted to see a demo before making any decisions. I can do a 20-minute screen share whenever works. Want me to send a calendar link?`,
-  },
-  {
-    id:4, biz:'Lone Star Concrete', type:'Concrete', daysAgo:2,
-    dueLabel:'Today', dueClass:'today',
-    message:`Hi Diego — quick follow-up from our conversation last Thursday. You mentioned you\'re scaling to 8 crews this year — that\'s exactly when scheduling and job costing problems compound fast. Would love to show you what that looks like in the system.`,
-  },
-  {
-    id:5, biz:'Hill Country HVAC', type:'HVAC', daysAgo:1,
-    dueLabel:'Tomorrow', dueClass:'future',
-    message:`Hey — following up on the calendar link I sent. Just wanted to make sure you got it. The audit slot on Wednesday at 10am is still open if that works.`,
-  },
-  {
-    id:6, biz:'Cedar Park Plumbing', type:'Plumbing', daysAgo:0,
-    dueLabel:'May 21', dueClass:'future',
-    message:`Hi — it\'s Jordan from TMI. You mentioned you\'d be back from vacation around the 20th. Hope the trip was good! Whenever you\'re ready, I\'d love to set up that 20-minute call we discussed.`,
-  },
-  {
-    id:7, biz:'Austin Painting Co', type:'Painting', daysAgo:0,
-    dueLabel:'May 22', dueClass:'future',
-    message:`Hi — following up on the email I sent last week with the TMI overview. Just wanted to make sure it didn\'t land in your spam folder. Happy to answer any questions before we schedule time to talk.`,
-  },
-];
+const FOLLOWUPS = [];
 
 let cards = FOLLOWUPS.map(f => ({ ...f, status:'pending' }));
 
@@ -301,11 +265,7 @@ function showFUTab(id) {
 }
 
 // Handoffs
-const HANDOFFS = [
-  { biz:'Lone Star Concrete', type:'Concrete', assignee:'Mia', urgency:'this_week', notes:'Diego is ready to move. He mentioned budget approval last week. He needs to see the scheduling module specifically. Great fit.', date:'May 15' },
-  { biz:'Travis Electric', type:'Electrician', assignee:'Tyler', urgency:'this_month', notes:'James (owner) wants a demo after meeting with his office manager. 12 techs, growing. Main interest: dispatch + job tracking.', date:'May 13' },
-  { biz:'SkyHigh Roofing', type:'Roofing', assignee:'Mia', urgency:'when_possible', notes:'Carlos is interested but not urgent. Good candidate for Q3. He mentioned cash flow is tight right now.', date:'May 10' },
-];
+const HANDOFFS = [];
 
 document.getElementById('handoff-list').innerHTML = HANDOFFS.length
   ? HANDOFFS.map(h => `
@@ -324,16 +284,13 @@ document.getElementById('handoff-list').innerHTML = HANDOFFS.length
         <button class="btn btn-ghost btn-sm" onclick="CL.toast('Status updated')">Mark Won</button>
       </div>
     </div>`).join('')
-  : `<div class="empty-state"><div class="empty-icon">🎯</div><h3>No handoffs yet</h3><p>When a business is ready to close, add a handoff from their profile.</p></div>`;
+  : `<div style="text-align:center;color:var(--muted);padding:32px;">No handoffs yet. When a business is ready to close, add a handoff from their profile.</div>`;
 
 // Referrals
-const REFERRALS = [
-  { from:'Apex HVAC', to:'Peak Performance HVAC', date:'May 16', status:'warm', notes:'Mike (Apex) gave me Robert\'s number directly. Called yesterday, he\'s expecting me Thursday.' },
-  { from:'Travis Electric', to:'Longhorn Electric Co', date:'May 12', status:'introduced', notes:'James mentioned his cousin runs an electrical business in Round Rock. Got the number but haven\'t called yet.' },
-  { from:'Lone Star Concrete', to:'Capital Concrete', date:'May 5', status:'closed', notes:'Diego referred us directly. Capital Concrete signed last week.' },
-];
+const REFERRALS = [];
 
-document.getElementById('referral-list').innerHTML = REFERRALS.map(r => `
+document.getElementById('referral-list').innerHTML = REFERRALS.length
+  ? REFERRALS.map(r => `
   <div class="ref-card">
     <div class="ref-flow">
       <span class="ref-biz">${r.from}</span>
@@ -343,17 +300,14 @@ document.getElementById('referral-list').innerHTML = REFERRALS.map(r => `
     </div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${r.date}</div>
     <div style="font-size:13px;color:var(--ink-2);line-height:1.5;">${r.notes}</div>
-  </div>`).join('');
+  </div>`).join('')
+  : `<div style="text-align:center;color:var(--muted);padding:32px;">No referrals yet. When a business owner sends you to another owner, log it here.</div>`;
 
 // Relationships
-const RELS = [
-  { biz:'Apex HVAC', owner:'Mike', type:'birthday', dot:'birthday', note:'Mike\'s birthday: June 14. Wife\'s name: Linda. Two kids — older one plays baseball.', date:'Birthday in 28 days' },
-  { biz:'Lone Star Concrete', owner:'Diego', type:'personal', dot:'personal', note:'Diego mentioned he\'s coaching his son\'s little league team this spring. Ask about the team next visit.', date:'Added May 15' },
-  { biz:'Travis Electric', owner:'James', type:'personal', dot:'personal', note:'James served in the Army — was stationed at Fort Hood. Has a dog named Bear. Very proud of his crew culture.', date:'Added May 13' },
-  { biz:'Hill Country HVAC', owner:'Tom', type:'anniversary', dot:'anniversary', note:'Business anniversary: 11 years this July. Would be a great hook for a check-in text.', date:'Anniversary in 47 days' },
-];
+const RELS = [];
 
-document.getElementById('rel-list').innerHTML = RELS.map(r => `
+document.getElementById('rel-list').innerHTML = RELS.length
+  ? RELS.map(r => `
   <div class="rel-item">
     <div class="rel-dot ${r.dot}"></div>
     <div>
@@ -361,7 +315,8 @@ document.getElementById('rel-list').innerHTML = RELS.map(r => `
       <div class="rel-note">${r.note}</div>
       <div class="rel-date">${r.date}</div>
     </div>
-  </div>`).join('');
+  </div>`).join('')
+  : `<div style="text-align:center;color:var(--muted);padding:32px;">No relationship notes yet. Add birthdays, family details, and personal notes from a business profile.</div>`;
 </script>
 </body>
 </html>

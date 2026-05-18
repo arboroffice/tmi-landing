@@ -159,34 +159,10 @@ function showTab(id) {
 }
 
 // Win stories
-const WINS = [
-  {
-    icon:'🔥', city:'Austin, TX', lead:'Jordan M.',
-    title:'Cold walk-in to closed deal in 11 days',
-    story:'Walked into an HVAC shop on a Tuesday. The owner was arguing on the phone about a tech who didn\'t show up to a job. I waited 5 minutes, asked one question: "How do you track where your techs are right now?" He said "we have no idea, that\'s why I\'m on the phone." Handed it to Mia on Thursday. Closed the following Friday.',
-    lesson:'The best time to walk in is when they\'re visibly in pain. Don\'t reschedule for later.',
-    stage:'Closed',
-    type:'HVAC',
-  },
-  {
-    icon:'💡', city:'Dallas, TX', lead:'Keisha P.',
-    title:'Third visit, different question, whole conversation changed',
-    story:'First two visits went nowhere. The owner was polite but busy. Third time I asked differently — not "how do you schedule" but "what\'s the most annoying thing about running your crew this week?" He talked for 15 minutes. I just listened. Set the audit at the end of that same conversation.',
-    lesson:'Change the question, not the pitch. Most owners will tell you exactly what\'s wrong if you ask about this week, not systems in general.',
-    stage:'Audit Booked',
-    type:'Plumbing',
-  },
-  {
-    icon:'🤝', city:'Houston, TX', lead:'Carlos V.',
-    title:'One referral turned into three leads in the same block',
-    story:'Closed a painting company. Owner mentioned his neighbor (roofing) had the same scheduling problem. Walked next door same day. That owner referred me to a concrete guy two blocks over. All three ended up in the pipeline within two weeks.',
-    lesson:'Always ask: "Do you know any other owners around here who run the same kind of business?" Referrals from warm owners close faster than cold walk-ins.',
-    stage:'Expansion',
-    type:'Painting',
-  },
-];
+const WINS = [];
 
-document.getElementById('win-list').innerHTML = WINS.map(w => `
+document.getElementById('win-list').innerHTML = WINS.length
+  ? WINS.map(w => `
   <div class="win-card">
     <div class="win-head">
       <div class="win-icon">${w.icon}</div>
@@ -197,7 +173,8 @@ document.getElementById('win-list').innerHTML = WINS.map(w => `
     </div>
     <div class="win-story">${w.story}</div>
     <div class="win-lesson"><strong>The lesson</strong>${w.lesson}</div>
-  </div>`).join('');
+  </div>`).join('')
+  : `<div style="text-align:center;color:var(--muted);padding:32px 20px;">No win stories yet. Be the first to share what worked.</div>`;
 
 // Scripts
 const SCRIPTS = [

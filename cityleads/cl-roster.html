@@ -39,7 +39,7 @@
             <option value="inactive">Inactive</option>
           </select>
         </div>
-        <span class="filter-count" id="row-count">18 city leads</span>
+        <span class="filter-count" id="row-count">0 city leads</span>
       </div>
 
       <div class="card">
@@ -109,19 +109,23 @@
 <script>
 CL.initPage('cl-roster', { adminOnly: true });
 
-const LEADS = [
-  { id:1, name:'Jordan Martinez', city:'Austin, TX',    assigned:'Jan 2026', biz:38, visits:42, warm:9,  closed:4,  earnings:3200,  status:'active'   },
-  { id:2, name:'Taylor Rhodes',   city:'Denver, CO',    assigned:'Feb 2026', biz:27, visits:31, warm:6,  closed:3,  earnings:2400,  status:'active'   },
-  { id:3, name:'Chris Wallace',   city:'Nashville, TN', assigned:'Feb 2026', biz:22, visits:28, warm:4,  closed:2,  earnings:1600,  status:'active'   },
-  { id:4, name:'Alex Park',       city:'Phoenix, AZ',   assigned:'Mar 2026', biz:19, visits:22, warm:3,  closed:1,  earnings:800,   status:'active'   },
-  { id:5, name:'Sam Brooks',      city:'Charlotte, NC', assigned:'Mar 2026', biz:15, visits:18, warm:2,  closed:1,  earnings:800,   status:'active'   },
-  { id:6, name:'Dana Kim',        city:'Tampa, FL',     assigned:'Apr 2026', biz:8,  visits:10, warm:1,  closed:0,  earnings:0,     status:'active'   },
-  { id:7, name:'Morgan Lee',      city:'Atlanta, GA',   assigned:'Apr 2026', biz:6,  visits:7,  warm:0,  closed:0,  earnings:0,     status:'active'   },
-  { id:8, name:'Riley Chen',      city:'Columbus, OH',  assigned:'May 2026', biz:3,  visits:4,  warm:0,  closed:0,  earnings:0,     status:'active'   },
-  { id:9, name:'Casey Hughes',    city:'Dallas, TX',    assigned:'Dec 2025', biz:0,  visits:0,  warm:0,  closed:0,  earnings:0,     status:'inactive' },
-];
+const LEADS = [];
 
-let filtered = [...LEADS];
+let filtered = [];
+
+async function loadRoster() {
+  const { data } = await CL.api('city_leads', { order: 'created_at', asc: false });
+  if (!data) return;
+  LEADS.length = 0;
+  data.forEach(l => LEADS.push({
+    id: l.id, name: l.name || [l.first_name, l.last_name].filter(Boolean).join(' ') || '—',
+    city: l.city || '—', state: l.state || '', assigned: l.territory || '—',
+    status: l.status || 'active', earnings: null, biz: 0, visits: 0, warm: 0, closed: 0
+  }));
+  filtered = [...LEADS];
+  renderRoster(filtered);
+}
+loadRoster();
 let activeLead = null;
 
 function renderRoster(data) {

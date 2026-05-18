@@ -176,7 +176,7 @@
 <script>
 CL.initPage('cl-add-business');
 
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
   const errEl = document.getElementById('form-error');
   errEl.style.display = 'none';
@@ -222,12 +222,35 @@ function handleSubmit(e) {
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
-  // Simulate save delay
-  setTimeout(() => {
-    // In production: await CL.api('businesses').insert(newBiz)
-    CL.toast(newBiz.name + ' added to your list');
-    window.location.href = 'cl-business.html?id=' + newBiz.id + '&new=1';
-  }, 600);
+  const sb = CL.initSupabase();
+  const clId = CL.getCityLeadId();
+  const { data: saved, error } = await sb.from('city_businesses').insert({
+    city_lead_id: clId,
+    business_name: newBiz.name,
+    industry: newBiz.type,
+    address: newBiz.address,
+    city: newBiz.city,
+    state: newBiz.state,
+    zip: newBiz.zip,
+    website: newBiz.website,
+    owner_name: newBiz.owner,
+    phone: newBiz.phone,
+    email: newBiz.email,
+    owner_linkedin: newBiz.linkedin,
+    stage: newBiz.stage || 'seed',
+    score: newBiz.score,
+    notes: newBiz.notes
+  }).select().single();
+
+  if (error) {
+    errEl.textContent = error.message || 'Failed to save. Please try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Add Business';
+    return;
+  }
+  CL.toast(saved.business_name + ' added to your list');
+  window.location.href = 'cl-business.html?id=' + saved.id + '&new=1';
 }
 </script>
 </body>
