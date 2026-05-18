@@ -159,22 +159,37 @@ function showTab(id) {
 }
 
 // Win stories
-const WINS = [];
+const INDUSTRY_ICONS = { HVAC:'🔧', Plumbing:'💧', Roofing:'🏗️', Electrician:'⚡', Landscaping:'🌿', Painting:'🎨', Construction:'🏠', Concrete:'🪨', Welding:'🔥', 'Heavy Equipment':'🚜' };
 
-document.getElementById('win-list').innerHTML = WINS.length
-  ? WINS.map(w => `
-  <div class="win-card">
-    <div class="win-head">
-      <div class="win-icon">${w.icon}</div>
-      <div>
-        <div class="win-title">${w.title}</div>
-        <div class="win-meta">${w.city} · ${w.type} · Stage: ${w.stage}</div>
+async function loadWins() {
+  const winList = document.getElementById('win-list');
+  const { data } = await CL.api('city_win_stories', {
+    select: 'id,headline,story,deal_value,industry,created_at,city_lead_id,city_leads(name,city)'
+  });
+  const wins = (data || []);
+  if (!wins.length) {
+    winList.innerHTML = `<div style="text-align:center;color:var(--muted);padding:32px 20px;">No win stories yet. Be the first to share what worked.</div>`;
+    return;
+  }
+  winList.innerHTML = wins.map(w => {
+    const lead = w.city_leads || {};
+    const icon = INDUSTRY_ICONS[w.industry] || '🏆';
+    const dealLabel = w.deal_value ? ' · ' + CL.currency(w.deal_value) + ' deal' : '';
+    return `
+    <div class="win-card">
+      <div class="win-head">
+        <div class="win-icon">${icon}</div>
+        <div>
+          <div class="win-title">${w.headline || 'Win Story'}</div>
+          <div class="win-meta">${lead.city || '—'} · ${w.industry || 'Trades'}${dealLabel} · ${CL.fmt(w.created_at)}</div>
+        </div>
       </div>
-    </div>
-    <div class="win-story">${w.story}</div>
-    <div class="win-lesson"><strong>The lesson</strong>${w.lesson}</div>
-  </div>`).join('')
-  : `<div style="text-align:center;color:var(--muted);padding:32px 20px;">No win stories yet. Be the first to share what worked.</div>`;
+      <div class="win-story">${(w.story || '').replace(/\n/g,'<br>')}</div>
+      ${lead.name ? `<div class="win-lesson"><strong>City Lead</strong>${lead.name}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+loadWins();
 
 // Scripts
 const SCRIPTS = [

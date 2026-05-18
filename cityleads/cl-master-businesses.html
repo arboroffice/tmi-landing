@@ -147,7 +147,45 @@
 <script>
 CL.initPage('cl-master-businesses', { adminOnly: true });
 
-const DEMO_DATA = [];
+const ALL_BIZ = [];
+let FILTERED = [];
+
+async function loadBusinesses() {
+  document.getElementById('biz-tbody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;">Loading...</td></tr>';
+
+  const [bizRes, leadsRes] = await Promise.all([
+    CL.api('city_businesses', {
+      select: 'id,business_name,industry,owner_name,stage,score,last_visit_at,created_at,city,state,city_lead_id',
+      order: 'created_at', asc: false
+    }),
+    CL.api('city_leads', { select: 'id,name,city,state', order: 'name', asc: true })
+  ]);
+
+  const leads = leadsRes.data || [];
+  const leadMap = {};
+  leads.forEach(l => { leadMap[l.id] = { name: l.name || '—', city: l.city || '—' }; });
+
+  const cityFilter = document.getElementById('city-filter');
+  const leadFilter = document.getElementById('lead-filter');
+  const cities = [...new Set(leads.map(l => l.city).filter(Boolean))].sort();
+  cities.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; cityFilter.appendChild(o); });
+  leads.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name || '—'; leadFilter.appendChild(o); });
+
+  ALL_BIZ.length = 0;
+  (bizRes.data || []).forEach(b => {
+    const lead = leadMap[b.city_lead_id] || {};
+    ALL_BIZ.push({
+      id: b.id, name: b.business_name || '—', type: b.industry || '—',
+      city: lead.city || b.city || '—', leadId: b.city_lead_id,
+      lead: lead.name || '—', owner: b.owner_name || '—',
+      stage: b.stage || 'seed', score: b.score || 'cold',
+      lastVisit: b.last_visit_at, added: b.created_at
+    });
+  });
+
+  filterTable();
+}
+loadBusinesses();
 
 function renderStats(data) {
   document.getElementById('stat-total').textContent = data.length;
@@ -157,24 +195,24 @@ function renderStats(data) {
 }
 
 function filterTable() {
-  const q = document.getElementById('q-search').value.toLowerCase();
-  const city = document.getElementById('city-filter').value;
-  const lead = document.getElementById('lead-filter').value;
+  const q     = document.getElementById('q-search').value.toLowerCase();
+  const city  = document.getElementById('city-filter').value;
+  const leadId = document.getElementById('lead-filter').value;
   const stage = document.getElementById('stage-filter').value;
   const score = document.getElementById('score-filter').value;
 
-  let results = DEMO_DATA.filter(b => {
-    if (city && b.city !== city) return false;
-    if (lead && b.lead !== lead) return false;
-    if (stage && b.stage !== stage) return false;
-    if (score && b.score !== score) return false;
-    if (q && !b.name.toLowerCase().includes(q) && !b.owner.toLowerCase().includes(q) && !b.city.toLowerCase().includes(q)) return false;
+  FILTERED = ALL_BIZ.filter(b => {
+    if (city   && b.city    !== city)   return false;
+    if (leadId && b.leadId  !== leadId) return false;
+    if (stage  && b.stage   !== stage)  return false;
+    if (score  && b.score   !== score)  return false;
+    if (q && !b.name.toLowerCase().includes(q) && !(b.owner||'').toLowerCase().includes(q) && !(b.city||'').toLowerCase().includes(q)) return false;
     return true;
   });
 
-  renderStats(results);
-  renderTable(results);
-  document.getElementById('filter-count').textContent = results.length + ' businesses';
+  renderStats(FILTERED);
+  renderTable(FILTERED);
+  document.getElementById('filter-count').textContent = FILTERED.length + ' businesses';
 }
 
 function renderTable(data) {
@@ -184,7 +222,7 @@ function renderTable(data) {
   const tblWrap = document.querySelector('.tbl-wrap');
   const mobileBizList = document.querySelector('.mobile-biz-list');
 
-  if (data.length === 0) {
+  if (!data.length) {
     if (tblWrap) tblWrap.style.display = 'none';
     if (mobileBizList) mobileBizList.style.display = 'none';
     emptyEl.style.display = 'block';
@@ -200,19 +238,13 @@ function renderTable(data) {
       <td><span class="tbl-biz-name">${b.name}</span></td>
       <td>${b.type}</td>
       <td>${b.city}</td>
-      <td>
-        <div class="tbl-city-lead">
-          <div class="tbl-cl-avatar">${CL.initials(b.lead)}</div>
-          ${b.lead}
-        </div>
-      </td>
+      <td><div class="tbl-city-lead"><div class="tbl-cl-avatar">${CL.initials(b.lead)}</div>${b.lead}</div></td>
       <td>${b.owner}</td>
       <td>${CL.stageBadge(b.stage)}</td>
       <td>${CL.scoreDot(b.score)}</td>
       <td class="td-muted">${CL.fmt(b.lastVisit)}</td>
       <td class="td-muted">${CL.fmt(b.added)}</td>
-    </tr>
-  `).join('');
+    </tr>`).join('');
 
   mobileList.innerHTML = data.map(b => `
     <a class="biz-item" href="cl-business.html?id=${b.id}">
@@ -221,21 +253,22 @@ function renderTable(data) {
         <div class="biz-name">${b.name}</div>
         <div class="biz-meta">${b.type} &middot; ${b.city} &middot; ${b.lead}</div>
       </div>
-      <div class="biz-right">
-        ${CL.stageBadge(b.stage)}
-        ${CL.scoreDot(b.score)}
-      </div>
-    </a>
-  `).join('');
+      <div class="biz-right">${CL.stageBadge(b.stage)}${CL.scoreDot(b.score)}</div>
+    </a>`).join('');
 }
 
 function exportData() {
-  CL.toast('Export started - check your downloads', 'info');
-  // In production: generate CSV from filtered data
+  if (!FILTERED.length) { CL.toast('No data to export', 'info'); return; }
+  const csv = [
+    'Business,Type,City,City Lead,Owner,Stage,Score,Last Visit,Added',
+    ...FILTERED.map(b => [b.name,b.type,b.city,b.lead,b.owner,b.stage,b.score,b.lastVisit||'',b.added||'']
+      .map(v => JSON.stringify(v ?? '')).join(','))
+  ].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'all-businesses.csv';
+  a.click();
 }
-
-// Init
-filterTable();
 </script>
 </body>
 </html>

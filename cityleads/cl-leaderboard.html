@@ -103,39 +103,127 @@
 CL.initPage('cl-leaderboard');
 
 const DATA = {
-  visits:   { week: [], label: 'visits' },
-  handoffs: { week: [], label: 'handoffs' },
-  deals:    { week: [], label: 'deals' },
-  earnings: { week: [], label: 'earned' },
+  visits:   { week: [], month: [], all: [], label: 'visits' },
+  handoffs: { week: [], month: [], all: [], label: 'handoffs' },
+  deals:    { week: [], month: [], all: [], label: 'deals' },
+  earnings: { week: [], month: [], all: [], label: 'earned' },
 };
 
 let metric = 'visits';
 let time = 'week';
-
 const MEDALS = ['🥇','🥈','🥉'];
 const RANK_CLASSES = ['first','second','third'];
+const AVATAR_COLORS = ['#3b82f6','#8b5cf6','#ec4899','#f59e0b','#10b981','#ef4444','#14b8a6'];
+
+function dateFilter(period) {
+  const now = new Date();
+  if (period === 'week') { const d = new Date(now); d.setDate(d.getDate() - 7); return d; }
+  if (period === 'month') { return new Date(now.getFullYear(), now.getMonth(), 1); }
+  return new Date(0);
+}
+
+function buildEntries(rawMap, myClId, leadMap, formatVal) {
+  return Object.entries(rawMap)
+    .map(([id, val]) => {
+      const lead = leadMap[id] || { name: '—', city: '—' };
+      const idx = Object.keys(leadMap).indexOf(id) % AVATAR_COLORS.length;
+      return {
+        id, name: lead.name, city: lead.city,
+        avatar: CL.initials(lead.name),
+        color: AVATAR_COLORS[idx], tc: '#fff',
+        val: formatVal(val), rawVal: val,
+        me: id === myClId
+      };
+    })
+    .sort((a, b) => b.rawVal - a.rawVal);
+}
+
+async function loadLeaderboard() {
+  const myClId = CL.getCityLeadId();
+
+  const [leadsRes, visitsRes, handoffsRes, bizRes, earningsRes] = await Promise.all([
+    CL.api('city_leads', { select: 'id,name,city,state' }),
+    CL.api('city_visits', { select: 'city_lead_id,visited_at' }),
+    CL.api('city_handoffs', { select: 'city_lead_id,created_at' }),
+    CL.api('city_businesses', { select: 'city_lead_id,stage,deal_value,updated_at' }),
+    CL.api('city_earnings', { select: 'city_lead_id,amount,created_at' })
+  ]);
+
+  const leads = leadsRes.data || [];
+  const leadMap = {};
+  leads.forEach(l => {
+    leadMap[l.id] = { name: l.name || '—', city: [l.city, l.state].filter(Boolean).join(', ') || '—' };
+  });
+
+  // Update my name in "your rank" card
+  if (myClId && leadMap[myClId]) {
+    document.getElementById('yr-name').textContent = leadMap[myClId].name;
+    document.getElementById('yr-city').textContent = leadMap[myClId].city;
+  }
+
+  const periods = ['week', 'month', 'all'];
+
+  periods.forEach(period => {
+    const cutoff = dateFilter(period);
+
+    // Visits
+    const visitMap = {};
+    (visitsRes.data || []).forEach(v => {
+      if (new Date(v.visited_at) >= cutoff) visitMap[v.city_lead_id] = (visitMap[v.city_lead_id]||0) + 1;
+    });
+    DATA.visits[period] = buildEntries(visitMap, myClId, leadMap, v => v);
+
+    // Handoffs
+    const hoMap = {};
+    (handoffsRes.data || []).forEach(h => {
+      if (new Date(h.created_at) >= cutoff) hoMap[h.city_lead_id] = (hoMap[h.city_lead_id]||0) + 1;
+    });
+    DATA.handoffs[period] = buildEntries(hoMap, myClId, leadMap, v => v);
+
+    // Deals (closed stage businesses updated in period)
+    const dealMap = {};
+    (bizRes.data || []).filter(b => ['closed','build_live','support_active','expansion'].includes(b.stage))
+      .forEach(b => {
+        if (new Date(b.updated_at) >= cutoff) dealMap[b.city_lead_id] = (dealMap[b.city_lead_id]||0) + 1;
+      });
+    DATA.deals[period] = buildEntries(dealMap, myClId, leadMap, v => v);
+
+    // Earnings
+    const earnMap = {};
+    (earningsRes.data || []).forEach(e => {
+      if (new Date(e.created_at) >= cutoff) earnMap[e.city_lead_id] = (earnMap[e.city_lead_id]||0) + (e.amount||0);
+    });
+    DATA.earnings[period] = buildEntries(earnMap, myClId, leadMap, v => CL.currency(v));
+  });
+
+  render();
+}
+loadLeaderboard();
 
 function render() {
-  const d = DATA[metric] || DATA.visits;
-  const entries = d.week;
+  const d = DATA[metric];
+  const entries = d[time] || [];
   const label = d.label;
 
   document.getElementById('yr-val-label').textContent = label;
 
   const list = document.getElementById('lb-list');
   if (!entries.length) {
-    list.innerHTML = `<div style="text-align:center;color:var(--muted);padding:40px 20px;">No activity yet.</div>`;
+    list.innerHTML = `<div style="text-align:center;color:var(--muted);padding:40px 20px;">No activity yet for this period.</div>`;
+    document.getElementById('your-rank-card').style.display = 'none';
     return;
   }
 
   const meIdx = entries.findIndex(e => e.me);
-  const meEntry = entries[meIdx];
-  document.getElementById('yr-rank').textContent = meIdx >= 0 ? '#' + (meIdx + 1) : '--';
+  const meEntry = meIdx >= 0 ? entries[meIdx] : null;
+  document.getElementById('yr-rank').textContent = meEntry ? '#' + (meIdx + 1) : '--';
   document.getElementById('yr-val').textContent = meEntry ? meEntry.val : '0';
   document.getElementById('your-rank-card').style.display = meEntry ? '' : 'none';
 
   list.innerHTML = entries.map((e, i) => {
-    const rankDisplay = i < 3 ? `<span class="${['medal-first','medal-second','medal-third'][i]}">${MEDALS[i]}</span>` : `<span>${i+1}</span>`;
+    const rankDisplay = i < 3
+      ? `<span class="${['medal-first','medal-second','medal-third'][i]}">${MEDALS[i]}</span>`
+      : `<span>${i+1}</span>`;
     return `
     <div class="lb-item${e.me ? ' me' : ''}">
       <div class="lb-rank ${RANK_CLASSES[i] || ''}">${rankDisplay}</div>
@@ -165,8 +253,6 @@ function setTime(t, btn) {
   btn.classList.add('active');
   render();
 }
-
-render();
 </script>
 </body>
 </html>
