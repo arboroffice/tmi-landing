@@ -914,16 +914,41 @@
 
   /* HOW IT WORKS */
   .how-section{background:var(--bg);padding:120px 0;border-bottom:1px solid var(--line);}
-  .how-header{margin-bottom:72px;}
-  .how-header .eyebrow{margin-bottom:16px;}
-  .how-header h2{color:var(--ink);}
-  .how-header h2 em{color:var(--ink-2);font-style:italic;}
-  .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line);border:1px solid var(--line);}
-  .how-step{background:var(--bg);padding:52px 44px;display:flex;flex-direction:column;gap:20px;}
-  .how-num{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--chart-dark);}
-  .how-step h3{font-family:var(--serif);font-size:clamp(26px,2.4vw,38px);font-weight:400;color:var(--ink);letter-spacing:-0.01em;line-height:1.1;margin:0;}
-  .how-step p{font-size:clamp(15px,1.2vw,17px);color:var(--ink-2);line-height:1.75;margin:0;}
-  @media(max-width:900px){.how-grid{grid-template-columns:1fr;}.how-step{padding:40px 24px;}}
+  .how-intro{text-align:center;max-width:600px;margin:0 auto 88px;}
+  .how-process-pill{display:inline-flex;align-items:center;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-2);background:var(--bg-alt);border:1px solid var(--line-strong);border-radius:999px;padding:6px 18px;margin-bottom:24px;}
+  .how-intro h2{font-family:var(--serif);font-size:clamp(36px,4.5vw,64px);font-weight:400;letter-spacing:-0.02em;line-height:1.05;color:var(--ink);margin:0 0 20px;}
+  .how-intro h2 em{font-style:italic;color:var(--ink-2);}
+  .how-intro .how-deck{font-family:var(--serif);font-size:clamp(16px,1.3vw,19px);color:var(--muted);line-height:1.6;margin:0;}
+  .how-timeline{max-width:760px;margin:0 auto;}
+  .how-row{display:grid;grid-template-columns:72px 1fr;position:relative;}
+  .how-col-num{position:relative;display:flex;flex-direction:column;align-items:center;padding-top:4px;}
+  .how-row:not(:last-child) .how-col-num::after{content:'';position:absolute;top:52px;left:50%;transform:translateX(-50%);width:1px;bottom:0;background:var(--line-strong);}
+  .how-circle{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:12px;font-weight:700;color:var(--ink-2);background:var(--bg);position:relative;z-index:1;flex-shrink:0;}
+  .how-circle.active{background:var(--chart);border-color:var(--chart);color:#0a0b14;}
+  .how-col-content{padding:0 0 60px 44px;border-bottom:1px solid var(--line);}
+  .how-row:last-child .how-col-content{border-bottom:none;padding-bottom:0;}
+  .how-phase{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .how-phase-label{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink);}
+  .how-phase-sep{width:1px;height:10px;background:var(--line-strong);}
+  .how-phase-sub{font-family:var(--sans);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+  .how-col-content h3{font-family:var(--serif);font-size:clamp(28px,3vw,44px);font-weight:400;letter-spacing:-0.02em;line-height:1.05;color:var(--ink);margin:0 0 14px;}
+  .how-col-content p{font-family:var(--sans);font-size:clamp(14px,1.1vw,16px);color:var(--ink-2);line-height:1.75;margin:0 0 22px;max-width:54ch;}
+  .how-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .how-chip{font-family:var(--sans);font-size:11px;font-weight:500;color:var(--ink-2);background:var(--bg-alt);border:1px solid var(--line-strong);border-radius:999px;padding:5px 13px;display:flex;align-items:center;gap:5px;}
+  .how-chip::before{content:'✓';font-size:10px;font-weight:700;color:var(--ink);}
+  .how-outcome{background:var(--bg-deep);border-radius:3px;padding:52px 60px;display:flex;align-items:center;justify-content:space-between;gap:32px;margin-top:72px;flex-wrap:wrap;}
+  .how-outcome-eyebrow{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--chart);margin-bottom:16px;}
+  .how-outcome h3{font-family:var(--serif);font-size:clamp(22px,2.2vw,34px);font-weight:400;letter-spacing:-0.02em;line-height:1.2;color:#fff;margin:0;}
+  .how-outcome h3 em{font-style:italic;color:rgba(255,255,255,0.38);}
+  .how-outcome-btn{font-family:var(--sans);font-size:13px;font-weight:700;background:#fff;color:#0a0b14;padding:13px 26px;border-radius:999px;white-space:nowrap;flex-shrink:0;transition:background 0.15s,color 0.15s;}
+  .how-outcome-btn:hover{background:var(--chart);}
+  @media(max-width:680px){
+    .how-section{padding:80px 0;}
+    .how-intro{margin-bottom:56px;}
+    .how-row{grid-template-columns:56px 1fr;}
+    .how-col-content{padding:0 0 44px 24px;}
+    .how-outcome{padding:36px 28px;flex-direction:column;margin-top:48px;}
+  }
 
   /* GUARANTEE CTA */
   .guar-cta-section{background:var(--bg-dark);padding:140px 0;text-align:center;border-top:1px solid rgba(255,255,255,0.04);}
@@ -968,6 +993,35 @@
     .two-econ-grid{grid-template-columns:1fr;}
     .econ-card{padding:40px 24px;}
   }
+  /* OUR STORY */
+  .our-story-section{background:var(--bg-dark);padding:120px 0;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);}
+  .our-story-top{text-align:center;max-width:780px;margin:0 auto 80px;}
+  .our-story-badge{display:inline-block;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--bg-dark);background:var(--chart);padding:6px 16px;border-radius:999px;margin-bottom:32px;}
+  .our-story-headline{font-family:var(--serif);font-size:clamp(42px,5.5vw,80px);font-weight:700;letter-spacing:-0.02em;line-height:1.05;color:#fff;margin:0 0 28px;}
+  .our-story-headline em{color:var(--chart);font-style:italic;font-weight:700;}
+  .our-story-sub{font-family:var(--sans);font-size:clamp(15px,1.4vw,18px);line-height:1.7;color:rgba(255,255,255,0.5);margin:0;}
+  .our-story-split{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;margin-bottom:72px;}
+  .our-story-rule{width:40px;height:3px;background:var(--chart);margin-bottom:32px;}
+  .our-story-quote{font-family:var(--serif);font-size:clamp(20px,2vw,28px);font-style:italic;font-weight:400;color:#fff;line-height:1.4;margin:0 0 40px;}
+  .our-story-founders{display:flex;align-items:center;gap:14px;}
+  .our-story-avatars{display:flex;gap:-8px;}
+  .our-story-avatar{width:36px;height:36px;border-radius:50%;background:var(--chart);color:var(--bg-dark);font-family:var(--sans);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .our-story-avatar--t{background:rgba(228,255,151,0.25);color:var(--chart);margin-left:-10px;border:2px solid var(--bg-dark);}
+  .our-story-name{font-family:var(--sans);font-size:14px;font-weight:600;color:#fff;}
+  .our-story-title{font-family:var(--sans);font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;}
+  .our-story-right p{font-family:var(--sans);font-size:15px;line-height:1.8;color:rgba(255,255,255,0.55);margin:0 0 20px;}
+  .our-story-right p:last-child{margin:0;}
+  .our-story-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:72px;}
+  .our-story-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:32px 28px;}
+  .our-story-card-label{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--chart);margin-bottom:16px;}
+  .our-story-card h3{font-family:var(--serif);font-size:clamp(18px,1.6vw,24px);font-weight:700;color:#fff;letter-spacing:-0.01em;line-height:1.2;margin:0 0 12px;}
+  .our-story-card p{font-family:var(--sans);font-size:14px;line-height:1.7;color:rgba(255,255,255,0.45);margin:0;}
+  .our-story-cta{text-align:center;}
+  .our-story-btn{display:inline-block;font-family:var(--sans);font-size:15px;font-weight:700;background:var(--chart);color:var(--bg-dark);padding:16px 36px;border-radius:999px;transition:background 0.15s;}
+  .our-story-btn:hover{background:var(--chart-dark);}
+  .our-story-note{font-family:var(--sans);font-size:12px;color:rgba(255,255,255,0.3);margin-top:16px;letter-spacing:0.06em;}
+  @media(max-width:900px){.our-story-split{grid-template-columns:1fr;gap:48px;}.our-story-cards{grid-template-columns:1fr;}}
+  @media(max-width:640px){.our-story-section{padding:80px 0;}.our-story-top{margin-bottom:52px;}}
 </style>
 </head>
 <body>
@@ -1033,29 +1087,76 @@
 <!-- HOW IT WORKS -->
 <section class="how-section" id="how">
   <div class="container">
-    <div class="how-header reveal">
-      <div class="eyebrow"><span class="dot"></span>How It Works</div>
-      <h2>From guessing <em>to running.</em></h2>
+    <div class="how-intro reveal">
+      <div class="how-process-pill">The process</div>
+      <h2>What working with TMI <em>actually looks like.</em></h2>
+      <p class="how-deck">Three steps from audit to running systems. First deliverable in week one. Systems live in 30 days.</p>
     </div>
-    <div class="how-grid">
-      <div class="how-step reveal">
-        <div class="how-num">01  -  Audit</div>
-        <h3>We map your operation, money and time leaks.</h3>
-        <p>We map exactly where AI moves the needle. No generic recommendations. No software demos. A real analysis of your operation and what to build first - for your business, your workflows, your team.</p>
+    <div class="how-timeline">
+      <div class="how-row reveal">
+        <div class="how-col-num">
+          <div class="how-circle">01</div>
+        </div>
+        <div class="how-col-content">
+          <div class="how-phase">
+            <span class="how-phase-label">Week 1</span>
+            <div class="how-phase-sep"></div>
+            <span class="how-phase-sub">Free, no pitch</span>
+          </div>
+          <h3>We audit your operation.</h3>
+          <p>We map exactly where the money and time are leaking - your workflows, your tools, your team. No generic recommendations. A real analysis of your business and what to build first.</p>
+          <div class="how-chips">
+            <span class="how-chip">Operation audit</span>
+            <span class="how-chip">3 quick wins identified</span>
+            <span class="how-chip">Leak report</span>
+          </div>
+        </div>
       </div>
-      <div class="how-step reveal reveal-d1">
-        <div class="how-num">02  -  Build</div>
-        <h3>We build the system, wired into your workflows.</h3>
-        <p>AI agents, automations, integrations - built from scratch and connected to the tools you already use. Not software you manage. Systems that run on their own.</p>
+      <div class="how-row reveal reveal-d1">
+        <div class="how-col-num">
+          <div class="how-circle">02</div>
+        </div>
+        <div class="how-col-content">
+          <div class="how-phase">
+            <span class="how-phase-label">Week 2</span>
+            <div class="how-phase-sep"></div>
+            <span class="how-phase-sub">Approve before build</span>
+          </div>
+          <h3>Blueprint delivered.</h3>
+          <p>We map exactly what we're building and why - every agent, workflow, integration, and screen. You see the full plan and the projected ROI before a line of code ships.</p>
+          <div class="how-chips">
+            <span class="how-chip">Visual blueprint</span>
+            <span class="how-chip">Projected ROI</span>
+            <span class="how-chip">30-day build plan</span>
+          </div>
+        </div>
       </div>
-      <div class="how-step reveal reveal-d2">
-        <div class="how-num">03  -  Install</div>
-        <h3>We hand it over running. And guarantee it works.</h3>
-        <p>We deploy, train your team, and stay until it delivers. If the build doesn't perform, we keep building. Done-for-you means done.</p>
+      <div class="how-row reveal reveal-d2">
+        <div class="how-col-num">
+          <div class="how-circle active">03</div>
+        </div>
+        <div class="how-col-content">
+          <div class="how-phase">
+            <span class="how-phase-label">Days 14-30</span>
+            <div class="how-phase-sep"></div>
+            <span class="how-phase-sub">Live in production</span>
+          </div>
+          <h3>Systems go live.</h3>
+          <p>AI agents, automations, integrations - built from scratch and wired into the tools you already use. Your team gets trained on what each agent does and when to step in. If it doesn't perform, we keep building.</p>
+          <div class="how-chips">
+            <span class="how-chip">Agents live</span>
+            <span class="how-chip">Team trained</span>
+            <span class="how-chip">Reporting wired</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div style="text-align:center;margin-top:48px;" class="reveal">
-      <a href="/audit" class="btn btn-dark">Apply &rarr;</a>
+    <div class="how-outcome reveal">
+      <div>
+        <div class="how-outcome-eyebrow">The outcome</div>
+        <h3>A <em>living</em> operations layer that compounds every month -<br>not a one-time project that rots.</h3>
+      </div>
+      <a href="/audit" class="how-outcome-btn">Start at step 01 &rarr;</a>
     </div>
   </div>
 </section>
@@ -1137,6 +1238,59 @@
 </div>
 
 
+<!-- OUR STORY -->
+<section class="our-story-section">
+  <div class="container">
+    <div class="our-story-top reveal">
+      <div class="our-story-badge">Our Story</div>
+      <h2 class="our-story-headline">Built to fix businesses.<br><em>Nothing else.</em></h2>
+      <p class="our-story-sub">Not software for software's sake. Not automation for automation's sake. Every system we build exists for one reason: more revenue, less chaos, for the businesses that keep the world running.</p>
+    </div>
+    <div class="our-story-split reveal">
+      <div class="our-story-left">
+        <div class="our-story-rule"></div>
+        <blockquote class="our-story-quote">"All I wanted was to stop watching hardworking operators drown in overhead they never signed up for. Tyler and I kept building systems to fix it. And that's how TMI was born."</blockquote>
+        <div class="our-story-founders">
+          <div class="our-story-avatars">
+            <div class="our-story-avatar">M</div>
+            <div class="our-story-avatar our-story-avatar--t">T</div>
+          </div>
+          <div>
+            <div class="our-story-name">Mia &amp; Tyler</div>
+            <div class="our-story-title">Co-Founders, TMI</div>
+          </div>
+        </div>
+      </div>
+      <div class="our-story-right">
+        <p>Mia didn't start TMI because AI was trending. She started because she watched smart, capable business owners get buried under the operational weight of growth. Every new client meant more calls, more paperwork, more things falling through the cracks.</p>
+        <p>She built her first systems to solve real problems she saw firsthand. Then Tyler joined. Together they turned individual fixes into repeatable frameworks - and the frameworks became TMI.</p>
+        <p>Today TMI works with field operators, trades businesses, and online companies across the country. The mission hasn't changed: build the infrastructure that lets owners focus on growth, not grind.</p>
+      </div>
+    </div>
+    <div class="our-story-cards reveal">
+      <div class="our-story-card">
+        <div class="our-story-card-label">A system</div>
+        <h3>Infrastructure, not software</h3>
+        <p>We don't sell you a subscription and hand you a login. We build and install the operational backbone your business needs to run without you in every decision.</p>
+      </div>
+      <div class="our-story-card">
+        <div class="our-story-card-label">A standard</div>
+        <h3>Operators first, always</h3>
+        <p>Everything we build is designed for the person who runs the business. If it doesn't work in the field, it doesn't ship.</p>
+      </div>
+      <div class="our-story-card">
+        <div class="our-story-card-label">A philosophy</div>
+        <h3>Systems that compound</h3>
+        <p>Every system we install gets smarter over time. Stop trading hours for dollars. The infrastructure earns while you lead.</p>
+      </div>
+    </div>
+    <div class="our-story-cta reveal">
+      <a href="funnel.html" class="our-story-btn">Book a strategy call &rarr;</a>
+      <p class="our-story-note">Free audit &middot; 30 minutes &middot; No commitment</p>
+    </div>
+  </div>
+</section>
+
 <!-- FOUNDERS OF THE FUTURE -->
 <section class="fotf-section">
   <div class="fotf-glow"></div>
@@ -1166,7 +1320,8 @@
         <div class="footer-brand-name">
           <img src="logo.svg" alt="TMI"/> TMI
         </div>
-        <p class="footer-desc">AI systems, built and installed. We help businesses adopt AI-native operations from the ground up.</p>
+        <p class="footer-desc">The operating layer for businesses, built by founders for founders. AI systems, built and installed. We help businesses adopt AI-native operations from the ground up.</p>
+        <p class="footer-desc" style="margin-top:10px;color:var(--chart);font-weight:600;">Made for the 20-Hour Work Week</p>
         <div class="footer-contact" style="margin-bottom:16px;">
           <a href="mailto:support@tmitechai.com">support@tmitechai.com</a>
         </div>
