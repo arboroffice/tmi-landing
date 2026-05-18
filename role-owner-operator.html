@@ -85,7 +85,24 @@ footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 
 .footer-right{display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;}.footer-col h5{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin:0 0 14px;}
 .footer-col a{display:block;font-size:14px;color:var(--ink-2);padding:3px 0;transition:color 0.15s;}.footer-col a:hover{color:var(--ink);}
 .footer-bottom{padding-top:28px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
-@media(max-width:1024px){.what-grid{grid-template-columns:1fr;gap:48px;}.steps-strip{grid-template-columns:1fr;}.step{border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);}.sys-grid{grid-template-columns:repeat(2,1fr);}.challenge-grid{grid-template-columns:repeat(2,1fr);}.ba-grid{grid-template-columns:1fr;}.ba-col+.ba-col{border-left:none;border-top:1px solid rgba(255,255,255,0.1);}.related-grid{grid-template-columns:repeat(2,1fr);}.cta-strip-inner{flex-direction:column;gap:32px;align-items:flex-start;}.footer-grid{grid-template-columns:1fr;gap:40px;}.footer-right{grid-template-columns:1fr 1fr;}}
+.mid-cta{background:var(--bg-alt);padding:64px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.mid-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:48px;flex-wrap:wrap;}
+.mid-cta-label{font-family:var(--sans);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.mid-cta-inner h3{font-family:var(--serif);font-size:clamp(20px,2vw,28px);font-weight:400;letter-spacing:-0.02em;color:var(--ink);max-width:44ch;margin:0;}
+.fn-section{padding:96px 0;border-top:1px solid var(--line);}
+.fn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line-strong);border-left:1px solid var(--line-strong);margin-top:56px;}
+.fn-card{border-right:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);display:flex;flex-direction:column;transition:background 0.2s;}
+.fn-card:hover{background:var(--bg-alt);}
+.fn-img{height:180px;background-size:cover;background-position:center;}
+.fn-body{padding:24px 24px 28px;display:flex;flex-direction:column;flex:1;}
+.fn-cat{font-family:var(--sans);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.fn-body h4{font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:-0.01em;line-height:1.2;color:var(--ink);margin-bottom:8px;}
+.fn-body p{font-size:13px;color:var(--ink-2);line-height:1.6;flex:1;margin-bottom:16px;}
+.fn-read{font-family:var(--sans);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink);}
+.fn-card:hover .fn-read{letter-spacing:0.2em;}
+.challenge-link{display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);margin-top:20px;transition:gap 0.2s;}
+.challenge-link:hover{gap:10px;}
+@media(max-width:1024px){.what-grid{grid-template-columns:1fr;gap:48px;}.steps-strip{grid-template-columns:1fr;}.step{border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);}.sys-grid{grid-template-columns:repeat(2,1fr);}.challenge-grid{grid-template-columns:repeat(2,1fr);}.ba-grid{grid-template-columns:1fr;}.ba-col+.ba-col{border-left:none;border-top:1px solid rgba(255,255,255,0.1);}.related-grid{grid-template-columns:repeat(2,1fr);}.cta-strip-inner{flex-direction:column;gap:32px;align-items:flex-start;}.footer-grid{grid-template-columns:1fr;gap:40px;}.footer-right{grid-template-columns:1fr 1fr;}.fn-grid{grid-template-columns:1fr;}}
 @media(max-width:640px){.container{padding:0 20px;}.sys-grid{grid-template-columns:1fr;}.challenge-grid{grid-template-columns:1fr;}.related-grid{grid-template-columns:1fr;}.footer-right{grid-template-columns:1fr;}.hero{min-height:80vh;padding-bottom:56px;}}
 </style>
 </head>
@@ -227,15 +244,30 @@ footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 
       <div class="challenge-card reveal">
         <h3>The Dispatch Bottleneck</h3>
         <p>When every crew assignment flows through the owner, the owner becomes the constraint on how many jobs the business can handle. AI dispatch removes you from the daily coordination loop without losing control of who goes where.</p>
+        <a href="system-dispatch.html" class="challenge-link">See AI Dispatch &rarr;</a>
       </div>
       <div class="challenge-card reveal reveal-d1">
         <h3>Revenue Walking Out the Door</h3>
         <p>Change orders that weren't documented. Scope that crept but wasn't billed. Materials that came off a truck but never hit an invoice. For most owner-run businesses, this is 8-12% of revenue. The system captures it automatically.</p>
+        <a href="system-revenue-leakage.html" class="challenge-link">See Revenue Leakage Detection &rarr;</a>
       </div>
       <div class="challenge-card reveal reveal-d2">
         <h3>The Vacation Problem</h3>
         <p>If your business stops when you stop, you don't own a business - you own a job. TMI builds the process layer that keeps operations running when you're not in the middle of every decision. That's what makes a business sellable or scalable.</p>
+        <a href="system-ops-twin.html" class="challenge-link">See Operations Twin &rarr;</a>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="mid-cta">
+  <div class="container">
+    <div class="mid-cta-inner reveal">
+      <div>
+        <p class="mid-cta-label">Owner-Operators</p>
+        <h3>Most owner-operators recover 14 hours a week in the first 30 days.</h3>
+      </div>
+      <a href="audit.html" class="btn btn-primary">Talk to us about your operation &rarr;</a>
     </div>
   </div>
 </section>
@@ -267,6 +299,44 @@ footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 
           <li><span class="icon-check">&#x2713;</span>Operations run whether owner is on-site or on vacation</li>
         </ul>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="fn-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow"><span class="dot"></span>From Field Notes</div>
+      <h2>Reads for the owner running it all.</h2>
+    </div>
+    <div class="fn-grid">
+      <a href="article-revenue-leakage.html" class="fn-card reveal">
+        <div class="fn-img" style="background-image:url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=800&q=80')"></div>
+        <div class="fn-body">
+          <span class="fn-cat">Operations</span>
+          <h4>Revenue Leakage in Field Ops</h4>
+          <p>Where the money goes between approval and invoice - and how to stop it leaving.</p>
+          <span class="fn-read">Read &rarr;</span>
+        </div>
+      </a>
+      <a href="article-admin-burden.html" class="fn-card reveal reveal-d1">
+        <div class="fn-img" style="background-image:url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800&q=80')"></div>
+        <div class="fn-body">
+          <span class="fn-cat">Operations</span>
+          <h4>The Admin Overhead Quietly Killing Your Margins</h4>
+          <p>How back-office tasks become a ceiling on what your operation can actually do.</p>
+          <span class="fn-read">Read &rarr;</span>
+        </div>
+      </a>
+      <a href="article-scaling-trap.html" class="fn-card reveal reveal-d2">
+        <div class="fn-img" style="background-image:url('https://images.pexels.com/photos/2381463/pexels-photo-2381463.jpeg?auto=compress&cs=tinysrgb&w=800&q=80')"></div>
+        <div class="fn-body">
+          <span class="fn-cat">Leadership</span>
+          <h4>The Scaling Trap</h4>
+          <p>Why growing without building systems first creates a ceiling you can't see until you hit it.</p>
+          <span class="fn-read">Read &rarr;</span>
+        </div>
+      </a>
     </div>
   </div>
 </section>
@@ -305,7 +375,8 @@ footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 
         <p>Book a strategy call to see how TMI builds the operational layer underneath your business - so it runs whether you're on-site or not.</p>
       </div>
       <div class="cta-actions">
-        <a href="audit.html" class="btn btn-primary">Book a Strategy Call &rarr;</a>
+        <a href="audit.html" class="btn btn-primary">Talk to us about your operation &rarr;</a>
+        <a href="platform.html" class="btn btn-ghost">See the Platform &rarr;</a>
       </div>
     </div>
   </div>
