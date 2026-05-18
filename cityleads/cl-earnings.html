@@ -233,6 +233,33 @@ function calcEarnings() {
 
 const ALL_EARNINGS = [];
 
+async function loadEarnings() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const { data } = await CL.api('city_earnings', {
+    eq: { city_lead_id: clId },
+    select: 'id,amount,earn_type,status,created_at,business_id,city_businesses(business_name)',
+    order: 'created_at', asc: false
+  });
+  if (!data) return;
+  ALL_EARNINGS.length = 0;
+  data.forEach(e => {
+    const d = new Date(e.created_at);
+    const month = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    ALL_EARNINGS.push({
+      id: e.id,
+      biz: e.city_businesses?.business_name || '—',
+      type: e.earn_type || 'referral',
+      amount: e.amount || 0,
+      status: e.status || 'pending',
+      month,
+      date: CL.fmt(e.created_at)
+    });
+  });
+  renderEarnings();
+}
+loadEarnings();
+
 const MONTH_LABELS = {
   '2026-05': 'May 2026',
   '2026-04': 'April 2026',
@@ -276,7 +303,7 @@ function renderEarnings() {
     </div>`).join('');
 }
 
-renderEarnings();
+// loaded by loadEarnings()
 </script>
 </body>
 </html>

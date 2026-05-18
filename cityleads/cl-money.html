@@ -156,11 +156,82 @@
 CL.initPage('cl-money', { adminOnly: true });
 
 const DEALS = [];
-
 const PAYOUTS = [];
+let dealsFiltered = [];
+let payoutsFiltered = [];
 
-let dealsFiltered = [...DEALS];
-let payoutsFiltered = [...PAYOUTS];
+async function loadMoney() {
+  const [bizRes, earningsRes, leadsRes] = await Promise.all([
+    CL.api('city_businesses', {
+      select: 'id,business_name,city,stage,deal_value,city_lead_id,updated_at',
+      order: 'updated_at', asc: false
+    }),
+    CL.api('city_earnings', {
+      select: 'id,amount,earn_type,status,created_at,city_lead_id',
+      order: 'created_at', asc: false
+    }),
+    CL.api('city_leads', { select: 'id,name,first_name,last_name' })
+  ]);
+  const bizAll = bizRes.data || [];
+  const earningsAll = earningsRes.data || [];
+  const leadsAll = leadsRes.data || [];
+  const leadMap = {};
+  leadsAll.forEach(l => {
+    leadMap[l.id] = l.name || [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
+  });
+
+  ['deals-lead','payouts-lead'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    leadsAll.forEach(l => {
+      const name = leadMap[l.id];
+      const o = document.createElement('option'); o.value = name; o.textContent = name;
+      sel.appendChild(o);
+    });
+  });
+
+  DEALS.length = 0;
+  bizAll.forEach(b => {
+    DEALS.push({
+      id: b.id,
+      biz: b.business_name || '—',
+      city: b.city || '—',
+      lead: leadMap[b.city_lead_id] || '—',
+      size: b.deal_value || 0,
+      comm: (b.deal_value || 0) * 0.10,
+      stage: b.stage || 'seed',
+      rawDate: b.updated_at,
+      date: CL.fmt(b.updated_at)
+    });
+  });
+
+  PAYOUTS.length = 0;
+  earningsAll.forEach(e => {
+    PAYOUTS.push({
+      id: e.id,
+      lead: leadMap[e.city_lead_id] || '—',
+      amount: e.amount || 0,
+      type: e.earn_type || 'referral',
+      status: e.status || 'pending',
+      date: CL.fmt(e.created_at)
+    });
+  });
+
+  const totalRev = DEALS.reduce((s,d) => s + d.size, 0);
+  const startOfMonth = new Date(); startOfMonth.setDate(1); startOfMonth.setHours(0,0,0,0);
+  const monthRev = DEALS.filter(d => d.rawDate && new Date(d.rawDate) >= startOfMonth).reduce((s,d) => s + d.size, 0);
+  const pending = PAYOUTS.filter(p => p.status === 'pending').reduce((s,p) => s + p.amount, 0);
+  const paid = PAYOUTS.filter(p => p.status === 'paid').reduce((s,p) => s + p.amount, 0);
+  document.getElementById('stat-total-rev').textContent = CL.currency(totalRev);
+  document.getElementById('stat-month-rev').textContent = CL.currency(monthRev);
+  document.getElementById('stat-pending').textContent = CL.currency(pending);
+  document.getElementById('stat-paid').textContent = CL.currency(paid);
+
+  dealsFiltered = [...DEALS];
+  payoutsFiltered = [...PAYOUTS];
+  renderDeals(dealsFiltered);
+  renderPayouts(payoutsFiltered);
+}
+loadMoney();
 
 function renderDeals(data) {
   const tbody = document.getElementById('deals-tbody');
@@ -228,8 +299,7 @@ function switchTab(tab) {
   document.getElementById('tab-payouts').classList.toggle('active', tab === 'payouts');
 }
 
-renderDeals(dealsFiltered);
-renderPayouts(payoutsFiltered);
+// loaded by loadMoney()
 </script>
 </body>
 </html>

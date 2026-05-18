@@ -112,8 +112,47 @@
 CL.initPage('cl-cities', { adminOnly: true });
 
 const ALL_CITIES = [];
+let filtered = [];
 
-let filtered = [...ALL_CITIES];
+async function loadCities() {
+  const [leadsRes, bizRes] = await Promise.all([
+    CL.api('city_leads', { select: 'id,name,first_name,last_name,city,state,territory,status,updated_at' }),
+    CL.api('city_businesses', { select: 'id,city_lead_id,stage,deal_value,updated_at,last_visit_at' })
+  ]);
+  const leads = leadsRes.data || [];
+  const bizAll = bizRes.data || [];
+
+  const leadSel = document.getElementById('lead-filter');
+  leads.forEach(l => {
+    const name = l.name || [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
+    const o = document.createElement('option'); o.value = name; o.textContent = name;
+    leadSel.appendChild(o);
+  });
+
+  ALL_CITIES.length = 0;
+  leads.forEach(l => {
+    const lBiz = bizAll.filter(b => b.city_lead_id === l.id);
+    const warm = lBiz.filter(b => ['warm','audit_booked','proposal_sent'].includes(b.stage)).length;
+    const closed = lBiz.filter(b => ['closed','build_live','support_active','expansion'].includes(b.stage)).length;
+    const rev = lBiz.filter(b => b.stage === 'closed').reduce((s,b) => s + (b.deal_value||0), 0);
+    const name = l.name || [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
+    const lastActive = lBiz.reduce((latest, b) => {
+      const d = new Date(b.updated_at || b.last_visit_at || 0);
+      return d > latest ? d : latest;
+    }, new Date(l.updated_at || 0));
+    ALL_CITIES.push({
+      city: l.territory || l.city || '—',
+      state: l.state || '—',
+      lead: name,
+      leadId: l.id,
+      biz: lBiz.length,
+      warm, closed, rev,
+      last: lastActive.getTime() > 0 ? CL.fmt(lastActive.toISOString()) : '—'
+    });
+  });
+  filtered = [...ALL_CITIES];
+  renderTable(filtered);
+}
 
 function renderTable(data) {
   const tbody = document.getElementById('cities-tbody');
@@ -166,7 +205,7 @@ function openAddCity() { CL.openModal('add-city-modal'); }
 
 document.getElementById('export-btn').onclick = () => CL.toast('CSV export coming soon', 'info');
 
-renderTable(filtered);
+loadCities();
 </script>
 </body>
 </html>

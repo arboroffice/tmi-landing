@@ -154,11 +154,41 @@
 <script>
 CL.initPage('cl-follow-ups');
 
-const TODAY = new Date('2026-05-17');
-
 const FOLLOWUPS = [];
+let cards = [];
 
-let cards = FOLLOWUPS.map(f => ({ ...f, status:'pending' }));
+async function loadFollowUps() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const today0 = new Date(); today0.setHours(0,0,0,0);
+  const today1 = new Date(); today1.setHours(23,59,59,999);
+
+  const { data } = await CL.api('city_follow_ups', {
+    eq: { city_lead_id: clId, completed: false },
+    select: 'id,title,due_at,business_id,city_businesses(business_name,industry)',
+    order: 'due_at', asc: true
+  });
+  if (!data) return;
+  FOLLOWUPS.length = 0;
+  data.forEach(f => {
+    const due = f.due_at ? new Date(f.due_at) : null;
+    let dueClass, dueLabel;
+    if (!due) { dueClass = 'future'; dueLabel = 'No date'; }
+    else if (due < today0) { dueClass = 'overdue'; dueLabel = 'Overdue'; }
+    else if (due <= today1) { dueClass = 'today'; dueLabel = 'Today'; }
+    else { dueClass = 'future'; dueLabel = CL.fmt(f.due_at); }
+    FOLLOWUPS.push({
+      id: f.id,
+      biz: f.city_businesses?.business_name || '—',
+      type: f.city_businesses?.industry || '—',
+      dueClass, dueLabel,
+      message: f.title || ('Follow up with ' + (f.city_businesses?.business_name || 'this business'))
+    });
+  });
+  cards = FOLLOWUPS.map(f => ({ ...f, status: 'pending' }));
+  renderAll();
+}
+loadFollowUps();
 
 function renderAll() {
   const today = cards.filter(c => c.status !== 'done' && (c.dueClass === 'overdue' || c.dueClass === 'today'));
@@ -248,14 +278,14 @@ function snooze(id, duration) {
   renderAll();
 }
 
-function markDone(id) {
+async function markDone(id) {
   const f = cards.find(c => c.id === id);
+  const sb = CL.initSupabase();
+  await sb.from('city_follow_ups').update({ completed: true }).eq('id', id);
   f.status = 'done';
   CL.toast(f.biz + ' follow-up marked done');
   renderAll();
 }
-
-renderAll();
 
 // Tab switching
 const FU_TABS = ['followups','handoffs','referrals','relationships'];
@@ -265,43 +295,61 @@ function showFUTab(id) {
 }
 
 // Handoffs
-const HANDOFFS = [];
-
-document.getElementById('handoff-list').innerHTML = HANDOFFS.length
-  ? HANDOFFS.map(h => `
-    <div class="ho-card">
-      <div class="ho-header">
-        <div><div class="ho-biz">${h.biz}</div><div class="ho-biz-type">${h.type}</div></div>
-        <span class="ho-urgency ${h.urgency}">${h.urgency.replace('_',' ')}</span>
-      </div>
-      <div class="ho-assignee">
-        <div class="ho-assignee-avatar">${h.assignee[0]}</div>
-        Assigned to ${h.assignee} · ${h.date}
-      </div>
-      <div class="ho-notes">${h.notes}</div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-ghost btn-sm" onclick="CL.toast('Opening business profile...')">View Profile</button>
-        <button class="btn btn-ghost btn-sm" onclick="CL.toast('Status updated')">Mark Won</button>
-      </div>
-    </div>`).join('')
-  : `<div style="text-align:center;color:var(--muted);padding:32px;">No handoffs yet. When a business is ready to close, add a handoff from their profile.</div>`;
+async function loadHandoffs() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const { data } = await CL.api('city_handoffs', {
+    eq: { city_lead_id: clId },
+    select: 'id,notes,status,assigned_to,deal_value,created_at,business_id,city_businesses(business_name,industry)',
+    order: 'created_at', asc: false
+  });
+  const items = data || [];
+  document.getElementById('handoff-list').innerHTML = items.length
+    ? items.map(h => `
+      <div class="ho-card">
+        <div class="ho-header">
+          <div><div class="ho-biz">${h.city_businesses?.business_name||'—'}</div><div class="ho-biz-type">${h.city_businesses?.industry||'—'}</div></div>
+          <span class="badge badge-${h.status||'in_progress'}">${(h.status||'in progress').replace('_',' ')}</span>
+        </div>
+        <div class="ho-assignee">
+          <div class="ho-assignee-avatar">${(h.assigned_to||'?')[0]}</div>
+          Assigned to ${h.assigned_to||'—'} &middot; ${CL.fmt(h.created_at)}
+        </div>
+        ${h.notes ? `<div class="ho-notes">${h.notes}</div>` : ''}
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="location.href='cl-business.html?id=${h.business_id}'">View Profile</button>
+          <button class="btn btn-ghost btn-sm" onclick="CL.toast('Status updated')">Mark Won</button>
+        </div>
+      </div>`).join('')
+    : `<div style="text-align:center;color:var(--muted);padding:32px;">No handoffs yet. When a business is ready to close, add a handoff from their profile.</div>`;
+}
+loadHandoffs();
 
 // Referrals
-const REFERRALS = [];
-
-document.getElementById('referral-list').innerHTML = REFERRALS.length
-  ? REFERRALS.map(r => `
-  <div class="ref-card">
-    <div class="ref-flow">
-      <span class="ref-biz">${r.from}</span>
-      <span class="ref-arrow">→</span>
-      <span class="ref-biz">${r.to}</span>
-      <span class="ref-status-badge ${r.status}">${r.status}</span>
-    </div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${r.date}</div>
-    <div style="font-size:13px;color:var(--ink-2);line-height:1.5;">${r.notes}</div>
-  </div>`).join('')
-  : `<div style="text-align:center;color:var(--muted);padding:32px;">No referrals yet. When a business owner sends you to another owner, log it here.</div>`;
+async function loadReferrals() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const { data } = await CL.api('city_referrals', {
+    eq: { city_lead_id: clId },
+    select: 'id,referred_name,referred_city,status,notes,created_at,source_business_id,city_businesses(business_name)',
+    order: 'created_at', asc: false
+  });
+  const items = data || [];
+  document.getElementById('referral-list').innerHTML = items.length
+    ? items.map(r => `
+    <div class="ref-card">
+      <div class="ref-flow">
+        <span class="ref-biz">${r.city_businesses?.business_name||'—'}</span>
+        <span class="ref-arrow">→</span>
+        <span class="ref-biz">${r.referred_name||'—'}${r.referred_city ? ', '+r.referred_city : ''}</span>
+        <span class="ref-status-badge ${r.status||'introduced'}">${r.status||'introduced'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${CL.fmt(r.created_at)}</div>
+      <div style="font-size:13px;color:var(--ink-2);line-height:1.5;">${r.notes||''}</div>
+    </div>`).join('')
+    : `<div style="text-align:center;color:var(--muted);padding:32px;">No referrals yet. When a business owner sends you to another owner, log it here.</div>`;
+}
+loadReferrals();
 
 // Relationships
 const RELS = [];

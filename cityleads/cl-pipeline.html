@@ -115,6 +115,34 @@ CL.initPage('cl-pipeline');
 
 const DEALS = [];
 
+async function loadPipeline() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const { data } = await CL.api('city_businesses', {
+    eq: { city_lead_id: clId },
+    select: 'id,business_name,owner_name,stage,score,deal_value,updated_at,last_visit_at',
+    order: 'updated_at', asc: false
+  });
+  if (!data) return;
+  DEALS.length = 0;
+  const now = Date.now();
+  data.forEach(b => {
+    const updated = b.updated_at || b.last_visit_at;
+    DEALS.push({
+      id: b.id,
+      biz: b.business_name || '—',
+      owner: b.owner_name || '—',
+      stage: b.stage || 'seed',
+      score: b.score || 'cold',
+      value: b.deal_value || 0,
+      days: updated ? Math.floor((now - new Date(updated).getTime()) / 86400000) : 0,
+      last: CL.fmt(b.last_visit_at || b.updated_at)
+    });
+  });
+  renderCurrent();
+}
+loadPipeline();
+
 let activeScore = 'all';
 let activeView = 'board';
 
@@ -211,7 +239,7 @@ function renderList(deals) {
     </tr>`).join('');
 }
 
-renderCurrent();
+// loaded by loadPipeline()
 </script>
 </body>
 </html>

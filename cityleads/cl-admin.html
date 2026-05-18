@@ -138,19 +138,98 @@
 <script>
 CL.initPage('cl-admin', { adminOnly: true });
 
-document.getElementById('stat-cities').textContent       = '0';
-document.getElementById('stat-leads').textContent        = '0';
-document.getElementById('stat-businesses').textContent   = '0';
-document.getElementById('stat-closed').textContent       = '0';
-document.getElementById('stat-cities-delta').textContent = '';
-document.getElementById('stat-leads-delta').textContent  = '';
-document.getElementById('stat-biz-delta').textContent    = '';
-document.getElementById('stat-closed-delta').textContent = '';
+async function loadAdminStats() {
+  const [leadsRes, bizRes, handoffsRes] = await Promise.all([
+    CL.api('city_leads', { select: 'id,name,first_name,last_name,city,state,territory,status,updated_at' }),
+    CL.api('city_businesses', { select: 'id,city_lead_id,business_name,stage,deal_value,updated_at,last_visit_at' }),
+    CL.api('city_handoffs', { select: 'id,business_id,city_lead_id,status,created_at,city_businesses(business_name,city,stage),city_leads(name,first_name,last_name)', order: 'created_at', asc: false })
+  ]);
+  const leads = leadsRes.data || [];
+  const bizAll = bizRes.data || [];
+  const handoffs = handoffsRes.data || [];
 
-document.getElementById('cities-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No cities yet</td></tr>';
-document.getElementById('top-leads-list').innerHTML = '<li class="biz-item" style="padding:20px;justify-content:center;"><div style="color:var(--muted);font-size:13px;">No activity yet</div></li>';
-document.getElementById('attention-list').innerHTML = '<li class="biz-item" style="padding:20px;justify-content:center;"><div style="color:var(--muted);font-size:13px;">Nothing here yet</div></li>';
-document.getElementById('handoffs-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No handoffs yet</td></tr>';
+  const activeLeads = leads.filter(l => l.status !== 'inactive');
+  const CLOSED = ['closed','build_live','support_active','expansion'];
+  const closedBiz = bizAll.filter(b => CLOSED.includes(b.stage));
+  const uniqueCities = new Set(leads.map(l => l.territory || l.city).filter(Boolean));
+
+  document.getElementById('stat-cities').textContent     = uniqueCities.size;
+  document.getElementById('stat-leads').textContent      = activeLeads.length;
+  document.getElementById('stat-businesses').textContent = bizAll.length;
+  document.getElementById('stat-closed').textContent     = closedBiz.length;
+  ['stat-cities-delta','stat-leads-delta','stat-biz-delta','stat-closed-delta'].forEach(id => {
+    document.getElementById(id).textContent = '';
+  });
+
+  // Cities table
+  const cityRows = leads.map(l => {
+    const name = l.name || [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
+    const lBiz = bizAll.filter(b => b.city_lead_id === l.id);
+    return {
+      city: l.territory || l.city || '—',
+      lead: name,
+      biz: lBiz.length,
+      warm: lBiz.filter(b => ['warm','audit_booked','proposal_sent'].includes(b.stage)).length,
+      closed: lBiz.filter(b => CLOSED.includes(b.stage)).length
+    };
+  }).sort((a,b) => b.biz - a.biz).slice(0,10);
+  document.getElementById('cities-tbody').innerHTML = cityRows.length
+    ? cityRows.map(c => `<tr><td>${c.city}</td><td>${c.lead}</td><td>${c.biz}</td><td>${c.warm}</td><td>${c.closed}</td></tr>`).join('')
+    : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">No cities yet</td></tr>';
+
+  // Top leads
+  const topLeads = leads.map(l => {
+    const name = l.name || [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
+    const lBiz = bizAll.filter(b => b.city_lead_id === l.id);
+    return { id: l.id, name, biz: lBiz.length, closed: lBiz.filter(b => CLOSED.includes(b.stage)).length };
+  }).sort((a,b) => b.closed - a.closed).slice(0,5);
+  document.getElementById('top-leads-list').innerHTML = topLeads.length
+    ? topLeads.map(l => `
+      <a class="biz-item" href="cl-roster.html">
+        <div class="biz-avatar">${CL.initials(l.name)}</div>
+        <div class="biz-body">
+          <div class="biz-name">${l.name}</div>
+          <div class="biz-meta">${l.biz} businesses &middot; ${l.closed} closed</div>
+        </div>
+      </a>`).join('')
+    : '<li class="biz-item" style="padding:20px;justify-content:center;"><div style="color:var(--muted);font-size:13px;">No activity yet</div></li>';
+
+  // Needs attention (stuck >14d in active stage)
+  const ACTIVE = ['met_owner','second_visit','problem_identified','warm','audit_booked','proposal_sent'];
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 14);
+  const stuck = bizAll.filter(b => ACTIVE.includes(b.stage) && new Date(b.updated_at || b.last_visit_at || 0) < cutoff).slice(0,5);
+  const leadMap = {};
+  leads.forEach(l => { leadMap[l.id] = l.name || [l.first_name,l.last_name].filter(Boolean).join(' ') || '—'; });
+  document.getElementById('attention-list').innerHTML = stuck.length
+    ? stuck.map(b => {
+        const days = Math.floor((Date.now() - new Date(b.updated_at || b.last_visit_at || 0).getTime()) / 86400000);
+        return `<a class="biz-item" href="cl-my-list.html">
+          <div class="biz-avatar">${CL.initials(b.business_name||'—')}</div>
+          <div class="biz-body">
+            <div class="biz-name">${b.business_name||'—'}</div>
+            <div class="biz-meta">${leadMap[b.city_lead_id]||'—'} &middot; ${days}d since activity</div>
+          </div>
+        </a>`;
+      }).join('')
+    : '<li class="biz-item" style="padding:20px;justify-content:center;"><div style="color:var(--muted);font-size:13px;">Nothing here yet</div></li>';
+
+  // Recent handoffs (last 30d)
+  const cutoff30 = new Date(); cutoff30.setDate(cutoff30.getDate() - 30);
+  const recentHO = handoffs.filter(h => new Date(h.created_at) >= cutoff30).slice(0,10);
+  document.getElementById('handoffs-tbody').innerHTML = recentHO.length
+    ? recentHO.map(h => {
+        const ln = h.city_leads ? (h.city_leads.name || [h.city_leads.first_name,h.city_leads.last_name].filter(Boolean).join(' ') || '—') : '—';
+        return `<tr>
+          <td>${h.city_businesses?.business_name||'—'}</td>
+          <td>${h.city_businesses?.city||'—'}</td>
+          <td>${ln}</td>
+          <td>${CL.stageBadge(h.city_businesses?.stage||'seed')}</td>
+          <td class="td-muted">${CL.fmt(h.created_at)}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">No handoffs yet</td></tr>';
+}
+loadAdminStats();
 
 // Desktop: expand grid to 2 columns
 if (window.innerWidth >= 769) {

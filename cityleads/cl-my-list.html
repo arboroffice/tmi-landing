@@ -125,7 +125,31 @@ CL.initPage('cl-my-list');
 
 const STAGE_ORDER = ['seed','met_owner','second_visit','problem_identified','warm','audit_booked','proposal_sent','closed','build_live','support_active','expansion'];
 
-const DEMO_LIST = [];
+const BIZES = [];
+
+async function loadList() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const { data } = await CL.api('city_businesses', {
+    eq: { city_lead_id: clId },
+    select: 'id,business_name,industry,owner_name,stage,score,last_visit_at',
+    order: 'created_at', asc: false
+  });
+  if (!data) return;
+  BIZES.length = 0;
+  data.forEach(b => BIZES.push({
+    id: b.id,
+    name: b.business_name || '—',
+    type: b.industry || '—',
+    owner: b.owner_name || '—',
+    stage: b.stage || 'seed',
+    score: b.score || 'cold',
+    lastContact: b.last_visit_at || null
+  }));
+  renderStats(BIZES);
+  filterList();
+}
+loadList();
 
 function daysSince(dateStr) {
   if (!dateStr) return 999;
@@ -151,7 +175,7 @@ function filterList() {
   const score = document.getElementById('score-filter').value;
   const sort = document.getElementById('sort-filter').value;
 
-  let results = DEMO_LIST.filter(b => {
+  let results = BIZES.filter(b => {
     if (stage && b.stage !== stage) return false;
     if (score && b.score !== score) return false;
     if (q && !b.name.toLowerCase().includes(q) && !b.owner.toLowerCase().includes(q)) return false;
@@ -198,9 +222,7 @@ function renderList(businesses) {
   }).join('');
 }
 
-// Init
-renderStats(DEMO_LIST);
-filterList();
+// loaded by loadList()
 </script>
 </body>
 </html>

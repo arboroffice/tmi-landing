@@ -185,6 +185,46 @@ function showTab(id) {
 // Visit data
 const VISITS = [];
 
+async function loadVisits() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const { data } = await CL.api('city_visits', {
+    eq: { city_lead_id: clId },
+    select: 'id,visited_at,visit_type,notes,business_id,city_businesses(business_name)',
+    order: 'visited_at', asc: false
+  });
+  if (!data) return;
+  VISITS.length = 0;
+  data.forEach(v => VISITS.push({
+    id: v.id,
+    biz: v.city_businesses?.business_name || '—',
+    type: v.visit_type || 'walk_in',
+    date: v.visited_at,
+    notes: v.notes || '',
+    tags: []
+  }));
+  renderVisits();
+}
+loadVisits();
+
+async function loadBizForNotes() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const { data } = await CL.api('city_businesses', {
+    eq: { city_lead_id: clId },
+    select: 'id,business_name',
+    order: 'business_name', asc: true
+  });
+  if (!data) return;
+  const sel = document.getElementById('note-biz-select');
+  data.forEach(b => {
+    const o = document.createElement('option');
+    o.value = b.id; o.textContent = b.business_name;
+    sel.appendChild(o);
+  });
+}
+loadBizForNotes();
+
 const typeIcons = {
   walk_in: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-linecap="round"/><circle cx="12" cy="10" r="3"/></svg>`,
   coffee:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7" width="16" height="16"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4" stroke-linecap="round"/><line x1="10" y1="1" x2="10" y2="4" stroke-linecap="round"/><line x1="14" y1="1" x2="14" y2="4" stroke-linecap="round"/></svg>`,
@@ -222,8 +262,6 @@ function renderVisits() {
     : `<div class="empty-state"><div class="empty-icon">👣</div><h3>No visits found</h3><p>Try changing the filters or log a new visit.</p></div>`;
 }
 
-renderVisits();
-
 // Scanner
 function triggerScan() { document.getElementById('card-input').click(); }
 
@@ -242,10 +280,22 @@ function processCard(e) {
   }, 1200);
 }
 
-function saveScanned() {
-  const biz = document.getElementById('sc-biz').value;
-  if (!biz) { CL.toast('Enter a business name', 'error'); return; }
-  CL.toast(biz + ' added to My List');
+async function saveScanned() {
+  const bizName = document.getElementById('sc-biz').value.trim();
+  if (!bizName) { CL.toast('Enter a business name', 'error'); return; }
+  const clId = CL.getCityLeadId();
+  const sb = CL.initSupabase();
+  const { error } = await sb.from('city_businesses').insert({
+    city_lead_id: clId,
+    business_name: bizName,
+    owner_name: document.getElementById('sc-name').value.trim() || null,
+    phone: document.getElementById('sc-phone').value.trim() || null,
+    email: document.getElementById('sc-email').value.trim() || null,
+    industry: document.getElementById('sc-industry').value || null,
+    stage: 'seed', score: 'cold'
+  });
+  if (error) { CL.toast('Failed to save: ' + error.message, 'error'); return; }
+  CL.toast(bizName + ' added to My List');
   resetScanner();
 }
 
@@ -264,11 +314,18 @@ function addTag(el, tag) {
   else { activeTags.add(tag); el.classList.add('active'); }
 }
 
-function saveLiveNote() {
-  const biz = document.getElementById('note-biz-select').value;
+async function saveLiveNote() {
+  const bizId = document.getElementById('note-biz-select').value;
   const note = document.getElementById('live-note').value.trim();
-  if (!biz) { CL.toast('Select a business first', 'error'); return; }
+  if (!bizId) { CL.toast('Select a business first', 'error'); return; }
   if (!note) { CL.toast('Add some notes first', 'error'); return; }
+  const clId = CL.getCityLeadId();
+  const sb = CL.initSupabase();
+  const tags = [...activeTags];
+  const { error } = await sb.from('city_personal_notes').insert({
+    city_lead_id: clId, business_id: bizId, note, tags
+  });
+  if (error) { CL.toast('Failed to save notes', 'error'); return; }
   document.getElementById('note-saved-msg').style.display = 'block';
   CL.toast('Notes saved');
   setTimeout(() => document.getElementById('note-saved-msg').style.display = 'none', 3000);
