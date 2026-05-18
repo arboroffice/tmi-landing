@@ -658,6 +658,52 @@ const PATHS = {
 };
 
 /* ═══════════════════════════════════════════
+   INDUSTRY QUESTION OVERRIDES
+   Key format: industryGroup_questionId
+═══════════════════════════════════════════ */
+const QUESTION_OVERRIDES = {
+  // Q6 — in-field / delivery problem handling
+  construction_q6:{text:"When a change order or site problem comes up on a project, who handles it?",opts:["Handled through a documented process - I am rarely the first call.","Usually someone on my team handles it but I get looped in.","Mix - some things get handled but I often get pulled in to make the call.","Me. Change orders and site problems always come to me."]},
+  oil_gas_energy_q6:{text:"When a field issue or safety situation comes up on site, how does it get resolved?",opts:["Through a documented response process without me being the first call.","My field supervisor handles it and escalates only if it is serious.","Usually escalates to me fairly quickly regardless of severity.","Everything routes through me immediately."]},
+  fleet_logistics_q6:{text:"When a driver has a problem on the road, how does it get handled?",opts:["Handled through a documented dispatch process without involving me.","Dispatch handles it and I hear about it after the fact.","Dispatch tries but most issues end up routed to me.","Everything comes to me directly."]},
+  manufacturing_q6:{text:"When a production issue or quality problem comes up on the floor, what happens?",opts:["Handled using our documented process without me getting involved.","A supervisor handles it but I get called on anything significant.","Often escalates to me even for routine production issues.","I am the one who resolves most floor issues."]},
+  healthcare_q6:{text:"When a patient has a complaint or billing issue, how does your team handle it?",opts:["Handled by a documented process - I am almost never the first contact.","A team member handles most cases and escalates if needed.","Mix - routine things get handled but I often get pulled in.","Patients and billing issues come to me directly."]},
+  coaching_q6:{text:"When a client has an issue or needs support between sessions, how does your team handle it?",opts:["Handled through a support process - I am never the first contact.","A team member handles routine requests and escalates if needed.","Mix - some things get handled but I often get pulled in.","Clients contact me directly for almost everything."]},
+  ecommerce_q6:{text:"When a customer has an order issue or complaint, how does it get handled?",opts:["Handled through a support system without me involved.","My support team handles the volume and escalates exceptions.","Mix - team handles some but I deal with a lot directly.","I handle customer issues personally."]},
+  agency_q6:{text:"When a client has an urgent request or scope issue, who resolves it?",opts:["Handled through an account management process without me.","An account manager handles it and I get looped in on bigger issues.","Mix - some get handled but most end up with me.","Me. Client issues come directly to the owner."]},
+  education_q6:{text:"When a student has a support question or complaint, how is it handled?",opts:["A knowledge base or support system handles it without my involvement.","A team member or VA handles the volume.","Mix - some get handled but a lot routes to me.","Students contact me directly."]},
+
+  // Q7 — scheduling / fulfillment autonomy
+  construction_q7:{text:"Can your project managers run a full week of site operations without calling you for decisions?",opts:["Yes. They have the authority and systems to handle it clean.","Yes but judgment calls and client issues still come to me.","Partially. Day to day is fine but bigger decisions wait on me.","No. Site operations route through me every day."]},
+  oil_gas_energy_q7:{text:"Can your field operations run for a full week without a single call being routed through you?",opts:["Yes. Field supervisors are empowered and equipped to handle it.","Mostly - emergencies and scope changes still come to me.","Partially. Operations slow significantly if I am unreachable.","No. I am the coordination point for all field work."]},
+  fleet_logistics_q7:{text:"Can your dispatch team route and manage drivers for a full week without your input?",opts:["Yes. Dispatch runs autonomously with clear authority.","Yes but escalations and exceptions still come to me.","Partially. Dispatch handles routine but struggles with anything outside of that.","No. I am managing dispatch directly."]},
+  manufacturing_q7:{text:"Can your floor supervisors manage the production schedule for a full week without you?",opts:["Yes. Scheduling and production decisions run without me.","Yes but capacity calls and schedule changes come to me.","Partially. Supervisors handle daily ops but strategy waits on me.","No. I manage the production schedule."]},
+  agency_q7:{text:"Can your team handle client delivery and project management for a full week without you?",opts:["Yes. Project managers run delivery autonomously.","Yes but approvals and scope decisions still route to me.","Partially. Delivery keeps moving but I get pulled in regularly.","No. Client work runs through me."]},
+
+  // Q11 — invoicing / billing / collections
+  construction_q11:{text:"What happens to progress billing, retainage tracking, and collections when you are not managing them?",opts:["Handled by a system or someone who owns it completely.","Someone handles it manually but it gets done.","It slows down significantly but eventually gets done.","It waits until I handle it personally."]},
+  healthcare_q11:{text:"What happens to claims submission, eligibility checks, and billing follow up when you step away?",opts:["Automated or handled by someone with full ownership.","Someone handles it manually but nothing falls through.","It slows down and things occasionally slip.","It waits until I am back to manage it."]},
+  coaching_q11:{text:"What happens to client invoicing and payment collection when you are not watching it?",opts:["Fully automated - payments collect and receipts go out without me.","Someone handles it manually but it gets done.","It slows down and occasionally things fall through.","It waits until I handle it."]},
+  ecommerce_q11:{text:"What happens to refund requests, chargebacks, and payment issues when you are not managing them?",opts:["Handled automatically or by a team member with clear authority.","Someone handles it manually but nothing falls through.","It slows down and things get missed sometimes.","They pile up and wait until I log in to deal with them."]},
+  agency_q11:{text:"What happens to client invoicing, payment follow up, and collections when you are not managing them?",opts:["Handled by a system or a team member who owns the process completely.","Someone handles it manually but it gets done.","It slows down and things occasionally slip.","It waits until I chase it personally."]},
+
+  // Q12 — job / product margin visibility
+  manufacturing_q12:{text:"How often do you know your real cost per unit and job margin without pulling it yourself?",opts:["Always. Real time job costing runs automatically.","Monthly when accounting closes the books.","Rarely. I estimate based on the bid versus what we actually spent.","Almost never. I go by feel."]},
+  coaching_q12:{text:"How clearly do you know your profit per client and cost of acquisition right now?",opts:["Very clearly. Both are tracked and visible at all times.","I review it monthly when I look at the books.","I have a rough sense but nothing tracked precisely.","I honestly do not know what my real numbers are."]},
+  ecommerce_q12:{text:"How often do you know your real product margin and true ROAS without manually pulling reports?",opts:["Always. Tracked automatically in real time.","Monthly when I review the numbers.","Occasionally when I sit down to calculate it.","Rarely. I estimate based on rough feel."]},
+  creator_q12:{text:"How clearly do you know which revenue channels are actually profitable versus just keeping you busy?",opts:["Very clearly. Each channel is tracked and compared.","I review it when I look at the books monthly.","I have a rough sense but nothing is tracked precisely.","It all blurs together. I honestly do not know."]},
+  agency_q12:{text:"How often do you know your real project margin and team utilization without calculating it yourself?",opts:["Always. Tracked in real time in our system.","Monthly when the books get done.","Rarely. I estimate based on how the project felt.","Almost never. We go by billable hours not real margin."]},
+
+  // Q13 — customer / client update communication
+  construction_q13:{text:"When a project owner or GC wants a status update, who handles it?",opts:["Automated updates go out or a project manager always handles it.","Usually my project manager or site super handles it.","Mix of me and someone else depending on the project.","Me. I handle client communication on every project."]},
+  coaching_q13:{text:"When a client needs something between sessions, who handles it?",opts:["A team member or automated process - never me directly.","Usually a team member handles routine requests.","Mix - some things get handled but I often get pulled in.","Me. Client communication comes directly to me."]},
+  education_q13:{text:"When a student has a question about the course or needs support, who handles it?",opts:["A knowledge base or support team handles it without me.","My support team or VA handles the volume.","Mix - some gets handled but a lot routes to me.","Me. Student questions come directly to me."]},
+  ecommerce_q13:{text:"When a customer asks about their order or has a complaint, who handles it?",opts:["A support system or team handles it without me.","My support team handles the volume.","Mix - team handles some but I deal with a lot personally.","Me. I handle customer issues directly."]},
+  agency_q13:{text:"When a client wants an update on their project or deliverables, who handles it?",opts:["Automated updates go out or account managers always handle it.","Usually an account manager handles client communication.","Mix of me and someone else depending on the client.","Me. I am the client's main point of contact for everything."]},
+  creator_q13:{text:"When a follower or brand partner reaches out to work together, who manages the response?",opts:["A team member or automated system handles initial contact.","My manager or assistant handles inbound messages.","Mix - some get handled but most end up in my personal inbox.","Me. Everything comes directly to my inbox or DMs."]},
+};
+
+/* ═══════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════ */
 let currentQ = 0;
@@ -793,7 +839,12 @@ function renderQuestion(idx) {
     const q = SCORED_QS[idx - 3];
     let qText = q.text;
     let qOpts = q.opts;
-    if (businessType === 'online') {
+    // Apply industry-specific override if one exists
+    const qGroup = businessType === 'online' ? getPainGroupOnline(answers.q2) : getPainGroup(answers.q2);
+    const override = QUESTION_OVERRIDES[qGroup + '_' + q.id];
+    if (override) { qText = override.text; qOpts = override.opts; }
+    // General online fallback for q6/q7 when no industry-specific override exists
+    if (businessType === 'online' && !override) {
       if (q.id === 'q6') {
         qText = "When a client has an issue or needs support, how does your team handle it?";
         qOpts = ["Handled through a documented process - I am never the first contact.","Usually handled by someone on my team for most issues.","Mix - some things handled but I often get pulled in.","Clients contact me directly for almost everything."];
