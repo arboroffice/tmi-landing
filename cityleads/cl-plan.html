@@ -148,28 +148,78 @@ function showTab(id) {
 // Route data
 const STOPS = [];
 
-const routeListEl = document.getElementById('route-list');
-if (STOPS.length) {
-  routeListEl.innerHTML = STOPS.map(s => `
-    <div class="route-stop">
-      <div class="stop-num ${s.status}">${s.status === 'done' ? '✓' : s.num}</div>
-      <div class="stop-body">
-        <div class="stop-biz">${s.biz}</div>
-        <div class="stop-addr">${s.addr}</div>
-        <div class="stop-action">${s.action}</div>
-        ${s.status !== 'done' ? `<div class="stop-controls">
-          <button class="btn btn-primary" onclick="markStopDone(${s.num})">Mark Done</button>
-          <button class="btn btn-ghost" onclick="window.open('https://maps.google.com?q=${encodeURIComponent(s.addr)}')">Navigate</button>
-          <button class="btn btn-ghost" onclick="CL.toast('Removed from route')">Remove</button>
-        </div>` : ''}
-      </div>
-    </div>`).join('');
-} else {
-  routeListEl.innerHTML = `<div style="text-align:center;color:var(--muted);padding:32px;">No stops planned yet. Use + Add Stop to build your route.</div>`;
+async function loadRoute() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const today = new Date().toISOString().slice(0,10);
+  const { data } = await CL.api('city_route_stops', {
+    eq: { city_lead_id: clId, date: today },
+    select: 'id,position,notes,visited,business_id,city_businesses(business_name,address)',
+    order: 'position', asc: true
+  });
+  STOPS.length = 0;
+  (data || []).forEach((s, i) => STOPS.push({
+    id: s.id, num: i + 1,
+    biz: s.city_businesses?.business_name || '—',
+    addr: s.city_businesses?.address || '—',
+    action: s.notes || 'Visit',
+    status: s.visited ? 'done' : 'pending',
+    bizId: s.business_id
+  }));
+  renderRoute();
+}
+loadRoute();
+
+function renderRoute() {
+  const doneCount = STOPS.filter(s => s.status === 'done').length;
+  document.getElementById('summary-stops').textContent = STOPS.length;
+  document.getElementById('summary-done').textContent = doneCount + ' of ' + STOPS.length;
+  const el = document.getElementById('route-list');
+  el.innerHTML = STOPS.length
+    ? STOPS.map(s => `
+      <div class="route-stop" id="stop-${s.id}">
+        <div class="stop-num ${s.status}">${s.status === 'done' ? '✓' : s.num}</div>
+        <div class="stop-body">
+          <div class="stop-biz">${s.biz}</div>
+          <div class="stop-addr">${s.addr}</div>
+          <div class="stop-action">${s.action}</div>
+          ${s.status !== 'done' ? `<div class="stop-controls">
+            <button class="btn btn-primary" onclick="markStopDone('${s.id}')">Mark Done</button>
+            <button class="btn btn-ghost" onclick="window.open('https://maps.google.com?q=${encodeURIComponent(s.addr)}','_blank')">Navigate</button>
+          </div>` : ''}
+        </div>
+      </div>`).join('')
+    : `<div style="text-align:center;color:var(--muted);padding:32px;">No stops for today. Add businesses to build your route.</div>`;
 }
 
-function markStopDone(num) { CL.toast('Stop ' + num + ' marked done'); }
-function addStop() { CL.toast('Add stop — coming soon'); }
+async function markStopDone(stopId) {
+  const sb = CL.initSupabase();
+  await sb.from('city_route_stops').update({ visited: true }).eq('id', stopId);
+  const s = STOPS.find(x => x.id === stopId);
+  if (s) { s.status = 'done'; renderRoute(); }
+  CL.toast('Stop marked done');
+}
+
+async function addStop() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const { data: bizList } = await CL.api('city_businesses', {
+    eq: { city_lead_id: clId }, select: 'id,business_name', order: 'business_name', asc: true
+  });
+  if (!bizList?.length) { CL.toast('No businesses in your list yet', 'info'); return; }
+  const opts = bizList.map(b => b.business_name).slice(0, 20).join('\n');
+  const name = prompt('Enter business name to add to today\'s route:\n\n' + opts);
+  const found = bizList.find(b => b.business_name.toLowerCase() === (name||'').toLowerCase());
+  if (!found) { CL.toast('Business not found in your list', 'error'); return; }
+  const today = new Date().toISOString().slice(0,10);
+  const sb = CL.initSupabase();
+  await sb.from('city_route_stops').insert({
+    city_lead_id: clId, business_id: found.id,
+    date: today, position: STOPS.length + 1, visited: false
+  });
+  CL.toast(found.business_name + ' added to route');
+  loadRoute();
+}
 
 // Week data
 const WEEK = [];
@@ -197,10 +247,38 @@ if (WEEK.length) {
 // Targets
 const TARGETS = [];
 
+async function loadTargets() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 14);
+  const { data } = await CL.api('city_businesses', {
+    eq: { city_lead_id: clId },
+    select: 'id,business_name,industry,address,stage,score,last_visit_at',
+    order: 'last_visit_at', asc: true
+  });
+  TARGETS.length = 0;
+  (data || []).filter(b => !['closed','build_live','support_active','expansion'].includes(b.stage))
+    .filter(b => !b.last_visit_at || new Date(b.last_visit_at) < cutoff)
+    .slice(0, 10)
+    .forEach((b, i) => TARGETS.push({
+      rank: i + 1, id: b.id,
+      biz: b.business_name || '—',
+      addr: b.address || '',
+      industry: b.industry || '—',
+      why: b.last_visit_at
+        ? 'Last visited ' + CL.fmt(b.last_visit_at) + ' — overdue for follow-up'
+        : 'Never visited — high priority for first contact',
+      tags: [b.industry || 'Unknown', b.score || 'cold', b.stage || 'seed'],
+      stage: b.stage, score: b.score
+    }));
+  renderTargets();
+}
+loadTargets();
+
 function renderTargets() {
   const targetList = document.getElementById('target-list');
   if (!TARGETS.length) {
-    targetList.innerHTML = `<div style="text-align:center;color:var(--muted);padding:32px;">No targets yet. Hit Refresh Targets to generate suggestions.</div>`;
+    targetList.innerHTML = `<div style="text-align:center;color:var(--muted);padding:32px;">All businesses visited recently — great work!</div>`;
     return;
   }
   targetList.innerHTML = TARGETS.map(t => `
@@ -211,20 +289,48 @@ function renderTargets() {
       <div class="target-why">${t.why}</div>
       <div class="target-tags">${t.tags.map(tag => `<span class="target-tag">${tag}</span>`).join('')}</div>
       <div class="target-actions">
-        <button class="btn btn-primary btn-sm" onclick="CL.toast('${t.biz} added to My List')">Add to My List</button>
-        <button class="btn btn-ghost btn-sm" onclick="CL.toast('Skip noted — won\'t suggest again')">Skip</button>
+        <button class="btn btn-primary btn-sm" onclick="location.href='cl-business.html?id=${t.id}'">View Profile</button>
+        <button class="btn btn-ghost btn-sm" onclick="addToRoute('${t.id}','${t.biz.replace(/'/g,"\\\'")}')">Add to Route</button>
       </div>
     </div>`).join('');
 }
 
-function refreshTargets() {
-  CL.toast('Refreshing targets with AI...');
-  setTimeout(() => { CL.toast('Targets updated'); }, 1500);
+async function addToRoute(bizId, bizName) {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const today = new Date().toISOString().slice(0,10);
+  const sb = CL.initSupabase();
+  const { error } = await sb.from('city_route_stops').insert({
+    city_lead_id: clId, business_id: bizId,
+    date: today, position: 99, visited: false
+  });
+  if (error) { CL.toast('Failed to add to route', 'error'); return; }
+  CL.toast(bizName + ' added to today\'s route');
 }
 
-renderTargets();
+function refreshTargets() { loadTargets(); }
 
 // City intel industries
+async function loadIndustries() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const { data } = await CL.api('city_businesses', {
+    eq: { city_lead_id: clId }, select: 'industry,stage'
+  });
+  if (!data?.length) return;
+  const counts = {};
+  data.forEach(b => { const k = b.industry || 'Other'; counts[k] = (counts[k]||0)+1; });
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+  const container = document.getElementById('industry-bars');
+  if (!container) return;
+  container.innerHTML = sorted.map(([industry, count]) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);">
+      <span style="font-size:14px;color:var(--ink)">${industry}</span>
+      <span style="font-size:13px;font-weight:600;color:var(--ink-2)">${count} businesses</span>
+    </div>`).join('');
+}
+loadIndustries();
+
 const INDUSTRIES = [];
 </script>
 </body>

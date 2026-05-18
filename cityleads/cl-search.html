@@ -113,14 +113,43 @@ let currentSource = 'mylist';
 let currentType = '';
 let currentQuery = '';
 
-const DEMO_BUSINESSES = [];
+const MY_BUSINESSES = [];
+const ALL_BUSINESSES = [];
+
+async function loadBusinesses() {
+  const clId = CL.getCityLeadId();
+  if (!clId) return;
+  const [myRes, allRes] = await Promise.all([
+    CL.api('city_businesses', {
+      eq: { city_lead_id: clId },
+      select: 'id,business_name,industry,owner_name,address,stage,score'
+    }),
+    CL.api('city_businesses', {
+      select: 'id,business_name,industry,owner_name,address,stage,score,city_lead_id'
+    })
+  ]);
+  MY_BUSINESSES.length = 0;
+  (myRes.data || []).forEach(b => MY_BUSINESSES.push({
+    id: b.id, name: b.business_name || '—', type: b.industry || '—',
+    owner: b.owner_name || '—', address: b.address || '—',
+    stage: b.stage || 'seed', score: b.score || 'cold'
+  }));
+  ALL_BUSINESSES.length = 0;
+  (allRes.data || []).forEach(b => ALL_BUSINESSES.push({
+    id: b.id, name: b.business_name || '—', type: b.industry || '—',
+    owner: b.owner_name || '—', address: b.address || '—',
+    stage: b.stage || 'seed', score: b.score || 'cold'
+  }));
+}
+loadBusinesses();
 
 function CL_searchBusinesses(query) {
   if (!query && !currentType) return [];
+  const pool = currentSource === 'mylist' ? MY_BUSINESSES : ALL_BUSINESSES;
   const lq = (query || '').toLowerCase();
-  return DEMO_BUSINESSES.filter(b => {
+  return pool.filter(b => {
     const matchType = !currentType || b.type === currentType;
-    const matchQ = !lq || b.name.toLowerCase().includes(lq) || b.owner.toLowerCase().includes(lq) || b.address.toLowerCase().includes(lq);
+    const matchQ = !lq || b.name.toLowerCase().includes(lq) || (b.owner||'').toLowerCase().includes(lq) || (b.address||'').toLowerCase().includes(lq);
     return matchType && matchQ;
   });
 }
@@ -182,6 +211,11 @@ function setSource(src, el) {
   currentSource = src;
   document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
+  if (src === 'google') {
+    const q = currentQuery || 'contractors near me';
+    window.open('https://maps.google.com/search?q=' + encodeURIComponent(q), '_blank');
+    return;
+  }
   if (currentQuery || currentType) onSearch(currentQuery);
 }
 
