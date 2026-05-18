@@ -82,27 +82,38 @@
     </div>
     <div class="form-group">
       <label class="form-label">City Name</label>
-      <input class="form-input" type="text" placeholder="e.g. Austin"/>
+      <input class="form-input" id="modal-city" type="text" placeholder="e.g. Austin"/>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">State</label>
-        <select class="form-input">
+        <select class="form-input" id="modal-state">
           <option value="">Select state</option>
-          <option>TX</option><option>CO</option><option>TN</option><option>AZ</option>
-          <option>NC</option><option>FL</option><option>GA</option><option>OH</option>
+          <option>AL</option><option>AK</option><option>AZ</option><option>AR</option>
+          <option>CA</option><option>CO</option><option>CT</option><option>DE</option>
+          <option>FL</option><option>GA</option><option>HI</option><option>ID</option>
+          <option>IL</option><option>IN</option><option>IA</option><option>KS</option>
+          <option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+          <option>MA</option><option>MI</option><option>MN</option><option>MS</option>
+          <option>MO</option><option>MT</option><option>NE</option><option>NV</option>
+          <option>NH</option><option>NJ</option><option>NM</option><option>NY</option>
+          <option>NC</option><option>ND</option><option>OH</option><option>OK</option>
+          <option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+          <option>SD</option><option>TN</option><option selected>TX</option><option>UT</option>
+          <option>VT</option><option>VA</option><option>WA</option><option>WV</option>
+          <option>WI</option><option>WY</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Assign City Lead</label>
-        <select class="form-input">
-          <option value="">Unassigned</option>
+        <label class="form-label">Assign to Existing Lead</label>
+        <select class="form-input" id="modal-lead">
+          <option value="">New territory (no lead yet)</option>
         </select>
       </div>
     </div>
     <div class="modal-ft">
       <button class="btn btn-ghost btn-full" onclick="CL.closeModal('add-city-modal')">Cancel</button>
-      <button class="btn btn-primary btn-full" onclick="CL.toast('City added');CL.closeModal('add-city-modal')">Add City</button>
+      <button class="btn btn-primary btn-full" id="modal-save-btn" onclick="saveAddCity()">Add City</button>
     </div>
   </div>
 </div>
@@ -112,6 +123,7 @@
 CL.initPage('cl-cities', { adminOnly: true });
 
 const ALL_CITIES = [];
+const LEADS_LIST = [];
 let filtered = [];
 
 async function loadCities() {
@@ -123,10 +135,15 @@ async function loadCities() {
   const bizAll = bizRes.data || [];
 
   const leadSel = document.getElementById('lead-filter');
+  const modalLeadSel = document.getElementById('modal-lead');
+  LEADS_LIST.length = 0;
   leads.forEach(l => {
     const name = l.name || [l.first_name, l.last_name].filter(Boolean).join(' ') || '—';
+    LEADS_LIST.push({ id: l.id, name });
     const o = document.createElement('option'); o.value = name; o.textContent = name;
     leadSel.appendChild(o);
+    const o2 = document.createElement('option'); o2.value = l.id; o2.textContent = name;
+    modalLeadSel.appendChild(o2);
   });
 
   ALL_CITIES.length = 0;
@@ -201,9 +218,52 @@ function sortTable(col) {
   renderTable(filtered);
 }
 
-function openAddCity() { CL.openModal('add-city-modal'); }
+function openAddCity() {
+  document.getElementById('modal-city').value = '';
+  document.getElementById('modal-state').value = 'TX';
+  document.getElementById('modal-lead').value = '';
+  CL.openModal('add-city-modal');
+}
 
-document.getElementById('export-btn').onclick = () => CL.toast('CSV export coming soon', 'info');
+async function saveAddCity() {
+  const city  = document.getElementById('modal-city').value.trim();
+  const state = document.getElementById('modal-state').value;
+  const leadId = document.getElementById('modal-lead').value;
+  if (!city) { CL.toast('City name is required', 'error'); return; }
+  const btn = document.getElementById('modal-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  const sb = CL.initSupabase();
+  let error;
+  if (leadId) {
+    ({ error } = await sb.from('city_leads').update({ city, state: state || null }).eq('id', leadId));
+    if (!error) CL.toast('Lead territory updated to ' + city);
+  } else {
+    ({ error } = await sb.from('city_leads').insert({
+      city, state: state || null,
+      name: city + (state ? ', ' + state : '') + ' (Open Territory)',
+      status: 'prospect'
+    }));
+    if (!error) CL.toast(city + ' added as open territory');
+  }
+  btn.disabled = false; btn.textContent = 'Add City';
+  if (error) { CL.toast(error.message || 'Save failed', 'error'); return; }
+  CL.closeModal('add-city-modal');
+  ALL_CITIES.length = 0;
+  loadCities();
+}
+
+document.getElementById('export-btn').onclick = () => {
+  if (!filtered.length) { CL.toast('No data to export', 'info'); return; }
+  const csv = [
+    'City,State,Lead,Businesses,Warm Leads,Deals Closed,Revenue,Last Activity',
+    ...filtered.map(c => [c.city, c.state, c.lead, c.biz, c.warm, c.closed, c.rev, c.last]
+      .map(v => JSON.stringify(v ?? '')).join(','))
+  ].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'cities.csv';
+  a.click();
+};
 
 loadCities();
 </script>

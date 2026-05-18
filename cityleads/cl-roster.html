@@ -183,13 +183,32 @@ function openPanel(id) {
     </div>`;
   document.getElementById('panel-deactivate-btn').textContent = activeLead.status === 'active' ? 'Deactivate Lead' : 'Reactivate Lead';
   document.getElementById('panel-deactivate-btn').onclick = async () => {
-    const confirmed = await CL.confirm(`Are you sure you want to ${activeLead.status === 'active' ? 'deactivate' : 'reactivate'} ${activeLead.name}?`);
-    if (confirmed) { CL.toast(`${activeLead.name} updated`); CL.closePanel('lead-panel'); }
+    const newStatus = activeLead.status === 'active' ? 'inactive' : 'active';
+    const sb = CL.initSupabase();
+    const { error } = await sb.from('city_leads').update({ status: newStatus }).eq('id', activeLead.id);
+    if (error) { CL.toast('Update failed', 'error'); return; }
+    activeLead.status = newStatus;
+    const inList = LEADS.find(l => l.id === activeLead.id);
+    if (inList) inList.status = newStatus;
+    CL.toast(`${activeLead.name} ${newStatus === 'active' ? 'reactivated' : 'deactivated'}`);
+    CL.closePanel('lead-panel');
+    filterRoster();
   };
   CL.openPanel('lead-panel');
 }
 
-document.getElementById('export-btn').onclick = () => CL.toast('Export coming soon', 'info');
+document.getElementById('export-btn').onclick = () => {
+  if (!filtered.length) { CL.toast('No data to export', 'info'); return; }
+  const csv = [
+    'Name,City,Territory,Status,Businesses,Warm,Closed,Earnings',
+    ...filtered.map(l => [l.name, l.city, l.assigned, l.status, l.biz, l.warm, l.closed, l.earnings || 0]
+      .map(v => JSON.stringify(v ?? '')).join(','))
+  ].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'city-leads-roster.csv';
+  a.click();
+};
 
 renderRoster(filtered);
 </script>
