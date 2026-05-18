@@ -145,28 +145,44 @@
 <script>
 CL.initPage('cl-add-lead', { adminOnly: true });
 
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
   btn.textContent = 'Creating account...';
 
-  const data = {
-    firstName:  document.getElementById('first-name').value.trim(),
-    lastName:   document.getElementById('last-name').value.trim(),
-    email:      document.getElementById('email').value.trim(),
-    phone:      document.getElementById('phone').value.trim(),
-    city:       document.getElementById('city').value.trim(),
-    state:      document.getElementById('state').value,
-    territory:  document.getElementById('territory').value.trim(),
-    notes:      document.getElementById('notes').value.trim(),
-  };
+  const firstName = document.getElementById('first-name').value.trim();
+  const lastName  = document.getElementById('last-name').value.trim();
+  const email     = document.getElementById('email').value.trim();
 
-  // Simulate async create
-  setTimeout(() => {
-    CL.toast(`${data.firstName} ${data.lastName} added as a City Lead`);
-    setTimeout(() => { window.location.href = 'cl-roster.html'; }, 1200);
-  }, 800);
+  if (!firstName || !lastName || !email) {
+    CL.toast('First name, last name, and email are required.', 'error');
+    btn.disabled = false; btn.textContent = 'Create City Lead Account';
+    return;
+  }
+
+  const sb = CL.initSupabase();
+  const { data: saved, error } = await sb.from('city_leads').insert({
+    first_name: firstName,
+    last_name: lastName,
+    name: firstName + ' ' + lastName,
+    email,
+    phone:     document.getElementById('phone').value.trim() || null,
+    city:      document.getElementById('city').value.trim() || null,
+    state:     document.getElementById('state').value || null,
+    territory: document.getElementById('territory').value.trim() || null,
+    notes:     document.getElementById('notes').value.trim() || null,
+    status: 'active'
+  }).select().single();
+
+  if (error) {
+    CL.toast(error.message || 'Failed to create city lead.', 'error');
+    btn.disabled = false; btn.textContent = 'Create City Lead Account';
+    return;
+  }
+
+  CL.toast(`${saved.name} added as a City Lead`);
+  setTimeout(() => { window.location.href = 'cl-roster.html'; }, 1000);
 }
 </script>
 </body>

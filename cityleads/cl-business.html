@@ -226,77 +226,124 @@
 CL.initPage('cl-business');
 
 const params = new URLSearchParams(window.location.search);
-const bizId = params.get('id') || 'b1';
+const bizId = params.get('id');
 const action = params.get('action');
 
-// Business data (loaded from backend)
-const BIZ_DATA = {};
+let biz = {};
+const VISITS_DATA = [];
+const FU_DATA = [];
+const NOTES_DATA = [];
 
-const biz = BIZ_DATA[bizId] || { id: bizId, name:'Unknown Business', type:'', owner:'', phone:'', email:'', linkedin:'', address:'', city:'', state:'', zip:'', website:'', stage:'seed', score:'cold', added:'', lastVisit:'', googlePlace:'' };
+async function loadBusiness() {
+  if (!bizId) { document.getElementById('hero-name').textContent = 'Business not found'; return; }
+  const sb = CL.initSupabase();
 
-const DEMO_VISITS = [];
+  const [bizRes, visitsRes, fuRes, notesRes] = await Promise.all([
+    sb.from('city_businesses').select('*').eq('id', bizId).single(),
+    sb.from('city_visits').select('*').eq('business_id', bizId).order('visited_at', { ascending: false }),
+    sb.from('city_follow_ups').select('*').eq('business_id', bizId).eq('completed', false).order('due_at', { ascending: true }),
+    sb.from('city_personal_notes').select('*').eq('business_id', bizId).order('created_at', { ascending: false })
+  ]);
 
-const DEMO_FU = [];
+  if (bizRes.error || !bizRes.data) {
+    document.getElementById('hero-name').textContent = 'Business not found';
+    return;
+  }
+  const d = bizRes.data;
+  biz = {
+    id: d.id,
+    name: d.business_name || '—',
+    type: d.industry || '—',
+    owner: d.owner_name || '—',
+    phone: d.phone || '',
+    email: d.email || '',
+    linkedin: d.owner_linkedin || '',
+    address: d.address || '',
+    city: d.city || '',
+    state: d.state || '',
+    zip: d.zip || '',
+    website: d.website || '',
+    stage: d.stage || 'seed',
+    score: d.score || 'cold',
+    added: d.created_at,
+    lastVisit: d.last_visit_at,
+    dealValue: d.deal_value || 0,
+    cityLeadId: d.city_lead_id
+  };
 
-const notes = [];
+  VISITS_DATA.length = 0;
+  (visitsRes.data || []).forEach(v => VISITS_DATA.push({
+    id: v.id, type: v.visit_type || 'walk_in',
+    notes: v.notes || '', date: v.visited_at, dot: 'chart'
+  }));
+
+  FU_DATA.length = 0;
+  (fuRes.data || []).forEach(f => FU_DATA.push({
+    id: f.id, message: f.title || '—',
+    due: f.due_at, status: 'pending'
+  }));
+
+  NOTES_DATA.length = 0;
+  (notesRes.data || []).forEach(n => NOTES_DATA.push({
+    id: n.id, text: n.note || '', date: n.created_at
+  }));
+
+  renderPage();
+  if (action === 'log-visit') openLogVisitModal();
+  if (params.get('new') === '1') CL.toast(biz.name + ' added to your list');
+}
+loadBusiness();
 
 function renderPage() {
-  // Topbar + Hero
   document.getElementById('topbar-name').textContent = biz.name;
   document.getElementById('hero-name').textContent = biz.name;
   document.getElementById('hero-type').textContent = biz.type;
   document.getElementById('hero-badges').innerHTML = CL.stageBadge(biz.stage) + ' ' + CL.scoreDot(biz.score);
-  document.getElementById('hero-addr').textContent = biz.address + ', ' + biz.city + ', ' + biz.state + ' ' + biz.zip;
+  const addrParts = [biz.address, biz.city, biz.state, biz.zip].filter(Boolean);
+  document.getElementById('hero-addr').textContent = addrParts.join(', ');
 
-  // Owner card
-  document.getElementById('owner-name').textContent = biz.owner;
+  document.getElementById('owner-name').textContent = biz.owner || 'No owner recorded';
   const phoneEl = document.getElementById('owner-phone');
-  phoneEl.textContent = biz.phone;
-  phoneEl.href = 'tel:' + biz.phone.replace(/\D/g,'');
+  phoneEl.textContent = biz.phone || '—';
+  if (biz.phone) phoneEl.href = 'tel:' + biz.phone.replace(/\D/g,'');
   const emailEl = document.getElementById('owner-email');
-  emailEl.textContent = biz.email;
-  emailEl.href = 'mailto:' + biz.email;
+  emailEl.textContent = biz.email || '—';
+  if (biz.email) emailEl.href = 'mailto:' + biz.email;
   const liRow = document.getElementById('owner-li-row');
   if (!biz.linkedin) { liRow.style.display = 'none'; }
   else { document.getElementById('owner-linkedin').href = biz.linkedin; }
 
-  // Detail grid
+  const scoreLabel = biz.score ? biz.score.charAt(0).toUpperCase() + biz.score.slice(1) : '—';
   document.getElementById('detail-grid').innerHTML = `
     <div><div class="detail-label">Type</div><div class="detail-val">${biz.type}</div></div>
     <div><div class="detail-label">Stage</div><div class="detail-val">${CL.stageBadge(biz.stage)}</div></div>
-    <div><div class="detail-label">Score</div><div class="detail-val">${CL.scoreDot(biz.score)} ${biz.score.charAt(0).toUpperCase()+biz.score.slice(1)}</div></div>
+    <div><div class="detail-label">Score</div><div class="detail-val">${CL.scoreDot(biz.score)} ${scoreLabel}</div></div>
     <div><div class="detail-label">Added</div><div class="detail-val">${CL.fmt(biz.added)}</div></div>
     <div><div class="detail-label">Last Visit</div><div class="detail-val">${CL.fmt(biz.lastVisit)}</div></div>
-    <div><div class="detail-label">Website</div><div class="detail-val">${biz.website ? '<a href="https://'+biz.website+'" target="_blank" style="color:var(--blue)">'+biz.website+'</a>' : '—'}</div></div>
+    <div><div class="detail-label">Website</div><div class="detail-val">${biz.website ? '<a href="'+biz.website+'" target="_blank" style="color:var(--blue)">'+biz.website+'</a>' : '—'}</div></div>
   `;
 
-  // Stage mover
   document.getElementById('stage-chips').innerHTML = CL.stages.map(s =>
     `<button class="stage-chip${biz.stage === s.id ? ' current' : ''}" onclick="moveStage('${s.id}',this)">${s.label}</button>`
   ).join('');
 
-  // Visits
-  renderVisits(DEMO_VISITS);
-
-  // Follow-ups
-  renderFollowUps(DEMO_FU);
-
-  // Notes
-  renderNotes(notes);
+  renderVisits(VISITS_DATA);
+  renderFollowUps(FU_DATA);
+  renderNotes(NOTES_DATA);
 }
 
 function renderVisits(visits) {
   const tl = document.getElementById('visits-timeline');
   const empty = document.getElementById('visits-empty');
   document.getElementById('visits-count').textContent = visits.length + ' visit' + (visits.length !== 1 ? 's' : '');
-  if (visits.length === 0) { tl.style.display = 'none'; empty.style.display = 'block'; return; }
+  if (!visits.length) { tl.style.display = 'none'; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   tl.style.display = 'block';
   tl.innerHTML = visits.map(v => `
     <li class="tl-item">
-      <div class="tl-dot ${v.dot}"></div>
+      <div class="tl-dot chart"></div>
       <div class="tl-body">
-        <div class="tl-title">${v.type}</div>
+        <div class="tl-title">${v.type.replace('_',' ')}</div>
         <div class="tl-text">${v.notes}</div>
         <div class="tl-time">${CL.fmt(v.date)}</div>
       </div>
@@ -307,21 +354,16 @@ function renderVisits(visits) {
 function renderFollowUps(fus) {
   const listEl = document.getElementById('fu-list');
   const empty = document.getElementById('fu-empty');
-  if (fus.length === 0) { listEl.style.display = 'none'; empty.style.display = 'block'; return; }
+  if (!fus.length) { listEl.style.display = 'none'; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   listEl.style.display = 'block';
   listEl.innerHTML = fus.map(f => `
     <div class="fu-card">
-      <span class="fu-status ${f.status}">${f.status === 'pending' ? 'Pending' : 'Sent'}</span>
+      <span class="fu-status pending">Pending</span>
       <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Due ${CL.fmt(f.due)}</div>
       <div class="fu-message">${f.message}</div>
       <div class="fu-actions">
-        ${f.status === 'pending' ? `
-          <button class="btn btn-primary btn-sm" onclick="sendFollowUp('${f.id}')">Approve &amp; Send</button>
-          <button class="btn btn-ghost btn-sm" onclick="editFollowUp('${f.id}')">Edit</button>
-        ` : `
-          <button class="btn btn-ghost btn-sm" onclick="CL.toast('Message resent')">Resend</button>
-        `}
+        <button class="btn btn-ghost btn-sm" onclick="markFUDone('${f.id}')">Mark Done</button>
       </div>
     </div>
   `).join('');
@@ -330,7 +372,7 @@ function renderFollowUps(fus) {
 function renderNotes(notesList) {
   const listEl = document.getElementById('notes-list');
   const empty = document.getElementById('notes-empty');
-  if (notesList.length === 0) { listEl.style.display = 'none'; empty.style.display = 'block'; return; }
+  if (!notesList.length) { listEl.style.display = 'none'; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   listEl.style.display = 'block';
   listEl.innerHTML = notesList.map(n => `
@@ -348,7 +390,10 @@ function switchTab(tab, el) {
   document.getElementById('tab-' + tab).classList.add('active');
 }
 
-function moveStage(stageId, el) {
+async function moveStage(stageId, el) {
+  const sb = CL.initSupabase();
+  const { error } = await sb.from('city_businesses').update({ stage: stageId }).eq('id', biz.id);
+  if (error) { CL.toast('Update failed', 'error'); return; }
   biz.stage = stageId;
   document.querySelectorAll('.stage-chip').forEach(c => c.classList.remove('current'));
   el.classList.add('current');
@@ -363,12 +408,23 @@ function openLogVisitModal() {
   }
 }
 
-function saveVisit() {
+async function saveVisit() {
   const type = document.getElementById('visit-type').value;
   const notesVal = document.getElementById('visit-notes').value.trim();
   if (!notesVal) { CL.toast('Add some notes about this visit', 'error'); return; }
-  DEMO_VISITS.unshift({ id:'v'+Date.now(), type, notes:notesVal, date:new Date().toISOString(), dot:'chart' });
-  renderVisits(DEMO_VISITS);
+  const clId = biz.cityLeadId || CL.getCityLeadId();
+  const sb = CL.initSupabase();
+  const now = new Date().toISOString();
+  const { data: saved, error } = await sb.from('city_visits').insert({
+    city_lead_id: clId, business_id: biz.id,
+    visit_type: type.toLowerCase().replace(/[- ]/g,'_'),
+    notes: notesVal, visited_at: now
+  }).select().single();
+  if (error) { CL.toast('Failed to save visit', 'error'); return; }
+  await sb.from('city_businesses').update({ last_visit_at: now }).eq('id', biz.id);
+  biz.lastVisit = now;
+  VISITS_DATA.unshift({ id: saved.id, type: saved.visit_type, notes: notesVal, date: now });
+  renderVisits(VISITS_DATA);
   CL.closeModal('log-visit-modal');
   CL.toast('Visit logged');
   document.getElementById('visit-notes').value = '';
@@ -382,36 +438,41 @@ function handOff() {
   CL.toast('Handed off to team', 'success');
 }
 
-function addNote() {
+async function addNote() {
   const text = document.getElementById('note-input').value.trim();
   if (!text) return;
-  notes.unshift({ text, date: new Date().toISOString() });
-  renderNotes(notes);
+  const clId = biz.cityLeadId || CL.getCityLeadId();
+  const sb = CL.initSupabase();
+  const { data: saved, error } = await sb.from('city_personal_notes').insert({
+    city_lead_id: clId, business_id: biz.id, note: text
+  }).select().single();
+  if (error) { CL.toast('Failed to save note', 'error'); return; }
+  NOTES_DATA.unshift({ id: saved.id, text, date: saved.created_at });
+  renderNotes(NOTES_DATA);
   document.getElementById('note-input').value = '';
   CL.toast('Note saved');
 }
 
-function sendFollowUp(id) {
-  const fu = DEMO_FU.find(f => f.id === id);
-  if (fu) fu.status = 'sent';
-  renderFollowUps(DEMO_FU);
-  CL.toast('Follow-up sent');
+async function markFUDone(id) {
+  const sb = CL.initSupabase();
+  await sb.from('city_follow_ups').update({ completed: true }).eq('id', id);
+  const idx = FU_DATA.findIndex(f => f.id === id);
+  if (idx !== -1) FU_DATA.splice(idx, 1);
+  renderFollowUps(FU_DATA);
+  CL.toast('Follow-up marked done');
 }
 
-function editFollowUp(id) {
-  CL.toast('Opening editor...', 'info');
+function draftFollowUp() {
+  CL.toast('Add follow-ups from the Follow-Ups page', 'info');
+}
+
+function handOff() {
+  CL.toast('Hand-off added — visible in Follow-Ups > Handoffs', 'info');
 }
 
 function openEditModal() {
   CL.toast('Edit coming soon', 'info');
 }
-
-// Open log visit if action param present
-if (action === 'log-visit') {
-  document.addEventListener('DOMContentLoaded', openLogVisitModal);
-}
-
-renderPage();
 </script>
 </body>
 </html>
