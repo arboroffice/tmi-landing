@@ -119,7 +119,6 @@
             </div>
             <div class="model-card" style="margin-top:16px">
               <div class="model-card-title">Cost Inputs</div>
-              <div class="input-row"><span class="input-label">City lead payout (% of client MRR)</span><div class="input-field"><input type="number" id="i-city-lead-pct" min="0" max="50" oninput="recalc()"/></div></div>
               <div class="input-row"><span class="input-label">Fulfillment cost per client ($/mo)</span><div class="input-field"><input type="number" id="i-fulfillment" min="0" oninput="recalc()"/></div></div>
               <div class="input-row"><span class="input-label">Fixed overhead ($/mo)</span><div class="input-field"><input type="number" id="i-overhead" min="0" oninput="recalc()"/></div></div>
               <div class="input-row"><span class="input-label">CAC - cost per lead ($)</span><div class="input-field"><input type="number" id="i-cac" min="0" oninput="recalc()"/></div></div>
@@ -139,7 +138,6 @@
               <div class="model-card-title">Revenue &amp; Costs (at 12 months)</div>
               <div class="output-row"><span class="output-label">Total active clients</span><span class="output-val" id="o-total-clients">—</span></div>
               <div class="output-row"><span class="output-label">Monthly Recurring Revenue</span><span class="output-val highlight" id="o-mrr">—</span></div>
-              <div class="output-row"><span class="output-label">City lead payouts</span><span class="output-val warn" id="o-city-payouts">—</span></div>
               <div class="output-row"><span class="output-label">Fulfillment cost</span><span class="output-val warn" id="o-fulfillment">—</span></div>
               <div class="output-row"><span class="output-label">Sales/marketing cost</span><span class="output-val warn" id="o-sales-cost">—</span></div>
               <div class="output-row"><span class="output-label">Fixed overhead</span><span class="output-val warn" id="o-overhead">—</span></div>
@@ -300,9 +298,9 @@ function switchTab(tab) {
 // ── Financial Model ───────────────────────────────────────────────────────────
 
 const SCENARIOS = {
-  conservative: { leads:10, auditRate:40, closeRate:30, dealSize:4500, mrrPerClient:1200, cityLeadPct:20, fulfillment:300, overhead:2000, cac:50, churn:5 },
-  target:       { leads:25, auditRate:50, closeRate:40, dealSize:6000, mrrPerClient:1500, cityLeadPct:20, fulfillment:300, overhead:3000, cac:40, churn:3 },
-  aggressive:   { leads:60, auditRate:60, closeRate:50, dealSize:8000, mrrPerClient:2000, cityLeadPct:20, fulfillment:350, overhead:4000, cac:30, churn:2 }
+  conservative: { leads:10, auditRate:40, closeRate:30, dealSize:4500, mrrPerClient:1200, fulfillment:300, overhead:2000, cac:50, churn:5 },
+  target:       { leads:25, auditRate:50, closeRate:40, dealSize:6000, mrrPerClient:1500, fulfillment:300, overhead:3000, cac:40, churn:3 },
+  aggressive:   { leads:60, auditRate:60, closeRate:50, dealSize:8000, mrrPerClient:2000, fulfillment:350, overhead:4000, cac:30, churn:2 }
 };
 
 function loadScenario(key, evt) {
@@ -315,7 +313,6 @@ function loadScenario(key, evt) {
   document.getElementById('i-close-rate').value      = s.closeRate;
   document.getElementById('i-deal-size').value       = s.dealSize;
   document.getElementById('i-mrr-per-client').value  = s.mrrPerClient;
-  document.getElementById('i-city-lead-pct').value   = s.cityLeadPct;
   document.getElementById('i-fulfillment').value     = s.fulfillment;
   document.getElementById('i-overhead').value        = s.overhead;
   document.getElementById('i-cac').value             = s.cac;
@@ -332,7 +329,6 @@ function recalc() {
   const auditRate      = get('i-audit-rate') / 100;
   const closeRate      = get('i-close-rate') / 100;
   const mrrPerClient   = get('i-mrr-per-client');
-  const cityLeadPct    = get('i-city-lead-pct') / 100;
   const fulfillmentPer = get('i-fulfillment');
   const overhead       = get('i-overhead');
   const cac            = get('i-cac');
@@ -349,9 +345,8 @@ function recalc() {
   const mrr         = clients * mrrPerClient;
   const churned     = Math.round(clients * churnRate);
   const netNew      = newMonth - churned;
-  const cityPayouts = Math.round(mrr * cityLeadPct);
   const fulfillment = Math.round(clients * fulfillmentPer);
-  const totalCosts  = cityPayouts + fulfillment + salesCost + overhead;
+  const totalCosts  = fulfillment + salesCost + overhead;
   const grossProfit = mrr - totalCosts;
   const marginPct   = mrr > 0 ? (grossProfit / mrr) * 100 : 0;
   const taxes       = Math.max(0, grossProfit * 0.30);
@@ -364,7 +359,6 @@ function recalc() {
   document.getElementById('o-net-new').textContent     = netNew;
   document.getElementById('o-total-clients').textContent = clients;
   document.getElementById('o-mrr').textContent           = fmtM(mrr) + '/mo';
-  document.getElementById('o-city-payouts').textContent  = fmtM(cityPayouts) + '/mo';
   document.getElementById('o-fulfillment').textContent   = fmtM(fulfillment) + '/mo';
   document.getElementById('o-sales-cost').textContent    = fmtM(salesCost) + '/mo';
   document.getElementById('o-overhead').textContent      = fmtM(overhead) + '/mo';

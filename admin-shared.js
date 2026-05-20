@@ -262,13 +262,7 @@ const TMIAdmin = (() => {
     ${navItem('fotf-identity', 'Identity', I.identity, false, '/admin-fotf-community-hub#identity')}
     ${navItem('fotf-library', 'Library', I.library, false, '/admin-fotf-resources#library')}
     ${navItem('fotf-growth', 'Growth', I.growth_fotf)}
-    <div class="sb-group-label">City Leads</div>
-    ${navItem('city-dashboard', 'Overview', I.cityPin, false, '/admin-city-leads#overview')}
-    ${navItem('cities', 'Cities', I.cityMap, false, '/admin-city-leads#cities')}
-    ${navItem('city-roster', 'Roster', I.team, false, '/admin-city-leads#roster')}
-    ${navItem('city-businesses', 'Businesses', I.clients)}
-    ${navItem('city-money', 'Money', I.cityMoney)}
-    <div class="sb-group-label">Plans</div>
+<div class="sb-group-label">Plans</div>
     ${navItem('financial-model', 'Financial Model', I.revenue, false, '/admin-plans#model')}
     ${navItem('retention-plan', 'Retention Plan', I.clientHealth, false, '/admin-plans#retention')}
     <div class="sb-sep"></div>
@@ -363,14 +357,7 @@ const TMIAdmin = (() => {
           { page:'fotf-library',       label:'Library',       icon:I.library,      href:'/admin-fotf-resources#library' },
           { page:'fotf-growth',        label:'Growth',        icon:I.growth_fotf },
         ]},
-        { label: 'City Leads', items: [
-          { page:'city-dashboard',  label:'Overview',   icon:I.cityPin,   href:'/admin-city-leads#overview' },
-          { page:'cities',          label:'Cities',     icon:I.cityMap,   href:'/admin-city-leads#cities' },
-          { page:'city-roster',     label:'Roster',     icon:I.team,      href:'/admin-city-leads#roster' },
-          { page:'city-businesses', label:'Businesses', icon:I.clients },
-          { page:'city-money',      label:'Money',      icon:I.cityMoney },
-        ]},
-        { label: 'Plans', items: [
+{ label: 'Plans', items: [
           { page:'financial-model', label:'Financial Model', icon:I.revenue,      href:'/admin-plans#model' },
           { page:'retention-plan',  label:'Retention Plan',  icon:I.clientHealth, href:'/admin-plans#retention' },
         ]},
