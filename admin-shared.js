@@ -250,18 +250,11 @@ const TMIAdmin = (() => {
     ${navItem('content-compose', 'Compose', I.content)}
     ${navItem('content-calendar', 'Calendar', I.rituals, false, '/admin-content-hub#calendar')}
     ${navItem('brand-plan', 'Brand Plan', I.identity)}
-    <div class="sb-group-label">FOTF</div>
-    ${navItem('fotf-dashboard', 'Home', I.fotf)}
+    <div class="sb-group-label">The Letter</div>
+    ${navItem('fotf-dashboard', 'Overview', I.fotf)}
+    ${navItem('fotf-community', 'Subscribers', I.community, false, '/admin-fotf-community-hub#community')}
     ${navItem('fotf-newsletter', 'Newsletter', I.newsletter, false, '/admin-fotf-editorial#newsletter')}
     ${navItem('fotf-issues', 'Issues', I.newsletter, false, '/admin-fotf-editorial#issues')}
-    ${navItem('fotf-community', 'Community', I.community, false, '/admin-fotf-community-hub#community')}
-    ${navItem('fotf-stories', 'Stories', I.stories, false, '/admin-fotf-community-hub#stories')}
-    ${navItem('fotf-glass-box', 'Glass Box', I.glassBox, false, '/admin-fotf-resources#glass-box')}
-    ${navItem('fotf-stage-letters', 'Stage Letters', I.stageLetters, false, '/admin-fotf-resources#stage-letters')}
-    ${navItem('fotf-rituals', 'Rituals', I.rituals, false, '/admin-fotf-resources#rituals')}
-    ${navItem('fotf-identity', 'Identity', I.identity, false, '/admin-fotf-community-hub#identity')}
-    ${navItem('fotf-library', 'Library', I.library, false, '/admin-fotf-resources#library')}
-    ${navItem('fotf-growth', 'Growth', I.growth_fotf)}
 <div class="sb-group-label">Plans</div>
     ${navItem('financial-model', 'Financial Model', I.revenue, false, '/admin-plans#model')}
     ${navItem('retention-plan', 'Retention Plan', I.clientHealth, false, '/admin-plans#retention')}
@@ -344,18 +337,11 @@ const TMIAdmin = (() => {
           { page:'content-calendar', label:'Calendar',     icon:I.rituals,  href:'/admin-content-hub#calendar' },
           { page:'brand-plan',       label:'Brand Plan',   icon:I.identity },
         ]},
-        { label: 'FOTF', items: [
-          { page:'fotf-dashboard',     label:'Home',          icon:I.fotf },
-          { page:'fotf-newsletter',    label:'Newsletter',    icon:I.newsletter,   href:'/admin-fotf-editorial#newsletter' },
-          { page:'fotf-issues',        label:'Issues',        icon:I.newsletter,   href:'/admin-fotf-editorial#issues' },
-          { page:'fotf-community',     label:'Community',     icon:I.community,    href:'/admin-fotf-community-hub#community' },
-          { page:'fotf-stories',       label:'Stories',       icon:I.stories,      href:'/admin-fotf-community-hub#stories' },
-          { page:'fotf-glass-box',     label:'Glass Box',     icon:I.glassBox,     href:'/admin-fotf-resources#glass-box' },
-          { page:'fotf-stage-letters', label:'Stage Letters', icon:I.stageLetters, href:'/admin-fotf-resources#stage-letters' },
-          { page:'fotf-rituals',       label:'Rituals',       icon:I.rituals,      href:'/admin-fotf-resources#rituals' },
-          { page:'fotf-identity',      label:'Identity',      icon:I.identity,     href:'/admin-fotf-community-hub#identity' },
-          { page:'fotf-library',       label:'Library',       icon:I.library,      href:'/admin-fotf-resources#library' },
-          { page:'fotf-growth',        label:'Growth',        icon:I.growth_fotf },
+        { label: 'The Letter', items: [
+          { page:'fotf-dashboard', label:'Overview',     icon:I.fotf },
+          { page:'fotf-community', label:'Subscribers',  icon:I.community, href:'/admin-fotf-community-hub#community' },
+          { page:'fotf-newsletter',label:'Newsletter',   icon:I.newsletter, href:'/admin-fotf-editorial#newsletter' },
+          { page:'fotf-issues',    label:'Issues',       icon:I.newsletter, href:'/admin-fotf-editorial#issues' },
         ]},
 { label: 'Plans', items: [
           { page:'financial-model', label:'Financial Model', icon:I.revenue,      href:'/admin-plans#model' },
