@@ -94,6 +94,14 @@ footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 
 .footer-bottom{padding-top:28px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
 @media(max-width:1024px){.what-grid{grid-template-columns:1fr;gap:48px;}.steps-strip{grid-template-columns:1fr;}.step{border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);}.sys-grid{grid-template-columns:repeat(2,1fr);}.industry-grid{grid-template-columns:repeat(2,1fr);}.ba-grid{grid-template-columns:1fr;}.ba-col+.ba-col{border-left:none;border-top:1px solid rgba(255,255,255,0.1);}.related-grid{grid-template-columns:repeat(2,1fr);}.cta-strip-inner{flex-direction:column;gap:32px;align-items:flex-start;}.footer-grid{grid-template-columns:1fr;gap:40px;}.footer-right{grid-template-columns:1fr 1fr;}}
 @media(max-width:640px){.container{padding:0 20px;}.sys-grid{grid-template-columns:1fr;}.industry-grid{grid-template-columns:1fr;}.related-grid{grid-template-columns:1fr;}.footer-right{grid-template-columns:1fr;}.hero{min-height:80vh;padding-bottom:56px;}}
+
+  .faq-section { padding: 96px 0; border-top: 1px solid var(--line); }
+  .faq-section .faq-eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .faq-section h2 { margin-bottom: 56px; }
+  .faq-item { border-top: 1px solid var(--line); padding: 28px 0; max-width: 760px; }
+  .faq-item:last-child { border-bottom: 1px solid var(--line); }
+  .faq-q { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 22px); font-weight: 400; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink); margin: 0 0 14px; }
+  .faq-a { font-family: var(--sans); font-size: 15px; line-height: 1.7; color: var(--ink-2); margin: 0; }
 </style>
 </head>
 <body>
@@ -302,6 +310,38 @@ footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 
       <div class="cta-actions">
         <a href="/audit" class="btn btn-primary">Book a Strategy Call &rarr;</a>
       </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="faq-section">
+  <div class="container">
+    <p class="faq-eyebrow">FAQ</p>
+    <h2>Common Questions</h2>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">What does TMI's AI dispatch system do?</h3>
+      <p class="faq-a">TMI's dispatch system routes incoming jobs to the optimal technician automatically - matching by skill, certification, current location, and availability without a human dispatcher making phone calls. Standard daily dispatching runs without intervention. Emergency escalation rules handle complex calls.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How is autonomous dispatch different from a scheduling tool?</h3>
+      <p class="faq-a">A scheduling tool shows available slots and lets a dispatcher assign jobs. Autonomous dispatch reads live data - tech location, job status, certification matrix, urgency - and makes the assignment automatically. The difference is whether a human is in the loop for each job or only for exceptions.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">What happens when a tech calls in sick or a job runs long?</h3>
+      <p class="faq-a">The system reads the change in real time and adjusts downstream assignments automatically. If a tech becomes unavailable, their jobs are redistributed by the same routing logic. If a job runs long, subsequent assignments shift without a dispatcher manually reworking the board.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does the certification matching work in dispatch?</h3>
+      <p class="faq-a">The system maintains a certification matrix for each technician - license class, specialty certifications, equipment authorizations. When a job requires a specific certification, only techs who hold it are eligible for assignment. This eliminates both liability exposure from incorrect dispatch and the liability exposure from a dispatcher who doesn't know every tech's certification status.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How much does autonomous dispatch reduce daily dispatch time?</h3>
+      <p class="faq-a">TMI's documented outcome is dispatch time reduced by 3-6 hours per day for companies that previously handled dispatching manually. That time shifts to exception handling - complex jobs, VIP clients, emergency responses - rather than routine call assignment.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How long does dispatch automation implementation take?</h3>
+      <p class="faq-a">Dispatch automation typically deploys in 4-8 weeks, including integration with existing job management systems and configuration of routing rules, certification matrices, and escalation protocols.</p>
     </div>
   </div>
 </section>

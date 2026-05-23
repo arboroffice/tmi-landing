@@ -112,6 +112,13 @@
   @media(max-width:1024px){.read-next-grid{grid-template-columns:1fr;}.foot-grid{grid-template-columns:1fr;}}
   @media(max-width:640px){.article-hero{padding:120px 0 48px;}.container-article{padding:0 20px;}.article-body{font-size:17px;}}
 @media(max-width:480px){.article-hero{padding:72px 0 32px;}.article-title{font-size:32px;}.article-deck{font-size:16px;}.article-body{font-size:16px;line-height:1.7;}.article-body blockquote{font-size:20px;padding-left:20px;}.article-body h2{font-size:22px;}.read-next{padding:56px 0;}.next-card .photo{height:160px;}}
+
+  .article-faq{padding:48px 0 0;border-top:1px solid var(--line);margin-top:48px;}
+  .article-faq h2{font-family:var(--serif);font-size:clamp(26px,2.5vw,36px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;color:var(--ink);margin:0 0 40px;}
+  .article-faq .faq-item{border-top:1px solid var(--line);padding:24px 0;}
+  .article-faq .faq-item:first-of-type{border-top:none;padding-top:0;}
+  .article-faq .faq-q{font-family:var(--serif);font-size:clamp(17px,1.5vw,20px);font-weight:400;letter-spacing:-0.01em;line-height:1.3;color:var(--ink);margin:0 0 12px;}
+  .article-faq .faq-a{font-family:var(--sans);font-size:15px;line-height:1.7;color:var(--ink-2);margin:0;}
 </style>
 <script type="application/ld+json">
 [
@@ -190,6 +197,30 @@
     </div>
   </div>
 </div>
+
+
+<div class="container-article">
+  <div class="article-faq reveal">
+    <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <h3 class="faq-q">What is the difference between anomaly detection and threshold alerts in manufacturing?</h3>
+        <p class="faq-a">Threshold alerts fire when a sensor value exceeds a set limit, which means the problem already exists when the alert fires. Anomaly detection AI builds a model of normal operation for each asset and flags deviations from that baseline before threshold levels are reached. A motor running 10 degrees above its historical average under the same load conditions is flagged even if the temperature is technically within spec. This gives operators intervention timing before failure rather than after.</p>
+      </div>
+      <div class="faq-item">
+        <h3 class="faq-q">How does AI improve OEE in manufacturing?</h3>
+        <p class="faq-a">AI improves OEE by addressing the root causes of unplanned downtime before they occur, rather than measuring OEE after the fact. Real-time anomaly detection surfaces developing equipment issues. Predictive maintenance schedules interventions before failures happen. Dynamic scheduling adjusts production plans when issues are detected early. The goal is not better OEE reporting but better operational decisions that determine what OEE will be.</p>
+      </div>
+      <div class="faq-item">
+        <h3 class="faq-q">What data sources should a manufacturing AI system connect?</h3>
+        <p class="faq-a">A manufacturing AI layer should connect SCADA and PLC data, historian data, MES production records, CMMS maintenance history, and quality data from inspection systems. The value is in the correlation: a temperature anomaly correlated with a vibration signature and a recent maintenance record tells a different story than any one of those data points alone.</p>
+      </div>
+      <div class="faq-item">
+        <h3 class="faq-q">What intelligent systems are most valuable for discrete vs. process manufacturing?</h3>
+        <p class="faq-a">For process manufacturing, the highest-value intelligent systems are anomaly detection across continuous process variables, predictive quality (correlating input conditions to output quality), and energy optimization. For discrete manufacturing, the most impactful are predictive maintenance for production equipment, schedule optimization, and defect detection in quality inspection. Both benefit from a unified data layer that enables cross-system correlation.</p>
+      </div>
+  </div>
+</div>
+
 
 <div class="read-next">
   <div class="container">

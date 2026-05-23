@@ -50,6 +50,14 @@
 footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 36px;}.footer-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:80px;margin-bottom:56px;}.footer-brand{font-family:var(--serif);font-size:22px;color:var(--ink);display:flex;align-items:center;gap:10px;margin-bottom:12px;}.footer-brand img{height:28px;width:auto;}.footer-desc{font-size:14px;color:var(--ink-2);line-height:1.65;max-width:34ch;margin-bottom:20px;}.footer-contact a{font-size:14px;color:var(--ink-2);}.footer-right{display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;}.footer-col h5{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin:0 0 14px;}.footer-col a{display:block;font-size:14px;color:var(--ink-2);padding:3px 0;transition:color 0.15s;}.footer-col a:hover{color:var(--ink);}.footer-bottom{padding-top:28px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
 @media(max-width:1024px){.what-grid{grid-template-columns:1fr;gap:48px;}.steps-strip{grid-template-columns:1fr;}.step{border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);}.sys-grid{grid-template-columns:repeat(2,1fr);}.industry-grid{grid-template-columns:repeat(2,1fr);}.ba-grid{grid-template-columns:1fr;}.ba-col+.ba-col{border-left:none;border-top:1px solid rgba(255,255,255,0.1);}.related-grid{grid-template-columns:repeat(2,1fr);}.cta-strip-inner{flex-direction:column;gap:32px;align-items:flex-start;}.footer-grid{grid-template-columns:1fr;gap:40px;}.footer-right{grid-template-columns:1fr 1fr;}}
 @media(max-width:640px){.container{padding:0 20px;}.sys-grid{grid-template-columns:1fr;}.industry-grid{grid-template-columns:1fr;}.related-grid{grid-template-columns:1fr;}.footer-right{grid-template-columns:1fr;}.hero{min-height:80vh;padding-bottom:56px;}}
+
+  .faq-section { padding: 96px 0; border-top: 1px solid var(--line); }
+  .faq-section .faq-eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .faq-section h2 { margin-bottom: 56px; }
+  .faq-item { border-top: 1px solid var(--line); padding: 28px 0; max-width: 760px; }
+  .faq-item:last-child { border-bottom: 1px solid var(--line); }
+  .faq-q { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 22px); font-weight: 400; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink); margin: 0 0 14px; }
+  .faq-a { font-family: var(--sans); font-size: 15px; line-height: 1.7; color: var(--ink-2); margin: 0; }
 </style>
 </head>
 <body>
@@ -251,6 +259,51 @@ footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 
       <div class="cta-actions">
         <a href="/audit" class="btn btn-primary">Book a Strategy Call &rarr;</a>
       </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- VISIBLE FAQ SECTION -->
+<section style="padding:72px 0;border-top:1px solid rgba(0,0,0,0.07);">
+  <div class="container" style="max-width:860px;">
+    <div style="margin-bottom:8px;font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);">FAQ</div>
+    <h2 style="font-family:var(--serif);font-size:clamp(28px,2.5vw,40px);font-weight:400;letter-spacing:-0.02em;color:var(--ink);margin:0 0 40px;line-height:1.1;">Common questions</h2>
+    
+      <div style="border-top:1px solid rgba(0,0,0,0.07);padding:20px 0;">
+        <h3 style="font-family:var(--sans);font-size:16px;font-weight:600;color:var(--ink);margin:0 0 10px;line-height:1.3;">How does TMI's revenue leakage detection work?</h3>
+        <p style="font-family:var(--sans);font-size:14px;line-height:1.65;color:var(--ink-2);margin:0;">The system audits every closed work order against the invoice generated for that job. When a work order shows materials used or labor logged that doesn't appear in the invoice, or when a job type typically generates add-on charges that are missing, the system flags it for review before the billing cycle closes.</p>
+      </div>
+  </div>
+</section>
+
+<section class="faq-section">
+  <div class="container">
+    <p class="faq-eyebrow">FAQ</p>
+    <h2>Common Questions</h2>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">What is revenue leakage in field service businesses?</h3>
+      <p class="faq-a">Revenue leakage is completed work that never reaches an invoice. Materials installed during a job that weren't logged. Add-on work approved verbally that got forgotten before billing. A job closed with an incomplete materials list because the tech was moving to the next call. Most field service companies leak 5-15% of revenue this way, silently, without knowing it.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does TMI's revenue leakage detection work?</h3>
+      <p class="faq-a">The system audits every closed work order against the invoice generated for that job. When a work order shows materials used or labor logged that doesn't appear in the invoice, or when a job type typically generates add-on charges that are missing, the system flags it for review before the billing cycle closes.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How much revenue do field service companies typically recover?</h3>
+      <p class="faq-a">TMI's documented outcome is 5-15% of revenue recovered when billing automation and revenue leakage detection are deployed together. For a $3M/year field service company, that is $150,000-$450,000 in revenue that was being completed but not billed.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How fast does the system recover unbilled revenue?</h3>
+      <p class="faq-a">Most clients recover unbilled revenue in the first billing cycle after deployment. The system identifies gaps in historical invoices that are still within recoverable windows, and prevents new gaps from forming going forward.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does revenue leakage detection connect to billing automation?</h3>
+      <p class="faq-a">The two systems work together. Billing automation triggers invoicing from job completion so materials and labor are captured at close. Revenue leakage detection audits completed work orders against invoices to catch anything that slipped through. The combination closes both the primary capture gap and the audit gap.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">Does the system flag customer disputes or just billing gaps?</h3>
+      <p class="faq-a">The system flags both: billing gaps where work was completed but not invoiced, and billing anomalies where invoices are significantly above or below the historical pattern for that job type. Both require human review before action - the system surfaces the gaps, the billing team resolves them.</p>
     </div>
   </div>
 </section>

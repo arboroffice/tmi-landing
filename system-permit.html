@@ -211,6 +211,14 @@
     .footer-right { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr; }
   }
+
+  .faq-section { padding: 96px 0; border-top: 1px solid var(--line); }
+  .faq-section .faq-eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .faq-section h2 { margin-bottom: 56px; }
+  .faq-item { border-top: 1px solid var(--line); padding: 28px 0; max-width: 760px; }
+  .faq-item:last-child { border-bottom: 1px solid var(--line); }
+  .faq-q { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 22px); font-weight: 400; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink); margin: 0 0 14px; }
+  .faq-a { font-family: var(--sans); font-size: 15px; line-height: 1.7; color: var(--ink-2); margin: 0; }
 </style>
 </head>
 <body>
@@ -439,6 +447,38 @@
 </section>
 
 <!-- FOOTER -->
+
+<section class="faq-section">
+  <div class="container">
+    <p class="faq-eyebrow">FAQ</p>
+    <h2>Common Questions</h2>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does AI permit tracking work for construction and trades?</h3>
+      <p class="faq-a">The system maintains a database of every active permit across every active project - issue date, expiration date, inspection requirements, jurisdiction, and associated work orders. When a permit is approaching expiration or an inspection deadline is upcoming, alerts fire at configured lead times. When a job requires a permit that hasn't been issued, the system flags the dependency before work is scheduled.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does the system handle permits across multiple active projects?</h3>
+      <p class="faq-a">Electrical contractors, general contractors, and plumbers managing dozens of simultaneous projects typically track permits manually - spreadsheets, email reminders, tribal knowledge. At that volume, permits expire or inspections are missed. The system tracks every permit for every active project in one view, with automated alerts replacing manual monitoring.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does permit tracking connect to dispatch and scheduling?</h3>
+      <p class="faq-a">When a job is scheduled for a site, the system checks permit status for the required work types at that location. If a permit hasn't been issued, the job is flagged before dispatch - not discovered when the crew arrives and can't work. If a permit is pending inspection before work can continue, that dependency is visible in the scheduling view.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">What types of permits and documents does the system track?</h3>
+      <p class="faq-a">Building permits, electrical permits, plumbing permits, mechanical permits, environmental permits, right-of-way permits, inspection certificates, and any other time-sensitive documentation that gates job execution. The system can be configured for any document type with an issue date, expiration date, and associated work requirements.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does the system handle permit applications and renewals?</h3>
+      <p class="faq-a">The system tracks permit application status through the approval process - submitted, under review, approved, issued. It connects to permit portal integrations where available for status updates. When a permit is approaching expiration on a long-running project, the renewal process initiates automatically at a configured lead time.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How long does permit tracking implementation take?</h3>
+      <p class="faq-a">A permit and document tracking implementation for an active portfolio of projects typically takes 4-8 weeks. This includes importing existing permit records, configuring alert timing, and integrating with job management and dispatch systems. Permit portal integrations for automatic status updates add 2-4 weeks.</p>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="container">
     <div class="footer-grid">

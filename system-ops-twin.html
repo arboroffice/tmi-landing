@@ -51,6 +51,14 @@
 footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 36px;}.footer-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:80px;margin-bottom:56px;}.footer-brand{font-family:var(--serif);font-size:22px;color:var(--ink);display:flex;align-items:center;gap:10px;margin-bottom:12px;}.footer-brand img{height:28px;width:auto;}.footer-desc{font-size:14px;color:var(--ink-2);line-height:1.65;max-width:34ch;margin-bottom:20px;}.footer-contact a{font-size:14px;color:var(--ink-2);}.footer-right{display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;}.footer-col h5{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin:0 0 14px;}.footer-col a{display:block;font-size:14px;color:var(--ink-2);padding:3px 0;transition:color 0.15s;}.footer-col a:hover{color:var(--ink);}.footer-bottom{padding-top:28px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
 @media(max-width:1024px){.what-grid{grid-template-columns:1fr;gap:48px;}.steps-strip{grid-template-columns:1fr;}.step{border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);}.sys-grid{grid-template-columns:repeat(2,1fr);}.industry-grid{grid-template-columns:repeat(2,1fr);}.ba-grid{grid-template-columns:1fr;}.ba-col+.ba-col{border-left:none;border-top:1px solid rgba(255,255,255,0.1);}.related-grid{grid-template-columns:repeat(2,1fr);}.cta-strip-inner{flex-direction:column;gap:32px;align-items:flex-start;}.footer-grid{grid-template-columns:1fr;gap:40px;}.footer-right{grid-template-columns:1fr 1fr;}}
 @media(max-width:640px){.container{padding:0 20px;}.sys-grid{grid-template-columns:1fr;}.industry-grid{grid-template-columns:1fr;}.related-grid{grid-template-columns:1fr;}.footer-right{grid-template-columns:1fr;}.hero{min-height:80vh;padding-bottom:56px;}.flagship-callout{padding:24px 24px;}}
+
+  .faq-section { padding: 96px 0; border-top: 1px solid var(--line); }
+  .faq-section .faq-eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .faq-section h2 { margin-bottom: 56px; }
+  .faq-item { border-top: 1px solid var(--line); padding: 28px 0; max-width: 760px; }
+  .faq-item:last-child { border-bottom: 1px solid var(--line); }
+  .faq-q { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 22px); font-weight: 400; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink); margin: 0 0 14px; }
+  .faq-a { font-family: var(--sans); font-size: 15px; line-height: 1.7; color: var(--ink-2); margin: 0; }
 </style>
 </head>
 <body>
@@ -242,6 +250,38 @@ footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 
       <div class="cta-actions">
         <a href="/audit" class="btn btn-primary">Book a Strategy Call &rarr;</a>
       </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="faq-section">
+  <div class="container">
+    <p class="faq-eyebrow">FAQ</p>
+    <h2>Common Questions</h2>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">What is a digital operations twin?</h3>
+      <p class="faq-a">A digital operations twin is a real-time model of the business that reflects current operational state - active jobs, crew locations, equipment status, financial performance, backlog - updated continuously from operational data. Managers use it for scenario analysis: 'if we add two crews in Zone 4, what happens to our average response time and utilization rate?'</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How is a digital ops twin different from a dashboard?</h3>
+      <p class="faq-a">A dashboard shows current operational data. A digital ops twin models the operation dynamically - it can simulate changes before they're made. 'What happens to our on-time completion rate if we shift 20% of Zone 2 crews to Zone 4 for the next three weeks?' A dashboard can't answer that question. An ops twin can, because it models how the operation functions, not just what it currently shows.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">What data feeds a digital operations twin?</h3>
+      <p class="faq-a">All operational data streams: job records and completion rates, crew and equipment availability and utilization, customer demand patterns, revenue and margin by job type and zone, maintenance and downtime records, seasonal demand patterns. The more comprehensive the data, the more accurate the twin's model of the operation.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How do managers use a digital ops twin for decision-making?</h3>
+      <p class="faq-a">Capacity planning - 'do we have enough crew coverage to handle a 20% volume increase next quarter?' Pricing decisions - 'which job types are profitable at current pricing and which are losing margin?' Geographic expansion - 'if we open a depot in Zone 6, what's the revenue potential and what crew investment does it require?' The twin provides answers from operational data rather than from intuition.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does a digital ops twin stay current as the operation changes?</h3>
+      <p class="faq-a">The twin updates in real time from operational data streams. When a new job type is added or pricing changes, the model adjusts. When seasonal patterns shift, the model reflects them in the next planning cycle. It's not a static snapshot - it's a living model that reflects the operation as it actually is, not as it was at some point in the past.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How long does digital operations twin implementation take?</h3>
+      <p class="faq-a">An operational twin implementation requires a mature data infrastructure - connected operational systems, historical data depth, and reliable real-time feeds. It is typically built in the later phases of a broader TMI implementation, after core operational systems are deployed and generating data. Full implementation typically takes 3-6 months after core systems are operational.</p>
     </div>
   </div>
 </section>

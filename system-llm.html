@@ -52,6 +52,14 @@
 footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 36px;}.footer-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:80px;margin-bottom:56px;}.footer-brand{font-family:var(--serif);font-size:22px;color:var(--ink);display:flex;align-items:center;gap:10px;margin-bottom:12px;}.footer-brand img{height:28px;width:auto;}.footer-desc{font-size:14px;color:var(--ink-2);line-height:1.65;max-width:34ch;margin-bottom:20px;}.footer-contact a{font-size:14px;color:var(--ink-2);}.footer-right{display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;}.footer-col h5{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin:0 0 14px;}.footer-col a{display:block;font-size:14px;color:var(--ink-2);padding:3px 0;transition:color 0.15s;}.footer-col a:hover{color:var(--ink);}.footer-bottom{padding-top:28px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
 @media(max-width:1024px){.what-grid{grid-template-columns:1fr;gap:48px;}.steps-strip{grid-template-columns:1fr;}.step{border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);}.sys-grid{grid-template-columns:repeat(2,1fr);}.industry-grid{grid-template-columns:repeat(2,1fr);}.ba-grid{grid-template-columns:1fr;}.ba-col+.ba-col{border-left:none;border-top:1px solid rgba(255,255,255,0.1);}.related-grid{grid-template-columns:repeat(2,1fr);}.cta-strip-inner{flex-direction:column;gap:32px;align-items:flex-start;}.footer-grid{grid-template-columns:1fr;gap:40px;}.footer-right{grid-template-columns:1fr 1fr;}}
 @media(max-width:640px){.container{padding:0 20px;}.sys-grid{grid-template-columns:1fr;}.industry-grid{grid-template-columns:1fr;}.related-grid{grid-template-columns:1fr;}.footer-right{grid-template-columns:1fr;}.hero{min-height:80vh;padding-bottom:56px;}.flagship-callout{padding:24px 24px;}}
+
+  .faq-section { padding: 96px 0; border-top: 1px solid var(--line); }
+  .faq-section .faq-eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .faq-section h2 { margin-bottom: 56px; }
+  .faq-item { border-top: 1px solid var(--line); padding: 28px 0; max-width: 760px; }
+  .faq-item:last-child { border-bottom: 1px solid var(--line); }
+  .faq-q { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 22px); font-weight: 400; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink); margin: 0 0 14px; }
+  .faq-a { font-family: var(--sans); font-size: 15px; line-height: 1.7; color: var(--ink-2); margin: 0; }
 </style>
 </head>
 <body>
@@ -243,6 +251,38 @@ footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 
       <div class="cta-actions">
         <a href="/audit" class="btn btn-primary">Book a Strategy Call &rarr;</a>
       </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="faq-section">
+  <div class="container">
+    <p class="faq-eyebrow">FAQ</p>
+    <h2>Common Questions</h2>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">What is an operational LLM and how is it different from ChatGPT?</h3>
+      <p class="faq-a">An operational LLM is a language model trained on and connected to a specific company's data - maintenance records, work orders, dispatch logs, financial data, compliance reports. When a manager asks 'which equipment on Site B has had more than three unplanned maintenance events in the last 90 days,' the operational LLM answers from actual operational records. ChatGPT can only answer from its training data, not from your company's data.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does an operational LLM connect to company data?</h3>
+      <p class="faq-a">TMI builds the data infrastructure that connects the LLM to operational databases, document repositories, and real-time data streams. The LLM layer can query structured data (job records, maintenance logs, financial data), read documents (contracts, SOPs, compliance reports), and respond to questions that require synthesizing information across multiple data sources.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">Who uses an operational LLM and how?</h3>
+      <p class="faq-a">Field managers query equipment history and troubleshooting guidance. Project managers query job cost status and change order history. Executives query operational performance and financial trends. Compliance officers query regulatory status and incident history. The same interface serves all roles - each person gets answers from the data they have access to, with access controls enforced at the data layer.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">What questions can an operational LLM answer that standard reports cannot?</h3>
+      <p class="faq-a">Standard reports answer predefined questions. An operational LLM answers any question that can be answered from the available data. 'Which customers have had three or more service calls this year without a maintenance agreement?' 'What was the average time from job assignment to arrival for our top five techs last quarter?' 'Which jobs in the past six months had materials costs that exceeded estimate by more than 20%?' These require combining data from multiple sources in a way no standard report can do on demand.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How is an operational LLM different from a basic search system?</h3>
+      <p class="faq-a">A search system finds documents or records that match keywords. An operational LLM understands the question and synthesizes an answer from across all relevant data. When a tech asks 'what's the maintenance history on the primary compressor at Pump Station 12,' the LLM pulls records from maintenance logs, work orders, parts history, and inspection records and returns a coherent answer - not a list of documents to read.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How long does operational LLM implementation take?</h3>
+      <p class="faq-a">An operational LLM implementation depends on the number and complexity of data sources being connected and the scope of the knowledge base being built. A focused implementation connecting core operational data typically takes 8-16 weeks. A comprehensive implementation covering all operational systems typically takes 4-6 months.</p>
     </div>
   </div>
 </section>

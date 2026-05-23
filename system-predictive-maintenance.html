@@ -47,6 +47,14 @@
 footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 36px;}.footer-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:80px;margin-bottom:56px;}.footer-brand{font-family:var(--serif);font-size:22px;color:var(--ink);display:flex;align-items:center;gap:10px;margin-bottom:12px;}.footer-brand img{height:28px;width:auto;}.footer-desc{font-size:14px;color:var(--ink-2);line-height:1.65;max-width:34ch;margin-bottom:20px;}.footer-contact a{font-size:14px;color:var(--ink-2);}.footer-right{display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;}.footer-col h5{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin:0 0 14px;}.footer-col a{display:block;font-size:14px;color:var(--ink-2);padding:3px 0;transition:color 0.15s;}.footer-col a:hover{color:var(--ink);}.footer-bottom{padding-top:28px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
 @media(max-width:1024px){.what-grid{grid-template-columns:1fr;gap:48px;}.steps-strip{grid-template-columns:1fr;}.step{border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);}.sys-grid{grid-template-columns:repeat(2,1fr);}.industry-grid{grid-template-columns:repeat(2,1fr);}.ba-grid{grid-template-columns:1fr;}.ba-col+.ba-col{border-left:none;border-top:1px solid rgba(255,255,255,0.1);}.related-grid{grid-template-columns:repeat(2,1fr);}.cta-strip-inner{flex-direction:column;gap:32px;align-items:flex-start;}.footer-grid{grid-template-columns:1fr;gap:40px;}.footer-right{grid-template-columns:1fr 1fr;}}
 @media(max-width:640px){.container{padding:0 20px;}.sys-grid{grid-template-columns:1fr;}.industry-grid{grid-template-columns:1fr;}.related-grid{grid-template-columns:1fr;}.footer-right{grid-template-columns:1fr;}.hero{min-height:80vh;padding-bottom:56px;}}
+
+  .faq-section { padding: 96px 0; border-top: 1px solid var(--line); }
+  .faq-section .faq-eyebrow { font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .faq-section h2 { margin-bottom: 56px; }
+  .faq-item { border-top: 1px solid var(--line); padding: 28px 0; max-width: 760px; }
+  .faq-item:last-child { border-bottom: 1px solid var(--line); }
+  .faq-q { font-family: var(--serif); font-size: clamp(18px, 1.6vw, 22px); font-weight: 400; letter-spacing: -0.01em; line-height: 1.3; color: var(--ink); margin: 0 0 14px; }
+  .faq-a { font-family: var(--sans); font-size: 15px; line-height: 1.7; color: var(--ink-2); margin: 0; }
 </style>
 </head>
 <body>
@@ -248,6 +256,38 @@ footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 
       <div class="cta-actions">
         <a href="/audit" class="btn btn-primary">Book a Strategy Call &rarr;</a>
       </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="faq-section">
+  <div class="container">
+    <p class="faq-eyebrow">FAQ</p>
+    <h2>Common Questions</h2>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does AI predictive maintenance work?</h3>
+      <p class="faq-a">The system monitors equipment data streams continuously - temperature, vibration, pressure, runtime hours, power consumption - and identifies patterns that precede failure. When equipment is trending toward a problem, an alert fires with the confidence level and estimated time to failure, ranked by consequence of that failure on operations.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How is predictive maintenance different from preventive maintenance?</h3>
+      <p class="faq-a">Preventive maintenance runs on a calendar schedule - service every X hours or X months. This wastes on equipment that is fine and misses failures that don't follow the calendar. Predictive maintenance triggers from actual equipment data. If a bearing is failing at 400 hours instead of the scheduled 600, the alert fires at 400. If a component is healthy at 600, it doesn't trigger unnecessary maintenance.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">What cost savings does predictive maintenance deliver?</h3>
+      <p class="faq-a">Studies consistently show 30-50% cost reduction in maintenance spending with predictive vs. reactive approaches. Emergency repairs typically cost 3-5x more than planned maintenance for the same work. Unplanned downtime in manufacturing or fleet operations adds significant additional cost on top of the repair itself.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">What data sources feed the predictive maintenance system?</h3>
+      <p class="faq-a">The system connects to IoT sensors on equipment, SCADA systems, maintenance history databases, inspection records, and manufacturer data on failure modes. The more data sources connected, the more accurate the failure predictions. TMI builds the data infrastructure as part of the implementation.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How does failure ranking work in predictive maintenance?</h3>
+      <p class="faq-a">Not all equipment failures are equal. A failed primary pump at an oil field costs differently than a failed service vehicle. The system ranks alerts by probability of failure AND consequence of that failure - production downtime cost, safety impact, customer impact. Operations teams see ranked priorities, not undifferentiated alert lists.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How long does predictive maintenance implementation take?</h3>
+      <p class="faq-a">Predictive maintenance implementation depends on the number of assets being monitored and the complexity of the data infrastructure. A focused implementation on a specific equipment fleet typically takes 8-16 weeks. TMI stays in after launch to refine failure models as more data accumulates.</p>
     </div>
   </div>
 </section>
