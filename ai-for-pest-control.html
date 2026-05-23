@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<meta name="description" content="TMI builds AI systems for pest control companies - route optimization, chemical compliance tracking, recurring billing, and seasonal demand management. Custom infrastructure for your pest control operation."/>
+<meta property="og:title" content="AI for Pest Control Companies | TMI"/>
+<meta property="og:description" content="TMI builds AI systems for pest control companies - route optimization, chemical compliance tracking, recurring billing, and seasonal demand management."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://www.tmitechai.com/ai-for-pest-control"/>
+<meta property="og:site_name" content="TMI"/>
+<link rel="canonical" href="https://www.tmitechai.com/ai-for-pest-control"/>
+<title>AI for Pest Control Companies | TMI</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "name": "AI Systems for Pest Control Companies",
+      "provider": {
+        "@type": "Organization",
+        "name": "TMI Technology",
+        "url": "https://www.tmitechai.com"
+      },
+      "description": "TMI builds custom AI infrastructure for pest control companies. Route density optimization, chemical compliance tracking, recurring service billing, and seasonal demand management systems.",
+      "areaServed": "US",
+      "serviceType": "AI System Integration"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What AI helps pest control companies most?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Route density optimization and recurring billing automation deliver the fastest ROI for pest control operators. Route optimization adds 6-8 stops per technician per day at the same labor cost. Recurring billing automation eliminates the manual renewal process that causes 20-30% of service contracts to lapse without a phone call."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does route optimization work for pest control?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TMI builds route density systems that cluster stops by geography, service type, and technician certification. Routes are rebuilt nightly based on new bookings, cancellations, and chemical restock requirements. The system accounts for service window preferences, access notes, and historical stop times to produce routes that actually hold up in the field."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does chemical compliance tracking work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TMI tracks chemical application records by technician, property, and product. Usage logs are captured at point of service, quantities reconciled against inventory, and documentation generated automatically for state pesticide regulatory submissions. Application records are stored in audit-ready format without anyone in the office manually entering data."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does recurring billing automation work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TMI builds billing logic that matches your service contract terms - monthly, quarterly, annual, and seasonal programs. Invoices generate on service completion. Renewals trigger automatically with the appropriate notice window. Payment failures route to a recovery sequence. The billing engine runs without someone manually processing each renewal cycle."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can TMI handle seasonal demand spikes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. TMI builds demand forecasting that identifies your historical seasonal patterns and pre-builds technician capacity for peak periods. The system surfaces scheduling capacity constraints 6-8 weeks ahead so you can hire or shift routes before demand overwhelms the operation, not after."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What makes TMI different from PestPac?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PestPac is a software platform you operate. TMI builds a system that operates for you. PestPac requires your staff to use it to get value out of it. TMI builds automations that run the routing, billing, compliance, and communication functions so your team is not the system - the system is the system."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does implementation take?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Most pest control implementations go live within 6 to 10 weeks. Route optimization and recurring billing are typically the first systems live. Chemical compliance documentation and seasonal demand forecasting come online in the second phase."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What does it cost?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Every engagement starts with The Audit at $997. That session maps your routes, billing cycles, compliance requirements, and current tools, then produces a full system blueprint with pricing. You own the blueprint whether you build with us or not."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#ffffff;--bg-alt:#f5f5f7;--bg-deep:#0d0e1a;--bg-dark:#0a0b14;
+    --ink:#1a1a1a;--ink-2:#505060;--muted:#86868b;
+    --line:rgba(0,0,0,0.07);--line-strong:rgba(0,0,0,0.12);
+    --serif:"Barlow",system-ui,sans-serif;
+    --sans:"Neue Haas Grotesk Display","Neue Haas Grotesk",system-ui,-apple-system,sans-serif;
+    --chart:#E4FF97;--chart-dark:#D0FF6A;
+  }
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}html{scroll-behavior:smooth;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.55;overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}img{display:block;max-width:100%;}
+  ::selection{background:var(--ink);color:#fff;}
+  h1,h2,h3,h4{margin:0;}
+  h1{font-family:var(--serif);font-size:clamp(44px,6vw,80px);font-weight:400;letter-spacing:-0.02em;line-height:1.05;}
+  h2{font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;}
+  h3{font-family:var(--sans);font-size:clamp(17px,1.6vw,20px);font-weight:600;line-height:1.25;}
+  p{margin:0;}
+  .container{max-width:1280px;margin:0 auto;padding:0 40px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;font-size:14px;font-weight:500;font-family:var(--sans);transition:all 0.2s;cursor:pointer;border:1px solid transparent;white-space:nowrap;}
+  .btn-primary{background:var(--chart);color:#0a0b14;}
+  .btn-primary:hover{background:var(--chart-dark);transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,255,0,0.22);}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-strong);}
+  .btn-ghost:hover{border-color:var(--ink);}
+  .btn-white-outline{background:transparent;color:#fff;border-color:rgba(255,255,255,0.35);}
+  .btn-white-outline:hover{border-color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.08);}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.65s ease,transform 0.65s ease;}
+  .reveal.visible{opacity:1;transform:translateY(0);}
+  .reveal-d1{transition-delay:0.1s;}.reveal-d2{transition-delay:0.2s;}.reveal-d3{transition-delay:0.3s;}
+
+  .nav-btn{position:fixed;top:20px;left:20px;z-index:201;width:44px;height:44px;background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,0.1);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;padding:0;transition:background 0.2s,box-shadow 0.2s;}
+  .nav-btn:hover{background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.1);}
+  .nav-btn span{display:block;width:18px;height:1.5px;background:var(--ink);border-radius:2px;transition:transform 0.25s,opacity 0.25s;}
+  .nav-btn.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+  .nav-btn.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+  .nav-btn.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+  .side-overlay{position:fixed;inset:0;z-index:198;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity 0.3s;}
+  .side-overlay.open{opacity:1;pointer-events:auto;}
+  .side-nav{position:fixed;left:0;top:0;bottom:0;z-index:200;width:280px;background:#fff;border-right:1px solid var(--line);transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;padding:28px 0 40px;overflow-y:auto;}
+  .side-nav.open{transform:translateX(0);box-shadow:8px 0 48px rgba(0,0,0,0.15);}
+  .side-nav-top{display:flex;align-items:center;padding:0 24px 28px;border-bottom:1px solid var(--line);margin-bottom:12px;}
+  .side-nav-brand{display:flex;align-items:center;gap:10px;font-family:var(--sans);font-size:16px;font-weight:600;color:var(--ink);text-decoration:none;}
+  .side-nav-brand img{height:28px;}
+  .side-nav-links{display:flex;flex-direction:column;padding:0 12px;flex:1;}
+  .side-nav-section{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:20px 12px 6px;}
+  .side-nav-links a{font-size:14px;font-weight:500;color:var(--ink-2);padding:10px 12px;border-radius:8px;transition:color 0.15s,background 0.15s;display:block;}
+  .side-nav-links a:hover{color:var(--ink);background:var(--bg-alt);}
+  .side-nav-cta{padding:24px 24px 0;border-top:1px solid var(--line);margin-top:16px;}
+  .side-nav-cta .btn{width:100%;justify-content:center;}
+
+  .hero{position:relative;height:90vh;min-height:700px;display:flex;align-items:flex-end;overflow:hidden;}
+  .hero-photo{position:absolute;inset:0;background-image:url('https://images.pexels.com/photos/3993212/pexels-photo-3993212.jpeg?auto=compress&cs=tinysrgb&w=1600&q=80');background-size:cover;background-position:center;}
+  .hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,20,0.3) 0%,rgba(10,11,20,0.88) 100%);}
+  .hero-inner{position:relative;z-index:2;padding:0 40px 110px;max-width:1280px;margin:0 auto;width:100%;}
+  .hero-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+  .hero-eyebrow .dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.4);flex:none;}
+  .hero-inner h1{color:#fff;max-width:22ch;margin-bottom:20px;}
+  .hero-inner h1 em{color:rgba(255,255,255,0.65);font-style:italic;}
+  .hero-inner p{font-size:clamp(16px,1.3vw,19px);color:rgba(255,255,255,0.7);max-width:56ch;margin-bottom:36px;line-height:1.6;}
+  .hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+
+  .stats-bar{background:var(--bg-deep);padding:72px 0;border-top:1px solid rgba(255,255,255,0.06);}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-left:1px solid rgba(255,255,255,0.1);}
+  .stat-item{padding:0 40px;border-right:1px solid rgba(255,255,255,0.1);text-align:center;}
+  .stat-val{font-family:var(--serif);font-size:clamp(36px,4vw,54px);letter-spacing:-0.03em;color:var(--chart);margin-bottom:8px;}
+  .stat-label{font-size:13px;color:rgba(255,255,255,0.55);line-height:1.5;}
+
+  .challenges{padding:100px 0;background:var(--bg);}
+  .sec-head{margin-bottom:56px;}
+  .sec-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .sec-eyebrow .dot{width:5px;height:5px;border-radius:50%;background:#7C6CF2;flex:none;}
+  .sec-sub{font-size:clamp(16px,1.3vw,19px);color:var(--ink-2);margin-top:14px;max-width:54ch;line-height:1.6;}
+  .challenge-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;}
+  .challenge-card{background:var(--bg-alt);border:1px solid var(--line);border-radius:20px;padding:36px 32px;}
+  .challenge-num{font-family:var(--sans);font-size:11px;letter-spacing:0.18em;color:var(--muted);text-transform:uppercase;margin-bottom:16px;}
+  .challenge-card h3{margin-bottom:12px;color:var(--ink);}
+  .challenge-card p{font-size:15px;color:var(--ink-2);line-height:1.65;}
+
+  .six-functions{padding:100px 0;background:var(--bg-deep);}
+  .six-head{text-align:center;max-width:680px;margin:0 auto 72px;}
+  .six-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:16px;display:flex;align-items:center;gap:8px;justify-content:center;}
+  .six-head h2{color:#fff;margin-top:16px;}
+  .six-head h2 em{color:rgba(255,255,255,0.6);font-style:italic;}
+  .six-head p{color:rgba(255,255,255,0.5);font-size:17px;line-height:1.65;margin-top:16px;}
+  .six-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+  .six-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);padding:40px 36px;transition:background 0.2s;display:flex;flex-direction:column;}
+  .six-card:hover{background:rgba(255,255,255,0.07);}
+  .six-num{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.12em;color:var(--chart);margin-bottom:18px;}
+  .six-card h3{font-family:var(--sans);font-size:17px;font-weight:600;color:#fff;margin-bottom:10px;line-height:1.3;}
+  .six-card p{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;flex:1;}
+
+  .comparison{padding:100px 0;background:var(--bg-dark);}
+  .comp-head{text-align:center;max-width:640px;margin:0 auto 64px;}
+  .comp-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;}
+  .comp-head h2{color:#fff;font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;}
+  .comp-head p{color:rgba(255,255,255,0.5);font-size:17px;margin-top:16px;line-height:1.6;}
+  .comp-table{width:100%;border-collapse:collapse;max-width:900px;margin:0 auto;}
+  .comp-table th{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);padding:16px 24px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);}
+  .comp-table th:not(:first-child){text-align:center;}
+  .comp-table td{font-family:var(--sans);font-size:14px;color:rgba(255,255,255,0.7);padding:18px 24px;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .comp-table td:not(:first-child){text-align:center;}
+  .comp-table tr:last-child td{border-bottom:none;}
+  .comp-yes{color:var(--chart);font-weight:600;}
+  .comp-no{color:rgba(255,255,255,0.25);}
+  .comp-tmi-col{background:rgba(228,255,151,0.04);}
+
+  .process{padding:100px 0;background:var(--bg);}
+  .n-steps{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+  .n-step{padding:40px 36px;background:var(--bg);border-right:1px solid var(--line);}
+  .n-step:last-child{border-right:none;}
+  .n-step-num{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.2em;color:var(--bg);background:var(--ink);display:inline-block;padding:3px 10px;border-radius:2px;margin-bottom:20px;}
+  .n-step h3{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--ink);margin:0 0 10px;line-height:1.3;}
+  .n-step p{font-family:var(--sans);font-size:14px;color:var(--ink-2);line-height:1.65;margin:0;}
+
+  .faq-section{padding:100px 0;background:var(--bg-alt);border-top:1px solid var(--line);}
+  .faq-inner{max-width:800px;margin:0 auto;padding:0 40px;}
+  .faq-item{border-bottom:1px solid var(--line);}
+  .faq-q{width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:24px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;font-family:var(--sans);font-size:16px;font-weight:600;color:var(--ink);line-height:1.35;}
+  .faq-ic{font-size:20px;font-weight:300;color:var(--muted);flex:none;line-height:1;}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height 0.35s ease;}
+  .faq-a-body{font-family:var(--sans);font-size:14px;color:var(--ink-2);line-height:1.7;padding-bottom:24px;margin:0;}
+
+  .cta-section{background:var(--bg-deep);color:#fff;padding:100px 0;text-align:center;border-top:1px solid rgba(255,255,255,0.06);}
+  .cta-inner{max-width:640px;margin:0 auto;}
+  .cta-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;}
+  .cta-inner h2{color:#fff;margin:14px 0 16px;}
+  .cta-inner p{color:rgba(255,255,255,0.6);font-size:18px;margin-bottom:36px;line-height:1.6;}
+  .cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+  footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 36px;}
+  .footer-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:80px;margin-bottom:56px;}
+  .footer-brand{font-family:var(--serif);font-size:22px;color:var(--ink);display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .footer-brand img{height:28px;width:auto;}
+  .footer-desc{font-size:14px;color:var(--ink-2);line-height:1.65;max-width:34ch;margin-bottom:20px;}
+  .footer-right{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;}
+  .footer-col h5{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin:0 0 14px;}
+  .footer-col a{display:block;font-size:14px;color:var(--ink-2);padding:3px 0;transition:color 0.15s;}
+  .footer-col a:hover{color:var(--ink);}
+  .footer-bottom{padding-top:28px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
+
+  @media(max-width:1024px){.six-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:768px){
+    .hero-inner{padding:0 20px 60px;}.container{padding:0 20px;}
+    .stats-grid{grid-template-columns:repeat(2,1fr);}.stat-item{padding:28px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+    .challenge-grid{grid-template-columns:1fr;}
+    .n-steps{grid-template-columns:1fr;}.n-step{border-right:none;border-bottom:1px solid var(--line);}.n-step:last-child{border-bottom:none;}
+    .footer-grid{grid-template-columns:1fr;gap:40px;}.footer-right{grid-template-columns:1fr;}.footer-bottom{flex-direction:column;gap:8px;}
+    .faq-inner{padding:0 20px;}
+  }
+  @media(max-width:640px){
+    .hero{min-height:auto;}.hero-inner{padding:80px 20px 40px;}
+    .hero-actions{flex-direction:column;}.hero-actions .btn{width:100%;justify-content:center;}
+    .challenges,.process,.faq-section,.cta-section{padding:56px 0;}
+    .six-grid{grid-template-columns:1fr;}
+    .comp-table th,.comp-table td{padding:12px 14px;font-size:12px;}
+  }
+</style>
+</head>
+<body>
+
+<button class="nav-btn" id="nav-btn" aria-label="Open menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="side-overlay" id="side-overlay"></div>
+<div class="side-nav" id="side-nav" aria-hidden="true">
+  <div class="side-nav-top">
+    <a class="side-nav-brand" href="stratum.html"><img src="logo.svg" alt="TMI"/> TMI</a>
+  </div>
+  <div class="side-nav-links">
+    <div class="side-nav-section">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="news.html">Field Notes</a>
+    <div class="side-nav-section">Industries</div>
+    <a href="ai-for-utilities.html">Utilities</a>
+    <a href="ai-for-pest-control.html">Pest Control</a>
+    <a href="ai-for-concrete-contractors.html">Concrete Contractors</a>
+    <a href="ai-for-painting-contractors.html">Painting Contractors</a>
+    <a href="ai-for-restoration-companies.html">Restoration Companies</a>
+    <a href="ai-for-coaches.html">Coaches &amp; Consultants</a>
+    <a href="ai-for-ecommerce.html">E-Commerce</a>
+  </div>
+  <div class="side-nav-cta">
+    <a href="/audit" class="btn btn-primary">Start with The Audit - $997 &#8594;</a>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-photo"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="dot"></span>Pest Control</div>
+    <h1>AI for Pest Control <em>Companies</em></h1>
+    <p>More stops per route. Recurring billing that runs itself. Chemical compliance without paperwork. TMI builds the back-office infrastructure that lets your technicians do the work and your company keep the money.</p>
+    <div class="hero-actions">
+      <a href="/audit" class="btn btn-primary">Start with The Audit - $997 &#8594;</a>
+      <a href="#systems" class="btn btn-white-outline">See the systems</a>
+    </div>
+  </div>
+</section>
+
+<section class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-val">$26B</div>
+        <div class="stat-label">US pest control market</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">35%</div>
+        <div class="stat-label">more stops per day from route density optimization</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">28%</div>
+        <div class="stat-label">of chemical compliance violations are documentation failures</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">65%</div>
+        <div class="stat-label">of pest control revenue is recurring service contracts</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="challenges">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="dot"></span>The Problem</div>
+      <h2>The margin is in the route. The risk is in the paperwork.</h2>
+      <p class="sec-sub">Pest control is a recurring revenue business that runs on route efficiency and compliance documentation. Most operators manage both by hand, which means both are operating below potential every single day.</p>
+    </div>
+    <div class="challenge-grid">
+      <div class="challenge-card reveal">
+        <div class="challenge-num">01</div>
+        <h3>Routes built by feel, not by data</h3>
+        <p>Most pest control routes are built by a dispatcher who knows the territory. When that person leaves, the knowledge leaves too. Routes built without density analysis run 25-35% longer than they should, burning fuel and limiting daily stop counts.</p>
+      </div>
+      <div class="challenge-card reveal reveal-d1">
+        <div class="challenge-num">02</div>
+        <h3>Recurring contracts that quietly lapse</h3>
+        <p>A quarterly account that does not get a renewal call in time just stops. No cancellation email. No complaint. It simply falls off the route and off the invoice. Most operators do not discover the attrition until they look at a revenue report three months later.</p>
+      </div>
+      <div class="challenge-card reveal reveal-d2">
+        <div class="challenge-num">03</div>
+        <h3>Chemical records that live on paper in trucks</h3>
+        <p>State pesticide regulators want application records - what was used, where, how much, by whom. When those records live on technician paper logs that get handed in weekly, documentation gaps are common. Violations for paperwork failures are more common than violations for actual misuse.</p>
+      </div>
+      <div class="challenge-card reveal reveal-d3">
+        <div class="challenge-num">04</div>
+        <h3>Seasonal spikes that break the operation</h3>
+        <p>Spring arrives and the phones ring faster than the schedule can absorb. The company that has pre-built route capacity for the surge captures the revenue. The one that tries to add stops reactively in peak week misses bookings, delays services, and generates callbacks that cost more than the job.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="six-functions" id="systems">
+  <div class="container">
+    <div class="six-head reveal">
+      <div class="six-eyebrow"><span class="dot" style="width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.3);flex:none;display:inline-block;"></span>Six Core Systems</div>
+      <h2>Built for pest control. <em>Not adapted from field service.</em></h2>
+      <p>Route optimization logic, recurring billing engines, and chemical compliance tracking built around how pest control operations actually work - not how a generic software platform thinks they should.</p>
+    </div>
+    <div class="six-grid">
+      <div class="six-card reveal">
+        <div class="six-num">01</div>
+        <h3>Route Density Optimization</h3>
+        <p>Clusters stops by geography, service type, and technician certification. Routes rebuilt nightly based on new bookings and cancellations. Accounts for service windows, access notes, and historical stop times so routes hold up in the field.</p>
+      </div>
+      <div class="six-card reveal reveal-d1">
+        <div class="six-num">02</div>
+        <h3>Chemical Usage and Compliance Tracking</h3>
+        <p>Captures application records at point of service - product, quantity, location, technician. Reconciles against inventory. Generates documentation for state pesticide regulatory submissions automatically without manual data entry.</p>
+      </div>
+      <div class="six-card reveal reveal-d2">
+        <div class="six-num">03</div>
+        <h3>Recurring Service Billing</h3>
+        <p>Billing logic built around your contract terms - monthly, quarterly, annual, seasonal. Invoices generate on service completion. Renewals trigger automatically. Payment failures route to a recovery sequence. No manual processing cycle.</p>
+      </div>
+      <div class="six-card reveal">
+        <div class="six-num">04</div>
+        <h3>Seasonal Demand Management</h3>
+        <p>Identifies historical seasonal patterns and pre-builds technician capacity for peak periods. Surfaces scheduling constraints 6-8 weeks ahead so you hire or shift routes before demand overwhelms the operation.</p>
+      </div>
+      <div class="six-card reveal reveal-d1">
+        <div class="six-num">05</div>
+        <h3>Customer Communication and CRM</h3>
+        <p>Service reminders, arrival windows, completion notifications, and renewal prompts go out automatically. Customer history, pest activity notes, and property access records live in one place and travel with the technician.</p>
+      </div>
+      <div class="six-card reveal reveal-d2">
+        <div class="six-num">06</div>
+        <h3>Technician Scheduling and Dispatch</h3>
+        <p>Matches technician certifications to job requirements. Manages availability, time-off, and load balancing across routes. Dispatches same-day emergency calls into existing routes without manual rescheduling by the office.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="comparison">
+  <div class="container">
+    <div class="comp-head reveal">
+      <div class="comp-eyebrow">How TMI Compares</div>
+      <h2>Software you use vs. a system that runs.</h2>
+      <p>PestPac, WorkWave, and Jobber are platforms your team operates. TMI builds the operations that run your company.</p>
+    </div>
+    <div class="reveal" style="overflow-x:auto;">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th class="comp-tmi-col">TMI</th>
+            <th>PestPac</th>
+            <th>WorkWave</th>
+            <th>Jobber</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Automated route density optimization</td>
+            <td class="comp-tmi-col comp-yes">Yes</td>
+            <td class="comp-no">Manual</td>
+            <td class="comp-no">Basic</td>
+            <td class="comp-no">No</td>
+          </tr>
+          <tr>
+            <td>Chemical compliance documentation</td>
+            <td class="comp-tmi-col comp-yes">Automated</td>
+            <td class="comp-no">Manual entry</td>
+            <td class="comp-no">Manual entry</td>
+            <td class="comp-no">No</td>
+          </tr>
+          <tr>
+            <td>Recurring billing without staff intervention</td>
+            <td class="comp-tmi-col comp-yes">Yes</td>
+            <td class="comp-no">Partial</td>
+            <td class="comp-no">Partial</td>
+            <td class="comp-no">Partial</td>
+          </tr>
+          <tr>
+            <td>Seasonal demand forecasting</td>
+            <td class="comp-tmi-col comp-yes">Yes</td>
+            <td class="comp-no">No</td>
+            <td class="comp-no">No</td>
+            <td class="comp-no">No</td>
+          </tr>
+          <tr>
+            <td>Built around your contracts, not defaults</td>
+            <td class="comp-tmi-col comp-yes">Yes</td>
+            <td class="comp-no">Configure</td>
+            <td class="comp-no">Configure</td>
+            <td class="comp-no">Configure</td>
+          </tr>
+          <tr>
+            <td>No per-seat pricing</td>
+            <td class="comp-tmi-col comp-yes">Yes</td>
+            <td class="comp-no">Per seat</td>
+            <td class="comp-no">Per seat</td>
+            <td class="comp-no">Per seat</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="process">
+  <div class="container">
+    <div class="sec-head reveal" style="text-align:center;max-width:640px;margin:0 auto 56px;">
+      <div class="sec-eyebrow" style="justify-content:center;"><span class="dot"></span>How It Works</div>
+      <h2>Three steps to a system that runs itself.</h2>
+    </div>
+    <div class="n-steps reveal">
+      <div class="n-step">
+        <div class="n-step-num">01</div>
+        <h3>The Audit</h3>
+        <p>A working session that maps your current routes, billing cycles, compliance requirements, chemical tracking process, and seasonal patterns. You get a complete system blueprint with implementation pricing. $997, and you own it either way.</p>
+      </div>
+      <div class="n-step">
+        <div class="n-step-num">02</div>
+        <h3>Build</h3>
+        <p>TMI builds your route optimization logic, billing engine, compliance documentation, and customer communication workflows against your actual service data - your territory, your contracts, your chemical inventory. Most implementations go live in 6 to 10 weeks.</p>
+      </div>
+      <div class="n-step">
+        <div class="n-step-num">03</div>
+        <h3>Operate</h3>
+        <p>Routes generate nightly. Billing runs on completion. Compliance documentation files itself. Customer communication goes out automatically. When your territory or service mix changes, the systems adapt. You are not maintaining software - the systems maintain the operation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq-section">
+  <div class="faq-inner">
+    <div class="faq-head reveal">
+      <div class="sec-eyebrow"><span class="dot"></span>Common Questions</div>
+      <h2 style="font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;margin-top:14px;">What pest control operators ask before they start.</h2>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">What AI helps pest control companies most?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">Route density optimization and recurring billing automation deliver the fastest ROI. Route optimization adds 6-8 stops per technician per day at the same labor cost - that is effectively a 20-30% revenue increase without adding headcount. Recurring billing automation eliminates the manual renewal process that causes 20-30% of service contracts to lapse quietly without a phone call.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">How does route optimization work for pest control?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">TMI builds route density systems that cluster stops by geography, service type, and technician certification. Routes are rebuilt nightly based on new bookings, cancellations, and chemical restock requirements. The system accounts for customer service window preferences, property access notes, and historical stop times to produce routes that hold up in the field rather than falling apart at the first reschedule.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">How does chemical compliance tracking work?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">TMI tracks chemical application records by technician, property, and product. Usage logs are captured at point of service on the technician's mobile device, quantities reconciled against inventory levels, and documentation generated automatically for state pesticide regulatory submissions. Application records are stored in audit-ready format without anyone in the office manually entering data from paper logs.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">How does recurring billing automation work?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">TMI builds billing logic that matches your service contract terms exactly - monthly, quarterly, annual, and seasonal programs. Invoices generate on service completion. Renewals trigger automatically with the appropriate customer notice window. Payment failures route to a recovery sequence that attempts the card again, sends customer notification, and escalates to your team only when human intervention is actually needed.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">Can TMI handle seasonal demand spikes?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">Yes. TMI builds demand forecasting that identifies your historical seasonal patterns and models expected booking volume for the coming season. The system surfaces scheduling capacity constraints 6-8 weeks ahead so you can hire seasonal technicians or shift route structures before demand hits - not after the spring surge has already overwhelmed your dispatch queue.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">What makes TMI different from PestPac?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">PestPac is a software platform you operate. TMI builds a system that operates for you. PestPac requires your dispatch staff to log in, build routes, process renewals, and generate compliance reports. TMI builds automations that run the routing, billing, compliance, and communication functions so your team is not the system - the system is the system. The measure of success is how little your office staff has to touch it.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">How long does implementation take?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">Most pest control implementations go live within 6 to 10 weeks. Route optimization and recurring billing are typically the first systems live, usually within 4 weeks of the build starting. Chemical compliance documentation and seasonal demand forecasting come online in the second phase. The Audit session produces a specific timeline for your operation before any build commitment is required.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">What does it cost?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">Every engagement starts with The Audit at $997. That session maps your routes, billing cycles, compliance requirements, and current tools, then produces a full system blueprint with implementation pricing. You own the blueprint whether you build with us or not. Pest control build engagements typically range from $12,000 to $35,000 depending on scope and number of technicians, with ongoing support retainers available after go-live.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-inner reveal">
+      <div class="cta-eyebrow">Get Started</div>
+      <h2>Start with The Audit.</h2>
+      <p>One session that maps your routes, billing, and compliance gaps - and produces a blueprint for fixing all three. $997, and it is yours.</p>
+      <div class="cta-actions">
+        <a href="/audit" class="btn btn-primary">Start with The Audit - $997 &#8594;</a>
+        <a href="about.html" class="btn btn-white-outline">Learn about TMI</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><img src="logo.svg" alt="TMI"/> TMI Technology</div>
+        <p class="footer-desc">Custom AI infrastructure for field service and operations businesses.</p>
+        <a href="mailto:support@tmitechai.com" style="font-size:14px;color:var(--ink-2);">support@tmitechai.com</a>
+      </div>
+      <div class="footer-right">
+        <div class="footer-col">
+          <h5>Industries</h5>
+          <a href="ai-for-utilities.html">Utilities</a>
+          <a href="ai-for-pest-control.html">Pest Control</a>
+          <a href="ai-for-concrete-contractors.html">Concrete</a>
+          <a href="ai-for-painting-contractors.html">Painting</a>
+        </div>
+        <div class="footer-col">
+          <h5>More</h5>
+          <a href="ai-for-restoration-companies.html">Restoration</a>
+          <a href="ai-for-coaches.html">Coaches</a>
+          <a href="ai-for-ecommerce.html">E-Commerce</a>
+        </div>
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="stratum.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="news.html">Field Notes</a>
+          <a href="/audit">The Audit</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 TMI Technology</span>
+      <span>AI for Pest Control</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const btn = document.getElementById('nav-btn');
+  const nav = document.getElementById('side-nav');
+  const overlay = document.getElementById('side-overlay');
+  function openNav(){btn.classList.add('open');nav.classList.add('open');overlay.classList.add('open');nav.setAttribute('aria-hidden','false');}
+  function closeNav(){btn.classList.remove('open');nav.classList.remove('open');overlay.classList.remove('open');nav.setAttribute('aria-hidden','true');}
+  btn.addEventListener('click',()=>nav.classList.contains('open')?closeNav():openNav());
+  overlay.addEventListener('click',closeNav);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeNav();});
+  const reveals=document.querySelectorAll('.reveal');
+  const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});},{threshold:0.1});
+  reveals.forEach(el=>observer.observe(el));
+  document.querySelectorAll('.faq-q').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      const answer=this.parentElement.querySelector('.faq-a');
+      const icon=this.querySelector('.faq-ic');
+      const isOpen=answer.style.maxHeight&&answer.style.maxHeight!=='0px';
+      document.querySelectorAll('.faq-a').forEach(a=>{a.style.maxHeight='0px';});
+      document.querySelectorAll('.faq-ic').forEach(i=>{i.textContent='+';});
+      if(!isOpen){answer.style.maxHeight=answer.scrollHeight+'px';icon.textContent='-';}
+    });
+  });
+</script>
+</body>
+</html>

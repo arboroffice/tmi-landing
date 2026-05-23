@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<meta name="description" content="TMI builds AI systems for utilities - field crew coordination, asset maintenance automation, compliance tracking, and service territory intelligence. Custom infrastructure for electric, gas, water, and telecom operations."/>
+<meta property="og:title" content="AI for Utilities and Power Companies | TMI"/>
+<meta property="og:description" content="TMI builds AI systems for utilities - field crew coordination, asset maintenance automation, compliance tracking, and service territory intelligence."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://www.tmitechai.com/ai-for-utilities"/>
+<meta property="og:site_name" content="TMI"/>
+<link rel="canonical" href="https://www.tmitechai.com/ai-for-utilities"/>
+<title>AI for Utilities and Power Companies | TMI</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "name": "AI Systems for Utilities and Power Companies",
+      "provider": {
+        "@type": "Organization",
+        "name": "TMI Technology",
+        "url": "https://www.tmitechai.com"
+      },
+      "description": "TMI builds custom AI infrastructure for electric, gas, water, and telecom utilities. Field crew dispatch intelligence, asset maintenance scheduling, compliance tracking, and outage response automation.",
+      "areaServed": "US",
+      "serviceType": "AI System Integration"
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What AI helps utilities most?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Utilities see the most value from field crew dispatch intelligence, predictive asset maintenance, and automated compliance reporting. These three systems eliminate the largest sources of unplanned cost - unnecessary truck rolls, reactive equipment failures, and regulatory penalty exposure."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does dispatch intelligence work for utility field crews?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TMI's dispatch intelligence layer routes field crews based on real-time location, job priority, skill certification, and travel time. It eliminates the manual dispatcher function for routine work orders and ensures the right crew reaches the right asset without phone calls and spreadsheets."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does asset maintenance automation work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TMI connects to your existing asset registry and maintenance logs to build predictive maintenance schedules. Rather than fixed calendar intervals, work orders are generated based on usage data, inspection history, and failure pattern models specific to your asset classes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What compliance does TMI track for utilities?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TMI tracks NERC, state PUC reporting cycles, environmental discharge limits, inspection certification deadlines, and permit renewal windows. Reports are generated automatically and flagged before deadlines - not after a violation has already occurred."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can TMI handle emergency outage response coordination?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. TMI builds outage response workflows that automatically triage incoming reports, group events by geography and likely cause, dispatch the appropriate crew tier, and update customer-facing communication channels without manual intervention from a control room operator."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does TMI differ from IBM Maximo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "IBM Maximo is an asset management platform that requires you to build workflows on top of it. TMI builds the workflows for you - specifically for your utility operation, your asset classes, and your regulatory environment. You get a running system, not a software license."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does implementation take?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Most utility implementations go live within 8 to 14 weeks. The timeline depends on the number of asset classes, existing data quality, and which systems we are integrating with - SCADA, GIS, existing CMMS, or billing platforms."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What does it cost?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Every engagement starts with The Audit at $997. That session maps your current operation, identifies the highest-value automation opportunities, and produces a full system blueprint with pricing. You own the blueprint whether you build with us or not."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#ffffff;--bg-alt:#f5f5f7;--bg-deep:#0d0e1a;--bg-dark:#0a0b14;
+    --ink:#1a1a1a;--ink-2:#505060;--muted:#86868b;
+    --line:rgba(0,0,0,0.07);--line-strong:rgba(0,0,0,0.12);
+    --serif:"Barlow",system-ui,sans-serif;
+    --sans:"Neue Haas Grotesk Display","Neue Haas Grotesk",system-ui,-apple-system,sans-serif;
+    --chart:#E4FF97;--chart-dark:#D0FF6A;
+  }
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}html{scroll-behavior:smooth;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.55;overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}img{display:block;max-width:100%;}
+  ::selection{background:var(--ink);color:#fff;}
+  h1,h2,h3,h4{margin:0;}
+  h1{font-family:var(--serif);font-size:clamp(44px,6vw,80px);font-weight:400;letter-spacing:-0.02em;line-height:1.05;}
+  h2{font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;}
+  h3{font-family:var(--sans);font-size:clamp(17px,1.6vw,20px);font-weight:600;line-height:1.25;}
+  p{margin:0;}
+  .container{max-width:1280px;margin:0 auto;padding:0 40px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;font-size:14px;font-weight:500;font-family:var(--sans);transition:all 0.2s;cursor:pointer;border:1px solid transparent;white-space:nowrap;}
+  .btn-primary{background:var(--chart);color:#0a0b14;}
+  .btn-primary:hover{background:var(--chart-dark);transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,255,0,0.22);}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-strong);}
+  .btn-ghost:hover{border-color:var(--ink);}
+  .btn-white-outline{background:transparent;color:#fff;border-color:rgba(255,255,255,0.35);}
+  .btn-white-outline:hover{border-color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.08);}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.65s ease,transform 0.65s ease;}
+  .reveal.visible{opacity:1;transform:translateY(0);}
+  .reveal-d1{transition-delay:0.1s;}.reveal-d2{transition-delay:0.2s;}.reveal-d3{transition-delay:0.3s;}
+
+  /* NAV */
+  .nav-btn{position:fixed;top:20px;left:20px;z-index:201;width:44px;height:44px;background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,0.1);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;padding:0;transition:background 0.2s,box-shadow 0.2s;}
+  .nav-btn:hover{background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.1);}
+  .nav-btn span{display:block;width:18px;height:1.5px;background:var(--ink);border-radius:2px;transition:transform 0.25s,opacity 0.25s;}
+  .nav-btn.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+  .nav-btn.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+  .nav-btn.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+  .side-overlay{position:fixed;inset:0;z-index:198;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity 0.3s;}
+  .side-overlay.open{opacity:1;pointer-events:auto;}
+  .side-nav{position:fixed;left:0;top:0;bottom:0;z-index:200;width:280px;background:#fff;border-right:1px solid var(--line);transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;padding:28px 0 40px;overflow-y:auto;}
+  .side-nav.open{transform:translateX(0);box-shadow:8px 0 48px rgba(0,0,0,0.15);}
+  .side-nav-top{display:flex;align-items:center;padding:0 24px 28px;border-bottom:1px solid var(--line);margin-bottom:12px;}
+  .side-nav-brand{display:flex;align-items:center;gap:10px;font-family:var(--sans);font-size:16px;font-weight:600;color:var(--ink);text-decoration:none;}
+  .side-nav-brand img{height:28px;}
+  .side-nav-links{display:flex;flex-direction:column;padding:0 12px;flex:1;}
+  .side-nav-section{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:20px 12px 6px;}
+  .side-nav-links a{font-size:14px;font-weight:500;color:var(--ink-2);padding:10px 12px;border-radius:8px;transition:color 0.15s,background 0.15s;display:block;}
+  .side-nav-links a:hover{color:var(--ink);background:var(--bg-alt);}
+  .side-nav-cta{padding:24px 24px 0;border-top:1px solid var(--line);margin-top:16px;}
+  .side-nav-cta .btn{width:100%;justify-content:center;}
+
+  /* HERO */
+  .hero{position:relative;height:90vh;min-height:700px;display:flex;align-items:flex-end;overflow:hidden;}
+  .hero-photo{position:absolute;inset:0;background-image:url('https://images.pexels.com/photos/1270184/pexels-photo-1270184.jpeg?auto=compress&cs=tinysrgb&w=1600&q=80');background-size:cover;background-position:center;}
+  .hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,20,0.3) 0%,rgba(10,11,20,0.88) 100%);}
+  .hero-inner{position:relative;z-index:2;padding:0 40px 110px;max-width:1280px;margin:0 auto;width:100%;}
+  .hero-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+  .hero-eyebrow .dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.4);flex:none;}
+  .hero-inner h1{color:#fff;max-width:22ch;margin-bottom:20px;}
+  .hero-inner h1 em{color:rgba(255,255,255,0.65);font-style:italic;}
+  .hero-inner p{font-size:clamp(16px,1.3vw,19px);color:rgba(255,255,255,0.7);max-width:56ch;margin-bottom:36px;line-height:1.6;}
+  .hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+
+  /* STATS */
+  .stats-bar{background:var(--bg-deep);padding:72px 0;border-top:1px solid rgba(255,255,255,0.06);}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-left:1px solid rgba(255,255,255,0.1);}
+  .stat-item{padding:0 40px;border-right:1px solid rgba(255,255,255,0.1);text-align:center;}
+  .stat-val{font-family:var(--serif);font-size:clamp(36px,4vw,54px);letter-spacing:-0.03em;color:var(--chart);margin-bottom:8px;}
+  .stat-label{font-size:13px;color:rgba(255,255,255,0.55);line-height:1.5;}
+
+  /* CHALLENGES */
+  .challenges{padding:100px 0;background:var(--bg);}
+  .sec-head{margin-bottom:56px;}
+  .sec-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .sec-eyebrow .dot{width:5px;height:5px;border-radius:50%;background:#7C6CF2;flex:none;}
+  .sec-sub{font-size:clamp(16px,1.3vw,19px);color:var(--ink-2);margin-top:14px;max-width:54ch;line-height:1.6;}
+  .challenge-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;}
+  .challenge-card{background:var(--bg-alt);border:1px solid var(--line);border-radius:20px;padding:36px 32px;}
+  .challenge-num{font-family:var(--sans);font-size:11px;letter-spacing:0.18em;color:var(--muted);text-transform:uppercase;margin-bottom:16px;}
+  .challenge-card h3{margin-bottom:12px;color:var(--ink);}
+  .challenge-card p{font-size:15px;color:var(--ink-2);line-height:1.65;}
+
+  /* SIX SYSTEMS */
+  .six-functions{padding:100px 0;background:var(--bg-deep);}
+  .six-head{text-align:center;max-width:680px;margin:0 auto 72px;}
+  .six-head .six-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:16px;display:flex;align-items:center;gap:8px;justify-content:center;}
+  .six-head h2{color:#fff;margin-top:16px;}
+  .six-head h2 em{color:rgba(255,255,255,0.6);font-style:italic;}
+  .six-head p{color:rgba(255,255,255,0.5);font-size:17px;line-height:1.65;margin-top:16px;}
+  .six-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+  .six-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);padding:40px 36px;transition:background 0.2s;display:flex;flex-direction:column;}
+  .six-card:hover{background:rgba(255,255,255,0.07);}
+  .six-num{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.12em;color:var(--chart);margin-bottom:18px;}
+  .six-card h3{font-family:var(--sans);font-size:17px;font-weight:600;color:#fff;margin-bottom:10px;line-height:1.3;}
+  .six-card p{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;flex:1;margin-bottom:20px;}
+
+  /* COMPARISON TABLE */
+  .comparison{padding:100px 0;background:var(--bg-dark);}
+  .comp-head{text-align:center;max-width:640px;margin:0 auto 64px;}
+  .comp-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;}
+  .comp-head h2{color:#fff;font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;}
+  .comp-head p{color:rgba(255,255,255,0.5);font-size:17px;margin-top:16px;line-height:1.6;}
+  .comp-table{width:100%;border-collapse:collapse;max-width:900px;margin:0 auto;}
+  .comp-table th{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);padding:16px 24px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08);}
+  .comp-table th:not(:first-child){text-align:center;}
+  .comp-table td{font-family:var(--sans);font-size:14px;color:rgba(255,255,255,0.7);padding:18px 24px;border-bottom:1px solid rgba(255,255,255,0.06);}
+  .comp-table td:not(:first-child){text-align:center;}
+  .comp-table tr:last-child td{border-bottom:none;}
+  .comp-yes{color:var(--chart);font-weight:600;}
+  .comp-no{color:rgba(255,255,255,0.25);}
+  .comp-tmi-col{background:rgba(228,255,151,0.04);}
+
+  /* PROCESS */
+  .process{padding:100px 0;background:var(--bg);}
+  .n-steps{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+  .n-step{padding:40px 36px;background:var(--bg);border-right:1px solid var(--line);}
+  .n-step:last-child{border-right:none;}
+  .n-step-num{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.2em;color:var(--bg);background:var(--ink);display:inline-block;padding:3px 10px;border-radius:2px;margin-bottom:20px;}
+  .n-step h3{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--ink);margin:0 0 10px;line-height:1.3;}
+  .n-step p{font-family:var(--sans);font-size:14px;color:var(--ink-2);line-height:1.65;margin:0;}
+
+  /* FAQ */
+  .faq-section{padding:100px 0;background:var(--bg-alt);border-top:1px solid var(--line);}
+  .faq-inner{max-width:800px;margin:0 auto;padding:0 40px;}
+  .faq-head{margin-bottom:56px;}
+  .faq-item{border-bottom:1px solid var(--line);}
+  .faq-q{width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:24px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;font-family:var(--sans);font-size:16px;font-weight:600;color:var(--ink);line-height:1.35;}
+  .faq-ic{font-size:20px;font-weight:300;color:var(--muted);flex:none;line-height:1;}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height 0.35s ease;}
+  .faq-a-body{font-family:var(--sans);font-size:14px;color:var(--ink-2);line-height:1.7;padding-bottom:24px;margin:0;}
+
+  /* CTA */
+  .cta-section{background:var(--bg-deep);color:#fff;padding:100px 0;text-align:center;border-top:1px solid rgba(255,255,255,0.06);}
+  .cta-inner{max-width:640px;margin:0 auto;}
+  .cta-eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;}
+  .cta-inner h2{color:#fff;margin:14px 0 16px;}
+  .cta-inner p{color:rgba(255,255,255,0.6);font-size:18px;margin-bottom:36px;line-height:1.6;}
+  .cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+  /* FOOTER */
+  footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 0 36px;}
+  .footer-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:80px;margin-bottom:56px;}
+  .footer-brand{font-family:var(--serif);font-size:22px;color:var(--ink);display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .footer-brand img{height:28px;width:auto;}
+  .footer-desc{font-size:14px;color:var(--ink-2);line-height:1.65;max-width:34ch;margin-bottom:20px;}
+  .footer-right{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;}
+  .footer-col h5{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin:0 0 14px;}
+  .footer-col a{display:block;font-size:14px;color:var(--ink-2);padding:3px 0;transition:color 0.15s;}
+  .footer-col a:hover{color:var(--ink);}
+  .footer-bottom{padding-top:28px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
+
+  @media(max-width:1024px){.six-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:768px){
+    .hero-inner{padding:0 20px 60px;}
+    .container{padding:0 20px;}
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .stat-item{padding:28px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+    .challenge-grid{grid-template-columns:1fr;}
+    .n-steps{grid-template-columns:1fr;}
+    .n-step{border-right:none;border-bottom:1px solid var(--line);}
+    .n-step:last-child{border-bottom:none;}
+    .footer-grid{grid-template-columns:1fr;gap:40px;}
+    .footer-right{grid-template-columns:1fr;}
+    .footer-bottom{flex-direction:column;gap:8px;}
+    .faq-inner{padding:0 20px;}
+  }
+  @media(max-width:640px){
+    .hero{min-height:auto;}
+    .hero-inner{padding:80px 20px 40px;}
+    .hero-actions{flex-direction:column;}
+    .hero-actions .btn{width:100%;justify-content:center;}
+    .challenges,.process,.faq-section,.cta-section{padding:56px 0;}
+    .six-grid{grid-template-columns:1fr;}
+    .comp-table th,.comp-table td{padding:12px 14px;font-size:12px;}
+  }
+</style>
+</head>
+<body>
+
+<button class="nav-btn" id="nav-btn" aria-label="Open menu">
+  <span></span><span></span><span></span>
+</button>
+<div class="side-overlay" id="side-overlay"></div>
+<div class="side-nav" id="side-nav" aria-hidden="true">
+  <div class="side-nav-top">
+    <a class="side-nav-brand" href="stratum.html">
+      <img src="logo.svg" alt="TMI"/> TMI
+    </a>
+  </div>
+  <div class="side-nav-links">
+    <div class="side-nav-section">Navigation</div>
+    <a href="stratum.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="news.html">Field Notes</a>
+    <div class="side-nav-section">Industries</div>
+    <a href="ai-for-utilities.html">Utilities</a>
+    <a href="ai-for-pest-control.html">Pest Control</a>
+    <a href="ai-for-concrete-contractors.html">Concrete Contractors</a>
+    <a href="ai-for-painting-contractors.html">Painting Contractors</a>
+    <a href="ai-for-restoration-companies.html">Restoration Companies</a>
+    <a href="ai-for-coaches.html">Coaches &amp; Consultants</a>
+    <a href="ai-for-ecommerce.html">E-Commerce</a>
+  </div>
+  <div class="side-nav-cta">
+    <a href="/audit" class="btn btn-primary">Start with The Audit - $997 &#8594;</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-photo"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="dot"></span>Utilities &amp; Power</div>
+    <h1>AI for Utilities and <em>Power Companies</em></h1>
+    <p>Field crews dispatched without phone calls. Assets maintained before they fail. Compliance reports generated automatically. TMI builds the operational infrastructure electric, gas, water, and telecom utilities run on.</p>
+    <div class="hero-actions">
+      <a href="/audit" class="btn btn-primary">Start with The Audit - $997 &#8594;</a>
+      <a href="#systems" class="btn btn-white-outline">See the systems</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<section class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-val">$900B</div>
+        <div class="stat-label">US utilities market</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">30%</div>
+        <div class="stat-label">of truck rolls could be eliminated with better dispatch intelligence</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">$150B</div>
+        <div class="stat-label">in annual US utility infrastructure maintenance</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">$25M</div>
+        <div class="stat-label">maximum compliance failure penalties per incident</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHALLENGES -->
+<section class="challenges">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="dot"></span>The Problem</div>
+      <h2>Utilities run on infrastructure built for a different era.</h2>
+      <p class="sec-sub">The field operations problem is not the grid. It is the coordination layer on top of it - dispatch, maintenance scheduling, compliance tracking, and outage response - that still runs on phone calls, spreadsheets, and institutional memory.</p>
+    </div>
+    <div class="challenge-grid">
+      <div class="challenge-card reveal">
+        <div class="challenge-num">01</div>
+        <h3>Truck rolls that should never happen</h3>
+        <p>A third of utility field dispatches are for issues that could be diagnosed remotely, handled by a closer crew, or deferred without service impact. The cost is not just fuel - it is crew time, overtime risk, and deferred work on assets that actually need attention.</p>
+      </div>
+      <div class="challenge-card reveal reveal-d1">
+        <div class="challenge-num">02</div>
+        <h3>Maintenance that happens on calendar, not condition</h3>
+        <p>Fixed-interval maintenance schedules were designed around paper records and gut instinct. Assets that are fine get inspected on schedule. Assets that are actually degrading do not get looked at because the system does not know they should.</p>
+      </div>
+      <div class="challenge-card reveal reveal-d2">
+        <div class="challenge-num">03</div>
+        <h3>Compliance managed by people, not systems</h3>
+        <p>NERC deadlines, state PUC reporting cycles, environmental permit renewals - these are tracked in spreadsheets maintained by people who also have other jobs. When someone leaves, the institutional knowledge about what is due and when goes with them.</p>
+      </div>
+      <div class="challenge-card reveal reveal-d3">
+        <div class="challenge-num">04</div>
+        <h3>Outage response that relies on the right person being available</h3>
+        <p>When an event hits, the quality of the response depends entirely on who picks up the phone. There is no system triage. No automatic crew grouping by geography. No customer communication that goes out without someone manually updating a status page.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SIX SYSTEMS -->
+<section class="six-functions" id="systems">
+  <div class="container">
+    <div class="six-head reveal">
+      <div class="six-eyebrow"><span class="dot" style="width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.3);flex:none;display:inline-block;"></span>Six Core Systems</div>
+      <h2>Built for utility operations. <em>Not adapted from something else.</em></h2>
+      <p>Every system TMI builds for utilities is designed around how field crews, control rooms, and compliance teams actually work - not around what a generic enterprise platform can be configured to do.</p>
+    </div>
+    <div class="six-grid">
+      <div class="six-card reveal">
+        <div class="six-num">01</div>
+        <h3>Field Crew Dispatch Intelligence</h3>
+        <p>Routes field crews based on real-time location, certification level, job priority, and travel time. Eliminates the manual dispatcher function for routine work orders. Right crew, right asset, no phone calls.</p>
+      </div>
+      <div class="six-card reveal reveal-d1">
+        <div class="six-num">02</div>
+        <h3>Asset Maintenance Scheduling</h3>
+        <p>Generates work orders based on usage data, inspection history, and failure pattern models rather than fixed calendar intervals. Assets get attention when they need it, not when the calendar says so.</p>
+      </div>
+      <div class="six-card reveal reveal-d2">
+        <div class="six-num">03</div>
+        <h3>Compliance and Regulatory Reporting</h3>
+        <p>Tracks NERC requirements, state PUC reporting cycles, permit renewals, and inspection certification deadlines. Reports generated automatically. Deadlines flagged before they become violations.</p>
+      </div>
+      <div class="six-card reveal">
+        <div class="six-num">04</div>
+        <h3>Outage Response Coordination</h3>
+        <p>Automatically triages incoming outage reports, groups events by geography and probable cause, dispatches the appropriate crew tier, and pushes customer communication without manual control room intervention.</p>
+      </div>
+      <div class="six-card reveal reveal-d1">
+        <div class="six-num">05</div>
+        <h3>Work Order and Permit Management</h3>
+        <p>Tracks work orders from creation through completion, manages permit applications and status, and ensures all field documentation is captured before a job closes. No paper. No chasing signatures.</p>
+      </div>
+      <div class="six-card reveal reveal-d2">
+        <div class="six-num">06</div>
+        <h3>Service Territory Analytics</h3>
+        <p>Gives operations leadership a live view of field activity, asset health distribution, compliance status, and crew utilization across the entire service territory. One screen instead of six systems.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON TABLE -->
+<section class="comparison">
+  <div class="container">
+    <div class="comp-head reveal">
+      <div class="comp-eyebrow">How TMI Compares</div>
+      <h2>Not a platform. A running system.</h2>
+      <p>IBM Maximo, SAP PM, and Cityworks are tools that require you to build on top of them. TMI builds the system for you.</p>
+    </div>
+    <div class="reveal" style="overflow-x:auto;">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th class="comp-tmi-col">TMI</th>
+            <th>IBM Maximo</th>
+            <th>SAP PM</th>
+            <th>Cityworks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Built for your specific operation</td>
+            <td class="comp-tmi-col comp-yes">Yes</td>
+            <td class="comp-no">Configure yourself</td>
+            <td class="comp-no">Configure yourself</td>
+            <td class="comp-no">Limited</td>
+          </tr>
+          <tr>
+            <td>Predictive maintenance scheduling</td>
+            <td class="comp-tmi-col comp-yes">Yes</td>
+            <td class="comp-no">Add-on module</td>
+            <td class="comp-no">Add-on module</td>
+            <td class="comp-no">No</td>
+          </tr>
+          <tr>
+            <td>Automated compliance reporting</td>
+            <td class="comp-tmi-col comp-yes">Yes</td>
+            <td class="comp-no">Manual</td>
+            <td class="comp-no">Manual</td>
+            <td class="comp-no">Partial</td>
+          </tr>
+          <tr>
+            <td>Outage response automation</td>
+            <td class="comp-tmi-col comp-yes">Yes</td>
+            <td class="comp-no">No</td>
+            <td class="comp-no">No</td>
+            <td class="comp-no">No</td>
+          </tr>
+          <tr>
+            <td>Weeks to live, not months</td>
+            <td class="comp-tmi-col comp-yes">8-14 weeks</td>
+            <td class="comp-no">6-18 months</td>
+            <td class="comp-no">12-24 months</td>
+            <td class="comp-no">3-9 months</td>
+          </tr>
+          <tr>
+            <td>No enterprise license fee</td>
+            <td class="comp-tmi-col comp-yes">Yes</td>
+            <td class="comp-no">$100K+ annually</td>
+            <td class="comp-no">$200K+ annually</td>
+            <td class="comp-no">$50K+ annually</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process">
+  <div class="container">
+    <div class="sec-head reveal" style="text-align:center;max-width:640px;margin:0 auto 56px;">
+      <div class="sec-eyebrow" style="justify-content:center;"><span class="dot"></span>How It Works</div>
+      <h2>Three steps from conversation to running system.</h2>
+    </div>
+    <div class="n-steps reveal">
+      <div class="n-step">
+        <div class="n-step-num">01</div>
+        <h3>The Audit</h3>
+        <p>A focused working session with your operations team. We map your current dispatch process, maintenance workflows, compliance exposure, and data environment. You get a full system blueprint with implementation pricing. $997, and you own the output.</p>
+      </div>
+      <div class="n-step">
+        <div class="n-step-num">02</div>
+        <h3>Build</h3>
+        <p>TMI builds your systems against your actual data - your asset registry, your crew certifications, your regulatory calendar. Integration with existing SCADA, GIS, CMMS, or billing platforms happens in this phase. Most utilities go live in 8 to 14 weeks.</p>
+      </div>
+      <div class="n-step">
+        <div class="n-step-num">03</div>
+        <h3>Operate</h3>
+        <p>Your systems run. Dispatch intelligence routes crews. Maintenance schedules generate automatically. Compliance reports go out on time. When your operation changes, we adjust the systems. You are not on your own after go-live.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="faq-inner">
+    <div class="faq-head reveal">
+      <div class="sec-eyebrow"><span class="dot"></span>Common Questions</div>
+      <h2 style="font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;margin-top:14px;">What operators ask before they start.</h2>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">What AI helps utilities most?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">Utilities see the most value from field crew dispatch intelligence, predictive asset maintenance, and automated compliance reporting. These three systems eliminate the largest sources of unplanned cost - unnecessary truck rolls, reactive equipment failures, and regulatory penalty exposure. The ROI on dispatch intelligence alone typically covers the full cost of implementation within the first year.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">How does dispatch intelligence work for utility field crews?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">TMI's dispatch intelligence layer routes field crews based on real-time location, job priority, skill certification, and travel time. It pulls from your work order queue, checks crew availability against certifications required for each job type, and assigns and routes automatically for routine work orders. Dispatchers focus on exceptions and emergencies instead of managing routine scheduling by hand.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">How does asset maintenance automation work?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">TMI connects to your existing asset registry and maintenance logs to build predictive maintenance schedules. Rather than fixed calendar intervals, work orders are generated based on usage data, inspection history, and failure pattern models specific to your asset classes. Transformers, switching equipment, pipeline segments, and telecom infrastructure all have different failure signatures - the system learns them over time and surfaces maintenance needs before they become outages.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">What compliance does TMI track for utilities?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">TMI tracks NERC reliability standards, state PUC reporting cycles, environmental discharge permit limits, inspection certification deadlines for field crew qualifications, and permit renewal windows for infrastructure projects. Reports are generated automatically and flagged before deadlines - not after a violation has already occurred. The system maintains an audit trail of all compliance activity.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">Can TMI handle emergency outage response coordination?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">Yes. TMI builds outage response workflows that automatically triage incoming outage reports, group events by geography and likely cause, dispatch the appropriate crew tier, and update customer-facing communication channels without manual intervention from a control room operator. The system handles the coordination layer so your crew supervisors can focus on the technical work of restoring service.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">How does TMI differ from IBM Maximo?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">IBM Maximo is an asset management platform that gives you a database and a set of configuration tools. You hire a team of consultants to build workflows on top of it over 12 to 18 months. TMI builds the workflows for you - designed specifically for your utility operation, your asset classes, and your regulatory environment. You get a running system, not a software license with an implementation project attached.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">How long does implementation take?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">Most utility implementations go live within 8 to 14 weeks. The timeline depends on the number of asset classes in scope, the quality of existing data in your current systems, and which platforms we are integrating with - SCADA, GIS, an existing CMMS, or billing infrastructure. The Audit session produces a realistic timeline specific to your environment before any build work begins.</p></div>
+    </div>
+    <div class="faq-item reveal">
+      <button class="faq-q">What does it cost?<span class="faq-ic">+</span></button>
+      <div class="faq-a"><p class="faq-a-body">Every engagement starts with The Audit at $997. That session maps your current operation, identifies the highest-value automation opportunities, and produces a full system blueprint with implementation pricing. You own the blueprint whether you build with us or not. Build engagements for utility operations typically range from $25,000 to $85,000 depending on scope, with ongoing support retainers available after go-live.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-inner reveal">
+      <div class="cta-eyebrow">Get Started</div>
+      <h2>Start with The Audit.</h2>
+      <p>A single working session that maps your operation and produces a complete system blueprint. $997. You own the output either way.</p>
+      <div class="cta-actions">
+        <a href="/audit" class="btn btn-primary">Start with The Audit - $997 &#8594;</a>
+        <a href="about.html" class="btn btn-white-outline">Learn about TMI</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="logo.svg" alt="TMI"/> TMI Technology
+        </div>
+        <p class="footer-desc">Custom AI infrastructure for field operations, utilities, and industrial businesses.</p>
+        <a href="mailto:support@tmitechai.com" style="font-size:14px;color:var(--ink-2);">support@tmitechai.com</a>
+      </div>
+      <div class="footer-right">
+        <div class="footer-col">
+          <h5>Industries</h5>
+          <a href="ai-for-utilities.html">Utilities</a>
+          <a href="ai-for-pest-control.html">Pest Control</a>
+          <a href="ai-for-concrete-contractors.html">Concrete</a>
+          <a href="ai-for-painting-contractors.html">Painting</a>
+        </div>
+        <div class="footer-col">
+          <h5>More</h5>
+          <a href="ai-for-restoration-companies.html">Restoration</a>
+          <a href="ai-for-coaches.html">Coaches</a>
+          <a href="ai-for-ecommerce.html">E-Commerce</a>
+        </div>
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="stratum.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="news.html">Field Notes</a>
+          <a href="/audit">The Audit</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 TMI Technology</span>
+      <span>AI for Utilities</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Hamburger nav
+  const btn = document.getElementById('nav-btn');
+  const nav = document.getElementById('side-nav');
+  const overlay = document.getElementById('side-overlay');
+  function openNav() { btn.classList.add('open'); nav.classList.add('open'); overlay.classList.add('open'); nav.setAttribute('aria-hidden','false'); }
+  function closeNav() { btn.classList.remove('open'); nav.classList.remove('open'); overlay.classList.remove('open'); nav.setAttribute('aria-hidden','true'); }
+  btn.addEventListener('click', () => nav.classList.contains('open') ? closeNav() : openNav());
+  overlay.addEventListener('click', closeNav);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNav(); });
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const item = this.parentElement;
+      const answer = item.querySelector('.faq-a');
+      const icon = this.querySelector('.faq-ic');
+      const isOpen = answer.style.maxHeight && answer.style.maxHeight !== '0px';
+      document.querySelectorAll('.faq-a').forEach(a => { a.style.maxHeight = '0px'; });
+      document.querySelectorAll('.faq-ic').forEach(i => { i.textContent = '+'; });
+      if (!isOpen) { answer.style.maxHeight = answer.scrollHeight + 'px'; icon.textContent = '-'; }
+    });
+  });
+</script>
+</body>
+</html>
