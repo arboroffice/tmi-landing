@@ -186,21 +186,21 @@ function renderRating(n) {
 async function setRating(n) {
   if (!currentApp) return;
   renderRating(n);
-  await TMIAdmin.api(`/api/city-leads/${currentApp.id}`, 'PATCH', { rating: n }).catch(() => {});
+  await TMIAdmin.api('/api/city-leads', 'PATCH', { id: currentApp.id, rating: n }).catch(() => {});
   currentApp.rating = n;
 }
 
 async function saveNotes() {
   if (!currentApp) return;
   const notes = document.getElementById('panel-notes').value;
-  await TMIAdmin.api(`/api/city-leads/${currentApp.id}`, 'PATCH', { notes }).catch(() => {});
+  await TMIAdmin.api('/api/city-leads', 'PATCH', { id: currentApp.id, notes }).catch(() => {});
   currentApp.notes = notes;
   TMIAdmin.toast('Notes saved');
 }
 
 async function acceptApp() {
   if (!currentApp) return;
-  await TMIAdmin.api(`/api/city-leads/${currentApp.id}`, 'PATCH', { status: 'accepted' }).catch(() => {});
+  await TMIAdmin.api('/api/city-leads', 'PATCH', { id: currentApp.id, status: 'accepted' }).catch(() => {});
   currentApp.status = 'accepted';
   document.getElementById('btn-accept').style.display = 'none';
   TMIAdmin.toast('Application accepted');
@@ -209,7 +209,7 @@ async function acceptApp() {
 
 async function rejectApp() {
   if (!currentApp) return;
-  await TMIAdmin.api(`/api/city-leads/${currentApp.id}`, 'PATCH', { status: 'rejected' }).catch(() => {});
+  await TMIAdmin.api('/api/city-leads', 'PATCH', { id: currentApp.id, status: 'rejected' }).catch(() => {});
   currentApp.status = 'rejected';
   document.getElementById('btn-reject').style.display = 'none';
   TMIAdmin.toast('Application rejected');
