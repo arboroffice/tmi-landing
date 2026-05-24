@@ -255,6 +255,9 @@ const TMIAdmin = (() => {
     ${navItem('fotf-community', 'Subscribers', I.community, false, '/admin-fotf-community-hub#community')}
     ${navItem('fotf-newsletter', 'Newsletter', I.newsletter, false, '/admin-fotf-editorial#newsletter')}
     ${navItem('fotf-issues', 'Issues', I.newsletter, false, '/admin-fotf-editorial#issues')}
+    <div class="sb-group-label">City Leads</div>
+    ${navItem('city-leads', 'Applications', I.cityPin, true, '/admin-city-leads')}
+    ${navItem('city-leads-map', 'Coverage Map', I.cityMap, false, '/admin-city-leads#map')}
 <div class="sb-group-label">Plans</div>
     ${navItem('financial-model', 'Financial Model', I.revenue, false, '/admin-plans#model')}
     ${navItem('retention-plan', 'Retention Plan', I.clientHealth, false, '/admin-plans#retention')}
@@ -342,6 +345,10 @@ const TMIAdmin = (() => {
           { page:'fotf-community', label:'Subscribers',  icon:I.community, href:'/admin-fotf-community-hub#community' },
           { page:'fotf-newsletter',label:'Newsletter',   icon:I.newsletter, href:'/admin-fotf-editorial#newsletter' },
           { page:'fotf-issues',    label:'Issues',       icon:I.newsletter, href:'/admin-fotf-editorial#issues' },
+        ]},
+{ label: 'City Leads', items: [
+          { page:'city-leads',     label:'Applications', icon:I.cityPin, href:'/admin-city-leads',      badge:'city-leads' },
+          { page:'city-leads-map', label:'Coverage Map', icon:I.cityMap, href:'/admin-city-leads#map' },
         ]},
 { label: 'Plans', items: [
           { page:'financial-model', label:'Financial Model', icon:I.revenue,      href:'/admin-plans#model' },

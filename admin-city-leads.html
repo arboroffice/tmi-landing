@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>City Leads — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">City Leads</span></div>
+      <div class="topbar-actions">
+        <a href="/citylead" target="_blank" class="btn btn-ghost btn-sm">View public page &rarr;</a>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>City Lead Applications</h1>
+        <span class="filter-count" id="cl-count"></span>
+      </div>
+
+      <!-- Map view placeholder (anchored by #map) -->
+      <div id="map" style="display:none;margin-bottom:24px;background:var(--bg-alt);border-radius:var(--r);border:1px solid var(--line);padding:48px;text-align:center;">
+        <div style="font-size:13px;color:var(--muted);line-height:1.65;">Coverage map coming soon — city pins will appear here as applications are accepted.</div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search" placeholder="Search name, email, city..." oninput="renderTable()"/>
+        </div>
+        <select class="filter-select" id="filter-status" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option value="new">New</option>
+          <option value="reviewed">Reviewed</option>
+          <option value="accepted">Accepted</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Name</th><th>Email</th><th>City / Metro</th><th>Revenue Goal</th><th>Status</th><th>Received</th><th></th>
+            </tr></thead>
+            <tbody id="cl-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide panel -->
+<div class="panel-overlay" id="cl-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('cl-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="panel-name">Application</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-reject" onclick="rejectApp()">Reject</button>
+        <button class="btn btn-primary btn-sm" id="btn-accept" onclick="acceptApp()">Accept &rarr; Lead</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid" id="panel-details"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Background</div>
+      <p id="panel-background" style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-bottom:16px;"></p>
+      <div class="panel-sec-label">Why TMI City Lead</div>
+      <p id="panel-why" style="font-size:14px;color:var(--ink-2);line-height:1.65;"></p>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label" style="margin-bottom:8px">Rating</div>
+      <div id="panel-rating" style="display:flex;gap:4px;margin-bottom:16px;cursor:pointer">
+        <span class="star" data-n="1" onclick="setRating(1)" style="font-size:22px;color:var(--line);transition:color 0.1s;user-select:none">&#9733;</span>
+        <span class="star" data-n="2" onclick="setRating(2)" style="font-size:22px;color:var(--line);transition:color 0.1s;user-select:none">&#9733;</span>
+        <span class="star" data-n="3" onclick="setRating(3)" style="font-size:22px;color:var(--line);transition:color 0.1s;user-select:none">&#9733;</span>
+        <span class="star" data-n="4" onclick="setRating(4)" style="font-size:22px;color:var(--line);transition:color 0.1s;user-select:none">&#9733;</span>
+        <span class="star" data-n="5" onclick="setRating(5)" style="font-size:22px;color:var(--line);transition:color 0.1s;user-select:none">&#9733;</span>
+      </div>
+      <div class="panel-sec-label">Notes</div>
+      <textarea class="form-input" id="panel-notes" rows="3" placeholder="Internal notes..." style="margin-top:8px;"></textarea>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="saveNotes()">Save Notes</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('city-leads');
+
+// Show map section if navigated to #map
+if (window.location.hash === '#map') {
+  document.getElementById('map').style.display = 'block';
+}
+
+let allApps = [];
+let currentApp = null;
+
+async function loadApps() {
+  allApps = await TMIAdmin.api('/api/city-leads').catch(() => []) || [];
+  renderTable();
+}
+
+function renderTable() {
+  const q  = document.getElementById('search').value.toLowerCase();
+  const st = document.getElementById('filter-status').value;
+
+  const rows = allApps.filter(a => {
+    if (st && a.status !== st) return false;
+    if (q && !`${a.first_name || ''} ${a.last_name || ''} ${a.email || ''} ${a.city || ''}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  document.getElementById('cl-count').textContent = `${rows.length} application${rows.length !== 1 ? 's' : ''}`;
+
+  const tbody = document.getElementById('cl-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📍</div><h3>No city lead applications yet</h3><p>Applications from <a href="/citylead" target="_blank" style="color:var(--ink);text-decoration:underline">citylead page</a> will appear here.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(a => {
+    const name = [a.first_name, a.last_name].filter(Boolean).join(' ') || a.email || 'Unknown';
+    return `
+    <tr onclick="openPanel('${a.id}')">
+      <td class="td-name">${name}</td>
+      <td>${a.email || '<span class="td-muted">-</span>'}</td>
+      <td>${a.city || '<span class="td-muted">-</span>'}</td>
+      <td>${a.revenue_goal ? `<span style="font-size:12px;color:var(--muted)">${a.revenue_goal}</span>` : '<span class="td-muted">-</span>'}</td>
+      <td>${TMIAdmin.badge(a.status || 'new')}</td>
+      <td class="td-muted">${TMIAdmin.fmt(a.created_at)}</td>
+      <td class="td-action"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPanel('${a.id}')">View</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openPanel(id) {
+  currentApp = allApps.find(a => a.id === id);
+  if (!currentApp) return;
+  const a = currentApp;
+  const name = [a.first_name, a.last_name].filter(Boolean).join(' ') || a.email || 'Unknown';
+
+  document.getElementById('panel-name').textContent = name;
+  document.getElementById('panel-background').textContent = a.background || 'No background provided.';
+  document.getElementById('panel-why').textContent = a.why || 'No details provided.';
+  document.getElementById('panel-notes').value = a.notes || '';
+  renderRating(a.rating || 0);
+
+  const details = [
+    { label: 'City', value: a.city || '-' },
+    { label: 'Email', value: a.email || '-' },
+    { label: 'Phone', value: a.phone || '-' },
+    { label: 'Revenue Goal', value: a.revenue_goal || '-' },
+    { label: 'Source', value: a.source || '-' },
+    { label: 'LinkedIn', value: a.linkedin ? `<a href="${a.linkedin}" target="_blank" rel="noopener" style="color:var(--chart)">${a.linkedin}</a>` : '-' },
+    { label: 'Status', value: TMIAdmin.badge(a.status || 'new') },
+    { label: 'Received', value: TMIAdmin.fmt(a.created_at) },
+  ];
+  document.getElementById('panel-details').innerHTML = details.map(d =>
+    `<div class="detail-row"><span class="detail-label">${d.label}</span><span class="detail-val">${d.value}</span></div>`
+  ).join('');
+
+  const status = a.status || 'new';
+  document.getElementById('btn-reject').style.display = status === 'rejected' ? 'none' : '';
+  document.getElementById('btn-accept').style.display = status === 'accepted' ? 'none' : '';
+
+  TMIAdmin.openPanel('cl-panel');
+}
+
+function renderRating(n) {
+  document.querySelectorAll('#panel-rating .star').forEach(s => {
+    s.style.color = +s.dataset.n <= n ? 'var(--chart)' : 'var(--line)';
+  });
+}
+
+async function setRating(n) {
+  if (!currentApp) return;
+  renderRating(n);
+  await TMIAdmin.api(`/api/city-leads/${currentApp.id}`, 'PATCH', { rating: n }).catch(() => {});
+  currentApp.rating = n;
+}
+
+async function saveNotes() {
+  if (!currentApp) return;
+  const notes = document.getElementById('panel-notes').value;
+  await TMIAdmin.api(`/api/city-leads/${currentApp.id}`, 'PATCH', { notes }).catch(() => {});
+  currentApp.notes = notes;
+  TMIAdmin.toast('Notes saved');
+}
+
+async function acceptApp() {
+  if (!currentApp) return;
+  await TMIAdmin.api(`/api/city-leads/${currentApp.id}`, 'PATCH', { status: 'accepted' }).catch(() => {});
+  currentApp.status = 'accepted';
+  document.getElementById('btn-accept').style.display = 'none';
+  TMIAdmin.toast('Application accepted');
+  renderTable();
+}
+
+async function rejectApp() {
+  if (!currentApp) return;
+  await TMIAdmin.api(`/api/city-leads/${currentApp.id}`, 'PATCH', { status: 'rejected' }).catch(() => {});
+  currentApp.status = 'rejected';
+  document.getElementById('btn-reject').style.display = 'none';
+  TMIAdmin.toast('Application rejected');
+  renderTable();
+}
+
+loadApps();
+</script>
+</body>
+</html>
