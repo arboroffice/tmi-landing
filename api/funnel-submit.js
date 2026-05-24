@@ -5,7 +5,7 @@ const { Client: QStashClient } = require('@upstash/qstash');
 
 const FROM_NUMBER = '+18557171044';
 const ALERT_NUMBER = '+13373809059';
-const OWNER_EMAIL = 'mia@elianatech.com';
+const OWNER_EMAIL = 'support@tmitechai.com';
 const SITE = 'https://www.tmi-technology.com';
 const BEEHIIV_PUB = 'pub_24a9962f-7b4a-4587-b363-263e5508e73c';
 

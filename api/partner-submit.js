@@ -4,7 +4,7 @@ const twilio = require('twilio');
 
 const FROM_NUMBER = '+18557171044';
 const ALERT_NUMBER = '+13373809059';
-const OWNER_EMAIL = 'mia@elianatech.com';
+const OWNER_EMAIL = 'support@tmitechai.com';
 const SITE = 'https://www.tmi-technology.com';
 
 module.exports = async function handler(req, res) {
