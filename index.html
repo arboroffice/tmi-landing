@@ -561,7 +561,7 @@
     .footer-right { gap: 24px; }
   }
   @media (max-width: 768px) {
-    .hero-content { padding: 0 24px; }
+    .hero-content { padding: clamp(100px, 18vh, 160px) 24px 0; }
     .manifesto-item { grid-template-columns: 40px 1fr; gap: 20px; }
     .tier-grid { grid-template-columns: 1fr; border-radius: 16px; }
     .summit-cards { grid-template-columns: 1fr; border-radius: 16px; }
@@ -1143,6 +1143,23 @@
   .result-label{font-family:var(--sans);font-size:13px;color:rgba(255,255,255,0.45);line-height:1.65;margin-bottom:16px;}
   .result-context{font-family:var(--sans);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.18);}
   @media(max-width:800px){.results-grid{grid-template-columns:1fr;}}
+
+  /* 4 PATHS */
+  .paths-section{background:var(--bg);padding:100px 0;border-top:1px solid var(--line);}
+  .paths-head{text-align:center;margin-bottom:56px;}
+  .paths-head .eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+  .paths-head h2{font-family:var(--serif);font-size:clamp(28px,3vw,44px);font-weight:400;letter-spacing:-0.02em;line-height:1.1;}
+  .paths-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+  .path-card{background:var(--bg-alt);padding:40px 32px;display:flex;flex-direction:column;gap:16px;}
+  .path-card:first-child{border-radius:12px 0 0 12px;}
+  .path-card:last-child{border-radius:0 12px 12px 0;}
+  .path-num{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+  .path-name{font-family:var(--serif);font-size:clamp(18px,1.6vw,24px);font-weight:400;letter-spacing:-0.01em;line-height:1.2;color:var(--ink);}
+  .path-desc{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.65;flex:1;}
+  .path-cta{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink);letter-spacing:0.06em;display:inline-flex;align-items:center;gap:6px;transition:gap 0.2s;margin-top:auto;}
+  .path-card:hover .path-cta{gap:10px;}
+  @media(max-width:860px){.paths-grid{grid-template-columns:repeat(2,1fr);}.path-card:first-child{border-radius:12px 0 0 0;}.path-card:nth-child(2){border-radius:0 12px 0 0;}.path-card:nth-child(3){border-radius:0 0 0 12px;}.path-card:last-child{border-radius:0 0 12px 0;}}
+  @media(max-width:500px){.paths-grid{grid-template-columns:1fr;}.path-card{border-radius:0!important;}.path-card:first-child{border-radius:12px 12px 0 0!important;}.path-card:last-child{border-radius:0 0 12px 12px!important;}}
 </style>
 </head>
 <body>
@@ -1167,6 +1184,8 @@
     <a href="/">Home</a>
     <a href="#vertical-founder">Become a Vertical Founder</a>
     <a href="/citylead">City Leads</a>
+    <a href="/diagnose">Talk to Mia</a>
+    <a href="/marketplace">Systems Marketplace</a>
     <a href="https://tmitechai.com/founders">The Letter</a>
     <a href="about.html">About</a>
     <a href="outcomes.html">Outcomes</a>
@@ -1486,6 +1505,42 @@
 </div>
 
 
+<!-- 4 PATHS -->
+<section class="paths-section">
+  <div class="container">
+    <div class="paths-head reveal">
+      <div class="eyebrow">Where do you start?</div>
+      <h2>Find your path into TMI.</h2>
+    </div>
+    <div class="paths-grid reveal">
+      <div class="path-card">
+        <div class="path-num">01</div>
+        <div class="path-name">Just getting started</div>
+        <p class="path-desc">Haven't built anything with AI yet. Want to get the tools configured properly from scratch and actually understand what you're using.</p>
+        <a href="https://buy.stripe.com/eVqeVecpOcCrgS85JLaEE00" class="path-cta">Foundation Setup &rarr;</a>
+      </div>
+      <div class="path-card">
+        <div class="path-num">02</div>
+        <div class="path-name">Building yourself</div>
+        <p class="path-desc">You're in the tools already. Writing prompts, building workflows. Want a pre-built system you can deploy and own without starting from scratch.</p>
+        <a href="/marketplace" class="path-cta">Browse the marketplace &rarr;</a>
+      </div>
+      <div class="path-card">
+        <div class="path-num">03</div>
+        <div class="path-name">Want help with it</div>
+        <p class="path-desc">Clear on the problem. Want someone to map it, build the plan, and work through it with you. One session to get real momentum.</p>
+        <a href="https://buy.stripe.com/aFa7sM0H6byndFW2xzaEE01" class="path-cta">Book The Audit &rarr;</a>
+      </div>
+      <div class="path-card">
+        <div class="path-num">04</div>
+        <div class="path-name">Want it done</div>
+        <p class="path-desc">You know what's broken. You want it built, installed, and handed over running. TMI takes it from map to live system.</p>
+        <a href="/audit" class="path-cta">Apply to work with TMI &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- OFFER LADDER -->
 <section class="ladder-section" id="ladder">
   <div class="container">
@@ -1659,6 +1714,7 @@
         </div>
 <div class="footer-col">
           <h5>Community</h5>
+          <a href="/marketplace">Marketplace</a>
           <a href="https://tmitechai.com/founders">The Letter</a>
           <a href="/audit">Apply</a>
           <a href="/citylead">City Leads</a>
@@ -1706,5 +1762,6 @@ function fotfSubscribe(formId, okId, source) {
 }
 fotfSubscribe('fotf-stratum-form', 'fotf-stratum-ok', 'fotf_main');
 </script>
+<script src="/chat-widget.js" defer></script>
 </body>
 </html>
