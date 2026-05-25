@@ -86,7 +86,7 @@
   .industry-section:nth-child(even) { background: var(--bg-alt); }
   .industry-label { font-family: var(--sans); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
   .industry-title { font-family: var(--serif); font-size: clamp(28px, 3vw, 42px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 16px; }
-  .industry-deck { font-family: var(--sans); font-size: 15px; line-height: 1.65; color: var(--ink-2); max-width: 52ch; margin-bottom: 48px; }
+  .industry-deck { font-family: var(--sans); font-size: 15px; line-height: 1.65; color: var(--ink-2); max-width: 52ch; margin-bottom: 24px; }
   .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; }
   @media(max-width:700px) { .metrics-grid { grid-template-columns: 1fr 1fr; } }
   @media(max-width:480px) { .metrics-grid { grid-template-columns: 1fr; } }
@@ -123,6 +123,20 @@
 
   .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s ease; }
   .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* FILTER BAR */
+  .filter-bar { background: var(--bg); border-bottom: 1px solid var(--line); padding: 18px 0; position: sticky; top: 56px; z-index: 50; }
+  .filter-inner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .filter-label { font-family: var(--sans); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); flex-shrink: 0; }
+  .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filter-pill { font-family: var(--sans); font-size: 12px; font-weight: 500; padding: 7px 16px; border: 1px solid var(--line-strong); border-radius: 999px; cursor: pointer; background: var(--bg); color: var(--ink-2); transition: background 0.15s, color 0.15s, border-color 0.15s; white-space: nowrap; }
+  .filter-pill.active, .filter-pill:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .industry-section.hidden { display: none; }
+
+  /* PROBLEM TAGS */
+  .problem-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 36px; }
+  .problem-tag { font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; padding: 5px 12px; border-radius: 999px; background: var(--bg); color: var(--ink-2); border: 1px solid var(--line-strong); }
+  .industry-section:nth-child(even) .problem-tag { background: var(--bg-alt); border-color: var(--line); }
 </style>
 </head>
 <body>
@@ -170,12 +184,36 @@
   </div>
 </section>
 
+<!-- FILTER BAR -->
+<div class="filter-bar" id="filterBar">
+  <div class="container">
+    <div class="filter-inner">
+      <span class="filter-label">Filter by</span>
+      <div class="filter-pills">
+        <button class="filter-pill active" data-filter="all">All Industries</button>
+        <button class="filter-pill" data-filter="field-service">Field Service</button>
+        <button class="filter-pill" data-filter="construction">Construction</button>
+        <button class="filter-pill" data-filter="industrial">Industrial</button>
+        <button class="filter-pill" data-filter="fleet">Fleet</button>
+        <button class="filter-pill" data-filter="online">Online Business</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FIELD SERVICE: HVAC / PLUMBING / ELECTRICAL -->
-<section class="industry-section reveal">
+<section class="industry-section reveal" data-category="field-service">
   <div class="container">
     <p class="industry-label">Field Service</p>
     <h2 class="industry-title">HVAC, Plumbing & Electrical</h2>
     <p class="industry-deck">Field service companies carry the highest margin leak rate of any industry we work in. Revenue leaves in three places: unbilled materials, dispatch inefficiency, and service agreement churn.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Dispatch Overhead</span>
+      <span class="problem-tag">Revenue Leakage</span>
+      <span class="problem-tag">Service Agreements</span>
+      <span class="problem-tag">Route Optimization</span>
+      <span class="problem-tag">After-Hours Calls</span>
+    </div>
 
     <div class="metrics-grid">
       <div class="metric-card">
@@ -219,11 +257,18 @@
 </section>
 
 <!-- ROOFING -->
-<section class="industry-section reveal">
+<section class="industry-section reveal" data-category="field-service construction">
   <div class="container">
     <p class="industry-label">Roofing</p>
     <h2 class="industry-title">Roofing Contractors</h2>
     <p class="industry-deck">Roofing margins get squeezed from both sides: estimates that miss material costs and field changes that never reach the invoice. Systems fix both.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Estimating Speed</span>
+      <span class="problem-tag">Material Waste</span>
+      <span class="problem-tag">Invoice Capture</span>
+      <span class="problem-tag">Change Orders</span>
+      <span class="problem-tag">Storm Season Scale</span>
+    </div>
 
     <div class="metrics-grid">
       <div class="metric-card">
@@ -267,11 +312,18 @@
 </section>
 
 <!-- CONSTRUCTION -->
-<section class="industry-section reveal">
+<section class="industry-section reveal" data-category="construction">
   <div class="container">
     <p class="industry-label">Construction</p>
     <h2 class="industry-title">General Contractors & Specialty Trades</h2>
     <p class="industry-deck">Construction loses money in the gap between what the estimate said and what the job actually cost. Systems that track job cost in real time - not at month end - close that gap before it becomes a loss.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Budget Overruns</span>
+      <span class="problem-tag">Change Order Capture</span>
+      <span class="problem-tag">Sub Coordination</span>
+      <span class="problem-tag">Job Costing</span>
+      <span class="problem-tag">Document Automation</span>
+    </div>
 
     <div class="metrics-grid">
       <div class="metric-card">
@@ -315,11 +367,18 @@
 </section>
 
 <!-- MANUFACTURING -->
-<section class="industry-section reveal">
+<section class="industry-section reveal" data-category="industrial">
   <div class="container">
     <p class="industry-label">Manufacturing</p>
     <h2 class="industry-title">Manufacturing & Industrial Production</h2>
     <p class="industry-deck">Manufacturing loses money when machines fail unexpectedly and when quality defects reach the end of the line. Predictive systems catch both before they become costs.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Unplanned Downtime</span>
+      <span class="problem-tag">Predictive Maintenance</span>
+      <span class="problem-tag">Labor Utilization</span>
+      <span class="problem-tag">Parts Management</span>
+      <span class="problem-tag">Production Continuity</span>
+    </div>
 
     <div class="metrics-grid">
       <div class="metric-card">
@@ -363,11 +422,18 @@
 </section>
 
 <!-- OIL & GAS -->
-<section class="industry-section reveal">
+<section class="industry-section reveal" data-category="industrial">
   <div class="container">
     <p class="industry-label">Oil & Gas</p>
     <h2 class="industry-title">Oil & Gas Operations</h2>
     <p class="industry-deck">Oil and gas operations run on crew coordination, permit compliance, and equipment reliability. Each one is a system problem. Each one has a system solution.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Crew Coordination</span>
+      <span class="problem-tag">Permit Compliance</span>
+      <span class="problem-tag">Equipment Reliability</span>
+      <span class="problem-tag">Documentation Overhead</span>
+      <span class="problem-tag">Remote Monitoring</span>
+    </div>
 
     <div class="metrics-grid">
       <div class="metric-card">
@@ -411,11 +477,18 @@
 </section>
 
 <!-- FLEET -->
-<section class="industry-section reveal">
+<section class="industry-section reveal" data-category="fleet">
   <div class="container">
     <p class="industry-label">Fleet Operations</p>
     <h2 class="industry-title">Commercial Fleet Management</h2>
     <p class="industry-deck">Fleet operations run on route efficiency, vehicle reliability, and job profitability per mile. AI connects all three into a system that optimizes continuously, not just at dispatch.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Route Efficiency</span>
+      <span class="problem-tag">Fuel Costs</span>
+      <span class="problem-tag">Breakdown Prevention</span>
+      <span class="problem-tag">Dispatch Throughput</span>
+      <span class="problem-tag">Driver Accountability</span>
+    </div>
 
     <div class="metrics-grid">
       <div class="metric-card">
@@ -458,6 +531,699 @@
   </div>
 </section>
 
+<!-- LANDSCAPING -->
+<section class="industry-section reveal" data-category="field-service">
+  <div class="container">
+    <p class="industry-label">Landscaping</p>
+    <h2 class="industry-title">Landscaping & Grounds Maintenance</h2>
+    <p class="industry-deck">Landscaping companies lose margin in two windows: the estimate that undersells the job and the invoice that misses what got installed. Systems that close both gaps protect the margins that make growth possible.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Seasonal Scheduling</span>
+      <span class="problem-tag">Crew Dispatch</span>
+      <span class="problem-tag">Equipment Utilization</span>
+      <span class="problem-tag">Quote Accuracy</span>
+      <span class="problem-tag">Billing Gaps</span>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">35-55%</div>
+        <div class="metric-label">Reduction in scheduling overhead during peak season with AI crew routing</div>
+        <div class="metric-source">Source: Crew scheduling automation, regional landscaping operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">2.5x</div>
+        <div class="metric-label">More proposals produced per estimator per week with AI-assisted quoting</div>
+        <div class="metric-source">Source: Estimating automation, residential and commercial maintenance</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">8-12%</div>
+        <div class="metric-label">Reduction in material waste through job-level procurement tracking</div>
+        <div class="metric-source">Source: Material usage capture, install and maintenance operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">25-40%</div>
+        <div class="metric-label">Reduction in unbilled materials per job with field-close documentation</div>
+        <div class="metric-source">Source: Invoice capture automation, commercial accounts</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">$180K-$340K</div>
+        <div class="metric-label">Additional revenue capacity per 15-truck operation from combined improvements</div>
+        <div class="metric-source">Source: Full-system deployments, commercial landscaping $2M-$8M revenue</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">4-6 wk</div>
+        <div class="metric-label">Time to live scheduling and billing system</div>
+        <div class="metric-source">Source: Standard landscaping implementation</div>
+      </div>
+    </div>
+
+    <div class="industry-detail">
+      <p>Peak season scheduling is the highest-pressure constraint in landscaping operations. When the phone is ringing with new commercial accounts and maintenance windows are shifting daily, the bottleneck is getting the right crew with the right equipment to the right property at the right time - repeatedly, across dozens of jobs per day. AI scheduling that reads crew availability, equipment location, route density, and job requirements eliminates the dispatch overhead that slows operations during the busiest periods.</p>
+      <p>The billing gap in landscaping is often invisible until you look at it directly. Mulch that got installed, annuals that got added, irrigation repairs that happened on-site - none of these make it onto the invoice unless the crew documents them before they leave. Field-close documentation that happens at the property, before the crew drives to the next job, recovers the margin that otherwise gets left behind.</p>
+    </div>
+    <a href="/article-landscaping" class="industry-link">See Landscaping systems &rarr;</a>
+  </div>
+</section>
+
+<!-- HOME SERVICES -->
+<section class="industry-section reveal" data-category="field-service">
+  <div class="container">
+    <p class="industry-label">Home Services</p>
+    <h2 class="industry-title">Home Services & Residential Maintenance</h2>
+    <p class="industry-deck">Home service businesses run on repeat customers, service agreements, and technician efficiency. The companies that win are the ones that systematize the follow-up that most technicians forget to do.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Repeat Bookings</span>
+      <span class="problem-tag">Service Contracts</span>
+      <span class="problem-tag">Customer Communication</span>
+      <span class="problem-tag">First-Call Resolution</span>
+      <span class="problem-tag">Review Generation</span>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">22-35%</div>
+        <div class="metric-label">Improvement in repeat booking rate with automated post-visit follow-up</div>
+        <div class="metric-source">Source: Follow-up automation, residential home service operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">18-28%</div>
+        <div class="metric-label">Increase in service contract attachment rate with system-prompted offers</div>
+        <div class="metric-source">Source: Service agreement automation, HVAC and appliance repair</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">4-6x</div>
+        <div class="metric-label">Improvement in online review collection rate with automated post-visit sequences</div>
+        <div class="metric-source">Source: Review automation, single-trade residential operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">15-25%</div>
+        <div class="metric-label">Improvement in first-call resolution rate with pre-visit diagnostic capture</div>
+        <div class="metric-source">Source: Intake automation, appliance and home repair services</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">$120K-$280K</div>
+        <div class="metric-label">Additional annual revenue on a 15-technician operation from retention improvements</div>
+        <div class="metric-source">Source: Combined follow-up and service agreement systems</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">3-6 wk</div>
+        <div class="metric-label">Time to live follow-up and service agreement system</div>
+        <div class="metric-source">Source: Standard home service implementation</div>
+      </div>
+    </div>
+
+    <div class="industry-detail">
+      <p>The most expensive customer in home services is the one you served well but lost before the next call. Customer lifetime value in residential home services is 8-14 times the value of a single visit when you account for repeat bookings, referrals, and service agreement revenue. Automated follow-up sequences that trigger after every job close - review requests, seasonal reminders, service plan offers - retain the customers that manual follow-up misses because the technician was too busy to call.</p>
+      <p>First-call resolution rates improve significantly when the system captures diagnostic information before the technician arrives. When a customer books a call and the system routes structured intake questions before the visit, the technician arrives knowing equipment age, recent service history, and reported symptoms. That preparation translates to faster diagnosis, fewer return visits, and higher customer satisfaction scores.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE & MIDSTREAM -->
+<section class="industry-section reveal" data-category="industrial">
+  <div class="container">
+    <p class="industry-label">Pipeline & Midstream</p>
+    <h2 class="industry-title">Pipeline & Midstream Operations</h2>
+    <p class="industry-deck">Pipeline operations carry regulatory and documentation requirements that create massive administrative overhead. Systems that automate compliance capture from field data eliminate the friction without eliminating the rigor.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Inspection Documentation</span>
+      <span class="problem-tag">Regulatory Compliance</span>
+      <span class="problem-tag">Crew Certification</span>
+      <span class="problem-tag">Site Monitoring</span>
+      <span class="problem-tag">Maintenance Scheduling</span>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">40-60%</div>
+        <div class="metric-label">Reduction in inspection and compliance documentation time per field supervisor</div>
+        <div class="metric-source">Source: Documentation automation, midstream operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">30-50%</div>
+        <div class="metric-label">Improvement in regulatory audit readiness with continuous compliance tracking</div>
+        <div class="metric-source">Source: Compliance systems, pipeline maintenance operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">20-35%</div>
+        <div class="metric-label">Reduction in emergency maintenance callouts with predictive pump and compressor monitoring</div>
+        <div class="metric-source">Source: Predictive maintenance, pump station monitoring</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">25-40%</div>
+        <div class="metric-label">Reduction in permit processing time with automated application support</div>
+        <div class="metric-source">Source: Permit workflow automation, multi-state operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">2-4 wk</div>
+        <div class="metric-label">Reduction in project mobilization time with automated crew and equipment coordination</div>
+        <div class="metric-source">Source: Mobilization optimization, construction and maintenance projects</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">15-24 wk</div>
+        <div class="metric-label">Time to live full-field compliance and maintenance system</div>
+        <div class="metric-source">Source: Complex pipeline operations with multi-agency regulatory requirements</div>
+      </div>
+    </div>
+
+    <div class="industry-detail">
+      <p>Pipeline compliance documentation is one of the highest labor-intensity activities in midstream operations. Field supervisors spend 2-4 hours per shift on documentation that could be automated: inspection forms, equipment readings, anomaly reports, and maintenance records. Systems that capture this data from field sensors and structured mobile inputs, then route it automatically to the correct regulatory format, return those hours to actual field work.</p>
+      <p>Crew certification tracking is an underestimated risk surface. When a project requires certified welders and a job starts without verifying current certifications, the exposure is both regulatory and safety. Automated certification tracking that alerts 90 days before expiration and verifies crew eligibility at dispatch eliminates the manual check that gets skipped when mobilization is fast.</p>
+    </div>
+    <a href="/physical/oil-gas" class="industry-link">See Pipeline systems &rarr;</a>
+  </div>
+</section>
+
+<!-- MINING & EXTRACTION -->
+<section class="industry-section reveal" data-category="industrial">
+  <div class="container">
+    <p class="industry-label">Mining & Extraction</p>
+    <h2 class="industry-title">Mining & Resource Extraction</h2>
+    <p class="industry-deck">Mining operations run on continuous production and expensive equipment. One unplanned haul truck failure costs more than most operations spend on maintenance in a month. Systems that prevent failures pay for themselves in a single avoided breakdown.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Equipment Downtime</span>
+      <span class="problem-tag">Shift Handoffs</span>
+      <span class="problem-tag">Production Tracking</span>
+      <span class="problem-tag">Safety Reporting</span>
+      <span class="problem-tag">Remote Coordination</span>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">35-55%</div>
+        <div class="metric-label">Reduction in unplanned heavy equipment downtime with predictive monitoring</div>
+        <div class="metric-source">Source: Equipment monitoring, open-pit and underground operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">$50K-$200K</div>
+        <div class="metric-label">Annual cost avoided per major equipment failure prevented</div>
+        <div class="metric-source">Source: Downtime cost analysis, haul trucks and processing equipment</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">40-60%</div>
+        <div class="metric-label">Improvement in shift handoff documentation completeness</div>
+        <div class="metric-source">Source: Digital shift handoff, continuous production facilities</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">15-25%</div>
+        <div class="metric-label">Reduction in total equipment maintenance spend with condition-based scheduling</div>
+        <div class="metric-source">Source: Maintenance optimization, surface mining equipment fleets</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">30-50%</div>
+        <div class="metric-label">Reduction in safety incident report completion time</div>
+        <div class="metric-source">Source: Safety documentation automation, multi-shift operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">20-35%</div>
+        <div class="metric-label">Improvement in production target accuracy with real-time shift tracking</div>
+        <div class="metric-source">Source: Production monitoring, tonnage and yield tracking systems</div>
+      </div>
+    </div>
+
+    <div class="industry-detail">
+      <p>A single unplanned failure of a large haul truck costs $40,000-$200,000 when you account for emergency parts procurement, expedited service, lost production during downtime, and the ripple effect on downstream processing. Predictive monitoring that detects early failure signatures in engine temperature, hydraulic pressure, and transmission behavior gives maintenance teams 48-96 hours of lead time to schedule repairs during planned maintenance windows rather than emergency callouts.</p>
+      <p>Shift handoff quality is a direct predictor of production continuity in mining operations. When incoming supervisors inherit undocumented equipment anomalies, verbal-only safety holds, and estimated rather than actual production figures, they are managing risk they cannot see. Digital shift handoffs that require structured data entry before clock-out create a complete operational record that the incoming crew can act on immediately.</p>
+    </div>
+    <a href="/article-mining" class="industry-link">See Mining systems &rarr;</a>
+  </div>
+</section>
+
+<!-- ELECTRICIANS -->
+<section class="industry-section reveal" data-category="field-service">
+  <div class="container">
+    <p class="industry-label">Electrical</p>
+    <h2 class="industry-title">Electrical Contractors</h2>
+    <p class="industry-deck">Electrical work is permit-heavy, inspection-dependent, and deeply vulnerable to billing gaps when change work happens in the field. Systems built for electrical operations recover margin at every stage from permit to final sign-off.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Permit Tracking</span>
+      <span class="problem-tag">Inspection Scheduling</span>
+      <span class="problem-tag">Material Variance</span>
+      <span class="problem-tag">Change Order Capture</span>
+      <span class="problem-tag">Service Agreement Renewals</span>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">40-60%</div>
+        <div class="metric-label">Reduction in permit application and tracking overhead per project manager</div>
+        <div class="metric-source">Source: Permit workflow automation, commercial electrical contractors</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">8-14%</div>
+        <div class="metric-label">Reduction in material variance between estimate and final invoice</div>
+        <div class="metric-source">Source: Job-level material tracking, commercial and residential electrical</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">25-40%</div>
+        <div class="metric-label">Improvement in change order capture rate on service and remodel work</div>
+        <div class="metric-source">Source: Field change order workflow, electrical service operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">18-28%</div>
+        <div class="metric-label">Improvement in service agreement renewal rate with automated outreach</div>
+        <div class="metric-source">Source: Renewal automation, commercial electrical maintenance programs</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">15-25%</div>
+        <div class="metric-label">Faster inspection scheduling with automated permit status tracking</div>
+        <div class="metric-source">Source: Inspection coordination, multi-permit commercial projects</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">3-6 wk</div>
+        <div class="metric-label">Time to live permit tracking and billing system</div>
+        <div class="metric-source">Source: Standard electrical implementation, single-market operations</div>
+      </div>
+    </div>
+    <div class="industry-detail">
+      <p>Permit management consumes a disproportionate share of project management time in electrical contracting. Tracking application status across multiple jurisdictions, scheduling inspections at the right project phase, and ensuring code compliance documentation is current before inspectors arrive - all of this happens manually in most operations. Systems that track permit status automatically, flag upcoming inspections, and generate required documentation from project data return those hours to billable coordination work.</p>
+      <p>Change work is where electrical margins get lost. When a technician adds circuits, replaces panels outside the original scope, or runs additional conduit at a customer's request, that work needs to be captured before the crew leaves the property. Field change order documentation that happens at the job, in real time, closes the gap between the work performed and the work invoiced.</p>
+    </div>
+    <a href="/article-electrician" class="industry-link">See Electrical systems &rarr;</a>
+  </div>
+</section>
+
+<!-- PAINTING -->
+<section class="industry-section reveal" data-category="field-service construction">
+  <div class="container">
+    <p class="industry-label">Painting</p>
+    <h2 class="industry-title">Painting Contractors</h2>
+    <p class="industry-deck">Painting is a labor-intensive, estimate-driven business where margin lives or dies on how accurately you price the job and how completely you bill what was done. Systems that tighten both ends protect the profitability that makes growth sustainable.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Estimate Accuracy</span>
+      <span class="problem-tag">Crew Scheduling</span>
+      <span class="problem-tag">Material Tracking</span>
+      <span class="problem-tag">Unbilled Extras</span>
+      <span class="problem-tag">Job Costing</span>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">3-4x</div>
+        <div class="metric-label">More proposals produced per estimator per week with AI-assisted quoting</div>
+        <div class="metric-source">Source: Estimating automation, commercial and residential painting</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">10-18%</div>
+        <div class="metric-label">Improvement in estimate accuracy for labor and materials</div>
+        <div class="metric-source">Source: Historical cost integration, multi-crew painting operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">25-40%</div>
+        <div class="metric-label">Reduction in unbilled extras and additional scope work</div>
+        <div class="metric-source">Source: Field documentation, commercial repaint and new construction</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">20-35%</div>
+        <div class="metric-label">Improvement in crew utilization during peak season with optimized scheduling</div>
+        <div class="metric-source">Source: Crew dispatch, 5-20 person painting operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">$60K-$150K</div>
+        <div class="metric-label">Additional annual margin on a $2M painting operation from combined improvements</div>
+        <div class="metric-source">Source: Multi-system deployments, commercial and residential painters</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">4-8 wk</div>
+        <div class="metric-label">Time to live estimating and crew scheduling system</div>
+        <div class="metric-source">Source: Standard painting implementation</div>
+      </div>
+    </div>
+    <div class="industry-detail">
+      <p>Estimating speed is a competitive advantage in painting. When a general contractor needs bids from three painters and you are the first to submit a detailed, professional proposal, close rates improve before price is even a factor. Systems that pull square footage from project documents, apply your real historical rates for surface type and prep complexity, and generate a customer-ready proposal in minutes let a single estimator keep up with demand that would otherwise require hiring.</p>
+      <p>Unbilled extras are the silent margin killer. When a customer asks for an additional room, requests a color change mid-job, or needs surface repairs that were not in the original scope - those costs exist whether they appear on the invoice or not. Documenting them in the field before the crew moves on is the difference between recovering the cost and absorbing it.</p>
+    </div>
+    <a href="/article-painting" class="industry-link">See Painting systems &rarr;</a>
+  </div>
+</section>
+
+<!-- PEST CONTROL -->
+<section class="industry-section reveal" data-category="field-service">
+  <div class="container">
+    <p class="industry-label">Pest Control</p>
+    <h2 class="industry-title">Pest Control & Specialty Services</h2>
+    <p class="industry-deck">Pest control is a route-dense, compliance-heavy business where recurring revenue depends on renewal systems that most operations leave entirely manual. The companies that automate renewals and routing run the same revenue on fewer trucks.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Route Density</span>
+      <span class="problem-tag">Chemical Compliance</span>
+      <span class="problem-tag">Recurring Renewals</span>
+      <span class="problem-tag">Technician Accountability</span>
+      <span class="problem-tag">Inspection Documentation</span>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">35-55%</div>
+        <div class="metric-label">Reduction in route planning time with AI-optimized daily scheduling</div>
+        <div class="metric-source">Source: Route optimization, residential and commercial pest control</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">18-30%</div>
+        <div class="metric-label">More service calls per technician per day from route density improvements</div>
+        <div class="metric-source">Source: Dispatch optimization, 5-25 technician operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">40-65%</div>
+        <div class="metric-label">Improvement in chemical use documentation completeness for regulatory compliance</div>
+        <div class="metric-source">Source: Application record automation, licensed pest control operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">25-40%</div>
+        <div class="metric-label">Increase in recurring service contract renewal rates with automated sequences</div>
+        <div class="metric-source">Source: Renewal automation, annual and quarterly service programs</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">$80K-$180K</div>
+        <div class="metric-label">Additional annual revenue on a 10-technician operation from routing and retention gains</div>
+        <div class="metric-source">Source: Combined dispatch and renewal improvements</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">3-5 wk</div>
+        <div class="metric-label">Time to live routing and renewal system</div>
+        <div class="metric-source">Source: Standard pest control implementation</div>
+      </div>
+    </div>
+    <div class="industry-detail">
+      <p>Route density is the primary profit lever in pest control. Two technicians covering adjacent neighborhoods inefficiently use twice the drive time and fuel of one technician with an optimized route. AI routing that clusters service stops by geography, sequence, and time window consistently adds two to four additional service calls per technician per day - without adding a single vehicle or hire.</p>
+      <p>Chemical application records are a regulatory requirement and a liability surface. When an inspector requests documentation of what was applied, when, at what concentration, and by whom, the answer needs to be complete and immediate. Systems that capture application data at the point of service - from the technician's mobile device - produce compliant records automatically rather than requiring manual data entry back at the office.</p>
+    </div>
+    <a href="/article-best-ai-pest-control-software" class="industry-link">See Pest Control systems &rarr;</a>
+  </div>
+</section>
+
+<!-- CONCRETE -->
+<section class="industry-section reveal" data-category="construction industrial">
+  <div class="container">
+    <p class="industry-label">Concrete & Masonry</p>
+    <h2 class="industry-title">Concrete & Masonry Contractors</h2>
+    <p class="industry-deck">Concrete work is time-critical, weather-dependent, and expensive to redo. Systems that coordinate pour schedules, track QC data, and capture field changes prevent the costly rework that erases margin on jobs that went well until they didn't.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Pour Scheduling</span>
+      <span class="problem-tag">QC Documentation</span>
+      <span class="problem-tag">Crew Coordination</span>
+      <span class="problem-tag">Material Waste</span>
+      <span class="problem-tag">Weather Planning</span>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">30-50%</div>
+        <div class="metric-label">Reduction in pour scheduling coordination time across crews and suppliers</div>
+        <div class="metric-source">Source: Schedule automation, commercial and infrastructure concrete operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">40-60%</div>
+        <div class="metric-label">Improvement in QC documentation completeness with field-capture workflows</div>
+        <div class="metric-source">Source: QC data capture, structural and flatwork operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">12-20%</div>
+        <div class="metric-label">Reduction in material waste through accurate mix design and batch tracking</div>
+        <div class="metric-source">Source: Material optimization, ready-mix and site-batch operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">8-14%</div>
+        <div class="metric-label">Reduction in rework rates from improved pre-pour checklists and sign-offs</div>
+        <div class="metric-source">Source: Pre-pour verification workflow, structural concrete</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">2-3x</div>
+        <div class="metric-label">More accurate project scheduling with weather-integrated planning</div>
+        <div class="metric-source">Source: Weather-aware scheduling, exterior flatwork and paving</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">6-10 wk</div>
+        <div class="metric-label">Time to live scheduling and QC documentation system</div>
+        <div class="metric-source">Source: Standard concrete implementation</div>
+      </div>
+    </div>
+    <div class="industry-detail">
+      <p>Pour timing is unforgiving. When a ready-mix truck arrives and the crew is not ready, or the inspector has not signed off, or weather conditions have changed since the pour was scheduled, the cost is immediate and real. Coordinating pours across multiple crews, suppliers, and inspectors manually creates the exact conditions for those timing failures. Systems that manage the coordination automatically - confirming inspector availability, checking weather forecasts, verifying crew and equipment readiness - make timing failures the exception rather than the pattern.</p>
+      <p>QC documentation in concrete work is not optional - it is a contractual requirement on commercial jobs and a liability protection on all of them. When compressive strength tests, slump measurements, air content readings, and pour temperatures are captured manually on paper at the job site, they get lost, incomplete, or illegible. Field-capture workflows that prompt for required data at the point of measurement produce complete, searchable records that meet specification requirements without extra effort from the crew.</p>
+    </div>
+    <a href="/article-concrete" class="industry-link">See Concrete systems &rarr;</a>
+  </div>
+</section>
+
+<!-- HEAVY EQUIPMENT -->
+<section class="industry-section reveal" data-category="fleet industrial">
+  <div class="container">
+    <p class="industry-label">Heavy Equipment</p>
+    <h2 class="industry-title">Heavy Equipment & Rental Operations</h2>
+    <p class="industry-deck">Heavy equipment operations lose money to idle assets, untracked hours, and breakdowns that were predictable three weeks before they happened. Systems that monitor utilization and machine health in real time turn expensive iron into optimized infrastructure.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Utilization Tracking</span>
+      <span class="problem-tag">Idle Time Costs</span>
+      <span class="problem-tag">Breakdown Prevention</span>
+      <span class="problem-tag">Rental Billing Accuracy</span>
+      <span class="problem-tag">Maintenance Scheduling</span>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">20-35%</div>
+        <div class="metric-label">Improvement in equipment utilization rates with real-time tracking and assignment</div>
+        <div class="metric-source">Source: Utilization monitoring, contractor and rental fleet operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">30-50%</div>
+        <div class="metric-label">Reduction in unplanned maintenance events with predictive health monitoring</div>
+        <div class="metric-source">Source: Predictive maintenance, excavators, loaders, and crane operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">15-25%</div>
+        <div class="metric-label">Reduction in idle time costs through automated operator accountability</div>
+        <div class="metric-source">Source: Idle tracking and reporting, construction and mining equipment</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">40-60%</div>
+        <div class="metric-label">Improvement in rental billing accuracy with automated hour and usage capture</div>
+        <div class="metric-source">Source: Billing automation, equipment rental operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">$15K-$45K</div>
+        <div class="metric-label">Annual cost avoided per machine in breakdown prevention and emergency repair savings</div>
+        <div class="metric-source">Source: Breakdown cost analysis, heavy construction and earthmoving equipment</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">8-12 wk</div>
+        <div class="metric-label">Time to live utilization monitoring and predictive maintenance system</div>
+        <div class="metric-source">Source: Equipment telematics integration, 10-50 unit fleets</div>
+      </div>
+    </div>
+    <div class="industry-detail">
+      <p>Equipment that is not running is not making money. Idle time in heavy equipment operations comes from poor job scheduling, operator behavior, and the lag between when a machine finishes one task and when the next assignment arrives. Real-time utilization tracking surfaces idle patterns by machine, operator, and job site. When the data shows that three excavators average four hours of idle time per shift on a specific project type, the scheduling fix is obvious - and the savings are immediate.</p>
+      <p>For rental operations, billing accuracy is a direct revenue problem. When rental agreements are based on hours used and usage is tracked manually, billing disputes are inevitable and undercharging is common. Automated hour and usage capture from machine telematics closes the gap between what was rented and what was billed - and provides the documentation to support every invoice when customers question it.</p>
+    </div>
+    <a href="/article-heavy-equipment" class="industry-link">See Heavy Equipment systems &rarr;</a>
+  </div>
+</section>
+
+<!-- WELDING -->
+<section class="industry-section reveal" data-category="industrial">
+  <div class="container">
+    <p class="industry-label">Welding & Fabrication</p>
+    <h2 class="industry-title">Welding & Metal Fabrication</h2>
+    <p class="industry-deck">Fabrication shops lose margin in the gap between the quoted job and the actual hours. Systems that track material consumption and labor against estimates in real time surface those gaps while there is still time to address them.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Job Cost Tracking</span>
+      <span class="problem-tag">Material Consumption</span>
+      <span class="problem-tag">Certification Compliance</span>
+      <span class="problem-tag">Quality Documentation</span>
+      <span class="problem-tag">Quote Accuracy</span>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">2-3x</div>
+        <div class="metric-label">Faster quote generation for custom fabrication jobs</div>
+        <div class="metric-source">Source: Estimating automation, custom and structural fabrication shops</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">15-25%</div>
+        <div class="metric-label">Reduction in material waste through job-level consumption tracking</div>
+        <div class="metric-source">Source: Material tracking, steel and aluminum fabrication operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">20-35%</div>
+        <div class="metric-label">Reduction in rework incidents from better job specification and sign-off capture</div>
+        <div class="metric-source">Source: Job documentation, custom fabrication and structural welding</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">40-60%</div>
+        <div class="metric-label">Reduction in quality and compliance documentation time per welder</div>
+        <div class="metric-source">Source: Documentation automation, certified welding operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">30-50%</div>
+        <div class="metric-label">Improvement in welder certification compliance tracking</div>
+        <div class="metric-source">Source: Certification management, AWS and ASME certified operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">6-10 wk</div>
+        <div class="metric-label">Time to live job costing and documentation system</div>
+        <div class="metric-source">Source: Standard fabrication shop implementation</div>
+      </div>
+    </div>
+    <div class="industry-detail">
+      <p>Custom fabrication quoting is part science, part experience, and entirely dependent on how good the estimator's memory is. When quotes are built from recollection rather than real job cost history - actual hours on similar work, actual material yields, actual setup and changeover times - the result is either overbidding that loses jobs or underbidding that loses money. Systems that pull from real job cost data make quote accuracy a function of information, not experience level.</p>
+      <p>Welder certification management carries real liability exposure. AWS, ASME, and API certifications expire. Procedure qualification records need to be current. When an inspector requests documentation on a certified weld and the certification expired three months ago, the work may need to be redone regardless of quality. Automated certification tracking that alerts 90 days before expiration eliminates the compliance gap that creates that exposure.</p>
+    </div>
+    <a href="/article-welding" class="industry-link">See Welding systems &rarr;</a>
+  </div>
+</section>
+
+<!-- COACHING & CONSULTING -->
+<section class="industry-section reveal" data-category="online">
+  <div class="container">
+    <p class="industry-label">Online Business</p>
+    <h2 class="industry-title">Coaching & Consulting</h2>
+    <p class="industry-deck">Coaches and consultants leave revenue in three places every week: leads who never got a follow-up, clients who churned because nobody checked in, and proposals that took four days to write. Systems that automate all three run more revenue on the same effort.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Lead Follow-Up</span>
+      <span class="problem-tag">Client Onboarding</span>
+      <span class="problem-tag">Proposal Generation</span>
+      <span class="problem-tag">Retention Sequences</span>
+      <span class="problem-tag">Referral Automation</span>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">40-65%</div>
+        <div class="metric-label">Improvement in lead-to-client conversion rate with automated follow-up sequences</div>
+        <div class="metric-source">Source: Lead automation, coaching and consulting practices</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">3-5x</div>
+        <div class="metric-label">Faster proposal and engagement letter generation with AI-assisted drafting</div>
+        <div class="metric-source">Source: Proposal automation, B2B consulting firms</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">25-40%</div>
+        <div class="metric-label">Reduction in client onboarding time with automated intake and setup workflows</div>
+        <div class="metric-source">Source: Onboarding automation, group and 1:1 coaching programs</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">15-25%</div>
+        <div class="metric-label">Improvement in client retention rate with structured check-in sequences</div>
+        <div class="metric-source">Source: Retention automation, high-ticket coaching and consulting</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">$80K-$240K</div>
+        <div class="metric-label">Additional annual revenue on a 1-3 person practice from conversion and retention gains</div>
+        <div class="metric-source">Source: Full-system deployments, individual and small-team practices</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">2-4 wk</div>
+        <div class="metric-label">Time to live follow-up and onboarding system</div>
+        <div class="metric-source">Source: Standard coaching practice implementation</div>
+      </div>
+    </div>
+    <div class="industry-detail">
+      <p>Lead follow-up is where most coaching practices silently bleed revenue. A prospect who books a discovery call but does not convert is not necessarily lost - they are often just waiting for a follow-up that never came. Automated sequences that send three to five touchpoints over 10-14 days after a no-convert call recover 15-30% of those leads without any additional effort from the coach. At high-ticket price points, recovering two or three clients per month from leads already in the pipeline has an immediate and significant revenue impact.</p>
+      <p>Client onboarding sets the tone for the entire engagement. When new clients wait days for their first materials, navigate confusing intake forms, and start their first session without context, the churn risk is elevated from day one. Automated onboarding workflows that deliver materials immediately, collect structured intake information, and prepare the coach with a client summary before the first session create the experience that commands premium retention rates.</p>
+    </div>
+  </div>
+</section>
+
+<!-- E-COMMERCE -->
+<section class="industry-section reveal" data-category="online">
+  <div class="container">
+    <p class="industry-label">Online Business</p>
+    <h2 class="industry-title">E-Commerce & Direct-to-Consumer</h2>
+    <p class="industry-deck">E-commerce revenue leaks at three points: abandoned carts that never got a recovery sequence, first-time buyers who never got a retention offer, and customer service volume that grew faster than the team. Systems that plug those leaks run more margin on existing traffic.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Cart Recovery</span>
+      <span class="problem-tag">Customer Retention</span>
+      <span class="problem-tag">Support Automation</span>
+      <span class="problem-tag">Inventory Forecasting</span>
+      <span class="problem-tag">Repeat Purchase Rate</span>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">25-45%</div>
+        <div class="metric-label">Improvement in repeat purchase rate with automated post-purchase retention sequences</div>
+        <div class="metric-source">Source: Retention automation, DTC e-commerce brands</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">20-35%</div>
+        <div class="metric-label">Improvement in abandoned cart recovery rate with multi-touch sequences</div>
+        <div class="metric-source">Source: Cart recovery automation, $500K-$5M annual revenue brands</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">15-30%</div>
+        <div class="metric-label">Reduction in customer service ticket volume with AI-powered FAQ and order support</div>
+        <div class="metric-source">Source: Support automation, Shopify and custom e-commerce operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">10-20%</div>
+        <div class="metric-label">Reduction in stockout events with AI demand forecasting</div>
+        <div class="metric-source">Source: Inventory forecasting, seasonal and trend-driven products</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">$120K-$400K</div>
+        <div class="metric-label">Additional annual revenue on a $2M store from retention and recovery improvements</div>
+        <div class="metric-source">Source: Full-system deployments, apparel, supplements, and home goods</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">4-8 wk</div>
+        <div class="metric-label">Time to live retention and support automation system</div>
+        <div class="metric-source">Source: Standard e-commerce implementation</div>
+      </div>
+    </div>
+    <div class="industry-detail">
+      <p>Customer acquisition costs have made retention the most important metric in e-commerce. A customer who buys once and never returns represents a loss on the acquisition spend. Retention sequences that trigger after the first purchase - product education content, replenishment reminders, loyalty offers, cross-sell recommendations - convert one-time buyers into repeat customers at a fraction of the cost of acquiring new ones. Increasing repeat purchase rate by 25-30% on an existing customer base moves revenue without increasing ad spend.</p>
+      <p>Customer service volume scales with order volume, but it does not have to scale with headcount. The majority of inbound customer service contacts in e-commerce fall into a handful of categories: order status, return requests, product questions, and address changes. AI-powered support systems that handle these categories automatically - pulling real-time order data, processing routine return requests, answering product questions from the catalog - reduce live agent contacts by 15-30% and improve response time from hours to seconds.</p>
+    </div>
+  </div>
+</section>
+
+<!-- AGENCIES -->
+<section class="industry-section reveal" data-category="online">
+  <div class="container">
+    <p class="industry-label">Online Business</p>
+    <h2 class="industry-title">Agencies & Professional Services</h2>
+    <p class="industry-deck">Agencies lose revenue to scope creep, unreported hours, and the 8-12 hours per client per month spent on reporting that could be automated. Systems that handle the administrative layer let the team spend time on work that actually moves client results.</p>
+    <div class="problem-tags">
+      <span class="problem-tag">Client Reporting</span>
+      <span class="problem-tag">Scope Creep</span>
+      <span class="problem-tag">Proposal Generation</span>
+      <span class="problem-tag">Utilization Tracking</span>
+      <span class="problem-tag">Retainer Management</span>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">50-70%</div>
+        <div class="metric-label">Reduction in client reporting time with automated data aggregation and formatting</div>
+        <div class="metric-source">Source: Reporting automation, marketing and creative agencies</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">3-5x</div>
+        <div class="metric-label">Faster proposal and SOW generation with AI-assisted drafting from templates</div>
+        <div class="metric-source">Source: Proposal automation, B2B service agencies</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">20-35%</div>
+        <div class="metric-label">Improvement in team utilization visibility with automated time and task tracking</div>
+        <div class="metric-source">Source: Utilization systems, 5-25 person agency operations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">15-25%</div>
+        <div class="metric-label">Reduction in untracked scope expansion with automated change request workflows</div>
+        <div class="metric-source">Source: Scope management automation, retainer-based agencies</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">$60K-$180K</div>
+        <div class="metric-label">Annual capacity freed from administrative automation on a 10-person agency</div>
+        <div class="metric-source">Source: Full-system deployments, digital marketing and consulting agencies</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">4-6 wk</div>
+        <div class="metric-label">Time to live reporting and proposal system</div>
+        <div class="metric-source">Source: Standard agency implementation</div>
+      </div>
+    </div>
+    <div class="industry-detail">
+      <p>Client reporting is the most resented task at most agencies - and the most consistently done badly under time pressure. When reports are assembled manually from five different platform dashboards the day before delivery, they are always late, sometimes incomplete, and represent several hours of work that produced nothing for the client's results. Automated reporting pipelines that pull data, format it against the client's KPIs, and generate a branded report on schedule return those hours to actual work - and produce reports that are more consistent and more complete than the manual version.</p>
+      <p>Scope creep is the structural revenue leak that most agency owners know about and few solve. When clients request additional work in a Slack message and the account manager says yes to keep the relationship smooth, that work either gets absorbed into the retainer or creates a billing dispute at month end. Automated change request workflows that log every out-of-scope request, surface it for approval, and generate an addendum before work begins create the paper trail that protects margins without creating friction with clients.</p>
+    </div>
+  </div>
+</section>
+
 <!-- FAQ -->
 <section class="faq-section">
   <div class="container">
@@ -478,6 +1244,14 @@
     <div class="faq-item reveal">
       <h3 class="faq-q">How does TMI measure and track these outcomes?</h3>
       <p class="faq-a">TMI establishes baseline metrics before implementation - invoice capture rates, jobs per truck per day, maintenance costs, downtime hours - and tracks the same metrics post-deployment. Most systems include built-in dashboards that surface the relevant KPIs continuously. Quarterly reviews with each client compare current performance to baseline and identify the next highest-value optimization target.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">Do these outcomes apply to smaller operations under $1M revenue?</h3>
+      <p class="faq-a">Smaller operations see the same categories of improvement but at lower absolute dollar values. A 10-person landscaping company recovering 8% in unbilled materials represents $40,000-$80,000 annually - meaningful for that business size. The implementation approach scales: smaller operations typically start with a single focused system (billing automation or dispatch) rather than a full multi-system build, which reduces cost and time-to-value. The Audit session identifies the single highest-leverage starting point for any operation size.</p>
+    </div>
+    <div class="faq-item reveal">
+      <h3 class="faq-q">How do outcomes differ between physical and online businesses?</h3>
+      <p class="faq-a">Physical operations - field service, construction, fleet - see the highest impact from operational automation: dispatch, billing, maintenance. Online businesses see the strongest results from customer acquisition and retention automation: lead follow-up, content systems, onboarding sequences, and customer communication flows. The mechanics are different but the pattern is the same: manual processes replaced by systems that run without staff involvement, capturing revenue that was previously left behind.</p>
     </div>
   </div>
 </section>
@@ -500,10 +1274,30 @@
 </footer>
 
 <script>
+// Reveal on scroll
 const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
 }, { threshold: 0.06 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// Filter
+const pills = document.querySelectorAll('.filter-pill');
+const sections = document.querySelectorAll('.industry-section');
+pills.forEach(pill => {
+  pill.addEventListener('click', () => {
+    pills.forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    const filter = pill.dataset.filter;
+    sections.forEach(sec => {
+      const cats = sec.dataset.category || '';
+      sec.classList.toggle('hidden', filter !== 'all' && !cats.includes(filter));
+    });
+    // Scroll to first visible section
+    const first = document.querySelector('.industry-section:not(.hidden)');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
 </script>
+<script src="/chat-widget.js" defer></script>
 </body>
 </html>
