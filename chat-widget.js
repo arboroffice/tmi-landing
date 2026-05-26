@@ -6,7 +6,7 @@
   if (/\/diagnose/.test(location.pathname)) return;
 
   const OPENING =
-    "Hey! I'm Mia. Tell me what's going on in your business - what you do, roughly how big you are, and what's the thing that's been taking up the most mental real estate lately. I'll figure out where to start.";
+    "Hi - I'm TMI's AI assistant, here to help figure out where AI fits in your operation. Tell me what you do, roughly how big you are, and what's the thing eating the most of your time or margin right now.";
 
   const ROUTES = {
     foundation: {
@@ -197,20 +197,20 @@
 
   // ─── HTML ───────────────────────────────────────────────────────────────────
   document.body.insertAdjacentHTML('beforeend', `
-    <button class="tmi-trigger" id="tmiTrigger" aria-label="Chat with Mia">
+    <button class="tmi-trigger" id="tmiTrigger" aria-label="Chat with TMI">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M14 1H2C1.45 1 1 1.45 1 2v9c0 .55.45 1 1 1h9l3 3V2c0-.55-.45-1-1-1z" fill="currentColor"/>
       </svg>
-      Talk to Mia
+      Talk to Us
     </button>
 
-    <div class="tmi-panel" id="tmiPanel" aria-hidden="true" role="dialog" aria-label="Chat with Mia from TMI">
+    <div class="tmi-panel" id="tmiPanel" aria-hidden="true" role="dialog" aria-label="Chat with TMI">
       <div class="tmi-panel-header">
         <div class="tmi-panel-who">
-          <div class="tmi-panel-avatar">M</div>
+          <div class="tmi-panel-avatar">T</div>
           <div>
-            <div class="tmi-panel-name">Mia</div>
-            <div class="tmi-panel-sub">TMI Diagnostic</div>
+            <div class="tmi-panel-name">TMI</div>
+            <div class="tmi-panel-sub">AI Assistant</div>
           </div>
         </div>
         <button class="tmi-panel-close" id="tmiClose" aria-label="Close chat">×</button>
@@ -347,7 +347,7 @@
       addMessage('assistant', content);
     } catch {
       removeTyping();
-      addMessage('assistant', 'Something went wrong on my end. Email mia@tmitechai.com directly.');
+      addMessage('assistant', 'Something went wrong on my end. Email support@tmitechai.com directly.');
     }
 
     loading = false;
