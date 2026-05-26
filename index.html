@@ -325,8 +325,30 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
 @media(max-width:1024px){.foot-grid{grid-template-columns:1fr;gap:40px;}.foot-cols{gap:20px;}}
 @media(max-width:600px){.foot-cols{grid-template-columns:1fr 1fr;}.foot-bottom{flex-direction:column;gap:8px;text-align:center;}}
 
+/* BUILD ORDER */
+.build-section{padding:88px 0;background:var(--bg);border-bottom:1px solid var(--line);}
+.build-intro{max-width:640px;margin-bottom:56px;}
+.build-stack{border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+.build-row{display:grid;grid-template-columns:60px 210px 1fr 130px;align-items:start;padding:28px 32px;border-bottom:1px solid var(--line);transition:background 0.15s;}
+.build-row:last-child{border-bottom:none;}
+.build-row:hover{background:var(--bg-alt);}
+.build-row--intel{background:var(--bg-dark);border-bottom-color:rgba(255,255,255,0.06);}
+.build-row--intel:hover{background:#0d0f1e;}
+.build-n{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.06em;padding-top:3px;}
+.build-row--intel .build-n{color:var(--chart);}
+.build-name{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--ink);letter-spacing:-0.01em;line-height:1.2;padding-right:24px;padding-top:1px;}
+.build-row--intel .build-name{color:#fff;}
+.build-desc{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.65;}
+.build-row--intel .build-desc{color:rgba(255,255,255,0.38);}
+.build-tag{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding:5px 12px;border:1px solid var(--line);border-radius:999px;white-space:nowrap;text-align:center;margin-top:3px;}
+.build-row--intel .build-tag{color:var(--chart);border-color:rgba(228,255,151,0.2);background:rgba(228,255,151,0.05);}
+.build-divider{background:var(--bg-dark);padding:14px 32px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,0.06);}
+.build-divider span{font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.22);}
+@media(max-width:900px){.build-row{grid-template-columns:52px 160px 1fr;}.build-tag{display:none;}}
+@media(max-width:640px){.build-row{grid-template-columns:44px 1fr;row-gap:8px;padding:20px;}.build-name{padding-right:0;}.build-desc{grid-column:2;}}
+
 /* GENERAL RESPONSIVE */
-@media(max-width:768px){.hero-content{padding:clamp(100px,18vh,160px) 24px 0;}.hero-actions{flex-direction:column;align-items:flex-start;}.container{padding:0 20px;}.container-md{padding:0 20px;}.sec,.sec-alt,.sec-dark,.built-for,.ladder-section,.programs-section,.how-section,.results-section,.numbers-section{padding:64px 0;}}
+@media(max-width:768px){.hero-content{padding:clamp(100px,18vh,160px) 24px 0;}.hero-actions{flex-direction:column;align-items:flex-start;}.container{padding:0 20px;}.container-md{padding:0 20px;}.sec,.sec-alt,.sec-dark,.built-for,.ladder-section,.programs-section,.how-section,.results-section,.numbers-section,.build-section{padding:64px 0;}}
 </style>
 </head>
 <body>
@@ -372,7 +394,7 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
     <h1>The centralized operating system for <em>industrial operations.</em></h1>
     <p class="sub">One dashboard for logistics, dispatch, safety, field operations, communication, and reporting. TMI helps industrial, oilfield, logistics, and field-service companies eliminate operational chaos and replace it with real-time visibility, traceability, and AI-driven coordination.</p>
     <div class="hero-actions">
-      <a href="https://buy.stripe.com/aFa7sM0H6byndFW2xzaEE01" class="btn btn-primary">Book Operational Assessment - $997 &#8594;</a>
+      <a href="/audit" class="btn btn-primary">Book Free Operational Assessment &#8594;</a>
       <a href="/physical" class="btn btn-white-outline">See the full build &#8594;</a>
     </div>
     <p class="hero-note">Working with oilfield, construction, industrial, and field service operations doing $1M+.</p>
@@ -518,6 +540,70 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
           <span class="sys-item">Invoice automation</span>
           <span class="sys-item">Revenue capture</span>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUILD ORDER -->
+<section class="build-section">
+  <div class="container">
+    <div class="build-intro reveal">
+      <div class="eyebrow sec-ey">How we build it</div>
+      <h2 class="sh" style="max-width:26ch;">Foundation first. <em>Intelligence second.</em></h2>
+      <p class="sd">Every AI vendor leads with the agent. We start with the infrastructure. Eight layers, built in sequence - because intelligence built on chaos is still chaos.</p>
+    </div>
+    <div class="build-stack reveal">
+      <div class="build-row">
+        <div class="build-n">01</div>
+        <div class="build-name">Data Layer</div>
+        <div class="build-desc">Every operational source wired in. Jobs, crews, equipment, GPS, field reports, compliance records - one structured data foundation. No AI works without clean, connected data underneath it.</div>
+        <div class="build-tag">Foundation</div>
+      </div>
+      <div class="build-row">
+        <div class="build-n">02</div>
+        <div class="build-name">Intake</div>
+        <div class="build-desc">Information enters at the source. Field tickets, mobile forms, voice input, photos, sensor readings. Captured where the work happens - not transcribed by someone in the office three days later.</div>
+        <div class="build-tag">Foundation</div>
+      </div>
+      <div class="build-row">
+        <div class="build-n">03</div>
+        <div class="build-name">Routing</div>
+        <div class="build-desc">The right information reaches the right place automatically. Dispatch logic, approval chains, escalation paths. The system routes without anyone making a call to figure out who handles what.</div>
+        <div class="build-tag">Foundation</div>
+      </div>
+      <div class="build-row">
+        <div class="build-n">04</div>
+        <div class="build-name">Notifications</div>
+        <div class="build-desc">Active operational awareness. Alerts when jobs run long. Flags when permits expire. Reminders before compliance windows close. Problems surface before they become incidents.</div>
+        <div class="build-tag">Foundation</div>
+      </div>
+      <div class="build-divider">
+        <span>Foundation complete &nbsp;&middot;&nbsp; Intelligence layer begins</span>
+      </div>
+      <div class="build-row build-row--intel">
+        <div class="build-n">05</div>
+        <div class="build-name">Automations</div>
+        <div class="build-desc">Recurring manual work runs without human input. Scheduling, invoice triggers, report generation, compliance reminders, end-of-day summaries. The system handles the repetitive so your team handles the important.</div>
+        <div class="build-tag">Intelligence</div>
+      </div>
+      <div class="build-row build-row--intel">
+        <div class="build-n">06</div>
+        <div class="build-name">Agents</div>
+        <div class="build-desc">AI that coordinates and decides. Dispatch assistance, incident triage, field Q&amp;A, reporting analysis. Built on your actual operational data - not a generic model that doesn't know what your operation runs on.</div>
+        <div class="build-tag">Intelligence</div>
+      </div>
+      <div class="build-row build-row--intel">
+        <div class="build-n">07</div>
+        <div class="build-name">Dashboards</div>
+        <div class="build-desc">The visibility layer. Fleet status, crew locations, job progress, labor vs estimate, downtime, margin by job - one screen, real time. Leadership and field managers working from the same picture.</div>
+        <div class="build-tag">Intelligence</div>
+      </div>
+      <div class="build-row build-row--intel">
+        <div class="build-n">08</div>
+        <div class="build-name">Complete Infrastructure</div>
+        <div class="build-desc">All eight layers wired together into one operational system running across your entire business. This is what other vendors call a five-year roadmap. We build it in 30 days, and you own it.</div>
+        <div class="build-tag">Infrastructure</div>
       </div>
     </div>
   </div>
@@ -740,34 +826,34 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
       <div class="rung">
         <div class="rung-n">00</div>
         <div class="rung-name">Operational Assessment</div>
-        <div class="rung-price">$997</div>
-        <p>One session to map your operation, identify bottlenecks and visibility gaps, and walk away with a real centralized system build plan.</p>
-        <a href="https://buy.stripe.com/aFa7sM0H6byndFW2xzaEE01" class="rung-link">Book the Assessment &rarr;</a>
+        <div class="rung-price" style="background:rgba(228,255,151,0.15);color:#1a6b00;border:1px solid rgba(0,120,0,0.15);">Free</div>
+        <p>One session to map your entire operation, identify every bottleneck and visibility gap, and walk away with a complete system build plan. No payment required.</p>
+        <a href="/audit" class="rung-link">Book Free Assessment &rarr;</a>
       </div>
       <div class="rung">
         <div class="rung-n">01</div>
-        <div class="rung-name">Focused System Build</div>
-        <div class="rung-price">$5k - $25k+</div>
-        <p>One operational problem solved with a purpose-built system. Dispatch, safety, field ops, or invoicing - deployed and handed over running.</p>
+        <div class="rung-name">Foundation Build</div>
+        <div class="rung-price">$25k+</div>
+        <p>We centralize your operation. Not replacing what you have - connecting it. Every tool, crew, job, and process wired into one operational layer that actually works together.</p>
         <a href="/audit" class="rung-link">Apply &rarr;</a>
       </div>
       <div class="rung">
         <div class="rung-n">02</div>
-        <div class="rung-name">AI Wing Build</div>
-        <div class="rung-price">From $25k</div>
-        <p>The full OpsOS - all systems wired together into one centralized operating layer. The complete intelligence infrastructure for your field operation.</p>
+        <div class="rung-name">Custom &amp; Vertical Builds</div>
+        <div class="rung-price">Scope-based</div>
+        <p>One-off systems built for your specific problem or industry. These builds become vertical playbooks - purpose-built operational infrastructure for oilfield, trucking, marine, and specialized trades.</p>
         <a href="/audit" class="rung-link">Apply &rarr;</a>
       </div>
       <div class="rung rung-dark">
         <div class="rung-n">03</div>
-        <div class="rung-name">AI Wing Retainer</div>
+        <div class="rung-name">AI Department Retainer</div>
         <div class="rung-price">$3k - $15k+/mo</div>
-        <p>Your outsourced AI department. Ongoing optimization, new workflows, automation maintenance, and monthly reporting. We stay in as your permanent AI division.</p>
+        <p>Your outsourced AI department. Every month we layer in more intelligence - new agents, automations, and workflows built on the foundation. We stay in as your permanent AI division.</p>
         <a href="/audit" class="rung-link">Apply &rarr;</a>
       </div>
     </div>
     <div class="ladder-cta reveal">
-      <a href="https://buy.stripe.com/aFa7sM0H6byndFW2xzaEE01" class="ladder-cta-btn">Book Operational Assessment - $997 &rarr;</a>
+      <a href="/audit" class="ladder-cta-btn">Book Free Operational Assessment &rarr;</a>
     </div>
   </div>
 </section>
