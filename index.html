@@ -109,14 +109,6 @@ h1,h2,h3,h4{margin:0;}p{margin:0;}
 .hero-scroll-lbl{font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.28);}
 @keyframes s-pulse{0%,100%{opacity:0.4}50%{opacity:1}}
 
-/* TICKER */
-.ticker{padding:18px 0;border-bottom:1px solid var(--line);overflow:hidden;background:var(--bg-alt);}
-@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.ticker-track{display:flex;width:max-content;animation:tick 36s linear infinite;}
-.ticker-track:hover{animation-play-state:paused;}
-.ticker-item{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding:0 28px;white-space:nowrap;display:flex;align-items:center;gap:14px;}
-.ticker-item::after{content:'·';color:var(--chart);font-size:18px;}
-
 /* SECTION COMMON */
 .sec{padding:88px 0;}
 .sec-alt{padding:88px 0;background:var(--bg-alt);}
@@ -155,17 +147,30 @@ h1,h2,h3,h4{margin:0;}p{margin:0;}
 .opsos-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;}
 .opsos-tag{font-family:var(--sans);font-size:11px;font-weight:500;padding:5px 14px;border-radius:999px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.08);}
 
+/* IS THIS YOU */
+.ity-section{padding:56px 0;background:var(--bg-alt);border-bottom:1px solid var(--line);}
+.ity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:36px;}
+.ity-item{background:var(--bg);padding:20px 28px;display:flex;align-items:flex-start;gap:14px;font-family:var(--serif);font-size:clamp(15px,1.3vw,18px);color:var(--ink-2);line-height:1.35;}
+.ity-item::before{content:'✓';font-family:var(--sans);font-size:13px;font-weight:700;color:var(--ink);flex-shrink:0;padding-top:1px;}
+@media(max-width:600px){.ity-grid{grid-template-columns:1fr;}.ity-item{padding:16px 20px;}}
+
+/* TRUST STRIP */
+.trust-strip{padding:24px 0;border-bottom:1px solid var(--line);background:var(--bg);}
+.trust-inner{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.trust-label{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.trust-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.trust-chip{font-family:var(--sans);font-size:11px;font-weight:500;padding:4px 12px;border-radius:999px;background:var(--bg-alt);color:var(--ink-2);border:1px solid var(--line-strong);}
+@media(max-width:640px){.trust-inner{gap:12px;}.trust-label{width:100%;}}
+
 /* SYSTEMS GRID */
-.systems-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
-.sys-card{background:#0d0f1e;padding:36px 32px;display:flex;flex-direction:column;gap:16px;}
-.sys-card:hover{background:#111428;}
-.sys-tag{font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--chart);margin-bottom:4px;}
-.sys-title{font-family:var(--serif);font-size:20px;font-weight:400;line-height:1.2;color:#fff;letter-spacing:-0.01em;}
-.sys-body{font-family:var(--sans);font-size:13px;color:rgba(255,255,255,0.4);line-height:1.65;flex:1;}
-.sys-items{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
-.sys-item{font-family:var(--sans);font-size:10px;font-weight:500;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.35);border:1px solid rgba(255,255,255,0.07);}
-@media(max-width:900px){.systems-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:560px){.systems-grid{grid-template-columns:1fr;}}
+.caps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.07);margin-top:48px;}
+.cap-row{background:#0d0f1e;padding:28px 28px;display:flex;flex-direction:column;gap:8px;transition:background 0.15s;}
+.cap-row:hover{background:#111428;}
+.cap-tag{font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--chart);opacity:0.7;}
+.cap-name{font-family:var(--serif);font-size:18px;font-weight:400;color:#fff;letter-spacing:-0.01em;line-height:1.2;}
+.cap-body{font-family:var(--sans);font-size:13px;color:rgba(255,255,255,0.38);line-height:1.6;}
+@media(max-width:900px){.caps-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.caps-grid{grid-template-columns:1fr;}}
 
 /* AUTOMATION SECTION */
 .auto-section{background:var(--bg-alt);padding:88px 0;border-bottom:1px solid var(--line);}
@@ -380,7 +385,8 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
 @media(max-width:560px){.opsdiag{grid-template-columns:1fr 1fr;}.opsdiag-hub{grid-column:1/3;}}
 
 /* GENERAL RESPONSIVE */
-@media(max-width:768px){.hero-content{padding:clamp(160px,24vh,220px) 24px 0;}.hero-actions{flex-direction:column;align-items:flex-start;}.container{padding:0 20px;}.container-md{padding:0 20px;}.sec,.sec-alt,.sec-dark,.built-for,.ladder-section,.programs-section,.how-section,.results-section,.numbers-section,.build-section,.ba-section{padding:64px 0;}}
+@media(max-width:768px){.hero-content{padding:clamp(160px,24vh,220px) 24px 0;}.hero-actions{flex-direction:column;align-items:flex-start;}.hero .sub{font-size:16px;max-width:100%;}.container{padding:0 20px;}.container-md{padding:0 20px;}.sec,.sec-alt,.sec-dark,.built-for,.ladder-section,.programs-section,.how-section,.results-section,.numbers-section,.build-section,.ba-section,.ity-section{padding:56px 0;}.opsos-section{padding:64px 0;}.opsos-intro{margin-bottom:40px;}}
+@media(max-width:480px){.hero h1{font-size:38px;}.hero-note{font-size:11px;}.hero-actions .btn{width:100%;justify-content:center;}.how-outcome{padding:24px;}.how-outcome h3{font-size:19px;}}
 </style>
 </head>
 <body>
@@ -419,25 +425,16 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
     <h1>The centralized operating system for <em>industrial operations.</em></h1>
     <p class="sub">One dashboard for logistics, dispatch, safety, field operations, communication, and reporting. TMI helps industrial, oilfield, logistics, and field-service companies eliminate operational chaos and replace it with real-time visibility, traceability, and AI-driven coordination. Centralization comes first. Then the intelligence layers on top.</p>
     <div class="hero-actions">
-      <a href="/audit" class="btn btn-primary">Book Free Operational Assessment &#8594;</a>
-      <a href="/physical" class="btn btn-white-outline">See the full build &#8594;</a>
+      <a href="/audit" class="btn btn-primary">Take the free audit &#8594;</a>
+      <a href="#how" class="btn btn-white-outline">How it works &#8594;</a>
     </div>
-    <p class="hero-note">Working with oilfield, construction, industrial, and field service operations doing $1M+.</p>
+    <p class="hero-note">For oilfield, construction, HVAC, fleet, mining, marine, and field service operations doing $1M+. Not for everyone.</p>
   </div>
   <div class="hero-scroll">
     <span class="hero-scroll-lbl">Scroll</span>
     <div class="hero-scroll-line"></div>
   </div>
 </section>
-
-<!-- TICKER -->
-<div class="ticker">
-  <div class="ticker-track">
-    <div class="ticker-item">Oilfield</div><div class="ticker-item">HVAC</div><div class="ticker-item">Construction</div><div class="ticker-item">Trucking</div><div class="ticker-item">Pipeline</div><div class="ticker-item">Industrial</div><div class="ticker-item">Roofing</div><div class="ticker-item">Fleet Operations</div><div class="ticker-item">Manufacturing</div><div class="ticker-item">Marine Operations</div><div class="ticker-item">Utility</div><div class="ticker-item">Mining</div><div class="ticker-item">Electrical</div><div class="ticker-item">Plumbing</div><div class="ticker-item">Real-time Visibility</div><div class="ticker-item">Yours Forever</div>
-    <div class="ticker-item">Oilfield</div><div class="ticker-item">HVAC</div><div class="ticker-item">Construction</div><div class="ticker-item">Trucking</div><div class="ticker-item">Pipeline</div><div class="ticker-item">Industrial</div><div class="ticker-item">Roofing</div><div class="ticker-item">Fleet Operations</div><div class="ticker-item">Manufacturing</div><div class="ticker-item">Marine Operations</div><div class="ticker-item">Utility</div><div class="ticker-item">Mining</div><div class="ticker-item">Electrical</div><div class="ticker-item">Plumbing</div><div class="ticker-item">Real-time Visibility</div><div class="ticker-item">Yours Forever</div>
-  </div>
-</div>
-
 
 <!-- BEFORE / AFTER -->
 <section class="ba-section">
@@ -473,152 +470,41 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
   </div>
 </section>
 
-<!-- OPSOS -->
-<section class="opsos-section">
+<!-- IS THIS YOU -->
+<section class="ity-section">
   <div class="container">
-    <div class="opsos-intro reveal">
-      <div class="opsos-badge">TMI OpsOS</div>
-      <h2>A centralized operational dashboard. <em>Everything in one place.</em></h2>
-      <p>One intelligent system that connects your dispatch board, crew visibility, safety compliance, field documentation, invoicing, and executive reporting. Not a new piece of software - a connected operating layer built on top of what you already use.</p>
-    </div>
-    <div class="opsdiag-wrap reveal">
-      <div class="opsdiag">
-        <div class="opsdiag-node">
-          <div class="opsdiag-node-tag">01</div>
-          <div class="opsdiag-node-name">Dispatch &amp; Scheduling</div>
-        </div>
-        <div class="opsdiag-node">
-          <div class="opsdiag-node-tag">02</div>
-          <div class="opsdiag-node-name">Safety &amp; Compliance</div>
-        </div>
-        <div class="opsdiag-node">
-          <div class="opsdiag-node-tag">03</div>
-          <div class="opsdiag-node-name">Field Crews &amp; Equipment</div>
-        </div>
-        <div class="opsdiag-node">
-          <div class="opsdiag-node-tag">04</div>
-          <div class="opsdiag-node-name">Communication</div>
-        </div>
-        <div class="opsdiag-hub">
-          <div class="opsdiag-hub-ey">TMI</div>
-          <div class="opsdiag-hub-name">Operating<br>System</div>
-          <div class="opsdiag-hub-sub">Everything connected</div>
-        </div>
-        <div class="opsdiag-node">
-          <div class="opsdiag-node-tag">05</div>
-          <div class="opsdiag-node-name">Reporting &amp; Analytics</div>
-        </div>
-        <div class="opsdiag-node">
-          <div class="opsdiag-node-tag">06</div>
-          <div class="opsdiag-node-name">Documentation &amp; Forms</div>
-        </div>
-        <div class="opsdiag-node">
-          <div class="opsdiag-node-tag">07</div>
-          <div class="opsdiag-node-name">Permits &amp; Inspections</div>
-        </div>
-        <div class="opsdiag-node">
-          <div class="opsdiag-node-tag">08</div>
-          <div class="opsdiag-node-name">AI Assistants &amp; Agents</div>
-        </div>
-      </div>
-    </div>
-    <div class="systems-grid reveal">
-      <div class="sys-card">
-        <div class="sys-tag">Logistics &amp; Dispatch</div>
-        <div class="sys-title">Live Dispatch &amp; Coordination</div>
-        <div class="sys-body">A live dispatch board with real-time job assignment, route coordination, equipment tracking, and crew scheduling. ETAs automatically communicated. Dispatch becomes a system, not a person making calls.</div>
-        <div class="sys-items">
-          <span class="sys-item">Live dispatch board</span>
-          <span class="sys-item">Route coordination</span>
-          <span class="sys-item">Equipment assignment</span>
-          <span class="sys-item">Crew scheduling</span>
-          <span class="sys-item">Live ETAs</span>
-        </div>
-      </div>
-      <div class="sys-card">
-        <div class="sys-tag">Field Operations</div>
-        <div class="sys-title">Digital Field &amp; Operational Traceability</div>
-        <div class="sys-body">Digital field tickets, mobile reporting, voice-to-report, GPS crew visibility, and full field documentation. Every hour, every action, every job - traced and searchable in real time.</div>
-        <div class="sys-items">
-          <span class="sys-item">Digital field tickets</span>
-          <span class="sys-item">Mobile reporting</span>
-          <span class="sys-item">Voice-to-report</span>
-          <span class="sys-item">GPS visibility</span>
-          <span class="sys-item">Field documentation</span>
-        </div>
-      </div>
-      <div class="sys-card">
-        <div class="sys-tag">Safety &amp; Compliance</div>
-        <div class="sys-title">Audit-Ready Compliance Infrastructure</div>
-        <div class="sys-body">Certification tracking, permit workflows, inspection scheduling, incident reporting, and recurring safety workflows - all documented automatically. You stop running compliance on memory and start running it on a system that can prove everything.</div>
-        <div class="sys-items">
-          <span class="sys-item">Cert tracking</span>
-          <span class="sys-item">Permit workflows</span>
-          <span class="sys-item">Inspections</span>
-          <span class="sys-item">Incident reporting</span>
-          <span class="sys-item">Audit-ready docs</span>
-        </div>
-      </div>
-      <div class="sys-card">
-        <div class="sys-tag">Communication Infrastructure</div>
-        <div class="sys-title">Centralized Operational Communication</div>
-        <div class="sys-body">AI call handling, centralized field-to-office communication, dispatch coordination, and automated operational notifications. Every update captured. Nothing falls through a text message or radio call.</div>
-        <div class="sys-items">
-          <span class="sys-item">AI call handling</span>
-          <span class="sys-item">Centralized comms</span>
-          <span class="sys-item">Dispatch coordination</span>
-          <span class="sys-item">Field-to-office updates</span>
-        </div>
-      </div>
-      <div class="sys-card">
-        <div class="sys-tag">Executive Dashboard</div>
-        <div class="sys-title">Real-Time Operational Visibility</div>
-        <div class="sys-body">One screen: fleet status, crew locations, job progress, labor hours vs estimate, downtime alerts, and profitability by job, crew, and region. You stop finding out what happened last week. You see what's happening right now.</div>
-        <div class="sys-items">
-          <span class="sys-item">Fleet visibility</span>
-          <span class="sys-item">Workforce tracking</span>
-          <span class="sys-item">Downtime alerts</span>
-          <span class="sys-item">Profitability insights</span>
-          <span class="sys-item">Operational summaries</span>
-        </div>
-      </div>
-      <div class="sys-card">
-        <div class="sys-tag">Admin &amp; Revenue Capture</div>
-        <div class="sys-title">Automated Estimating, Billing &amp; Invoicing</div>
-        <div class="sys-body">Estimates built from historical job data. Change orders captured in the field and added to invoices automatically. Every hour of work billed. You stop losing 15-23% of your revenue to unbilled extras, slow invoicing, and scope changes nobody wrote down.</div>
-        <div class="sys-items">
-          <span class="sys-item">Estimating</span>
-          <span class="sys-item">Change orders</span>
-          <span class="sys-item">Invoice automation</span>
-          <span class="sys-item">Revenue capture</span>
-        </div>
-      </div>
+    <div class="eyebrow sec-ey reveal">Is this you?</div>
+    <h2 class="sh reveal" style="max-width:28ch;">If any of these describe your operation, <em>keep reading.</em></h2>
+    <div class="ity-grid reveal">
+      <div class="ity-item">Your dispatcher is a person making calls, not a system routing jobs</div>
+      <div class="ity-item">Your crews have no way to document what happened in the field</div>
+      <div class="ity-item">You find out about problems after they've already cost you money</div>
+      <div class="ity-item">Compliance and safety tracking runs on memory and spreadsheets</div>
+      <div class="ity-item">You're the communication hub for everything - jobs, crew, clients, subs</div>
+      <div class="ity-item">Reporting takes hours and is still incomplete by the time you send it</div>
     </div>
   </div>
 </section>
 
-
-<!-- NUMBERS -->
-<section class="numbers-section">
+<!-- TRUST STRIP -->
+<div class="trust-strip">
   <div class="container">
-    <div class="eyebrow sec-ey reveal" style="color:rgba(255,255,255,0.35);">The real cost of a fragmented operation</div>
-    <h2 class="sh sh-white reveal" style="max-width:22ch;">Most field operations are losing 15-20% of revenue every year to process failures.</h2>
-    <div class="nums-grid reveal">
-      <div class="num-card">
-        <div class="num-val">23%</div>
-        <div class="num-lbl">Average revenue lost to unbilled extras, missed change orders, and invoice errors in trade businesses over $2M</div>
-      </div>
-      <div class="num-card">
-        <div class="num-val">4.2hrs</div>
-        <div class="num-lbl">Average hours per day a field service owner spends on admin, calls, and coordination instead of running the business</div>
-      </div>
-      <div class="num-card">
-        <div class="num-val">$47k</div>
-        <div class="num-lbl">Average annual cost of a dispatcher role that intelligent scheduling and coordination systems can partially or fully replace</div>
+    <div class="trust-inner">
+      <span class="trust-label">Built for</span>
+      <div class="trust-chips">
+        <span class="trust-chip">Oilfield</span>
+        <span class="trust-chip">Construction</span>
+        <span class="trust-chip">HVAC &amp; Trades</span>
+        <span class="trust-chip">Fleet &amp; Logistics</span>
+        <span class="trust-chip">Mining</span>
+        <span class="trust-chip">Marine</span>
+        <span class="trust-chip">Manufacturing</span>
+        <span class="trust-chip">Pipeline</span>
+        <span class="trust-chip">Field Service</span>
       </div>
     </div>
   </div>
-</section>
+</div>
 
 <!-- HOW IT WORKS -->
 <section class="how-section" id="how">
@@ -687,6 +573,113 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
         <h3>If your systems aren't running in 30 days, <em>we work free until they are.</em></h3>
       </div>
       <a href="/audit" class="how-outcome-btn">Start the assessment &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- OPSOS -->
+<section class="opsos-section">
+  <div class="container">
+    <div class="opsos-intro reveal">
+      <div class="opsos-badge">TMI OpsOS</div>
+      <h2>A centralized operational dashboard. <em>Everything in one place.</em></h2>
+      <p>One intelligent system that connects your dispatch board, crew visibility, safety compliance, field documentation, invoicing, and executive reporting. Not a new piece of software - a connected operating layer built on top of what you already use.</p>
+    </div>
+    <div class="opsdiag-wrap reveal">
+      <div class="opsdiag">
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">01</div>
+          <div class="opsdiag-node-name">Dispatch &amp; Scheduling</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">02</div>
+          <div class="opsdiag-node-name">Safety &amp; Compliance</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">03</div>
+          <div class="opsdiag-node-name">Field Crews &amp; Equipment</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">04</div>
+          <div class="opsdiag-node-name">Communication</div>
+        </div>
+        <div class="opsdiag-hub">
+          <div class="opsdiag-hub-ey">TMI</div>
+          <div class="opsdiag-hub-name">Operating<br>System</div>
+          <div class="opsdiag-hub-sub">Everything connected</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">05</div>
+          <div class="opsdiag-node-name">Reporting &amp; Analytics</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">06</div>
+          <div class="opsdiag-node-name">Documentation &amp; Forms</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">07</div>
+          <div class="opsdiag-node-name">Permits &amp; Inspections</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">08</div>
+          <div class="opsdiag-node-name">AI Assistants &amp; Agents</div>
+        </div>
+      </div>
+    </div>
+    <div class="caps-grid reveal">
+      <div class="cap-row">
+        <div class="cap-tag">Logistics &amp; Dispatch</div>
+        <div class="cap-name">Live Dispatch &amp; Coordination</div>
+        <div class="cap-body">Real-time job assignment, route coordination, and automated ETAs. Dispatch becomes a system, not a person making calls.</div>
+      </div>
+      <div class="cap-row">
+        <div class="cap-tag">Field Operations</div>
+        <div class="cap-name">Digital Field Traceability</div>
+        <div class="cap-body">Digital tickets, mobile reporting, voice-to-report, and GPS crew visibility. Every hour and every job traced in real time.</div>
+      </div>
+      <div class="cap-row">
+        <div class="cap-tag">Safety &amp; Compliance</div>
+        <div class="cap-name">Audit-Ready Compliance</div>
+        <div class="cap-body">Cert tracking, permit workflows, inspection scheduling, and incident reporting - documented automatically. You can prove everything.</div>
+      </div>
+      <div class="cap-row">
+        <div class="cap-tag">Communication</div>
+        <div class="cap-name">Centralized Field-to-Office Comms</div>
+        <div class="cap-body">AI call handling, automated notifications, and a single hub for every update. Nothing falls through a text chain or radio call.</div>
+      </div>
+      <div class="cap-row">
+        <div class="cap-tag">Executive Dashboard</div>
+        <div class="cap-name">Real-Time Operational Visibility</div>
+        <div class="cap-body">Fleet status, crew locations, job progress, labor vs estimate, and profitability by job and region - live, not last week.</div>
+      </div>
+      <div class="cap-row">
+        <div class="cap-tag">Admin &amp; Revenue</div>
+        <div class="cap-name">Automated Billing &amp; Revenue Capture</div>
+        <div class="cap-body">Estimates from historical data, change orders captured in the field, every hour billed. Stop losing 15-23% to unbilled extras.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- NUMBERS -->
+<section class="numbers-section">
+  <div class="container">
+    <div class="eyebrow sec-ey reveal" style="color:rgba(255,255,255,0.35);">The real cost of a fragmented operation</div>
+    <h2 class="sh sh-white reveal" style="max-width:22ch;">Most field operations are losing 15-20% of revenue every year to process failures.</h2>
+    <div class="nums-grid reveal">
+      <div class="num-card">
+        <div class="num-val">23%</div>
+        <div class="num-lbl">Average revenue lost to unbilled extras, missed change orders, and invoice errors in trade businesses over $2M</div>
+      </div>
+      <div class="num-card">
+        <div class="num-val">4.2hrs</div>
+        <div class="num-lbl">Average hours per day a field service owner spends on admin, calls, and coordination instead of running the business</div>
+      </div>
+      <div class="num-card">
+        <div class="num-val">$47k</div>
+        <div class="num-lbl">Average annual cost of a dispatcher role that intelligent scheduling and coordination systems can partially or fully replace</div>
+      </div>
     </div>
   </div>
 </section>
