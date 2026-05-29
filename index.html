@@ -357,8 +357,40 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
 @media(max-width:900px){.build-row{grid-template-columns:52px 160px 1fr;}.build-tag{display:none;}}
 @media(max-width:640px){.build-row{grid-template-columns:44px 1fr;row-gap:8px;padding:20px;}.build-name{padding-right:0;}.build-desc{grid-column:2;}}
 
+/* BEFORE / AFTER TRANSFORMATION */
+.ba-section{padding:88px 0;background:var(--bg);border-bottom:1px solid var(--line);}
+.ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:52px;}
+.ba-col{padding:48px 44px;}
+.ba-col--before{background:var(--bg-alt);}
+.ba-col--after{background:var(--bg-dark);}
+.ba-col-label{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:28px;}
+.ba-col--before .ba-col-label{color:var(--muted);}
+.ba-col--after .ba-col-label{color:var(--chart);}
+.ba-list{display:flex;flex-direction:column;gap:0;}
+.ba-item{font-family:var(--serif);font-size:clamp(16px,1.4vw,20px);font-weight:400;line-height:1.2;padding:13px 0;border-bottom:1px solid var(--line);color:var(--ink-2);}
+.ba-item:last-child{border-bottom:none;}
+.ba-col--after .ba-item{color:rgba(255,255,255,0.55);border-bottom-color:rgba(255,255,255,0.06);}
+.ba-item b{color:var(--ink);font-weight:600;}
+.ba-col--after .ba-item b{color:#fff;}
+@media(max-width:680px){.ba-grid{grid-template-columns:1fr;}.ba-col{padding:32px 24px;}}
+
+/* OPSDIAG */
+.opsdiag-wrap{max-width:840px;margin:0 auto 64px;position:relative;}
+.opsdiag-wrap::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(228,255,151,0.1);pointer-events:none;z-index:0;}
+.opsdiag-wrap::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(228,255,151,0.1);pointer-events:none;z-index:0;}
+.opsdiag{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;position:relative;z-index:1;}
+.opsdiag-node{background:#0d0f1e;padding:22px 20px;display:flex;flex-direction:column;gap:5px;transition:background 0.15s;cursor:default;}
+.opsdiag-node:hover{background:#111428;}
+.opsdiag-node-tag{font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.25);}
+.opsdiag-node-name{font-family:var(--sans);font-size:13px;font-weight:500;color:rgba(255,255,255,0.65);line-height:1.35;}
+.opsdiag-hub{background:rgba(228,255,151,0.07);padding:28px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;border:1px solid rgba(228,255,151,0.18);}
+.opsdiag-hub-ey{font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;color:var(--chart);opacity:0.7;}
+.opsdiag-hub-name{font-family:var(--serif);font-size:clamp(15px,1.8vw,21px);font-weight:400;color:#fff;letter-spacing:-0.015em;line-height:1.15;}
+.opsdiag-hub-sub{font-family:var(--sans);font-size:10px;color:rgba(228,255,151,0.45);margin-top:3px;}
+@media(max-width:560px){.opsdiag{grid-template-columns:1fr 1fr;}.opsdiag-hub{grid-column:1/3;}}
+
 /* GENERAL RESPONSIVE */
-@media(max-width:768px){.hero-content{padding:clamp(100px,18vh,160px) 24px 0;}.hero-actions{flex-direction:column;align-items:flex-start;}.container{padding:0 20px;}.container-md{padding:0 20px;}.sec,.sec-alt,.sec-dark,.built-for,.ladder-section,.programs-section,.how-section,.results-section,.numbers-section,.build-section{padding:64px 0;}}
+@media(max-width:768px){.hero-content{padding:clamp(100px,18vh,160px) 24px 0;}.hero-actions{flex-direction:column;align-items:flex-start;}.container{padding:0 20px;}.container-md{padding:0 20px;}.sec,.sec-alt,.sec-dark,.built-for,.ladder-section,.programs-section,.how-section,.results-section,.numbers-section,.build-section,.ba-section{padding:64px 0;}}
 </style>
 </head>
 <body>
@@ -372,22 +404,17 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
     <a class="side-nav-brand" href="/"><img src="logo.svg" alt="TMI"/> TMI</a>
   </div>
   <div class="side-nav-links">
-    <div class="snl-section">Navigation</div>
-    <a href="/">Home</a>
-    <a href="/physical">Physical Operations</a>
-    <a href="/diagnose">Talk to Us</a>
-    <a href="/news">Field Notes</a>
-    <a href="about.html">About</a>
-    <a href="outcomes.html">Outcomes</a>
+    <div class="snl-section">Solutions</div>
+    <a href="/physical">The Operating System</a>
+    <a href="/audit">Free Assessment</a>
     <div class="snl-section">Industries</div>
-    <a href="/physical/hvac">HVAC</a>
     <a href="/physical/construction">Construction</a>
-    <a href="/physical/roofing">Roofing</a>
+    <a href="/physical/hvac">HVAC &amp; Trades</a>
     <a href="/physical/oil-gas">Oil &amp; Gas</a>
-    <a href="/physical/fleet">Fleet &amp; Trucking</a>
-    <a href="/physical/manufacturing">Manufacturing</a>
-    <a href="/physical/electrical">Electrical</a>
-    <a href="/physical/plumbing">Plumbing</a>
+    <a href="/physical/fleet">Fleet &amp; Logistics</a>
+    <div class="snl-section">Company</div>
+    <a href="about.html">About</a>
+    <a href="news.html">Field Notes</a>
   </div>
   <div class="side-nav-cta">
     <a href="/audit" class="btn btn-primary" onclick="closeSideNav()">Apply to Work with TMI &#8594;</a>
@@ -400,7 +427,7 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
   <div class="hero-content container">
     <p class="hero-kicker">TMI OpsOS</p>
     <h1>The centralized operating system for <em>industrial operations.</em></h1>
-    <p class="sub">One dashboard for logistics, dispatch, safety, field operations, communication, and reporting. TMI helps industrial, oilfield, logistics, and field-service companies eliminate operational chaos and replace it with real-time visibility, traceability, and AI-driven coordination.</p>
+    <p class="sub">One dashboard for logistics, dispatch, safety, field operations, communication, and reporting. TMI helps industrial, oilfield, logistics, and field-service companies eliminate operational chaos and replace it with real-time visibility, traceability, and intelligent coordination.</p>
     <div class="hero-actions">
       <a href="/audit" class="btn btn-primary">Book Free Operational Assessment &#8594;</a>
       <a href="/physical" class="btn btn-white-outline">See the full build &#8594;</a>
@@ -455,6 +482,40 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
   </div>
 </section>
 
+<!-- BEFORE / AFTER -->
+<section class="ba-section">
+  <div class="container">
+    <div class="eyebrow sec-ey reveal">The transformation</div>
+    <h2 class="sh reveal" style="max-width:26ch;">What changes when you stop running on <em>duct tape.</em></h2>
+    <div class="ba-grid reveal">
+      <div class="ba-col ba-col--before">
+        <div class="ba-col-label">Before TMI</div>
+        <div class="ba-list">
+          <div class="ba-item"><b>Whiteboards and spreadsheets</b></div>
+          <div class="ba-item"><b>Dispatch by phone call</b></div>
+          <div class="ba-item"><b>Paper tickets in the field</b></div>
+          <div class="ba-item"><b>Compliance tracked by memory</b></div>
+          <div class="ba-item"><b>Reporting takes hours</b></div>
+          <div class="ba-item"><b>Owner is the communication hub</b></div>
+          <div class="ba-item"><b>Nobody knows what's happening</b></div>
+        </div>
+      </div>
+      <div class="ba-col ba-col--after">
+        <div class="ba-col-label">After TMI</div>
+        <div class="ba-list">
+          <div class="ba-item"><b>One centralized dashboard</b></div>
+          <div class="ba-item"><b>Automated dispatch and scheduling</b></div>
+          <div class="ba-item"><b>Digital field tickets, real-time</b></div>
+          <div class="ba-item"><b>Compliance tracked automatically</b></div>
+          <div class="ba-item"><b>Reports generated automatically</b></div>
+          <div class="ba-item"><b>System handles communication</b></div>
+          <div class="ba-item"><b>Live visibility across everything</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- OPSOS -->
 <section class="opsos-section">
   <div class="container">
@@ -462,20 +523,46 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
       <div class="opsos-badge">TMI OpsOS</div>
       <h2>A centralized operational dashboard. <em>Everything in one place.</em></h2>
       <p>One intelligent system that connects your dispatch board, crew visibility, safety compliance, field documentation, invoicing, and executive reporting. Not a new piece of software - a connected operating layer built on top of what you already use.</p>
-      <div class="opsos-tags">
-        <span class="opsos-tag">Dispatch</span>
-        <span class="opsos-tag">Crews</span>
-        <span class="opsos-tag">Trucks &amp; Equipment</span>
-        <span class="opsos-tag">Jobs</span>
-        <span class="opsos-tag">Safety</span>
-        <span class="opsos-tag">Inspections</span>
-        <span class="opsos-tag">Permits</span>
-        <span class="opsos-tag">Incidents</span>
-        <span class="opsos-tag">Reporting</span>
-        <span class="opsos-tag">Communication</span>
-        <span class="opsos-tag">Documentation</span>
-        <span class="opsos-tag">Field Activity</span>
-        <span class="opsos-tag">Operational Analytics</span>
+    </div>
+    <div class="opsdiag-wrap reveal">
+      <div class="opsdiag">
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">01</div>
+          <div class="opsdiag-node-name">Dispatch &amp; Scheduling</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">02</div>
+          <div class="opsdiag-node-name">Safety &amp; Compliance</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">03</div>
+          <div class="opsdiag-node-name">Field Crews &amp; Equipment</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">04</div>
+          <div class="opsdiag-node-name">Communication</div>
+        </div>
+        <div class="opsdiag-hub">
+          <div class="opsdiag-hub-ey">TMI</div>
+          <div class="opsdiag-hub-name">Operating<br>System</div>
+          <div class="opsdiag-hub-sub">Everything connected</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">05</div>
+          <div class="opsdiag-node-name">Reporting &amp; Analytics</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">06</div>
+          <div class="opsdiag-node-name">Documentation &amp; Forms</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">07</div>
+          <div class="opsdiag-node-name">Permits &amp; Inspections</div>
+        </div>
+        <div class="opsdiag-node">
+          <div class="opsdiag-node-tag">08</div>
+          <div class="opsdiag-node-name">AI Assistants &amp; Agents</div>
+        </div>
       </div>
     </div>
     <div class="systems-grid reveal">
