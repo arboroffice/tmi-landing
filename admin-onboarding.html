@@ -196,11 +196,15 @@ function renderJourney(){
     }).join('') + `</div>`;
 }
 async function addStage(){
-  const title=prompt('Stage title:'); if(!title||!title.trim())return;
-  const dayRaw=prompt('Day offset (number from kickoff):','0'); const day_offset=dayRaw?Number(dayRaw):0;
-  const type=(prompt('Type — call / asset / milestone:','milestone')||'milestone').trim();
-  const description=prompt('Description (optional):')||null;
-  const r=await TMIAdmin.api('/api/os-journey','POST',{journey:'default',title:title.trim(),day_offset,type,description,sort:day_offset});
+  const v=await TMIAdmin.formModal({title:'Add journey stage',submitLabel:'Add',fields:[
+    {name:'title',label:'Stage title',required:true},
+    {name:'day_offset',label:'Day offset (from kickoff)',type:'number',value:0},
+    {name:'type',label:'Type',type:'select',value:'milestone',options:[{value:'milestone',label:'Milestone'},{value:'call',label:'Call'},{value:'asset',label:'Asset'}]},
+    {name:'description',label:'Description (optional)',type:'textarea',rows:2}
+  ]});
+  if(!v)return;
+  const day_offset=v.day_offset!=null?Number(v.day_offset):0;
+  const r=await TMIAdmin.api('/api/os-journey','POST',{journey:'default',title:v.title,day_offset,type:v.type,description:v.description||null,sort:day_offset});
   if(r){ TMIAdmin.toast('Stage added'); loadJourney(); }
 }
 async function delStage(id){ await TMIAdmin.api('/api/os-journey?id='+id,'DELETE'); loadJourney(); }

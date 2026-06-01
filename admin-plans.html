@@ -500,19 +500,26 @@ async function loadInitiatives(){
   }).join('');
 }
 async function addInitiative(){
-  const title=prompt('Initiative title:'); if(!title||!title.trim())return;
-  const category=prompt('Category (Media / Product / Delivery / Recruiting / Retention):')||null;
-  const owner=prompt('Owner (optional):')||null;
-  const source=prompt('Source — advisor or origin (optional):')||null;
-  const r=await TMIAdmin.api('/api/os-initiatives','POST',{title:title.trim(),category,owner,source,status:'on-track',progress:0,sort:INITS.length});
+  const v=await TMIAdmin.formModal({title:'Add initiative',submitLabel:'Add',fields:[
+    {name:'title',label:'Initiative title',required:true},
+    {name:'category',label:'Category',type:'select',value:'Media',options:['Media','Product','Delivery','Recruiting','Retention','Other']},
+    {name:'owner',label:'Owner (optional)'},
+    {name:'source',label:'Source — advisor or origin (optional)'}
+  ]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-initiatives','POST',{title:v.title,category:v.category||null,owner:v.owner||null,source:v.source||null,status:'on-track',progress:0,sort:INITS.length});
   if(r){TMIAdmin.toast('Initiative added');loadInitiatives();}
 }
 async function editInitiative(id){
   const i=INITS.find(x=>x.id===id); if(!i)return;
-  const status=(prompt('Status (on-track / behind / done):',i.status||'on-track')||i.status);
-  const pRaw=prompt('Progress % (0-100):',i.progress||0); const progress=pRaw!=null?Math.max(0,Math.min(100,Number(pRaw))):i.progress;
-  const notes=prompt('Notes (optional):',i.notes||'');
-  const r=await TMIAdmin.api('/api/os-initiatives','PUT',{id,status,progress,notes});
+  const v=await TMIAdmin.formModal({title:'Update initiative',submitLabel:'Save',fields:[
+    {name:'status',label:'Status',type:'select',value:i.status||'on-track',options:[{value:'on-track',label:'On track'},{value:'behind',label:'Behind'},{value:'done',label:'Done'}]},
+    {name:'progress',label:'Progress %',type:'number',value:i.progress||0},
+    {name:'notes',label:'Notes (optional)',type:'textarea',rows:3,value:i.notes||''}
+  ]});
+  if(!v)return;
+  const progress=v.progress!=null?Math.max(0,Math.min(100,Number(v.progress))):i.progress;
+  const r=await TMIAdmin.api('/api/os-initiatives','PUT',{id,status:v.status,progress,notes:v.notes||null});
   if(r){loadInitiatives();}
 }
 async function delInitiative(id){ if(!(await TMIAdmin.confirm('Delete this initiative?')))return; await TMIAdmin.api('/api/os-initiatives?id='+id,'DELETE'); loadInitiatives(); }
@@ -541,18 +548,18 @@ function renderOffers(items){
 async function editLadder(){
   const cur=(await osGet('/api/os-kv?key=strategy_ladder'));
   const steps=(cur&&cur.value&&cur.value.steps)||[];
-  const txt=prompt('Value ladder — one rung per line (low to high):', steps.join('\n'));
-  if(txt==null)return;
-  const arr=txt.split('\n').map(s=>s.trim()).filter(Boolean);
+  const v=await TMIAdmin.formModal({title:'Value ladder',submitLabel:'Save',fields:[{name:'steps',label:'One rung per line (low to high)',type:'textarea',rows:7,value:steps.join('\n')}]});
+  if(!v)return;
+  const arr=v.steps.split('\n').map(s=>s.trim()).filter(Boolean);
   await TMIAdmin.api('/api/os-kv','PUT',{key:'strategy_ladder',value:{steps:arr}});
   renderLadder(arr); TMIAdmin.toast('Saved');
 }
 async function editOffers(){
   const cur=(await osGet('/api/os-kv?key=strategy_offers'));
   const items=(cur&&cur.value&&cur.value.items)||[];
-  const txt=prompt('Current offers — one per line:', items.join('\n'));
-  if(txt==null)return;
-  const arr=txt.split('\n').map(s=>s.trim()).filter(Boolean);
+  const v=await TMIAdmin.formModal({title:'Current offers',submitLabel:'Save',fields:[{name:'items',label:'One offer per line',type:'textarea',rows:7,value:items.join('\n')}]});
+  if(!v)return;
+  const arr=v.items.split('\n').map(s=>s.trim()).filter(Boolean);
   await TMIAdmin.api('/api/os-kv','PUT',{key:'strategy_offers',value:{items:arr}});
   renderOffers(arr); TMIAdmin.toast('Saved');
 }
@@ -569,10 +576,13 @@ function renderAdvisors(list){
   </div>`).join('');
 }
 async function addAdvisor(){
-  const advisor=prompt('Advisor / mentor name:'); if(!advisor||!advisor.trim())return;
-  const insights=prompt('Key insights from the conversation:')||null;
-  const action_items=prompt('Action items (optional):')||null;
-  const r=await TMIAdmin.api('/api/os-advisors','POST',{advisor:advisor.trim(),met_on:new Date().toISOString().slice(0,10),insights,action_items});
+  const v=await TMIAdmin.formModal({title:'Log a conversation',submitLabel:'Save',fields:[
+    {name:'advisor',label:'Advisor / mentor name',required:true},
+    {name:'insights',label:'Key insights',type:'textarea',rows:4},
+    {name:'action_items',label:'Action items (optional)',type:'textarea',rows:3}
+  ]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-advisors','POST',{advisor:v.advisor,met_on:new Date().toISOString().slice(0,10),insights:v.insights||null,action_items:v.action_items||null});
   if(r){TMIAdmin.toast('Logged');loadStrategy();}
 }
 async function delAdvisor(id){ await TMIAdmin.api('/api/os-advisors?id='+id,'DELETE'); loadStrategy(); }
@@ -594,9 +604,9 @@ function renderFlywheel(stages){
 async function editFlywheel(){
   const cur=await osGet('/api/os-kv?key=flywheel');
   const stages=(cur&&cur.value&&cur.value.stages&&cur.value.stages.length)?cur.value.stages:FW_DEFAULT;
-  const txt=prompt('Flywheel stages — "Headline | description" per line:', stages.map(s=>`${s.h} | ${s.p}`).join('\n'));
-  if(txt==null)return;
-  const arr=txt.split('\n').map(l=>{const [h,...p]=l.split('|');return {h:(h||'').trim(),p:p.join('|').trim()};}).filter(s=>s.h);
+  const v=await TMIAdmin.formModal({title:'Flywheel stages',submitLabel:'Save',fields:[{name:'stages',label:'One stage per line — "Headline | description"',type:'textarea',rows:6,value:stages.map(s=>`${s.h} | ${s.p}`).join('\n')}]});
+  if(!v)return;
+  const arr=v.stages.split('\n').map(l=>{const [h,...p]=l.split('|');return {h:(h||'').trim(),p:p.join('|').trim()};}).filter(s=>s.h);
   await TMIAdmin.api('/api/os-kv','PUT',{key:'flywheel',value:{stages:arr}});
   renderFlywheel(arr); TMIAdmin.toast('Saved');
 }
@@ -618,14 +628,17 @@ function renderVision(v){
   `;
 }
 async function editVision(){
-  const cur=await osGet('/api/os-kv?key=vision'); const v=(cur&&cur.value)||{};
-  const mission=prompt('Mission:',v.mission||''); if(mission==null)return;
-  const vision=prompt('Vision:',v.vision||'');
-  const values=prompt('Values:',v.values||'');
-  const goalsTxt=prompt('Core goals — "Horizon | target" per line (e.g. 1 yr | $2M/mo):',(v.goals||[]).map(g=>`${g.horizon||''} | ${g.target||''}`).join('\n'))||'';
-  const goals=goalsTxt.split('\n').map(l=>{const [h,...t]=l.split('|');return {horizon:(h||'').trim(),target:t.join('|').trim()};}).filter(g=>g.horizon||g.target);
-  await TMIAdmin.api('/api/os-kv','PUT',{key:'vision',value:{mission,vision,values,goals}});
-  renderVision({mission,vision,values,goals}); TMIAdmin.toast('Saved');
+  const cur=await osGet('/api/os-kv?key=vision'); const cv=(cur&&cur.value)||{};
+  const v=await TMIAdmin.formModal({title:'Vision & core goals',submitLabel:'Save',fields:[
+    {name:'mission',label:'Mission',type:'textarea',rows:2,value:cv.mission||''},
+    {name:'vision',label:'Vision',type:'textarea',rows:2,value:cv.vision||''},
+    {name:'values',label:'Values',type:'textarea',rows:2,value:cv.values||''},
+    {name:'goalsTxt',label:'Core goals — "Horizon | target" per line',type:'textarea',rows:4,value:(cv.goals||[]).map(g=>`${g.horizon||''} | ${g.target||''}`).join('\n')}
+  ]});
+  if(!v)return;
+  const goals=(v.goalsTxt||'').split('\n').map(l=>{const [h,...t]=l.split('|');return {horizon:(h||'').trim(),target:t.join('|').trim()};}).filter(g=>g.horizon||g.target);
+  await TMIAdmin.api('/api/os-kv','PUT',{key:'vision',value:{mission:v.mission,vision:v.vision,values:v.values,goals}});
+  renderVision({mission:v.mission,vision:v.vision,values:v.values,goals}); TMIAdmin.toast('Saved');
 }
 </script>
 </body>

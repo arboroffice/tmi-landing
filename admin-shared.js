@@ -287,8 +287,15 @@ const TMIAdmin = (() => {
     <button class="sb-logout" onclick="TMIAdmin.logout()">${I.logout}Log out</button>
   </div>
 </aside>`;
-      // Mark active
+      // Mark active by key
       root.querySelectorAll(`[data-page="${active}"]`).forEach(el => el.classList.add('active'));
+      // Also mark items whose hashed href matches the current URL (so Ops Machine
+      // tabs like #level10 / #journey / #success highlight correctly).
+      const here = location.pathname.replace(/\/$/, '') + location.hash;
+      root.querySelectorAll('.sb-item[href*="#"]').forEach(el => {
+        const href = (el.getAttribute('href') || '').replace(/\/$/, '');
+        if (href && href === here) el.classList.add('active');
+      });
       // Load badge counts async
       self._loadBadges();
       // Init global search
@@ -569,6 +576,68 @@ const TMIAdmin = (() => {
 
     initials(first, last) {
       return ((first?.[0] || '') + (last?.[0] || '')).toUpperCase() || '?';
+    },
+
+    // ── Form modal: a styled replacement for prompt() ───────────────────────
+    // fields: [{ name, label, type, value, placeholder, options, rows, required }]
+    // types: 'text' | 'number' | 'textarea' | 'select'  → resolves to values, or null.
+    formModal({ title = 'Add', fields = [], submitLabel = 'Save' } = {}) {
+      return new Promise(resolve => {
+        const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+        const fieldHtml = fields.map((f, i) => {
+          const id = `fm-f-${i}`;
+          let control;
+          if (f.type === 'textarea') {
+            control = `<textarea class="form-input" id="${id}" rows="${f.rows || 4}" placeholder="${esc(f.placeholder)}" style="resize:vertical">${esc(f.value)}</textarea>`;
+          } else if (f.type === 'select') {
+            const opts = (f.options || []).map(o => {
+              const val = (o && typeof o === 'object') ? o.value : o;
+              const lab = (o && typeof o === 'object') ? o.label : o;
+              return `<option value="${esc(val)}" ${String(val) === String(f.value) ? 'selected' : ''}>${esc(lab)}</option>`;
+            }).join('');
+            control = `<select class="form-input" id="${id}">${opts}</select>`;
+          } else {
+            control = `<input class="form-input" id="${id}" type="${f.type || 'text'}" value="${esc(f.value)}" placeholder="${esc(f.placeholder)}"/>`;
+          }
+          return `<div style="margin-bottom:14px"><label class="form-label">${esc(f.label)}</label>${control}</div>`;
+        }).join('');
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay open';
+        overlay.innerHTML = `<div class="modal" style="max-width:460px;padding:28px">
+          <div class="modal-hd"><h3 class="modal-title" style="font-size:18px">${esc(title)}</h3><button class="modal-close" id="fm-x">&times;</button></div>
+          <div class="modal-bd" style="margin:8px 0 4px">${fieldHtml}</div>
+          <div class="modal-ft" style="margin-top:8px">
+            <button class="btn btn-ghost btn-sm" id="fm-cancel">Cancel</button>
+            <button class="btn btn-primary btn-sm" id="fm-ok">${esc(submitLabel)}</button>
+          </div>
+        </div>`;
+        document.body.appendChild(overlay);
+
+        const close = val => { overlay.remove(); resolve(val); };
+        const submit = () => {
+          const out = {};
+          for (let i = 0; i < fields.length; i++) {
+            const f = fields[i];
+            let v = document.getElementById(`fm-f-${i}`).value;
+            if (f.type === 'number') v = v === '' ? null : Number(v);
+            else if (typeof v === 'string') v = v.trim();
+            if (f.required && (v === '' || v == null)) { document.getElementById(`fm-f-${i}`).focus(); return; }
+            out[f.name] = v;
+          }
+          close(out);
+        };
+        overlay.querySelector('#fm-ok').onclick = submit;
+        overlay.querySelector('#fm-cancel').onclick = () => close(null);
+        overlay.querySelector('#fm-x').onclick = () => close(null);
+        overlay.addEventListener('mousedown', e => { if (e.target === overlay) close(null); });
+        overlay.addEventListener('keydown', e => {
+          if (e.key === 'Escape') close(null);
+          if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') submit();
+        });
+        const first = overlay.querySelector('.form-input');
+        if (first) setTimeout(() => { first.focus(); }, 50);
+      });
     },
 
     async confirm(msg, danger = true) {

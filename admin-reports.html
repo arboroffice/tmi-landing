@@ -15,6 +15,7 @@
   @media(max-width:900px){.l10-grid{grid-template-columns:1fr;}}
   .sc-row{display:grid;grid-template-columns:1.5fr .7fr .85fr 64px auto;gap:8px;align-items:center;padding:9px 20px;border-bottom:1px solid var(--line);font-size:13px;}
   .sc-spark{height:22px;}
+  @media(max-width:600px){.sc-spark{display:none;}.sc-row{grid-template-columns:1.4fr .7fr .9fr auto;}}
   .sc-row:last-child{border-bottom:none;}
   .sc-name{font-weight:500;color:var(--ink);}
   .sc-sub{font-size:11px;color:var(--muted);}
@@ -523,12 +524,14 @@ async function saveMetric(id,val){
 }
 
 async function addMetric(){
-  const name = prompt('Metric name (e.g. Cash Collected):'); if(!name||!name.trim()) return;
-  const unit = (prompt('Unit — $, %, or # :','#')||'#').trim();
-  const tRaw = prompt('Weekly target (number, optional):');
-  const target_value = tRaw && tRaw.trim()!=='' ? Number(tRaw) : null;
-  const direction = (prompt('Better when value is higher or lower? (higher/lower):','higher')||'higher').trim()==='lower'?'lower':'higher';
-  const r = await TMIAdmin.api('/api/os-scorecard','POST',{ metric:{ name:name.trim(), unit, target_value, direction, source:'manual', sort:SC.metrics.length } });
+  const v = await TMIAdmin.formModal({ title:'Add scorecard metric', submitLabel:'Add metric', fields:[
+    { name:'name', label:'Metric name', required:true, placeholder:'e.g. Cash Collected' },
+    { name:'unit', label:'Unit', type:'select', value:'#', options:[{value:'#',label:'# (number)'},{value:'$',label:'$ (dollars)'},{value:'%',label:'% (percent)'}] },
+    { name:'target_value', label:'Weekly target (optional)', type:'number', placeholder:'e.g. 175000' },
+    { name:'direction', label:'On track when value is', type:'select', value:'higher', options:[{value:'higher',label:'At or above target'},{value:'lower',label:'At or below target'}] }
+  ]});
+  if (!v) return;
+  const r = await TMIAdmin.api('/api/os-scorecard','POST',{ metric:{ name:v.name, unit:v.unit, target_value:v.target_value, direction:v.direction, source:'manual', sort:SC.metrics.length } });
   if (r){ SC.metrics.push(r); renderScorecard(); TMIAdmin.toast('Metric added'); }
 }
 
@@ -541,7 +544,11 @@ function renderWins(wins){
     <button class="ids-mini" onclick="delWin('${w.id}')" title="Remove">&times;</button>
   </div>`).join('');
 }
-async function addWin(){ const t=prompt('Win:'); if(!t||!t.trim())return; const a=prompt('Who? (optional):')||null; const r=await TMIAdmin.api('/api/os-wins','POST',{text:t.trim(),author:a,week_of:weekOf()}); if(r){loadLevel10();} }
+async function addWin(){
+  const v=await TMIAdmin.formModal({title:'Add a win',submitLabel:'Add win',fields:[{name:'text',label:'Win',required:true,placeholder:'What did the team accomplish?'},{name:'author',label:'Who? (optional)'}]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-wins','POST',{text:v.text,author:v.author||null,week_of:weekOf()}); if(r){loadLevel10();}
+}
 async function delWin(id){ await TMIAdmin.api('/api/os-wins?id='+id,'DELETE'); loadLevel10(); }
 
 function renderIds(){
@@ -564,7 +571,11 @@ function renderIds(){
   el.innerHTML = open.map((i,idx)=>row(i,idx,open)).join('') +
     (solved.length?`<div style="padding:8px 20px 4px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Solved this week</div>`+solved.map((i,idx)=>row(i,idx,solved)).join(''):'');
 }
-async function addIssue(){ const t=prompt('Issue or opportunity:'); if(!t||!t.trim())return; const n=prompt('Notes (optional):')||null; const r=await TMIAdmin.api('/api/os-issues','POST',{title:t.trim(),notes:n,status:'identify',sort:ISSUES.length}); if(r){loadLevel10();} }
+async function addIssue(){
+  const v=await TMIAdmin.formModal({title:'Add issue or opportunity',submitLabel:'Add',fields:[{name:'title',label:'Issue or opportunity',required:true},{name:'notes',label:'Notes (optional)',type:'textarea',rows:3}]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-issues','POST',{title:v.title,notes:v.notes||null,status:'identify',sort:ISSUES.length}); if(r){loadLevel10();}
+}
 async function solveIssue(id){ await TMIAdmin.api('/api/os-issues','PUT',{id,status:'solved',solved_at:new Date().toISOString()}); loadLevel10(); }
 async function reopenIssue(id){ await TMIAdmin.api('/api/os-issues','PUT',{id,status:'identify',solved_at:null}); loadLevel10(); }
 async function delIssue(id){ await TMIAdmin.api('/api/os-issues?id='+id,'DELETE'); loadLevel10(); }

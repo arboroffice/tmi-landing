@@ -353,29 +353,25 @@ function renderCommandColumn(level) {
 }
 
 async function addGoal(level) {
-  const title = prompt(`New ${level} goal:`);
-  if (!title || !title.trim()) return;
-  const owner = prompt('Owner (optional):') || null;
-  // Offer to link to a parent-level goal so progress ladders up
-  let parent_id = null;
   const pLevel = CMD_PARENT[level];
+  const fields = [
+    { name:'title', label:`New ${level} goal`, required:true, placeholder:'Goal title' },
+    { name:'owner', label:'Owner (optional)', placeholder:'Who owns it' }
+  ];
   if (pLevel) {
     const cand = CMD_GOALS.filter(g => g.level === pLevel && g.status !== 'archived');
-    if (cand.length) {
-      const list = cand.map((c,i) => `${i+1}) ${c.title}`).join('\n');
-      const pick = prompt(`Ladder up to a ${pLevel} goal? Enter a number, or leave blank:\n${list}`);
-      const idx = pick ? parseInt(pick, 10) - 1 : -1;
-      if (idx >= 0 && idx < cand.length) parent_id = cand[idx].id;
-    }
+    if (cand.length) fields.push({ name:'parent', label:`Ladder up to a ${pLevel} goal`, type:'select', value:'', options:[{value:'',label:'— none —'}].concat(cand.map(c => ({ value:c.id, label:c.title }))) });
   }
-  const r = await TMIAdmin.api('/api/os-goals', 'POST', { goal: { level, title: title.trim(), owner, parent_id } });
+  const v = await TMIAdmin.formModal({ title:`Add ${level} goal`, fields, submitLabel:'Add goal' });
+  if (!v) return;
+  const r = await TMIAdmin.api('/api/os-goals', 'POST', { goal: { level, title: v.title, owner: v.owner || null, parent_id: v.parent || null } });
   if (r) { TMIAdmin.toast('Goal added'); loadCommand(); }
 }
 
 async function addSubtask(goalId) {
-  const text = prompt('Subtask:');
-  if (!text || !text.trim()) return;
-  const r = await TMIAdmin.api('/api/os-goals', 'POST', { subtask: { goal_id: goalId, text: text.trim() } });
+  const v = await TMIAdmin.formModal({ title:'Add subtask', fields:[{ name:'text', label:'Subtask', required:true }], submitLabel:'Add' });
+  if (!v) return;
+  const r = await TMIAdmin.api('/api/os-goals', 'POST', { subtask: { goal_id: goalId, text: v.text } });
   if (r) loadCommand();
 }
 

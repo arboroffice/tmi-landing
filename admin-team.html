@@ -154,16 +154,25 @@ async function loadRoster(){
   el.innerHTML = cards + `<div class="team-card add-card" onclick="addMember()"><div class="add-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div style="font-size:14px;font-weight:500">Add team member</div></div>`;
 }
 async function addMember(){
-  const name=prompt('Name:'); if(!name||!name.trim())return;
-  const role=prompt('Role:')||null; const region=prompt('Region (optional):')||null;
-  const capRaw=prompt('Capacity % (0-100):','80'); const capacity_pct=capRaw?Math.max(0,Math.min(100,Number(capRaw))):0;
-  const r=await TMIAdmin.api('/api/os-team','POST',{name:name.trim(),role,region,capacity_pct,status:'active',sort:MEMBERS.length});
+  const v=await TMIAdmin.formModal({title:'Add team member',submitLabel:'Add',fields:[
+    {name:'name',label:'Name',required:true},
+    {name:'role',label:'Role',placeholder:'e.g. CSM, Sales, Ops'},
+    {name:'region',label:'Region (optional)'},
+    {name:'capacity_pct',label:'Capacity %',type:'number',value:80}
+  ]});
+  if(!v)return;
+  const capacity_pct=v.capacity_pct!=null?Math.max(0,Math.min(100,Number(v.capacity_pct))):0;
+  const r=await TMIAdmin.api('/api/os-team','POST',{name:v.name,role:v.role||null,region:v.region||null,capacity_pct,status:'active',sort:MEMBERS.length});
   if(r){TMIAdmin.toast('Added');loadRoster();}
 }
 async function editMember(id){
   const m=MEMBERS.find(x=>x.id===id); if(!m)return;
-  const role=prompt('Role:',m.role||''); const capRaw=prompt('Capacity % (0-100):',m.capacity_pct||0);
-  const r=await TMIAdmin.api('/api/os-team','PUT',{id,role,capacity_pct:capRaw?Math.max(0,Math.min(100,Number(capRaw))):m.capacity_pct});
+  const v=await TMIAdmin.formModal({title:'Edit member',submitLabel:'Save',fields:[
+    {name:'role',label:'Role',value:m.role||''},
+    {name:'capacity_pct',label:'Capacity %',type:'number',value:m.capacity_pct||0}
+  ]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-team','PUT',{id,role:v.role||null,capacity_pct:v.capacity_pct!=null?Math.max(0,Math.min(100,Number(v.capacity_pct))):m.capacity_pct});
   if(r){loadRoster();}
 }
 async function delMember(id){ if(!(await TMIAdmin.confirm('Remove from roster?')))return; await TMIAdmin.api('/api/os-team?id='+id,'DELETE'); loadRoster(); }
@@ -203,22 +212,28 @@ function renderRkTable(){
   </tr>`).join('');
 }
 async function addRecruiter(){
-  const name=prompt('Recruiter / channel name:'); if(!name||!name.trim())return;
-  const channel=prompt('Channel type (optional):')||null;
-  const region=prompt('Region:')||null;
-  const upfront_cost=prompt('Upfront cost (e.g. $2K retainer / TBD):','TBD')||null;
-  const status=prompt('Status (e.g. Onboarding, Signing Today, Intro Pending):')||null;
-  const r=await TMIAdmin.api('/api/os-recruiting','POST',{recruiter:{name:name.trim(),channel,region,upfront_cost,status,sort:RK.recruiters.length}});
+  const v=await TMIAdmin.formModal({title:'Add recruiting channel',submitLabel:'Add',fields:[
+    {name:'name',label:'Recruiter / channel name',required:true},
+    {name:'channel',label:'Channel type (optional)'},
+    {name:'region',label:'Region'},
+    {name:'upfront_cost',label:'Upfront cost',value:'TBD',placeholder:'$2K retainer / TBD'},
+    {name:'status',label:'Status',placeholder:'Onboarding, Signing Today, Intro Pending'}
+  ]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-recruiting','POST',{recruiter:{name:v.name,channel:v.channel||null,region:v.region||null,upfront_cost:v.upfront_cost||null,status:v.status||null,sort:RK.recruiters.length}});
   if(r){TMIAdmin.toast('Channel added');loadRecruiting();}
 }
 async function editRecruiter(id){
   const r=RK.recruiters.find(x=>x.id===id); if(!r)return;
-  const candidates=Number(prompt('Candidates:',r.candidates||0)??r.candidates);
-  const advanced=Number(prompt('Advanced:',r.advanced||0)??r.advanced);
-  const hired=Number(prompt('Hired:',r.hired||0)??r.hired);
-  const cphRaw=prompt('Cost per hire (number, optional):',r.cost_per_hire||''); const cost_per_hire=cphRaw&&cphRaw.trim()!==''?Number(cphRaw):null;
-  const status=prompt('Status:',r.status||'')||r.status;
-  const res=await TMIAdmin.api('/api/os-recruiting','PUT',{recruiter:{id,candidates,advanced,hired,cost_per_hire,status}});
+  const v=await TMIAdmin.formModal({title:'Update channel',submitLabel:'Save',fields:[
+    {name:'candidates',label:'Candidates',type:'number',value:r.candidates||0},
+    {name:'advanced',label:'Advanced',type:'number',value:r.advanced||0},
+    {name:'hired',label:'Hired',type:'number',value:r.hired||0},
+    {name:'cost_per_hire',label:'Cost per hire (optional)',type:'number',value:r.cost_per_hire!=null?r.cost_per_hire:''},
+    {name:'status',label:'Status',value:r.status||''}
+  ]});
+  if(!v)return;
+  const res=await TMIAdmin.api('/api/os-recruiting','PUT',{recruiter:{id,candidates:Number(v.candidates)||0,advanced:Number(v.advanced)||0,hired:Number(v.hired)||0,cost_per_hire:v.cost_per_hire,status:v.status||null}});
   if(res){loadRecruiting();}
 }
 async function delRecruiter(id){ if(!(await TMIAdmin.confirm('Delete this channel?')))return; await TMIAdmin.api('/api/os-recruiting?id='+id+'&type=recruiter','DELETE'); loadRecruiting(); }
@@ -233,9 +248,14 @@ function renderCandidates(){
   </tr>`).join('')}</tbody></table></div>`;
 }
 async function addCandidate(){
-  const name=prompt('Candidate name:'); if(!name||!name.trim())return;
-  const role=prompt('Role:')||null; const region=prompt('Region:')||null; const stage=prompt('Stage (new/reviewed/scheduled/accepted):','new')||'new';
-  const r=await TMIAdmin.api('/api/os-recruiting','POST',{candidate:{name:name.trim(),role,region,stage}});
+  const v=await TMIAdmin.formModal({title:'Add candidate',submitLabel:'Add',fields:[
+    {name:'name',label:'Candidate name',required:true},
+    {name:'role',label:'Role'},
+    {name:'region',label:'Region'},
+    {name:'stage',label:'Stage',type:'select',value:'new',options:['new','reviewed','scheduled','accepted','rejected']}
+  ]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-recruiting','POST',{candidate:{name:v.name,role:v.role||null,region:v.region||null,stage:v.stage||'new'}});
   if(r){TMIAdmin.toast('Candidate added');loadRecruiting();}
 }
 async function delCandidate(id){ await TMIAdmin.api('/api/os-recruiting?id='+id+'&type=candidate','DELETE'); loadRecruiting(); }
@@ -270,9 +290,9 @@ async function loadSuccess(){
 }
 async function editCsmTarget(){
   const cur=await osGet('/api/os-kv?key=success_target');
-  const n=prompt('Target number of CSMs:', (cur&&cur.value&&cur.value.n)||12);
-  if(n==null)return;
-  await TMIAdmin.api('/api/os-kv','PUT',{key:'success_target',value:{n:Number(n)}});
+  const v=await TMIAdmin.formModal({title:'CSM target',submitLabel:'Save',fields:[{name:'n',label:'Target number of CSMs',type:'number',value:(cur&&cur.value&&cur.value.n)||12,required:true}]});
+  if(!v)return;
+  await TMIAdmin.api('/api/os-kv','PUT',{key:'success_target',value:{n:Number(v.n)}});
   loadSuccess(); TMIAdmin.toast('Target saved');
 }
 
