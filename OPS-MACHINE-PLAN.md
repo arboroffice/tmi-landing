@@ -20,16 +20,33 @@ recordings.
 
 ## 1. Architecture (matches the existing stack — no new frameworks)
 
-- **Frontend:** one new static page `admin-os.html`, same shell as every other
-  admin page (`<div id="sidebar-root">` + `.main` + `.topbar` + `.content`),
-  loading `admin.css` and `admin-shared.js`. Inside `.content` is a top
-  `.tab-bar` (the existing tab pattern from `admin-sales.html`) with the 10 Ops
-  Machine tabs. Hash routing (`/admin-os#command`, `#level10`, …) exactly like
-  `/admin-sales#pipeline`.
-- **Navigation:** add a new **"Ops Machine"** group at the very top of
-  `TMIAdmin.initSidebar()` in `admin-shared.js` (and the mobile More-sheet),
-  linking to each tab via `/admin-os#<tab>`. New SVG icons added to the `I`
-  icon map.
+**The Ops Machine is woven into the existing admin pages — not a separate
+`admin-os.html`.** Each capability is added to the page where it naturally
+belongs, using the same hash-tab pattern those pages already use
+(`admin-reports#revenue`, `admin-plans#retention`). Page placement map:
+
+| Ops Machine capability | Lives in (existing page) |
+| --- | --- |
+| **Command** (goal ladder) | `admin-dashboard.html` — the cockpit, top of the dashboard ✅ built |
+| **Level 10** (Wins / Scorecard / IDS) | `admin-reports.html` — new `#scorecard` + `#level10` tabs |
+| **Initiatives** | `admin-plans.html` — new `#initiatives` tab |
+| **Team** (roster + scorecard) | `admin-team.html` — enhance existing page |
+| **Success** (CSM capacity, retention) | `admin-clients.html#health` + `admin-onboarding.html` |
+| **Recruiting** (leaderboard) | `admin-team.html` — new `#recruiting` tab |
+| **Journey** (delivery playbook) | `admin-onboarding.html` — timeline |
+| **Flywheel** | `admin-plans.html` — new `#flywheel` tab |
+| **Strategy** (+ advisor log) | `admin-plans.html` — new `#strategy` tab |
+| **Vision** | `admin-plans.html` — new `#vision` tab |
+
+- **Frontend:** enhance the pages above in place (same `admin.css` +
+  `admin-shared.js`, same `.tab-bar`/`switchTab` + hash routing). `admin-plans`
+  becomes the strategy hub; `admin-reports` becomes the scorecard/Level-10 hub;
+  the Dashboard becomes the Command cockpit.
+- **Navigation:** the sidebar groups in `TMIAdmin.initSidebar()` already exist
+  (Overview, Plans, System, …). New tabs are added as nav items pointing at the
+  new hashes (e.g. `/admin-reports#scorecard`, `/admin-plans#initiatives`),
+  exactly like the current Revenue/Analytics/Retention items. New SVG icons
+  added to the `I` map as needed.
 - **Backend:** new Vercel serverless functions under `/api/os-*.js`, reusing
   `api/_auth.js` (JWT bearer) and `api/_supabase.js` (service client) — same
   shape as `api/leads.js`, `api/clients.js`, etc.
@@ -217,14 +234,13 @@ New env vars: `ANTHROPIC_API_KEY`, `FATHOM_WEBHOOK_SECRET`. New dependency:
 
 ## 6. Build phases
 
-- **Phase 0 — Foundation.** `supabase-os-schema.sql` + apply migration; add the
-  "Ops Machine" sidebar group + icons + mobile sheet entries in
-  `admin-shared.js`; create `admin-os.html` shell with the 10-tab bar, hash
-  routing, and OS-specific CSS additions (scorecard grid, progress bars, IDS
-  drag list, leaderboard table, journey timeline, flywheel loop, vision card).
-- **Phase 1 — The meeting core.** Command (goal ladder + subtasks) and Level 10
-  (Wins, Scorecard with live CRM pulls, IDS). `os-goals`, `os-scorecard`,
-  `os-wins`, `os-issues` endpoints. This is the highest-value slice.
+- **Phase 0 — Foundation.** `supabase-os-schema.sql` (all `os_*` tables).
+  ✅ Done — schema file shipped; apply in Supabase SQL editor.
+- **Phase 1 — The meeting core.**
+  - ✅ **Command Center built into `admin-dashboard.html`** (goal ladder
+    quarter/month/week + subtasks + progress bars) with `/api/os-goals.js`.
+  - Next: Level 10 (Wins, Scorecard with live CRM pulls, IDS) into
+    `admin-reports.html`; `os-scorecard`, `os-wins`, `os-issues` endpoints.
 - **Phase 2 — People.** Recruiting leaderboard (your screenshot) + Team roster +
   Success. `os-recruiting`, `os-team`; Success reuses existing CRM endpoints.
 - **Phase 3 — Story.** Initiatives, Journey, Flywheel, Strategy (+ advisor log),
