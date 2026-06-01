@@ -2,12 +2,15 @@
 
 Turn the `admin.tmitechai.com` subdomain into a complete **business operating
 system** — a "founder cockpit" modeled on the EOS/Traction "Level 10" rhythm
-shown in the reference walkthrough, adapted to TMI's real business (custom AI
-operating systems for the physical + online economy, the FOTF/"The Letter"
-newsletter, and the City Leads program).
+shown in the reference walkthrough, adapted to TMI's real business: custom AI
+operating systems for the physical + online economy, the **Field Notes**
+content/newsletter engine (the `article-*.html` / `news.html` system),
+**FOTF / "The Letter"** (Mia's community — TMI-owned but run separately from
+the main Field Notes newsletter), and the **City Leads** program.
 
 The existing admin is already a strong CRM/agency-ops tool (leads, clients,
-projects, invoices, comms, content, FOTF, city leads). The Ops Machine sits
+projects, invoices, comms, Field Notes content, FOTF community, city leads).
+The Ops Machine sits
 **on top** of that data as a leadership-and-rhythm layer: goals, scorecard,
 weekly meeting, initiatives, team, recruiting, journey, flywheel, strategy,
 vision — plus an AI pipeline that updates it automatically from meeting
@@ -58,8 +61,10 @@ A guided meeting screen with the standard segments and a built-in timer:
 - **Wins / Segue** — quick-add wins, energizing the room.
 - **Scorecard** — weekly metrics with target + on-track/off-track coloring:
   cash collected, gross margin, MRR, new clients, audits booked, proposals
-  sent, close rate, show rate, churn, City Leads apps, FOTF subscribers,
-  FSMs/CSMs hired. Pulls live numbers from the existing CRM tables where they
+  sent, close rate, show rate, churn, Field Notes subscribers/cadence, FOTF
+  community members, City Leads apps, FSMs/CSMs hired. (Field Notes and FOTF
+  are tracked as separate scorecard lines.) Pulls live numbers from the
+  existing CRM tables where they
   already exist (leads, clients, invoices, audits, applications) and stores
   manual metrics in `os_scorecard`.
 - **Rock / Goal review** — pulls quarterly goals from Command, on/off track.
