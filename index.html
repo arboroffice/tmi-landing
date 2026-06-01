@@ -309,6 +309,29 @@ h1,h2,h3,h4{margin:0;}p{margin:0;}
 .letter-ok{display:none;font-family:var(--serif);font-size:18px;color:var(--chart);padding:12px 0;text-align:center;}
 @media(max-width:480px){.letter-form{flex-direction:column;border-radius:16px;padding:10px;}.letter-btn{border-radius:999px;}}
 
+/* WHO THIS IS FOR */
+.for-section{padding:56px 0;background:var(--bg-alt);border-bottom:1px solid var(--line);}
+.for-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:36px;}
+.for-card{background:var(--bg);padding:36px 32px;display:flex;flex-direction:column;gap:10px;}
+.for-label{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+.for-heading{font-family:var(--serif);font-size:clamp(18px,1.8vw,22px);font-weight:400;color:var(--ink);line-height:1.2;}
+.for-body{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.7;}
+@media(max-width:768px){.for-grid{grid-template-columns:1fr;}}
+
+/* WHY TMI COMPARISON */
+.why-section{padding:88px 0;background:var(--bg-alt);border-bottom:1px solid var(--line);}
+.diff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:52px;}
+.diff-card{background:var(--bg);padding:40px 32px;display:flex;flex-direction:column;gap:12px;}
+.diff-card--active{background:var(--bg-dark);}
+.diff-label{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+.diff-label--active{color:rgba(228,255,151,0.55);}
+.diff-title{font-family:var(--serif);font-size:clamp(18px,1.8vw,24px);font-weight:400;color:var(--ink);line-height:1.2;}
+.diff-title--active{color:#fff;}
+.diff-body{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.7;flex:1;}
+.diff-body--active{color:rgba(255,255,255,0.42);}
+.diff-badge{display:inline-block;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;background:var(--chart);color:#0a0b14;padding:5px 14px;border-radius:999px;margin-top:4px;align-self:flex-start;}
+@media(max-width:680px){.diff-grid{grid-template-columns:1fr;}}
+
 /* FOOTER */
 footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);padding:64px 0 32px;}
 .foot-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:80px;margin-bottom:48px;}
@@ -470,18 +493,27 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
   </div>
 </section>
 
-<!-- IS THIS YOU -->
-<section class="ity-section">
+<!-- WHO THIS IS FOR -->
+<section class="for-section">
   <div class="container">
     <div class="eyebrow sec-ey reveal">Is this you?</div>
-    <h2 class="sh reveal" style="max-width:28ch;">If any of these describe your operation, <em>keep reading.</em></h2>
-    <div class="ity-grid reveal">
-      <div class="ity-item">Your dispatcher is a person making calls, not a system routing jobs</div>
-      <div class="ity-item">Your crews have no way to document what happened in the field</div>
-      <div class="ity-item">You find out about problems after they've already cost you money</div>
-      <div class="ity-item">Compliance and safety tracking runs on memory and spreadsheets</div>
-      <div class="ity-item">You're the communication hub for everything - jobs, crew, clients, subs</div>
-      <div class="ity-item">Reporting takes hours and is still incomplete by the time you send it</div>
+    <h2 class="sh reveal" style="max-width:28ch;">Three kinds of operations that need what we build.</h2>
+    <div class="for-grid">
+      <div class="for-card reveal">
+        <div class="for-label">Type 01</div>
+        <div class="for-heading">You're doing real revenue and still running on chaos</div>
+        <div class="for-body">$3M-$10M in, crews are busy, jobs are getting done. But dispatch is still phone calls. Invoices go out late. Change orders get missed. Compliance is managed by whoever remembers. You've outgrown the process that got you here and you know it.</div>
+      </div>
+      <div class="for-card reveal">
+        <div class="for-label">Type 02</div>
+        <div class="for-heading">The business only works because you're in it</div>
+        <div class="for-body">You built it and it runs because you're the operating system. When you're in the field, the office calls. When you're in the office, the crews need you. You can't step back because everything depends on you being in the loop on everything, all the time.</div>
+      </div>
+      <div class="for-card reveal">
+        <div class="for-label">Type 03</div>
+        <div class="for-heading">You're losing margin and you know roughly why</div>
+        <div class="for-body">The work is good. The problem is the 15-20% that disappears between the job and the invoice. Unbilled extras. Missed change orders. Slow estimates. Parts markup that never makes it to the bill. You know it's happening. You just don't have the system to stop it.</div>
+      </div>
     </div>
   </div>
 </section>
@@ -679,6 +711,32 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
       <div class="num-card">
         <div class="num-val">$47k</div>
         <div class="num-lbl">Average annual cost of a dispatcher role that intelligent scheduling and coordination systems can partially or fully replace</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY TMI -->
+<section class="why-section">
+  <div class="container">
+    <div class="eyebrow sec-ey reveal">Why TMI</div>
+    <h2 class="sh reveal" style="max-width:30ch;">Three ways to fix your operation. <em>One of them actually works.</em></h2>
+    <div class="diff-grid reveal">
+      <div class="diff-card">
+        <div class="diff-label">Option A</div>
+        <div class="diff-title">Buy off-the-shelf software</div>
+        <div class="diff-body">ServiceTitan, Jobber, whatever the category leader is. Spend six months implementing. Pay $300-800/month forever. Still manually running 60% of your workflows because it doesn't fit how you actually work. Now you're dependent on a platform raising prices every year.</div>
+      </div>
+      <div class="diff-card diff-card--active">
+        <div class="diff-label diff-label--active">Option B - This One</div>
+        <div class="diff-title diff-title--active">TMI OpsOS</div>
+        <div class="diff-body diff-body--active">We map your specific operation, build the infrastructure that fixes it, wire it into your existing tools, and hand it over running. You own it. No monthly license. No dependency on us after the build. If it doesn't run in 30 days, we work free until it does.</div>
+        <span class="diff-badge">TMI</span>
+      </div>
+      <div class="diff-card">
+        <div class="diff-label">Option C</div>
+        <div class="diff-title">Hire consultants</div>
+        <div class="diff-body">A firm spends three months analyzing the problem and gives you a 60-page document. The implementation is your problem. The knowledge walks out the door with them. You've spent $50k and you're back where you started, now with a binder nobody reads.</div>
       </div>
     </div>
   </div>
