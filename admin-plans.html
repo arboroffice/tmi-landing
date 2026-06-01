@@ -314,6 +314,10 @@
           <div class="card-head"><span class="card-title">Company Initiatives</span><button class="btn btn-ghost btn-sm" onclick="addInitiative()">+ Initiative</button></div>
           <div id="init-body"><div style="padding:16px 20px;font-size:13px;color:var(--muted)">Loading...</div></div>
         </div>
+        <div class="card" style="margin-top:20px">
+          <div class="card-head"><span class="card-title">Media Signals</span><span class="card-sub" id="media-sub"></span><button class="btn btn-ghost btn-sm" onclick="editWatchlist()">Watchlist</button></div>
+          <div id="media-body"><div style="padding:16px 20px;font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
       </div>
 
       <!-- Strategy -->
@@ -331,6 +335,10 @@
         <div class="card" style="margin-top:20px">
           <div class="card-head"><span class="card-title">Advisor &amp; Mentor Log</span><button class="btn btn-ghost btn-sm" onclick="addAdvisor()">+ Log a conversation</button></div>
           <div id="advisor-body"><div style="padding:16px 20px;font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
+        <div class="card" style="margin-top:20px">
+          <div class="card-head"><span class="card-title">Competitor Ads</span><span class="card-sub">via Apify ad-library scrapers</span></div>
+          <div id="ads-body"><div style="padding:16px 20px;font-size:13px;color:var(--muted)">Loading...</div></div>
         </div>
       </div>
 
@@ -373,7 +381,7 @@ function switchTab(tab) {
   if (!PLAN_TABS.includes(tab)) tab = 'model';
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   PLAN_TABS.forEach(t => { const el = document.getElementById('tab-'+t); if (el) el.style.display = (t===tab)?'':'none'; });
-  if (tab==='initiatives' && !_osLoaded.initiatives){ _osLoaded.initiatives=true; loadInitiatives(); }
+  if (tab==='initiatives' && !_osLoaded.initiatives){ _osLoaded.initiatives=true; loadInitiatives(); loadMedia(); }
   if (tab==='strategy' && !_osLoaded.strategy){ _osLoaded.strategy=true; loadStrategy(); }
   if (tab==='flywheel' && !_osLoaded.flywheel){ _osLoaded.flywheel=true; loadFlywheel(); }
   if (tab==='vision' && !_osLoaded.vision){ _osLoaded.vision=true; loadVision(); }
@@ -524,6 +532,53 @@ async function editInitiative(id){
 }
 async function delInitiative(id){ if(!(await TMIAdmin.confirm('Delete this initiative?')))return; await TMIAdmin.api('/api/os-initiatives?id='+id,'DELETE'); loadInitiatives(); }
 
+// ── Media Signals (Apify social scrapers) ─────────────────────────────────────
+const fmtK = n => { if(n==null) return '—'; n=Number(n); return n>=1000?(n/1000).toFixed(n>=10000?0:1)+'k':String(n); };
+async function loadMedia(){
+  const [posts, wl] = await Promise.all([ osGet('/api/os-social'), osGet('/api/os-kv?key=media_watchlist') ]);
+  const list = Array.isArray(posts) ? posts : [];
+  const handles = (wl && wl.value && wl.value.handles) || [];
+  document.getElementById('media-sub').textContent = handles.length ? `Watching ${handles.length}` : '';
+  const el = document.getElementById('media-body');
+  if (!list.length){
+    el.innerHTML = `<div style="padding:16px 20px;font-size:13px;color:var(--muted)">${handles.length?`Watching: ${handles.map(osEsc).join(', ')}. `:''}No posts pulled yet. Connect an Apify scraper to <code>/api/apify-ingest?target=media&amp;source=tiktok</code> (or instagram/linkedin/x).</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>Account</th><th>Platform</th><th>Post</th><th>Likes</th><th>Comments</th><th>Views</th><th>Posted</th></tr></thead><tbody>${
+    list.slice(0,100).map(p=>`<tr>
+      <td style="font-weight:500;color:var(--ink)">${osEsc(p.author||'—')}</td>
+      <td>${osEsc(p.platform||'—')}</td>
+      <td style="max-width:280px">${p.url?`<a href="${osEsc(p.url)}" target="_blank" rel="noopener" style="color:var(--ink)">${osEsc((p.text||'view').slice(0,60))||'view'}</a>`:osEsc((p.text||'').slice(0,60))}</td>
+      <td>${fmtK(p.likes)}</td><td>${fmtK(p.comments)}</td><td>${fmtK(p.views)}</td>
+      <td style="color:var(--muted)">${p.posted_at?TMIAdmin.fmt(p.posted_at):'—'}</td>
+    </tr>`).join('')
+  }</tbody></table></div>`;
+}
+async function editWatchlist(){
+  const cur = await osGet('/api/os-kv?key=media_watchlist');
+  const handles = (cur && cur.value && cur.value.handles) || [];
+  const v = await TMIAdmin.formModal({title:'Media watchlist',submitLabel:'Save',fields:[{name:'handles',label:'Accounts to track — one per line (e.g. @yourhandle, competitor handles)',type:'textarea',rows:7,value:handles.join('\n')}]});
+  if(!v)return;
+  const arr=v.handles.split('\n').map(s=>s.trim().replace(/^@/,'')).filter(Boolean);
+  await TMIAdmin.api('/api/os-kv','PUT',{key:'media_watchlist',value:{handles:arr}});
+  loadMedia(); TMIAdmin.toast('Watchlist saved');
+}
+
+// ── Competitor Ads ────────────────────────────────────────────────────────────
+async function loadAds(){
+  const list = (await osGet('/api/os-ads')) || [];
+  const el = document.getElementById('ads-body');
+  if (!list.length){ el.innerHTML = `<div style="padding:16px 20px;font-size:13px;color:var(--muted)">No ads pulled yet. Connect a Google/Facebook ad-library scraper to <code>/api/apify-ingest?target=ads&amp;source=facebook</code>.</div>`; return; }
+  el.innerHTML = list.slice(0,60).map(a=>`<div class="adv-row">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+      <span class="adv-name">${osEsc(a.advertiser||'Unknown')}</span>
+      <span class="adv-date">${osEsc(a.platform||'')}${a.started_on?` &middot; ${osEsc(a.started_on)}`:''}</span>
+    </div>
+    ${a.ad_text?`<div class="adv-text">${osEsc(String(a.ad_text).slice(0,300))}</div>`:''}
+    ${a.ad_url?`<div style="margin-top:6px"><a href="${osEsc(a.ad_url)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--ink-2);text-decoration:underline">view ad</a></div>`:''}
+  </div>`).join('');
+}
+
 // ── Strategy: value ladder, offers, advisor log ───────────────────────────────
 async function loadStrategy(){
   const [ladder, offers, advisors] = await Promise.all([
@@ -534,6 +589,7 @@ async function loadStrategy(){
   renderLadder((ladder&&ladder.value&&ladder.value.steps)||[]);
   renderOffers((offers&&offers.value&&offers.value.items)||[]);
   renderAdvisors(Array.isArray(advisors)?advisors:[]);
+  loadAds();
 }
 function renderLadder(steps){
   const el=document.getElementById('ladder-body');

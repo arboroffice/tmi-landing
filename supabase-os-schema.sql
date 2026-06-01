@@ -162,6 +162,33 @@ create table if not exists public.os_kv (
   updated_at    timestamptz default now()
 );
 
+-- ── Apify ingestion targets ─────────────────────────────────────────────────
+create table if not exists public.os_social_posts (
+  id            uuid primary key default gen_random_uuid(),
+  platform      text,                  -- instagram | tiktok | linkedin | x | threads | youtube
+  author        text,
+  url           text,
+  text          text,
+  likes         bigint,
+  comments      bigint,
+  shares        bigint,
+  views         bigint,
+  posted_at     timestamptz,
+  captured_at   timestamptz default now()
+);
+create index if not exists os_social_posts_url_idx on public.os_social_posts (url);
+
+create table if not exists public.os_competitor_ads (
+  id            uuid primary key default gen_random_uuid(),
+  advertiser    text,
+  platform      text,                  -- google | facebook
+  ad_text       text,
+  ad_url        text,
+  started_on    text,
+  captured_at   timestamptz default now()
+);
+create index if not exists os_competitor_ads_url_idx on public.os_competitor_ads (ad_url);
+
 -- ── Seed data (only if empty, so this stays safe to re-run) ──────────────────
 do $$
 begin
