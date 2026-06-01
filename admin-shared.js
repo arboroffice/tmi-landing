@@ -232,7 +232,7 @@ const TMIAdmin = (() => {
     ${navItem('initiatives', 'Initiatives', I.pipeline, false, '/admin-plans#initiatives')}
     ${navItem('os-team', 'Team', I.team, false, '/admin-team#roster')}
     ${navItem('recruiting', 'Recruiting', I.recruiting, false, '/admin-team#recruiting')}
-    ${navItem('os-success', 'Success', I.clientHealth, false, '/admin-clients#health')}
+    ${navItem('success', 'Success', I.clientHealth, false, '/admin-team#success')}
     ${navItem('journey', 'Journey', I.journey, false, '/admin-onboarding#journey')}
     ${navItem('flywheel', 'Flywheel', I.flywheel, false, '/admin-plans#flywheel')}
     ${navItem('strategy', 'Strategy', I.strategy, false, '/admin-plans#strategy')}
@@ -331,7 +331,7 @@ const TMIAdmin = (() => {
           { page:'initiatives', label:'Initiatives', icon:I.pipeline,    href:'/admin-plans#initiatives' },
           { page:'os-team',     label:'Team',        icon:I.team,        href:'/admin-team#roster' },
           { page:'recruiting',  label:'Recruiting',  icon:I.recruiting,  href:'/admin-team#recruiting' },
-          { page:'os-success',  label:'Success',     icon:I.clientHealth,href:'/admin-clients#health' },
+          { page:'success',     label:'Success',     icon:I.clientHealth,href:'/admin-team#success' },
           { page:'journey',     label:'Journey',     icon:I.journey,     href:'/admin-onboarding#journey' },
           { page:'flywheel',    label:'Flywheel',    icon:I.flywheel,    href:'/admin-plans#flywheel' },
           { page:'strategy',    label:'Strategy',    icon:I.strategy,    href:'/admin-plans#strategy' },

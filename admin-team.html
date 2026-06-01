@@ -61,6 +61,7 @@
       <div class="tab-bar">
         <button class="tab-btn active" data-tab="roster" onclick="switchTab('roster')">Roster</button>
         <button class="tab-btn" data-tab="recruiting" onclick="switchTab('recruiting')">Recruiting</button>
+        <button class="tab-btn" data-tab="success" onclick="switchTab('success')">Success</button>
       </div>
 
       <!-- Roster -->
@@ -90,6 +91,18 @@
         </div>
       </div>
 
+      <!-- Success / CSM capacity -->
+      <div id="tab-success" style="display:none">
+        <div class="rk-kpis" id="sx-kpis"></div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Customer Success Team</span><button class="btn btn-ghost btn-sm" onclick="editCsmTarget()">Set CSM target</button></div>
+          <div id="sx-body"><div style="padding:16px 20px;font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
+        <div class="role-note" style="margin-top:16px">
+          <strong>Retention is the game.</strong> Scale the success team in step with the client base — keep clients per CSM in a healthy band so nobody is overloaded as you grow toward the target.
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -98,19 +111,21 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-let _recruitingLoaded = false;
+const TEAM_TABS = ['roster','recruiting','success'];
+let _recruitingLoaded = false, _successLoaded = false;
 (function(){
   const _h = location.hash.slice(1);
-  const _tab = _h === 'recruiting' ? 'recruiting' : 'roster';
+  const _tab = TEAM_TABS.includes(_h) ? _h : 'roster';
   switchTab(_tab);
   TMIAdmin.initSidebar(_h || 'team');
 })();
 
 function switchTab(tab){
+  if (!TEAM_TABS.includes(tab)) tab = 'roster';
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.getElementById('tab-roster').style.display = tab==='roster'?'':'none';
-  document.getElementById('tab-recruiting').style.display = tab==='recruiting'?'':'none';
+  TEAM_TABS.forEach(t => { const el=document.getElementById('tab-'+t); if(el) el.style.display = (t===tab)?'':'none'; });
   if (tab==='recruiting' && !_recruitingLoaded){ _recruitingLoaded=true; loadRecruiting(); }
+  if (tab==='success' && !_successLoaded){ _successLoaded=true; loadSuccess(); }
   history.replaceState(null,'','#'+tab);
 }
 
@@ -224,6 +239,42 @@ async function addCandidate(){
   if(r){TMIAdmin.toast('Candidate added');loadRecruiting();}
 }
 async function delCandidate(id){ await TMIAdmin.api('/api/os-recruiting?id='+id+'&type=candidate','DELETE'); loadRecruiting(); }
+
+// ── Success / CSM capacity ─────────────────────────────────────────────────────
+async function loadSuccess(){
+  const [members, clients, targetKv] = await Promise.all([
+    osGet('/api/os-team'),
+    osGet('/api/clients'),
+    osGet('/api/os-kv?key=success_target')
+  ]);
+  const team = members || [];
+  const activeClients = (clients||[]).filter(c => c.status === 'active').length;
+  let csms = team.filter(m => /csm|success/i.test((m.role||'')));
+  if (!csms.length) csms = team.filter(m => !/owner/i.test((m.role||'')));
+  const target = (targetKv && targetKv.value && targetKv.value.n) ? Number(targetKv.value.n) : 12;
+  const perCsm = csms.length ? (activeClients / csms.length).toFixed(1) : '—';
+
+  document.getElementById('sx-kpis').innerHTML = `
+    <div class="rk-kpi"><div class="v">${activeClients}</div><div class="l">Active Clients</div></div>
+    <div class="rk-kpi"><div class="v">${csms.length} <span style="font-size:14px;color:var(--muted)">/ ${target}</span></div><div class="l">CSMs (vs target)</div></div>
+    <div class="rk-kpi"><div class="v">${perCsm}</div><div class="l">Clients / CSM</div></div>
+    <div class="rk-kpi"><div class="v">${Math.max(0,target-csms.length)}</div><div class="l">CSMs to Hire</div></div>`;
+
+  const body = document.getElementById('sx-body');
+  if (!csms.length){ body.innerHTML = `<div style="padding:16px 20px;font-size:13px;color:var(--muted)">No success team members yet. Add people on the Roster tab with a role like “CSM” or “Customer Success”.</div>`; return; }
+  body.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Region</th><th>Capacity</th></tr></thead><tbody>${csms.map(m=>{
+    const cap=Math.max(0,Math.min(100,m.capacity_pct||0));
+    return `<tr><td style="font-weight:500;color:var(--ink)">${tEsc(m.name)}</td><td>${tEsc(m.role||'')}</td><td>${tEsc(m.region||'—')}</td>
+      <td style="min-width:160px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span>${cap}%</span></div><div class="cap-bar"><div class="cap-fill" style="width:${cap}%"></div></div></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+async function editCsmTarget(){
+  const cur=await osGet('/api/os-kv?key=success_target');
+  const n=prompt('Target number of CSMs:', (cur&&cur.value&&cur.value.n)||12);
+  if(n==null)return;
+  await TMIAdmin.api('/api/os-kv','PUT',{key:'success_target',value:{n:Number(n)}});
+  loadSuccess(); TMIAdmin.toast('Target saved');
+}
 
 loadRoster();
 </script>

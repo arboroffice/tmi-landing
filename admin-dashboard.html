@@ -36,6 +36,8 @@
   .cmd-sub.done span{text-decoration:line-through;color:var(--muted);}
   .cmd-sub-add{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit;text-align:left;}
   .cmd-sub-add:hover{color:var(--ink);}
+  .cmd-roll{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink-2);padding:2px 0;}
+  .cmd-roll-pct{font-size:11px;font-weight:600;color:var(--ink);}
   .cmd-empty{padding:16px;font-size:12px;color:var(--muted);text-align:center;}
   @media(max-width:880px){.cmd-grid{grid-template-columns:1fr;}}
 </style>
@@ -279,9 +281,10 @@
 TMIAdmin.requireAuth();
 TMIAdmin.initSidebar('dashboard');
 
-// ── Ops Machine: Command Center ────────────────────────────────────────────────
+// ── Ops Machine: Command Center (with week→month→quarter roll-up) ───────────────
 let CMD_GOALS = [];
 const CMD_LEVELS = ['quarter','month','week'];
+const CMD_PARENT = { week: 'month', month: 'quarter', quarter: null };
 
 function cmdEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -296,6 +299,16 @@ async function loadCommand() {
   CMD_LEVELS.forEach(renderCommandColumn);
 }
 
+// Progress rolls up: a goal with linked children = average of their progress;
+// otherwise its own subtasks done/total.
+function cmdChildren(id){ return CMD_GOALS.filter(g => g.parent_id === id && g.status !== 'archived'); }
+function goalProgress(g){
+  const kids = cmdChildren(g.id);
+  if (kids.length){ const a = kids.map(goalProgress); return Math.round(a.reduce((s,v)=>s+v,0)/a.length); }
+  const subs = g.os_subtasks || [];
+  return subs.length ? Math.round(subs.filter(s=>s.done).length / subs.length * 100) : 0;
+}
+
 function renderCommandColumn(level) {
   const el = document.getElementById('cmd-' + level);
   if (!el) return;
@@ -305,26 +318,36 @@ function renderCommandColumn(level) {
     return;
   }
   el.innerHTML = goals.map(g => {
-    const subs = g.os_subtasks || [];
-    const done = subs.filter(s => s.done).length;
-    const pct = subs.length ? Math.round(done / subs.length * 100) : 0;
-    return `<div class="cmd-goal">
-      <div class="cmd-goal-top">
-        <div>
-          <div class="cmd-goal-title">${cmdEsc(g.title)}</div>
-          ${g.owner ? `<div class="cmd-goal-owner">${cmdEsc(g.owner)}</div>` : ''}
-        </div>
-        <button class="cmd-goal-del" onclick="deleteGoal('${g.id}')" title="Delete">&times;</button>
-      </div>
-      <div class="cmd-bar"><div class="cmd-bar-fill" style="width:${pct}%"></div></div>
-      <span class="cmd-bar-pct">${done}/${subs.length} &middot; ${pct}%</span>
-      <div class="cmd-subs">
+    const pct = goalProgress(g);
+    const kids = cmdChildren(g.id);
+    const parent = g.parent_id ? CMD_GOALS.find(p => p.id === g.parent_id) : null;
+    let inner;
+    if (kids.length) {
+      // Parent goal: show rolled-up child list instead of subtasks
+      inner = `<div class="cmd-subs">${kids.map(k => `<div class="cmd-roll"><span>${cmdEsc(k.title)}</span><span class="cmd-roll-pct">${goalProgress(k)}%</span></div>`).join('')}</div>`;
+    } else {
+      const subs = g.os_subtasks || [];
+      inner = `<div class="cmd-subs">
         ${subs.map(s => `<label class="cmd-sub${s.done ? ' done' : ''}">
           <input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleSubtask('${s.id}',this.checked)"/>
           <span>${cmdEsc(s.text)}</span>
         </label>`).join('')}
         <button class="cmd-sub-add" onclick="addSubtask('${g.id}')">+ subtask</button>
+      </div>`;
+    }
+    const meta = kids.length ? `${kids.length} linked &middot; ${pct}%`
+      : `${(g.os_subtasks||[]).filter(s=>s.done).length}/${(g.os_subtasks||[]).length} &middot; ${pct}%`;
+    return `<div class="cmd-goal">
+      <div class="cmd-goal-top">
+        <div>
+          <div class="cmd-goal-title">${cmdEsc(g.title)}</div>
+          ${parent ? `<div class="cmd-goal-owner">↳ ${cmdEsc(parent.title)}</div>` : (g.owner ? `<div class="cmd-goal-owner">${cmdEsc(g.owner)}</div>` : '')}
+        </div>
+        <button class="cmd-goal-del" onclick="deleteGoal('${g.id}')" title="Delete">&times;</button>
       </div>
+      <div class="cmd-bar"><div class="cmd-bar-fill" style="width:${pct}%"></div></div>
+      <span class="cmd-bar-pct">${meta}</span>
+      ${inner}
     </div>`;
   }).join('');
 }
@@ -333,7 +356,19 @@ async function addGoal(level) {
   const title = prompt(`New ${level} goal:`);
   if (!title || !title.trim()) return;
   const owner = prompt('Owner (optional):') || null;
-  const r = await TMIAdmin.api('/api/os-goals', 'POST', { goal: { level, title: title.trim(), owner } });
+  // Offer to link to a parent-level goal so progress ladders up
+  let parent_id = null;
+  const pLevel = CMD_PARENT[level];
+  if (pLevel) {
+    const cand = CMD_GOALS.filter(g => g.level === pLevel && g.status !== 'archived');
+    if (cand.length) {
+      const list = cand.map((c,i) => `${i+1}) ${c.title}`).join('\n');
+      const pick = prompt(`Ladder up to a ${pLevel} goal? Enter a number, or leave blank:\n${list}`);
+      const idx = pick ? parseInt(pick, 10) - 1 : -1;
+      if (idx >= 0 && idx < cand.length) parent_id = cand[idx].id;
+    }
+  }
+  const r = await TMIAdmin.api('/api/os-goals', 'POST', { goal: { level, title: title.trim(), owner, parent_id } });
   if (r) { TMIAdmin.toast('Goal added'); loadCommand(); }
 }
 
@@ -345,11 +380,12 @@ async function addSubtask(goalId) {
 }
 
 async function toggleSubtask(id, done) {
-  // Optimistic local update so the bar moves instantly
+  // Optimistic local update so the bars move instantly across all levels
   for (const g of CMD_GOALS) {
     const s = (g.os_subtasks || []).find(x => x.id === id);
-    if (s) { s.done = done; renderCommandColumn(g.level); break; }
+    if (s) { s.done = done; break; }
   }
+  CMD_LEVELS.forEach(renderCommandColumn);
   await TMIAdmin.api('/api/os-goals', 'PUT', { subtask: { id, done } });
 }
 

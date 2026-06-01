@@ -250,8 +250,21 @@ New env vars: `ANTHROPIC_API_KEY`, `FATHOM_WEBHOOK_SECRET`. New dependency:
 - ✅ **"Ops Machine" sidebar group** (desktop + mobile) tying it all together
 - ✅ Seed data: starter scorecard, the recruiting leaderboard, owner on roster
 
+**Round 2 additions:**
+- ✅ **Goal roll-up** — week goals ladder into a month parent, month into quarter;
+  parent progress bars are the average of their children (recursive). Link a
+  parent when adding a goal.
+- ✅ **Meeting pipeline finished** — `os-meetings` history endpoint, async
+  `os-meeting-process` worker, webhook path enqueues via QStash (inline
+  fallback), and a **Meeting history** viewer in Level 10 to review/apply past
+  digests (including Fathom-webhook ones).
+- ✅ **Scorecard weekly trends** — per-metric sparkline from stored entries.
+- ✅ **Success / CSM capacity board** — `admin-team#success`: active clients,
+  CSMs vs target, clients/CSM, CSMs-to-hire, capacity table.
+
 **To go live:** run `supabase-os-schema.sql` in Supabase, set `ANTHROPIC_API_KEY`
-(and optional `FATHOM_WEBHOOK_SECRET`) in Vercel env, then merge to `main`.
+(and optional `FATHOM_WEBHOOK_SECRET`, plus `QSTASH_TOKEN` + `OPS_BASE_URL` for
+async webhook processing) in Vercel env, then merge to `main`.
 - **Phase 2 — People.** Recruiting leaderboard (your screenshot) + Team roster +
   Success. `os-recruiting`, `os-team`; Success reuses existing CRM endpoints.
 - **Phase 3 — Story.** Initiatives, Journey, Flywheel, Strategy (+ advisor log),
