@@ -161,3 +161,37 @@ create table if not exists public.os_kv (
   value         jsonb default '{}'::jsonb,
   updated_at    timestamptz default now()
 );
+
+-- ── Seed data (only if empty, so this stays safe to re-run) ──────────────────
+do $$
+begin
+  if not exists (select 1 from public.os_scorecard_metrics) then
+    insert into public.os_scorecard_metrics (name, unit, target_value, direction, source, crm_key, sort) values
+      ('Cash Collected',        '$', 175000, 'higher', 'manual', null,            0),
+      ('Gross Margin',          '%', 70,     'higher', 'manual', null,            1),
+      ('MRR',                   '$', 200000, 'higher', 'crm',    'mrr',           2),
+      ('Active Clients',        '#', null,   'higher', 'crm',    'active_clients',3),
+      ('Audits Booked',         '#', 10,     'higher', 'manual', null,            4),
+      ('Proposals Sent',        '#', 8,      'higher', 'manual', null,            5),
+      ('Close Rate',            '%', 35,     'higher', 'manual', null,            6),
+      ('Show Rate',             '%', 80,     'higher', 'manual', null,            7),
+      ('Churn',                 '%', 3,      'lower',  'manual', null,            8),
+      ('Field Notes Subscribers','#',null,   'higher', 'manual', null,            9),
+      ('FOTF Members',          '#', null,   'higher', 'manual', null,            10);
+  end if;
+
+  if not exists (select 1 from public.os_recruiters) then
+    insert into public.os_recruiters (name, channel, region, upfront_cost, status, sort) values
+      ('Channel 1', 'Recruiter', 'Lebanon',        '$2K retainer', 'Onboarding',     0),
+      ('Channel 2', 'Recruiter', 'Brazil',         'TBD',          'Onboarding',     1),
+      ('Channel 3', 'Recruiter', 'Eastern Europe', 'TBD',          'Looms Pending',  2),
+      ('Channel 4', 'Recruiter', 'Latin America',  'TBD',          'Signing Today',  3),
+      ('Channel 5', 'Recruiter', 'Global',         'TBD',          'Call Mon 1:30PM',4),
+      ('Channel 6', 'Recruiter', 'Global',         'TBD',          'Intro Pending',  5);
+  end if;
+
+  if not exists (select 1 from public.os_team_members) then
+    insert into public.os_team_members (name, role, region, status, capacity_pct, sort) values
+      ('Mia Louviere', 'Owner', 'US', 'active', 100, 0);
+  end if;
+end $$;

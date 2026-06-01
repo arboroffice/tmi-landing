@@ -234,13 +234,24 @@ New env vars: `ANTHROPIC_API_KEY`, `FATHOM_WEBHOOK_SECRET`. New dependency:
 
 ## 6. Build phases
 
-- **Phase 0 — Foundation.** `supabase-os-schema.sql` (all `os_*` tables).
-  ✅ Done — schema file shipped; apply in Supabase SQL editor.
-- **Phase 1 — The meeting core.**
-  - ✅ **Command Center built into `admin-dashboard.html`** (goal ladder
-    quarter/month/week + subtasks + progress bars) with `/api/os-goals.js`.
-  - Next: Level 10 (Wins, Scorecard with live CRM pulls, IDS) into
-    `admin-reports.html`; `os-scorecard`, `os-wins`, `os-issues` endpoints.
+**Build status — all 10 tabs + AI pipeline shipped (pending schema apply):**
+- ✅ **Command** → `admin-dashboard.html` (goal ladder + subtasks + bars) · `os-goals`
+- ✅ **Level 10** → `admin-reports.html#level10` (Wins, Scorecard w/ live CRM pulls,
+  IDS reorder/solve, meeting digest) · `os-scorecard`, `os-wins`, `os-issues`
+- ✅ **Initiatives** → `admin-plans.html#initiatives` · `os-initiatives`
+- ✅ **Team roster** → `admin-team.html#roster` · `os-team`
+- ✅ **Recruiting** → `admin-team.html#recruiting` (leaderboard + candidates) · `os-recruiting`
+- ✅ **Success** → routed to `admin-clients.html#health` (existing client health/retention)
+- ✅ **Journey** → `admin-onboarding.html#journey` (delivery timeline) · `os-journey`
+- ✅ **Flywheel** → `admin-plans.html#flywheel` · `os-kv`
+- ✅ **Strategy** → `admin-plans.html#strategy` (ladder, offers, advisor log) · `os-kv`, `os-advisors`
+- ✅ **Vision** → `admin-plans.html#vision` · `os-kv`
+- ✅ **Fathom → Claude** ingestion · `os-meeting-ingest` + Level 10 review/apply
+- ✅ **"Ops Machine" sidebar group** (desktop + mobile) tying it all together
+- ✅ Seed data: starter scorecard, the recruiting leaderboard, owner on roster
+
+**To go live:** run `supabase-os-schema.sql` in Supabase, set `ANTHROPIC_API_KEY`
+(and optional `FATHOM_WEBHOOK_SECRET`) in Vercel env, then merge to `main`.
 - **Phase 2 — People.** Recruiting leaderboard (your screenshot) + Team roster +
   Success. `os-recruiting`, `os-team`; Success reuses existing CRM endpoints.
 - **Phase 3 — Story.** Initiatives, Journey, Flywheel, Strategy (+ advisor log),

@@ -71,11 +71,17 @@
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Onboarding</span></div>
     </div>
     <div class="content">
-      <div class="sec-head" style="margin-bottom:20px">
+      <div class="sec-head" style="margin-bottom:16px">
         <h1>Client Onboarding</h1>
         <span id="client-count" style="font-size:13px;color:var(--muted)"></span>
       </div>
 
+      <div class="tab-bar" style="display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto">
+        <button class="tab-btn active" data-tab="clients" onclick="switchTab('clients')" style="padding:10px 18px;font-size:13px;font-weight:500;background:none;border:none;border-bottom:2px solid var(--ink);cursor:pointer;color:var(--ink);font-family:inherit">Clients</button>
+        <button class="tab-btn" data-tab="journey" onclick="switchTab('journey')" style="padding:10px 18px;font-size:13px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-family:inherit">Delivery Journey</button>
+      </div>
+
+      <div id="tab-clients">
       <div class="ob-layout">
         <!-- Left: client list -->
         <div class="ob-sidebar">
@@ -103,16 +109,101 @@
           <!-- Populated by JS when a client is selected -->
         </div>
       </div>
+      </div><!-- /tab-clients -->
+
+      <!-- Delivery Journey -->
+      <div id="tab-journey" style="display:none">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Standardized Delivery Journey</span><button class="btn btn-ghost btn-sm" onclick="addStage()">+ Stage</button></div>
+          <div style="padding:10px 24px 4px;font-size:13px;color:var(--ink-2);line-height:1.55">The repeatable path every client runs through — calls, assets and milestones. McDonaldize it so every client gets the same world-class experience.</div>
+          <div id="journey-body" style="padding:16px 24px 24px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
 <div id="toast-root"></div>
 
+<style>
+  .jn-list{position:relative;padding-left:28px;}
+  .jn-list:before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:var(--line-strong);}
+  .jn-item{position:relative;padding:0 0 22px;}
+  .jn-item:last-child{padding-bottom:0;}
+  .jn-dot{position:absolute;left:-28px;top:2px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#0a0b14;background:var(--chart);border:2px solid var(--surface);}
+  .jn-dot.call{background:var(--blue);color:#fff;}.jn-dot.asset{background:var(--chart-dark);}.jn-dot.milestone{background:var(--ink);color:#fff;}
+  .jn-day{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .jn-title{font-size:15px;font-weight:600;color:var(--ink);margin-top:1px;}
+  .jn-desc{font-size:13px;color:var(--ink-2);margin-top:3px;line-height:1.5;}
+  .jn-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-left:8px;}
+  .jn-mini{background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px 5px;font-family:inherit;}
+  .jn-mini:hover{color:var(--ink);}
+</style>
+
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
-TMIAdmin.initSidebar('onboarding');
+let _journeyLoaded = false;
+(function(){
+  const _h = location.hash.slice(1);
+  TMIAdmin.initSidebar('onboarding');
+  if (_h === 'journey') switchTab('journey');
+})();
+
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const on = b.dataset.tab === tab;
+    b.classList.toggle('active', on);
+    b.style.color = on ? 'var(--ink)' : 'var(--muted)';
+    b.style.borderBottomColor = on ? 'var(--ink)' : 'transparent';
+  });
+  document.getElementById('tab-clients').style.display = tab==='clients'?'':'none';
+  document.getElementById('tab-journey').style.display = tab==='journey'?'':'none';
+  if (tab==='journey' && !_journeyLoaded){ _journeyLoaded=true; loadJourney(); }
+  history.replaceState(null,'','#'+tab);
+}
+
+const JN_DEFAULT = [
+  {day_offset:0, type:'call', title:'Kickoff call', description:'Align on goals, access, and the build plan.'},
+  {day_offset:3, type:'milestone', title:'Operations deep dive', description:'Map the current workflow, systems, and pain points.'},
+  {day_offset:10, type:'asset', title:'System blueprint delivered', description:'The custom operating-system design and scope.'},
+  {day_offset:30, type:'milestone', title:'Core build live', description:'First modules in the client’s hands.'},
+  {day_offset:60, type:'call', title:'Adoption review', description:'Train the crew, tighten the workflow, expand usage.'},
+  {day_offset:75, type:'milestone', title:'Handoff & scale', description:'Embedded, documented, running without us in the loop.'}
+];
+let JN = [];
+async function loadJourney(){
+  let data = [];
+  try { const r = await fetch('/api/os-journey', { headers:{Authorization:'Bearer '+TMIAdmin.token()} }); if (r.ok) data = await r.json(); } catch {}
+  JN = Array.isArray(data) ? data : [];
+  renderJourney();
+}
+function jnEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function renderJourney(){
+  const el = document.getElementById('journey-body');
+  const stages = JN.length ? JN : JN_DEFAULT;
+  const seeding = !JN.length;
+  el.innerHTML = (seeding ? `<div style="font-size:12px;color:var(--muted);margin-bottom:14px">Showing a starter journey. Tap “+ Stage” to make it yours.</div>` : '') +
+    `<div class="jn-list">` + stages.map(s => {
+      const icon = s.type==='call'?'☎':(s.type==='asset'?'⚑':'●');
+      return `<div class="jn-item">
+        <div class="jn-dot ${s.type||'milestone'}">${icon}</div>
+        <div class="jn-day">Day ${s.day_offset||0}<span class="jn-type">${jnEsc(s.type||'milestone')}</span></div>
+        <div class="jn-title">${jnEsc(s.title)}${s.id?` <button class="jn-mini" onclick="delStage('${s.id}')" title="Remove">&times;</button>`:''}</div>
+        ${s.description?`<div class="jn-desc">${jnEsc(s.description)}</div>`:''}
+      </div>`;
+    }).join('') + `</div>`;
+}
+async function addStage(){
+  const title=prompt('Stage title:'); if(!title||!title.trim())return;
+  const dayRaw=prompt('Day offset (number from kickoff):','0'); const day_offset=dayRaw?Number(dayRaw):0;
+  const type=(prompt('Type — call / asset / milestone:','milestone')||'milestone').trim();
+  const description=prompt('Description (optional):')||null;
+  const r=await TMIAdmin.api('/api/os-journey','POST',{journey:'default',title:title.trim(),day_offset,type,description,sort:day_offset});
+  if(r){ TMIAdmin.toast('Stage added'); loadJourney(); }
+}
+async function delStage(id){ await TMIAdmin.api('/api/os-journey?id='+id,'DELETE'); loadJourney(); }
 
 // ─── Checklist definition ────────────────────────────────────────────────────
 

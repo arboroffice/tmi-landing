@@ -52,7 +52,14 @@ const TMIAdmin = (() => {
     analytics:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><line x1="18" y1="20" x2="18" y2="10" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="4" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="14" stroke-linecap="round"/></svg>`,
     cityPin:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
     cityMap:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18" stroke-linecap="round"/><line x1="16" y1="6" x2="16" y2="22" stroke-linecap="round"/></svg>`,
-    cityMoney:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="1" y="4" width="22" height="16" rx="2"/><circle cx="12" cy="12" r="4"/><path d="M6 12h.01M18 12h.01" stroke-linecap="round" stroke-width="2.5"/></svg>`
+    cityMoney:  `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="1" y="4" width="22" height="16" rx="2"/><circle cx="12" cy="12" r="4"/><path d="M6 12h.01M18 12h.01" stroke-linecap="round" stroke-width="2.5"/></svg>`,
+    command:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke-linecap="round"/></svg>`,
+    level10:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3" stroke-linecap="round"/></svg>`,
+    recruiting: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="9" cy="8" r="4"/><path stroke-linecap="round" d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1M19 8v6M22 11h-6"/></svg>`,
+    journey:    `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h6a4 4 0 0 0 0-8H10a4 4 0 0 1 0-8h6" stroke-linecap="round"/></svg>`,
+    flywheel:   `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 12a9 9 0 1 1-3-6.7" stroke-linecap="round"/><polyline points="21 4 21 9 16 9" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    vision:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    strategy:   `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><polygon points="15.5 8.5 11 11 8.5 15.5 13 13 15.5 8.5" stroke-linejoin="round"/></svg>`
   };
 
   function navItem(page, label, icon, badge, href) {
@@ -219,6 +226,17 @@ const TMIAdmin = (() => {
     <div><div class="sb-brand-label">TMI</div><div class="sb-brand-sub">Admin</div></div>
   </div>
   <nav class="sb-nav">
+    <div class="sb-group-label">Ops Machine</div>
+    ${navItem('command', 'Command', I.command, false, '/admin-dashboard')}
+    ${navItem('level10', 'Level 10', I.level10, false, '/admin-reports#level10')}
+    ${navItem('initiatives', 'Initiatives', I.pipeline, false, '/admin-plans#initiatives')}
+    ${navItem('os-team', 'Team', I.team, false, '/admin-team#roster')}
+    ${navItem('recruiting', 'Recruiting', I.recruiting, false, '/admin-team#recruiting')}
+    ${navItem('os-success', 'Success', I.clientHealth, false, '/admin-clients#health')}
+    ${navItem('journey', 'Journey', I.journey, false, '/admin-onboarding#journey')}
+    ${navItem('flywheel', 'Flywheel', I.flywheel, false, '/admin-plans#flywheel')}
+    ${navItem('strategy', 'Strategy', I.strategy, false, '/admin-plans#strategy')}
+    ${navItem('vision', 'Vision', I.vision, false, '/admin-plans#vision')}
     <div class="sb-group-label">Overview</div>
     ${navItem('dashboard', 'Dashboard', I.dashboard)}
     ${navItem('revenue', 'Revenue', I.revenue, false, '/admin-reports#revenue')}
@@ -307,6 +325,18 @@ const TMIAdmin = (() => {
 
       // More sheet
       const groups = [
+        { label: 'Ops Machine', items: [
+          { page:'command',     label:'Command',     icon:I.command,     href:'/admin-dashboard' },
+          { page:'level10',     label:'Level 10',    icon:I.level10,     href:'/admin-reports#level10' },
+          { page:'initiatives', label:'Initiatives', icon:I.pipeline,    href:'/admin-plans#initiatives' },
+          { page:'os-team',     label:'Team',        icon:I.team,        href:'/admin-team#roster' },
+          { page:'recruiting',  label:'Recruiting',  icon:I.recruiting,  href:'/admin-team#recruiting' },
+          { page:'os-success',  label:'Success',     icon:I.clientHealth,href:'/admin-clients#health' },
+          { page:'journey',     label:'Journey',     icon:I.journey,     href:'/admin-onboarding#journey' },
+          { page:'flywheel',    label:'Flywheel',    icon:I.flywheel,    href:'/admin-plans#flywheel' },
+          { page:'strategy',    label:'Strategy',    icon:I.strategy,    href:'/admin-plans#strategy' },
+          { page:'vision',      label:'Vision',      icon:I.vision,      href:'/admin-plans#vision' },
+        ]},
         { label: 'Overview', items: [
           { page:'revenue',   label:'Revenue',   icon:I.revenue,   href:'/admin-reports#revenue' },
           { page:'analytics', label:'Analytics', icon:I.analytics, href:'/admin-reports#analytics' },
