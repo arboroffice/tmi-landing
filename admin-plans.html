@@ -10,6 +10,40 @@
   .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto;}
   .tab-btn{padding:10px 18px;font-size:13px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-family:inherit;white-space:nowrap;transition:color 0.15s,border-color 0.15s;}
   .tab-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+  /* Ops Machine panels */
+  .init-row{padding:13px 20px;border-bottom:1px solid var(--line);}
+  .init-row:last-child{border-bottom:none;}
+  .init-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .init-title{font-size:14px;font-weight:600;color:var(--ink);}
+  .init-meta{font-size:11px;color:var(--muted);margin-top:2px;display:flex;gap:10px;flex-wrap:wrap;}
+  .init-cat{color:var(--ink-2);}
+  .init-bar{height:6px;background:var(--bg-alt,#f5f5f7);border-radius:999px;margin:10px 0 4px;overflow:hidden;}
+  .init-fill{height:100%;border-radius:999px;transition:width .3s ease;}
+  .st-on{background:#dcfce7;color:#15803d}.st-behind{background:#fee2e2;color:#b91c1c}.st-done{background:#dbeafe;color:#1d4ed8}
+  .init-pill{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+  .init-mini{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:2px 5px;font-family:inherit;border-radius:4px;}
+  .init-mini:hover{color:var(--ink);background:var(--bg-alt,#f5f5f7);}
+  .ladder-step{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px;color:var(--ink);}
+  .ladder-step:last-child{border-bottom:none;}
+  .ladder-num{width:24px;height:24px;border-radius:50%;background:var(--chart);color:#0a0b14;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .adv-row{padding:13px 20px;border-bottom:1px solid var(--line);}
+  .adv-row:last-child{border-bottom:none;}
+  .adv-name{font-size:14px;font-weight:600;color:var(--ink);}
+  .adv-date{font-size:11px;color:var(--muted);}
+  .adv-text{font-size:13px;color:var(--ink-2);margin-top:6px;line-height:1.55;white-space:pre-wrap;}
+  .adv-actions{font-size:13px;color:var(--ink);margin-top:8px;background:var(--bg-alt,#f5f5f7);border-radius:6px;padding:10px 12px;line-height:1.55;white-space:pre-wrap;}
+  .fw-loop{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch;justify-content:center;}
+  .fw-stage{flex:1;min-width:180px;max-width:240px;background:var(--bg-alt,#f5f5f7);border:1px solid var(--line);border-radius:10px;padding:18px;text-align:center;}
+  .fw-n{width:30px;height:30px;border-radius:50%;background:var(--chart-dark);color:#0a0b14;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+  .fw-stage h4{font-size:15px;margin:0 0 6px;color:var(--ink);font-family:var(--serif);font-weight:500;}
+  .fw-stage p{font-size:12px;color:var(--ink-2);margin:0;line-height:1.5;}
+  .fw-arrow{display:flex;align-items:center;color:var(--muted);font-size:20px;}
+  .vis-block{margin-bottom:22px;}
+  .vis-block h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-family:var(--sans);font-weight:600;margin:0 0 8px;}
+  .vis-block p{font-size:17px;color:var(--ink);line-height:1.55;font-family:var(--serif);margin:0;}
+  .vis-goals{display:flex;flex-direction:column;gap:8px;}
+  .vis-goal{display:flex;gap:10px;font-size:15px;color:var(--ink);align-items:baseline;}
+  .vis-goal b{color:var(--muted);font-size:12px;min-width:54px;}
 
   /* Financial Model */
   .model-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
@@ -86,8 +120,12 @@
     <div class="content">
       <div class="sec-head"><h1>Plans</h1></div>
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('model')">Financial Model</button>
-        <button class="tab-btn" onclick="switchTab('retention')">Retention Plan</button>
+        <button class="tab-btn active" data-tab="model" onclick="switchTab('model')">Financial Model</button>
+        <button class="tab-btn" data-tab="retention" onclick="switchTab('retention')">Retention Plan</button>
+        <button class="tab-btn" data-tab="initiatives" onclick="switchTab('initiatives')">Initiatives</button>
+        <button class="tab-btn" data-tab="strategy" onclick="switchTab('strategy')">Strategy</button>
+        <button class="tab-btn" data-tab="flywheel" onclick="switchTab('flywheel')">Flywheel</button>
+        <button class="tab-btn" data-tab="vision" onclick="switchTab('vision')">Vision</button>
       </div>
 
       <!-- Financial Model Tab -->
@@ -269,6 +307,49 @@
           </div>
         </div>
       </div>
+
+      <!-- Initiatives -->
+      <div id="tab-initiatives" style="display:none">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Company Initiatives</span><button class="btn btn-ghost btn-sm" onclick="addInitiative()">+ Initiative</button></div>
+          <div id="init-body"><div style="padding:16px 20px;font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- Strategy -->
+      <div id="tab-strategy" style="display:none">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><span class="card-title">Value Ladder</span><button class="btn btn-ghost btn-sm" onclick="editLadder()">Edit</button></div>
+            <div id="ladder-body" style="padding:16px 20px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><span class="card-title">Current Offers</span><button class="btn btn-ghost btn-sm" onclick="editOffers()">Edit</button></div>
+            <div id="offers-body" style="padding:16px 20px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px">
+          <div class="card-head"><span class="card-title">Advisor &amp; Mentor Log</span><button class="btn btn-ghost btn-sm" onclick="addAdvisor()">+ Log a conversation</button></div>
+          <div id="advisor-body"><div style="padding:16px 20px;font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- Flywheel -->
+      <div id="tab-flywheel" style="display:none">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Company Flywheel</span><button class="btn btn-ghost btn-sm" onclick="editFlywheel()">Edit</button></div>
+          <div id="flywheel-body" style="padding:28px 24px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- Vision -->
+      <div id="tab-vision" style="display:none">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Vision &amp; Core Goals</span><button class="btn btn-ghost btn-sm" onclick="editVision()">Edit</button></div>
+          <div id="vision-body" style="padding:28px 24px"><div style="font-size:13px;color:var(--muted)">Loading...</div></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -276,22 +357,26 @@
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
+const PLAN_TABS = ['model','retention','initiatives','strategy','flywheel','vision'];
+const _PLMAP = {'financial-model':'model','retention-plan':'retention'};
+const _PLH = {'model':'financial-model','retention':'retention-plan'};
+const _osLoaded = {};
 (function(){
   const _h = location.hash.slice(1);
-  const _PLMAP = {'financial-model':'model','retention-plan':'retention'};
-  const _PLRMAP = {'model':'financial-model','retention':'retention-plan'};
   const _tab = _PLMAP[_h] || _h || 'model';
-  const _valid = ['model','retention'];
-  const _safeTab = _valid.includes(_tab) ? _tab : 'model';
+  const _safeTab = PLAN_TABS.includes(_tab) ? _tab : 'model';
   switchTab(_safeTab);
-  TMIAdmin.initSidebar(_PLRMAP[_safeTab] || _h || 'financial-model');
+  TMIAdmin.initSidebar(_PLH[_safeTab] || _h || 'financial-model');
 })();
 
 function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['model','retention'][i] === tab));
-  document.getElementById('tab-model').style.display     = tab === 'model'     ? '' : 'none';
-  document.getElementById('tab-retention').style.display  = tab === 'retention' ? '' : 'none';
-  const _PLH = {'model':'financial-model','retention':'retention-plan'};
+  if (!PLAN_TABS.includes(tab)) tab = 'model';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  PLAN_TABS.forEach(t => { const el = document.getElementById('tab-'+t); if (el) el.style.display = (t===tab)?'':'none'; });
+  if (tab==='initiatives' && !_osLoaded.initiatives){ _osLoaded.initiatives=true; loadInitiatives(); }
+  if (tab==='strategy' && !_osLoaded.strategy){ _osLoaded.strategy=true; loadStrategy(); }
+  if (tab==='flywheel' && !_osLoaded.flywheel){ _osLoaded.flywheel=true; loadFlywheel(); }
+  if (tab==='vision' && !_osLoaded.vision){ _osLoaded.vision=true; loadVision(); }
   history.replaceState(null, '', '#' + (_PLH[tab] || tab));
 }
 
@@ -383,6 +468,178 @@ function recalc() {
 
 // Init with target scenario
 loadScenario('target', null);
+
+// ── Ops Machine: shared helpers ───────────────────────────────────────────────
+function osEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+async function osGet(path){ try{ const r=await fetch(path,{headers:{Authorization:'Bearer '+TMIAdmin.token()}}); if(r.ok) return await r.json(); }catch{} return null; }
+
+// ── Initiatives ───────────────────────────────────────────────────────────────
+let INITS = [];
+async function loadInitiatives(){
+  INITS = (await osGet('/api/os-initiatives')) || [];
+  const el = document.getElementById('init-body');
+  if (!INITS.length){ el.innerHTML = `<div style="padding:16px 20px;font-size:13px;color:var(--muted)">No initiatives yet. Advisor plans and big bets live here.</div>`; return; }
+  const stCls = {'on-track':'st-on','behind':'st-behind','done':'st-done'};
+  el.innerHTML = INITS.map(i => {
+    const p = Math.max(0, Math.min(100, i.progress||0));
+    const fill = i.status==='behind' ? 'var(--red)' : (i.status==='done' ? 'var(--blue)' : 'var(--chart-dark)');
+    return `<div class="init-row">
+      <div class="init-top">
+        <div><div class="init-title">${osEsc(i.title)}</div>
+        <div class="init-meta">${i.category?`<span class="init-cat">${osEsc(i.category)}</span>`:''}${i.owner?`<span>${osEsc(i.owner)}</span>`:''}${i.source?`<span>via ${osEsc(i.source)}</span>`:''}</div></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="init-pill ${stCls[i.status]||''}">${osEsc(i.status||'on-track')}</span>
+          <button class="init-mini" onclick="editInitiative('${i.id}')" title="Edit">✎</button>
+          <button class="init-mini" onclick="delInitiative('${i.id}')" title="Delete">&times;</button>
+        </div>
+      </div>
+      <div class="init-bar"><div class="init-fill" style="width:${p}%;background:${fill}"></div></div>
+      <div style="font-size:11px;color:var(--muted)">${p}% complete</div>
+      ${i.notes?`<div style="font-size:13px;color:var(--ink-2);margin-top:8px;line-height:1.5;white-space:pre-wrap">${osEsc(i.notes)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+async function addInitiative(){
+  const v=await TMIAdmin.formModal({title:'Add initiative',submitLabel:'Add',fields:[
+    {name:'title',label:'Initiative title',required:true},
+    {name:'category',label:'Category',type:'select',value:'Media',options:['Media','Product','Delivery','Recruiting','Retention','Other']},
+    {name:'owner',label:'Owner (optional)'},
+    {name:'source',label:'Source — advisor or origin (optional)'}
+  ]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-initiatives','POST',{title:v.title,category:v.category||null,owner:v.owner||null,source:v.source||null,status:'on-track',progress:0,sort:INITS.length});
+  if(r){TMIAdmin.toast('Initiative added');loadInitiatives();}
+}
+async function editInitiative(id){
+  const i=INITS.find(x=>x.id===id); if(!i)return;
+  const v=await TMIAdmin.formModal({title:'Update initiative',submitLabel:'Save',fields:[
+    {name:'status',label:'Status',type:'select',value:i.status||'on-track',options:[{value:'on-track',label:'On track'},{value:'behind',label:'Behind'},{value:'done',label:'Done'}]},
+    {name:'progress',label:'Progress %',type:'number',value:i.progress||0},
+    {name:'notes',label:'Notes (optional)',type:'textarea',rows:3,value:i.notes||''}
+  ]});
+  if(!v)return;
+  const progress=v.progress!=null?Math.max(0,Math.min(100,Number(v.progress))):i.progress;
+  const r=await TMIAdmin.api('/api/os-initiatives','PUT',{id,status:v.status,progress,notes:v.notes||null});
+  if(r){loadInitiatives();}
+}
+async function delInitiative(id){ if(!(await TMIAdmin.confirm('Delete this initiative?')))return; await TMIAdmin.api('/api/os-initiatives?id='+id,'DELETE'); loadInitiatives(); }
+
+// ── Strategy: value ladder, offers, advisor log ───────────────────────────────
+async function loadStrategy(){
+  const [ladder, offers, advisors] = await Promise.all([
+    osGet('/api/os-kv?key=strategy_ladder'),
+    osGet('/api/os-kv?key=strategy_offers'),
+    osGet('/api/os-advisors')
+  ]);
+  renderLadder((ladder&&ladder.value&&ladder.value.steps)||[]);
+  renderOffers((offers&&offers.value&&offers.value.items)||[]);
+  renderAdvisors(Array.isArray(advisors)?advisors:[]);
+}
+function renderLadder(steps){
+  const el=document.getElementById('ladder-body');
+  el.innerHTML = steps.length ? steps.map((s,i)=>`<div class="ladder-step"><span class="ladder-num">${i+1}</span><span>${osEsc(s)}</span></div>`).join('')
+    : `<div style="font-size:13px;color:var(--muted)">No ladder yet. Tap Edit to lay out your value ladder.</div>`;
+}
+function renderOffers(items){
+  const el=document.getElementById('offers-body');
+  el.innerHTML = items.length ? items.map(s=>`<div class="ladder-step"><span class="ladder-num" style="background:var(--chart-dark)">$</span><span>${osEsc(s)}</span></div>`).join('')
+    : `<div style="font-size:13px;color:var(--muted)">No offers listed. Tap Edit.</div>`;
+}
+async function editLadder(){
+  const cur=(await osGet('/api/os-kv?key=strategy_ladder'));
+  const steps=(cur&&cur.value&&cur.value.steps)||[];
+  const v=await TMIAdmin.formModal({title:'Value ladder',submitLabel:'Save',fields:[{name:'steps',label:'One rung per line (low to high)',type:'textarea',rows:7,value:steps.join('\n')}]});
+  if(!v)return;
+  const arr=v.steps.split('\n').map(s=>s.trim()).filter(Boolean);
+  await TMIAdmin.api('/api/os-kv','PUT',{key:'strategy_ladder',value:{steps:arr}});
+  renderLadder(arr); TMIAdmin.toast('Saved');
+}
+async function editOffers(){
+  const cur=(await osGet('/api/os-kv?key=strategy_offers'));
+  const items=(cur&&cur.value&&cur.value.items)||[];
+  const v=await TMIAdmin.formModal({title:'Current offers',submitLabel:'Save',fields:[{name:'items',label:'One offer per line',type:'textarea',rows:7,value:items.join('\n')}]});
+  if(!v)return;
+  const arr=v.items.split('\n').map(s=>s.trim()).filter(Boolean);
+  await TMIAdmin.api('/api/os-kv','PUT',{key:'strategy_offers',value:{items:arr}});
+  renderOffers(arr); TMIAdmin.toast('Saved');
+}
+function renderAdvisors(list){
+  const el=document.getElementById('advisor-body');
+  if(!list.length){ el.innerHTML=`<div style="padding:16px 20px;font-size:13px;color:var(--muted)">No conversations logged. Aim for ~5 mentor calls a week.</div>`; return; }
+  el.innerHTML=list.map(a=>`<div class="adv-row">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+      <span class="adv-name">${osEsc(a.advisor)}</span>
+      <span style="display:flex;align-items:center;gap:8px"><span class="adv-date">${a.met_on?TMIAdmin.fmt(a.met_on):TMIAdmin.fmt(a.created_at)}</span><button class="init-mini" onclick="delAdvisor('${a.id}')" title="Delete">&times;</button></span>
+    </div>
+    ${a.insights?`<div class="adv-text">${osEsc(a.insights)}</div>`:''}
+    ${a.action_items?`<div class="adv-actions"><strong>Actions:</strong>\n${osEsc(a.action_items)}</div>`:''}
+  </div>`).join('');
+}
+async function addAdvisor(){
+  const v=await TMIAdmin.formModal({title:'Log a conversation',submitLabel:'Save',fields:[
+    {name:'advisor',label:'Advisor / mentor name',required:true},
+    {name:'insights',label:'Key insights',type:'textarea',rows:4},
+    {name:'action_items',label:'Action items (optional)',type:'textarea',rows:3}
+  ]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-advisors','POST',{advisor:v.advisor,met_on:new Date().toISOString().slice(0,10),insights:v.insights||null,action_items:v.action_items||null});
+  if(r){TMIAdmin.toast('Logged');loadStrategy();}
+}
+async function delAdvisor(id){ await TMIAdmin.api('/api/os-advisors?id='+id,'DELETE'); loadStrategy(); }
+
+// ── Flywheel ──────────────────────────────────────────────────────────────────
+const FW_DEFAULT=[{h:'Build a great product',p:'Deliver an operating system founders feel in their business every day.'},{h:'Market the results',p:'Show the outcomes and the founders we help.'},{h:'Founders spread it',p:'People buy what other people want. Word of mouth compounds.'},{h:'Attract more',p:'Better founders come in, and the machine keeps turning.'}];
+async function loadFlywheel(){
+  const cur=await osGet('/api/os-kv?key=flywheel');
+  const stages=(cur&&cur.value&&cur.value.stages&&cur.value.stages.length)?cur.value.stages:FW_DEFAULT;
+  renderFlywheel(stages);
+}
+function renderFlywheel(stages){
+  const el=document.getElementById('flywheel-body');
+  el.innerHTML=`<div class="fw-loop">`+stages.map((s,i)=>`
+    <div class="fw-stage"><div class="fw-n">${i+1}</div><h4>${osEsc(s.h)}</h4><p>${osEsc(s.p)}</p></div>
+    ${i<stages.length-1?`<div class="fw-arrow">&rarr;</div>`:`<div class="fw-arrow">&#8631;</div>`}
+  `).join('')+`</div>`;
+}
+async function editFlywheel(){
+  const cur=await osGet('/api/os-kv?key=flywheel');
+  const stages=(cur&&cur.value&&cur.value.stages&&cur.value.stages.length)?cur.value.stages:FW_DEFAULT;
+  const v=await TMIAdmin.formModal({title:'Flywheel stages',submitLabel:'Save',fields:[{name:'stages',label:'One stage per line — "Headline | description"',type:'textarea',rows:6,value:stages.map(s=>`${s.h} | ${s.p}`).join('\n')}]});
+  if(!v)return;
+  const arr=v.stages.split('\n').map(l=>{const [h,...p]=l.split('|');return {h:(h||'').trim(),p:p.join('|').trim()};}).filter(s=>s.h);
+  await TMIAdmin.api('/api/os-kv','PUT',{key:'flywheel',value:{stages:arr}});
+  renderFlywheel(arr); TMIAdmin.toast('Saved');
+}
+
+// ── Vision ────────────────────────────────────────────────────────────────────
+async function loadVision(){
+  const cur=await osGet('/api/os-kv?key=vision');
+  renderVision((cur&&cur.value)||{});
+}
+function renderVision(v){
+  const el=document.getElementById('vision-body');
+  const goals=v.goals||[];
+  el.innerHTML=`
+    ${v.mission?`<div class="vis-block"><h3>Mission</h3><p>${osEsc(v.mission)}</p></div>`:''}
+    ${v.vision?`<div class="vis-block"><h3>Vision</h3><p>${osEsc(v.vision)}</p></div>`:''}
+    ${v.values?`<div class="vis-block"><h3>Values</h3><p>${osEsc(v.values)}</p></div>`:''}
+    ${goals.length?`<div class="vis-block"><h3>Core Goals</h3><div class="vis-goals">${goals.map(g=>`<div class="vis-goal"><b>${osEsc(g.horizon||'')}</b><span>${osEsc(g.target||g)}</span></div>`).join('')}</div></div>`:''}
+    ${(!v.mission&&!v.vision&&!v.values&&!goals.length)?`<div style="font-size:13px;color:var(--muted)">No vision set yet. Tap Edit to write your mission, vision, values and core goals.</div>`:''}
+  `;
+}
+async function editVision(){
+  const cur=await osGet('/api/os-kv?key=vision'); const cv=(cur&&cur.value)||{};
+  const v=await TMIAdmin.formModal({title:'Vision & core goals',submitLabel:'Save',fields:[
+    {name:'mission',label:'Mission',type:'textarea',rows:2,value:cv.mission||''},
+    {name:'vision',label:'Vision',type:'textarea',rows:2,value:cv.vision||''},
+    {name:'values',label:'Values',type:'textarea',rows:2,value:cv.values||''},
+    {name:'goalsTxt',label:'Core goals — "Horizon | target" per line',type:'textarea',rows:4,value:(cv.goals||[]).map(g=>`${g.horizon||''} | ${g.target||''}`).join('\n')}
+  ]});
+  if(!v)return;
+  const goals=(v.goalsTxt||'').split('\n').map(l=>{const [h,...t]=l.split('|');return {horizon:(h||'').trim(),target:t.join('|').trim()};}).filter(g=>g.horizon||g.target);
+  await TMIAdmin.api('/api/os-kv','PUT',{key:'vision',value:{mission:v.mission,vision:v.vision,values:v.values,goals}});
+  renderVision({mission:v.mission,vision:v.vision,values:v.values,goals}); TMIAdmin.toast('Saved');
+}
 </script>
 </body>
 </html>

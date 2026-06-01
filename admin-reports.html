@@ -10,6 +10,38 @@
   .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto;}
   .tab-btn{padding:10px 18px;font-size:13px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-family:inherit;white-space:nowrap;transition:color 0.15s,border-color 0.15s;}
   .tab-btn.active{color:var(--ink);border-bottom-color:var(--ink);}
+  /* Level 10 */
+  .l10-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;}
+  @media(max-width:900px){.l10-grid{grid-template-columns:1fr;}}
+  .sc-row{display:grid;grid-template-columns:1.5fr .7fr .85fr 64px auto;gap:8px;align-items:center;padding:9px 20px;border-bottom:1px solid var(--line);font-size:13px;}
+  .sc-spark{height:22px;}
+  @media(max-width:600px){.sc-spark{display:none;}.sc-row{grid-template-columns:1.4fr .7fr .9fr auto;}}
+  .sc-row:last-child{border-bottom:none;}
+  .sc-name{font-weight:500;color:var(--ink);}
+  .sc-sub{font-size:11px;color:var(--muted);}
+  .sc-target{color:var(--ink-2);}
+  .sc-input{width:88px;padding:5px 8px;border:1px solid var(--line-strong);border-radius:5px;font-family:inherit;font-size:13px;text-align:right;}
+  .sc-input[readonly]{background:var(--bg-alt,#f5f5f7);color:var(--ink-2);}
+  .sc-pill{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;justify-self:start;white-space:nowrap;}
+  .sc-on{background:#dcfce7;color:#15803d;}
+  .sc-off{background:#fee2e2;color:#b91c1c;}
+  .sc-na{background:var(--bg-alt,#f5f5f7);color:var(--muted);}
+  .win-item,.ids-item{display:flex;align-items:flex-start;gap:10px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;}
+  .win-item:last-child,.ids-item:last-child{border-bottom:none;}
+  .win-dot{width:7px;height:7px;border-radius:50%;background:var(--chart-dark);margin-top:5px;flex-shrink:0;}
+  .ids-body{flex:1;}
+  .ids-title{font-weight:500;color:var(--ink);}
+  .ids-notes{font-size:12px;color:var(--muted);margin-top:2px;}
+  .ids-actions{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+  .ids-mini{background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px 4px;font-family:inherit;border-radius:4px;}
+  .ids-mini:hover{color:var(--ink);background:var(--bg-alt,#f5f5f7);}
+  .ids-item.solved .ids-title{text-decoration:line-through;color:var(--muted);}
+  .l10-add{font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:inherit;padding:10px 20px;text-align:left;width:100%;}
+  .l10-add:hover{color:var(--ink);}
+  .digest-box{background:var(--bg-alt,#f5f5f7);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-top:14px;font-size:13px;}
+  .digest-sec{margin-top:12px;}
+  .digest-sec h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-family:var(--sans);font-weight:600;}
+  .digest-line{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line);}
 </style>
 </head>
 <body>
@@ -22,8 +54,9 @@
     <div class="content">
       <div class="sec-head"><h1>Reports</h1></div>
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('revenue')">Revenue</button>
-        <button class="tab-btn" onclick="switchTab('analytics')">Analytics</button>
+        <button class="tab-btn active" data-tab="revenue" onclick="switchTab('revenue')">Revenue</button>
+        <button class="tab-btn" data-tab="analytics" onclick="switchTab('analytics')">Analytics</button>
+        <button class="tab-btn" data-tab="level10" onclick="switchTab('level10')">Level 10</button>
       </div>
 
       <!-- Revenue Tab -->
@@ -84,27 +117,83 @@
           </div>
         </div>
       </div>
+
+      <!-- Level 10 Tab -->
+      <div id="tab-level10" style="display:none">
+        <div class="card" style="margin-top:20px">
+          <div class="card-head">
+            <span class="card-title">Weekly Scorecard</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost btn-sm" onclick="addMetric()">+ Metric</button>
+              <button class="btn btn-ghost btn-sm" onclick="toggleMeetings()">Meeting history</button>
+              <button class="btn btn-primary btn-sm" onclick="openIngest()">Ingest Meeting &rarr;</button>
+            </div>
+          </div>
+          <div id="sc-body"><div style="padding:16px 20px;font-size:13px;color:var(--muted)">Loading...</div></div>
+          <div id="meetings-wrap" style="padding:0 20px"></div>
+          <div id="digest-wrap" style="padding:0 20px 16px"></div>
+        </div>
+        <div class="l10-grid">
+          <div class="card">
+            <div class="card-head"><span class="card-title">Wins</span></div>
+            <div id="wins-body"><div style="padding:16px 20px;font-size:13px;color:var(--muted)">Loading...</div></div>
+            <button class="l10-add" onclick="addWin()">+ Add a win</button>
+          </div>
+          <div class="card">
+            <div class="card-head"><span class="card-title">Issues &amp; Opportunities</span><span class="card-sub">Identify &middot; Discuss &middot; Solve</span></div>
+            <div id="ids-body"><div style="padding:16px 20px;font-size:13px;color:var(--muted)">Loading...</div></div>
+            <button class="l10-add" onclick="addIssue()">+ Add an issue</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
+
+<!-- Ingest Meeting Modal -->
+<div class="modal-overlay" id="modal-ingest" onclick="if(event.target===this)TMIAdmin.closeModal('modal-ingest')">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hd">
+      <h3 class="modal-title">Ingest Meeting</h3>
+      <button class="modal-close" onclick="TMIAdmin.closeModal('modal-ingest')">&times;</button>
+    </div>
+    <div class="modal-bd">
+      <p style="font-size:13px;color:var(--ink-2);margin-bottom:12px;line-height:1.5">Paste a Fathom transcript. Claude pulls out wins, issues, scorecard updates and action items for you to review before they hit the board.</p>
+      <input class="form-input" id="ing-title" placeholder="Meeting title (optional)" style="margin-bottom:10px"/>
+      <textarea class="form-input" id="ing-text" rows="9" placeholder="Paste transcript here..." style="resize:vertical;font-size:13px;line-height:1.5"></textarea>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost btn-sm" onclick="TMIAdmin.closeModal('modal-ingest')">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="ing-btn" onclick="runIngest()">Analyze &rarr;</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-root"></div>
 <script src="admin-shared.js"></script>
 <script>
 TMIAdmin.requireAuth();
+const REPORT_TABS = ['revenue','analytics','level10','scorecard'];
+let analyticsLoaded = false;
+let level10Loaded = false;
 (function(){
-  const _h = location.hash.slice(1);
-  const _tab = (_h === 'analytics') ? 'analytics' : 'revenue';
+  let _h = location.hash.slice(1);
+  if (_h === 'scorecard') _h = 'level10'; // scorecard nav item routes into Level 10
+  const _tab = REPORT_TABS.includes(_h) ? _h : 'revenue';
   switchTab(_tab);
-  TMIAdmin.initSidebar(_h || 'revenue');
+  TMIAdmin.initSidebar(location.hash.slice(1) || 'revenue');
 })();
 
-let analyticsLoaded = false;
-
 function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['revenue','analytics'][i] === tab));
-  document.getElementById('tab-revenue').style.display    = tab === 'revenue'   ? '' : 'none';
-  document.getElementById('tab-analytics').style.display  = tab === 'analytics' ? '' : 'none';
+  if (tab === 'scorecard') tab = 'level10';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  ['revenue','analytics','level10'].forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) el.style.display = (t === tab) ? '' : 'none';
+  });
   if (tab === 'analytics' && !analyticsLoaded) { analyticsLoaded = true; loadAnalytics(); }
+  if (tab === 'level10' && !level10Loaded) { level10Loaded = true; loadLevel10(); }
   history.replaceState(null, '', '#' + tab);
 }
 
@@ -358,6 +447,200 @@ async function loadAnalytics() {
 }
 
 loadRevenue();
+
+// ── Level 10 ──────────────────────────────────────────────────────────────────
+let SC = { metrics: [], entries: [], crm: {} };
+let ISSUES = [];
+
+function l10Esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function weekOf(){ const d=new Date(); const day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); return d.toISOString().slice(0,10); }
+function fmtNum(v,unit){ if(v==null||v==='')return '—'; const n=Number(v); const s=unit==='$'?'$'+n.toLocaleString('en-US'):(unit==='%'?n+'%':n.toLocaleString('en-US')); return s; }
+
+async function osGet(path){ try{ const r=await fetch(path,{headers:{Authorization:'Bearer '+TMIAdmin.token()}}); if(r.ok) return await r.json(); }catch{} return null; }
+
+async function loadLevel10(){
+  const [sc, wins, issues] = await Promise.all([
+    osGet('/api/os-scorecard'),
+    osGet('/api/os-wins'),
+    osGet('/api/os-issues')
+  ]);
+  SC = sc && sc.metrics ? sc : { metrics: [], entries: [], crm: {} };
+  ISSUES = Array.isArray(issues) ? issues : [];
+  renderScorecard();
+  renderWins(Array.isArray(wins) ? wins : []);
+  renderIds();
+}
+
+function metricValue(m){
+  if (m.source === 'crm') return SC.crm ? SC.crm[m.crm_key] : null;
+  const wk = weekOf();
+  const e = (SC.entries||[]).find(x => x.metric_id === m.id && String(x.week_of) === wk);
+  return e ? e.value : null;
+}
+function metricStatus(m,v){
+  if (v==null||v==='') return ['sc-na','—'];
+  if (m.target_value==null) return ['sc-na','set'];
+  const ok = m.direction==='lower' ? Number(v)<=Number(m.target_value) : Number(v)>=Number(m.target_value);
+  return ok ? ['sc-on','On track'] : ['sc-off','Off track'];
+}
+
+function lastWeeks(n){ const out=[]; const d=new Date(); const day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); for(let i=n-1;i>=0;i--){ const w=new Date(d); w.setDate(d.getDate()-i*7); out.push(w.toISOString().slice(0,10)); } return out; }
+function metricSeries(m){
+  const weeks=lastWeeks(8);
+  return weeks.map(wk=>{ const e=(SC.entries||[]).find(x=>x.metric_id===m.id && String(x.week_of)===wk); return e&&e.value!=null?Number(e.value):null; });
+}
+function sparkline(series){
+  const vals=series.filter(v=>v!=null);
+  if (vals.length<2) return '';
+  const max=Math.max(...vals), min=Math.min(...vals), range=(max-min)||1;
+  const W=60,H=22,P=2;
+  const pts=series.map((v,i)=>{ const x=P+(i/(series.length-1))*(W-P*2); const y=v==null?H-P:(H-P-((v-min)/range)*(H-P*2)); return `${x.toFixed(1)},${y.toFixed(1)}`; }).join(' ');
+  return `<svg class="sc-spark" width="60" height="22" viewBox="0 0 60 22" fill="none"><polyline points="${pts}" stroke="var(--chart-dark)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
+}
+function renderScorecard(){
+  const el = document.getElementById('sc-body');
+  if (!SC.metrics.length){ el.innerHTML = `<div style="padding:16px 20px;font-size:13px;color:var(--muted)">No metrics yet. Tap “+ Metric” to build your scoreboard.</div>`; return; }
+  el.innerHTML = SC.metrics.map(m => {
+    const v = metricValue(m);
+    const [cls,label] = metricStatus(m,v);
+    const readonly = m.source==='crm';
+    return `<div class="sc-row">
+      <div><div class="sc-name">${l10Esc(m.name)}</div><div class="sc-sub">${readonly?'live from CRM':(m.direction==='lower'?'lower is better':'target or higher')}</div></div>
+      <div class="sc-target">${m.target_value!=null?fmtNum(m.target_value,m.unit):'—'}</div>
+      <div><input class="sc-input" ${readonly?'readonly':''} value="${v!=null?v:''}" placeholder="${readonly?'—':'enter'}" onchange="saveMetric('${m.id}',this.value)"/></div>
+      <div>${readonly?'':sparkline(metricSeries(m))}</div>
+      <span class="sc-pill ${cls}">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+async function saveMetric(id,val){
+  const v = val===''?null:Number(val);
+  await TMIAdmin.api('/api/os-scorecard','POST',{ entry:{ metric_id:id, week_of:weekOf(), value:v } });
+  const m = SC.metrics.find(x=>x.id===id);
+  let e = (SC.entries||[]).find(x=>x.metric_id===id && String(x.week_of)===weekOf());
+  if (e) e.value=v; else { SC.entries=SC.entries||[]; SC.entries.push({metric_id:id,week_of:weekOf(),value:v}); }
+  renderScorecard();
+}
+
+async function addMetric(){
+  const v = await TMIAdmin.formModal({ title:'Add scorecard metric', submitLabel:'Add metric', fields:[
+    { name:'name', label:'Metric name', required:true, placeholder:'e.g. Cash Collected' },
+    { name:'unit', label:'Unit', type:'select', value:'#', options:[{value:'#',label:'# (number)'},{value:'$',label:'$ (dollars)'},{value:'%',label:'% (percent)'}] },
+    { name:'target_value', label:'Weekly target (optional)', type:'number', placeholder:'e.g. 175000' },
+    { name:'direction', label:'On track when value is', type:'select', value:'higher', options:[{value:'higher',label:'At or above target'},{value:'lower',label:'At or below target'}] }
+  ]});
+  if (!v) return;
+  const r = await TMIAdmin.api('/api/os-scorecard','POST',{ metric:{ name:v.name, unit:v.unit, target_value:v.target_value, direction:v.direction, source:'manual', sort:SC.metrics.length } });
+  if (r){ SC.metrics.push(r); renderScorecard(); TMIAdmin.toast('Metric added'); }
+}
+
+function renderWins(wins){
+  const el = document.getElementById('wins-body');
+  if (!wins.length){ el.innerHTML = `<div style="padding:16px 20px;font-size:13px;color:var(--muted)">No wins logged yet. Start the meeting with one.</div>`; return; }
+  el.innerHTML = wins.map(w => `<div class="win-item">
+    <div class="win-dot"></div>
+    <div class="ids-body"><div>${l10Esc(w.text)}</div>${w.author?`<div class="ids-notes">${l10Esc(w.author)} &middot; ${TMIAdmin.reltime(w.created_at)}</div>`:`<div class="ids-notes">${TMIAdmin.reltime(w.created_at)}</div>`}</div>
+    <button class="ids-mini" onclick="delWin('${w.id}')" title="Remove">&times;</button>
+  </div>`).join('');
+}
+async function addWin(){
+  const v=await TMIAdmin.formModal({title:'Add a win',submitLabel:'Add win',fields:[{name:'text',label:'Win',required:true,placeholder:'What did the team accomplish?'},{name:'author',label:'Who? (optional)'}]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-wins','POST',{text:v.text,author:v.author||null,week_of:weekOf()}); if(r){loadLevel10();}
+}
+async function delWin(id){ await TMIAdmin.api('/api/os-wins?id='+id,'DELETE'); loadLevel10(); }
+
+function renderIds(){
+  const el = document.getElementById('ids-body');
+  const open = ISSUES.filter(i=>i.status!=='solved');
+  const solved = ISSUES.filter(i=>i.status==='solved');
+  if (!ISSUES.length){ el.innerHTML = `<div style="padding:16px 20px;font-size:13px;color:var(--muted)">Nothing to solve. Off-track items land here.</div>`; return; }
+  const row = (i,idx,arr) => `<div class="ids-item ${i.status==='solved'?'solved':''}">
+    <div class="ids-body">
+      <div class="ids-title">${l10Esc(i.title)}</div>
+      ${i.notes?`<div class="ids-notes">${l10Esc(i.notes)}</div>`:''}
+      ${i.origin&&i.origin!=='manual'?`<div class="ids-notes">via ${l10Esc(i.origin)}</div>`:''}
+    </div>
+    <div class="ids-actions">
+      ${i.status!=='solved' && idx>0?`<button class="ids-mini" onclick="moveIssue('${i.id}',-1)" title="Move up">↑</button>`:''}
+      ${i.status!=='solved'?`<button class="ids-mini" onclick="solveIssue('${i.id}')" title="Mark solved">✓</button>`:`<button class="ids-mini" onclick="reopenIssue('${i.id}')" title="Reopen">↺</button>`}
+      <button class="ids-mini" onclick="delIssue('${i.id}')" title="Delete">&times;</button>
+    </div>
+  </div>`;
+  el.innerHTML = open.map((i,idx)=>row(i,idx,open)).join('') +
+    (solved.length?`<div style="padding:8px 20px 4px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Solved this week</div>`+solved.map((i,idx)=>row(i,idx,solved)).join(''):'');
+}
+async function addIssue(){
+  const v=await TMIAdmin.formModal({title:'Add issue or opportunity',submitLabel:'Add',fields:[{name:'title',label:'Issue or opportunity',required:true},{name:'notes',label:'Notes (optional)',type:'textarea',rows:3}]});
+  if(!v)return;
+  const r=await TMIAdmin.api('/api/os-issues','POST',{title:v.title,notes:v.notes||null,status:'identify',sort:ISSUES.length}); if(r){loadLevel10();}
+}
+async function solveIssue(id){ await TMIAdmin.api('/api/os-issues','PUT',{id,status:'solved',solved_at:new Date().toISOString()}); loadLevel10(); }
+async function reopenIssue(id){ await TMIAdmin.api('/api/os-issues','PUT',{id,status:'identify',solved_at:null}); loadLevel10(); }
+async function delIssue(id){ await TMIAdmin.api('/api/os-issues?id='+id,'DELETE'); loadLevel10(); }
+async function moveIssue(id,dir){
+  const open = ISSUES.filter(i=>i.status!=='solved');
+  const idx = open.findIndex(i=>i.id===id); const swap = idx+dir;
+  if (swap<0||swap>=open.length) return;
+  const a=open[idx], b=open[swap];
+  const as=a.sort||0, bs=b.sort||0;
+  await Promise.all([ TMIAdmin.api('/api/os-issues','PUT',{id:a.id,sort:bs}), TMIAdmin.api('/api/os-issues','PUT',{id:b.id,sort:as}) ]);
+  loadLevel10();
+}
+
+// ── Meeting ingestion (Fathom -> Claude) ──────────────────────────────────────
+function openIngest(){ TMIAdmin.openModal('modal-ingest'); }
+async function runIngest(){
+  const text = document.getElementById('ing-text').value.trim();
+  const title = document.getElementById('ing-title').value.trim() || 'Meeting';
+  if (text.length < 40){ TMIAdmin.toast('Paste a longer transcript','error'); return; }
+  const btn = document.getElementById('ing-btn'); btn.disabled=true; btn.textContent='Analyzing...';
+  const r = await TMIAdmin.api('/api/os-meeting-ingest','POST',{ transcript:text, title });
+  btn.disabled=false; btn.textContent='Analyze →';
+  if (!r){ return; }
+  TMIAdmin.closeModal('modal-ingest');
+  document.getElementById('ing-text').value=''; document.getElementById('ing-title').value='';
+  renderDigest(r.extracted||{});
+}
+
+function renderDigest(d){
+  const wrap = document.getElementById('digest-wrap');
+  const wins=(d.wins||[]), issues=(d.issues||[]), actions=(d.action_items||[]), scs=(d.scorecard_updates||[]);
+  let html = `<div class="digest-box"><div style="display:flex;justify-content:space-between;align-items:center"><strong>Meeting digest</strong><button class="ids-mini" onclick="document.getElementById('digest-wrap').innerHTML=''">dismiss</button></div>`;
+  if (d.summary) html += `<p style="color:var(--ink-2);margin:8px 0 0;line-height:1.5">${l10Esc(d.summary)}</p>`;
+  if (wins.length){ html += `<div class="digest-sec"><h4>Wins</h4>` + wins.map((w,i)=>`<div class="digest-line"><span>${l10Esc(w)}</span><button class="ids-mini" onclick="applyWin(${i})">add ✓</button></div>`).join('') + `</div>`; }
+  if (issues.length){ html += `<div class="digest-sec"><h4>Issues</h4>` + issues.map((x,i)=>`<div class="digest-line"><span>${l10Esc(x.title)}</span><button class="ids-mini" onclick="applyIssue(${i})">add ✓</button></div>`).join('') + `</div>`; }
+  if (actions.length){ html += `<div class="digest-sec"><h4>Action items</h4>` + actions.map(a=>`<div class="digest-line"><span>${l10Esc(a.title)}${a.owner?` <span style="color:var(--muted)">— ${l10Esc(a.owner)}</span>`:''}</span></div>`).join('') + `</div>`; }
+  if (scs.length){ html += `<div class="digest-sec"><h4>Scorecard mentions</h4>` + scs.map(s=>`<div class="digest-line"><span>${l10Esc(s.metric)}</span><strong>${l10Esc(s.value)}</strong></div>`).join('') + `</div>`; }
+  html += `</div>`;
+  wrap.innerHTML = html;
+  window._DIGEST = d;
+}
+async function applyWin(i){ const w=window._DIGEST.wins[i]; await TMIAdmin.api('/api/os-wins','POST',{text:w,week_of:weekOf()}); TMIAdmin.toast('Win added'); loadLevel10(); }
+async function applyIssue(i){ const x=window._DIGEST.issues[i]; await TMIAdmin.api('/api/os-issues','POST',{title:x.title,notes:x.notes||null,status:'identify',origin:'ai',sort:ISSUES.length}); TMIAdmin.toast('Issue added'); loadLevel10(); }
+
+// ── Meeting history (review/apply past digests, incl. Fathom webhook ones) ─────
+let _meetingsOpen = false;
+async function toggleMeetings(){
+  const el = document.getElementById('meetings-wrap');
+  _meetingsOpen = !_meetingsOpen;
+  if (!_meetingsOpen){ el.innerHTML=''; return; }
+  el.innerHTML = `<div style="padding:12px 0;font-size:13px;color:var(--muted)">Loading meetings...</div>`;
+  const list = await osGet('/api/os-meetings') || [];
+  window._MEETINGS = list;
+  if (!list.length){ el.innerHTML = `<div style="padding:12px 0;font-size:13px;color:var(--muted)">No meetings ingested yet.</div>`; return; }
+  el.innerHTML = `<div class="digest-box"><div style="display:flex;justify-content:space-between;align-items:center"><strong>Meeting history</strong><button class="ids-mini" onclick="toggleMeetings()">close</button></div>`
+    + list.map((m,i)=>{
+        const pending = !m.processed_at;
+        return `<div class="digest-line">
+          <span>${l10Esc(m.title||'Meeting')} <span style="color:var(--muted)">&middot; ${TMIAdmin.fmt(m.met_on||m.created_at)} &middot; ${l10Esc(m.source||'manual')}</span></span>
+          <span style="display:flex;gap:6px;align-items:center">${pending?`<span style="color:var(--muted);font-size:11px">processing…</span>`:`<button class="ids-mini" onclick="openMeeting(${i})">view digest</button>`}<button class="ids-mini" onclick="delMeeting('${m.id}')">&times;</button></span>
+        </div>`;
+      }).join('') + `</div>`;
+}
+function openMeeting(i){ const m=window._MEETINGS[i]; if(m&&m.extracted) renderDigest(m.extracted); else TMIAdmin.toast('No digest on this meeting yet','error'); }
+async function delMeeting(id){ await TMIAdmin.api('/api/os-meetings?id='+id,'DELETE'); toggleMeetings(); toggleMeetings(); }
 </script>
 </body>
 </html>

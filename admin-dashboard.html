@@ -6,6 +6,41 @@
 <title>Dashboard — TMI Admin</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="stylesheet" href="admin.css"/>
+<style>
+  /* Ops Machine — Command Center */
+  .cmd-wrap{margin-bottom:20px;}
+  .cmd-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+  .cmd-title{font-family:var(--serif);font-size:20px;font-weight:500;letter-spacing:-0.01em;color:var(--ink);display:flex;align-items:center;gap:10px;}
+  .cmd-title .tag{font-family:var(--sans);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#0a0b14;background:var(--chart);padding:3px 8px;border-radius:999px;font-weight:700;}
+  .cmd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .cmd-col{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;}
+  .cmd-col-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--line);}
+  .cmd-col-label{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+  .cmd-col-add{background:none;border:none;cursor:pointer;color:var(--ink-2);font-size:18px;line-height:1;padding:0 2px;font-family:inherit;}
+  .cmd-col-add:hover{color:var(--ink);}
+  .cmd-col-body{padding:6px 0;flex:1;min-height:60px;}
+  .cmd-goal{padding:11px 16px;border-bottom:1px solid var(--line);}
+  .cmd-goal:last-child{border-bottom:none;}
+  .cmd-goal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .cmd-goal-title{font-size:13px;font-weight:600;color:var(--ink);line-height:1.35;}
+  .cmd-goal-owner{font-size:11px;color:var(--muted);margin-top:1px;}
+  .cmd-goal-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;line-height:1;opacity:0;transition:opacity .15s;padding:0 2px;flex-shrink:0;}
+  .cmd-goal:hover .cmd-goal-del{opacity:.6;}
+  .cmd-goal-del:hover{opacity:1!important;color:var(--red);}
+  .cmd-bar{height:5px;background:var(--bg-alt,#f5f5f7);border-radius:999px;margin:9px 0 4px;overflow:hidden;}
+  .cmd-bar-fill{height:100%;background:var(--chart-dark);border-radius:999px;transition:width .3s ease;}
+  .cmd-bar-pct{font-size:10px;color:var(--muted);font-weight:600;}
+  .cmd-subs{margin-top:8px;display:flex;flex-direction:column;gap:5px;}
+  .cmd-sub{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);cursor:pointer;}
+  .cmd-sub input{width:14px;height:14px;cursor:pointer;accent-color:var(--chart-dark);flex-shrink:0;}
+  .cmd-sub.done span{text-decoration:line-through;color:var(--muted);}
+  .cmd-sub-add{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit;text-align:left;}
+  .cmd-sub-add:hover{color:var(--ink);}
+  .cmd-roll{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink-2);padding:2px 0;}
+  .cmd-roll-pct{font-size:11px;font-weight:600;color:var(--ink);}
+  .cmd-empty{padding:16px;font-size:12px;color:var(--muted);text-align:center;}
+  @media(max-width:880px){.cmd-grid{grid-template-columns:1fr;}}
+</style>
 </head>
 <body>
 <div class="layout">
@@ -39,6 +74,28 @@
         <div class="stat-box"><div class="stat-label">Active Clients</div><div class="stat-val" id="stat-clients">—</div><div class="stat-delta" id="stat-clients-d"><span id="stat-mrr-val"></span><svg id="stat-mrr-spark" width="60" height="24" style="display:none;vertical-align:middle;margin-left:8px;" viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline id="stat-mrr-line" points="" stroke="#E4FF97" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div></div>
         <div class="stat-box"><div class="stat-label">Total Contacts</div><div class="stat-val" id="stat-contacts">—</div><div class="stat-delta" id="stat-contacts-d"></div></div>
         <div class="stat-box"><div class="stat-label">Emails Sent</div><div class="stat-val" id="stat-emails">—</div><div class="stat-delta" id="stat-emails-d"></div></div>
+      </div>
+
+      <!-- Ops Machine: Command Center -->
+      <div class="cmd-wrap">
+        <div class="cmd-head">
+          <div class="cmd-title">Command Center <span class="tag">Ops Machine</span></div>
+          <span style="font-size:12px;color:var(--muted)">Priorities that ladder week &rarr; month &rarr; quarter</span>
+        </div>
+        <div class="cmd-grid">
+          <div class="cmd-col" data-level="quarter">
+            <div class="cmd-col-head"><span class="cmd-col-label">This Quarter</span><button class="cmd-col-add" onclick="addGoal('quarter')" title="Add quarterly goal">+</button></div>
+            <div class="cmd-col-body" id="cmd-quarter"><div class="cmd-empty">Loading...</div></div>
+          </div>
+          <div class="cmd-col" data-level="month">
+            <div class="cmd-col-head"><span class="cmd-col-label">This Month</span><button class="cmd-col-add" onclick="addGoal('month')" title="Add monthly goal">+</button></div>
+            <div class="cmd-col-body" id="cmd-month"><div class="cmd-empty">Loading...</div></div>
+          </div>
+          <div class="cmd-col" data-level="week">
+            <div class="cmd-col-head"><span class="cmd-col-label">This Week</span><button class="cmd-col-add" onclick="addGoal('week')" title="Add weekly goal">+</button></div>
+            <div class="cmd-col-body" id="cmd-week"><div class="cmd-empty">Loading...</div></div>
+          </div>
+        </div>
       </div>
 
       <!-- Grid -->
@@ -223,6 +280,118 @@
 <script>
 TMIAdmin.requireAuth();
 TMIAdmin.initSidebar('dashboard');
+
+// ── Ops Machine: Command Center (with week→month→quarter roll-up) ───────────────
+let CMD_GOALS = [];
+const CMD_LEVELS = ['quarter','month','week'];
+const CMD_PARENT = { week: 'month', month: 'quarter', quarter: null };
+
+function cmdEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+async function loadCommand() {
+  // Silent fetch: don't nag with a toast if the os_* schema isn't applied yet.
+  let data = [];
+  try {
+    const r = await fetch('/api/os-goals', { headers: { 'Authorization': 'Bearer ' + TMIAdmin.token() } });
+    if (r.ok) data = await r.json();
+  } catch {}
+  CMD_GOALS = Array.isArray(data) ? data : [];
+  CMD_LEVELS.forEach(renderCommandColumn);
+}
+
+// Progress rolls up: a goal with linked children = average of their progress;
+// otherwise its own subtasks done/total.
+function cmdChildren(id){ return CMD_GOALS.filter(g => g.parent_id === id && g.status !== 'archived'); }
+function goalProgress(g){
+  const kids = cmdChildren(g.id);
+  if (kids.length){ const a = kids.map(goalProgress); return Math.round(a.reduce((s,v)=>s+v,0)/a.length); }
+  const subs = g.os_subtasks || [];
+  return subs.length ? Math.round(subs.filter(s=>s.done).length / subs.length * 100) : 0;
+}
+
+function renderCommandColumn(level) {
+  const el = document.getElementById('cmd-' + level);
+  if (!el) return;
+  const goals = CMD_GOALS.filter(g => g.level === level && g.status !== 'archived');
+  if (!goals.length) {
+    el.innerHTML = `<div class="cmd-empty">No goals yet. Tap + to add one.</div>`;
+    return;
+  }
+  el.innerHTML = goals.map(g => {
+    const pct = goalProgress(g);
+    const kids = cmdChildren(g.id);
+    const parent = g.parent_id ? CMD_GOALS.find(p => p.id === g.parent_id) : null;
+    let inner;
+    if (kids.length) {
+      // Parent goal: show rolled-up child list instead of subtasks
+      inner = `<div class="cmd-subs">${kids.map(k => `<div class="cmd-roll"><span>${cmdEsc(k.title)}</span><span class="cmd-roll-pct">${goalProgress(k)}%</span></div>`).join('')}</div>`;
+    } else {
+      const subs = g.os_subtasks || [];
+      inner = `<div class="cmd-subs">
+        ${subs.map(s => `<label class="cmd-sub${s.done ? ' done' : ''}">
+          <input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleSubtask('${s.id}',this.checked)"/>
+          <span>${cmdEsc(s.text)}</span>
+        </label>`).join('')}
+        <button class="cmd-sub-add" onclick="addSubtask('${g.id}')">+ subtask</button>
+      </div>`;
+    }
+    const meta = kids.length ? `${kids.length} linked &middot; ${pct}%`
+      : `${(g.os_subtasks||[]).filter(s=>s.done).length}/${(g.os_subtasks||[]).length} &middot; ${pct}%`;
+    return `<div class="cmd-goal">
+      <div class="cmd-goal-top">
+        <div>
+          <div class="cmd-goal-title">${cmdEsc(g.title)}</div>
+          ${parent ? `<div class="cmd-goal-owner">↳ ${cmdEsc(parent.title)}</div>` : (g.owner ? `<div class="cmd-goal-owner">${cmdEsc(g.owner)}</div>` : '')}
+        </div>
+        <button class="cmd-goal-del" onclick="deleteGoal('${g.id}')" title="Delete">&times;</button>
+      </div>
+      <div class="cmd-bar"><div class="cmd-bar-fill" style="width:${pct}%"></div></div>
+      <span class="cmd-bar-pct">${meta}</span>
+      ${inner}
+    </div>`;
+  }).join('');
+}
+
+async function addGoal(level) {
+  const pLevel = CMD_PARENT[level];
+  const fields = [
+    { name:'title', label:`New ${level} goal`, required:true, placeholder:'Goal title' },
+    { name:'owner', label:'Owner (optional)', placeholder:'Who owns it' }
+  ];
+  if (pLevel) {
+    const cand = CMD_GOALS.filter(g => g.level === pLevel && g.status !== 'archived');
+    if (cand.length) fields.push({ name:'parent', label:`Ladder up to a ${pLevel} goal`, type:'select', value:'', options:[{value:'',label:'— none —'}].concat(cand.map(c => ({ value:c.id, label:c.title }))) });
+  }
+  const v = await TMIAdmin.formModal({ title:`Add ${level} goal`, fields, submitLabel:'Add goal' });
+  if (!v) return;
+  const r = await TMIAdmin.api('/api/os-goals', 'POST', { goal: { level, title: v.title, owner: v.owner || null, parent_id: v.parent || null } });
+  if (r) { TMIAdmin.toast('Goal added'); loadCommand(); }
+}
+
+async function addSubtask(goalId) {
+  const v = await TMIAdmin.formModal({ title:'Add subtask', fields:[{ name:'text', label:'Subtask', required:true }], submitLabel:'Add' });
+  if (!v) return;
+  const r = await TMIAdmin.api('/api/os-goals', 'POST', { subtask: { goal_id: goalId, text: v.text } });
+  if (r) loadCommand();
+}
+
+async function toggleSubtask(id, done) {
+  // Optimistic local update so the bars move instantly across all levels
+  for (const g of CMD_GOALS) {
+    const s = (g.os_subtasks || []).find(x => x.id === id);
+    if (s) { s.done = done; break; }
+  }
+  CMD_LEVELS.forEach(renderCommandColumn);
+  await TMIAdmin.api('/api/os-goals', 'PUT', { subtask: { id, done } });
+}
+
+async function deleteGoal(id) {
+  if (!(await TMIAdmin.confirm('Delete this goal and its subtasks?'))) return;
+  const r = await TMIAdmin.api(`/api/os-goals?id=${id}&type=goal`, 'DELETE');
+  if (r) { TMIAdmin.toast('Goal deleted'); loadCommand(); }
+}
+
+loadCommand();
 
 const PIPELINE_STAGES = ['new','contacted','qualified','proposal','won','lost'];
 const STAGE_COLORS = {
