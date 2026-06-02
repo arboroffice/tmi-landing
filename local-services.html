@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
+<meta name="description" content="TMI builds AI operating systems for local service businesses - appliance repair, pool service, locksmith, janitorial, moving, towing, and more. Deployed in 30 days. You own it."/>
+<meta property="og:title" content="AI for Local Service Businesses | TMI Technology"/>
+<meta property="og:description" content="TMI builds AI operating systems for local service businesses. Dispatch, scheduling, invoicing, and customer follow-up - built for how you actually work."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://tmi-technology.com/local-services"/>
+<meta property="og:image" content="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80"/>
+<meta property="og:site_name" content="TMI"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="AI for Local Service Businesses | TMI Technology"/>
+<meta name="twitter:description" content="TMI builds AI operating systems for local service businesses."/>
+<meta name="twitter:image" content="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80"/>
+<link rel="canonical" href="https://tmi-technology.com/local-services"/>
+<title>AI for Local Service Businesses | TMI Technology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#ffffff;--bg-alt:#f5f5f7;--bg-deep:#0d0e1a;--bg-dark:#0a0b14;
+  --ink:#1a1a1a;--ink-2:#505060;--muted:#86868b;
+  --line:rgba(0,0,0,0.08);--line-strong:rgba(0,0,0,0.13);
+  --chart:#E4FF97;--chart-dark:#D0FF6A;
+  --serif:"Barlow",system-ui,sans-serif;
+  --sans:"Neue Haas Grotesk Display","Neue Haas Grotesk",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;}html,body{margin:0;padding:0;}html{scroll-behavior:smooth;}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.55;overflow-x:hidden;}
+a{color:inherit;text-decoration:none;}img{display:block;max-width:100%;}
+::selection{background:var(--ink);color:var(--bg);}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:400;letter-spacing:-0.02em;line-height:1.05;margin:0;}
+p{margin:0;}
+
+.hd{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;background:rgba(255,255,255,0.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;}
+.hd-inner{max-width:1200px;margin:0 auto;padding:0 32px;width:100%;display:flex;align-items:center;gap:16px;}
+.hd-brand{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:15px;font-weight:700;color:var(--ink);flex:1;}
+.hd-brand img{height:22px;width:auto;}
+.hd-nav{display:flex;align-items:center;gap:2px;}
+.hd-nav a{font-family:var(--sans);font-size:13px;color:var(--ink-2);padding:6px 12px;border-radius:6px;transition:color 0.15s,background 0.15s;}
+.hd-nav a:hover{color:var(--ink);background:var(--bg-alt);}
+.hd-cta{font-family:var(--sans);font-size:12px;font-weight:700;background:var(--chart);color:#0a0b14;padding:9px 20px;border-radius:999px;transition:background 0.15s;white-space:nowrap;}
+.hd-cta:hover{background:var(--chart-dark);}
+@media(max-width:640px){.hd-nav{display:none;}.hd-inner{padding:0 20px;}}
+
+.container{max-width:1200px;margin:0 auto;padding:0 40px;}
+@media(max-width:640px){.container{padding:0 20px;}}
+
+.hero{position:relative;min-height:72vh;overflow:hidden;display:flex;align-items:center;padding:96px 0 80px;}
+.hero-bg{position:absolute;inset:0;}
+.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:center 40%;}
+.hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(165deg,rgba(10,11,20,0.6) 0%,rgba(10,11,20,0.9) 100%);}
+.hero-content{position:relative;z-index:2;max-width:1200px;width:100%;padding:0 40px;}
+.hero-kicker{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;font-weight:600;color:var(--chart);display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+.hero-kicker::before{content:"";display:block;width:24px;height:1px;background:var(--chart);}
+.hero h1{color:#fff;font-family:var(--serif);font-size:clamp(44px,6vw,88px);font-weight:400;line-height:1.02;letter-spacing:-0.03em;max-width:16ch;margin:0 0 24px;}
+.hero h1 em{color:rgba(255,255,255,0.45);font-style:italic;}
+.hero .lede{color:rgba(255,255,255,0.62);max-width:52ch;font-family:var(--serif);font-size:clamp(17px,1.5vw,21px);line-height:1.65;margin-bottom:36px;}
+.hero-cta{display:inline-flex;align-items:center;gap:8px;background:var(--chart);color:#0a0b14;font-family:var(--sans);font-size:13px;font-weight:700;padding:15px 32px;border-radius:999px;transition:background 0.15s;}
+.hero-cta:hover{background:var(--chart-dark);}
+.hero-note{font-family:var(--sans);font-size:12px;color:rgba(255,255,255,0.3);margin-top:16px;letter-spacing:0.04em;}
+@media(max-width:640px){.hero-content{padding:0 20px;}.hero h1{font-size:clamp(36px,9vw,56px);}}
+
+.section{padding:88px 0;}
+.section-alt{padding:88px 0;background:var(--bg-alt);}
+.eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.section-heading{font-family:var(--serif);font-size:clamp(32px,4vw,56px);font-weight:400;letter-spacing:-0.025em;line-height:1.05;margin-bottom:14px;}
+.section-deck{font-family:var(--serif);font-size:18px;font-weight:400;line-height:1.75;color:var(--ink-2);max-width:58ch;margin-bottom:48px;}
+
+.industry-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:48px;}
+a.industry-card,a.industry-card:visited{color:inherit;}
+.industry-card{border:1px solid var(--line);border-radius:4px;padding:24px;display:flex;flex-direction:column;gap:10px;transition:border-color 0.15s,box-shadow 0.15s;}
+a.industry-card:hover{border-color:var(--ink);box-shadow:0 4px 24px rgba(0,0,0,0.08);}
+.industry-icon{font-size:22px;line-height:1;}
+.industry-title{font-family:var(--serif);font-size:16px;font-weight:400;color:var(--ink);line-height:1.2;}
+.industry-desc{font-family:var(--sans);font-size:12px;color:var(--muted);line-height:1.6;flex:1;}
+.industry-link{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.06em;color:var(--ink-2);margin-top:4px;}
+@media(max-width:900px){.industry-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:640px){.industry-grid{grid-template-columns:1fr 1fr;}}
+
+.problems-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:48px;}
+.problem-card{background:var(--bg);padding:36px 32px;}
+.problem-n{font-family:var(--serif);font-size:38px;font-weight:400;color:var(--line-strong);letter-spacing:-0.02em;margin-bottom:16px;line-height:1;}
+.problem-title{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--ink);line-height:1.2;margin-bottom:10px;}
+.problem-body{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.7;}
+@media(max-width:768px){.problems-grid{grid-template-columns:1fr;}}
+
+.guar{background:var(--bg-dark);padding:80px 0;text-align:center;}
+.guar-inner{max-width:580px;margin:0 auto;}
+.guar-label{font-family:var(--sans);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(228,255,151,0.45);margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:12px;}
+.guar-label::before,.guar-label::after{content:'';display:block;width:24px;height:1px;background:var(--chart);opacity:0.4;}
+.guar h2{font-family:var(--serif);font-size:clamp(26px,3.5vw,48px);font-weight:400;letter-spacing:-0.025em;line-height:1.1;color:#fff;margin-bottom:16px;}
+.guar p{font-family:var(--serif);font-size:17px;color:rgba(255,255,255,0.35);max-width:44ch;margin:0 auto 36px;line-height:1.7;}
+.guar-btn{display:inline-flex;align-items:center;gap:8px;background:var(--chart);color:#0a0b14;font-family:var(--sans);font-size:14px;font-weight:700;padding:16px 36px;border-radius:999px;transition:background 0.15s;}
+.guar-btn:hover{background:var(--chart-dark);}
+.guar-checks{display:flex;justify-content:center;flex-wrap:wrap;gap:24px;margin-top:24px;}
+.guar-check{font-family:var(--sans);font-size:11px;color:rgba(255,255,255,0.28);letter-spacing:0.04em;display:flex;align-items:center;gap:6px;}
+.guar-check span{color:var(--chart);font-weight:700;}
+
+footer{background:var(--bg-alt);padding:56px 0 32px;border-top:1px solid var(--line);}
+.foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:48px;margin-bottom:48px;}
+.foot-brand{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:15px;font-weight:700;color:var(--ink);margin-bottom:10px;}
+.foot-brand img{height:20px;}
+.foot-desc{font-family:var(--sans);font-size:13px;color:var(--muted);line-height:1.65;max-width:28ch;}
+.foot-col h5{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;}
+.foot-col a{display:block;font-family:var(--sans);font-size:13px;color:var(--ink-2);padding:3px 0;transition:color 0.15s;}
+.foot-col a:hover{color:var(--ink);}
+.foot-bottom{display:flex;justify-content:space-between;font-family:var(--sans);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);padding-top:24px;border-top:1px solid var(--line);}
+@media(max-width:768px){.foot-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.foot-grid{grid-template-columns:1fr;}.foot-bottom{flex-direction:column;gap:8px;}}
+
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.8s ease,transform 0.8s cubic-bezier(.2,.7,.2,1);}
+.reveal.in{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="hd-inner">
+    <a href="/" class="hd-brand"><img src="logo.svg" alt="TMI"/> TMI</a>
+    <nav class="hd-nav">
+      <a href="/physical">All Industries</a>
+      <a href="/news">Field Notes</a>
+      <a href="/about">About</a>
+    </nav>
+    <a href="/audit" class="hd-cta">Apply &rarr;</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg">
+    <img src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80" alt="" fetchpriority="high"/>
+  </div>
+  <div class="hero-content">
+    <p class="hero-kicker">AI Infrastructure</p>
+    <h1>The AI operating system for <em>local service businesses.</em></h1>
+    <p class="lede">You run the crews and the jobs. TMI builds the AI infrastructure that runs your scheduling, dispatch, invoicing, and customer follow-up - so the business keeps moving when you step back.</p>
+    <a href="/audit" class="hero-cta">Get your free assessment &rarr;</a>
+    <p class="hero-note">Deployed in 30 days. No monthly license. You own it.</p>
+  </div>
+</section>
+
+<!-- Problems -->
+<section class="section">
+  <div class="container">
+    <div class="eyebrow reveal">What's costing you</div>
+    <h2 class="section-heading reveal">Three problems every local service business deals with.</h2>
+    <div class="problems-grid reveal">
+      <div class="problem-card">
+        <div class="problem-n">01</div>
+        <div class="problem-title">Dispatch runs through one person</div>
+        <div class="problem-body">Every job assignment is a phone call. Scheduling lives on a whiteboard or in someone's head. When that person is out, everything slows down or stops.</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-n">02</div>
+        <div class="problem-title">Revenue leaks between the job and the invoice</div>
+        <div class="problem-body">Extra work gets done and never makes it to the bill. Change orders get verbal approval and never get written down. You complete $12k of work and invoice $9k.</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-n">03</div>
+        <div class="problem-title">Customer follow-up happens whenever someone remembers</div>
+        <div class="problem-body">Review requests, maintenance reminders, referral asks - all manual, all inconsistent, all dependent on someone having time. Most of them never happen at all.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Industries -->
+<section class="section-alt">
+  <div class="container">
+    <div class="eyebrow reveal">Industries we serve</div>
+    <h2 class="section-heading reveal">Built for how local service businesses actually operate.</h2>
+    <p class="section-deck reveal">Each build is specific to the workflows, problems, and operational rhythms of that industry. Not generic software. Not a template. The system that fits how your business actually runs.</p>
+
+    <div class="industry-grid">
+      <a href="/physical/appliance-repair" class="industry-card reveal">
+        <div class="industry-icon">&#128268;</div>
+        <div class="industry-title">Appliance Repair</div>
+        <div class="industry-desc">Multi-tech dispatch, parts inventory, and customer scheduling.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/pool-service" class="industry-card reveal">
+        <div class="industry-icon">&#128756;</div>
+        <div class="industry-title">Pool Service</div>
+        <div class="industry-desc">Route optimization, chemical tracking, and recurring service management.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/pressure-washing" class="industry-card reveal">
+        <div class="industry-icon">&#128167;</div>
+        <div class="industry-title">Pressure Washing</div>
+        <div class="industry-desc">Crew scheduling, quote automation, and route efficiency.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/moving-companies" class="industry-card reveal">
+        <div class="industry-icon">&#128666;</div>
+        <div class="industry-title">Moving Companies</div>
+        <div class="industry-desc">Crew assignment, vehicle dispatch, and damage documentation.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/towing-companies" class="industry-card reveal">
+        <div class="industry-icon">&#128658;</div>
+        <div class="industry-title">Towing Companies</div>
+        <div class="industry-desc">24/7 dispatch automation, driver routing, and billing workflows.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/glass-repair" class="industry-card reveal">
+        <div class="industry-icon">&#128250;</div>
+        <div class="industry-title">Glass &amp; Window Repair</div>
+        <div class="industry-desc">Emergency dispatch, parts ordering, and job documentation.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/locksmith-companies" class="industry-card reveal">
+        <div class="industry-icon">&#128273;</div>
+        <div class="industry-title">Locksmith Companies</div>
+        <div class="industry-desc">Emergency response dispatch, multi-tech scheduling, and job tracking.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/janitorial-services" class="industry-card reveal">
+        <div class="industry-icon">&#129529;</div>
+        <div class="industry-title">Janitorial Services</div>
+        <div class="industry-desc">Crew scheduling, quality inspection, and client billing automation.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/garage-door-service" class="industry-card reveal">
+        <div class="industry-icon">&#127968;</div>
+        <div class="industry-title">Garage Door Service</div>
+        <div class="industry-desc">Tech dispatch, parts inventory, and preventive maintenance scheduling.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/fence-contractors" class="industry-card reveal">
+        <div class="industry-icon">&#127757;</div>
+        <div class="industry-title">Fence Contractors</div>
+        <div class="industry-desc">Estimate management, material tracking, and install crew scheduling.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/flooring-contractors" class="industry-card reveal">
+        <div class="industry-icon">&#128295;</div>
+        <div class="industry-title">Flooring Contractors</div>
+        <div class="industry-desc">Material ordering, install scheduling, and subcontractor coordination.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/drywall-contractors" class="industry-card reveal">
+        <div class="industry-icon">&#127963;</div>
+        <div class="industry-title">Drywall Contractors</div>
+        <div class="industry-desc">Multi-crew scheduling, material management, and change order tracking.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/solar-installation" class="industry-card reveal">
+        <div class="industry-icon">&#9728;</div>
+        <div class="industry-title">Solar Installation</div>
+        <div class="industry-desc">Permit tracking, install crew scheduling, and inspection coordination.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/security-systems" class="industry-card reveal">
+        <div class="industry-icon">&#128247;</div>
+        <div class="industry-title">Security Systems</div>
+        <div class="industry-desc">Install scheduling, service call dispatch, and equipment tracking.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/generator-service" class="industry-card reveal">
+        <div class="industry-icon">&#9889;</div>
+        <div class="industry-title">Generator Service</div>
+        <div class="industry-desc">Preventive maintenance, emergency response, and parts inventory.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/fire-sprinkler" class="industry-card reveal">
+        <div class="industry-icon">&#128293;</div>
+        <div class="industry-title">Fire Sprinkler &amp; Safety</div>
+        <div class="industry-desc">Inspection scheduling, compliance documentation, and service records.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+      <a href="/physical/elevator-service" class="industry-card reveal">
+        <div class="industry-icon">&#128203;</div>
+        <div class="industry-title">Elevator Service</div>
+        <div class="industry-desc">Compliance inspections, maintenance scheduling, and regulatory documentation.</div>
+        <div class="industry-link">See the build &rarr;</div>
+      </a>
+    </div>
+
+    <div style="margin-top:32px;text-align:center;">
+      <p style="font-family:var(--sans);font-size:13px;color:var(--muted);">Don't see your industry? <a href="/audit" style="color:var(--ink);font-weight:600;border-bottom:1px solid var(--line-strong);">Talk to us &rarr;</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- Guarantee -->
+<div class="guar">
+  <div class="container">
+    <div class="guar-inner reveal">
+      <div class="guar-label">The commitment</div>
+      <h2>If your systems aren't running in 30 days, we work free until they are.</h2>
+      <p>You own everything we build. No monthly license. No retainer after the build. Built on your existing tools.</p>
+      <a href="/audit" class="guar-btn">Start the free assessment &rarr;</a>
+      <div class="guar-checks">
+        <div class="guar-check"><span>&#10003;</span> You own it</div>
+        <div class="guar-check"><span>&#10003;</span> No monthly fee</div>
+        <div class="guar-check"><span>&#10003;</span> 30-day delivery</div>
+        <div class="guar-check"><span>&#10003;</span> Built on your existing tools</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand"><img src="logo.svg" alt="TMI"/> TMI</div>
+        <div class="foot-desc">AI operating systems for local service businesses. Done for you, yours forever.</div>
+      </div>
+      <div class="foot-col">
+        <h5>Industries</h5>
+        <a href="/physical/appliance-repair">Appliance Repair</a>
+        <a href="/physical/pool-service">Pool Service</a>
+        <a href="/physical/towing-companies">Towing Companies</a>
+        <a href="/physical/locksmith-companies">Locksmith Companies</a>
+        <a href="/physical/janitorial-services">Janitorial Services</a>
+        <a href="/local-services">All Local Services &rarr;</a>
+      </div>
+      <div class="foot-col">
+        <h5>TMI</h5>
+        <a href="/">Home</a>
+        <a href="/physical">All Industries</a>
+        <a href="/news">Field Notes</a>
+        <a href="/audit">Apply</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; 2026 TMI Technology</span>
+      <span>Local Service Businesses</span>
+    </div>
+  </div>
+</footer>
+
+<script src="chat-widget.js" defer></script>
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+}, { threshold: 0.07 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
