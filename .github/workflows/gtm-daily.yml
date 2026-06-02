@@ -1,0 +1,35 @@
+name: GTM Daily Outbound
+
+on:
+  schedule:
+    # 8am ET daily (1pm UTC)
+    - cron: '0 13 * * 1-5'
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: cd agents && npm install
+
+      - name: Run GTM outbound agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
+          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+          RESEND_OUTREACH_API_KEY: ${{ secrets.RESEND_OUTREACH_API_KEY }}
+          OUTREACH_FROM_EMAIL: ${{ secrets.OUTREACH_FROM_EMAIL }}
+          OUTREACH_REPLY_TO: ${{ secrets.OUTREACH_REPLY_TO }}
+          GTM_DIGEST_EMAIL: ${{ secrets.GTM_DIGEST_EMAIL }}
+        run: cd agents && node gtm/orchestrator.js
