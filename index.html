@@ -273,24 +273,6 @@ a.path-card:hover{border-color:var(--ink);box-shadow:0 6px 30px rgba(0,0,0,0.06)
 .found-sec p{font-family:var(--serif);font-size:18px;color:var(--ink-2);line-height:1.7;margin-bottom:20px;}
 .found-line{font-family:var(--serif);font-size:clamp(19px,1.8vw,24px);font-style:italic;color:var(--ink);border-left:3px solid var(--ink);padding-left:24px;margin-top:32px;}
 
-/* FIELD NOTES */
-.letter-section{background:var(--bg-dark);padding:80px 0;position:relative;overflow:hidden;border-top:1px solid rgba(255,255,255,0.04);}
-.letter-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:400px;background:radial-gradient(ellipse at center,rgba(228,255,151,0.07) 0%,transparent 70%);pointer-events:none;}
-.letter-inner{position:relative;z-index:1;max-width:520px;margin:0 auto;text-align:center;}
-.letter-tag{font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(228,255,151,0.55);margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:10px;}
-.letter-tag::before,.letter-tag::after{content:'';display:block;width:20px;height:1px;background:var(--chart);opacity:0.5;}
-.letter-section h2{font-family:var(--serif);font-size:clamp(28px,3.5vw,48px);font-weight:400;letter-spacing:-0.02em;line-height:1.05;color:#fff;margin-bottom:14px;}
-.letter-section h2 em{color:var(--chart);font-style:italic;}
-.letter-desc{font-family:var(--serif);font-size:16px;color:rgba(255,255,255,0.35);line-height:1.7;margin-bottom:32px;}
-.letter-form{display:flex;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:999px;padding:6px 6px 6px 20px;max-width:400px;margin:0 auto 10px;}
-.letter-input{flex:1;background:none;border:none;color:#fff;font-family:var(--sans);font-size:14px;outline:none;min-width:0;}
-.letter-input::placeholder{color:rgba(255,255,255,0.26);}
-.letter-btn{padding:10px 20px;background:var(--chart);color:#0a0b14;border:none;border-radius:999px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;transition:background 0.15s;}
-.letter-btn:hover{background:var(--chart-dark);}
-.letter-note{font-size:11px;color:rgba(255,255,255,0.16);letter-spacing:0.06em;}
-.letter-ok{display:none;font-family:var(--serif);font-size:18px;color:var(--chart);padding:12px 0;}
-@media(max-width:480px){.letter-form{flex-direction:column;border-radius:16px;padding:10px;}}
-
 /* FINAL CTA */
 .final-sec{padding:100px 0;background:var(--bg);text-align:center;border-top:1px solid var(--line);}
 .final-inner{max-width:680px;margin:0 auto;}
@@ -319,8 +301,17 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
 @media(max-width:840px){.foot-grid{grid-template-columns:1fr 1fr;gap:36px;}}
 @media(max-width:480px){.foot-grid{grid-template-columns:1fr;}.foot-bottom{flex-direction:column;gap:8px;}}
 
-@media(max-width:768px){.container,.container-md{padding:0 24px;}.hero-content{padding:0 24px;}.problem-sec,.latency-sec,.band,.shift-sec,.caps-sec,.steps-sec,.why-sec,.guar-sec,.vision-sec,.found-sec,.final-sec{padding:64px 0;}}
-@media(max-width:480px){.hero h1{font-size:42px;}}
+/* MID CTA */
+.midcta-sec{padding:64px 0;background:var(--bg-alt);border-bottom:1px solid var(--line);text-align:center;}
+.midcta-sec h2{font-family:var(--serif);font-size:clamp(24px,2.8vw,38px);font-weight:400;letter-spacing:-0.02em;line-height:1.08;color:var(--ink);margin-bottom:18px;}
+.midcta-sec h2 em{font-style:italic;color:var(--ink-2);}
+.midcta-sec p{font-family:var(--serif);font-size:17px;color:var(--ink-2);line-height:1.6;max-width:46ch;margin:0 auto 26px;}
+.midcta-btn{display:inline-flex;align-items:center;gap:8px;background:var(--chart);color:#0a0b14;font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:0.02em;padding:16px 36px;border-radius:999px;transition:background 0.15s;}
+.midcta-btn:hover{background:var(--chart-dark);}
+
+@media(max-width:768px){.container,.container-md{padding:0 24px;}.hero-content{padding:0 24px;}.problem-sec,.latency-sec,.midcta-sec,.band,.shift-sec,.caps-sec,.steps-sec,.why-sec,.guar-sec,.found-sec,.final-sec{padding:64px 0;}}
+@media(max-width:600px){.hero h1{font-size:clamp(38px,11vw,52px);}.hero-sub{font-size:16px;}.problem-sec,.latency-sec,.midcta-sec,.band,.shift-sec,.caps-sec,.steps-sec,.why-sec,.guar-sec,.found-sec,.final-sec{padding:52px 0;}.problem-grid{gap:32px;}.latency-flow{gap:6px;}.latency-step{font-size:12px;padding:6px 12px;}}
+@media(max-width:480px){.container,.container-md{padding:0 20px;}.hero-content{padding:0 20px;}.hero h1{font-size:36px;}.hero-cta,.midcta-btn,.guar-btn,.final-btn{width:100%;justify-content:center;}.hd-cta{padding:8px 14px;font-size:11px;}.foot-apply{max-width:none;}}
 </style>
 </head>
 <body>
@@ -361,11 +352,11 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
       </div>
       <div>
         <div class="problem-facts">
-          <div class="problem-fact"><strong>Information</strong> lives in texts and inboxes.</div>
-          <div class="problem-fact"><strong>Schedules</strong> live on a whiteboard or in someone's head.</div>
-          <div class="problem-fact"><strong>Money</strong> leaks between the work and the invoice.</div>
-          <div class="problem-fact"><strong>Knowledge</strong> walks out the door when people leave.</div>
-          <div class="problem-fact">The only thing connecting it all is <strong>you.</strong></div>
+          <div class="problem-fact"><strong>A customer asks for an update</strong> and three people get looped in before anyone can answer.</div>
+          <div class="problem-fact"><strong>A deal stalls for a week</strong> sitting in an inbox nobody thought to check.</div>
+          <div class="problem-fact"><strong>The work gets done</strong> but the invoice goes out late, or never.</div>
+          <div class="problem-fact"><strong>Your best person leaves</strong> and takes half the playbook with them.</div>
+          <div class="problem-fact">The only thing holding it together is <strong>you,</strong> answering questions at 9pm.</div>
         </div>
       </div>
     </div>
@@ -441,6 +432,15 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
       <div class="shift-card"><div class="shift-name">Predictability</div><div class="shift-body">See what is coming before it costs you.</div></div>
       <div class="shift-card"><div class="shift-name">Control</div><div class="shift-body">The business runs without you in the middle of every decision.</div></div>
     </div>
+  </div>
+</section>
+
+<!-- MID CTA -->
+<section class="midcta-sec">
+  <div class="container-md reveal">
+    <h2>See what this would look like for <em>your business.</em></h2>
+    <p>One free call. We map your operation and show you exactly where time and money are leaking. No pitch.</p>
+    <a href="/audit" class="midcta-btn">Get your free assessment &rarr;</a>
   </div>
 </section>
 
@@ -710,45 +710,6 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
   </div>
 </section>
 
-<!-- BIGGER VISION -->
-<section class="vision-sec">
-  <div class="container">
-    <div class="reveal">
-      <div class="sec-eyebrow">The bigger vision</div>
-      <h2>Every business will eventually run on <em>a digital workforce.</em></h2>
-      <div class="vision-row">
-        <span class="vision-node">AI-native companies</span>
-        <span class="vision-arrow">&rarr;</span>
-        <span class="vision-node">AI-native industries</span>
-        <span class="vision-arrow">&rarr;</span>
-        <span class="vision-node">AI-native cities</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- OTHER PATHS -->
-<section class="band band-alt">
-  <div class="container">
-    <div class="reveal">
-      <div class="sec-eyebrow">Two more ways in</div>
-      <h2>Have an idea, or want to bring this <em>to your city?</em></h2>
-    </div>
-    <div class="paths-grid reveal">
-      <a href="/dwy" class="path-card">
-        <div class="path-name">Build a company with us</div>
-        <div class="path-body">Have an idea for an AI-powered company? We validate it, build it with you or for you, and make it AI-native from day one. Agents as a service, not just software.</div>
-        <div class="path-link">Build your company &rarr;</div>
-      </a>
-      <a href="/citylead" class="path-card">
-        <div class="path-name">Become a City Lead</div>
-        <div class="path-body">Own TMI in your city. You build the relationships, we build the systems, and the tech does the work so you can do the living.</div>
-        <div class="path-link">Become a City Lead &rarr;</div>
-      </a>
-    </div>
-  </div>
-</section>
-
 <!-- FOUNDERS -->
 <section class="found-sec">
   <div class="container">
@@ -762,24 +723,6 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
   </div>
 </section>
 
-<!-- FIELD NOTES -->
-<section class="letter-section">
-  <div class="letter-glow"></div>
-  <div class="container">
-    <div class="letter-inner reveal">
-      <div class="letter-tag">Field Notes</div>
-      <h2>What we're <em>building.</em></h2>
-      <p class="letter-desc">What's working. What broke and what we learned. One email when something real drops.</p>
-      <form class="letter-form" id="letter-form">
-        <input type="email" class="letter-input" placeholder="your@email.com" required/>
-        <button type="submit" class="letter-btn">Join Free &rarr;</button>
-      </form>
-      <div class="letter-ok" id="letter-ok">You're in. Watch your inbox.</div>
-      <p class="letter-note">No spam. Unsubscribe any time.</p>
-    </div>
-  </div>
-</section>
-
 <!-- FINAL CTA -->
 <section class="final-sec">
   <div class="container">
@@ -787,7 +730,6 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
       <h2>See exactly what your chaos is costing you.</h2>
       <p>The free assessment maps your business, finds where time and money are leaking, and shows you what we would build. No obligation. No pitch. Just clarity.</p>
       <a href="/audit" class="final-btn">Get your free assessment &rarr;</a>
-      <p class="final-follow">For more, follow <a href="https://www.instagram.com/miaelianaa" target="_blank" rel="noopener">@miaelianaa</a></p>
     </div>
   </div>
 </section>
@@ -841,8 +783,6 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
 <script>
 const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});},{threshold:0.07});
 document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
-const form=document.getElementById('letter-form'),ok=document.getElementById('letter-ok');
-if(form){form.addEventListener('submit',async function(e){e.preventDefault();const email=form.querySelector('input').value;form.style.display='none';ok.style.display='block';try{fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,source:'fotf_main',audience:'all'})});}catch(err){}});}
 </script>
 <script src="/chat-widget.js" defer></script>
 </body>
