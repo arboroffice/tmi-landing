@@ -92,6 +92,19 @@ src="https://www.facebook.com/tr?id=1020562120324709&ev=PageView&noscript=1"
 Cal('init', { origin: 'https://cal.com' });
 Cal('inline', { elementOrSelector: '#cal-embed', calLink: 'mia-elianaa-a4n2hk/30min', layout: 'month_view' });
 Cal('ui', { styles: { branding: { brandColor: '#E4FF97' } }, hideEventTypeDetails: false, layout: 'month_view' });
+
+// Meta Pixel — Schedule conversion when a call is booked. Deduped with the
+// server-side Conversions API event (api/booking-confirmed.js) via the Cal
+// booking uid, so the same booking counts once.
+Cal('on', { action: 'bookingSuccessful', callback: function (e) {
+  try {
+    var d = (e && e.detail && e.detail.data) ? e.detail.data : {};
+    var uid = (d.booking && (d.booking.uid || d.booking.id)) || d.uid || '';
+    if (typeof fbq === 'function') {
+      fbq('track', 'Schedule', {}, uid ? { eventID: 'booking_' + uid } : {});
+    }
+  } catch (err) {}
+}});
 </script>
 </body>
 </html>

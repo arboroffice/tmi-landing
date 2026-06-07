@@ -36,6 +36,29 @@ module.exports = async function handler(req, res) {
   }
 
   const firstName = lead.name.split(' ')[0];
+
+  // Meta Conversions API — Schedule conversion (a call was booked). This is the
+  // high-intent conversion after the audit. The booking happens on the website
+  // via the Cal embed, but this confirmation arrives as a Cal webhook (so the
+  // request IP/UA are Cal's, not the user's) - match on hashed email/phone/name
+  // instead, and dedup with the browser pixel via the Cal booking uid.
+  try {
+    const { sendLeadEvent } = require('./_meta-capi');
+    const uid = body?.payload?.uid || body?.payload?.bookingId || '';
+    const nameParts = (lead.name || '').trim().split(/\s+/);
+    sendLeadEvent({
+      eventName: 'Schedule',
+      actionSource: 'website',
+      eventSourceUrl: `${SITE}/booking`,
+      eventId: uid ? `booking_${uid}` : undefined,
+      email,
+      phone: lead.phone,
+      firstName: nameParts[0] || undefined,
+      lastName: nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined,
+      leadId: lead.id,
+    }).catch(() => {});
+  } catch (e) { console.error('Meta CAPI Schedule:', e.message); }
+
   const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   const dateStr = startTime
     ? new Date(startTime).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
