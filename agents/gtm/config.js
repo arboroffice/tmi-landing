@@ -55,3 +55,25 @@ export const SENDER = {
   from: process.env.OUTREACH_FROM_EMAIL || 'hello@mail.tmitechai.com',
   replyTo: process.env.OUTREACH_REPLY_TO || 'support@tmitechai.com',
 };
+
+// TMI social accounts - where repurposed content gets published
+export const SOCIAL = {
+  linkedin: {
+    companyId: '116333936',
+    url: 'https://www.linkedin.com/company/116333936/admin/',
+    // For auto-posting: needs LinkedIn Community Management API OAuth token
+    // env: LINKEDIN_ACCESS_TOKEN, LINKEDIN_ORG_URN (urn:li:organization:116333936)
+  },
+  instagram: {
+    handle: 'tmitech',
+    url: 'https://www.instagram.com/tmitech/',
+    // For auto-posting: needs Instagram Graph API (business account + FB page link)
+    // env: IG_USER_ID, META_ACCESS_TOKEN
+  },
+  facebook: {
+    pageId: '61589248780094',
+    url: 'https://www.facebook.com/profile.php?id=61589248780094',
+    // For auto-posting: needs Facebook Graph API page token
+    // env: FB_PAGE_ID, META_ACCESS_TOKEN
+  },
+};

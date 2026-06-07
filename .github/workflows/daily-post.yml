@@ -1,8 +1,8 @@
-name: Daily Blog Post
+name: Weekly Field Notes
 
 on:
   schedule:
-    - cron: '0 7 * * *'   # 7am UTC = 3am ET / midnight PT
+    - cron: '0 9 * * 1'   # Mondays at 9am UTC (5am ET)
   workflow_dispatch:        # manual trigger from GitHub Actions tab
 
 permissions:
@@ -43,7 +43,7 @@ jobs:
         run: |
           git config user.name "TMI Bot"
           git config user.email "bot@tmi-technology.com"
-          TITLE=$(cat .last-title 2>/dev/null || echo "Daily Field Notes")
+          TITLE=$(cat .last-title 2>/dev/null || echo "Weekly Field Notes")
           git add -A
           if git diff --staged --quiet; then
             echo "No changes to commit"
@@ -51,3 +51,10 @@ jobs:
             git commit -m "Field Notes: $TITLE"
             git push
           fi
+
+      - name: Send email to subscribers
+        run: node agents/email-sender.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

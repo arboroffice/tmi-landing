@@ -184,6 +184,20 @@ For the READ NEXT section, pick 2 related articles from this list and use real i
 - article-scaling-trap.html (Leadership) - image: https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80
 - article-idle-time.html (Operations) - image: https://images.pexels.com/photos/2101137/pexels-photo-2101137.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80
 
+REQUIRED: Include this audit CTA block immediately before <div class="article-end"> (every article must have it):
+<div class="oi-cta">
+  <h3>[Write a short punchy heading relevant to this article's topic]</h3>
+  <p>[One sentence: what the TMI audit reveals for an operator in this situation. Max 25 words.]</p>
+  <a href="/audit" class="btn">Book the audit &nearr;</a>
+</div>
+
+And include this CSS in the <style> block:
+  .oi-cta{margin:3em 0 0;padding:46px 40px;background:var(--bg-deep);border-radius:8px;text-align:center;}
+  .oi-cta h3{font-family:var(--serif);font-size:clamp(24px,3vw,32px);color:#fff;margin-bottom:14px;letter-spacing:-0.02em;}
+  .oi-cta p{font-family:var(--sans);font-size:15px;line-height:1.6;color:rgba(255,255,255,0.78);max-width:48ch;margin:0 auto 26px;}
+  .oi-cta .btn{display:inline-block;font-family:var(--sans);font-size:14px;font-weight:600;background:var(--chart);color:#0a0b14;padding:14px 28px;border-radius:999px;transition:background 0.15s;}
+  .oi-cta .btn:hover{background:var(--chart-dark);}
+
 Return ONLY the complete HTML file.`
     }]
   });
@@ -263,8 +277,9 @@ async function main() {
   prependStoryToNews({ card });
   console.log('Updated news.html');
 
-  // Save title for git commit message
+  // Save title and filename for git commit message and email-sender
   fs.writeFileSync(path.join(ROOT, '.last-title'), topic.suggested_title);
+  fs.writeFileSync(path.join(ROOT, '.last-article'), filename);
 
   console.log(`Done. Article: ${filename} | ${readTime} min read`);
 }
