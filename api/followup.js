@@ -59,20 +59,68 @@ async function handler(req, res) {
 
   const preCallSteps = ['pre_call_24h', 'pre_call_2h'];
 
-  // Always skip unsubscribed
-  if (!lead || lead.status === 'unsubscribed') {
+  // Statuses where the lead has converted, gone dead, or opted out. Once a lead
+  // reaches any of them, all cold and Intelligence Audit nurture follow-up stops.
+  //
+  // Verified against the admin portal (admin-leads.html): the lead pipeline is
+  // new -> contacted -> qualified -> proposal -> won -> lost. "Convert to client"
+  // sets the lead to 'won' and creates the client record, so on the lead side
+  // 'won' IS "we got them as a client / we're building." booking-confirmed.js
+  // sets 'booked'. Those plus 'lost' and 'unsubscribed' are the real stop
+  // signals. The rest are forward-compatible synonyms in case the vocabulary
+  // grows (client tables already use active/healthy/churned).
+  const STOP_STATUSES = [
+    'unsubscribed', 'booked', 'won', 'lost',          // verified, live today
+    'client', 'building', 'customer', 'onboarding',   // forward-compatible
+    'closed', 'paid', 'churned', 'dead',
+    'rejected', 'do_not_contact',
+  ];
+
+  if (!lead) {
+    return res.status(200).json({ skipped: true, reason: 'lead not found' });
+  }
+
+  if (lead.status === 'unsubscribed') {
     return res.status(200).json({ skipped: true, reason: 'unsubscribed' });
   }
 
-  // Booked leads only get pre-call steps - skip all cold follow-ups
-  if (lead.status === 'booked' && !preCallSteps.includes(step)) {
-    return res.status(200).json({ skipped: true, reason: 'booked - cold sequence suppressed' });
+  if (preCallSteps.includes(step)) {
+    // Pre-call reminders only make sense for a lead with a booked call.
+    if (lead.status !== 'booked') {
+      return res.status(200).json({ skipped: true, reason: 'not booked' });
+    }
+  } else {
+    // Cold + Intelligence Audit nurture steps stop once the lead has converted
+    // (booked / client / building / etc.) or gone dead.
+    if (STOP_STATUSES.includes(lead.status)) {
+      return res.status(200).json({ skipped: true, reason: `suppressed - status is "${lead.status}"` });
+    }
   }
 
-  // New leads only get cold follow-ups, not pre-call steps
-  if (lead.status === 'new' && preCallSteps.includes(step)) {
-    return res.status(200).json({ skipped: true, reason: 'not booked' });
-  }
+  // Pull the lead's most recent Intelligence Audit (if any) so the campaign can
+  // reference their actual industry and biggest bottleneck.
+  let audit = null;
+  try {
+    const { data: a } = await supabase
+      .from('audit_submissions')
+      .select('industry, worst_cat, tier, dep_pct')
+      .eq('email', lead.email)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    audit = a || null;
+  } catch { /* personalization is best-effort */ }
+
+  // Map the scored worst area to a plain-language bottleneck line.
+  const WORST_LINE = {
+    leads:   'new jobs leak between the first call and the signed estimate',
+    ops:     'every dispatch and field decision still routes back through you',
+    people:  'the operation runs on what is in your best people’s heads',
+    finance: 'money you already earned sits uncollected between job-done and cash-in',
+    comms:   'you find out a job went sideways when the customer calls, not before',
+  };
+  const worstLine = (audit && WORST_LINE[audit.worst_cat]) || 'most of what keeps the business running still routes through you';
+  const industryLine = audit && audit.industry ? audit.industry : 'your operation';
 
   const firstName = lead.name.split(' ')[0];
   const unsubUrl = `${SITE}/api/unsubscribe?id=${leadId}`;
@@ -141,6 +189,94 @@ async function handler(req, res) {
 <p style="margin:0 0 16px;">If the operation's in a good place - genuinely good. If it's not and the timing just hasn't been right, the calendar's here whenever: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
 <p style="margin:0 0 24px;">One last thing worth reading: <a href="${SITE}/article-scaling-trap" style="color:#5a9e00;">Why Growth Usually Makes the Problem Worse</a></p>
 <p style="margin:0;">TMI<br><span style="color:#888;font-size:13px;">tmi-technology.com</span></p>
+`, unsubUrl),
+    });
+  }
+
+  // ─── INTELLIGENCE AUDIT CAMPAIGN ───
+  // 7-day sequence for people who completed the Intelligence Audit, plus a
+  // 30-day check-in. Framed around the three bottlenecks: founder, information,
+  // latency. Stops automatically once the lead converts (see STOP_STATUSES).
+
+  if (step === 'ia_day1_sms' && lead.phone) {
+    await sms.messages.create({
+      body: `Hey ${firstName} - your TMI Intelligence Audit is in your inbox. The short version: the ceiling on most operations isn't the market, it's that ${worstLine}. Worth 15 min to walk through what we'd build first? ${SITE}/booking`,
+      from: FROM_NUMBER,
+      to: formatPhone(lead.phone),
+    });
+  }
+
+  if (step === 'ia_day2_email') {
+    // From Mia — reinforce the framing of the audit
+    await resend.emails.send({
+      from: 'TMI <support@tmitechai.com>',
+      to: lead.email,
+      subject: 'The three places a business gets stuck',
+      html: emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">Now that you've seen your audit, here's the pattern underneath it.</p>
+<p style="margin:0 0 16px;">Almost every operation we look at is stuck in one of three places. The founder, where every decision waits on one person. The information, where job status and numbers live in people's heads and texts instead of somewhere you can see. And the latency, the lag in every handoff, where margin quietly leaks out.</p>
+<p style="margin:0 0 16px;">For ${industryLine}, the one doing the most damage right now is the first: ${worstLine}.</p>
+<p style="margin:0 0 24px;">An intelligent company runs those three on systems instead of on you. If you want to see what that looks like for your operation specifically, the calendar's here: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - intelligent infrastructure for field operations</span></p>
+`, unsubUrl),
+    });
+  }
+
+  if (step === 'ia_day4_email') {
+    // From Tyler — cost of staying the same
+    await resend.emails.send({
+      from: 'TMI <support@tmitechai.com>',
+      to: lead.email,
+      subject: 'What the lag is actually costing',
+      html: emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">The expensive part of being stuck isn't dramatic. It's the lag.</p>
+<p style="margin:0 0 16px;">A lead waits a few hours for a callback and goes with whoever answered first. A job finishes and the invoice goes out days later. A decision sits because the one person who can make it is on a roof. None of it shows up as a line item, which is exactly why it never gets fixed.</p>
+<p style="margin:0 0 16px;">Your audit put a number on it. The reason it compounds is that it's structural, not a people problem. You can't hire your way out of latency. You build it out.</p>
+<p style="margin:0 0 24px;">Here's how it usually adds up: <a href="${SITE}/article-revenue-leakage" style="color:#5a9e00;">Where the Revenue Actually Goes</a>. And if you want to map it on your operation: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
+<p style="margin:0;">Tyler<br><span style="color:#888;font-size:13px;">TMI</span></p>
+`, unsubUrl),
+    });
+  }
+
+  if (step === 'ia_day7_email_sms') {
+    // From Mia — the straight question
+    await resend.emails.send({
+      from: 'TMI <support@tmitechai.com>',
+      to: lead.email,
+      subject: 'Straight question about your audit',
+      html: emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">You ran the audit, which means some part of this is on your mind. So a real question, not a guilt trip: is now just a bad time?</p>
+<p style="margin:0 0 16px;">If you're mid-season, buried on a job, dealing with staffing, I get it. We can come back to this. If it's something else, reply and tell me. I'd rather know than keep guessing.</p>
+<p style="margin:0 0 24px;">Calendar's here whenever it's useful: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI</span></p>
+`, unsubUrl),
+    });
+
+    if (lead.phone) {
+      await sms.messages.create({
+        body: `Hey ${firstName} - is now just a bad time on the audit follow-up? Real question. Happy to circle back whenever: ${SITE}/booking`,
+        from: FROM_NUMBER,
+        to: formatPhone(lead.phone),
+      });
+    }
+  }
+
+  if (step === 'ia_day30_checkin') {
+    // 30-day check-in — re-open the loop without pressure
+    await resend.emails.send({
+      from: 'TMI <support@tmitechai.com>',
+      to: lead.email,
+      subject: `${firstName}, 30 days since your Intelligence Audit`,
+      html: emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">It's been about a month since you ran the audit. Checking in, no agenda.</p>
+<p style="margin:0 0 16px;">The thing about a bottleneck is it doesn't fix itself. If anything, a busy month makes it louder, because the more work comes through, the more of it routes through you. If ${worstLine} is still true, it's still costing you.</p>
+<p style="margin:0 0 16px;">If the operation's in a genuinely good place, ignore this and good on you. If it's not and the timing just hasn't lined up, twenty minutes is all it takes to map the first build.</p>
+<p style="margin:0 0 24px;">Whenever you're ready: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - intelligent infrastructure for field operations</span></p>
 `, unsubUrl),
     });
   }

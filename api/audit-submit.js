@@ -166,15 +166,29 @@ module.exports = async function handler(req, res) {
   const firstName = (contact.name || 'there').split(' ')[0];
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-  // 1. Insert into leads table for follow-up chain
+  // 1. Get the lead row for the follow-up chain. Most audit takers already have
+  //    a lead from audit-start (status 'audit_started'), and email is unique, so
+  //    a blind insert collides and leaves us without a leadId. Try the insert,
+  //    and on conflict fall back to the existing lead so the campaign still
+  //    schedules. Never downgrade a lead that has already converted.
+  const emailLc = contact.email.toLowerCase();
   let leadId = null;
   const { data: lead, error: leadErr } = await supabase
     .from('leads')
-    .insert({ name: contact.name, email: contact.email.toLowerCase(), phone: contact.phone || null, status: 'new' })
+    .insert({ name: contact.name, email: emailLc, phone: contact.phone || null, status: 'new' })
     .select()
     .single();
-  if (!leadErr) leadId = lead.id;
-  else console.error('Lead insert:', leadErr.message);
+  if (!leadErr && lead) {
+    leadId = lead.id;
+  } else {
+    const { data: existing } = await supabase
+      .from('leads')
+      .select('id')
+      .eq('email', emailLc)
+      .maybeSingle();
+    if (existing) leadId = existing.id;
+    else console.error('Lead insert:', leadErr?.message);
+  }
 
   // 2. Insert full audit record
   const { error: auditErr } = await supabase.from('audit_submissions').insert({
@@ -234,15 +248,19 @@ module.exports = async function handler(req, res) {
     to: ALERT_NUMBER,
   }).catch(e => console.error('Alert SMS:', e.message));
 
-  // 6. Schedule follow-up chain
+  // 6. Schedule the Intelligence Audit follow-up campaign: a 7-day sequence
+  //    plus a 30-day check-in. Every step is suppressed automatically once the
+  //    lead converts (booked / client / building / etc.) — see api/followup.js.
   if (leadId) {
     const qstash = new QStashClient({ token: process.env.QSTASH_TOKEN });
     const followupUrl = `${SITE}/api/followup`;
+    const DAY = 86400;
     const schedule = [
-      { delay: 86400,   step: 'day1_sms' },
-      { delay: 259200,  step: 'day3_email' },
-      { delay: 604800,  step: 'day7_email_sms' },
-      { delay: 1209600, step: 'day14_email' },
+      { delay: 1 * DAY,  step: 'ia_day1_sms' },        // Day 1  — SMS
+      { delay: 2 * DAY,  step: 'ia_day2_email' },      // Day 2  — email: the three bottlenecks
+      { delay: 4 * DAY,  step: 'ia_day4_email' },      // Day 4  — email: what the lag costs
+      { delay: 7 * DAY,  step: 'ia_day7_email_sms' },  // Day 7  — email + SMS: straight question
+      { delay: 30 * DAY, step: 'ia_day30_checkin' },   // Day 30 — check-in
     ];
     for (const { delay, step } of schedule) {
       qstash.publishJSON({ url: followupUrl, delay, body: { leadId, step } })
