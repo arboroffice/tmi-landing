@@ -67,6 +67,22 @@ module.exports = async (req, res) => {
       .select('*, contacts(*)')
       .single();
     if (error) return res.status(500).json({ error: error.message });
+
+    // Meta Conversions API — lead stage change (fire and forget)
+    if (leadFields.status) {
+      try {
+        const { sendLeadEvent } = require('./_meta-capi');
+        const c = data.contacts || {};
+        sendLeadEvent({
+          eventName: data.status || leadFields.status,
+          email: c.email || data.email,
+          phone: c.phone || data.phone,
+          firstName: c.first_name,
+          lastName: c.last_name,
+        }).catch(() => {});
+      } catch (e) { console.error('Meta CAPI:', e.message); }
+    }
+
     return res.json(data);
   }
 

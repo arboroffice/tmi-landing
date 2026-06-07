@@ -28,6 +28,22 @@ module.exports = async (req, res) => {
       .select()
       .single();
     if (error) return res.status(500).json({ error: error.message });
+
+    // Meta Conversions API — application stage change (fire and forget)
+    if (status) {
+      try {
+        const { sendLeadEvent } = require('./_meta-capi');
+        const parts = (data.name || '').trim().split(' ');
+        sendLeadEvent({
+          eventName: status,
+          email: data.email,
+          phone: data.phone,
+          firstName: parts[0] || undefined,
+          lastName: parts.slice(1).join(' ') || undefined,
+        }).catch(() => {});
+      } catch (e) { console.error('Meta CAPI:', e.message); }
+    }
+
     return res.json(data);
   }
 

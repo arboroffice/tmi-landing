@@ -92,6 +92,19 @@ module.exports = async function handler(req, res) {
     console.error('Supabase:', e.message);
   }
 
+  // Meta Conversions API — initial lead event (fire and forget)
+  try {
+    const { sendLeadEvent, webContext } = require('./_meta-capi');
+    sendLeadEvent({
+      eventName: 'Lead',
+      email,
+      firstName: first_name,
+      lastName: last_name,
+      leadId,
+      ...webContext(req),
+    }).catch(() => {});
+  } catch (e) { console.error('Meta CAPI:', e.message); }
+
   // Notifications — fire and forget
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);

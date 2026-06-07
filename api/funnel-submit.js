@@ -118,6 +118,20 @@ module.exports = async function handler(req, res) {
     console.error('Supabase:', e.message);
   }
 
+  // Meta Conversions API — initial lead event (fire and forget)
+  try {
+    const { sendLeadEvent, webContext } = require('./_meta-capi');
+    sendLeadEvent({
+      eventName: 'Lead',
+      email,
+      phone: formattedPhone,
+      firstName: first_name,
+      lastName: last_name,
+      leadId,
+      ...webContext(req),
+    }).catch(() => {});
+  } catch (e) { console.error('Meta CAPI:', e.message); }
+
   // Subscribe to Beehiiv
   const customFields = [
     ...(audience ? [{ name: 'Audience', value: audience }] : []),
