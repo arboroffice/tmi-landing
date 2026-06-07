@@ -118,37 +118,19 @@ module.exports = async function handler(req, res) {
     console.error('Supabase:', e.message);
   }
 
-  // Meta Conversions API — SubmitApplication conversion (fire and forget).
-  // Sends every parameter Meta's setup wizard requires: Event Time, Event Name,
-  // Event Source URL, Action Source, Event ID, Opt Out, and customer info
-  // (email/phone/first+last name/city/state/country hashed by the helper; client
-  // IP and user agent sent unhashed). event_id/event_source_url may be passed in
-  // from the funnel page so the browser pixel and this server event dedup.
+  // Meta Conversions API — initial lead event (fire and forget).
+  // The SubmitApplication conversion fires on the Intelligence Audit submit
+  // (see api/audit-submit.js); the funnel is tracked as a Lead.
   try {
-    const crypto = require('crypto');
     const { sendLeadEvent, webContext } = require('./_meta-capi');
-    const ctx = webContext(req);
-    const b = req.body || {};
-    const eventId = b.event_id || `app_${appId || leadId || ''}_${crypto.randomBytes(6).toString('hex')}`;
-    const eventSourceUrl = b.event_source_url || (req.headers && req.headers.referer) || `${SITE}/funnel`;
     sendLeadEvent({
-      eventName: 'SubmitApplication',
-      actionSource: 'website',
-      eventSourceUrl,
-      eventId,
-      optOut: b.opt_out === true,
+      eventName: 'Lead',
       email,
       phone: formattedPhone,
       firstName: first_name,
       lastName: last_name,
-      city: b.city,
-      state: b.state,
-      country: b.country,
       leadId,
-      fbc: ctx.fbc,
-      fbp: ctx.fbp,
-      clientIp: ctx.clientIp,
-      userAgent: ctx.userAgent,
+      ...webContext(req),
     }).catch(() => {});
   } catch (e) { console.error('Meta CAPI:', e.message); }
 

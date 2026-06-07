@@ -209,6 +209,41 @@ module.exports = async function handler(req, res) {
   });
   if (auditErr) console.error('Audit insert:', auditErr.message);
 
+  // Meta Conversions API — SubmitApplication conversion (fire and forget).
+  // Completing the Intelligence Audit is the application. Sends every parameter
+  // Meta's setup wizard requires: Event Time, Event Name, Event Source URL,
+  // Action Source (website), Event ID, Opt Out, plus customer info (email/phone/
+  // first+last name hashed by the helper; client IP + user agent unhashed).
+  // event_id and event_source_url come from audit.html so the browser pixel and
+  // this server event dedup.
+  try {
+    const crypto = require('crypto');
+    const { sendLeadEvent, webContext } = require('./_meta-capi');
+    const ctx = webContext(req);
+    const nameParts = (contact.name || '').trim().split(/\s+/);
+    const eventId = req.body.event_id || `audit_${leadId || ''}_${crypto.randomBytes(6).toString('hex')}`;
+    const eventSourceUrl = req.body.event_source_url || (req.headers && req.headers.referer) || `${SITE}/audit`;
+    sendLeadEvent({
+      eventName: 'SubmitApplication',
+      actionSource: 'website',
+      eventSourceUrl,
+      eventId,
+      optOut: req.body.opt_out === true,
+      email: contact.email,
+      phone: contact.phone,
+      firstName: nameParts[0] || undefined,
+      lastName: nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined,
+      city: contact.city,
+      state: contact.state,
+      country: contact.country,
+      leadId,
+      fbc: ctx.fbc,
+      fbp: ctx.fbp,
+      clientIp: ctx.clientIp,
+      userAgent: ctx.userAgent,
+    }).catch(() => {});
+  } catch (e) { console.error('Meta CAPI:', e.message); }
+
   const unsubUrl = leadId
     ? `${SITE}/api/unsubscribe?id=${leadId}`
     : `${SITE}/api/unsubscribe?email=${encodeURIComponent(contact.email)}`;

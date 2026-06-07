@@ -897,11 +897,35 @@ function showResults() {
 }
 
 async function submitAuditToAPI(r) {
+  // Shared event id so the browser pixel and the server Conversions API event
+  // dedup into one SubmitApplication conversion.
+  let eventId;
+  try {
+    eventId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+      : 'audit_' + Date.now() + '_' + Math.random().toString(16).slice(2);
+  } catch (e) {
+    eventId = 'audit_' + Date.now() + '_' + Math.random().toString(16).slice(2);
+  }
+  const eventSourceUrl = window.location.href;
+
+  // Browser pixel side of the conversion
+  try {
+    if (typeof fbq === 'function') {
+      fbq('track', 'SubmitApplication', {}, { eventID: eventId });
+    }
+  } catch (e) {}
+
   try {
     await fetch('/api/audit-submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contact: contactInfo, results: r, answers: answers }),
+      body: JSON.stringify({
+        contact: contactInfo,
+        results: r,
+        answers: answers,
+        event_id: eventId,
+        event_source_url: eventSourceUrl,
+      }),
     });
   } catch(e) {}
 }
