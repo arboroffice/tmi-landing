@@ -4,15 +4,15 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
-<meta name="description" content="19 questions. 5 minutes. Score your operation across dispatch, billing, compliance, field visibility, and more — then get a personalized AI infrastructure roadmap for your industry."/>
+<meta name="description" content="A 5-minute Intelligence Audit that pinpoints why your operation is stuck: founder bottlenecks, information bottlenecks, and operational latency. Real agent reasoning, tailored to your industry and niche, with a plan to become intelligent."/>
 <link rel="canonical" href="https://www.tmitechai.com/audit"/>
-<meta property="og:title" content="Free Operations Audit | TMI"/>
-<meta property="og:description" content="Find out exactly where your operation is leaking. One session to map every bottleneck and walk away with a complete build plan. No payment required."/>
+<meta property="og:title" content="The Intelligence Audit | TMI"/>
+<meta property="og:description" content="Find out exactly where your business is stuck: founder bottlenecks, information bottlenecks, operational latency. A personalized diagnosis of your operation and the path to intelligent. No payment required."/>
 <meta property="og:image" content="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1400&q=80"/>
 <meta property="og:url" content="https://www.tmitechai.com/audit"/>
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="TMI"/>
-<title>Free Operations Audit | TMI</title>
+<title>The Intelligence Audit | TMI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
@@ -344,6 +344,32 @@ p{margin:0;}
   .prop-before-after,.prop-roi-grid{grid-template-columns:1fr;}
   .prop-section{padding:48px 0;}
 }
+/* ── AGENT REASONING ── */
+.prop-doc-headline{font-family:var(--serif);font-size:clamp(18px,2vw,26px);font-weight:400;letter-spacing:-0.015em;line-height:1.2;color:var(--chart);margin-top:14px;}
+.ai-status-badge{display:inline-flex;align-items:center;gap:9px;margin-top:22px;padding:8px 16px;border-radius:999px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.02em;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);}
+.ai-status-badge .ai-dot{width:7px;height:7px;border-radius:50%;background:var(--chart);flex:none;}
+.ai-status-badge.analyzing{color:rgba(255,255,255,0.55);}
+.ai-status-badge.analyzing .ai-dot{animation:aiPulse 1.1s ease-in-out infinite;}
+@keyframes aiPulse{0%,100%{opacity:0.3;transform:scale(0.85);}50%{opacity:1;transform:scale(1.15);}}
+/* shimmer placeholder while the agent reasons */
+.ai-loading{position:relative;color:transparent!important;border-radius:4px;background:linear-gradient(100deg,rgba(0,0,0,0.045) 30%,rgba(0,0,0,0.085) 50%,rgba(0,0,0,0.045) 70%);background-size:200% 100%;animation:aiShimmer 1.4s ease-in-out infinite;}
+.ai-loading *{visibility:hidden;}
+.prop-section.dark .ai-loading{background:linear-gradient(100deg,rgba(255,255,255,0.05) 30%,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.05) 70%);background-size:200% 100%;}
+@keyframes aiShimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.ai-diagnosis-text{font-family:var(--serif);font-size:clamp(19px,1.9vw,25px);font-weight:400;line-height:1.5;letter-spacing:-0.01em;color:var(--ink);max-width:74ch;margin-top:8px;}
+.ai-bn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px;}
+.ai-bn-card{border:1px solid var(--line-strong);border-radius:14px;padding:26px 24px;background:#fff;}
+.ai-bn-card.worst{border-color:var(--ink);background:var(--ink);color:#fff;}
+.ai-bn-type{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.ai-bn-card.worst .ai-bn-type{color:var(--chart);}
+.ai-bn-title{font-family:var(--serif);font-size:19px;font-weight:500;line-height:1.2;letter-spacing:-0.01em;color:var(--ink);margin-bottom:10px;}
+.ai-bn-card.worst .ai-bn-title{color:#fff;}
+.ai-bn-body{font-family:var(--sans);font-size:14px;line-height:1.6;color:var(--ink-2);}
+.ai-bn-card.worst .ai-bn-body{color:rgba(255,255,255,0.7);}
+.ai-outcome{font-family:var(--serif);font-size:clamp(17px,1.6vw,21px);font-weight:400;line-height:1.5;color:var(--ink-2);max-width:70ch;margin-top:36px;padding-left:22px;border-left:3px solid var(--chart-dark);}
+.ai-first-move{font-family:var(--sans);font-size:15px;line-height:1.65;color:var(--ink);max-width:70ch;margin-top:24px;padding:18px 22px;background:rgba(228,255,151,0.14);border:1px solid rgba(208,255,106,0.5);border-radius:10px;}
+.ai-first-move strong{font-weight:700;}
+@media(max-width:768px){.ai-bn-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -357,26 +383,24 @@ p{margin:0;}
   </nav>
   <div class="intro-body">
     <div class="intro-inner">
-      <div class="eyebrow"><span class="dot"></span>Free Operations Audit</div>
-      <h1 class="intro-h1">Find Out Exactly Where Your Operation Is Leaking.</h1>
-      <p class="intro-sub">19 questions. 5 minutes. We score your operation across five key areas, surface your biggest gaps, and build a personalized AI infrastructure roadmap for your industry.</p>
+      <div class="eyebrow"><span class="dot"></span>The Intelligence Audit</div>
+      <h1 class="intro-h1">Find Out Exactly Where Your Business Is Stuck.</h1>
+      <p class="intro-sub">Most operations are not stuck because of the market. They are stuck because every decision waits on the owner, the information lives in people's heads, and there is lag in every handoff. This audit reads your operation and shows you exactly where, then maps the path to an intelligent company that runs without running through you.</p>
       <div class="intro-stats">
-        <div class="intro-stat"><div class="intro-stat-val">19</div><div class="intro-stat-label">Questions</div></div>
-        <div class="intro-stat"><div class="intro-stat-val">5 Min</div><div class="intro-stat-label">Average Time</div></div>
-        <div class="intro-stat"><div class="intro-stat-val">100%</div><div class="intro-stat-label">Personalized</div></div>
+        <div class="intro-stat"><div class="intro-stat-val">5 Min</div><div class="intro-stat-label">To Complete</div></div>
+        <div class="intro-stat"><div class="intro-stat-val">Live</div><div class="intro-stat-label">Agent Analysis</div></div>
+        <div class="intro-stat"><div class="intro-stat-val">100%</div><div class="intro-stat-label">Your Operation</div></div>
       </div>
       <div class="intro-areas">
-        <div class="intro-areas-label">Five areas we assess:</div>
+        <div class="intro-areas-label">The three ways businesses get stuck:</div>
         <div class="intro-areas-list">
-          <span>Sales &amp; Estimating</span>
-          <span>Dispatch &amp; Scheduling</span>
-          <span>Finance &amp; Billing</span>
-          <span>Crew &amp; Knowledge</span>
-          <span>Field Visibility</span>
+          <span>Founder Bottlenecks</span>
+          <span>Information Bottlenecks</span>
+          <span>Operational Latency</span>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="startAudit()" style="font-size:16px;padding:16px 40px;">Start My Free Audit</button>
-      <p style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:14px;">No payment required. Takes about 5 minutes.</p>
+      <button class="btn btn-primary" onclick="startAudit()" style="font-size:16px;padding:16px 40px;">Start My Intelligence Audit</button>
+      <p style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:14px;">No payment required. Takes about 5 minutes. Analyzed live by TMI's reasoning agent.</p>
     </div>
   </div>
 </section>
@@ -389,8 +413,8 @@ p{margin:0;}
   <div class="contact-body">
     <div class="contact-inner">
       <div class="eyebrow"><span class="dot"></span>One Quick Step</div>
-      <h2 class="contact-h2">Where should we send your results?</h2>
-      <p class="contact-sub">We'll email you a full copy of your score, roadmap, and recommended next step.</p>
+      <h2 class="contact-h2">Where should we send your Intelligence Audit?</h2>
+      <p class="contact-sub">We'll email you the full diagnosis: where your operation is stuck, what it's costing, and the path to intelligent.</p>
       <form id="contact-form" onsubmit="submitContact(event)">
         <div class="contact-fields">
           <div class="contact-row">
@@ -651,6 +675,14 @@ const HOURS_OPTIONS = [
   {text:"More than 40 hours per week",val:"over40",num:50},
 ];
 
+const SOFTWARE_OPTIONS = [
+  {text:"Mostly pen, paper, texts, and spreadsheets",val:"manual",num:1,label:"mostly manual - paper, texts, and spreadsheets"},
+  {text:"1 or 2 core tools",val:"few",num:2,label:"1 to 2 core tools"},
+  {text:"3 to 5 separate tools",val:"some",num:4,label:"3 to 5 separate tools that don't fully talk to each other"},
+  {text:"6 to 10 tools, and they don't talk to each other",val:"many",num:8,label:"6 to 10 disconnected tools"},
+  {text:"More than 10, it's a mess",val:"sprawl",num:12,label:"more than 10 tools, none of them connected"},
+];
+
 const REV_MONTHLY = {
   under500k:25000,
   '500k_2m':104000,
@@ -694,45 +726,45 @@ const OFFERS = {
   tier3:{headline:"Foundation Build",why:"You have the volume and the crew. What you are missing is the infrastructure that makes growth happen without adding more of your personal hours to it. The Foundation Build closes the gaps and installs the full system. Starting at $25,000.",bullets:["Full intake-to-close automation with no leaks at any stage","Dispatch and field coordination running without your daily involvement","Invoice and collections automated from job complete to cash collected","Real-time job costing so you know your margin before you invoice","Custom integrations with your existing tools","Active support after launch"]},
   tier4:{headline:"Foundation Build",why:"At your scale you need the full build plus custom depth. Custom workflows built around how your specific operation runs, financial visibility, and a system that holds together under real volume and complexity.",bullets:["Everything in the Foundation Build","Custom agentic workflows built around your exact operation and industry","Financial automation and real-time reporting built for your actual revenue","Compliance and safety documentation tracking automated where applicable","Analytics dashboard with live operational visibility across all crews","Extended active support after launch"]},
   tier5:{headline:"Foundation Build",why:"Multiple crews or locations without connected infrastructure creates gaps that cost money every day. The Foundation Build at your scale connects everything into one system with consistent standards enforced automatically across every site.",bullets:["Everything in the Foundation Build","Centralized dispatch and coordination across all crews and locations","Multi-location reporting without anyone compiling a spreadsheet","Cross-location standards enforced automatically","Redundancy built in so nothing breaks when a key person is unavailable","Extended active support after launch"]},
-  tier6:{headline:"Chief AI Officer Engagement",why:"At your level you need TMI embedded at the leadership layer, not just the operational layer. The CAO Engagement is private one-on-one consulting at the executive level. Custom architecture, custom pricing. You own everything built.",bullets:["Private engagement at the executive level - not a product, a partnership","Fully custom agentic architecture designed for your exact operation and scale","Complete IP ownership transferred at delivery","Team training and full documentation handed over","AI Department Retainer available for ongoing expansion and new builds","Option to license your built systems to others in your industry"]},
-  tier7:{headline:"Chief AI Officer Engagement",why:"You are running a real company. The infrastructure needs to match that. The CAO Engagement is not a software product. It is a custom build designed around your operation, your goals, and where you are taking this business.",bullets:["Private engagement at the executive level - not a product, a partnership","Fully custom agentic architecture designed for your exact operation and scale","Complete IP ownership transferred at delivery","Team training and full documentation handed over","AI Department Retainer available for ongoing expansion and new builds","Option to license your built systems to others in your industry"]},
+  tier6:{headline:"Chief AI Officer Engagement",why:"At your level you need TMI embedded at the leadership layer, not just the operational layer. The CAO Engagement is private one-on-one consulting at the executive level. Custom architecture, custom pricing. You own everything built.",bullets:["Private engagement at the executive level - not a product, a partnership","Fully custom agentic architecture designed for your exact operation and scale","Complete IP ownership transferred at delivery","Team training and full documentation handed over","Systems Department Retainer available for ongoing expansion and new builds","Option to license your built systems to others in your industry"]},
+  tier7:{headline:"Chief AI Officer Engagement",why:"You are running a real company. The infrastructure needs to match that. The CAO Engagement is not a software product. It is a custom build designed around your operation, your goals, and where you are taking this business.",bullets:["Private engagement at the executive level - not a product, a partnership","Fully custom agentic architecture designed for your exact operation and scale","Complete IP ownership transferred at delivery","Team training and full documentation handed over","Systems Department Retainer available for ongoing expansion and new builds","Option to license your built systems to others in your industry"]},
 };
 
 const PATHS = {
   tier1:[
     {label:"Now",text:"Free Operational Assessment - One call. We map your operation, find every leak, and build your plan.",active:false},
-    {label:"Start Here",text:"Foundation Build - Core operational infrastructure installed. Everything connected. Starting at $25,000.",active:true,note:"Most Foundation Build clients add the AI Department Retainer within 60-90 days."},
-    {label:"Next",text:"AI Department Retainer - TMI stays in as your ongoing AI department. New systems built every month. $3,000 to $15,000+/mo.",active:false},
+    {label:"Start Here",text:"Foundation Build - Core operational infrastructure installed. Everything connected. Starting at $25,000.",active:true,note:"Most Foundation Build clients add the Systems Department Retainer within 60-90 days."},
+    {label:"Next",text:"Systems Department Retainer - TMI stays in as your ongoing systems department. New systems built every month. $3,000 to $15,000+/mo.",active:false},
   ],
   tier2:[
     {label:"Now",text:"Free Operational Assessment - One call. We map your operation and identify every gap.",active:false},
     {label:"Start Here",text:"Foundation Build - Full custom operational infrastructure. Lead to invoice, automated. Starting at $25,000.",active:true},
-    {label:"Next",text:"AI Department Retainer - TMI stays in and keeps building. $3,000 to $15,000+/mo.",active:false},
+    {label:"Next",text:"Systems Department Retainer - TMI stays in and keeps building. $3,000 to $15,000+/mo.",active:false},
   ],
   tier3:[
     {label:"Now",text:"Free Operational Assessment - One call. We map your operation and identify every gap.",active:false},
     {label:"Start Here",text:"Foundation Build - Full custom operational infrastructure. Starting at $25,000.",active:true},
-    {label:"Next",text:"AI Department Retainer - TMI stays in and keeps building intelligence on the foundation. $3,000 to $15,000+/mo.",active:false},
+    {label:"Next",text:"Systems Department Retainer - TMI stays in and keeps building intelligence on the foundation. $3,000 to $15,000+/mo.",active:false},
   ],
   tier4:[
     {label:"Now",text:"Free Operational Assessment - One call. Custom scoping conversation with the TMI team.",active:false},
     {label:"Start Here",text:"Foundation Build - Custom workflows, financial automation, and compliance built for your exact operation.",active:true},
-    {label:"Next",text:"AI Department Retainer - Full fractional AI department. Systems maintained and expanded monthly.",active:false},
+    {label:"Next",text:"Systems Department Retainer - Full fractional systems department. Systems maintained and expanded monthly.",active:false},
   ],
   tier5:[
     {label:"Now",text:"Free Operational Assessment - One call. Custom scoping conversation with the TMI team.",active:false},
     {label:"Start Here",text:"Foundation Build - Multi-crew and multi-location infrastructure. Every site connected. Standards enforced automatically.",active:true},
-    {label:"Next",text:"AI Department Retainer - Full fractional AI department. New builds monthly as the operation grows.",active:false},
+    {label:"Next",text:"Systems Department Retainer - Full fractional systems department. New builds monthly as the operation grows.",active:false},
   ],
   tier6:[
     {label:"Now",text:"Free Operational Assessment - Executive-level scoping conversation with TMI.",active:false},
-    {label:"Start Here",text:"Chief AI Officer Engagement - Private executive engagement. Fully custom AI infrastructure. You own everything built.",active:true},
-    {label:"Optional",text:"AI Department Retainer - Ongoing retainer for future expansion, new builds, and optimization.",active:false},
+    {label:"Start Here",text:"Chief AI Officer Engagement - Private executive engagement. Fully custom intelligent infrastructure. You own everything built.",active:true},
+    {label:"Optional",text:"Systems Department Retainer - Ongoing retainer for future expansion, new builds, and optimization.",active:false},
   ],
   tier7:[
     {label:"Now",text:"Free Operational Assessment - Executive-level scoping conversation with TMI.",active:false},
-    {label:"Start Here",text:"Chief AI Officer Engagement - Private executive engagement. Fully custom AI infrastructure. You own everything built.",active:true},
-    {label:"Optional",text:"AI Department Retainer - Ongoing retainer for future expansion, new builds, and optimization.",active:false},
+    {label:"Start Here",text:"Chief AI Officer Engagement - Private executive engagement. Fully custom intelligent infrastructure. You own everything built.",active:true},
+    {label:"Optional",text:"Systems Department Retainer - Ongoing retainer for future expansion, new builds, and optimization.",active:false},
   ],
 };
 
@@ -843,6 +875,7 @@ function showResults() {
   document.getElementById('screen-results').classList.remove('screen-hidden');
   window.scrollTo({top:0,behavior:'smooth'});
   submitAuditToAPI(r);
+  fetchIntelligence(r);
 }
 
 async function submitAuditToAPI(r) {
@@ -853,6 +886,148 @@ async function submitAuditToAPI(r) {
       body: JSON.stringify({ contact: contactInfo, results: r, answers: answers }),
     });
   } catch(e) {}
+}
+
+/* ═══════════════════════════════════════════
+   REAL AGENT REASONING
+═══════════════════════════════════════════ */
+function buildTranscript() {
+  const t = [];
+  // Stage
+  const stage = Q1_OPTIONS.find(o => o.val === answers.q1val);
+  if (stage) t.push({ q: 'Where is your operation right now?', a: stage.text });
+  // 12 scored diagnostic questions, honoring industry overrides
+  const qGroup = getPainGroup(answers.q2);
+  for (const q of SCORED_QS) {
+    const sel = answers[q.id];
+    if (sel === undefined) continue;
+    const override = QUESTION_OVERRIDES[qGroup + '_' + q.id];
+    const qText = override ? override.text : q.text;
+    const opts = override ? override.opts : q.opts;
+    const aText = opts[sel];
+    if (aText) t.push({ q: qText, a: aText });
+  }
+  return t;
+}
+
+function buildProfile(r) {
+  const stage = Q1_OPTIONS.find(o => o.val === answers.q1val);
+  const rev = Q15_OPTIONS.find(o => o.val === answers.q15val);
+  const head = HEADCOUNT_OPTIONS.find(o => o.val === answers.headcount);
+  const hrs = HOURS_OPTIONS.find(o => o.val === answers.hoursPerWeek);
+  const sw  = SOFTWARE_OPTIONS.find(o => o.val === answers.softwareCount);
+  const CAT_NAMES = {leads:'Sales & Estimating',ops:'Dispatch & Scheduling',people:'Crew & Knowledge',finance:'Finance & Billing',comms:'Field Visibility'};
+  return {
+    industry: INDUSTRY_DISPLAY_NAME[r.painGroup] || 'Industrial operations',
+    niche: getNicheLabel(answers.q2) || '',
+    revenue: rev ? rev.text : '',
+    employees: head ? head.text : '',
+    softwareCount: sw ? sw.label : '',
+    hoursPerWeek: hrs ? hrs.text : '',
+    stage: stage ? stage.text : '',
+    depPct: r.depPct,
+    worstArea: CAT_NAMES[r.worstCat] || r.worstCat,
+    secondArea: CAT_NAMES[r.secondCat] || r.secondCat,
+  };
+}
+
+async function fetchIntelligence(r) {
+  const profile = buildProfile(r);
+  const transcript = buildTranscript();
+  const openAnswers = {
+    flow: answers.qOpen1 || '',
+    cracks: answers.qOpen2 || '',
+    unreachable: answers.qOpen3 || '',
+    fixFirst: answers.qOpen4 || '',
+  };
+  try {
+    const resp = await fetch('/api/audit-intelligence', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile, transcript, openAnswers }),
+    });
+    if (!resp.ok) { markIntelligenceFailed(); return; }
+    const data = await resp.json();
+    if (data && data.analysis) applyIntelligence(data.analysis);
+    else markIntelligenceFailed();
+  } catch (e) {
+    markIntelligenceFailed();
+  }
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function setAI(id, text) {
+  const el = document.getElementById(id);
+  if (el && text) {
+    el.classList.remove('ai-loading');
+    el.innerHTML = esc(text);
+  }
+}
+
+function markIntelligenceFailed() {
+  // Graceful degradation: drop the loading shimmer, keep the template fallback text,
+  // and hide the live-analysis section if it never filled.
+  document.querySelectorAll('.ai-loading').forEach(el => el.classList.remove('ai-loading'));
+  const badge = document.getElementById('ai-status-badge');
+  if (badge) badge.style.display = 'none';
+  const sec = document.getElementById('ai-diagnosis-section');
+  if (sec && sec.dataset.filled !== '1') sec.style.display = 'none';
+}
+
+function applyIntelligence(ai) {
+  // Executive summary blocks
+  setAI('ai-situation', ai.situation);
+  setAI('ai-proposal', ai.proposal);
+  setAI('ai-outcome', ai.outcome);
+
+  // Status badge
+  const badge = document.getElementById('ai-status-badge');
+  if (badge) {
+    badge.classList.remove('analyzing');
+    badge.innerHTML = '<span class="ai-dot"></span> Personalized analysis complete';
+  }
+
+  // Headline under the doc title
+  const hl = document.getElementById('ai-headline');
+  if (hl && ai.headline) { hl.textContent = ai.headline; hl.style.display = ''; }
+
+  // Diagnosis section (the core agent reasoning)
+  const sec = document.getElementById('ai-diagnosis-section');
+  const diagEl = document.getElementById('ai-diagnosis');
+  if (diagEl && ai.diagnosis) diagEl.innerHTML = esc(ai.diagnosis);
+
+  if (Array.isArray(ai.bottlenecks) && ai.bottlenecks.length) {
+    const wrap = document.getElementById('ai-bottlenecks');
+    if (wrap) {
+      wrap.innerHTML = ai.bottlenecks.slice(0,3).map((b,i) => `
+        <div class="ai-bn-card${i===0?' worst':''}">
+          <div class="ai-bn-type">${esc(b.type || '')}</div>
+          <div class="ai-bn-title">${esc(b.title || '')}</div>
+          <div class="ai-bn-body">${esc(b.body || '')}</div>
+        </div>`).join('');
+    }
+  }
+  if (sec && (ai.diagnosis || (ai.bottlenecks||[]).length)) {
+    sec.dataset.filled = '1';
+    sec.style.display = '';
+  }
+
+  // First move line
+  const fm = document.getElementById('ai-first-move');
+  if (fm && ai.firstMove) { fm.innerHTML = '<strong>Where we would start:</strong> ' + esc(ai.firstMove); fm.style.display = ''; }
+
+  // Before / after lists
+  if (Array.isArray(ai.before) && ai.before.length) {
+    const b = document.getElementById('ai-before');
+    if (b) b.innerHTML = ai.before.map(t=>`<div class="prop-ba-item">${esc(t)}</div>`).join('');
+  }
+  if (Array.isArray(ai.after) && ai.after.length) {
+    const a = document.getElementById('ai-after');
+    if (a) a.innerHTML = ai.after.map(t=>`<div class="prop-ba-item">${esc(t)}</div>`).join('');
+  }
 }
 
 function retakeAudit() {
@@ -870,7 +1045,7 @@ function retakeAudit() {
    QUESTION RENDERING
 ═══════════════════════════════════════════ */
 const LETTERS = ['A','B','C','D','E','F','G'];
-const TOTAL_QS = 21;
+const TOTAL_QS = 22;
 
 function renderQuestion(idx) {
   currentQ = idx;
@@ -941,6 +1116,15 @@ function renderQuestion(idx) {
     <div class="q-text">Roughly how many hours per week are you or your team spending on manual admin work - dispatch calls, paperwork, status updates, and reporting?</div>
     <div class="q-options">
       ${HOURS_OPTIONS.map((o,i) => `<button class="q-btn" onclick="answerHours('${o.val}',${o.num},this)">
+        <span class="q-badge">${LETTERS[i]}</span>
+        <span class="q-btn-text">${o.text}</span>
+      </button>`).join('')}
+    </div>`;
+  } else if (idx === 21) {
+    html = `<div class="q-category">Your Operation</div>
+    <div class="q-text">How many separate software tools and apps does your operation run on today?</div>
+    <div class="q-options">
+      ${SOFTWARE_OPTIONS.map((o,i) => `<button class="q-btn" onclick="answerSoftware('${o.val}',${o.num},this)">
         <span class="q-badge">${LETTERS[i]}</span>
         <span class="q-btn-text">${o.text}</span>
       </button>`).join('')}
@@ -1042,12 +1226,32 @@ function answerHours(val, num, btn) {
   btn.classList.add('selected');
   answers.hoursPerWeek = val;
   answers.hoursPerWeekNum = num;
+  setTimeout(() => renderQuestion(21), 180);
+}
+
+function answerSoftware(val, num, btn) {
+  btn.closest('.q-options').querySelectorAll('.q-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers.softwareCount = val;
+  answers.softwareCountNum = num;
   setTimeout(() => showResults(), 250);
 }
 
 /* ═══════════════════════════════════════════
    SCORING
 ═══════════════════════════════════════════ */
+function getNicheLabel(val) {
+  if (!val) return '';
+  for (const cat of Q2_CATS) {
+    const sub = cat.subs.find(s => s.val === val);
+    if (sub) {
+      const label = sub.label === 'Other' ? cat.label : sub.label;
+      return label;
+    }
+  }
+  return '';
+}
+
 function getPainGroup(industryVal) {
   if (!industryVal) return 'trades_field';
   if (industryVal.startsWith('trades_')) return 'trades_field';
@@ -1140,6 +1344,7 @@ function buildResultsHTML(r) {
   }
 
   const industryLabel = INDUSTRY_DISPLAY_NAME[r.painGroup] || 'Industrial Operations';
+  const nicheLabel = getNicheLabel(answers.q2) || '';
   const firstName = (contactInfo.name || '').split(' ')[0] || '';
   const companyName = contactInfo.company || '';
   const displayName = firstName || companyName || 'Your Operation';
@@ -1229,13 +1434,15 @@ function buildResultsHTML(r) {
     <!-- PROPOSAL HEADER -->
     <div class="prop-header">
       <div class="res-container">
-        <div class="prop-eyebrow">Operational Assessment &mdash; ${industryLabel}</div>
+        <div class="prop-eyebrow">Intelligence Audit &mdash; ${nicheLabel || industryLabel}</div>
         <div class="prop-doc-title">${displayName}</div>
+        <div id="ai-headline" class="prop-doc-headline" style="display:none;"></div>
         <div class="prop-doc-meta">
           <span>Prepared by TMI Technology</span>
           <span>${date}</span>
-          <span>Operational Dependency: ${r.depPct}%</span>
+          <span>Founder Dependency: ${r.depPct}%</span>
         </div>
+        <div id="ai-status-badge" class="ai-status-badge analyzing"><span class="ai-dot"></span> TMI is analyzing your operation&hellip;</div>
       </div>
     </div>
 
@@ -1249,7 +1456,7 @@ function buildResultsHTML(r) {
         <div class="prop-exec-grid">
           <div class="prop-exec-block">
             <div class="prop-exec-block-label">Situation</div>
-            <div class="prop-exec-block-text">
+            <div id="ai-situation" class="prop-exec-block-text ai-loading">
               This is a ${industryLabel} operation with ${headcountLabel}, generating ${revLabel}.
               The audit shows ${r.depPct}% manual dependency - most of what keeps this business running rides on people, phones, and memory rather than systems.
               The highest friction is concentrated in ${CAT_NAMES[r.worstCat]} and ${CAT_NAMES[r.secondCat]}.
@@ -1257,7 +1464,7 @@ function buildResultsHTML(r) {
           </div>
           <div class="prop-exec-block">
             <div class="prop-exec-block-label">Proposal</div>
-            <div class="prop-exec-block-text">
+            <div id="ai-proposal" class="prop-exec-block-text ai-loading">
               TMI builds the operational infrastructure that changes that equation: centralized job management, automated dispatch and scheduling, and a visibility layer that shows live status across every crew, job, and asset.
               Built for ${industryLabel} - your workflows, your tools, your compliance requirements - connected into one operational layer.
               The result is a business that runs without running through you.
@@ -1266,7 +1473,7 @@ function buildResultsHTML(r) {
           <div class="prop-exec-block invest">
             <div class="prop-exec-block-label">Investment Range</div>
             <div class="prop-exec-invest-line">Foundation Build: $25,000+</div>
-            <div class="prop-exec-invest-line" style="font-size:13px;font-weight:500;color:rgba(228,255,151,0.65);margin-top:2px;">AI Department Retainer: $3k&ndash;$15k/mo</div>
+            <div class="prop-exec-invest-line" style="font-size:13px;font-weight:500;color:rgba(228,255,151,0.65);margin-top:2px;">Systems Department Retainer: $3k&ndash;$15k/mo</div>
             <div class="prop-exec-block-text" style="margin-top:14px;font-size:13px;color:rgba(255,255,255,0.5);">Estimated payback from Foundation Build: ${r.paybackMonths} months.</div>
           </div>
         </div>
@@ -1301,6 +1508,25 @@ function buildResultsHTML(r) {
           <div class="prop-open-quote-text">&ldquo;${q2Ans.substring(0,350)}${q2Ans.length>350?'&hellip;':''}&rdquo;</div>
           <div class="prop-open-quote-attr">Where work falls through the cracks</div>
         </div>` : ''}
+      </div>
+    </div>
+
+    <!-- S2.5: AGENT DIAGNOSIS (real reasoning) -->
+    <div id="ai-diagnosis-section" class="prop-section">
+      <div class="res-container">
+        <div class="prop-section-hd">
+          <div class="prop-sec-num">The Diagnosis</div>
+          <div class="prop-sec-title">Where your operation is stuck.</div>
+          <div class="prop-sec-body">Read live by TMI's reasoning agent from your answers and your own words. Every operation gets stuck in one of three places: the founder, the information, or the lag between them.</div>
+        </div>
+        <div id="ai-diagnosis" class="ai-diagnosis-text ai-loading">Reading your operation. Naming exactly where decisions, information, and time are getting trapped, in the context of how ${nicheLabel || industryLabel} work actually moves.</div>
+        <div id="ai-bottlenecks" class="ai-bn-grid">
+          <div class="ai-bn-card worst"><div class="ai-bn-type ai-loading">Founder bottleneck</div><div class="ai-bn-title ai-loading">Analyzing your answers</div><div class="ai-bn-body ai-loading">Pinpointing where everything routes through one person.</div></div>
+          <div class="ai-bn-card"><div class="ai-bn-type ai-loading">Information bottleneck</div><div class="ai-bn-title ai-loading">Analyzing your answers</div><div class="ai-bn-body ai-loading">Pinpointing where the operation goes dark.</div></div>
+          <div class="ai-bn-card"><div class="ai-bn-type ai-loading">Operational latency</div><div class="ai-bn-title ai-loading">Analyzing your answers</div><div class="ai-bn-body ai-loading">Pinpointing where margin leaks in the gaps.</div></div>
+        </div>
+        <div id="ai-outcome" class="ai-outcome ai-loading">When the operation stops running through one person and starts running on infrastructure, the ceiling moves. This is what changes for ${nicheLabel || industryLabel} operations once it's built.</div>
+        <div id="ai-first-move" class="ai-first-move" style="display:none;"></div>
       </div>
     </div>
 
@@ -1342,12 +1568,12 @@ function buildResultsHTML(r) {
         </div>
         <div class="prop-before-after">
           <div>
-            <div class="prop-ba-col-label">Before</div>
-            ${beforeItems}
+            <div class="prop-ba-col-label">Today</div>
+            <div id="ai-before">${beforeItems}</div>
           </div>
           <div>
-            <div class="prop-ba-col-label after">After TMI</div>
-            ${afterItems}
+            <div class="prop-ba-col-label after">AI-Native</div>
+            <div id="ai-after">${afterItems}</div>
           </div>
         </div>
         <div class="prop-stack-note">The build integrates with your existing tools where possible - CRM, accounting software, field apps - rather than replacing everything at once. The goal is to make what you have work together.</div>
@@ -1451,7 +1677,7 @@ function buildResultsHTML(r) {
           </div>
           <div class="prop-invest-tbl-row">
             <div>
-              <div class="prop-invest-row-label">AI Department Retainer</div>
+              <div class="prop-invest-row-label">Systems Department Retainer</div>
               <div class="prop-invest-row-sub">TMI stays in after the build. Maintains the foundation, adds intelligence layer by layer as the operation grows. Ongoing builds included.</div>
             </div>
             <div class="prop-invest-row-price">$3k&ndash;$15k/mo</div>
