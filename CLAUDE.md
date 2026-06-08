@@ -236,7 +236,7 @@ Writes and publishes one new Field Notes article per day. Picks a topic not alre
       <a href="news.html">Field Notes</a>
       <a href="about.html">About</a>
     </nav>
-    <a href="funnel.html" class="ah-cta">Apply &rarr;</a>
+    <a href="/audit" class="ah-cta">Apply &rarr;</a>
   </div>
 </header>
 
