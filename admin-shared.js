@@ -237,6 +237,7 @@ const TMIAdmin = (() => {
     ${navItem('applications', 'Applications', I.apps, true, '/admin-inbox#apps')}
     ${navItem('followups', 'Follow-ups', I.followup, true, '/admin-inbox#followups')}
     ${navItem('leads', 'Leads', I.leads)}
+    ${navItem('visitors', 'Site Visitors', I.vision)}
     ${navItem('proposals', 'Proposals', I.proposals)}
     <div class="sb-group-label">Clients</div>
     ${navItem('clients', 'Clients', I.clients, false, '/admin-clients')}
