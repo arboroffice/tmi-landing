@@ -1,12 +1,15 @@
 const { getSupabase } = require('./_supabase');
 const { verifyToken, cors } = require('./_auth');
 const { scoreVisitor, HOT_THRESHOLD } = require('./_visitor-score');
+const { getAutomationSettings } = require('./_visitor-settings');
+const { Client: QStashClient } = require('@upstash/qstash');
 const { Resend } = require('resend');
 const twilio = require('twilio');
 
 const FROM_NUMBER = '+18557171044';
 const ALERT_NUMBER = '+13373809059';
 const OWNER_EMAIL = 'support@tmitechai.com';
+const SITE = 'https://www.tmitechai.com';
 const ADMIN_URL = 'https://admin.tmitechai.com/admin-visitors';
 
 // Real-time internal alert (to the operator, not the visitor) when a hot
@@ -113,19 +116,30 @@ module.exports = async (req, res) => {
   const now = new Date().toISOString();
   let upserted = 0;
 
-  // Storage only: identified visitors land in site_visitors for review. They are
-  // NOT auto-added to contacts/leads or contacted — an admin approves each one
-  // from the Site Visitors page (api/visitor-enroll), which then creates the
-  // contact + lead and starts the email nurture. Keeps the CRM clean and outreach
-  // consented to the operator's judgement.
+  // Automation: hand qualifying visitors to api/visitor-process (enrich -> re-score
+  // -> auto-outbound), governed by the admin settings. The webhook only stores +
+  // enqueues so it stays fast; visitor-process does the slow/charged work and is
+  // idempotent. Needs QSTASH_TOKEN (to queue) and CRON_SECRET (to auth the job).
+  const automation = await getAutomationSettings(db);
+  const qstash = process.env.QSTASH_TOKEN ? new QStashClient({ token: process.env.QSTASH_TOKEN }) : null;
+  const autoBars = [];
+  if (automation.auto_enrich) autoBars.push(automation.enrich_min_score);
+  if (automation.auto_outbound) autoBars.push(automation.outbound_min_score);
+  const autoBar = autoBars.length ? Math.min(...autoBars) : Infinity;
+  const canAutomate = automation.enabled && qstash && !!process.env.CRON_SECRET && autoBar !== Infinity;
+
   for (const row of mapped) {
     try {
       const existingV = await db.from('site_visitors')
-        .select('id, visit_count, alerted').eq('identity_key', row.identity_key).maybeSingle();
+        .select('id, visit_count, alerted, score, enrolled').eq('identity_key', row.identity_key).maybeSingle();
 
       const visit_count = existingV.data ? (existingV.data.visit_count || 1) + 1 : 1;
       const { score, reasons } = scoreVisitor({ ...row, visit_count });
       const record = { ...row, visit_count, score, score_reasons: reasons, last_seen: now };
+
+      const isNew = !existingV.data;
+      const prevScore = existingV.data ? (existingV.data.score || 0) : -1;
+      const wasEnrolled = existingV.data ? !!existingV.data.enrolled : false;
 
       let vid;
       if (existingV.data) {
@@ -141,6 +155,17 @@ module.exports = async (req, res) => {
       if (vid && score >= HOT_THRESHOLD && !(existingV.data && existingV.data.alerted)) {
         await sendHotAlert(record).catch(() => {});
         await db.from('site_visitors').update({ alerted: true }).eq('id', vid);
+      }
+
+      // Enqueue automation once a visitor crosses the bar (and again only if the
+      // score rises), never for the already-enrolled. ~45s delay lets a page
+      // burst settle. visitor-process re-reads settings and is idempotent.
+      if (canAutomate && vid && !wasEnrolled && score >= autoBar && (isNew || prevScore < score)) {
+        qstash.publishJSON({
+          url: `${SITE}/api/visitor-process?secret=${encodeURIComponent(process.env.CRON_SECRET)}`,
+          delay: 45,
+          body: { id: vid },
+        }).catch(e => console.error('[rb2b-webhook] enqueue process:', e.message));
       }
     } catch (e) {
       console.error('[rb2b-webhook] row failed:', e.message);

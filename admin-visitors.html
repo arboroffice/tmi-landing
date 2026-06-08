@@ -33,6 +33,27 @@
   .modal-card h3{margin:0 0 12px;font-size:18px;}
   .modal-card textarea{width:100%;min-height:160px;border:1px solid var(--line-strong);border-radius:8px;padding:12px;font:inherit;font-size:14px;line-height:1.5;resize:vertical;}
   .modal-row{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+  /* automation + health */
+  .health{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 16px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--bg-alt);color:var(--ink-2);}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:#c9ccd6;flex:none;}
+  .chip.on{background:#d6f7e0;color:#0a7a3a;}
+  .chip.on .dot{background:#0a7a3a;}
+  .chip.off{background:#fde0e0;color:#b51b1b;}
+  .chip.off .dot{background:#b51b1b;}
+  .health-meta{font-size:12px;color:var(--muted);margin-left:auto;}
+  .set-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);}
+  .set-row:last-child{border-bottom:none;}
+  .set-row .lbl{font-size:14px;font-weight:600;color:var(--ink);}
+  .set-row .desc{font-size:12px;color:var(--muted);margin-top:2px;max-width:360px;}
+  .set-row input[type=number]{width:72px;padding:6px 8px;border:1px solid var(--line-strong);border-radius:6px;font:inherit;font-size:13px;}
+  .switch{position:relative;width:42px;height:24px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .sl{position:absolute;inset:0;background:#c9ccd6;border-radius:999px;transition:.15s;cursor:pointer;}
+  .switch .sl:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;}
+  .switch input:checked + .sl{background:var(--chart);}
+  .switch input:checked + .sl:before{transform:translateX(18px);}
+  .modal-card.wide{max-width:600px;}
 </style>
 </head>
 <body>
@@ -46,7 +67,9 @@
       <div class="topbar-actions">
         <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Export CSV</button>
         <button class="btn btn-ghost btn-sm" onclick="buildLookalike()">Build Lookalike</button>
-        <button class="btn btn-primary btn-sm" onclick="syncMeta()">Sync to Meta</button>
+        <button class="btn btn-ghost btn-sm" onclick="syncMeta()">Sync to Meta</button>
+        <button class="btn btn-ghost btn-sm" onclick="runAutomation()" title="Process every qualifying visitor now">Run automation</button>
+        <button class="btn btn-primary btn-sm" onclick="openAutomation()">Automation</button>
       </div>
     </div>
     <div class="content">
@@ -61,6 +84,8 @@
           </div>
         </div>
       </div>
+
+      <div class="health" id="health"></div>
 
       <div class="filter-bar">
         <div class="search-wrap">
@@ -99,6 +124,39 @@
   </div>
 </div></div>
 
+<div class="modal-bg" id="auto-modal"><div class="modal-card wide">
+  <h3>Visitor automation</h3>
+  <p style="font-size:13px;color:var(--muted);margin:0 0 6px;">When RB2B identifies a visitor, the pipeline can auto-enrich them and start outbound if they match ICP. Outbound is email-only (no SMS), and your team, existing clients, active leads, and opt-outs are always skipped.</p>
+  <div id="auto-form">
+    <div class="set-row">
+      <div><div class="lbl">Automation</div><div class="desc">Master switch. Off = pure storage; review and enroll by hand.</div></div>
+      <label class="switch"><input type="checkbox" id="s-enabled"><span class="sl"></span></label>
+    </div>
+    <div class="set-row">
+      <div><div class="lbl">Auto-enrich (Apollo)</div><div class="desc">Pull the person + buying committee for visitors at or above this score.</div></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <input type="number" id="s-enrich-min" min="0" max="100" step="5">
+        <label class="switch"><input type="checkbox" id="s-auto-enrich"><span class="sl"></span></label>
+      </div>
+    </div>
+    <div class="set-row">
+      <div><div class="lbl">Auto-outbound (ICP)</div><div class="desc">Auto-enroll visitors at or above this score into the email nurture + Meta audience.</div></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <input type="number" id="s-outbound-min" min="0" max="100" step="5">
+        <label class="switch"><input type="checkbox" id="s-auto-outbound"><span class="sl"></span></label>
+      </div>
+    </div>
+    <div class="set-row">
+      <div><div class="lbl">Require work email</div><div class="desc">Only auto-outbound when a business email is known (skip personal-only).</div></div>
+      <label class="switch"><input type="checkbox" id="s-work-email"><span class="sl"></span></label>
+    </div>
+  </div>
+  <div class="modal-row">
+    <button class="btn btn-ghost btn-sm" onclick="closeAutomation()">Cancel</button>
+    <button class="btn btn-primary btn-sm" onclick="saveAutomation()">Save</button>
+  </div>
+</div></div>
+
 <div id="toast-root"></div>
 
 <script src="admin-shared.js"></script>
@@ -112,6 +170,69 @@ async function load() {
   const data = await TMIAdmin.api('/api/visitors');
   VISITORS = Array.isArray(data) ? data : [];
   render();
+  loadHealth();
+}
+
+// ── Automation + integrations health ──
+let HEALTH = null;
+const INTEG_LABELS = {
+  rb2b_secret:'RB2B webhook', qstash:'QStash', cron_secret:'Automation key',
+  apollo:'Apollo', anthropic:'AI drafts', meta_audience:'Meta audience',
+  resend:'Email', twilio:'SMS alerts',
+};
+async function loadHealth(){
+  const h = await TMIAdmin.api('/api/visitor-health');
+  if(!h||!h.ok){ document.getElementById('health').innerHTML=''; return; }
+  HEALTH = h;
+  const s = h.settings||{};
+  const autoOn = !!s.enabled;
+  const chips = Object.entries(INTEG_LABELS).map(([k,lbl])=>{
+    const on = !!(h.integrations&&h.integrations[k]);
+    return `<span class="chip ${on?'on':'off'}" title="${on?'Configured':'Not configured'}"><span class="dot"></span>${lbl}</span>`;
+  }).join('');
+  const p = h.pipeline||{};
+  const blocked = autoOn && !h.automation_ready;
+  const autoChip = `<span class="chip ${autoOn?(blocked?'off':'on'):''}" title="Master automation switch">
+    <span class="dot"></span>Automation ${autoOn?(blocked?'ON — needs QStash + key':'ON'):'OFF'}</span>`;
+  const meta = `<span class="health-meta">${p.total||0} visitors · ${p.enrolled||0} enrolled · ${p.hot||0} hot${p.last_ingest?' · last '+new Date(p.last_ingest).toLocaleDateString():''}</span>`;
+  document.getElementById('health').innerHTML = autoChip + chips + meta;
+}
+
+function openAutomation(){
+  const s = (HEALTH&&HEALTH.settings)||{enabled:true,auto_enrich:true,enrich_min_score:40,auto_outbound:true,outbound_min_score:70,require_work_email:true};
+  document.getElementById('s-enabled').checked = !!s.enabled;
+  document.getElementById('s-auto-enrich').checked = !!s.auto_enrich;
+  document.getElementById('s-enrich-min').value = s.enrich_min_score!=null?s.enrich_min_score:40;
+  document.getElementById('s-auto-outbound').checked = !!s.auto_outbound;
+  document.getElementById('s-outbound-min').value = s.outbound_min_score!=null?s.outbound_min_score:70;
+  document.getElementById('s-work-email').checked = s.require_work_email!==false;
+  document.getElementById('auto-modal').classList.add('open');
+}
+function closeAutomation(){ document.getElementById('auto-modal').classList.remove('open'); }
+async function saveAutomation(){
+  const value = {
+    enabled: document.getElementById('s-enabled').checked,
+    auto_enrich: document.getElementById('s-auto-enrich').checked,
+    enrich_min_score: Math.max(0,Math.min(100,parseInt(document.getElementById('s-enrich-min').value,10)||0)),
+    auto_outbound: document.getElementById('s-auto-outbound').checked,
+    outbound_min_score: Math.max(0,Math.min(100,parseInt(document.getElementById('s-outbound-min').value,10)||0)),
+    require_work_email: document.getElementById('s-work-email').checked,
+  };
+  const res = await TMIAdmin.api('/api/os-kv','PUT',{key:'visitor_automation',value});
+  if(res){ TMIAdmin.toast('Automation saved'); closeAutomation(); loadHealth(); }
+}
+async function runAutomation(){
+  if(!confirm('Process every qualifying visitor now (enrich + start outbound if ICP)? Respects your automation settings and suppression rules.')) return;
+  TMIAdmin.toast('Running automation…');
+  const res = await TMIAdmin.api('/api/visitor-process','POST',{all:true});
+  if(res&&res.ok){ TMIAdmin.toast(`Processed ${res.processed} · ${res.enriched} enriched · ${res.enrolled} enrolled`); load(); }
+  else TMIAdmin.toast((res&&res.skipped)?('Skipped: '+res.skipped):'Automation failed');
+}
+async function runOne(id){
+  TMIAdmin.toast('Running…');
+  const res = await TMIAdmin.api('/api/visitor-process','POST',{id});
+  if(res&&res.ok){ const r=(res.results&&res.results[0])||{}; TMIAdmin.toast(r.outbound==='enrolled'?'Enrolled':(r.enriched?'Enriched':'Done')); load(); }
+  else TMIAdmin.toast((res&&res.skipped)?('Skipped: '+res.skipped):'Failed');
 }
 
 function setView(v){ view = v; ['list','accounts','linkedin'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('active', t===v)); render(); }
@@ -166,7 +287,8 @@ function renderList(rows){
     const reasons = (v.score_reasons||[]).join(', ');
     const hasEmail = !!(v.email||v.personal_email);
     const acts = v.enrolled ? '' :
-      `<button class="btn btn-ghost btn-sm" onclick="draft('${v.id}')" title="AI draft">Draft</button>
+      `<button class="btn btn-ghost btn-sm" onclick="runOne('${v.id}')" title="Run automation on this visitor (enrich + outbound if ICP)">Auto</button>
+       <button class="btn btn-ghost btn-sm" onclick="draft('${v.id}')" title="AI draft">Draft</button>
        <button class="btn btn-ghost btn-sm" onclick="enrich('${v.id}')" title="Apollo enrich">Enrich</button>
        <button class="btn btn-primary btn-sm" onclick="enroll('${v.id}')"${hasEmail?'':' disabled'}>Enroll</button>`;
     return `<tr>
