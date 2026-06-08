@@ -217,6 +217,26 @@ create table if not exists public.content_posts (
   created_at    timestamptz default now()
 );
 
+-- ── Reconcile columns (heals tables that pre-existed with a different shape,
+--    e.g. a leftover GTM `leads` table). Non-destructive; no-op on a fresh DB. ─
+alter table public.leads         add column if not exists contact_id  uuid references public.contacts(id) on delete cascade;
+alter table public.leads         add column if not exists status      text default 'new';
+alter table public.leads         add column if not exists source      text;
+alter table public.leads         add column if not exists title       text;
+alter table public.leads         add column if not exists notes       text;
+alter table public.clients       add column if not exists contact_id  uuid references public.contacts(id) on delete cascade;
+alter table public.activities    add column if not exists contact_id  uuid references public.contacts(id) on delete cascade;
+alter table public.followups     add column if not exists contact_id  uuid references public.contacts(id) on delete cascade;
+alter table public.followups     add column if not exists due_at      timestamptz;
+alter table public.followups     add column if not exists completed   boolean default false;
+alter table public.applications  add column if not exists status      text default 'new';
+alter table public.applications  add column if not exists contact_id  uuid references public.contacts(id) on delete set null;
+alter table public.applications  add column if not exists lead_id     uuid references public.leads(id) on delete set null;
+alter table public.invoices      add column if not exists client_id   uuid references public.clients(id) on delete set null;
+alter table public.invoices      add column if not exists status      text default 'unpaid';
+alter table public.email_sends   add column if not exists campaign_id uuid references public.email_campaigns(id) on delete cascade;
+alter table public.content_posts add column if not exists idea_id     uuid references public.content_ideas(id) on delete set null;
+
 -- ── CRM indexes ───────────────────────────────────────────────────────────--
 create index if not exists idx_leads_contact_id       on public.leads(contact_id);
 create index if not exists idx_leads_status            on public.leads(status);
