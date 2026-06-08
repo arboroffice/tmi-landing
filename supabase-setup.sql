@@ -217,102 +217,6 @@ create table if not exists public.content_posts (
   created_at    timestamptz default now()
 );
 
--- ── Founders of the Future (FOTF) ────────────────────────────────────────────
-create table if not exists public.fotf_members (
-  id              uuid primary key default gen_random_uuid(),
-  email           text not null unique,
-  name            text,
-  business_name   text,
-  founder_number  serial,
-  status          text default 'active',
-  stage           text,
-  updated_at      timestamptz default now(),
-  created_at      timestamptz default now()
-);
-
-create table if not exists public.fotf_receipts (
-  id              uuid primary key default gen_random_uuid(),
-  member_id       uuid references public.fotf_members(id) on delete cascade,
-  founder_number  integer,
-  created_at      timestamptz default now()
-);
-
-create table if not exists public.fotf_stories (
-  id            uuid primary key default gen_random_uuid(),
-  member_id     uuid references public.fotf_members(id) on delete cascade,
-  story_text    text,
-  submitted_at  timestamptz default now(),
-  created_at    timestamptz default now()
-);
-
-create table if not exists public.fotf_sprints (
-  id            uuid primary key default gen_random_uuid(),
-  member_id     uuid references public.fotf_members(id) on delete cascade,
-  title         text,
-  status        text default 'active',
-  goal          text,
-  start_date    timestamptz,
-  end_date      timestamptz,
-  created_at    timestamptz default now()
-);
-
-create table if not exists public.fotf_glass_box (
-  id            uuid primary key default gen_random_uuid(),
-  post_text     text,
-  created_at    timestamptz default now()
-);
-
-create table if not exists public.fotf_issues (
-  id                uuid primary key default gen_random_uuid(),
-  status            text default 'draft',
-  series            text,
-  headline          text,
-  dek               text,
-  cold_open         text,
-  setup             text,
-  the_turn          text,
-  the_proof         text,
-  pull_quote        text,
-  online_example    text,
-  physical_example  text,
-  next_step         text,
-  scheduled_at      timestamptz,
-  beehiiv_id        text,
-  updated_at        timestamptz default now(),
-  created_at        timestamptz default now()
-);
-
-create table if not exists public.fotf_library (
-  id            uuid primary key default gen_random_uuid(),
-  title         text,
-  category      text,
-  audience      text,
-  content       text,
-  url           text,
-  updated_at    timestamptz default now(),
-  created_at    timestamptz default now()
-);
-
-create table if not exists public.fotf_rituals (
-  id            uuid primary key default gen_random_uuid(),
-  title         text,
-  frequency     text,
-  type          text,
-  description   text,
-  scheduled_at  timestamptz,
-  updated_at    timestamptz default now(),
-  created_at    timestamptz default now()
-);
-
-create table if not exists public.fotf_stage_letters (
-  id            uuid primary key default gen_random_uuid(),
-  stage         text,
-  subject       text,
-  body          text,
-  updated_at    timestamptz default now(),
-  created_at    timestamptz default now()
-);
-
 -- ── CRM indexes ───────────────────────────────────────────────────────────--
 create index if not exists idx_leads_contact_id       on public.leads(contact_id);
 create index if not exists idx_leads_status            on public.leads(status);
@@ -326,9 +230,6 @@ create index if not exists idx_invoices_client_id      on public.invoices(client
 create index if not exists idx_invoices_status         on public.invoices(status);
 create index if not exists idx_email_sends_campaign_id on public.email_sends(campaign_id);
 create index if not exists idx_content_posts_idea_id   on public.content_posts(idea_id);
-create index if not exists idx_fotf_members_email      on public.fotf_members(email);
-create index if not exists idx_fotf_receipts_member_id on public.fotf_receipts(member_id);
-create index if not exists idx_fotf_stories_member_id  on public.fotf_stories(member_id);
 
 
 -- ════════════════════════════════════════════════════════════════════════════
@@ -525,8 +426,7 @@ begin
       ('Close Rate',            '%', 35,     'higher', 'manual', null,            6),
       ('Show Rate',             '%', 80,     'higher', 'manual', null,            7),
       ('Churn',                 '%', 3,      'lower',  'manual', null,            8),
-      ('Field Notes Subscribers','#',null,   'higher', 'manual', null,            9),
-      ('FOTF Members',          '#', null,   'higher', 'manual', null,            10);
+      ('Field Notes Subscribers','#',null,   'higher', 'manual', null,            9);
   end if;
 
   if not exists (select 1 from public.os_recruiters) then

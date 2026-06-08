@@ -257,6 +257,8 @@ const TMIAdmin = (() => {
     ${navItem('content-compose', 'Compose', I.content)}
     ${navItem('content-calendar', 'Calendar', I.rituals, false, '/admin-content-hub#calendar')}
     ${navItem('brand-plan', 'Brand Plan', I.identity)}
+    <div class="sb-group-label">City Leads</div>
+    ${navItem('city-leads', 'Applications', I.cityPin, false, '/admin-city-leads')}
     <div class="sb-sep"></div>
     ${navItem('settings', 'Settings', I.settings)}
   </nav>
@@ -341,6 +343,9 @@ const TMIAdmin = (() => {
           { page:'content-compose',  label:'Compose',      icon:I.content },
           { page:'content-calendar', label:'Calendar',     icon:I.rituals,  href:'/admin-content-hub#calendar' },
           { page:'brand-plan',       label:'Brand Plan',   icon:I.identity },
+        ]},
+        { label: 'City Leads', items: [
+          { page:'city-leads', label:'Applications', icon:I.cityPin, href:'/admin-city-leads' },
         ]},
         { label: 'System', items: [
           { page:'settings', label:'Settings', icon:I.settings },
