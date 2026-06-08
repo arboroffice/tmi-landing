@@ -38,6 +38,17 @@ module.exports = async (req, res) => {
     if (!email) { results.push({ id: v.id, skipped: 'no email' }); continue; }
     if (v.enrolled) { results.push({ id: v.id, skipped: 'already enrolled' }); continue; }
 
+    // Suppression: don't cold-enroll your own team or anyone who opted out
+    // (unless the admin explicitly forces it).
+    const domain = email.includes('@') ? email.split('@')[1].toLowerCase() : '';
+    if (!body.force && ['tmitechai.com', 'tmi-technology.com', 'arboroffice.io'].includes(domain)) {
+      results.push({ id: v.id, skipped: 'own domain' }); continue;
+    }
+    if (!body.force) {
+      const unsub = await db.from('leads').select('id').eq('email', email).eq('status', 'unsubscribed').maybeSingle();
+      if (unsub.data) { results.push({ id: v.id, skipped: 'unsubscribed' }); continue; }
+    }
+
     try {
       // 1. Contact (reuse linked contact, else upsert by email)
       let contactId = v.contact_id;
@@ -64,6 +75,7 @@ module.exports = async (req, res) => {
       const notes = JSON.stringify({
         company: v.company || '', title: v.title || '', industry: v.industry || '',
         linkedin: v.linkedin_url || '', last_page: v.last_page || '', source: 'rb2b-visitor',
+        intro: v.ai_intro || '',
       });
       const { data: lead, error: lErr } = await db.from('leads').insert({
         contact_id: contactId, name, email, status: 'new', source: 'rb2b-visitor', notes,

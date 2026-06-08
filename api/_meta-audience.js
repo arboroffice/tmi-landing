@@ -65,4 +65,38 @@ async function addEmailsToAudience(emails) {
   }
 }
 
-module.exports = { ensureAudience, addEmailsToAudience };
+// Create a lookalike audience from the source Custom Audience. No ad spend.
+// Needs META_AD_ACCOUNT_ID + a source audience (META_CUSTOM_AUDIENCE_ID or auto).
+async function createLookalike({ country = 'US', ratio = 0.01 } = {}) {
+  const token = process.env.META_CAPI_ACCESS_TOKEN;
+  if (!token) return { ok: false, error: 'META_CAPI_ACCESS_TOKEN not set' };
+  let acct = process.env.META_AD_ACCOUNT_ID;
+  if (!acct) return { ok: false, error: 'META_AD_ACCOUNT_ID not set' };
+  if (!acct.startsWith('act_')) acct = 'act_' + acct;
+
+  let sourceId;
+  try { sourceId = await ensureAudience(token); }
+  catch (e) { return { ok: false, error: e.message }; }
+
+  const url = `https://graph.facebook.com/${GRAPH_VERSION}/${acct}/customaudiences`;
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'RB2B Visitors Lookalike',
+        subtype: 'LOOKALIKE',
+        origin_audience_id: sourceId,
+        lookalike_spec: JSON.stringify({ type: 'similarity', country, ratio }),
+        access_token: token,
+      }),
+    });
+    const json = await r.json().catch(() => ({}));
+    if (!r.ok || !json.id) return { ok: false, error: 'Create lookalike failed', body: json };
+    return { ok: true, lookalike_id: json.id, source_id: sourceId };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+module.exports = { ensureAudience, addEmailsToAudience, createLookalike };

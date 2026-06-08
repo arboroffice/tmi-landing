@@ -10,10 +10,29 @@
   .vis-co{font-weight:600;color:var(--ink);}
   .vis-sub{font-size:12px;color:var(--muted);}
   .vis-li{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;}
-  .vis-page{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--ink-2);}
-  .badge-sync{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--chart);color:var(--ink);}
-  .badge-meta{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#e7f0ff;color:#1b4fd6;margin-left:4px;}
-  .badge-new{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--bg-alt);color:var(--ink-2);}
+  .vis-page{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--ink-2);}
+  .b{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin:0 2px 2px 0;}
+  .b-enr{background:var(--chart);color:var(--ink);}
+  .b-meta{background:#e7f0ff;color:#1b4fd6;}
+  .b-conv{background:#d6f7e0;color:#0a7a3a;}
+  .b-new{background:var(--bg-alt);color:var(--ink-2);}
+  .b-known{background:#fff3d6;color:#8a6100;}
+  .b-client{background:#e9defb;color:#5b2bb5;}
+  .b-unsub{background:#fde0e0;color:#b51b1b;}
+  .score{display:inline-flex;align-items:center;justify-content:center;min-width:34px;padding:3px 8px;border-radius:8px;font-weight:700;font-size:13px;}
+  .score.hot{background:var(--chart);color:#0a0b14;}
+  .score.warm{background:#fff3d6;color:#8a6100;}
+  .score.cold{background:var(--bg-alt);color:var(--muted);}
+  .tabs{display:inline-flex;gap:2px;background:var(--bg);border:1px solid var(--line-strong);border-radius:var(--r-sm,8px);padding:2px;}
+  .tabs button{background:none;border:none;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;color:var(--ink-2);cursor:pointer;}
+  .tabs button.active{background:var(--chart);color:var(--ink);}
+  .acts{white-space:nowrap;display:flex;gap:4px;}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;display:none;align-items:center;justify-content:center;padding:24px;}
+  .modal-bg.open{display:flex;}
+  .modal-card{background:#fff;border-radius:12px;max-width:560px;width:100%;padding:24px;box-shadow:0 24px 64px rgba(0,0,0,0.22);}
+  .modal-card h3{margin:0 0 12px;font-size:18px;}
+  .modal-card textarea{width:100%;min-height:160px;border:1px solid var(--line-strong);border-radius:8px;padding:12px;font:inherit;font-size:14px;line-height:1.5;resize:vertical;}
+  .modal-row{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
 </style>
 </head>
 <body>
@@ -26,10 +45,8 @@
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Site Visitors</span></div>
       <div class="topbar-actions">
         <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Export CSV</button>
-        <button class="btn btn-primary btn-sm" id="btn-sync" onclick="syncMeta()">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7" stroke-linecap="round"/><polyline points="21 4 21 9 16 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Sync to Meta Audience
-        </button>
+        <button class="btn btn-ghost btn-sm" onclick="buildLookalike()">Build Lookalike</button>
+        <button class="btn btn-primary btn-sm" onclick="syncMeta()">Sync to Meta</button>
       </div>
     </div>
     <div class="content">
@@ -37,35 +54,50 @@
         <h1>Site Visitors</h1>
         <div class="sec-head-right">
           <span class="filter-count" id="vis-count"></span>
+          <div class="tabs">
+            <button id="tab-list" class="active" onclick="setView('list')">Visitors</button>
+            <button id="tab-accounts" onclick="setView('accounts')">Accounts</button>
+            <button id="tab-linkedin" onclick="setView('linkedin')">LinkedIn</button>
+          </div>
         </div>
       </div>
 
       <div class="filter-bar">
         <div class="search-wrap">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="search" id="search" placeholder="Search name, company, title, industry..." oninput="renderTable()"/>
+          <input type="search" id="search" placeholder="Search name, company, title, industry..." oninput="render()"/>
         </div>
-        <select class="filter-select" id="filter-sync" onchange="renderTable()">
-          <option value="">All</option>
-          <option value="unsynced">Not synced to Meta</option>
-          <option value="synced">Synced to Meta</option>
+        <select class="filter-select" id="filter-score" onchange="render()">
+          <option value="">All scores</option>
+          <option value="hot">Hot (70+)</option>
+          <option value="warm">Warm (40-69)</option>
         </select>
+        <select class="filter-select" id="filter-status" onchange="render()">
+          <option value="">All statuses</option>
+          <option value="new">New</option>
+          <option value="enrolled">Enrolled</option>
+          <option value="converted">Converted</option>
+        </select>
+        <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);cursor:pointer">
+          <input type="checkbox" id="hide-suppressed" onchange="render()"/> Hide known/clients
+        </label>
       </div>
 
       <div class="card">
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>Person</th><th>Company</th><th>Industry</th><th>Location</th>
-              <th>Last page</th><th>Visits</th><th>Last seen</th><th>Status</th><th></th>
-            </tr></thead>
-            <tbody id="vis-tbody"></tbody>
-          </table>
-        </div>
+        <div class="tbl-wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
       </div>
     </div>
   </div>
 </div>
+
+<div class="modal-bg" id="modal"><div class="modal-card">
+  <h3 id="modal-title">Message</h3>
+  <textarea id="modal-text"></textarea>
+  <div class="modal-row">
+    <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
+    <button class="btn btn-primary btn-sm" id="modal-copy" onclick="copyModal()">Copy</button>
+  </div>
+</div></div>
 
 <div id="toast-root"></div>
 
@@ -74,109 +106,173 @@
 TMIAdmin.initSidebar('visitors');
 
 let VISITORS = [];
+let view = 'list';
 
 async function load() {
   const data = await TMIAdmin.api('/api/visitors');
   VISITORS = Array.isArray(data) ? data : [];
-  renderTable();
+  render();
 }
 
+function setView(v){ view = v; ['list','accounts','linkedin'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('active', t===v)); render(); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function name(v){ return [v.first_name,v.last_name].filter(Boolean).join(' ') || '—'; }
+function scoreClass(s){ return s>=70?'hot':s>=40?'warm':'cold'; }
+
 function getFiltered() {
-  const q = (document.getElementById('search').value || '').toLowerCase().trim();
-  const sync = document.getElementById('filter-sync').value;
+  const q = (document.getElementById('search').value||'').toLowerCase().trim();
+  const sc = document.getElementById('filter-score').value;
+  const st = document.getElementById('filter-status').value;
+  const hide = document.getElementById('hide-suppressed').checked;
   return VISITORS.filter(v => {
-    if (sync === 'synced' && !v.synced_meta) return false;
-    if (sync === 'unsynced' && v.synced_meta) return false;
+    const f = v.flags||{};
+    if (hide && (f.known||f.client||f.own_domain)) return false;
+    if (sc==='hot' && (v.score||0)<70) return false;
+    if (sc==='warm' && ((v.score||0)<40 || (v.score||0)>=70)) return false;
+    if (st==='enrolled' && !v.enrolled) return false;
+    if (st==='converted' && !v.converted) return false;
+    if (st==='new' && v.enrolled) return false;
     if (!q) return true;
-    const hay = [v.first_name, v.last_name, v.company, v.title, v.industry, v.email, v.region, v.city]
-      .filter(Boolean).join(' ').toLowerCase();
-    return hay.includes(q);
+    return [v.first_name,v.last_name,v.company,v.title,v.industry,v.email,v.region,v.city].filter(Boolean).join(' ').toLowerCase().includes(q);
   });
 }
 
-function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function statusBadges(v){
+  const f = v.flags||{}; const b=[];
+  if (v.converted) b.push('<span class="b b-conv">Converted</span>');
+  if (v.enrolled) b.push('<span class="b b-enr">Enrolled</span>');
+  if (v.synced_meta) b.push('<span class="b b-meta">Meta</span>');
+  if (f.client) b.push('<span class="b b-client">Client</span>');
+  else if (f.known) b.push('<span class="b b-known">Known</span>');
+  if (f.unsubscribed) b.push('<span class="b b-unsub">Unsub</span>');
+  if (!b.length) b.push('<span class="b b-new">New</span>');
+  return b.join('');
+}
 
-function renderTable() {
+function render(){
   const rows = getFiltered();
-  document.getElementById('vis-count').textContent = `${rows.length} visitor${rows.length === 1 ? '' : 's'}`;
-  const tbody = document.getElementById('vis-tbody');
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="9" style="padding:40px;text-align:center;color:var(--muted)">No identified visitors yet. Once RB2B starts resolving traffic, they show up here.</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows.map(v => {
-    const name = [v.first_name, v.last_name].filter(Boolean).join(' ') || '—';
-    const nameCell = v.linkedin_url
-      ? `<a class="vis-li" href="${esc(v.linkedin_url)}" target="_blank" rel="noopener">${esc(name)}</a>`
-      : esc(name);
-    const loc = [v.city, v.region, v.country].filter(Boolean).join(', ') || '—';
-    const seen = v.last_seen ? new Date(v.last_seen).toLocaleDateString() : '';
-    const badges = [];
-    if (v.enrolled) badges.push('<span class="badge-sync">Enrolled</span>');
-    if (v.synced_meta) badges.push('<span class="badge-meta">Meta</span>');
-    if (!badges.length) badges.push('<span class="badge-new">New</span>');
-    const hasEmail = !!(v.email || v.personal_email);
-    const action = v.enrolled
-      ? ''
-      : `<button class="btn btn-primary btn-sm" onclick="enroll('${v.id}')"${hasEmail ? '' : ' disabled title="No email to enroll"'}>Enroll</button>`;
+  document.getElementById('vis-count').textContent = `${rows.length} visitor${rows.length===1?'':'s'}`;
+  if (view==='accounts') return renderAccounts(rows);
+  if (view==='linkedin') return renderLinkedIn(rows);
+  renderList(rows);
+}
+
+function renderList(rows){
+  document.getElementById('thead').innerHTML = `<tr><th>Person</th><th>Company</th><th>Industry</th><th>Score</th><th>Status</th><th></th></tr>`;
+  const tb = document.getElementById('tbody');
+  if (!rows.length){ tb.innerHTML = `<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--muted)">No visitors match. Once RB2B resolves traffic, they appear here.</td></tr>`; return; }
+  tb.innerHTML = rows.map(v=>{
+    const nm = v.linkedin_url ? `<a class="vis-li" href="${esc(v.linkedin_url)}" target="_blank" rel="noopener">${esc(name(v))}</a>` : esc(name(v));
+    const reasons = (v.score_reasons||[]).join(', ');
+    const hasEmail = !!(v.email||v.personal_email);
+    const acts = v.enrolled ? '' :
+      `<button class="btn btn-ghost btn-sm" onclick="draft('${v.id}')" title="AI draft">Draft</button>
+       <button class="btn btn-ghost btn-sm" onclick="enrich('${v.id}')" title="Apollo enrich">Enrich</button>
+       <button class="btn btn-primary btn-sm" onclick="enroll('${v.id}')"${hasEmail?'':' disabled'}>Enroll</button>`;
     return `<tr>
-      <td><div class="vis-co">${nameCell}</div><div class="vis-sub">${esc(v.title || '')}${v.email ? ' · ' + esc(v.email) : ''}</div></td>
-      <td>${esc(v.company || '—')}${v.company_domain ? `<div class="vis-sub">${esc(v.company_domain)}</div>` : ''}</td>
-      <td>${esc(v.industry || '—')}</td>
-      <td>${esc(loc)}</td>
-      <td><div class="vis-page" title="${esc(v.last_page || '')}">${esc(v.last_page || '—')}</div></td>
-      <td>${v.visit_count || 1}</td>
-      <td>${esc(seen)}</td>
-      <td>${badges.join('')}</td>
-      <td style="white-space:nowrap">${action} <button class="btn btn-ghost btn-sm" onclick="del('${v.id}')" title="Delete">&times;</button></td>
+      <td><div class="vis-co">${nm}</div><div class="vis-sub">${esc(v.title||'')}${v.email?' · '+esc(v.email):''}</div></td>
+      <td>${esc(v.company||'—')}${v.company_domain?`<div class="vis-sub">${esc(v.company_domain)}</div>`:''}</td>
+      <td>${esc(v.industry||'—')}</td>
+      <td><span class="score ${scoreClass(v.score||0)}" title="${esc(reasons)}">${v.score||0}</span></td>
+      <td>${statusBadges(v)}</td>
+      <td><div class="acts">${acts}<button class="btn btn-ghost btn-sm" onclick="del('${v.id}')" title="Delete">&times;</button></div></td>
     </tr>`;
   }).join('');
 }
 
-async function enroll(id) {
-  if (!confirm('Approve this visitor? This creates a lead, starts the email-only nurture, and adds them to the Meta retargeting audience.')) return;
-  const res = await TMIAdmin.api('/api/visitor-enroll', 'POST', { id });
-  if (res && res.ok) {
-    TMIAdmin.toast(res.meta_warning ? 'Enrolled - email nurture started (Meta push failed, check token)' : 'Enrolled - email nurture started');
-    load();
-  }
+function renderAccounts(rows){
+  document.getElementById('thead').innerHTML = `<tr><th>Company</th><th>People</th><th>Top score</th><th>Industry</th><th>Last seen</th></tr>`;
+  const map = {};
+  rows.forEach(v=>{ const k=v.company||v.company_domain||'(unknown)'; const g=map[k]||(map[k]={people:[],top:0,ind:v.industry,last:v.last_seen}); g.people.push(name(v)); g.top=Math.max(g.top,v.score||0); if(v.last_seen>g.last)g.last=v.last_seen; });
+  const arr = Object.entries(map).sort((a,b)=>b[1].top-a[1].top||b[1].people.length-a[1].people.length);
+  const tb = document.getElementById('tbody');
+  if(!arr.length){ tb.innerHTML=`<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">No accounts.</td></tr>`; return; }
+  tb.innerHTML = arr.map(([co,g])=>`<tr>
+    <td class="vis-co">${esc(co)}</td>
+    <td>${g.people.length}<div class="vis-sub">${esc(g.people.slice(0,4).join(', '))}${g.people.length>4?'…':''}</div></td>
+    <td><span class="score ${scoreClass(g.top)}">${g.top}</span></td>
+    <td>${esc(g.ind||'—')}</td>
+    <td>${g.last?new Date(g.last).toLocaleDateString():''}</td>
+  </tr>`).join('');
 }
 
-async function del(id) {
-  if (!confirm('Remove this visitor?')) return;
-  const res = await TMIAdmin.api(`/api/visitors?id=${id}`, 'DELETE');
-  if (res) { TMIAdmin.toast('Removed'); load(); }
+function renderLinkedIn(rows){
+  const li = rows.filter(v=>v.linkedin_url);
+  document.getElementById('thead').innerHTML = `<tr><th>Person</th><th>Company</th><th>Score</th><th>Status</th><th></th></tr>`;
+  const tb = document.getElementById('tbody');
+  if(!li.length){ tb.innerHTML=`<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">No visitors with a LinkedIn profile yet.</td></tr>`; return; }
+  tb.innerHTML = li.map(v=>{
+    const sent = v.linkedin_status==='sent';
+    return `<tr>
+      <td><div class="vis-co"><a class="vis-li" href="${esc(v.linkedin_url)}" target="_blank" rel="noopener">${esc(name(v))}</a></div><div class="vis-sub">${esc(v.title||'')}</div></td>
+      <td>${esc(v.company||'—')}</td>
+      <td><span class="score ${scoreClass(v.score||0)}">${v.score||0}</span></td>
+      <td>${sent?'<span class="b b-enr">Sent</span>':'<span class="b b-new">To do</span>'}</td>
+      <td><div class="acts">
+        <a class="btn btn-ghost btn-sm" href="${esc(v.linkedin_url)}" target="_blank" rel="noopener">Open</a>
+        <button class="btn btn-ghost btn-sm" onclick="liMessage('${v.id}')">Message</button>
+        <button class="btn btn-primary btn-sm" onclick="liSent('${v.id}')"${sent?' disabled':''}>Mark sent</button>
+      </div></td>
+    </tr>`;
+  }).join('');
 }
 
-async function syncMeta() {
-  const btn = document.getElementById('btn-sync');
-  btn.disabled = true;
-  const res = await TMIAdmin.api('/api/visitors-sync-meta', 'POST', {});
-  btn.disabled = false;
-  if (res && res.ok) {
-    TMIAdmin.toast(`Synced ${res.synced} visitor${res.synced === 1 ? '' : 's'} to Meta`);
-    load();
-  }
+// ── Actions ──
+async function enroll(id){
+  if(!confirm('Approve this visitor? Creates a lead, starts the email-only nurture, and adds them to the Meta retargeting audience.')) return;
+  const res = await TMIAdmin.api('/api/visitor-enroll','POST',{id});
+  if(res&&res.ok){ TMIAdmin.toast(res.meta_warning?'Enrolled (Meta push failed - check token)':'Enrolled - nurture started'); load(); }
+}
+async function enrich(id){
+  TMIAdmin.toast('Enriching via Apollo…');
+  const res = await TMIAdmin.api('/api/visitor-enrich','POST',{id});
+  if(res&&res.ok){ const c=res.enrichment&&res.enrichment.committee; TMIAdmin.toast('Enriched'+(c?` · ${c.length} contacts at company`:'')); load(); }
+}
+async function draft(id){
+  TMIAdmin.toast('Drafting…');
+  const res = await TMIAdmin.api('/api/visitor-draft','POST',{id});
+  if(res&&res.ok){ openModal('AI first-touch draft', res.ai_intro); load(); }
+}
+async function del(id){
+  if(!confirm('Remove this visitor?')) return;
+  const res = await TMIAdmin.api(`/api/visitors?id=${id}`,'DELETE');
+  if(res){ TMIAdmin.toast('Removed'); load(); }
+}
+async function syncMeta(){
+  const res = await TMIAdmin.api('/api/visitors-sync-meta','POST',{});
+  if(res&&res.ok) TMIAdmin.toast(`Synced ${res.synced} to Meta`), load();
+}
+async function buildLookalike(){
+  if(!confirm('Create a Meta lookalike audience from your visitors? (No ad spend.)')) return;
+  const res = await TMIAdmin.api('/api/visitors-lookalike','POST',{});
+  if(res&&res.ok) TMIAdmin.toast('Lookalike created: '+res.lookalike_id);
+}
+function liMessage(id){
+  const v = VISITORS.find(x=>x.id===id); if(!v) return;
+  const fn = v.first_name||'there';
+  const msg = v.ai_intro || `Hi ${fn} - saw ${v.company||'your team'} might be a fit for what we build at TMI (AI infrastructure for field operations). Worth a quick chat? https://www.tmi-technology.com/booking`;
+  openModal(`Message for ${name(v)}`, msg);
+}
+async function liSent(id){
+  const res = await TMIAdmin.api(`/api/visitors?id=${id}`,'PUT',{linkedin_status:'sent'});
+  if(res){ TMIAdmin.toast('Marked sent'); load(); }
 }
 
-function exportCSV() {
+// ── Modal ──
+function openModal(title, text){ document.getElementById('modal-title').textContent=title; document.getElementById('modal-text').value=text||''; document.getElementById('modal').classList.add('open'); }
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+function copyModal(){ const t=document.getElementById('modal-text'); t.select(); navigator.clipboard.writeText(t.value).then(()=>TMIAdmin.toast('Copied')); }
+
+function exportCSV(){
   const rows = getFiltered();
-  const headers = ['Name','Title','Company','Domain','Email','Industry','Location','Last Page','Visits','Last Seen','LinkedIn'];
-  const lines = rows.map(v => {
-    const name = [v.first_name, v.last_name].filter(Boolean).join(' ');
-    const loc = [v.city, v.region, v.country].filter(Boolean).join(', ');
-    return [
-      name, v.title || '', v.company || '', v.company_domain || '', v.email || '',
-      v.industry || '', loc, v.last_page || '', v.visit_count || 1,
-      v.last_seen ? new Date(v.last_seen).toLocaleString() : '', v.linkedin_url || ''
-    ].map(x => `"${String(x).replace(/"/g, '""')}"`).join(',');
+  const headers=['Name','Title','Company','Domain','Email','Industry','Score','Location','Last Page','Visits','Enrolled','Converted','Last Seen','LinkedIn'];
+  const lines = rows.map(v=>{
+    const loc=[v.city,v.region,v.country].filter(Boolean).join(', ');
+    return [name(v),v.title||'',v.company||'',v.company_domain||'',v.email||'',v.industry||'',v.score||0,loc,v.last_page||'',v.visit_count||1,v.enrolled?'yes':'no',v.converted?'yes':'no',v.last_seen?new Date(v.last_seen).toLocaleString():'',v.linkedin_url||''].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',');
   });
-  const csv = [headers.join(','), ...lines].join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `site-visitors-${new Date().toISOString().split('T')[0]}.csv`;
-  a.click(); URL.revokeObjectURL(url);
+  const csv=[headers.join(','),...lines].join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`site-visitors-${new Date().toISOString().split('T')[0]}.csv`; a.click(); URL.revokeObjectURL(url);
 }
 
 load();

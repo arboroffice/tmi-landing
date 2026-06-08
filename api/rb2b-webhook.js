@@ -1,5 +1,36 @@
 const { getSupabase } = require('./_supabase');
 const { verifyToken, cors } = require('./_auth');
+const { scoreVisitor, HOT_THRESHOLD } = require('./_visitor-score');
+const { Resend } = require('resend');
+const twilio = require('twilio');
+
+const FROM_NUMBER = '+18557171044';
+const ALERT_NUMBER = '+13373809059';
+const OWNER_EMAIL = 'support@tmitechai.com';
+const ADMIN_URL = 'https://admin.tmitechai.com/admin-visitors';
+
+// Real-time internal alert (to the operator, not the visitor) when a hot
+// visitor is identified. Best-effort; never throws.
+async function sendHotAlert(v) {
+  const name = [v.first_name, v.last_name].filter(Boolean).join(' ') || 'A visitor';
+  const line = [name, v.title, v.company].filter(Boolean).join(' · ');
+  try {
+    if (process.env.TWILIO_ACCOUNT_SID) {
+      const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+      await sms.messages.create({ body: `Hot site visitor (${v.score}): ${line} | ${v.last_page || ''} ${ADMIN_URL}`, from: FROM_NUMBER, to: ALERT_NUMBER });
+    }
+  } catch (e) { console.error('[rb2b-webhook] hot SMS:', e.message); }
+  try {
+    if (process.env.RESEND_API_KEY) {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from: 'TMI <support@tmitechai.com>', to: OWNER_EMAIL,
+        subject: `Hot visitor (${v.score}): ${name}${v.company ? ' · ' + v.company : ''}`,
+        html: `<p style="font-family:Arial,sans-serif">${line}<br>${v.email || ''}<br>Page: ${v.last_page || ''}<br>Score: ${v.score} (${(v.score_reasons || []).join(', ')})</p><p><a href="${ADMIN_URL}">Review in admin &rarr;</a></p>`,
+      });
+    }
+  } catch (e) { console.error('[rb2b-webhook] hot email:', e.message); }
+}
 
 // RB2B visitor-identification webhook.
 //
@@ -90,18 +121,27 @@ module.exports = async (req, res) => {
   for (const row of mapped) {
     try {
       const existingV = await db.from('site_visitors')
-        .select('id, visit_count').eq('identity_key', row.identity_key).maybeSingle();
+        .select('id, visit_count, alerted').eq('identity_key', row.identity_key).maybeSingle();
 
+      const visit_count = existingV.data ? (existingV.data.visit_count || 1) + 1 : 1;
+      const { score, reasons } = scoreVisitor({ ...row, visit_count });
+      const record = { ...row, visit_count, score, score_reasons: reasons, last_seen: now };
+
+      let vid;
       if (existingV.data) {
-        await db.from('site_visitors').update({
-          ...row,
-          visit_count: (existingV.data.visit_count || 1) + 1,
-          last_seen:   now,
-        }).eq('id', existingV.data.id);
+        vid = existingV.data.id;
+        await db.from('site_visitors').update(record).eq('id', vid);
       } else {
-        await db.from('site_visitors').insert({ ...row, first_seen: now, last_seen: now });
+        const ins = await db.from('site_visitors').insert({ ...record, first_seen: now }).select('id').single();
+        vid = ins.data ? ins.data.id : null;
       }
       upserted++;
+
+      // Fire a one-time internal alert for hot visitors.
+      if (vid && score >= HOT_THRESHOLD && !(existingV.data && existingV.data.alerted)) {
+        await sendHotAlert(record).catch(() => {});
+        await db.from('site_visitors').update({ alerted: true }).eq('id', vid);
+      }
     } catch (e) {
       console.error('[rb2b-webhook] row failed:', e.message);
     }

@@ -29,6 +29,14 @@ create table if not exists public.site_visitors (
   enrolled_at     timestamptz,
   synced_meta     boolean default false,
   synced_meta_at  timestamptz,
+  score           int default 0,
+  score_reasons   jsonb,
+  alerted         boolean default false,
+  converted       boolean default false,
+  converted_at    timestamptz,
+  linkedin_status text default 'none',
+  ai_intro        text,
+  enrichment      jsonb,
   raw             jsonb,
   first_seen      timestamptz default now(),
   last_seen       timestamptz default now(),
@@ -48,4 +56,13 @@ alter table public.site_visitors add column if not exists contact_id     uuid re
 alter table public.site_visitors add column if not exists lead_id        uuid references public.leads(id) on delete set null;
 alter table public.site_visitors add column if not exists enrolled       boolean default false;
 alter table public.site_visitors add column if not exists enrolled_at    timestamptz;
+alter table public.site_visitors add column if not exists score          int default 0;
+alter table public.site_visitors add column if not exists score_reasons  jsonb;
+alter table public.site_visitors add column if not exists alerted        boolean default false;
+alter table public.site_visitors add column if not exists converted      boolean default false;
+alter table public.site_visitors add column if not exists converted_at   timestamptz;
+alter table public.site_visitors add column if not exists linkedin_status text default 'none';
+alter table public.site_visitors add column if not exists ai_intro       text;
+alter table public.site_visitors add column if not exists enrichment     jsonb;
 alter table public.site_visitors add column if not exists raw            jsonb;
+create index if not exists site_visitors_score_idx on public.site_visitors (score desc);

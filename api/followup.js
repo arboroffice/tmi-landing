@@ -199,22 +199,29 @@ async function handler(req, res) {
   // Email-only, opt-out at any time. For leads created from an identified site
   // visitor (source 'rb2b-visitor') that an admin approved from the Visitors page.
   // Deliberately NO SMS: these people never gave express consent (TCPA).
-  let visitorCompany = '';
-  try { visitorCompany = (JSON.parse(lead.notes || '{}').company) || ''; } catch { visitorCompany = ''; }
+  let visitorNotes = {};
+  try { visitorNotes = JSON.parse(lead.notes || '{}'); } catch { visitorNotes = {}; }
+  const visitorCompany = visitorNotes.company || '';
   const coLine = visitorCompany ? ` at ${visitorCompany}` : '';
+  const escHtml = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const introToParas = t => String(t).split(/\n+/).map(s => s.trim()).filter(Boolean)
+    .map(s => `<p style="margin:0 0 16px;">${escHtml(s)}</p>`).join('');
 
   if (step === 'visitor_day0_email') {
+    const sig = `<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - AI Infrastructure for Field Operations</span></p>`;
+    const cta = `<p style="margin:0 0 24px;">If that's worth 20 minutes, the calendar's here: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a>. If not, no hard feelings.</p>`;
+    const bodyHtml = visitorNotes.intro
+      ? `<p style="margin:0 0 20px;">Hey ${firstName},</p>\n${introToParas(visitorNotes.intro)}\n${cta}\n${sig}`
+      : `<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">You came across TMI recently, so I'll keep this short and useful.</p>
+<p style="margin:0 0 16px;">We build AI infrastructure for field operations - the systems that take dispatch, job status, and the numbers off your plate and onto something you can actually see. Most operations${coLine} are running those on people instead of systems, and that's where the margin quietly goes.</p>
+${cta}
+${sig}`;
     await resend.emails.send({
       from: 'TMI <support@tmitechai.com>',
       to: lead.email,
       subject: visitorCompany ? `A thought for ${visitorCompany}` : 'A thought on your operation',
-      html: emailWrap(`
-<p style="margin:0 0 20px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">You came across TMI recently, so I'll keep this short and useful.</p>
-<p style="margin:0 0 16px;">We build AI infrastructure for field operations - the systems that take dispatch, job status, and the numbers off your plate and onto something you can actually see. Most operations${coLine} are running those on people instead of systems, and that's where the margin quietly goes.</p>
-<p style="margin:0 0 24px;">If that's worth 20 minutes, the calendar's here: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a>. If not, no hard feelings.</p>
-<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - AI Infrastructure for Field Operations</span></p>
-`, unsubUrl),
+      html: emailWrap(bodyHtml, unsubUrl),
     });
   }
 

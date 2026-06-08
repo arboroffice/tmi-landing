@@ -83,6 +83,17 @@ module.exports = async (req, res) => {
       } catch (e) { console.error('Meta CAPI:', e.message); }
     }
 
+    // RB2B visitor conversion attribution: when a visitor-sourced lead converts,
+    // mark the originating site_visitor so retargeting/lookalikes can learn from it.
+    if (leadFields.status && data.source === 'rb2b-visitor') {
+      const CONVERTING = ['booked', 'won', 'client', 'building', 'customer', 'onboarding', 'paid'];
+      if (CONVERTING.includes(data.status)) {
+        db.from('site_visitors')
+          .update({ converted: true, converted_at: new Date().toISOString() })
+          .eq('lead_id', id).then(() => {}).catch(() => {});
+      }
+    }
+
     return res.json(data);
   }
 

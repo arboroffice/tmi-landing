@@ -51,7 +51,11 @@ Requires (already used by the lead nurture): `RESEND_API_KEY`, `QSTASH_TOKEN`,
    | `RB2B_WEBHOOK_SECRET` | Shared secret the webhook checks. If unset, the endpoint accepts all payloads (logs a warning) — set it before going live. |
    | `META_CAPI_ACCESS_TOKEN` | Already used by the CAPI helper; reused to write the audience. |
    | `META_CUSTOM_AUDIENCE_ID` | Target Custom Audience. If unset, one named "RB2B Site Visitors" is auto-created (needs `META_AD_ACCOUNT_ID`). |
-   | `META_AD_ACCOUNT_ID` | Numeric or `act_`-prefixed; only needed to auto-create the audience. |
+   | `META_AD_ACCOUNT_ID` | Numeric or `act_`-prefixed; needed to auto-create the audience and to build lookalikes. |
+   | `ANTHROPIC_API_KEY` | AI-drafted first-touch emails (`/api/visitor-draft`). Already set. |
+   | `APOLLO_API_KEY` | Apollo enrichment + buying committee (`/api/visitor-enrich`). Optional; feature degrades if unset. |
+   | `CRON_SECRET` | Optional: lets you trigger the weekly digest manually via `?secret=`. |
+   | `TWILIO_*` | Reused for hot-visitor internal alerts (SMS to the operator only). |
 
 4. **Deploy.** The pixel only goes live when this branch merges to `main`
    (every push to `main` triggers a Vercel deploy).
@@ -65,6 +69,25 @@ visitor lands → rb2b.js resolves identity → RB2B POSTs profile
    → "Sync to Meta Audience" button → /api/visitors-sync-meta
    → Meta Custom Audience (retarget on FB/IG)
 ```
+
+## Intelligence layer (admin Site Visitors page)
+
+| Capability | Where |
+|---|---|
+| **Lead-fit scoring** (0-100, ICP industry / seniority / intent page / visits) | `_visitor-score.js`, computed on ingest + shown/sortable in admin |
+| **Hot-visitor alerts** (SMS + email to the operator when score ≥ 70) | `rb2b-webhook.js` |
+| **Dedup / suppression** (flags Known / Client / Unsubscribed / own-domain; blocks cold-enroll of those) | `visitors.js` + `visitor-enroll.js` |
+| **Account rollup** (group visitors by company) | admin "Accounts" tab |
+| **Apollo enrichment + buying committee** | `/api/visitor-enrich` (button) |
+| **AI-drafted first touch** | `/api/visitor-draft` (button) → used as the day-0 email body |
+| **LinkedIn outreach queue** (drafted message, mark-sent) | admin "LinkedIn" tab + `visitors.js` PUT |
+| **Conversion attribution** (visitor → booked/won marks the visitor converted) | `leads.js` |
+| **Meta lookalike audience** (no ad spend) | `/api/visitors-lookalike` (button) |
+| **Weekly visitor digest email** | `/api/visitor-digest` (Vercel cron, Mondays 13:00 UTC) |
+
+Auto-creating spending ad **campaigns** is intentionally NOT wired up (only the
+audience + lookalike) to avoid surprise spend — say the word to add a paused
+campaign scaffold.
 
 ## Compliance note
 
