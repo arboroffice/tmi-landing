@@ -4,7 +4,7 @@ const twilio = require('twilio');
 
 const FROM_NUMBER = '+18557171044';
 const ALERT_NUMBER = '+13373809059';
-const OWNER_EMAIL = ['support@tmitechai.com', 'mialouviere@gmail.com'];
+const OWNER_EMAIL = ['support@tmitechai.com', 'mia@tmitechai.com'];
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
