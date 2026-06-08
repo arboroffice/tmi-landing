@@ -5,8 +5,8 @@ module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const url = process.env.SUPABASE_URL || '';
-  const key = process.env.SUPABASE_SERVICE_KEY || '';
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
   let supabase_connect = 'not tested';
   let supabase_error = null;
@@ -27,6 +27,7 @@ module.exports = async (req, res) => {
     supabase_connect,
     supabase_error,
     supabase_role_key:     !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    next_public_url:       !!process.env.NEXT_PUBLIC_SUPABASE_URL,
     jwt_secret:            !!process.env.JWT_SECRET,
     admin_password:        !!process.env.ADMIN_PASSWORD,
     resend:                !!process.env.RESEND_API_KEY,
