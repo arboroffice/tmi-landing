@@ -106,6 +106,9 @@ p{margin:0;}
 .intro-areas-label{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
 .intro-areas-list{display:flex;flex-wrap:wrap;gap:8px;}
 .intro-areas-list span{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink-2);padding:5px 12px;border:1px solid var(--line-strong);border-radius:999px;}
+.intro-skip{margin-top:18px;font-family:var(--sans);font-size:13px;color:var(--muted);}
+.intro-skip a{color:var(--ink);font-weight:600;border-bottom:1px solid var(--line-strong);cursor:pointer;padding-bottom:1px;transition:border-color 0.15s;}
+.intro-skip a:hover{border-color:var(--ink);}
 
 /* ─── QUIZ SCREEN ─── */
 #screen-quiz{background:var(--bg);display:flex;flex-direction:column;}
@@ -440,6 +443,7 @@ p{margin:0;}
       </div>
       <button class="btn btn-primary" onclick="startAudit()" style="font-size:16px;padding:16px 40px;">Start My Intelligence Audit</button>
       <p style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:14px;">No payment required. Takes about 5 minutes. Analyzed live by TMI's reasoning agent.</p>
+      <div class="intro-skip">Short on time? <a onclick="skipToBooking()">Skip the audit and book a call &rarr;</a></div>
     </div>
   </div>
 </section>
@@ -451,9 +455,9 @@ p{margin:0;}
   </nav>
   <div class="contact-body">
     <div class="contact-inner">
-      <div class="eyebrow"><span class="dot"></span>One Quick Step</div>
-      <h2 class="contact-h2">Where should we send your Intelligence Audit?</h2>
-      <p class="contact-sub">We'll email you the full diagnosis: where your operation is stuck, what it's costing, and the path to an intelligent company.</p>
+      <div class="eyebrow"><span class="dot"></span><span id="contact-eyebrow">One Quick Step</span></div>
+      <h2 class="contact-h2" id="contact-h2">Where should we send your Intelligence Audit?</h2>
+      <p class="contact-sub" id="contact-sub">We'll email you the full diagnosis: where your operation is stuck, what it's costing, and the path to an intelligent company.</p>
       <form id="contact-form" onsubmit="submitContact(event)">
         <div class="contact-fields">
           <div class="contact-row">
@@ -477,7 +481,8 @@ p{margin:0;}
             </div>
           </div>
         </div>
-        <button type="submit" class="btn btn-primary" style="font-size:15px;padding:15px 36px;">Start My Audit &nbsp;&rarr;</button>
+        <button type="submit" class="btn btn-primary" id="contact-submit-btn" style="font-size:15px;padding:15px 36px;">Start My Audit &nbsp;&rarr;</button>
+        <p id="contact-skip-note" class="contact-sub" style="display:none;margin:16px 0 0;font-size:13px;">We ask up front so we can text you your booking link and a quick reminder to run the 5-minute audit before the call. That is what makes the call worth your time.</p>
       </form>
     </div>
   </div>
@@ -855,13 +860,45 @@ let currentQ = 0;
 let answers = {};
 let selectedCategory = null;
 let contactInfo = {};
+let bookingIntent = false;
 
 /* ═══════════════════════════════════════════
    SCREEN MANAGEMENT
 ═══════════════════════════════════════════ */
 function startAudit() {
+  bookingIntent = false;
+  setContactMode(false);
   document.getElementById('screen-intro').classList.add('screen-hidden');
   document.getElementById('screen-contact').classList.remove('screen-hidden');
+}
+
+// "Skip the audit and book a call." We still collect contact info first so we
+// have their phone: a lead gets created (api/audit-start), and the pre-call
+// sequence (api/followup) texts them to finish the 5-min audit before the call,
+// which is what makes the call effective.
+function skipToBooking() {
+  bookingIntent = true;
+  setContactMode(true);
+  document.getElementById('screen-intro').classList.add('screen-hidden');
+  document.getElementById('screen-contact').classList.remove('screen-hidden');
+}
+
+// Re-label the shared contact screen for booking vs audit.
+function setContactMode(booking) {
+  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  if (booking) {
+    set('contact-eyebrow', 'Book Your Call');
+    set('contact-h2', 'Where should we send your call details?');
+    set('contact-sub', "Tell us where to reach you and we'll take you straight to the calendar.");
+    set('contact-submit-btn', 'Continue to booking  →');
+    const note = document.getElementById('contact-skip-note'); if (note) note.style.display = 'block';
+  } else {
+    set('contact-eyebrow', 'One Quick Step');
+    set('contact-h2', 'Where should we send your Intelligence Audit?');
+    set('contact-sub', "We'll email you the full diagnosis: where your operation is stuck, what it's costing, and the path to an intelligent company.");
+    set('contact-submit-btn', 'Start My Audit  →');
+    const note = document.getElementById('contact-skip-note'); if (note) note.style.display = 'none';
+  }
 }
 
 function submitContact(e) {
@@ -872,6 +909,25 @@ function submitContact(e) {
     email: document.getElementById('cf-email').value.trim(),
     phone: document.getElementById('cf-phone').value.trim(),
   };
+
+  if (bookingIntent) {
+    // Create the lead (and the abandon/pre-call nudge chain) before handing off
+    // to the calendar, then prefill Cal so the booking matches this lead by email.
+    fetch('/api/audit-start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...contactInfo, intent: 'book' }),
+      keepalive: true,
+    }).catch(() => {});
+    const params = new URLSearchParams({
+      name: contactInfo.name || '',
+      email: contactInfo.email || '',
+      phone: contactInfo.phone || '',
+    });
+    window.location.href = '/booking?' + params.toString();
+    return;
+  }
+
   fetch('/api/audit-start', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

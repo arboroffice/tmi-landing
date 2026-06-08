@@ -66,10 +66,33 @@ module.exports = async function handler(req, res) {
     ? new Date(startTime).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
     : 'TBD';
 
+  // Has this lead completed the Intelligence Audit? If not (e.g. they used "skip
+  // the audit and book a call"), the call is far more effective with their actual
+  // numbers, so the confirmation text doubles as the first push to run it. The
+  // pre-call sequence (api/followup) keeps nudging at 24h and 2h; this covers the
+  // gap for same-day / next-day bookings where those reminders can't fire.
+  let auditDone = false;
+  try {
+    const { data: a } = await supabase
+      .from('audit_submissions')
+      .select('id')
+      .eq('email', (lead.email || '').toLowerCase())
+      .limit(1)
+      .maybeSingle();
+    auditDone = !!a;
+  } catch { /* best effort — default to the plain confirmation */ }
+
+  let companyNote = '';
+  try { companyNote = (JSON.parse(lead.notes || '{}').company) || ''; } catch { companyNote = ''; }
+  const resumeParams = new URLSearchParams({ n: lead.name || '', e: lead.email || '', p: lead.phone || '', c: companyNote });
+  const auditLink = `${SITE}/audit?resume=1&${resumeParams.toString()}`;
+
   // Confirmation SMS to lead
   if (lead.phone) {
     sms.messages.create({
-      body: `You're confirmed, ${firstName}. See you then. If anything comes up before the call, reply here.`,
+      body: auditDone
+        ? `You're confirmed, ${firstName}. See you then. If anything comes up before the call, reply here.`
+        : `You're confirmed, ${firstName}. One quick favor before the call: run your 5-min Intelligence Audit so we walk in with your real numbers and go deep from minute one - ${auditLink}`,
       from: FROM_NUMBER,
       to: formatPhone(lead.phone),
     }).catch(e => console.error('Confirmation SMS error:', e));

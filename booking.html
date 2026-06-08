@@ -91,7 +91,21 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 })(window, 'https://app.cal.com/embed/embed.js', 'init');
 
 Cal('init', { origin: 'https://cal.com' });
-Cal('inline', { elementOrSelector: '#cal-embed', calLink: 'mia-elianaa-a4n2hk/30min', layout: 'month_view' });
+
+// Prefill name/email (and phone as a note) when arriving from the audit "skip
+// and book" path, so the Cal booking carries the same email we created the lead
+// with — that's what lets api/booking-confirmed match the lead and schedule the
+// pre-call texts pushing them to finish the audit.
+var _cp = new URLSearchParams(window.location.search);
+var _prefill = {};
+if (_cp.get('name')) _prefill.name = _cp.get('name');
+if (_cp.get('email')) _prefill.email = _cp.get('email');
+if (_cp.get('phone')) {
+  _prefill.notes = 'Phone: ' + _cp.get('phone');
+  _prefill.attendeePhoneNumber = _cp.get('phone');
+}
+
+Cal('inline', { elementOrSelector: '#cal-embed', calLink: 'mia-elianaa-a4n2hk/30min', layout: 'month_view', config: _prefill });
 Cal('ui', { styles: { branding: { brandColor: '#E4FF97' } }, hideEventTypeDetails: false, layout: 'month_view' });
 
 // Meta Pixel — Schedule conversion when a call is booked. Deduped with the

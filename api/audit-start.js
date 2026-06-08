@@ -9,8 +9,13 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { name, email, phone, company } = req.body || {};
+  const { name, email, phone, company, intent } = req.body || {};
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'email required' });
+
+  // intent 'book' = they chose "skip the audit and book a call." We still create
+  // the lead so booking-confirmed can match them by email, and the pre-call
+  // sequence (api/followup) texts them to finish the 5-min audit before the call.
+  const skippedToBook = intent === 'book';
 
   let leadId = null;
   try {
@@ -20,8 +25,13 @@ module.exports = async function handler(req, res) {
         name: name || null,
         email: email.toLowerCase().trim(),
         phone: phone || null,
-        status: 'audit_started',
-        notes: JSON.stringify({ company, audit_started_at: new Date().toISOString(), nudge_sent: false }),
+        status: skippedToBook ? 'audit_skipped' : 'audit_started',
+        notes: JSON.stringify({
+          company,
+          audit_started_at: new Date().toISOString(),
+          nudge_sent: false,
+          ...(skippedToBook ? { booking_intent: true } : {}),
+        }),
       }, { onConflict: 'email' })
       .select()
       .single();
