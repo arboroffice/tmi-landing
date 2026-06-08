@@ -21,7 +21,7 @@ module.exports = async function handler(req, res) {
 
   if (!email) return res.status(400).json({ error: 'No email in payload' });
 
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
+  const supabase = createClient((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL), process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
 
   const { data: lead } = await supabase
     .from('leads')

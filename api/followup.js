@@ -50,7 +50,7 @@ async function handler(req, res) {
 
   const { leadId, step } = JSON.parse(rawBody);
 
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
+  const supabase = createClient((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL), process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
   const { data: lead } = await supabase
     .from('leads')
     .select('*')

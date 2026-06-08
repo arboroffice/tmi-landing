@@ -81,7 +81,7 @@ module.exports = async function handler(req, res) {
 
   // Support both env var names for Supabase key
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const supabase = createClient(process.env.SUPABASE_URL, supabaseKey);
+  const supabase = createClient((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL), supabaseKey);
 
   // Write to applications table (CRM inbox)
   const { data: app, error: dbError } = await supabase

@@ -174,6 +174,14 @@ create table if not exists public.sms_log (
   created_at    timestamptz default now()
 );
 
+create table if not exists public.email_templates (
+  id            uuid primary key default gen_random_uuid(),
+  name          text not null,
+  subject       text,
+  body          text,
+  created_at    timestamptz default now()
+);
+
 -- ── Content ───────────────────────────────────────────────────────────────--
 create table if not exists public.content_items (
   id            uuid primary key default gen_random_uuid(),
