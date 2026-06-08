@@ -8,11 +8,30 @@ portal, with an optional sync into a Meta Custom Audience for retargeting.
 | File | Role |
 |------|------|
 | `rb2b.js` | RB2B pixel loader (key `E63P0HZ15KOW`), injected on every public page that carries the Meta Pixel. |
-| `api/rb2b-webhook.js` | Receives RB2B's identified-visitor POSTs, upserts `site_visitors`, links/creates a contact. |
+| `api/rb2b-webhook.js` | Receives RB2B's identified-visitor POSTs and upserts `site_visitors`. Storage only — does **not** auto-create contacts/leads or contact anyone. |
 | `api/visitors.js` | Admin GET list / DELETE for visitors. |
-| `api/visitors-sync-meta.js` | Hashes visitor emails and pushes them into a Meta Custom Audience (manual, button-triggered). |
-| `admin-visitors.html` | Admin "Site Visitors" page (Sales group in the sidebar). |
-| `supabase-visitors.sql` | `site_visitors` table + indexes. |
+| `api/visitor-enroll.js` | Admin "approve & enroll" — creates a contact + lead, starts the email-only nurture, adds to the Meta audience. |
+| `api/visitors-sync-meta.js` | Bulk-pushes visitor emails into a Meta Custom Audience (button on the Visitors page). |
+| `api/_meta-audience.js` | Shared Meta Custom Audience helper (create/find + push hashed emails). |
+| `admin-visitors.html` | Admin "Site Visitors" page (Sales group). Per-row **Enroll** button + status badges. |
+| `supabase-visitors.sql` | `site_visitors` table + indexes (incl. `enrolled` / `lead_id`). |
+
+## Follow-up model (review → approve)
+
+Identified visitors are **stored only** by the webhook — nobody is contacted automatically.
+In the admin Site Visitors page you click **Enroll** on a visitor, which:
+
+1. Creates/links a contact and a lead (`source = 'rb2b-visitor'`).
+2. Schedules an **email-only** nurture (`visitor_day0` / `day3` / `day7`) via QStash → `/api/followup`.
+   Every email carries an unsubscribe link (CAN-SPAM); unsubscribing sets the lead to
+   `unsubscribed` and stops the sequence.
+3. Adds the visitor's email (hashed) to the Meta Custom Audience for Facebook/IG retargeting.
+
+**No SMS is ever sent to identified visitors** — they never gave express consent (TCPA).
+SMS stays reserved for real opted-in leads/bookings in the existing `followup.js` steps.
+
+Requires (already used by the lead nurture): `RESEND_API_KEY`, `QSTASH_TOKEN`,
+`QSTASH_CURRENT_SIGNING_KEY`, `QSTASH_NEXT_SIGNING_KEY`.
 
 ## One-time setup
 

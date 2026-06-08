@@ -82,55 +82,24 @@ module.exports = async (req, res) => {
   const now = new Date().toISOString();
   let upserted = 0;
 
+  // Storage only: identified visitors land in site_visitors for review. They are
+  // NOT auto-added to contacts/leads or contacted — an admin approves each one
+  // from the Site Visitors page (api/visitor-enroll), which then creates the
+  // contact + lead and starts the email nurture. Keeps the CRM clean and outreach
+  // consented to the operator's judgement.
   for (const row of mapped) {
     try {
-      // Optionally upsert + link a contact when we have an email.
-      let contactId = null;
-      const contactEmail = row.email || row.personal_email;
-      if (contactEmail && row.first_name) {
-        const existing = await db.from('contacts').select('id').eq('email', contactEmail).maybeSingle();
-        if (existing.data) {
-          contactId = existing.data.id;
-        } else {
-          const { data: c } = await db.from('contacts').insert({
-            first_name: row.first_name,
-            last_name:  row.last_name,
-            email:      contactEmail,
-            company:    row.company,
-            title:      row.title,
-            niche:      row.industry,
-            notes:      'Identified site visitor (RB2B)',
-          }).select('id').single();
-          contactId = c ? c.id : null;
-        }
-      }
-
       const existingV = await db.from('site_visitors')
         .select('id, visit_count').eq('identity_key', row.identity_key).maybeSingle();
 
       if (existingV.data) {
         await db.from('site_visitors').update({
           ...row,
-          contact_id:  contactId || undefined,
           visit_count: (existingV.data.visit_count || 1) + 1,
           last_seen:   now,
         }).eq('id', existingV.data.id);
       } else {
-        await db.from('site_visitors').insert({
-          ...row,
-          contact_id: contactId,
-          first_seen: now,
-          last_seen:  now,
-        });
-        // Log the first identification on the contact timeline.
-        if (contactId) {
-          db.from('activities').insert({
-            contact_id: contactId,
-            type: 'note',
-            title: 'Site visit identified (RB2B)',
-            body: [row.title, row.company, row.last_page].filter(Boolean).join(' · ') || null,
-          }).then(() => {}).catch(() => {});
-        }
+        await db.from('site_visitors').insert({ ...row, first_seen: now, last_seen: now });
       }
       upserted++;
     } catch (e) {

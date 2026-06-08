@@ -24,6 +24,9 @@ create table if not exists public.site_visitors (
   source          text default 'rb2b',
   visit_count     int  default 1,
   contact_id      uuid references public.contacts(id) on delete set null,
+  lead_id         uuid references public.leads(id) on delete set null,
+  enrolled        boolean default false,
+  enrolled_at     timestamptz,
   synced_meta     boolean default false,
   synced_meta_at  timestamptz,
   raw             jsonb,
@@ -42,4 +45,7 @@ alter table public.site_visitors add column if not exists company_size  text;
 alter table public.site_visitors add column if not exists synced_meta    boolean default false;
 alter table public.site_visitors add column if not exists synced_meta_at timestamptz;
 alter table public.site_visitors add column if not exists contact_id     uuid references public.contacts(id) on delete set null;
+alter table public.site_visitors add column if not exists lead_id        uuid references public.leads(id) on delete set null;
+alter table public.site_visitors add column if not exists enrolled       boolean default false;
+alter table public.site_visitors add column if not exists enrolled_at    timestamptz;
 alter table public.site_visitors add column if not exists raw            jsonb;

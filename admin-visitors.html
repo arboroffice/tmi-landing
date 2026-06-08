@@ -12,6 +12,7 @@
   .vis-li{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;}
   .vis-page{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--ink-2);}
   .badge-sync{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--chart);color:var(--ink);}
+  .badge-meta{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#e7f0ff;color:#1b4fd6;margin-left:4px;}
   .badge-new{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--bg-alt);color:var(--ink-2);}
 </style>
 </head>
@@ -56,7 +57,7 @@
           <table>
             <thead><tr>
               <th>Person</th><th>Company</th><th>Industry</th><th>Location</th>
-              <th>Last page</th><th>Visits</th><th>Last seen</th><th>Meta</th><th></th>
+              <th>Last page</th><th>Visits</th><th>Last seen</th><th>Status</th><th></th>
             </tr></thead>
             <tbody id="vis-tbody"></tbody>
           </table>
@@ -110,7 +111,14 @@ function renderTable() {
       : esc(name);
     const loc = [v.city, v.region, v.country].filter(Boolean).join(', ') || '—';
     const seen = v.last_seen ? new Date(v.last_seen).toLocaleDateString() : '';
-    const meta = v.synced_meta ? `<span class="badge-sync">Synced</span>` : `<span class="badge-new">New</span>`;
+    const badges = [];
+    if (v.enrolled) badges.push('<span class="badge-sync">Enrolled</span>');
+    if (v.synced_meta) badges.push('<span class="badge-meta">Meta</span>');
+    if (!badges.length) badges.push('<span class="badge-new">New</span>');
+    const hasEmail = !!(v.email || v.personal_email);
+    const action = v.enrolled
+      ? ''
+      : `<button class="btn btn-primary btn-sm" onclick="enroll('${v.id}')"${hasEmail ? '' : ' disabled title="No email to enroll"'}>Enroll</button>`;
     return `<tr>
       <td><div class="vis-co">${nameCell}</div><div class="vis-sub">${esc(v.title || '')}${v.email ? ' · ' + esc(v.email) : ''}</div></td>
       <td>${esc(v.company || '—')}${v.company_domain ? `<div class="vis-sub">${esc(v.company_domain)}</div>` : ''}</td>
@@ -119,10 +127,19 @@ function renderTable() {
       <td><div class="vis-page" title="${esc(v.last_page || '')}">${esc(v.last_page || '—')}</div></td>
       <td>${v.visit_count || 1}</td>
       <td>${esc(seen)}</td>
-      <td>${meta}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="del('${v.id}')" title="Delete">&times;</button></td>
+      <td>${badges.join('')}</td>
+      <td style="white-space:nowrap">${action} <button class="btn btn-ghost btn-sm" onclick="del('${v.id}')" title="Delete">&times;</button></td>
     </tr>`;
   }).join('');
+}
+
+async function enroll(id) {
+  if (!confirm('Approve this visitor? This creates a lead, starts the email-only nurture, and adds them to the Meta retargeting audience.')) return;
+  const res = await TMIAdmin.api('/api/visitor-enroll', 'POST', { id });
+  if (res && res.ok) {
+    TMIAdmin.toast(res.meta_warning ? 'Enrolled - email nurture started (Meta push failed, check token)' : 'Enrolled - email nurture started');
+    load();
+  }
 }
 
 async function del(id) {

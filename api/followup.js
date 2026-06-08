@@ -195,6 +195,59 @@ async function handler(req, res) {
     });
   }
 
+  // ─── IDENTIFIED VISITOR CAMPAIGN (RB2B) ───
+  // Email-only, opt-out at any time. For leads created from an identified site
+  // visitor (source 'rb2b-visitor') that an admin approved from the Visitors page.
+  // Deliberately NO SMS: these people never gave express consent (TCPA).
+  let visitorCompany = '';
+  try { visitorCompany = (JSON.parse(lead.notes || '{}').company) || ''; } catch { visitorCompany = ''; }
+  const coLine = visitorCompany ? ` at ${visitorCompany}` : '';
+
+  if (step === 'visitor_day0_email') {
+    await resend.emails.send({
+      from: 'TMI <support@tmitechai.com>',
+      to: lead.email,
+      subject: visitorCompany ? `A thought for ${visitorCompany}` : 'A thought on your operation',
+      html: emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">You came across TMI recently, so I'll keep this short and useful.</p>
+<p style="margin:0 0 16px;">We build AI infrastructure for field operations - the systems that take dispatch, job status, and the numbers off your plate and onto something you can actually see. Most operations${coLine} are running those on people instead of systems, and that's where the margin quietly goes.</p>
+<p style="margin:0 0 24px;">If that's worth 20 minutes, the calendar's here: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a>. If not, no hard feelings.</p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - AI Infrastructure for Field Operations</span></p>
+`, unsubUrl),
+    });
+  }
+
+  if (step === 'visitor_day3_email') {
+    await resend.emails.send({
+      from: 'TMI <support@tmitechai.com>',
+      to: lead.email,
+      subject: 'Where the revenue actually goes',
+      html: emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">The operations losing the most usually aren't doing anything wrong. They're just running on people instead of systems. Every dispatch call, every schedule change, every job update - someone has to catch it or it falls through.</p>
+<p style="margin:0 0 16px;">Here's how it adds up: <a href="${SITE}/article-revenue-leakage" style="color:#5a9e00;">Where the Revenue Actually Goes</a></p>
+<p style="margin:0 0 24px;">Worth 20 minutes if that sounds like your operation: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
+<p style="margin:0;">Tyler<br><span style="color:#888;font-size:13px;">TMI</span></p>
+`, unsubUrl),
+    });
+  }
+
+  if (step === 'visitor_day7_email') {
+    await resend.emails.send({
+      from: 'TMI <support@tmitechai.com>',
+      to: lead.email,
+      subject: 'Worth a conversation?',
+      html: emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">Last note from me - I don't want to be another email you're ignoring.</p>
+<p style="margin:0 0 16px;">If the operation's in a good place, genuinely good. If it's not and the timing just hasn't been right, twenty minutes is all it takes to map what we'd build first.</p>
+<p style="margin:0 0 24px;">Whenever it's useful: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI</span></p>
+`, unsubUrl),
+    });
+  }
+
   // ─── INTELLIGENCE AUDIT CAMPAIGN ───
   // 7-day sequence for people who completed the Intelligence Audit, plus a
   // 30-day check-in. Framed around the three bottlenecks: founder, information,
