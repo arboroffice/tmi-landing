@@ -226,17 +226,6 @@ const TMIAdmin = (() => {
     <div><div class="sb-brand-label">TMI</div><div class="sb-brand-sub">Admin</div></div>
   </div>
   <nav class="sb-nav">
-    <div class="sb-group-label">Ops Machine</div>
-    ${navItem('command', 'Command', I.command, false, '/admin-dashboard')}
-    ${navItem('level10', 'Level 10', I.level10, false, '/admin-reports#level10')}
-    ${navItem('initiatives', 'Initiatives', I.pipeline, false, '/admin-plans#initiatives')}
-    ${navItem('os-team', 'Team', I.team, false, '/admin-team#roster')}
-    ${navItem('recruiting', 'Recruiting', I.recruiting, false, '/admin-team#recruiting')}
-    ${navItem('success', 'Success', I.clientHealth, false, '/admin-team#success')}
-    ${navItem('journey', 'Journey', I.journey, false, '/admin-onboarding#journey')}
-    ${navItem('flywheel', 'Flywheel', I.flywheel, false, '/admin-plans#flywheel')}
-    ${navItem('strategy', 'Strategy', I.strategy, false, '/admin-plans#strategy')}
-    ${navItem('vision', 'Vision', I.vision, false, '/admin-plans#vision')}
     <div class="sb-group-label">Overview</div>
     ${navItem('dashboard', 'Dashboard', I.dashboard)}
     ${navItem('revenue', 'Revenue', I.revenue, false, '/admin-reports#revenue')}
@@ -268,19 +257,7 @@ const TMIAdmin = (() => {
     ${navItem('content-compose', 'Compose', I.content)}
     ${navItem('content-calendar', 'Calendar', I.rituals, false, '/admin-content-hub#calendar')}
     ${navItem('brand-plan', 'Brand Plan', I.identity)}
-    <div class="sb-group-label">The Letter</div>
-    ${navItem('fotf-dashboard', 'Overview', I.fotf)}
-    ${navItem('fotf-community', 'Subscribers', I.community, false, '/admin-fotf-community-hub#community')}
-    ${navItem('fotf-newsletter', 'Newsletter', I.newsletter, false, '/admin-fotf-editorial#newsletter')}
-    ${navItem('fotf-issues', 'Issues', I.newsletter, false, '/admin-fotf-editorial#issues')}
-    <div class="sb-group-label">City Leads</div>
-    ${navItem('city-leads', 'Applications', I.cityPin, true, '/admin-city-leads')}
-    ${navItem('city-leads-map', 'Coverage Map', I.cityMap, false, '/admin-city-leads#map')}
-<div class="sb-group-label">Plans</div>
-    ${navItem('financial-model', 'Financial Model', I.revenue, false, '/admin-plans#model')}
-    ${navItem('retention-plan', 'Retention Plan', I.clientHealth, false, '/admin-plans#retention')}
     <div class="sb-sep"></div>
-    ${navItem('team', 'Team', I.team)}
     ${navItem('settings', 'Settings', I.settings)}
   </nav>
   <div class="sb-foot">
@@ -332,18 +309,6 @@ const TMIAdmin = (() => {
 
       // More sheet
       const groups = [
-        { label: 'Ops Machine', items: [
-          { page:'command',     label:'Command',     icon:I.command,     href:'/admin-dashboard' },
-          { page:'level10',     label:'Level 10',    icon:I.level10,     href:'/admin-reports#level10' },
-          { page:'initiatives', label:'Initiatives', icon:I.pipeline,    href:'/admin-plans#initiatives' },
-          { page:'os-team',     label:'Team',        icon:I.team,        href:'/admin-team#roster' },
-          { page:'recruiting',  label:'Recruiting',  icon:I.recruiting,  href:'/admin-team#recruiting' },
-          { page:'success',     label:'Success',     icon:I.clientHealth,href:'/admin-team#success' },
-          { page:'journey',     label:'Journey',     icon:I.journey,     href:'/admin-onboarding#journey' },
-          { page:'flywheel',    label:'Flywheel',    icon:I.flywheel,    href:'/admin-plans#flywheel' },
-          { page:'strategy',    label:'Strategy',    icon:I.strategy,    href:'/admin-plans#strategy' },
-          { page:'vision',      label:'Vision',      icon:I.vision,      href:'/admin-plans#vision' },
-        ]},
         { label: 'Overview', items: [
           { page:'revenue',   label:'Revenue',   icon:I.revenue,   href:'/admin-reports#revenue' },
           { page:'analytics', label:'Analytics', icon:I.analytics, href:'/admin-reports#analytics' },
@@ -377,22 +342,7 @@ const TMIAdmin = (() => {
           { page:'content-calendar', label:'Calendar',     icon:I.rituals,  href:'/admin-content-hub#calendar' },
           { page:'brand-plan',       label:'Brand Plan',   icon:I.identity },
         ]},
-        { label: 'The Letter', items: [
-          { page:'fotf-dashboard', label:'Overview',     icon:I.fotf },
-          { page:'fotf-community', label:'Subscribers',  icon:I.community, href:'/admin-fotf-community-hub#community' },
-          { page:'fotf-newsletter',label:'Newsletter',   icon:I.newsletter, href:'/admin-fotf-editorial#newsletter' },
-          { page:'fotf-issues',    label:'Issues',       icon:I.newsletter, href:'/admin-fotf-editorial#issues' },
-        ]},
-{ label: 'City Leads', items: [
-          { page:'city-leads',     label:'Applications', icon:I.cityPin, href:'/admin-city-leads',      badge:'city-leads' },
-          { page:'city-leads-map', label:'Coverage Map', icon:I.cityMap, href:'/admin-city-leads#map' },
-        ]},
-{ label: 'Plans', items: [
-          { page:'financial-model', label:'Financial Model', icon:I.revenue,      href:'/admin-plans#model' },
-          { page:'retention-plan',  label:'Retention Plan',  icon:I.clientHealth, href:'/admin-plans#retention' },
-        ]},
         { label: 'System', items: [
-          { page:'team',     label:'Team',     icon:I.team },
           { page:'settings', label:'Settings', icon:I.settings },
         ]},
       ];
