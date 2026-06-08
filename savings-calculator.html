@@ -460,6 +460,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
       });
       if (!res.ok) throw new Error('failed');
       localStorage.setItem('calc_unlocked','1');
+      try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Savings Calculator' }); } catch (e) {}
       unlockResults();
     } catch(ex){
       err.textContent = 'Something went wrong - please try again.';

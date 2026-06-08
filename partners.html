@@ -501,6 +501,7 @@ document.getElementById('partner-form').addEventListener('submit', async functio
     if (res.ok) {
       form.style.display = 'none';
       document.getElementById('partner-success').style.display = 'block';
+      try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Partner Application' }); } catch (e) {}
     } else {
       btn.textContent = 'Try again'; btn.disabled = false;
     }

@@ -463,6 +463,7 @@ document.getElementById('citylead-form').addEventListener('submit', async functi
     if (!res.ok) throw new Error('API error');
     document.getElementById('form-container').style.display = 'none';
     document.getElementById('success-state').style.display = 'block';
+    try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'City Lead Application' }); } catch (e) {}
   } catch (err) {
     errEl.textContent = 'Something went wrong. Please try again or email us at support@tmitechai.com.';
     errEl.style.display = 'block';

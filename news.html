@@ -1103,6 +1103,7 @@ if (newsletterForm) {
         newsletterForm.innerHTML = '';
         note.textContent = "You're in. First issue hits Monday.";
         note.style.color = 'rgba(228,255,151,0.9)';
+        try { if (typeof fbq === 'function') fbq('track', 'CompleteRegistration', { content_name: 'Newsletter' }); } catch (e) {}
       } else {
         throw new Error('Subscribe failed');
       }

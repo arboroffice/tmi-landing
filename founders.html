@@ -447,6 +447,7 @@ async function handleSubmit(formId, successId) {
       if (note) note.style.display = 'none';
     }
     try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'the_letter_page', audience: 'the_letter' }) }); } catch(err) {}
+    try { if (typeof fbq === 'function') fbq('track', 'CompleteRegistration', { content_name: 'The Letter' }); } catch(err) {}
     try {
       const fd = new FormData();
       fd.append('email', email);

@@ -663,6 +663,7 @@ document.getElementById('contact-form').addEventListener('submit', async functio
     if (res.ok) {
       document.getElementById('form-wrap').style.display = 'none';
       document.getElementById('form-success').style.display = 'block';
+      try { if (typeof fbq === 'function') fbq('track', 'Contact'); } catch (e) {}
     } else {
       btnText.textContent = 'Send - let\'s talk →';
       btn.disabled = false;
