@@ -183,6 +183,9 @@
       <div class="panel-sep"></div>
       <button class="btn btn-primary btn-sm" onclick="convertToClient()" id="convert-btn">Convert to Client &rarr;</button>
       <div class="panel-sep"></div>
+      <div class="panel-sec-label" style="margin-bottom:12px">Account 360</div>
+      <div id="account-360" style="font-size:13px;color:var(--ink-2);">Loading…</div>
+      <div class="panel-sep"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div class="panel-sec-label" style="margin:0">Activity</div>
         <button class="btn btn-ghost btn-sm" onclick="logLeadActivity()">+ Log</button>
@@ -352,6 +355,75 @@ function openPanel(lead) {
   document.getElementById('lead-activity-feed').innerHTML = '';
   TMIAdmin.openPanel('lead-panel');
   if (lead.contact_id) TMIAdmin.renderActivityPanel(lead.contact_id, 'lead-activity-feed');
+  loadAccount360(lead);
+}
+
+// Account 360 — pull the full picture for this person (audit answers + results,
+// booking, follow-ups, and every email/SMS) from /api/account and render it.
+async function loadAccount360(lead) {
+  const box = document.getElementById('account-360');
+  if (!box) return;
+  box.innerHTML = 'Loading…';
+  const data = await TMIAdmin.api(`/api/account?leadId=${lead.id}`);
+  if (!data) { box.innerHTML = '<span style="color:var(--muted)">Could not load account.</span>'; return; }
+
+  const esc = s => String(s == null ? '' : s).replace(/[<>&]/g, m => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[m]));
+  const fmt = t => t ? TMIAdmin.fmt(t) : '—';
+  const c = data.counts || {};
+
+  // Summary chips
+  const chips = [
+    `${c.audits || 0} audit${c.audits === 1 ? '' : 's'}`,
+    data.booking && data.booking.booked ? 'Booked ✓' : 'Not booked',
+    `${c.followups || 0} follow-ups`,
+    `${c.emails || 0} emails`,
+    `${c.sms || 0} SMS`,
+  ].map(t => `<span style="display:inline-block;padding:3px 10px;border:1px solid var(--line-strong);border-radius:999px;font-size:11px;margin:0 6px 6px 0;color:var(--ink-2)">${t}</span>`).join('');
+
+  // Latest audit: results headline + raw answers
+  let auditHtml = '<div style="color:var(--muted);font-size:12px">No audit submitted.</div>';
+  const audit = (data.audits || [])[0];
+  if (audit) {
+    const ANS = audit.answers && typeof audit.answers === 'object' ? audit.answers : {};
+    const rows = Object.keys(ANS).map(k =>
+      `<tr><td style="padding:3px 8px;color:var(--muted);vertical-align:top;white-space:nowrap">${esc(k)}</td><td style="padding:3px 8px;color:var(--ink)">${esc(ANS[k])}</td></tr>`).join('');
+    auditHtml = `
+      <div style="margin-bottom:8px">
+        <strong>${esc(audit.tier || '—')}</strong> ·
+        ${typeof audit.dep_pct === 'number' ? audit.dep_pct + '% dependency' : '—'} ·
+        ${esc(audit.industry || '—')} ·
+        <span style="color:var(--muted)">${fmt(audit.created_at)}</span>
+      </div>
+      <details><summary style="cursor:pointer;color:var(--blue);font-size:12px">Raw answers (${Object.keys(ANS).length})</summary>
+        <table style="margin-top:6px;border-collapse:collapse;font-size:12px;width:100%"><tbody>${rows || '<tr><td style="color:var(--muted)">No answers recorded.</td></tr>'}</tbody></table>
+      </details>`;
+  }
+
+  // Booking
+  const b = data.booking || {};
+  const bookingHtml = b.booked
+    ? `Booked ${b.booked_at ? 'on ' + fmt(b.booked_at) : ''} · status <strong>${esc(b.status || '')}</strong>`
+    : `<span style="color:var(--muted)">No call booked. Current status: ${esc(b.status || '—')}</span>`;
+
+  // Communications + follow-up timeline
+  const tl = (data.timeline || []).slice(0, 40);
+  const icon = { email: '✉️', sms: '💬', activity: '•', followup: '⏰' };
+  const tlHtml = tl.length ? tl.map(e => `
+    <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)">
+      <span style="flex:none">${icon[e.kind] || '•'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="color:var(--ink)">${esc(e.title)}</div>
+        <div style="color:var(--muted);font-size:11px">${esc(e.kind)}${e.detail ? ' · ' + esc(e.detail) : ''} · ${fmt(e.at)}</div>
+      </div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:12px">No communications logged yet.</div>';
+
+  const sec = (label, inner) => `<div style="margin-bottom:14px"><div class="panel-sec-label" style="margin-bottom:6px">${label}</div>${inner}</div>`;
+
+  box.innerHTML =
+    `<div style="margin-bottom:12px">${chips}</div>` +
+    sec('Audit', auditHtml) +
+    sec('Booking', bookingHtml) +
+    sec('Communications &amp; follow-ups', tlHtml);
 }
 
 async function logLeadActivity() {
