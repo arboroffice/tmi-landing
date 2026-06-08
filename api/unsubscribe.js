@@ -5,7 +5,7 @@ module.exports = async function handler(req, res) {
 
   if (!id) return res.status(400).send('Missing id');
 
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
   await supabase.from('leads').update({ status: 'unsubscribed' }).eq('id', id);
 
   res.setHeader('Content-Type', 'text/html');

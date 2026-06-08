@@ -164,7 +164,7 @@ module.exports = async function handler(req, res) {
   if (!contact?.email || !results?.tierKey) return res.status(400).json({ error: 'Missing required fields' });
 
   const firstName = (contact.name || 'there').split(' ')[0];
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
 
   // 1. Get the lead row for the follow-up chain. Most audit takers already have
   //    a lead from audit-start (status 'audit_started'), and email is unique, so
