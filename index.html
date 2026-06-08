@@ -64,7 +64,9 @@ p{margin:0;}
 .hd-nav a:hover{color:var(--ink);background:var(--bg-alt);}
 .hd-cta{font-family:var(--sans);font-size:12px;font-weight:700;background:var(--chart);color:#0a0b14;padding:9px 20px;border-radius:999px;transition:background 0.15s;white-space:nowrap;}
 .hd-cta:hover{background:var(--chart-dark);}
+.hd-cta-short{display:none;}
 @media(max-width:760px){.hd-nav{display:none;}.hd-inner{padding:0 20px;}}
+@media(max-width:520px){.hd-cta-full{display:none;}.hd-cta-short{display:inline;}}
 
 .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.7s ease,transform 0.7s ease;}
 .reveal.visible{opacity:1;transform:translateY(0);}
@@ -355,7 +357,8 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
 
 @media(max-width:768px){.container,.container-md{padding:0 24px;}.hero-content{padding:0 24px;}.problem-sec,.latency-sec,.midcta-sec,.band,.shift-sec,.caps-sec,.steps-sec,.why-sec,.guar-sec,.found-sec,.final-sec{padding:64px 0;}}
 @media(max-width:600px){.hero h1{font-size:clamp(38px,11vw,52px);}.hero-sub{font-size:16px;}.problem-sec,.latency-sec,.midcta-sec,.band,.shift-sec,.caps-sec,.steps-sec,.why-sec,.guar-sec,.found-sec,.final-sec{padding:52px 0;}.problem-grid{gap:32px;}.latency-flow{gap:6px;}.latency-step{font-size:12px;padding:6px 12px;}}
-@media(max-width:480px){.container,.container-md{padding:0 20px;}.hero-content{padding:0 20px;}.hero h1{font-size:36px;}.hero-cta,.midcta-btn,.guar-btn,.final-btn{width:100%;justify-content:center;}.hd-cta{padding:8px 14px;font-size:11px;}.foot-apply{max-width:none;}}
+@media(max-width:480px){.container,.container-md{padding:0 20px;}.hero-content{padding:0 20px;}.hero h1{font-size:36px;}.hero-cta,.midcta-btn,.guar-btn,.final-btn{width:100%;justify-content:center;}.hd-cta{padding:8px 14px;font-size:11px;}.foot-apply{max-width:none;}.who-close{flex-direction:column;align-items:flex-start;gap:16px;}.who-close .btn-ghost{width:100%;justify-content:center;}.shift-card,.cap-card,.pillar-card,.contrast-card,.diff-card,.phil-card{padding:26px 22px;}.foot-bottom{flex-direction:column;gap:8px;}}
+@media(max-width:380px){.hd-brand{font-size:14px;}.hd-cta{padding:7px 12px;font-size:10.5px;}.hero h1{font-size:32px;}.hero-sub{font-size:15px;}.problem-lede{font-size:19px;}}
 </style>
 <script src="/rb2b.js"></script>
 </head>
@@ -371,7 +374,7 @@ footer{background:var(--bg-dark);border-top:1px solid rgba(255,255,255,0.06);pad
       <a href="#who">Who it's for</a>
       <a href="about.html">About</a>
     </nav>
-    <a href="/audit" class="hd-cta">Get your free assessment &rarr;</a>
+    <a href="/audit" class="hd-cta"><span class="hd-cta-full">Get your free assessment</span><span class="hd-cta-short">Free assessment</span> &rarr;</a>
   </div>
 </header>
 
