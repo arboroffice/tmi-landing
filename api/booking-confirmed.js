@@ -60,6 +60,8 @@ module.exports = async function handler(req, res) {
   } catch (e) { console.error('Meta CAPI Schedule:', e.message); }
 
   const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  // Log the confirmation SMS to the lead (the phone filter excludes the team alert).
+  try { require('./_comms').instrument(supabase, { sms, leadId: lead.id, phone: lead.phone }); } catch (e) { console.error('comms instrument:', e.message); }
   const dateStr = startTime
     ? new Date(startTime).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
     : 'TBD';

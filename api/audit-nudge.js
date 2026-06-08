@@ -125,17 +125,21 @@ module.exports = async function handler(req, res) {
 
   let emailSent = false, smsSent = false;
 
+  const { logEmail, logSms } = require('./_comms');
+
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({ from: 'TMI <support@tmitechai.com>', to: email, subject: emailContent.subject, html: emailContent.html });
     emailSent = true;
+    logEmail(db, { address: email, subject: emailContent.subject, leadId });
   } catch (e) { console.error(`nudge email (${step}):`, e.message); }
 
   if (phone) {
     try {
       const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-      await sms.messages.create({ body: smsBody, from: FROM_NUMBER, to: formatPhone(phone) });
+      const msg = await sms.messages.create({ body: smsBody, from: FROM_NUMBER, to: formatPhone(phone) });
       smsSent = true;
+      logSms(db, { phone: formatPhone(phone), body: smsBody, leadId, twilioSid: msg && msg.sid });
     } catch (e) { console.error(`nudge SMS (${step}):`, e.message); }
   }
 

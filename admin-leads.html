@@ -408,12 +408,13 @@ async function loadAccount360(lead) {
   // Communications + follow-up timeline
   const tl = (data.timeline || []).slice(0, 40);
   const icon = { email: '✉️', sms: '💬', activity: '•', followup: '⏰' };
+  const dirLabel = d => d === 'inbound' ? '⬇ in · ' : d === 'outbound' ? '⬆ out · ' : '';
   const tlHtml = tl.length ? tl.map(e => `
-    <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)">
+    <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)${e.direction === 'inbound' ? ';border-left:2px solid var(--blue);padding-left:8px' : ''}">
       <span style="flex:none">${icon[e.kind] || '•'}</span>
       <div style="flex:1;min-width:0">
         <div style="color:var(--ink)">${esc(e.title)}</div>
-        <div style="color:var(--muted);font-size:11px">${esc(e.kind)}${e.detail ? ' · ' + esc(e.detail) : ''} · ${fmt(e.at)}</div>
+        <div style="color:var(--muted);font-size:11px">${dirLabel(e.direction)}${esc(e.kind)}${e.detail ? ' · ' + esc(e.detail) : ''} · ${fmt(e.at)}</div>
       </div>
     </div>`).join('') : '<div style="color:var(--muted);font-size:12px">No communications logged yet.</div>';
 

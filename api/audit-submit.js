@@ -250,6 +250,9 @@ module.exports = async function handler(req, res) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  // Log lead-facing email/SMS to the timeline. The email/phone filter keeps the
+  // internal alerts to the team out of the lead's record.
+  try { require('./_comms').instrument(supabase, { resend, sms, leadId, email: contact.email, phone: contact.phone }); } catch (e) { console.error('comms instrument:', e.message); }
 
   // 3. Send personalized results email
   resend.emails.send({

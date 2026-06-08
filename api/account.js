@@ -100,7 +100,17 @@ module.exports = async (req, res) => {
   const timeline = [];
   for (const e of emails) timeline.push({ kind: 'email', at: e.created_at, title: e.subject || 'Email sent', detail: e.status || 'sent', direction: 'outbound' });
   for (const s of sms)    timeline.push({ kind: 'sms', at: s.created_at, title: s.body || 'SMS', detail: s.status || '', direction: s.direction || 'outbound' });
-  for (const a of activities) timeline.push({ kind: 'activity', at: a.created_at, title: a.title || a.type, detail: a.body || '', direction: null });
+  for (const a of activities) {
+    const kind = a.type === 'email' ? 'email' : a.type === 'sms' ? 'sms' : 'activity';
+    const inbound = /^Reply:/i.test(a.title || '') || /^From\s/i.test(a.body || '');
+    timeline.push({
+      kind,
+      at: a.created_at,
+      title: a.title || a.type,
+      detail: a.body ? String(a.body).slice(0, 160) : '',
+      direction: kind === 'email' ? (inbound ? 'inbound' : 'outbound') : null,
+    });
+  }
   for (const f of followups) timeline.push({ kind: 'followup', at: f.due_at || f.created_at, title: f.title || f.type, detail: f.completed ? 'completed' : 'scheduled', direction: null });
   timeline.sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0));
 

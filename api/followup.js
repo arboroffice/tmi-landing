@@ -126,6 +126,8 @@ async function handler(req, res) {
   const unsubUrl = `${SITE}/api/unsubscribe?id=${leadId}`;
   const resend = new Resend(process.env.RESEND_API_KEY);
   const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  // Log every email/SMS this handler sends (all addressed to the lead) to the timeline.
+  try { require('./_comms').instrument(supabase, { resend, sms, leadId: lead.id }); } catch (e) { console.error('comms instrument:', e.message); }
 
   if (step === 'day1_sms' && lead.phone) {
     await sms.messages.create({
