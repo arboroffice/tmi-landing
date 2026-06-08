@@ -54,6 +54,7 @@ module.exports = async function handler(req, res) {
     }, { onConflict: 'email' }).select('id').single();
 
     if (contact?.id && record?.id) {
+      await db.from('city_leads').update({ contact_id: contact.id }).eq('id', record.id).catch(() => {});
       await db.from('activities').insert({
         contact_id: contact.id,
         type: 'note',
