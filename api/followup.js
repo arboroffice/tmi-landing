@@ -282,28 +282,54 @@ async function handler(req, res) {
   }
 
   // --- BOOKED SEQUENCE ---
+  // Goal: every call goes in with the audit already done. If the booked lead
+  // has not completed the audit (no audit_submissions row -> `audit` is null),
+  // the pre-call touches push them to finish it first. If they have, we just
+  // send a clean reminder.
+  const auditDone = !!audit;
+  let preCallCompany = '';
+  try { preCallCompany = (JSON.parse(lead.notes || '{}').company) || ''; } catch { preCallCompany = ''; }
+  const resumeParams = new URLSearchParams({ n: lead.name || '', e: lead.email || '', p: lead.phone || '', c: preCallCompany });
+  const auditLink = `${SITE}/audit?resume=1&${resumeParams.toString()}`;
 
   if (step === 'pre_call_24h') {
     // From Mia — day before the call
     await resend.emails.send({
       from: 'TMI <support@tmitechai.com>',
       to: lead.email,
-      subject: "We're talking tomorrow",
-      html: emailWrap(`
+      subject: auditDone ? "We're talking tomorrow" : "Before our call tomorrow",
+      html: auditDone ? emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">Just a heads up - we're on tomorrow. Looking forward to it.</p>
-<p style="margin:0 0 16px;">One thing that'll make the call more useful: if you haven't already, submit your operations audit before we get on. Takes about 5 minutes and means we can go deep from the start instead of spending the whole call on basics.</p>
-<p style="margin:0 0 24px;"><a href="${SITE}/audit" style="color:#5a9e00;font-weight:600;">Submit your audit here</a></p>
+<p style="margin:0 0 16px;">I've got your audit in front of me, so we can skip the basics and go straight to what matters for your operation.</p>
 <p style="margin:0 0 16px;">See you then.</p>
-<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - AI Infrastructure for Field Operations</span></p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - intelligent infrastructure for field operations</span></p>
+`, unsubUrl) : emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">We're on tomorrow. Looking forward to it.</p>
+<p style="margin:0 0 16px;">One thing that'll make the call much more useful: finish your Intelligence Audit before we get on. It takes about 5 minutes, and it means we walk in with your actual numbers and go deep from the first minute instead of spending the call on basics.</p>
+<p style="margin:0 0 24px;"><a href="${auditLink}" style="color:#5a9e00;font-weight:600;">Finish my audit before the call &rarr;</a></p>
+<p style="margin:0 0 16px;">See you then.</p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - intelligent infrastructure for field operations</span></p>
 `, unsubUrl),
     });
+
+    // If the audit isn't done, also send an SMS so it doesn't get missed.
+    if (!auditDone && lead.phone) {
+      await sms.messages.create({
+        body: `Hey ${firstName} - we're on tomorrow. Quick favor: finish your 5-min audit before the call so we go deep from the start: ${auditLink}`,
+        from: FROM_NUMBER,
+        to: formatPhone(lead.phone),
+      });
+    }
   }
 
   if (step === 'pre_call_2h' && lead.phone) {
     // SMS only — 2 hours before
     await sms.messages.create({
-      body: `Hey ${firstName} - we're on in 2 hours. See you then.`,
+      body: auditDone
+        ? `Hey ${firstName} - we're on in 2 hours. See you then.`
+        : `Hey ${firstName} - we're on in 2 hours. If you get 5 min, finish your audit first so we can go deep: ${auditLink}`,
       from: FROM_NUMBER,
       to: formatPhone(lead.phone),
     });
