@@ -32,7 +32,11 @@ That is the whole game.`,
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   const to = (req.query.to || 'mia@tmitechai.com').toString().toLowerCase().trim();
-  if (!/@tmitechai\.com$/.test(to)) return res.status(403).json({ error: 'Test sends restricted to @tmitechai.com addresses' });
+  // Restrict to TMI addresses, plus the Resend account owner (needed for test
+  // delivery while tmitechai.com is unverified in Resend).
+  if (!/@tmitechai\.com$/.test(to) && to !== 'mialouviere@gmail.com') {
+    return res.status(403).json({ error: 'Test sends restricted to @tmitechai.com addresses' });
+  }
   if (!process.env.RESEND_API_KEY) return res.status(503).json({ error: 'RESEND_API_KEY not set' });
 
   const unsub = 'https://www.tmitechai.com/api/nl-unsubscribe?e=' + encodeURIComponent(to);
