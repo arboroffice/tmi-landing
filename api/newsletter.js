@@ -1,6 +1,7 @@
 const { getSupabase } = require('./_supabase');
 const { requireAuth, cors } = require('./_auth');
 const { Resend } = require('resend');
+const { renderIssue } = require('./_newsletter-render');
 
 // Founders of the Future newsletter - admin compose/manage/send.
 //   GET                     -> { issues:[...], subscriber_count }
@@ -12,43 +13,6 @@ const { Resend } = require('resend');
 
 const SITE = 'https://www.tmitechai.com';
 const FROM = 'Founders of the Future <support@tmitechai.com>';
-
-function bodyToHtml(body) {
-  const s = (body || '').trim();
-  if (!s) return '';
-  if (/<(p|div|h[1-6]|ul|ol|table|img|a|br|blockquote)\b/i.test(s)) return s; // already HTML
-  return s.split(/\n{2,}/).map(p => `<p style="margin:0 0 18px;">${p.trim().replace(/\n/g, '<br>')}</p>`).join('');
-}
-
-function renderIssue(issue, unsubUrl) {
-  const content = bodyToHtml(issue.body);
-  const fmt = issue.format || 'standard';
-  const kicker = `<p style="margin:0 0 6px;font-size:11px;color:#8a8f9c;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">Founders of the Future</p>`;
-  const cta = `<p style="margin:28px 0 0;"><a href="${SITE}/audit" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:13px 28px;border-radius:999px;text-decoration:none;">Get your free audit &rarr;</a></p>`;
-
-  let head;
-  if (fmt === 'long-read') {
-    head = `${kicker}<h1 style="margin:0 0 24px;font-size:34px;font-weight:800;letter-spacing:-0.02em;line-height:1.1;">${issue.title || ''}</h1>`;
-  } else if (fmt === 'announcement') {
-    head = `<div style="text-align:center;">${kicker}<h1 style="margin:0 0 20px;font-size:32px;font-weight:800;letter-spacing:-0.02em;line-height:1.1;">${issue.title || ''}</h1></div>`;
-  } else if (fmt === 'digest') {
-    head = `${kicker}<h2 style="margin:0 0 20px;font-size:24px;font-weight:800;letter-spacing:-0.01em;">${issue.title || ''}</h2><div style="height:1px;background:#eee;margin:0 0 20px;"></div>`;
-  } else { // standard
-    head = `${kicker}<h1 style="margin:0 0 22px;font-size:28px;font-weight:800;letter-spacing:-0.02em;line-height:1.12;">${issue.title || ''}</h1>`;
-  }
-
-  const align = fmt === 'announcement' ? 'text-align:center;' : '';
-  return `<!DOCTYPE html><html><body style="margin:0;background:#f5f5f7;">
-<div style="max-width:600px;margin:0 auto;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;line-height:1.7;padding:40px 32px;${align}">
-${head}
-<div style="font-size:16px;color:#333;">${content}</div>
-${fmt === 'announcement' || fmt === 'standard' ? cta : ''}
-<div style="margin:40px 0 0;border-top:1px solid #eee;padding-top:16px;font-size:11px;color:#aaa;line-height:1.6;text-align:left;">
-TMI Technology &middot; AI infrastructure for intelligent companies<br>
-<a href="${unsubUrl}" style="color:#aaa;">Unsubscribe</a>
-</div>
-</div></body></html>`;
-}
 
 async function getSubscribers(db, audienceTag) {
   let q = db.from('contacts').select('email,first_name,tags,audience').not('email', 'is', null).limit(50000);
