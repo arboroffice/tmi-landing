@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Command Brief — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .brief-asof{font-size:12px;color:var(--muted);}
+  .brief-grid{display:grid;grid-template-columns:3fr 2fr;gap:20px;margin-top:8px;}
+  @media(max-width:900px){.brief-grid{grid-template-columns:1fr;}}
+  .list-row{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-bottom:1px solid var(--line);font-size:13px;}
+  .list-row:last-child{border-bottom:none;}
+  .list-row .lr-name{color:var(--ink);font-weight:500;}
+  .list-row .lr-sub{color:var(--muted);font-size:12px;}
+  .lr-score{font-family:var(--serif);font-weight:700;font-size:15px;color:var(--ink);}
+  .lr-score.hot{color:var(--red,#dc2626);}
+  .brief-empty{padding:18px 20px;font-size:13px;color:var(--muted);}
+  .card-body{padding:4px 0;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Command Brief</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadBrief()">Refresh</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Command Brief</h1>
+        <div class="sec-head-right">
+          <span class="brief-asof" id="brief-asof"></span>
+        </div>
+      </div>
+
+      <div id="brief-stats" class="stats-row"></div>
+      <div id="brief-lists" class="brief-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('brief');
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function statBox(label, val, delta) {
+  return `<div class="stat-box">
+    <div class="stat-label">${esc(label)}</div>
+    <div class="stat-val">${esc(val)}</div>
+    ${delta ? `<div class="stat-delta">${esc(delta)}</div>` : ''}
+  </div>`;
+}
+
+function card(title, sub, inner) {
+  return `<div class="card">
+    <div class="card-head">
+      <span class="card-title">${esc(title)}</span>
+      ${sub ? `<span class="card-sub">${esc(sub)}</span>` : ''}
+    </div>
+    <div class="card-body">${inner}</div>
+  </div>`;
+}
+
+function render(data) {
+  // As-of line
+  const asof = data.generated_at ? new Date(data.generated_at).toLocaleString('en-US', {
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+  }) : '';
+  document.getElementById('brief-asof').textContent = asof ? 'as of ' + asof : '';
+
+  // ── Stat boxes (only render what came back) ──────────────────────────────
+  const stats = [];
+  if (data.visitors) {
+    stats.push(statBox('Visitors (7d)', data.visitors.total_7d ?? 0));
+    stats.push(statBox('Hot visitors', data.visitors.hot_count ?? 0, 'score 70+'));
+  }
+  if (typeof data.new_leads_7d === 'number') stats.push(statBox('New leads (7d)', data.new_leads_7d));
+  if (typeof data.audits_7d === 'number') stats.push(statBox('Audits (7d)', data.audits_7d));
+  if (typeof data.follow_ups_due === 'number') stats.push(statBox('Follow-ups due', data.follow_ups_due));
+  if (data.pipeline) stats.push(statBox('Open pipeline', data.pipeline.total ?? 0, 'total leads'));
+
+  const statsEl = document.getElementById('brief-stats');
+  statsEl.innerHTML = stats.length ? stats.join('') : '';
+  statsEl.style.display = stats.length ? '' : 'none';
+
+  // ── Lists: hottest visitors + pipeline by stage ──────────────────────────
+  const lists = [];
+
+  if (data.visitors && Array.isArray(data.visitors.top_hottest) && data.visitors.top_hottest.length) {
+    const rows = data.visitors.top_hottest.map(v => {
+      const score = Number(v.score) || 0;
+      const sub = [v.company].filter(Boolean).join(' · ');
+      return `<div class="list-row">
+        <div>
+          <div class="lr-name">${esc(v.name || v.company || 'Unknown visitor')}</div>
+          ${sub && v.name ? `<div class="lr-sub">${esc(sub)}</div>` : ''}
+        </div>
+        <div class="lr-score${score >= 70 ? ' hot' : ''}">${score}</div>
+      </div>`;
+    }).join('');
+    lists.push(card('Hottest visitors', 'last 7 days', rows));
+  }
+
+  if (data.pipeline && data.pipeline.by_status) {
+    const ORDER = ['new', 'contacted', 'qualified', 'proposal', 'won', 'lost'];
+    const keys = Object.keys(data.pipeline.by_status).sort((a, b) => {
+      const ai = ORDER.indexOf(a), bi = ORDER.indexOf(b);
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    });
+    const rows = keys.length ? keys.map(k =>
+      `<div class="list-row">
+        <div class="lr-name">${esc(k)}</div>
+        <div class="lr-score">${esc(data.pipeline.by_status[k])}</div>
+      </div>`).join('') : '<div class="brief-empty">No leads yet.</div>';
+    lists.push(card('Pipeline by stage', null, rows));
+  }
+
+  const listsEl = document.getElementById('brief-lists');
+  if (lists.length) {
+    listsEl.innerHTML = lists.join('');
+    listsEl.style.display = '';
+  } else {
+    listsEl.innerHTML = '';
+    listsEl.style.display = 'none';
+  }
+
+  if (!stats.length && !lists.length) {
+    listsEl.style.display = '';
+    listsEl.innerHTML = `<div class="brief-empty">No data available yet.</div>`;
+  }
+}
+
+async function loadBrief() {
+  const data = await TMIAdmin.api('/api/brief');
+  if (data) render(data);
+}
+
+loadBrief();
+</script>
+</body>
+</html>

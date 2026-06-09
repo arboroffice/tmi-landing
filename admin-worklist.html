@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Today — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .wl-list{display:flex;flex-direction:column;gap:12px;}
+  .wl-card{background:var(--surface,#fff);border:1px solid var(--line-strong);border-radius:var(--r-sm,8px);padding:16px 18px;display:flex;gap:16px;align-items:flex-start;transition:border-color 0.12s,box-shadow 0.12s;}
+  .wl-card:hover{border-color:var(--ink-2);box-shadow:0 2px 10px rgba(0,0,0,0.05);}
+  .wl-score{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;width:54px;height:54px;border-radius:10px;background:var(--chart);color:var(--ink);}
+  .wl-score b{font-size:20px;line-height:1;font-weight:700;}
+  .wl-score span{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;margin-top:3px;opacity:0.75;}
+  .wl-main{flex:1;min-width:0;}
+  .wl-name{font-size:15px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .wl-company{font-size:13px;color:var(--ink-2);margin-top:2px;}
+  .wl-action{font-size:13px;color:var(--ink);margin-top:10px;font-weight:500;display:flex;align-items:center;gap:7px;}
+  .wl-action svg{width:14px;height:14px;flex:none;color:var(--ink-2);}
+  .wl-reasons{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .wl-reason{font-size:11px;color:var(--ink-2);background:var(--bg-alt,#f5f5f7);border:1px solid var(--line);border-radius:999px;padding:3px 9px;}
+  .wl-side{flex:none;display:flex;flex-direction:column;gap:7px;align-items:stretch;min-width:130px;}
+  .wl-side .btn{justify-content:center;}
+  @media(max-width:720px){.wl-card{flex-wrap:wrap;}.wl-side{flex-direction:row;flex-wrap:wrap;min-width:0;width:100%;}.wl-side .btn{flex:1;}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Today</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadWorklist()">Refresh</button>
+        <a href="/admin-leads" class="btn btn-primary btn-sm">All Leads &rarr;</a>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Today</h1>
+        <div class="sec-head-right">
+          <span class="filter-count" id="wl-count"></span>
+        </div>
+      </div>
+
+      <p style="font-size:13px;color:var(--ink-2);margin:0 0 18px;max-width:620px;line-height:1.5">
+        Your ranked worklist. Active leads scored by stage, how long they have sat untouched, and how reachable they are. Work top to bottom.
+      </p>
+
+      <div class="wl-list" id="wl-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('worklist');
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const ICON_PHONE = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`;
+const ICON_MAIL = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path stroke-linecap="round" d="m2 7 10 7 10-7"/></svg>`;
+const ICON_FLAG = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15" stroke-linecap="round"/></svg>`;
+
+let ranked = [];
+
+async function loadWorklist() {
+  const list = document.getElementById('wl-list');
+  list.innerHTML = `<div style="padding:20px 0;font-size:13px;color:var(--muted)">Loading worklist...</div>`;
+  const data = await TMIAdmin.api('/api/worklist');
+  if (!data) { list.innerHTML = `<div style="padding:20px 0;font-size:13px;color:var(--muted)">Could not load worklist.</div>`; return; }
+  ranked = Array.isArray(data) ? data : [];
+  render();
+}
+
+function render() {
+  const list = document.getElementById('wl-list');
+  document.getElementById('wl-count').textContent = `${ranked.length} to work`;
+
+  if (!ranked.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><h3>Nothing in the queue</h3><p>No active leads need attention right now.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = ranked.map((r, i) => {
+    const lead = r.lead || {};
+    const c = lead.contacts || {};
+    const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || lead.title || 'Unnamed lead';
+    const company = c.company ? `<div class="wl-company">${esc(c.company)}</div>` : '';
+    const reasons = (r.reasons || []).map(x => `<span class="wl-reason">${esc(x)}</span>`).join('');
+
+    const actions = [];
+    if (c.phone) actions.push(`<a class="btn btn-ghost btn-sm" href="tel:${esc(String(c.phone).replace(/[^0-9+]/g,''))}">${ICON_PHONE} Call</a>`);
+    if (c.email) actions.push(`<a class="btn btn-ghost btn-sm" href="mailto:${esc(c.email)}">${ICON_MAIL} Email</a>`);
+    if (lead.id) actions.push(`<button class="btn btn-primary btn-sm" onclick="markContacted('${esc(lead.id)}', this)">${ICON_FLAG} Mark contacted</button>`);
+
+    return `<div class="wl-card">
+      <div class="wl-score"><b>${r.score}</b><span>score</span></div>
+      <div class="wl-main">
+        <div class="wl-name">${esc(name)} ${TMIAdmin.badge(lead.status)}</div>
+        ${company}
+        <div class="wl-action">${ICON_FLAG}${esc(r.suggested_action || '')}</div>
+        <div class="wl-reasons">${reasons}</div>
+      </div>
+      <div class="wl-side">${actions.join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+async function markContacted(id, btn) {
+  if (!id) return;
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+  const res = await TMIAdmin.api('/api/leads', 'PUT', {
+    lead: { id, status: 'contacted' }
+  });
+  if (res) {
+    TMIAdmin.toast('Marked contacted');
+    await loadWorklist();
+  } else if (btn) {
+    btn.disabled = false; btn.style.opacity = '';
+  }
+}
+
+loadWorklist();
+</script>
+</body>
+</html>

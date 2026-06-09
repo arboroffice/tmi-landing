@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Prospecting — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .prospect-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
+  .prospect-filters .form-group{margin:0;}
+  .prospect-bar{display:flex;align-items:flex-end;gap:12px;}
+  .prospect-bar .btn{flex:none;}
+  .needs-key{padding:40px 24px;text-align:center;color:var(--ink-2);font-size:14px;}
+  .needs-key code{background:var(--bg-alt);padding:2px 6px;border-radius:4px;font-size:13px;}
+  .apollo-err{padding:16px 18px;font-size:13px;color:var(--red,#c0392b);}
+  .es-cell{font-size:11px;color:var(--muted);}
+  .pager{display:flex;align-items:center;gap:10px;justify-content:flex-end;padding:14px 4px 0;font-size:13px;color:var(--ink-2);}
+  @media(max-width:880px){.prospect-filters{grid-template-columns:repeat(2,1fr);}.prospect-bar{flex-wrap:wrap;}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Prospecting</span></div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Prospecting</h1>
+        <div class="sec-head-right">
+          <span class="filter-count" id="result-count"></span>
+        </div>
+      </div>
+
+      <div class="card" style="padding:18px 18px 20px;margin-bottom:18px">
+        <div class="prospect-filters">
+          <div class="form-group">
+            <label class="form-label">Title / Seniority</label>
+            <input class="form-input" id="f-title" placeholder="e.g. Owner, Operations Manager"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Industry or Keywords</label>
+            <input class="form-input" id="f-industry" placeholder="e.g. HVAC, plumbing"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <input class="form-input" id="f-location" placeholder="e.g. Texas, United States"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company Size</label>
+            <select class="form-input" id="f-size">
+              <option value="">Any size</option>
+              <option value="1-10">1-10</option>
+              <option value="11-50">11-50</option>
+              <option value="51-200">51-200</option>
+              <option value="201-500">201-500</option>
+              <option value="501-1000">501-1000</option>
+              <option value="1001-5000">1001-5000</option>
+              <option value="5001+">5001+</option>
+            </select>
+          </div>
+        </div>
+        <div class="prospect-bar">
+          <div class="form-group" style="flex:1;margin:0">
+            <label class="form-label">More keywords (optional)</label>
+            <input class="form-input" id="f-keywords" placeholder="e.g. commercial, fleet" onkeydown="if(event.key==='Enter')runSearch()"/>
+          </div>
+          <button class="btn btn-primary" id="search-btn" onclick="runSearch()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search
+          </button>
+        </div>
+      </div>
+
+      <div class="card" id="results-card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Name</th><th>Title</th><th>Company</th><th>Location</th><th>Email</th><th></th>
+            </tr></thead>
+            <tbody id="prospect-tbody">
+              <tr><td colspan="6" class="empty-state"><div class="empty-icon">🔍</div><h3>Search to find prospects</h3><p>Set a title, industry, location or size, then hit Search.</p></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pager" id="pager" style="display:none">
+          <button class="btn btn-ghost btn-sm" id="prev-btn" onclick="changePage(-1)">&larr; Prev</button>
+          <span id="page-label"></span>
+          <button class="btn btn-ghost btn-sm" id="next-btn" onclick="changePage(1)">Next &rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('prospect');
+
+let currentPage = 1;
+let totalPages = 1;
+let lastResults = [];
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function getFilters() {
+  return {
+    title: document.getElementById('f-title').value.trim(),
+    industry: document.getElementById('f-industry').value.trim(),
+    location: document.getElementById('f-location').value.trim(),
+    company_size: document.getElementById('f-size').value,
+    keywords: document.getElementById('f-keywords').value.trim(),
+  };
+}
+
+async function runSearch(page) {
+  currentPage = page && page > 0 ? page : 1;
+  const btn = document.getElementById('search-btn');
+  const tbody = document.getElementById('prospect-tbody');
+  btn.disabled = true;
+  tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><p>Searching Apollo...</p></td></tr>`;
+  document.getElementById('pager').style.display = 'none';
+
+  const payload = Object.assign({ action: 'search', page: currentPage }, getFilters());
+  const res = await TMIAdmin.api('/api/prospect', 'POST', payload);
+  btn.disabled = false;
+
+  if (!res) return; // api() already toasted
+
+  if (res.needs_key) {
+    tbody.innerHTML = `<tr><td colspan="6" class="needs-key">Add <code>APOLLO_API_KEY</code> in Vercel to enable Prospecting.</td></tr>`;
+    document.getElementById('result-count').textContent = '';
+    return;
+  }
+
+  if (res.apollo_error) {
+    tbody.innerHTML = `<tr><td colspan="6" class="apollo-err">Apollo error (${esc(res.apollo_error.status)}): ${esc(res.apollo_error.body)}</td></tr>`;
+    document.getElementById('result-count').textContent = '';
+    return;
+  }
+
+  lastResults = res.people || [];
+  const pg = res.pagination || {};
+  totalPages = pg.total_pages || 1;
+  renderResults();
+  document.getElementById('result-count').textContent =
+    `${pg.total_entries || lastResults.length} prospect${(pg.total_entries || lastResults.length) !== 1 ? 's' : ''}`;
+}
+
+function renderResults() {
+  const tbody = document.getElementById('prospect-tbody');
+  if (!lastResults.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="empty-icon">🔍</div><h3>No prospects found</h3><p>Try widening your filters.</p></td></tr>`;
+    document.getElementById('pager').style.display = 'none';
+    return;
+  }
+
+  tbody.innerHTML = lastResults.map((p, i) => {
+    const loc = [p.city, p.state].filter(Boolean).join(', ') || '—';
+    const email = p.email
+      ? `<a href="mailto:${esc(p.email)}" style="color:var(--blue)">${esc(p.email)}</a>`
+      : (p.email_status ? `<span class="es-cell">${esc(p.email_status)}</span>` : '—');
+    const nameCell = p.linkedin_url
+      ? `<a href="${esc(p.linkedin_url)}" target="_blank" rel="noopener" class="td-name">${esc(p.name) || '—'}</a>`
+      : `<span class="td-name">${esc(p.name) || '—'}</span>`;
+    return `<tr>
+      <td>${nameCell}</td>
+      <td class="td-muted">${esc(p.title) || '—'}</td>
+      <td>${esc(p.company) || '—'}</td>
+      <td class="td-muted">${esc(loc)}</td>
+      <td style="color:var(--ink-2)">${email}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="addToLeads(${i}, this)">Add to leads</button></td>
+    </tr>`;
+  }).join('');
+
+  const pager = document.getElementById('pager');
+  pager.style.display = totalPages > 1 ? 'flex' : 'none';
+  document.getElementById('page-label').textContent = `Page ${currentPage} of ${totalPages}`;
+  document.getElementById('prev-btn').disabled = currentPage <= 1;
+  document.getElementById('next-btn').disabled = currentPage >= totalPages;
+}
+
+function changePage(delta) {
+  const next = currentPage + delta;
+  if (next < 1 || next > totalPages) return;
+  runSearch(next);
+}
+
+async function addToLeads(i, btn) {
+  const person = lastResults[i];
+  if (!person) return;
+  btn.disabled = true;
+  btn.textContent = 'Adding...';
+  const res = await TMIAdmin.api('/api/prospect', 'POST', { action: 'add', person });
+  if (res && res.id) {
+    btn.textContent = 'Added ✓';
+    TMIAdmin.toast('Added to leads');
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Add to leads';
+  }
+}
+</script>
+</body>
+</html>

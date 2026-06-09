@@ -227,17 +227,21 @@ const TMIAdmin = (() => {
   </div>
   <nav class="sb-nav">
     <div class="sb-group-label">Overview</div>
+    ${navItem('brief', 'Command Brief', I.command)}
     ${navItem('dashboard', 'Dashboard', I.dashboard)}
     ${navItem('revenue', 'Revenue', I.revenue, false, '/admin-reports#revenue')}
     ${navItem('analytics', 'Analytics', I.analytics, false, '/admin-reports#analytics')}
+    ${navItem('seo', 'SEO', I.flywheel)}
     <div class="sb-group-label">Sales</div>
     ${navItem('pipeline', 'Pipeline', I.pipeline, false, '/admin-sales#pipeline')}
     ${navItem('audits', 'Audits', I.audits, false, '/admin-sales#audits')}
     ${navItem('bookings', 'Bookings', I.bookings, false, '/admin-sales#bookings')}
     ${navItem('applications', 'Applications', I.apps, true, '/admin-inbox#apps')}
     ${navItem('followups', 'Follow-ups', I.followup, true, '/admin-inbox#followups')}
+    ${navItem('worklist', 'Today', I.level10)}
     ${navItem('leads', 'Leads', I.leads)}
     ${navItem('visitors', 'Site Visitors', I.vision)}
+    ${navItem('prospect', 'Prospecting', I.recruiting)}
     ${navItem('proposals', 'Proposals', I.proposals)}
     <div class="sb-group-label">Clients</div>
     ${navItem('clients', 'Clients', I.clients, false, '/admin-clients')}
