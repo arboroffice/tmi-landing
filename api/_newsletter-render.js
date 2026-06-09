@@ -75,26 +75,31 @@ function renderIssue(issue = {}, unsubUrl = SITE + '/api/nl-unsubscribe') {
 
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="color-scheme" content="light"/>
-<meta name="supported-color-schemes" content="light"/>
+<meta name="color-scheme" content="light only"/>
+<meta name="supported-color-schemes" content="light only"/>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
 <style>
-  :root{color-scheme:light;supported-color-schemes:light;}
+  :root{color-scheme:light only;supported-color-schemes:light only;}
+  html,body{background-color:#ffffff!important;}
+  /* Keep it light in clients that auto-dark (prefers-color-scheme aware) */
   @media (prefers-color-scheme:dark){
-    .fc-bg{background-color:#ffffff!important;}
+    html,body,.fc-bg{background-color:#ffffff!important;}
     .fc-ink{color:#111111!important;}
     .fc-body,.fc-body p,.fc-body td,.fc-body span,.fc-body li,.fc-body strong{color:${BODY}!important;}
     .fc-chart{background-color:${CHART}!important;color:#0a0b14!important;}
     .fc-mut,.fc-mut a{color:#888888!important;}
   }
-  [data-ogsc] .fc-bg{background-color:#ffffff!important;}
+  /* Gmail / Outlook dark-mode re-coloring: data-ogsc (text) + data-ogsb (background) */
   [data-ogsc] .fc-ink{color:#111111!important;}
   [data-ogsc] .fc-body,[data-ogsc] .fc-body p,[data-ogsc] .fc-body td,[data-ogsc] .fc-body span,[data-ogsc] .fc-body li,[data-ogsc] .fc-body strong{color:${BODY}!important;}
-  [data-ogsc] .fc-chart{background-color:${CHART}!important;color:#0a0b14!important;}
+  [data-ogsc] .fc-chart{color:#0a0b14!important;}
   [data-ogsc] .fc-mut,[data-ogsc] .fc-mut a{color:#888888!important;}
+  [data-ogsb] .fc-bg{background-color:#ffffff!important;}
+  [data-ogsb] .fc-chart{background-color:${CHART}!important;}
+  u + #body .fc-bg{background-color:#ffffff!important;}
 </style>
 </head>
-<body class="fc-bg" style="margin:0;padding:0;background-color:#ffffff;">
+<body id="body" class="fc-bg" style="margin:0;padding:0;background-color:#ffffff;">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preheader)}</div>
 <table role="presentation" class="fc-bg" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="background-color:#ffffff;"><tr><td align="center" style="padding:32px 16px;">
 <table role="presentation" class="fc-bg" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:600px;max-width:600px;background-color:#ffffff;">
