@@ -29,7 +29,7 @@ CSS variables:
 --sans: "Neue Haas Grotesk Display", system-ui, sans-serif
 ```
 
-### Field Notes Articles (article-*.html)
+### Founders of the Future Articles (article-*.html)
 Same design system as the main site — white background, Barlow, dark accent:
 ```css
 --bg: #ffffff
@@ -110,7 +110,7 @@ Font: `family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1
 ## Daily Blog Poster Agent
 
 ### What it does
-Writes and publishes one new Field Notes article per day. Picks a topic not already covered, writes 800–1400 words in TMI's voice, generates the full HTML file, and adds it to news.html.
+Writes and publishes one new Founders of the Future article per day. Picks a topic not already covered, writes 800–1400 words in TMI's voice, generates the full HTML file, and adds it to news.html.
 
 ### TMI Voice & Tone
 - Direct. No hedging. No "leverage AI strategically."
@@ -233,7 +233,7 @@ Writes and publishes one new Field Notes article per day. Picks a topic not alre
   <div class="article-header-inner">
     <a href="stratum.html" class="ah-brand"><img src="logo.svg" alt="TMI"/> TMI</a>
     <nav class="ah-nav">
-      <a href="news.html">Field Notes</a>
+      <a href="news.html">Founders of the Future</a>
       <a href="about.html">About</a>
     </nav>
     <a href="/audit" class="ah-cta">Apply &rarr;</a>
@@ -242,7 +242,7 @@ Writes and publishes one new Field Notes article per day. Picks a topic not alre
 
 <section class="article-hero">
   <div class="container-article">
-    <a href="news.html" class="article-back">← Back to Field Notes</a>
+    <a href="news.html" class="article-back">← Back to Founders of the Future</a>
     <div class="article-meta"><span class="cat">{CATEGORY}</span><span>{READ_TIME} min read</span><span>{DATE}</span></div>
     <h1 class="article-title">{TITLE_LINE_1} <em>{TITLE_LINE_2_ITALIC}</em></h1>
     <p class="article-deck">{DECK — one sentence, 20–30 words, Playfair voice}</p>
@@ -276,7 +276,7 @@ Writes and publishes one new Field Notes article per day. Picks a topic not alre
     <p>{Closing paragraph — what changes when this is fixed.}</p>
 
     <div class="article-end">
-      <div class="byline">TMI Field Notes · {CATEGORY}</div>
+      <div class="byline">TMI Founders of the Future · {CATEGORY}</div>
       <a href="news.html" class="back-link">← All stories</a>
     </div>
   </div>
@@ -306,7 +306,7 @@ Writes and publishes one new Field Notes article per day. Picks a topic not alre
   <div class="container">
     <div class="foot-bottom">
       <span>&copy; 2026 TMI Technology</span>
-      <span>Field Notes</span>
+      <span>Founders of the Future</span>
     </div>
   </div>
 </footer>
@@ -358,7 +358,7 @@ Good TMI photo IDs by topic:
 After writing the article file and updating news.html:
 ```bash
 git add {ARTICLE_FILENAME} news.html
-git commit -m "Add Field Notes: {TITLE}"
+git commit -m "Add Founders of the Future: {TITLE}"
 git push origin main
 ```
 
