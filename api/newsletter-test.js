@@ -38,8 +38,13 @@ module.exports = async (req, res) => {
   const unsub = 'https://www.tmitechai.com/api/nl-unsubscribe?e=' + encodeURIComponent(to);
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
+    // tmitechai.com may not be verified in Resend yet; onboarding@resend.dev is
+    // Resend's universal test sender and delivers to the account owner's inbox.
+    const from = req.query.from === 'domain'
+      ? 'Founders of the Future <support@tmitechai.com>'
+      : 'Founders of the Future <onboarding@resend.dev>';
     const r = await resend.emails.send({
-      from: 'Founders of the Future <support@tmitechai.com>',
+      from,
       to,
       subject: '[TEST] ' + SAMPLE.subject,
       html: renderIssue(SAMPLE, unsub),
