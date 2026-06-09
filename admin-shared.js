@@ -258,6 +258,7 @@ const TMIAdmin = (() => {
     ${navItem('sms', 'SMS', I.sms, false, '/admin-comms#sms')}
     <div class="sb-group-label">Content</div>
     ${navItem('content', 'Founders of the Future', I.content, false, '/admin-content-hub#articles')}
+    ${navItem('newsletter', 'Newsletter', I.newsletter)}
     ${navItem('content-ideas', 'Social Ideas', I.ideas, false, '/admin-content-hub#ideas')}
     ${navItem('content-compose', 'Compose', I.content)}
     ${navItem('content-calendar', 'Calendar', I.rituals, false, '/admin-content-hub#calendar')}

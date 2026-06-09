@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Founders of the Future — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .nl-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:start;}
+  @media(max-width:980px){.nl-grid{grid-template-columns:1fr;}}
+  .fld{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+  .fld label{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+  .fld input,.fld select,.fld textarea{padding:10px 12px;border:1px solid var(--line-strong);border-radius:8px;font:inherit;font-size:14px;background:var(--bg);color:var(--ink);}
+  .fld textarea{min-height:240px;line-height:1.6;resize:vertical;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .nl-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .b{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;}
+  .b-draft{background:var(--bg-alt);color:var(--ink-2);}
+  .b-sent{background:#d6f7e0;color:#0a7a3a;}
+  .count-pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--chart);color:#0a0b14;}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;display:none;align-items:center;justify-content:center;padding:24px;}
+  .modal-bg.open{display:flex;}
+  .modal-card{background:#fff;border-radius:12px;max-width:600px;width:100%;padding:24px;box-shadow:0 24px 64px rgba(0,0,0,0.22);}
+  .modal-card h3{margin:0 0 10px;font-size:18px;}
+  .modal-card textarea{width:100%;min-height:120px;border:1px solid var(--line-strong);border-radius:8px;padding:12px;font:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.5;}
+  .modal-row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
+  .hint{font-size:12px;color:var(--muted);margin:0 0 12px;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Founders of the Future</span></div>
+      <div class="topbar-actions">
+        <span class="count-pill" id="sub-count">- subscribers</span>
+        <button class="btn btn-ghost btn-sm" onclick="openEmbed()">Embed signup</button>
+        <button class="btn btn-primary btn-sm" onclick="newIssue()">New issue</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head"><h1>Founders of the Future</h1></div>
+      <div class="nl-grid">
+        <!-- Composer -->
+        <div class="card">
+          <input type="hidden" id="issue-id"/>
+          <div class="fld"><label>Title</label><input id="f-title" placeholder="The float game"/></div>
+          <div class="row2">
+            <div class="fld"><label>Subject line</label><input id="f-subject" placeholder="Why invoice timing is quietly killing your cash flow"/></div>
+            <div class="fld"><label>Format</label><select id="f-format">
+              <option value="standard">Standard (title + body + CTA)</option>
+              <option value="long-read">Long read (big headline)</option>
+              <option value="digest">Digest (multiple items)</option>
+              <option value="announcement">Announcement (centered + CTA)</option>
+            </select></div>
+          </div>
+          <div class="row2">
+            <div class="fld"><label>Preheader <span style="text-transform:none;font-weight:400;opacity:.6">(optional)</span></label><input id="f-preheader" placeholder="One line of inbox preview text"/></div>
+            <div class="fld"><label>Audience tag <span style="text-transform:none;font-weight:400;opacity:.6">(optional, blank = all)</span></label><input id="f-audience" placeholder="founders-embed"/></div>
+          </div>
+          <div class="fld"><label>Body</label><textarea id="f-body" placeholder="Write in plain text (blank line = new paragraph) or paste HTML."></textarea></div>
+          <div class="nl-actions">
+            <button class="btn btn-primary btn-sm" onclick="save()">Save draft</button>
+            <button class="btn btn-ghost btn-sm" onclick="preview()">Preview</button>
+            <button class="btn btn-ghost btn-sm" onclick="sendTest()">Send test</button>
+            <button class="btn btn-ghost btn-sm" onclick="sendAll()" style="margin-left:auto;border-color:var(--chart-dark)">Send to subscribers &rarr;</button>
+          </div>
+        </div>
+        <!-- Issues list -->
+        <div class="card">
+          <div class="sec-head" style="margin:0 0 12px"><h2 style="font-size:16px;margin:0">Issues</h2></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Title</th><th>Format</th><th>Status</th><th></th></tr></thead><tbody id="issues"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal"><div class="modal-card">
+  <h3 id="modal-title">Preview</h3>
+  <div id="modal-body"></div>
+  <div class="modal-row"><button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button><button class="btn btn-primary btn-sm" id="modal-copy" style="display:none" onclick="copyEmbed()">Copy</button></div>
+</div></div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.initSidebar('newsletter');
+let ISSUES = [];
+
+async function load(){
+  const data = await TMIAdmin.api('/api/newsletter');
+  if(!data) return;
+  ISSUES = data.issues || [];
+  document.getElementById('sub-count').textContent = (data.subscriber_count||0) + ' subscribers';
+  renderList();
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function renderList(){
+  const tb=document.getElementById('issues');
+  if(!ISSUES.length){tb.innerHTML='<tr><td colspan="4" style="padding:28px;text-align:center;color:var(--muted)">No issues yet. Write your first one.</td></tr>';return;}
+  tb.innerHTML=ISSUES.map(i=>`<tr>
+    <td><a href="#" onclick="edit('${i.id}');return false;" style="font-weight:600">${esc(i.title||'(untitled)')}</a>${i.sent_at?`<div style="font-size:11px;color:var(--muted)">${new Date(i.sent_at).toLocaleDateString()} · ${i.recipient_count||0} sent</div>`:''}</td>
+    <td style="font-size:12px;color:var(--ink-2)">${esc(i.format||'standard')}</td>
+    <td><span class="b ${i.status==='sent'?'b-sent':'b-draft'}">${i.status||'draft'}</span></td>
+    <td><button class="btn btn-ghost btn-sm" onclick="del('${i.id}')" title="Delete">&times;</button></td>
+  </tr>`).join('');
+}
+function newIssue(){ ['issue-id','f-title','f-subject','f-preheader','f-audience','f-body'].forEach(id=>document.getElementById(id).value=''); document.getElementById('f-format').value='standard'; document.getElementById('f-title').focus(); }
+function edit(id){ const i=ISSUES.find(x=>x.id===id); if(!i)return; document.getElementById('issue-id').value=i.id; document.getElementById('f-title').value=i.title||''; document.getElementById('f-subject').value=i.subject||''; document.getElementById('f-preheader').value=i.preheader||''; document.getElementById('f-audience').value=i.audience_tag||''; document.getElementById('f-format').value=i.format||'standard'; document.getElementById('f-body').value=i.body||''; window.scrollTo({top:0,behavior:'smooth'}); }
+function payload(){ return { id:document.getElementById('issue-id').value||undefined, title:document.getElementById('f-title').value.trim(), subject:document.getElementById('f-subject').value.trim(), preheader:document.getElementById('f-preheader').value.trim(), audience_tag:document.getElementById('f-audience').value.trim()||null, format:document.getElementById('f-format').value, body:document.getElementById('f-body').value }; }
+async function save(){ const res=await TMIAdmin.api('/api/newsletter','POST',payload()); if(res&&res.id){ document.getElementById('issue-id').value=res.id; TMIAdmin.toast('Saved draft'); load(); } }
+async function del(id){ if(!confirm('Delete this issue?'))return; const res=await TMIAdmin.api(`/api/newsletter?id=${id}`,'DELETE'); if(res){TMIAdmin.toast('Deleted');load();} }
+async function sendTest(){ const p=payload(); if(!p.id){TMIAdmin.toast('Save the draft first','error');return;} const email=prompt('Send a test to which email?'); if(!email)return; const res=await TMIAdmin.api('/api/newsletter','POST',{action:'send',id:p.id,test_email:email}); if(res&&res.ok)TMIAdmin.toast('Test sent to '+email); }
+async function sendAll(){ const p=payload(); if(!p.id){TMIAdmin.toast('Save the draft first','error');return;} if(!confirm('Send this issue to all subscribers? This cannot be undone.'))return; const res=await TMIAdmin.api('/api/newsletter','POST',{action:'send',id:p.id}); if(res&&res.ok){TMIAdmin.toast(`Sent to ${res.sent} subscribers`);load();} }
+
+function preview(){
+  const p=payload(); const fmt=p.format;
+  const body=(p.body||'').trim();
+  const html = /<(p|div|h[1-6]|ul|ol|br|a|img)\b/i.test(body) ? body : body.split(/\n{2,}/).map(x=>`<p>${esc(x).replace(/\n/g,'<br>')}</p>`).join('');
+  const titleSize = fmt==='long-read'?34:fmt==='digest'?24:28;
+  const center = fmt==='announcement'?'text-align:center;':'';
+  document.getElementById('modal-title').textContent='Preview';
+  document.getElementById('modal-copy').style.display='none';
+  document.getElementById('modal-body').innerHTML=`<div style="border:1px solid var(--line);border-radius:8px;padding:24px;max-height:60vh;overflow:auto;${center}">
+    <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#8a8f9c;font-weight:700;margin-bottom:6px;">Founders of the Future</div>
+    <div style="font-size:${titleSize}px;font-weight:800;letter-spacing:-0.02em;line-height:1.12;margin-bottom:16px;">${esc(p.title||'')}</div>
+    <div style="font-size:15px;color:#333;line-height:1.7;">${html}</div>
+  </div>`;
+  openModal();
+}
+function openEmbed(){
+  const url='https://www.tmi-technology.com/founders-embed';
+  const snippet=`<iframe src="${url}" title="Subscribe to Founders of the Future" width="100%" height="240" style="border:0;overflow:hidden;" loading="lazy"></iframe>`;
+  document.getElementById('modal-title').textContent='Embed the signup form';
+  document.getElementById('modal-body').innerHTML=`<p class="hint">Paste this where you want the signup form on your personal site. Or link directly to <a href="${url}" target="_blank">${url}</a>.</p><textarea id="embed-snippet" readonly>${esc(snippet)}</textarea>`;
+  const c=document.getElementById('modal-copy'); c.style.display='inline-block';
+  openModal();
+}
+function copyEmbed(){ const t=document.getElementById('embed-snippet'); if(!t)return; t.select(); navigator.clipboard.writeText(t.value).then(()=>TMIAdmin.toast('Copied')); }
+function openModal(){document.getElementById('modal').classList.add('open');}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+
+load();
+</script>
+</body>
+</html>
