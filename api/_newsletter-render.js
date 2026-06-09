@@ -67,28 +67,29 @@ function renderIssue(issue = {}, unsubUrl = SITE + '/api/nl-unsubscribe') {
 
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="light"/>
+<meta name="supported-color-schemes" content="light"/>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>:root{color-scheme:light;supported-color-schemes:light;}</style>
 </head>
-<body style="margin:0;padding:0;background:#eceef2;">
+<body style="margin:0;padding:0;background-color:#ffffff;">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preheader)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eceef2;padding:36px 0;"><tr><td align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 12px 40px rgba(10,11,20,0.07);">
-  <tr><td style="height:5px;background:${CHART};font-size:0;line-height:0;">&nbsp;</td></tr>
-  <tr><td style="padding:26px 40px 0;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="background-color:#ffffff;"><tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:600px;max-width:600px;background-color:#ffffff;">
+  <tr><td style="padding:0 8px 22px;border-bottom:2px solid ${CHART};">
     <table role="presentation" width="100%"><tr>
-      <td style="font-family:${FONT};font-size:17px;font-weight:800;letter-spacing:0.06em;color:${INK};">TMI</td>
-      <td align="right" style="font-family:${FONT};font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#9aa0ad;">Founders of the Future</td>
+      <td style="font-family:${FONT};font-size:18px;font-weight:800;letter-spacing:0.06em;color:#111111;">TMI</td>
+      <td align="right" style="font-family:${FONT};font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#777777;">Founders of the Future</td>
     </tr></table>
-    <div style="height:1px;background:#ececf0;margin:20px 0 30px;"></div>
   </td></tr>
-  <tr><td style="padding:0 40px 40px;">
+  <tr><td style="padding:34px 8px 8px;">
     ${titleBlock}${divider}
     <div>${content}</div>
     ${cta}
   </td></tr>
-  <tr><td style="background:#fafafb;padding:24px 40px;border-top:1px solid #ececf0;">
-    <p style="margin:0 0 6px;font-family:${FONT};font-size:12px;color:#8a8f9c;line-height:1.6;">Founders of the Future &middot; the community we are building at TMI.</p>
-    <p style="margin:0;font-family:${FONT};font-size:11px;color:#b3b7c2;">TMI Technology &middot; intelligent infrastructure for any business &middot; <a href="${unsubUrl}" style="color:#b3b7c2;">Unsubscribe</a></p>
+  <tr><td style="padding:28px 8px 0;border-top:1px solid #e6e6e6;">
+    <p style="margin:18px 0 6px;font-family:${FONT};font-size:12px;color:#888888;line-height:1.6;">Founders of the Future &middot; the community we are building at TMI.</p>
+    <p style="margin:0;font-family:${FONT};font-size:11px;color:#aaaaaa;">TMI Technology &middot; intelligent infrastructure for any business &middot; <a href="${unsubUrl}" style="color:#888888;">Unsubscribe</a></p>
   </td></tr>
 </table>
 </td></tr></table>
