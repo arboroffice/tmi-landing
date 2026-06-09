@@ -109,6 +109,17 @@ p{margin:0;}
 .intro-skip{margin-top:18px;font-family:var(--sans);font-size:13px;color:var(--muted);}
 .intro-skip a{color:var(--ink);font-weight:600;border-bottom:1px solid var(--line-strong);cursor:pointer;padding-bottom:1px;transition:border-color 0.15s;}
 .intro-skip a:hover{border-color:var(--ink);}
+/* what the audit looks like */
+.audit-overview{background:var(--bg-alt);border-top:1px solid var(--line);padding:72px 40px;}
+.ao-inner{max-width:900px;margin:0 auto;text-align:center;}
+.ao-inner .eyebrow{justify-content:center;margin-bottom:16px;}
+.ao-h2{font-family:var(--serif);font-size:clamp(24px,2.6vw,36px);font-weight:700;letter-spacing:-0.01em;line-height:1.15;margin-bottom:12px;}
+.ao-deck{font-size:16px;color:var(--ink-2);line-height:1.6;max-width:52ch;margin:0 auto 40px;}
+.ao-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left;}
+.ao-card{background:#fff;border:1px solid var(--line-strong);border-radius:14px;padding:26px 24px;}
+.ao-card h3{font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:8px;color:var(--ink);}
+.ao-card p{font-size:14px;color:var(--ink-2);line-height:1.6;}
+@media(max-width:600px){.audit-overview{padding:52px 20px;}.ao-grid{grid-template-columns:1fr;}}
 
 /* ─── QUIZ SCREEN ─── */
 #screen-quiz{background:var(--bg);display:flex;flex-direction:column;}
@@ -436,6 +447,19 @@ p{margin:0;}
       <button class="btn btn-primary" onclick="startAudit()" style="font-size:16px;padding:16px 40px;">Start My Intelligence Audit</button>
       <p style="font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:14px;">No payment required. Takes about 5 minutes. Analyzed live by TMI's reasoning agent.</p>
       <div class="intro-skip">Short on time? <a onclick="skipToBooking()">Skip the audit and book a call &rarr;</a></div>
+    </div>
+  </div>
+  <div class="audit-overview">
+    <div class="ao-inner">
+      <div class="eyebrow"><span class="dot"></span>The Audit</div>
+      <h2 class="ao-h2">A full picture of how your business actually operates today.</h2>
+      <p class="ao-deck">Not a surface review. We map the whole thing so we know exactly what to build.</p>
+      <div class="ao-grid">
+        <div class="ao-card"><h3>Tech stack audit</h3><p>We look at every tool you are using. What is working, what is outdated, and what is costing you more than it gives you.</p></div>
+        <div class="ao-card"><h3>Operations audit</h3><p>We map how your business actually runs day to day. Where things move fast and where they get stuck.</p></div>
+        <div class="ao-card"><h3>Data flow mapping</h3><p>We trace where your data goes and where it stops. Dead ends in your data flow are dead ends in your intelligence.</p></div>
+        <div class="ao-card"><h3>Outcomes alignment</h3><p>We get clear on what you are actually trying to make happen. Then we build toward that. Not toward a generic best practice.</p></div>
+      </div>
     </div>
   </div>
 </section>
