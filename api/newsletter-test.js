@@ -24,9 +24,13 @@ Look at where your week actually goes. The owner who answers the phone because n
 
 You do not need to understand the technology. You need to know which parts of your operation still run on someone remembering to do something, because those are the parts quietly costing you money and capping your growth.
 
-So start there. Pick the one handoff that breaks most often when things get busy. Build the system that makes it impossible to drop. Then do it again. That is how a company stops running on people and starts running on systems.
+## Where to start
 
-That is the whole game.`,
+1. Find the one handoff that breaks most when you get busy - the lead that waits, the invoice that slips, the question no one answers at night.
+2. Write down exactly what a person does in that moment, step by step. That written process is the system.
+3. Make it run automatically every time, whether you are watching or not. Then move to the next handoff and do it again.
+
+That is how a company stops running on people and starts running on systems. That is the whole game.`,
 };
 
 module.exports = async (req, res) => {
