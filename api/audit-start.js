@@ -36,6 +36,22 @@ module.exports = async function handler(req, res) {
       .select()
       .single();
     if (lead) leadId = lead.id;
+
+    // Also subscribe them to Founders of the Future (tag the contact). We never
+    // touch `unsubscribed`, so anyone who previously opted out stays opted out.
+    try {
+      const em = email.toLowerCase().trim();
+      const ex = await db.from('contacts').select('tags').eq('email', em).maybeSingle();
+      const tags = Array.isArray(ex.data && ex.data.tags) ? ex.data.tags.slice() : [];
+      if (!tags.includes('founders-of-the-future')) tags.push('founders-of-the-future');
+      if (!tags.includes('audit')) tags.push('audit');
+      const first = (name || '').trim().split(' ')[0] || em.split('@')[0];
+      const last = (name && name.trim().includes(' ')) ? name.trim().split(' ').slice(1).join(' ') : null;
+      await db.from('contacts').upsert(
+        { first_name: first, last_name: last, email: em, company: company || null, tags },
+        { onConflict: 'email' }
+      );
+    } catch (e) { console.error('audit-start fotf subscribe:', e.message); }
   } catch (e) {
     console.error('audit-start db:', e.message);
   }
