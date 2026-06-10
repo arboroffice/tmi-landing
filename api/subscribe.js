@@ -16,10 +16,20 @@ module.exports = async function handler(req, res) {
   const first_name = name ? name.trim().split(' ')[0] : email.split('@')[0];
   const last_name = name && name.includes(' ') ? name.trim().split(' ').slice(1).join(' ') : null;
 
+  const emailNorm = email.toLowerCase().trim();
+
+  // Already a contact? Treat as success (idempotent). This avoids upsert, which
+  // needs a unique constraint on email that production may not have yet.
+  let existing = null;
+  try {
+    existing = (await db.from('contacts').select('id').eq('email', emailNorm).maybeSingle()).data;
+  } catch (e) { /* fall through to insert */ }
+  if (existing) return res.status(200).json({ success: true, existing: true });
+
   const row = {
     first_name,
     last_name,
-    email: email.toLowerCase().trim(),
+    email: emailNorm,
     audience: audience || null,
     niche: niche || null,
     tags: source ? [source] : null,
@@ -28,10 +38,10 @@ module.exports = async function handler(req, res) {
 
   // Resilience: optional columns (tags, unsubscribed) may not be migrated yet.
   // Drop whichever column the schema reports as missing and retry, so the signup
-  // still succeeds. Run supabase-newsletter.sql to add them for full functionality.
+  // still succeeds. Run supabase-newsletter.sql for full functionality.
   let error;
   for (let attempt = 0; attempt < 5; attempt++) {
-    ({ error } = await db.from('contacts').upsert(row, { onConflict: 'email' }));
+    ({ error } = await db.from('contacts').insert(row));
     if (!error) break;
     const m = /find the '(\w+)' column/i.exec(error.message || '');
     if (m && Object.prototype.hasOwnProperty.call(row, m[1])) { delete row[m[1]]; continue; }

@@ -22,3 +22,5 @@ create index if not exists newsletter_issues_created_idx on public.newsletter_is
 -- contacts already carries the subscriber fields; ensure the opt-out + tags columns exist.
 alter table public.contacts add column if not exists unsubscribed boolean default false;
 alter table public.contacts add column if not exists tags text[];
+-- email upserts (subscribe, audit-start, city-lead-apply) need a unique key on email.
+create unique index if not exists contacts_email_unique on public.contacts (email);
