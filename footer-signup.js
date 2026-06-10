@@ -51,7 +51,7 @@
     var sec = document.createElement('section');
     sec.className = 'tmi-fsignup';
     sec.id = 'tmi-fsignup';
-    sec.innerHTML = '<div class="in"><div class="hd">Stay sharp</div><div class="grid">' +
+    sec.innerHTML = '<div class="in"><div class="grid">' +
       card('Daily', 'The Brief', 'A short daily read on building a company that runs on systems. Two minutes, every morning.', 'the-brief', 'you@company.com') +
       card('Community', 'Founders of the Future', 'The community we are building at TMI. Long reads and sharp dispatches for owners and the founders of the future. Zero AI hype.', 'founders-of-the-future', 'you@company.com') +
       '</div></div>';
