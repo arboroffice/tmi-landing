@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>City Leads — TMI Admin</title>
+<title>Partners — TMI Admin</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="stylesheet" href="admin.css"/>
 </head>
@@ -14,14 +14,14 @@
 
   <div class="main">
     <div class="topbar">
-      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">City Leads</span></div>
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Partners</span></div>
       <div class="topbar-actions">
         <a href="/founders" target="_blank" class="btn btn-ghost btn-sm">View public page &rarr;</a>
       </div>
     </div>
     <div class="content">
       <div class="sec-head">
-        <h1>City Lead Applications</h1>
+        <h1>Partner Applications</h1>
         <span class="filter-count" id="cl-count"></span>
       </div>
 
@@ -74,7 +74,7 @@
       <div class="panel-sep"></div>
       <div class="panel-sec-label">Background</div>
       <p id="panel-background" style="font-size:14px;color:var(--ink-2);line-height:1.65;margin-bottom:16px;"></p>
-      <div class="panel-sec-label">Why TMI City Lead</div>
+      <div class="panel-sec-label">Why partner with TMI</div>
       <p id="panel-why" style="font-size:14px;color:var(--ink-2);line-height:1.65;"></p>
       <div class="panel-sep"></div>
       <div class="panel-sec-label" style="margin-bottom:8px">Rating</div>
@@ -126,7 +126,7 @@ function renderTable() {
 
   const tbody = document.getElementById('cl-tbody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📍</div><h3>No city lead applications yet</h3><p>Applications from the <a href="/founders" target="_blank" style="color:var(--ink);text-decoration:underline">Founders of the Future page</a> will appear here.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📍</div><h3>No partner applications yet</h3><p>Applications from the <a href="/founders" target="_blank" style="color:var(--ink);text-decoration:underline">Founders of the Future page</a> will appear here.</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(a => {
