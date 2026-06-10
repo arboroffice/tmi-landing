@@ -173,6 +173,11 @@ h1, h2, h3, h4 { margin: 0; }
   font-size: 11px; color: rgba(255,255,255,0.25); margin-top: 14px;
   letter-spacing: 0.05em;
 }
+.signup-opt { display: flex; align-items: flex-start; gap: 8px; max-width: 480px; margin: 14px auto 0; text-align: left; font-family: var(--sans); font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.45; cursor: pointer; }
+.signup-opt input { margin: 2px 0 0; accent-color: var(--chart); width: 15px; height: 15px; flex: none; }
+.signup-opt b { color: rgba(255,255,255,0.85); font-weight: 600; }
+.signup-opt a { color: var(--chart); text-decoration: underline; }
+.signup-err { max-width: 480px; margin: 12px auto 0; font-family: var(--sans); font-size: 12px; color: #ff8585; }
 .signup-success {
   display: none; text-align: center;
   font-family: var(--serif); font-size: 18px; color: var(--chart);
@@ -326,7 +331,7 @@ footer {
 <script src="/rb2b.js"></script>
 <script src="/footer-signup.js" defer></script>
 </head>
-<body>
+<body data-no-footer-signup>
 
 <nav class="nav">
   <div class="nav-inner">
@@ -356,11 +361,14 @@ footer {
   <div id="hero-form-wrap">
     <form class="signup-form" id="signup-form">
       <input type="email" class="signup-input" placeholder="your@email.com" required/>
-      <button type="submit" class="signup-btn">Join the letter &rarr;</button>
+      <button type="submit" class="signup-btn">Sign up &rarr;</button>
     </form>
+    <label class="signup-opt"><input type="checkbox" id="opt-brief" checked/> <span>Also send me <b>The Brief</b>, the 2-minute daily read on running a company on systems.</span></label>
+    <label class="signup-opt"><input type="checkbox" id="opt-terms"/> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">terms</a>.</span></label>
+    <p class="signup-err" id="signup-err" style="display:none;">Please agree to the terms to continue.</p>
     <p class="signup-note">No spam. Unsubscribe anytime.</p>
   </div>
-  <div class="signup-success" id="signup-success">You're in. We'll be in touch.</div>
+  <div class="signup-success" id="signup-success">You're in. Check your inbox.</div>
 </section>
 
 <!-- WHAT IS IT -->
@@ -594,27 +602,33 @@ async function handleSubmit(formId, successId) {
   if (!form) return;
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
-    const email = form.querySelector('input[type="email"]').value;
+    const email = (form.querySelector('input[type="email"]').value || '').trim();
+    if (!email || email.indexOf('@') < 0) return;
+    const briefEl = document.getElementById('opt-brief');
+    const termsEl = document.getElementById('opt-terms');
+    const errEl = document.getElementById('signup-err');
+    if (termsEl && !termsEl.checked) { if (errEl) errEl.style.display = 'block'; return; }
+    if (errEl) errEl.style.display = 'none';
+    const wantsBrief = briefEl ? briefEl.checked : true;
+    const sources = ['founders-of-the-future'];
+    if (wantsBrief) sources.push('the-brief');
     saveEmail(email);
     form.style.display = 'none';
     success.style.display = 'block';
-    if (formId === 'signup-form') {
-      const note = document.querySelector('.signup-note');
-      if (note) note.style.display = 'none';
-    }
-    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'the_letter_page', audience: 'the_letter' }) }); } catch(err) {}
-    try { if (typeof fbq === 'function') fbq('track', 'CompleteRegistration', { content_name: 'The Letter' }); } catch(err) {}
+    const note = document.querySelector('.signup-note'); if (note) note.style.display = 'none';
+    document.querySelectorAll('.signup-opt').forEach(function(o){ o.style.display = 'none'; });
+    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, sources }) }); } catch(err) {}
+    try { if (typeof fbq === 'function') fbq('track', 'CompleteRegistration', { content_name: 'Founders of the Future' + (wantsBrief ? ' + The Brief' : '') }); } catch(err) {}
     try {
       const fd = new FormData();
       fd.append('email', email);
-      fd.append('_subject', 'New Letter Signup - ' + email);
-      fd.append('message', 'New Founders of the Future signup\nEmail: ' + email + '\nPage: ' + location.href);
+      fd.append('_subject', 'New Founders of the Future signup - ' + email);
+      fd.append('message', 'New signup\nEmail: ' + email + '\nThe Brief: ' + (wantsBrief ? 'yes' : 'no') + '\nPage: ' + location.href);
       fetch('https://formsubmit.co/ajax/support@tmitechai.com', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd });
     } catch(err) {}
   });
 }
 handleSubmit('signup-form', 'signup-success');
-handleSubmit('signup-form-2', 'signup-success-2');
 
 // Admin view: founders.html?admin=the_letter
 if (new URLSearchParams(location.search).get('admin') === 'the_letter') {

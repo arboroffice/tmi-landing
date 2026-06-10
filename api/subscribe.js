@@ -7,8 +7,12 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, source, audience, niche, name } = req.body || {};
+  const { email, source, sources, audience, niche, name } = req.body || {};
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Invalid email' });
+
+  // Accept a single `source` or a `sources` array (e.g. ['founders-of-the-future','the-brief']).
+  const tagList = (Array.isArray(sources) && sources.length) ? sources.filter(Boolean)
+    : (source ? [source] : null);
 
   let db;
   try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
@@ -32,7 +36,7 @@ module.exports = async function handler(req, res) {
     email: emailNorm,
     audience: audience || null,
     niche: niche || null,
-    tags: source ? [source] : null,
+    tags: tagList,
     unsubscribed: false,
   };
 
