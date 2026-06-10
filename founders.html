@@ -326,7 +326,7 @@ footer {
 <script src="/rb2b.js"></script>
 <script src="/footer-signup.js" defer></script>
 </head>
-<body>
+<body data-no-footer-signup>
 
 <nav class="nav">
   <div class="nav-inner">
@@ -353,14 +353,15 @@ footer {
     The next generation of founders will build differently - with leverage, intelligence, and ownership.
     <strong>Join the movement, and get the dispatch from inside the build when something real drops.</strong>
   </p>
-  <div id="hero-form-wrap">
-    <form class="signup-form" id="signup-form">
-      <input type="email" class="signup-input" placeholder="your@email.com" required/>
-      <button type="submit" class="signup-btn">Join the movement &rarr;</button>
-    </form>
-    <p class="signup-note">No spam. Unsubscribe anytime.</p>
+  <div id="hero-form-wrap" style="display:flex;justify-content:center;">
+    <!-- Founders of the Future — letter signup embed -->
+    <iframe
+      data-fotf-embed
+      src="https://foundersofthefuture.com/embed/signup?source=letter"
+      title="Join Founders of the Future"
+      loading="lazy"
+      style="width:100%;max-width:560px;border:0;height:440px"></iframe>
   </div>
-  <div class="signup-success" id="signup-success">You're in. We'll be in touch.</div>
 </section>
 
 <!-- WHAT IS IT -->
@@ -494,14 +495,7 @@ footer {
   <div class="container-sm">
     <h2>Join the founders <em>who are building.</em></h2>
     <p>One email when something real drops. No noise. No schedule. Just what we are building, what is working, and what we learned the hard way.</p>
-    <div id="cta-form-wrap">
-      <form class="signup-form" id="signup-form-2">
-        <input type="email" class="signup-input" placeholder="your@email.com" required/>
-        <button type="submit" class="signup-btn">Subscribe &rarr;</button>
-      </form>
-    </div>
-    <div class="signup-success" id="signup-success-2" style="color:var(--chart);font-family:var(--serif);font-size:18px;margin-top:16px;display:none;">You're in. We'll be in touch.</div>
-    <p class="signup-note" style="color:rgba(255,255,255,0.2);margin-top:14px;">No spam. Unsubscribe anytime.</p>
+    <a href="#hero-form-wrap" class="signup-btn" style="display:inline-flex;align-items:center;text-decoration:none;">Join the letter &uarr;</a>
   </div>
 </section>
 
@@ -638,5 +632,6 @@ if (new URLSearchParams(location.search).get('admin') === 'the_letter') {
   });
 }
 </script>
+<script src="https://foundersofthefuture.com/embed.js" async></script>
 </body>
 </html>
