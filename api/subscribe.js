@@ -16,7 +16,7 @@ module.exports = async function handler(req, res) {
   const first_name = name ? name.trim().split(' ')[0] : email.split('@')[0];
   const last_name = name && name.includes(' ') ? name.trim().split(' ').slice(1).join(' ') : null;
 
-  const { error } = await db.from('contacts').upsert({
+  const row = {
     first_name,
     last_name,
     email: email.toLowerCase().trim(),
@@ -24,7 +24,16 @@ module.exports = async function handler(req, res) {
     niche: niche || null,
     tags: source ? [source] : null,
     unsubscribed: false,
-  }, { onConflict: 'email' });
+  };
+
+  let { error } = await db.from('contacts').upsert(row, { onConflict: 'email' });
+
+  // Resilience: if the optional `tags` column hasn't been migrated yet, retry
+  // without it so the signup still succeeds (run supabase-newsletter.sql to add it).
+  if (error && /tags/i.test(error.message || '')) {
+    delete row.tags;
+    ({ error } = await db.from('contacts').upsert(row, { onConflict: 'email' }));
+  }
 
   if (error) return res.status(500).json({ error: error.message });
 

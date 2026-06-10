@@ -19,5 +19,6 @@ create table if not exists public.newsletter_issues (
 
 create index if not exists newsletter_issues_created_idx on public.newsletter_issues (created_at desc);
 
--- contacts already carries the subscriber fields; ensure the opt-out column exists.
+-- contacts already carries the subscriber fields; ensure the opt-out + tags columns exist.
 alter table public.contacts add column if not exists unsubscribed boolean default false;
+alter table public.contacts add column if not exists tags text[];
