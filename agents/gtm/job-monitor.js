@@ -15,14 +15,10 @@ if (!process.env.ANTHROPIC_API_KEY) {
   } catch {}
 }
 
-import { createClient } from '@supabase/supabase-js';
+import * as db from './tools/db.js';
 import { findContact, getEmail, enrichCompany } from './tools/apollo.js';
 import { extractDomain } from './tools/apify.js';
 import { sendDigest } from './tools/email.js';
-
-function db() {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-}
 
 // ── Indeed scraper via Apify ───────────────────────────────────────────────
 
@@ -86,7 +82,6 @@ async function findCompanyWebsite(companyName, location) {
 // ── Main job monitor ───────────────────────────────────────────────────────
 
 export async function runJobMonitor() {
-  const supabase = db();
   const stats = { jobsFound: 0, newLeads: 0, alreadyTracked: 0 };
 
   // Pick 2-3 random search queries per run
@@ -124,18 +119,14 @@ export async function runJobMonitor() {
     const guessedDomain = await findCompanyWebsite(job.company, job.location);
     const domain = extractDomain(`https://${guessedDomain}`) || guessedDomain;
 
-    // Check if already in DB
-    const { data: existing } = await supabase
-      .from('leads')
-      .select('id, status')
-      .ilike('company_name', job.company)
-      .single();
+    // Check if already in DB (exact company_name match; Firestore has no ilike)
+    const existing = await db.findLead('company_name', job.company);
 
     if (existing) {
       // Update with new signal info
-      await supabase.from('leads').update({
+      await db.updateLead(existing.id, {
         research_notes: `Active job posting: "${job.title}" - ${existing.status === 'new' ? 'PRIORITY' : 'already in sequence'}`,
-      }).eq('id', existing.id);
+      });
       stats.alreadyTracked++;
       continue;
     }
@@ -158,11 +149,7 @@ export async function runJobMonitor() {
     if (!contact?.email) continue;
 
     // Check email uniqueness
-    const { data: emailExists } = await supabase
-      .from('leads')
-      .select('id')
-      .eq('email', contact.email)
-      .single();
+    const emailExists = await db.leadExists(contact.email);
     if (emailExists) continue;
 
     const lead = {
@@ -182,8 +169,8 @@ export async function runJobMonitor() {
       pain_points: 'dispatch coordination, operations management',
     };
 
-    const { error } = await supabase.from('leads').insert(lead);
-    if (!error) {
+    const saved = await db.insertLead(lead).catch(() => null);
+    if (saved) {
       newLeads.push(lead);
       stats.newLeads++;
       console.log(`  New high-intent lead: ${lead.company_name} <${lead.email}>`);

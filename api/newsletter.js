@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
 const { Resend } = require('resend');
 const { renderIssue } = require('./_newsletter-render');
@@ -14,12 +14,13 @@ const { renderIssue } = require('./_newsletter-render');
 const SITE = 'https://www.tmitechai.com';
 const FROM = 'Founders of the Future <support@tmitechai.com>';
 
-async function getSubscribers(db, audienceTag) {
-  let q = db.from('contacts').select('email,first_name,tags,audience').not('email', 'is', null).limit(50000);
-  q = q.or('unsubscribed.is.null,unsubscribed.eq.false');
-  const { data, error } = await q;
-  if (error) throw new Error(error.message);
-  let rows = (data || []).filter(r => r.email && r.email.includes('@'));
+async function getSubscribers(audienceTag) {
+  // Large read: pull up to 50k contacts then filter in JS. Firestore can't do
+  // not-null / "unsubscribed is null or false" / tags-array OR audience in one
+  // query, so the original .not('email','is',null) + .or(unsubscribed...) and the
+  // tags/audience targeting all happen below.
+  const data = await db.list('contacts', { limit: 50000 });
+  let rows = (data || []).filter(r => r.email && r.email.includes('@') && r.unsubscribed !== true);
   if (audienceTag) {
     rows = rows.filter(r => (Array.isArray(r.tags) && r.tags.includes(audienceTag)) || r.audience === audienceTag);
   }
@@ -33,14 +34,12 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (!requireAuth(req, res)) return;
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
   if (req.method === 'GET') {
-    const { data: issues, error } = await db.from('newsletter_issues').select('*').order('created_at', { ascending: false }).limit(200);
-    if (error) return res.status(500).json({ error: error.message });
+    let issues;
+    try { issues = await db.list('newsletter_issues', { order: 'created_at', ascending: false, limit: 200 }); }
+    catch (e) { return res.status(500).json({ error: e.message }); }
     let subscriber_count = 0;
-    try { subscriber_count = (await getSubscribers(db)).length; } catch (e) { /* best effort */ }
+    try { subscriber_count = (await getSubscribers()).length; } catch (e) { /* best effort */ }
     return res.json({ issues: issues || [], subscriber_count });
   }
 
@@ -51,8 +50,10 @@ module.exports = async (req, res) => {
     if (body.action === 'send') {
       if (!process.env.RESEND_API_KEY) return res.status(503).json({ error: 'RESEND_API_KEY not set' });
       if (!body.id) return res.status(400).json({ error: 'id required' });
-      const { data: issue, error } = await db.from('newsletter_issues').select('*').eq('id', body.id).single();
-      if (error || !issue) return res.status(404).json({ error: 'Issue not found' });
+      let issue;
+      try { issue = await db.getById('newsletter_issues', body.id); }
+      catch (e) { return res.status(404).json({ error: 'Issue not found' }); }
+      if (!issue) return res.status(404).json({ error: 'Issue not found' });
 
       const resend = new Resend(process.env.RESEND_API_KEY);
       const subject = issue.subject || issue.title || 'Founders of the Future';
@@ -81,7 +82,7 @@ module.exports = async (req, res) => {
         catch (e) { console.error('[newsletter] batch failed:', e.message); }
       }
 
-      await db.from('newsletter_issues').update({ status: 'sent', sent_at: new Date().toISOString(), recipient_count: sent }).eq('id', issue.id);
+      await db.update('newsletter_issues', issue.id, { status: 'sent', sent_at: new Date().toISOString(), recipient_count: sent });
       return res.json({ ok: true, sent });
     }
 
@@ -92,21 +93,24 @@ module.exports = async (req, res) => {
       updated_at: new Date().toISOString(),
     };
     if (body.id) {
-      const { data, error } = await db.from('newsletter_issues').update(fields).eq('id', body.id).select('*').single();
-      if (error) return res.status(500).json({ error: error.message });
-      return res.json(data);
+      try {
+        const data = await db.update('newsletter_issues', body.id, fields);
+        return res.json(data);
+      } catch (e) { return res.status(500).json({ error: e.message }); }
     }
-    const { data, error } = await db.from('newsletter_issues').insert(fields).select('*').single();
-    if (error) return res.status(500).json({ error: error.message });
-    return res.status(201).json(data);
+    try {
+      const data = await db.insert('newsletter_issues', fields);
+      return res.status(201).json(data);
+    } catch (e) { return res.status(500).json({ error: e.message }); }
   }
 
   if (req.method === 'DELETE') {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: 'id required' });
-    const { error } = await db.from('newsletter_issues').delete().eq('id', id);
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json({ ok: true });
+    try {
+      await db.remove('newsletter_issues', id);
+      return res.json({ ok: true });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
   }
 
   res.status(405).json({ error: 'Method not allowed' });

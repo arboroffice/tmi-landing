@@ -70,12 +70,14 @@
       err.style.display = 'none';
       if (!email || email.indexOf('@') < 0) { input.focus(); return; }
       if (!terms.checked) { err.style.display = 'block'; return; }
-      var sources = ['founders-of-the-future'];
-      if (brief.checked) sources.push('the-brief');
       btn.disabled = true; btn.textContent = '...';
+      // The Brief is a separate service (external waitlist) — fire-and-forget opt-in.
+      if (brief.checked) {
+        try { fetch('https://thebrief.foundersotf.com/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) }); } catch (_) {}
+      }
       fetch('/api/subscribe', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, sources: sources })
+        body: JSON.stringify({ email: email, source: 'founders-of-the-future' })
       }).then(function (r) {
         if (!r.ok) throw new Error('failed');
         try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Founders of the Future' + (brief.checked ? ' + The Brief' : '') }); } catch (_) {}

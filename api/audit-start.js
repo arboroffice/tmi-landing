@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { cors } = require('./_auth');
 const { Client: QStashClient } = require('@upstash/qstash');
 
@@ -19,37 +19,32 @@ module.exports = async function handler(req, res) {
 
   let leadId = null;
   try {
-    const db = getSupabase();
-    const { data: lead } = await db.from('leads')
-      .upsert({
-        name: name || null,
-        email: email.toLowerCase().trim(),
-        phone: phone || null,
-        status: skippedToBook ? 'audit_skipped' : 'audit_started',
-        notes: JSON.stringify({
-          company,
-          audit_started_at: new Date().toISOString(),
-          nudge_sent: false,
-          ...(skippedToBook ? { booking_intent: true } : {}),
-        }),
-      }, { onConflict: 'email' })
-      .select()
-      .single();
+    const lead = await db.upsertByField('leads', 'email', email.toLowerCase().trim(), {
+      name: name || null,
+      email: email.toLowerCase().trim(),
+      phone: phone || null,
+      status: skippedToBook ? 'audit_skipped' : 'audit_started',
+      notes: JSON.stringify({
+        company,
+        audit_started_at: new Date().toISOString(),
+        nudge_sent: false,
+        ...(skippedToBook ? { booking_intent: true } : {}),
+      }),
+    });
     if (lead) leadId = lead.id;
 
     // Also subscribe them to Founders of the Future (tag the contact). We never
     // touch `unsubscribed`, so anyone who previously opted out stays opted out.
     try {
       const em = email.toLowerCase().trim();
-      const ex = await db.from('contacts').select('tags').eq('email', em).maybeSingle();
-      const tags = Array.isArray(ex.data && ex.data.tags) ? ex.data.tags.slice() : [];
+      const ex = await db.findOne('contacts', 'email', em);
+      const tags = Array.isArray(ex && ex.tags) ? ex.tags.slice() : [];
       if (!tags.includes('founders-of-the-future')) tags.push('founders-of-the-future');
       if (!tags.includes('audit')) tags.push('audit');
       const first = (name || '').trim().split(' ')[0] || em.split('@')[0];
       const last = (name && name.trim().includes(' ')) ? name.trim().split(' ').slice(1).join(' ') : null;
-      await db.from('contacts').upsert(
-        { first_name: first, last_name: last, email: em, company: company || null, tags },
-        { onConflict: 'email' }
+      await db.upsertByField('contacts', 'email', em,
+        { first_name: first, last_name: last, email: em, company: company || null, tags }
       );
     } catch (e) { console.error('audit-start fotf subscribe:', e.message); }
   } catch (e) {

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import * as db from './gtm/tools/db.js';
 import { Resend } from 'resend';
 import fs from 'fs';
 import path from 'path';
@@ -75,12 +75,10 @@ function buildEmailHtml({ title, deck, category, readTime, articleUrl, photoUrl,
 async function main() {
   console.log('TMI Email Sender - ' + new Date().toISOString());
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
   const resendKey = process.env.RESEND_API_KEY;
 
-  if (!supabaseUrl || !supabaseKey || !resendKey) {
-    console.error('Missing env vars: SUPABASE_URL, SUPABASE_SERVICE_KEY, RESEND_API_KEY');
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT || !resendKey) {
+    console.error('Missing env vars: FIREBASE_SERVICE_ACCOUNT, RESEND_API_KEY');
     process.exit(1);
   }
 
@@ -122,22 +120,15 @@ async function main() {
 
   const articleUrl = `https://tmi-technology.com/${filename}`;
 
-  // Connect to Supabase
-  const db = createClient(supabaseUrl, supabaseKey);
-
-  // Fetch subscribers
-  const { data: contacts, error: contactsErr } = await db
-    .from('contacts')
-    .select('id, email, first_name')
-    .eq('unsubscribed', false)
-    .not('email', 'is', null);
-
-  if (contactsErr) {
-    console.error('Failed to fetch contacts:', contactsErr.message);
+  // Fetch subscribers (subscribed contacts with a valid email).
+  let subscribers;
+  try {
+    subscribers = await db.getSubscribedContacts();
+  } catch (err) {
+    console.error('Failed to fetch contacts:', err.message);
     process.exit(1);
   }
 
-  const subscribers = (contacts || []).filter(c => c.email?.includes('@'));
   console.log(`Subscribers: ${subscribers.length}`);
 
   if (!subscribers.length) {
@@ -147,21 +138,18 @@ async function main() {
 
   // Create campaign record
   const subject = `Field Notes: ${title}`;
-  const { data: campaign, error: campaignErr } = await db
-    .from('email_campaigns')
-    .insert({
+  let campaign = null;
+  try {
+    campaign = await db.insertCampaign({
       subject,
       body: `${deck}\n\nRead the full article: ${articleUrl}`,
       from_name: 'TMI Field Notes',
       from_email: 'fieldnotes@tmi-technology.com',
       audience_type: 'all',
       status: 'sending',
-    })
-    .select()
-    .single();
-
-  if (campaignErr) {
-    console.warn('Campaign record failed (continuing):', campaignErr.message);
+    });
+  } catch (err) {
+    console.warn('Campaign record failed (continuing):', err.message);
   }
 
   const campaignId = campaign?.id;
@@ -187,7 +175,7 @@ async function main() {
         });
 
         if (campaignId && contact.id) {
-          await db.from('email_sends').insert({
+          await db.logEmailSend({
             campaign_id: campaignId,
             contact_id: contact.id,
             email: contact.email,
@@ -199,7 +187,7 @@ async function main() {
       } catch (err) {
         console.warn(`  Failed → ${contact.email}: ${err.message}`);
         if (campaignId && contact.id) {
-          await db.from('email_sends').insert({
+          await db.logEmailSend({
             campaign_id: campaignId,
             contact_id: contact.id,
             email: contact.email,
@@ -217,11 +205,11 @@ async function main() {
 
   // Finalize campaign status
   if (campaignId) {
-    await db.from('email_campaigns').update({
+    await db.updateCampaign(campaignId, {
       status: sent === 0 ? 'failed' : 'sent',
       sent_count: sent,
       sent_at: new Date().toISOString(),
-    }).eq('id', campaignId);
+    });
   }
 
   console.log(`Done: ${sent} sent, ${failed} failed`);

@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { Resend } = require('resend');
 const twilio = require('twilio');
 const { Client: QStashClient } = require('@upstash/qstash');
@@ -40,53 +40,41 @@ module.exports = async function handler(req, res) {
   let leadId = null;
 
   try {
-    const db = getSupabase();
-
     // Upsert contact by email
-    const { data: contact, error: cErr } = await db
-      .from('contacts')
-      .upsert({
-        first_name: first_name.trim(),
-        last_name: (last_name || '').trim() || null,
-        email: email.toLowerCase().trim(),
-        company: company || null,
-        audience,
-        niche: industry || null,
-        tags: areasArr.length ? areasArr : null,
-        notes: notesText || null,
-      }, { onConflict: 'email' })
-      .select('id')
-      .single();
+    const contact = await db.upsertByField('contacts', 'email', email.toLowerCase().trim(), {
+      first_name: first_name.trim(),
+      last_name: (last_name || '').trim() || null,
+      email: email.toLowerCase().trim(),
+      company: company || null,
+      audience,
+      niche: industry || null,
+      tags: areasArr.length ? areasArr : null,
+      notes: notesText || null,
+    });
 
-    if (cErr) console.error('contact upsert:', cErr.message);
-    else contactId = contact.id;
+    contactId = contact.id;
 
     // Insert lead
-    const { data: lead, error: lErr } = await db
-      .from('leads')
-      .insert({
-        contact_id: contactId,
-        name,
-        email: email.toLowerCase().trim(),
-        status: 'new',
-        source: 'contact-form',
-        notes: notesText || null,
-      })
-      .select('id')
-      .single();
+    const lead = await db.insert('leads', {
+      contact_id: contactId,
+      name,
+      email: email.toLowerCase().trim(),
+      status: 'new',
+      source: 'contact-form',
+      notes: notesText || null,
+    });
 
-    if (lErr) console.error('lead insert:', lErr.message);
-    else leadId = lead.id;
+    leadId = lead.id;
 
     // Activity log
     if (contactId) {
-      db.from('activities').insert({
+      db.insert('activities', {
         contact_id: contactId,
         lead_id: leadId || null,
         type: 'note',
         title: 'Strategy call request submitted',
         body: notesText || null,
-      }).then(() => {}).catch(e => console.error('activity:', e.message));
+      }).catch(e => console.error('activity:', e.message));
     }
   } catch (e) {
     console.error('Supabase:', e.message);

@@ -1,12 +1,16 @@
-const { createClient } = require('@supabase/supabase-js');
+const db = require('./_db');
 
 module.exports = async function handler(req, res) {
   const { id } = req.query;
 
   if (!id) return res.status(400).send('Missing id');
 
-  const supabase = createClient((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL), process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
-  await supabase.from('leads').update({ status: 'unsubscribed' }).eq('id', id);
+  try {
+    await db.update('leads', id, { status: 'unsubscribed' });
+  } catch (e) {
+    // fall through to a friendly page regardless
+    console.error('[unsubscribe]', e.message);
+  }
 
   res.setHeader('Content-Type', 'text/html');
   res.status(200).send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Unsubscribed</title></head>

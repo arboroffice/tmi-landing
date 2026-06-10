@@ -1,15 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@supabase/supabase-js';
+import * as db from './tools/db.js';
 import { findContact, getEmail, enrichCompany } from './tools/apollo.js';
 import { researchCompany } from './tools/research.js';
 import { extractDomain } from './tools/apify.js';
 import { sendDigest } from './tools/email.js';
 
 const anthropic = new Anthropic();
-
-function db() {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-}
 
 // Fetch a company website for context
 async function fetchWebsite(url) {
@@ -86,8 +82,6 @@ Based on what we know, what should we likely recommend? Foundation Setup ($2,500
 // ── Main audit prep handler ────────────────────────────────────────────────
 
 export async function prepAudit({ companyName, contactName, contactEmail, website, leadId }) {
-  const supabase = db();
-
   console.log(`Preparing audit brief for: ${companyName}`);
 
   // Enrich what we know
@@ -131,7 +125,7 @@ export async function prepAudit({ companyName, contactName, contactEmail, websit
   const briefing = await buildBriefing({ company, contact, website: websiteContent, painResearch });
 
   // Save to DB
-  await supabase.from('audit_briefs').insert({
+  await db.insertAuditBrief({
     lead_id: leadId || null,
     company_name: company.name,
     contact_name: contact.name || contactName,

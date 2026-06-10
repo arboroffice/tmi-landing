@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const { requireAuth, cors } = require('./_auth');
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 
 // ── Twitter OAuth 1.0a ────────────────────────────────────────────────────────
 function oauthSign(method, url, params, consumerSecret, tokenSecret) {
@@ -137,11 +137,9 @@ module.exports = async function handler(req, res) {
   if (schedule_at && !isScheduled) {
     try {
       const msgId = await schedulePost({ post_id, platforms, content_body }, schedule_at);
-      // Update post status in DB
-      let db;
-      try { db = getSupabase(); } catch {}
-      if (db && post_id) {
-        await db.from('content_posts').update({ status: 'scheduled', scheduled_at: schedule_at }).eq('id', post_id);
+      // Update post status in DB (best effort)
+      if (post_id) {
+        await db.update('content_posts', post_id, { status: 'scheduled', scheduled_at: schedule_at }).catch(() => {});
       }
       return res.json({ ok: true, scheduled: true, message_id: msgId });
     } catch (e) {
@@ -172,18 +170,14 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // Update post status in DB
+  // Update post status in DB (best effort)
   if (post_id) {
-    let db;
-    try { db = getSupabase(); } catch {}
-    if (db) {
-      const posted = Object.keys(results).length > 0;
-      await db.from('content_posts').update({
-        status: posted ? 'posted' : 'draft',
-        posted_at: posted ? new Date().toISOString() : null,
-        notes: JSON.stringify({ post_ids: results, errors }),
-      }).eq('id', post_id);
-    }
+    const posted = Object.keys(results).length > 0;
+    await db.update('content_posts', post_id, {
+      status: posted ? 'posted' : 'draft',
+      posted_at: posted ? new Date().toISOString() : null,
+      notes: JSON.stringify({ post_ids: results, errors }),
+    }).catch(() => {});
   }
 
   const hasSuccess = Object.keys(results).length > 0;

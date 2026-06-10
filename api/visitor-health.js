@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
 const { getAutomationSettings } = require('./_visitor-settings');
 
@@ -11,9 +11,6 @@ module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (!requireAuth(req, res)) return;
-
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
 
   const has = (k) => !!process.env[k];
   const integrations = {
@@ -31,28 +28,25 @@ module.exports = async (req, res) => {
   const automationReady = integrations.qstash && integrations.cron_secret;
   const outboundReady = integrations.resend;
 
-  const settings = await getAutomationSettings(db);
-
-  const count = async (mut) => {
-    let q = db.from('site_visitors').select('id', { count: 'exact', head: true });
-    if (mut) q = mut(q);
-    const { count } = await q;
-    return count || 0;
-  };
+  const settings = await getAutomationSettings();
 
   let pipeline = {};
   try {
-    const [total, enrolled, hot, enriched] = await Promise.all([
-      count(),
-      count(q => q.eq('enrolled', true)),
-      count(q => q.gte('score', 70)),
-      count(q => q.not('enrichment', 'is', null)),
-    ]);
-    const recent = await db.from('site_visitors').select('last_seen').order('last_seen', { ascending: false }).limit(1).maybeSingle();
+    // Firestore has no count() aggregate here, so pull the rows and tally in JS.
+    // Limit is generous; counts are advisory health stats for the admin page.
+    const rows = await db.list('site_visitors', { limit: 10000 });
+    const total = rows.length;
+    const enrolled = rows.filter(r => r.enrolled === true).length;
+    const hot = rows.filter(r => (r.score || 0) >= 70).length;
+    const enriched = rows.filter(r => r.enrichment != null).length;
+    let last_ingest = null;
+    for (const r of rows) {
+      if (r.last_seen && (!last_ingest || String(r.last_seen) > String(last_ingest))) last_ingest = r.last_seen;
+    }
     pipeline = {
       total, enrolled, hot, enriched,
       awaiting: total - enrolled,
-      last_ingest: recent && recent.data ? recent.data.last_seen : null,
+      last_ingest,
     };
   } catch (e) {
     pipeline = { error: e.message };

@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
 
 // Statuses that mean the lead is done / out of the active worklist.
@@ -117,17 +117,16 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
-  const { data, error } = await db
-    .from('leads')
-    .select('*, contacts(*)')
-    .not('status', 'in', '(' + TERMINAL.join(',') + ')')
-    .order('created_at', { ascending: false })
-    .limit(500);
-
-  if (error) return res.status(500).json({ error: error.message });
+  let data;
+  try {
+    // Firestore has no "not in" operator, so fetch recent leads and drop
+    // terminal statuses in JS (same effect as the old .not('status','in',...)).
+    const rows = await db.list('leads', { order: 'created_at', ascending: false, limit: 500 });
+    data = rows.filter(l => !TERMINAL.includes(String((l && l.status) || '').toLowerCase()));
+    await db.hydrateMany(data, 'contact_id', 'contacts', 'contacts');
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
 
   const leads = Array.isArray(data) ? data : [];
 

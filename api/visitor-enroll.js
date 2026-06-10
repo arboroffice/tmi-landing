@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
 const { addEmailsToAudience } = require('./_meta-audience');
 const { Client: QStashClient } = require('@upstash/qstash');
@@ -19,15 +19,18 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   if (!requireAuth(req, res)) return;
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
   const body = req.body || {};
   const ids = Array.isArray(body.ids) ? body.ids : body.id ? [body.id] : [];
   if (!ids.length) return res.status(400).json({ error: 'id or ids[] required' });
 
-  const { data: visitors, error } = await db.from('site_visitors').select('*').in('id', ids);
-  if (error) return res.status(500).json({ error: error.message });
+  let visitors;
+  try {
+    // ids are doc ids — fetch each directly (getById) and drop any that are gone.
+    const fetched = await Promise.all(ids.map(id => db.getById('site_visitors', id)));
+    visitors = fetched.filter(Boolean);
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
   if (!visitors || !visitors.length) return res.status(404).json({ error: 'No visitors found' });
 
   const qstash = process.env.QSTASH_TOKEN ? new QStashClient({ token: process.env.QSTASH_TOKEN }) : null;
@@ -45,19 +48,19 @@ module.exports = async (req, res) => {
       results.push({ id: v.id, skipped: 'own domain' }); continue;
     }
     if (!body.force) {
-      const unsub = await db.from('leads').select('id').eq('email', email).eq('status', 'unsubscribed').maybeSingle();
-      if (unsub.data) { results.push({ id: v.id, skipped: 'unsubscribed' }); continue; }
+      const leadRows = await db.list('leads', { where: [['email', '==', email], ['status', '==', 'unsubscribed']], limit: 1 });
+      if (leadRows.length) { results.push({ id: v.id, skipped: 'unsubscribed' }); continue; }
     }
 
     try {
       // 1. Contact (reuse linked contact, else upsert by email)
       let contactId = v.contact_id;
       if (!contactId) {
-        const existing = await db.from('contacts').select('id').eq('email', email).maybeSingle();
-        if (existing.data) {
-          contactId = existing.data.id;
+        const existing = await db.findOne('contacts', 'email', email);
+        if (existing) {
+          contactId = existing.id;
         } else {
-          const { data: c } = await db.from('contacts').insert({
+          const c = await db.insert('contacts', {
             first_name: v.first_name || 'Visitor',
             last_name:  v.last_name,
             email,
@@ -65,7 +68,7 @@ module.exports = async (req, res) => {
             title:      v.title,
             niche:      v.industry,
             notes:      'Identified site visitor (RB2B)',
-          }).select('id').single();
+          });
           contactId = c ? c.id : null;
         }
       }
@@ -77,10 +80,12 @@ module.exports = async (req, res) => {
         linkedin: v.linkedin_url || '', last_page: v.last_page || '', source: 'rb2b-visitor',
         intro: v.ai_intro || '',
       });
-      const { data: lead, error: lErr } = await db.from('leads').insert({
-        contact_id: contactId, name, email, status: 'new', source: 'rb2b-visitor', notes,
-      }).select('id').single();
-      if (lErr) throw new Error('lead insert: ' + lErr.message);
+      let lead;
+      try {
+        lead = await db.insert('leads', {
+          contact_id: contactId, name, email, status: 'new', source: 'rb2b-visitor', notes,
+        });
+      } catch (lErr) { throw new Error('lead insert: ' + lErr.message); }
       const leadId = lead.id;
 
       // 3. Email-only nurture via QStash
@@ -101,15 +106,15 @@ module.exports = async (req, res) => {
       const meta = await addEmailsToAudience([email]);
 
       // 5. Mark enrolled
-      await db.from('site_visitors').update({
+      await db.update('site_visitors', v.id, {
         contact_id: contactId, lead_id: leadId,
         enrolled: true, enrolled_at: new Date().toISOString(),
         synced_meta: meta.ok ? true : v.synced_meta,
         synced_meta_at: meta.ok ? new Date().toISOString() : v.synced_meta_at,
-      }).eq('id', v.id);
+      });
 
       // 6. Timeline
-      db.from('activities').insert({
+      db.insert('activities', {
         contact_id: contactId, lead_id: leadId, type: 'note',
         title: 'Enrolled identified visitor (email nurture + Meta audience)',
         body: [v.title, v.company, v.last_page].filter(Boolean).join(' · ') || null,

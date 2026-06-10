@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { verifyToken, cors } = require('./_auth');
 const { Resend } = require('resend');
 const { scoreVisitor } = require('./_visitor-score');
@@ -20,13 +20,16 @@ module.exports = async (req, res) => {
   const okSecret = secret && req.query.secret === secret;
   if (!isCron && !okSecret && !verifyToken(req)) return res.status(401).json({ error: 'Unauthorized' });
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
   const since = new Date(Date.now() - 7 * 86400000).toISOString();
-  const { data, error } = await db.from('site_visitors')
-    .select('*').gte('last_seen', since).order('last_seen', { ascending: false }).limit(2000);
-  if (error) return res.status(500).json({ error: error.message });
+  let data;
+  try {
+    data = await db.list('site_visitors', {
+      where: [['last_seen', '>=', since]],
+      order: 'last_seen', ascending: false, limit: 2000,
+    });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
 
   const visitors = (data || []).map(v => ({ ...v, _score: v.score || scoreVisitor(v).score }));
   if (!visitors.length) {

@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+const db = require('./_db');
 const { Resend } = require('resend');
 const twilio = require('twilio');
 const { Receiver } = require('@upstash/qstash');
@@ -50,12 +50,7 @@ async function handler(req, res) {
 
   const { leadId, step } = JSON.parse(rawBody);
 
-  const supabase = createClient((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL), process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
-  const { data: lead } = await supabase
-    .from('leads')
-    .select('*')
-    .eq('id', leadId)
-    .single();
+  const lead = await db.getById('leads', leadId);
 
   const preCallSteps = ['pre_call_24h', 'pre_call_2h'];
 
@@ -101,14 +96,13 @@ async function handler(req, res) {
   // reference their actual industry and biggest bottleneck.
   let audit = null;
   try {
-    const { data: a } = await supabase
-      .from('audit_submissions')
-      .select('industry, worst_cat, tier, dep_pct')
-      .eq('email', lead.email)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    audit = a || null;
+    const rows = await db.list('audit_submissions', {
+      where: [['email', '==', lead.email]],
+      order: 'created_at',
+      ascending: false,
+      limit: 1,
+    });
+    audit = rows[0] || null;
   } catch { /* personalization is best-effort */ }
 
   // Map the scored worst area to a plain-language bottleneck line.
@@ -127,7 +121,7 @@ async function handler(req, res) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   // Log every email/SMS this handler sends (all addressed to the lead) to the timeline.
-  try { require('./_comms').instrument(supabase, { resend, sms, leadId: lead.id }); } catch (e) { console.error('comms instrument:', e.message); }
+  try { require('./_comms').instrument(db, { resend, sms, leadId: lead.id }); } catch (e) { console.error('comms instrument:', e.message); }
 
   if (step === 'day1_sms' && lead.phone) {
     await sms.messages.create({

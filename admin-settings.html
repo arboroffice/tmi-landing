@@ -53,10 +53,10 @@
           <div style="display:flex;flex-direction:column;gap:14px;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg);border-radius:var(--r-sm);">
               <div>
-                <div style="font-weight:600;font-size:13px;">Supabase</div>
+                <div style="font-weight:600;font-size:13px;">Firestore</div>
                 <div style="font-size:12px;color:var(--muted);margin-top:2px;">Database — contacts, leads, clients, campaigns</div>
               </div>
-              <div id="supabase-status" class="badge">Checking...</div>
+              <div id="db-status" class="badge">Checking...</div>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg);border-radius:var(--r-sm);">
               <div>
@@ -67,7 +67,7 @@
             </div>
           </div>
           <div style="margin-top:16px;padding:14px;background:#fef9c3;border-radius:var(--r-sm);font-size:13px;color:#854d0e;line-height:1.5;">
-            <strong>To configure:</strong> Add <code>SUPABASE_URL</code>, <code>SUPABASE_SERVICE_KEY</code>, <code>RESEND_API_KEY</code>, <code>ADMIN_PASSWORD</code>, and <code>JWT_SECRET</code> to your Vercel environment variables. Run <code>schema.sql</code> in your Supabase SQL editor.
+            <strong>To configure:</strong> Add <code>FIREBASE_SERVICE_ACCOUNT</code>, <code>RESEND_API_KEY</code>, <code>ADMIN_PASSWORD</code>, and <code>JWT_SECRET</code> to your Vercel environment variables.
           </div>
         </div>
       </div>
@@ -132,9 +132,12 @@ async function init() {
   // Check integration status
   const health = await TMIAdmin.api('/api/health');
   if (health) {
-    const db = document.getElementById('supabase-status');
-    db.textContent = health.supabase ? 'Connected' : 'Not configured';
-    db.className = 'badge ' + (health.supabase ? 'badge-active' : 'badge-failed');
+    // The /api/health DB connectivity probe reports `supabase_connect: 'ok'`
+    // when the database query succeeds (data now lives in Firestore).
+    const dbOk = health.supabase_connect === 'ok' || health.firestore_connect === 'ok' || !!health.supabase;
+    const db = document.getElementById('db-status');
+    db.textContent = dbOk ? 'Connected' : 'Not configured';
+    db.className = 'badge ' + (dbOk ? 'badge-active' : 'badge-failed');
 
     const em = document.getElementById('resend-status');
     em.textContent = health.resend ? 'Connected' : 'Not configured';

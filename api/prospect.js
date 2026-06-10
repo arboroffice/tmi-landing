@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
 
 // Prospecting console - Apollo-powered people search + add-to-leads.
@@ -127,9 +127,6 @@ module.exports = async (req, res) => {
   if (action === 'add') {
     const person = body.person || {};
 
-    let db;
-    try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
     // Derive first/last name from whatever Apollo gave us.
     let firstName = person.first_name;
     let lastName = person.last_name;
@@ -161,16 +158,19 @@ module.exports = async (req, res) => {
     // Upsert contact by email (mirrors api/leads.js), or create without email.
     let contactId;
     if (contact.email) {
-      const existing = await db.from('contacts').select('id').eq('email', contact.email).maybeSingle();
-      if (existing.data) {
-        contactId = existing.data.id;
-        await db.from('contacts').update(contact).eq('id', contactId);
+      const existing = await db.findOne('contacts', 'email', contact.email);
+      if (existing) {
+        contactId = existing.id;
+        await db.update('contacts', contactId, contact);
       }
     }
     if (!contactId) {
-      const { data: c, error: ce } = await db.from('contacts').insert(contact).select().single();
-      if (ce) return res.status(500).json({ error: ce.message });
-      contactId = c.id;
+      try {
+        const c = await db.insert('contacts', contact);
+        contactId = c.id;
+      } catch (ce) {
+        return res.status(500).json({ error: ce.message });
+      }
     }
 
     const lead = {
@@ -182,12 +182,13 @@ module.exports = async (req, res) => {
       notes: notes || null,
     };
 
-    const { data, error } = await db
-      .from('leads')
-      .insert(lead)
-      .select('*, contacts(*)')
-      .single();
-    if (error) return res.status(500).json({ error: error.message });
+    let data;
+    try {
+      data = await db.insert('leads', lead);
+      await db.hydrateOne(data, 'contact_id', 'contacts', 'contacts');
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
     return res.status(201).json(data);
   }
 

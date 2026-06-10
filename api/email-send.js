@@ -1,6 +1,19 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
 const { Resend } = require('resend');
+
+// Chunk an array into groups of `size` (Firestore 'in' supports up to 30 values).
+function chunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+// Best-effort per-send log. Never throws so a logging failure can't break a send.
+async function logSend(fields) {
+  try { await db.insert('email_sends', fields); }
+  catch (e) { console.error('[email-send] log:', e.message); }
+}
 
 module.exports = async (req, res) => {
   cors(res);
@@ -11,41 +24,53 @@ module.exports = async (req, res) => {
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) return res.status(503).json({ error: 'RESEND_API_KEY not configured' });
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
   const { campaign_id } = req.body || {};
   if (!campaign_id) return res.status(400).json({ error: 'campaign_id required' });
 
   // Fetch campaign
-  const { data: campaign, error: ce } = await db
-    .from('email_campaigns')
-    .select('*')
-    .eq('id', campaign_id)
-    .single();
-  if (ce || !campaign) return res.status(404).json({ error: 'Campaign not found' });
+  let campaign;
+  try { campaign = await db.getById('email_campaigns', campaign_id); }
+  catch (e) { return res.status(404).json({ error: 'Campaign not found' }); }
+  if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
   if (campaign.status === 'sent') return res.status(409).json({ error: 'Campaign already sent' });
 
   // Fetch recipients
   let contacts = [];
-  if (campaign.audience_type === 'all') {
-    const { data } = await db.from('contacts').select('id, email, first_name, last_name').neq('email', null).eq('unsubscribed', false);
-    contacts = (data || []).filter(c => c.email);
-  } else if (campaign.audience_type === 'segment') {
-    const f = campaign.audience_filter || {};
-    let query = db.from('contacts').select('id, email, first_name, last_name, audience, niche').neq('email', null).eq('unsubscribed', false);
-    if (f.audiences?.length) query = query.in('audience', f.audiences);
-    if (f.niches?.length) query = query.in('niche', f.niches);
-    const { data } = await query;
-    contacts = (data || []).filter(c => c.email);
-  } else if (campaign.audience_type === 'custom') {
-    const raw = campaign.audience_filter?.custom_emails || '';
-    const emails = raw.split(/[\n,]/).map(e => e.trim().toLowerCase()).filter(Boolean);
-    const { data } = await db.from('contacts').select('id, email, first_name').in('email', emails).eq('unsubscribed', false);
-    const found = new Set((data || []).map(c => c.email));
-    // Include raw email addresses not in contacts DB
-    emails.forEach(e => { if (!found.has(e)) contacts.push({ id: null, email: e, first_name: '' }); });
-    contacts = [...(data || []), ...contacts.filter(c => !c.id)];
+  try {
+    if (campaign.audience_type === 'all') {
+      // Firestore can't express .neq('email',null); fetch unsubscribed===false then
+      // drop rows without an email in JS. Large read - up to 50000 contacts.
+      const data = await db.list('contacts', { where: [['unsubscribed', '==', false]], limit: 50000 });
+      contacts = (data || []).filter(c => c.email);
+    } else if (campaign.audience_type === 'segment') {
+      const f = campaign.audience_filter || {};
+      // Pull the unsubscribed===false set (large read, up to 50000) then apply the
+      // audience/niche filters and the not-null email check in JS - replaces the
+      // .in('audience',...) / .in('niche',...) chained queries.
+      let data = await db.list('contacts', { where: [['unsubscribed', '==', false]], limit: 50000 });
+      data = (data || []).filter(c => c.email);
+      if (f.audiences?.length) data = data.filter(c => f.audiences.includes(c.audience));
+      if (f.niches?.length) data = data.filter(c => f.niches.includes(c.niche));
+      contacts = data;
+    } else if (campaign.audience_type === 'custom') {
+      const raw = campaign.audience_filter?.custom_emails || '';
+      const emails = raw.split(/[\n,]/).map(e => e.trim().toLowerCase()).filter(Boolean);
+      // .in('email', emails) -> chunk into groups of 30 and concat. unsubscribed
+      // filtered in JS so the chunked query stays a single-field 'in'.
+      let data = [];
+      for (const c of chunk(emails, 30)) {
+        const rows = await db.list('contacts', { where: [['email', 'in', c]] });
+        data = data.concat(rows || []);
+      }
+      data = data.filter(c => c.unsubscribed === false);
+      const found = new Set(data.map(c => c.email));
+      // Include raw email addresses not in contacts DB
+      const extras = [];
+      emails.forEach(e => { if (!found.has(e)) extras.push({ id: null, email: e, first_name: '' }); });
+      contacts = [...data, ...extras];
+    }
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
 
   if (!contacts.length) {
@@ -53,7 +78,7 @@ module.exports = async (req, res) => {
   }
 
   // Mark as sending
-  await db.from('email_campaigns').update({ status: 'sending' }).eq('id', campaign_id);
+  await db.update('email_campaigns', campaign_id, { status: 'sending' });
 
   const resend = new Resend(resendKey);
   const unsubUrl = `https://tmi-technology.com/api/unsubscribe?id=`;
@@ -81,7 +106,7 @@ module.exports = async (req, res) => {
 
         // Log send
         if (contact.id) {
-          await db.from('email_sends').insert({
+          await logSend({
             campaign_id,
             contact_id: contact.id,
             email: contact.email,
@@ -93,7 +118,7 @@ module.exports = async (req, res) => {
         failed++;
         errors.push({ email: contact.email, error: e.message });
         if (contact.id) {
-          await db.from('email_sends').insert({
+          await logSend({
             campaign_id,
             contact_id: contact.id,
             email: contact.email,
@@ -110,11 +135,11 @@ module.exports = async (req, res) => {
   }
 
   // Update campaign status
-  await db.from('email_campaigns').update({
+  await db.update('email_campaigns', campaign_id, {
     status: failed > 0 && sent === 0 ? 'failed' : 'sent',
     sent_count: sent,
     sent_at: new Date().toISOString()
-  }).eq('id', campaign_id);
+  });
 
   return res.json({ ok: true, sent, failed, errors: errors.slice(0, 5) });
 };

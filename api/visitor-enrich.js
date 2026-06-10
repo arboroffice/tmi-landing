@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
 
 // Apollo enrichment for an identified visitor.
@@ -41,11 +41,10 @@ module.exports = async (req, res) => {
   const id = req.body && req.body.id;
   if (!id) return res.status(400).json({ error: 'id required' });
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
-  const { data: v, error } = await db.from('site_visitors').select('*').eq('id', id).single();
-  if (error || !v) return res.status(404).json({ error: 'Visitor not found' });
+  let v;
+  try { v = await db.getById('site_visitors', id); }
+  catch (e) { return res.status(500).json({ error: e.message }); }
+  if (!v) return res.status(404).json({ error: 'Visitor not found' });
 
   const enrichment = { fetched_at: new Date().toISOString() };
   try {
@@ -104,6 +103,6 @@ module.exports = async (req, res) => {
   if (!v.company_size && enrichment.company && enrichment.company.employees) patch.company_size = String(enrichment.company.employees);
   if (!v.title && enrichment.person && enrichment.person.title) patch.title = enrichment.person.title;
 
-  await db.from('site_visitors').update(patch).eq('id', id);
+  await db.update('site_visitors', id, patch);
   return res.json({ ok: true, enrichment });
 };

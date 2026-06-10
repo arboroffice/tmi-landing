@@ -1,25 +1,26 @@
 const { cors } = require('./_auth');
-const { createClient } = require('@supabase/supabase-js');
+const db = require('./_db');
 
 module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const key = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  const url = process.env.FIREBASE_SERVICE_ACCOUNT || '';
 
   let supabase_connect = 'not tested';
   let supabase_error = null;
   let visitors_table = 'not tested';
   try {
-    const db = createClient(url, key);
-    const { error } = await db.from('contacts').select('id').limit(1);
-    supabase_connect = error ? 'query_error' : 'ok';
-    if (error) supabase_error = error.message;
+    await db.list('contacts', { limit: 1 });
+    supabase_connect = 'ok';
 
-    // RB2B pipeline: does the site_visitors table exist yet?
-    const v = await db.from('site_visitors').select('id').limit(1);
-    visitors_table = v.error ? 'missing' : 'ok';
+    // RB2B pipeline: is the site_visitors collection reachable?
+    try {
+      await db.list('site_visitors', { limit: 1 });
+      visitors_table = 'ok';
+    } catch (ve) {
+      visitors_table = 'missing';
+    }
   } catch (e) {
     supabase_connect = 'client_error';
     supabase_error = e.message;
@@ -27,12 +28,12 @@ module.exports = async (req, res) => {
 
   return res.json({
     supabase_url:          !!url,
-    supabase_url_value:    url.slice(0, 30) + (url.length > 30 ? '...' : ''),
-    supabase_service_key:  !!key,
+    supabase_url_value:    'firestore',
+    supabase_service_key:  !!url,
     supabase_connect,
     supabase_error,
-    supabase_role_key:     !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    next_public_url:       !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    supabase_role_key:     !!url,
+    next_public_url:       !!url,
     jwt_secret:            !!process.env.JWT_SECRET,
     admin_password:        !!process.env.ADMIN_PASSWORD,
     resend:                !!process.env.RESEND_API_KEY,

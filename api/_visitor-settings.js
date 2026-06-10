@@ -1,7 +1,9 @@
 // Visitor-automation settings. Stored as a single os_kv row (key
 // 'visitor_automation') so the admin Visitors page can tune the pipeline
 // without a deploy. Server-side callers (webhook, visitor-process) read it
-// straight from Supabase; the admin UI reads/writes it through /api/os-kv.
+// straight from Firestore; the admin UI reads/writes it through /api/os-kv.
+
+const db = require('./_db');
 
 const KEY = 'visitor_automation';
 
@@ -14,11 +16,11 @@ const DEFAULTS = {
   require_work_email: true, // outbound only to a real work email (not personal)
 };
 
-// Merge stored settings over the defaults. `db` is a Supabase client.
-async function getAutomationSettings(db) {
+// Merge stored settings over the defaults.
+async function getAutomationSettings() {
   try {
-    const { data } = await db.from('os_kv').select('value').eq('key', KEY).maybeSingle();
-    const v = (data && data.value) || {};
+    const row = await db.findOne('os_kv', 'key', KEY);
+    const v = (row && row.value) || {};
     return { ...DEFAULTS, ...v };
   } catch {
     return { ...DEFAULTS };

@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { verifyToken, cors } = require('./_auth');
 
 // Ops Machine — Apify ingestion.
@@ -102,9 +102,6 @@ module.exports = async (req, res) => {
   }
   if (!items.length) return res.json({ ok: true, inserted: 0, skipped: 0 });
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
   const table = TARGET_TABLE[target];
   const dedupeCol = DEDUPE_COL[target];
 
@@ -113,8 +110,12 @@ module.exports = async (req, res) => {
   const keys = [...new Set(mapped.map(m => m._key).filter(Boolean))];
   let existing = new Set();
   if (keys.length) {
-    const { data } = await db.from(table).select(dedupeCol).in(dedupeCol, keys);
-    existing = new Set((data || []).map(r => r[dedupeCol]));
+    // Firestore 'in' is capped at 30 values, so chunk the key set.
+    for (let i = 0; i < keys.length; i += 30) {
+      const part = keys.slice(i, i + 30);
+      const rows = await db.list(table, { where: [[dedupeCol, 'in', part]] });
+      rows.forEach(r => existing.add(r[dedupeCol]));
+    }
   }
   const seen = new Set();
   const rows = [];
@@ -125,7 +126,11 @@ module.exports = async (req, res) => {
   }
   if (!rows.length) return res.json({ ok: true, inserted: 0, skipped: mapped.length });
 
-  const { error } = await db.from(table).insert(rows);
-  if (error) return res.status(500).json({ error: error.message });
+  try {
+    // Firestore has no multi-row insert; write each row individually.
+    await Promise.all(rows.map(r => db.insert(table, r)));
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
   return res.status(201).json({ ok: true, inserted: rows.length, skipped: mapped.length - rows.length, target });
 };

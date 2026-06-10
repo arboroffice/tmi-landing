@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
 const twilio = require('twilio');
 
@@ -9,17 +9,13 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (!requireAuth(req, res)) return;
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
   if (req.method === 'GET') {
-    const { data, error } = await db
-      .from('sms_log')
-      .select('*, contacts(first_name, last_name)')
-      .order('created_at', { ascending: false })
-      .limit(200);
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json(data || []);
+    try {
+      const rows = await db.list('sms_log', { order: 'created_at', ascending: false, limit: 200 });
+      // Replaces the Supabase embed contacts(first_name, last_name).
+      await db.hydrateMany(rows, 'contact_id', 'contacts', 'contacts');
+      return res.json(rows || []);
+    } catch (e) { return res.status(500).json({ error: e.message }); }
   }
 
   if (req.method === 'POST') {
@@ -45,16 +41,19 @@ module.exports = async (req, res) => {
       console.error('Twilio error:', e.message);
     }
 
-    const { data } = await db.from('sms_log').insert({
-      contact_id: contact_id || null,
-      direction: 'outbound',
-      phone: toNumber,
-      body,
-      status,
-      twilio_sid: twilioSid,
-    }).select().single();
+    let record = null;
+    try {
+      record = await db.insert('sms_log', {
+        contact_id: contact_id || null,
+        direction: 'outbound',
+        phone: toNumber,
+        body,
+        status,
+        twilio_sid: twilioSid,
+      });
+    } catch (e) { console.error('[sms] log insert:', e.message); }
 
-    return res.json({ ok: status === 'sent', status, record: data });
+    return res.json({ ok: status === 'sent', status, record });
   }
 
   res.status(405).json({ error: 'Method not allowed' });

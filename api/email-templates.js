@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
 
 // Reusable email templates for the Comms / Email composer.
@@ -10,16 +10,11 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (!requireAuth(req, res)) return;
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
   if (req.method === 'GET') {
-    const { data, error } = await db
-      .from('email_templates')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json(data || []);
+    try {
+      const data = await db.list('email_templates', { order: 'created_at', ascending: false });
+      return res.json(data || []);
+    } catch (e) { return res.status(500).json({ error: e.message }); }
   }
 
   if (req.method === 'POST') {
@@ -27,21 +22,24 @@ module.exports = async (req, res) => {
     if (!name) return res.status(400).json({ error: 'name required' });
     const fields = { name, subject: subject || null, body: body || null };
     if (id) {
-      const { data, error } = await db.from('email_templates').update(fields).eq('id', id).select().single();
-      if (error) return res.status(500).json({ error: error.message });
-      return res.json(data);
+      try {
+        const data = await db.update('email_templates', id, fields);
+        return res.json(data);
+      } catch (e) { return res.status(500).json({ error: e.message }); }
     }
-    const { data, error } = await db.from('email_templates').insert(fields).select().single();
-    if (error) return res.status(500).json({ error: error.message });
-    return res.status(201).json(data);
+    try {
+      const data = await db.insert('email_templates', fields);
+      return res.status(201).json(data);
+    } catch (e) { return res.status(500).json({ error: e.message }); }
   }
 
   if (req.method === 'DELETE') {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: 'id required' });
-    const { error } = await db.from('email_templates').delete().eq('id', id);
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json({ ok: true });
+    try {
+      await db.remove('email_templates', id);
+      return res.json({ ok: true });
+    } catch (e) { return res.status(500).json({ error: e.message }); }
   }
 
   res.status(405).json({ error: 'Method not allowed' });

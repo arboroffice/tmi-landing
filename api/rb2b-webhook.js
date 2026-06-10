@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { verifyToken, cors } = require('./_auth');
 const { scoreVisitor, HOT_THRESHOLD } = require('./_visitor-score');
 const { getAutomationSettings } = require('./_visitor-settings');
@@ -107,9 +107,6 @@ module.exports = async (req, res) => {
   items = items.filter(it => it && typeof it === 'object');
   if (!items.length) return res.json({ ok: true, upserted: 0, skipped: 0 });
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
   const mapped = items.map(mapRecord).filter(Boolean);
   if (!mapped.length) return res.json({ ok: true, upserted: 0, skipped: items.length });
 
@@ -120,7 +117,7 @@ module.exports = async (req, res) => {
   // -> auto-outbound), governed by the admin settings. The webhook only stores +
   // enqueues so it stays fast; visitor-process does the slow/charged work and is
   // idempotent. Needs QSTASH_TOKEN (to queue) and CRON_SECRET (to auth the job).
-  const automation = await getAutomationSettings(db);
+  const automation = await getAutomationSettings();
   const qstash = process.env.QSTASH_TOKEN ? new QStashClient({ token: process.env.QSTASH_TOKEN }) : null;
   const autoBars = [];
   if (automation.auto_enrich) autoBars.push(automation.enrich_min_score);
@@ -130,31 +127,30 @@ module.exports = async (req, res) => {
 
   for (const row of mapped) {
     try {
-      const existingV = await db.from('site_visitors')
-        .select('id, visit_count, alerted, score, enrolled').eq('identity_key', row.identity_key).maybeSingle();
+      const existing = await db.findOne('site_visitors', 'identity_key', row.identity_key);
 
-      const visit_count = existingV.data ? (existingV.data.visit_count || 1) + 1 : 1;
+      const visit_count = existing ? (existing.visit_count || 1) + 1 : 1;
       const { score, reasons } = scoreVisitor({ ...row, visit_count });
       const record = { ...row, visit_count, score, score_reasons: reasons, last_seen: now };
 
-      const isNew = !existingV.data;
-      const prevScore = existingV.data ? (existingV.data.score || 0) : -1;
-      const wasEnrolled = existingV.data ? !!existingV.data.enrolled : false;
+      const isNew = !existing;
+      const prevScore = existing ? (existing.score || 0) : -1;
+      const wasEnrolled = existing ? !!existing.enrolled : false;
 
       let vid;
-      if (existingV.data) {
-        vid = existingV.data.id;
-        await db.from('site_visitors').update(record).eq('id', vid);
+      if (existing) {
+        vid = existing.id;
+        await db.update('site_visitors', vid, record);
       } else {
-        const ins = await db.from('site_visitors').insert({ ...record, first_seen: now }).select('id').single();
-        vid = ins.data ? ins.data.id : null;
+        const ins = await db.insert('site_visitors', { ...record, first_seen: now });
+        vid = ins ? ins.id : null;
       }
       upserted++;
 
       // Fire a one-time internal alert for hot visitors.
-      if (vid && score >= HOT_THRESHOLD && !(existingV.data && existingV.data.alerted)) {
+      if (vid && score >= HOT_THRESHOLD && !(existing && existing.alerted)) {
         await sendHotAlert(record).catch(() => {});
-        await db.from('site_visitors').update({ alerted: true }).eq('id', vid);
+        await db.update('site_visitors', vid, { alerted: true });
       }
 
       // Enqueue automation once a visitor crosses the bar (and again only if the

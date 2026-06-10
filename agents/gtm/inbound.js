@@ -1,15 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@supabase/supabase-js';
+import * as db from './tools/db.js';
 import { findContact, getEmail, enrichCompany } from './tools/apollo.js';
 import { extractDomain } from './tools/apify.js';
 import { sendEmail, sendDigest } from './tools/email.js';
 import { VOICE_SYSTEM } from './prompts/voice.js';
 
 const anthropic = new Anthropic();
-
-function db() {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-}
 
 // ── Score a lead from the chat conversation ────────────────────────────────
 
@@ -97,8 +93,6 @@ Return JSON: {"subject": "...", "body": "plain text"}`
 // ── Main inbound handler ───────────────────────────────────────────────────
 
 export async function handleInboundLead({ messages, routeTag, prospectEmail }) {
-  const supabase = db();
-
   // Score the conversation
   const scoring = await scoreInboundLead({ messages, routeTag });
   console.log(`Inbound lead scored: ${scoring?.score} - ${scoring?.primaryPain}`);
@@ -150,23 +144,21 @@ export async function handleInboundLead({ messages, routeTag, prospectEmail }) {
   };
 
   if (email) {
-    // Check if already exists
-    const { data: existing } = await supabase.from('leads').select('id').eq('email', email).single();
-    if (existing) {
-      await supabase.from('leads').update({
-        route_tag: routeTag,
-        score: scoring?.score || 'warm',
-        research_notes: scoring?.primaryPain,
-        status: 'new',
-      }).eq('id', existing.id);
-      leadId = existing.id;
-    } else {
-      const { data } = await supabase.from('leads').insert(leadData).select().single();
-      leadId = data?.id;
+    // Get-or-create keyed by email; merge new signal info on hit.
+    const saved = await db.upsertLeadByEmail(email, {
+      route_tag: routeTag,
+      score: scoring?.score || 'warm',
+      research_notes: scoring?.primaryPain,
+      status: 'new',
+    });
+    // If it was a fresh insert, backfill the rest of the lead data.
+    if (saved && !saved.company_name) {
+      await db.updateLead(saved.id, leadData);
     }
+    leadId = saved?.id;
   } else {
-    const { data } = await supabase.from('leads').insert(leadData).select().single();
-    leadId = data?.id;
+    const saved = await db.insertLead(leadData);
+    leadId = saved?.id;
   }
 
   // Send follow-up if we have an email
@@ -190,20 +182,20 @@ export async function handleInboundLead({ messages, routeTag, prospectEmail }) {
       }).catch(e => ({ data: null, error: e }));
 
       if (sent?.id && leadId) {
-        await supabase.from('outreach').insert({
-          lead_id: leadId,
-          sequence_step: 'inbound_response',
+        await db.logOutreach({
+          leadId,
+          step: 'inbound_response',
           subject: emailCopy.subject,
           body: emailCopy.body,
-          resend_message_id: sent.id,
+          resendMessageId: sent.id,
         });
-        await supabase.from('leads').update({
+        await db.updateLead(leadId, {
           status: 'sent',
           outreach_count: 1,
           first_contact_at: new Date().toISOString(),
           last_contact_at: new Date().toISOString(),
           next_followup_at: new Date(Date.now() + 3 * 86400000).toISOString(),
-        }).eq('id', leadId);
+        });
 
         console.log(`Sent inbound follow-up to ${email}`);
       }

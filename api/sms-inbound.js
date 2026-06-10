@@ -2,7 +2,6 @@
 // webhook (Messaging) at https://www.tmi-technology.com/api/sms-inbound (POST).
 // Logs the reply to the timeline and alerts the team. Returns empty TwiML.
 
-const { getSupabase } = require('./_supabase');
 const { logSms } = require('./_comms');
 const twilio = require('twilio');
 
@@ -25,8 +24,7 @@ module.exports = async (req, res) => {
   if (from) {
     // Record the inbound message
     try {
-      const db = getSupabase();
-      await logSms(db, { direction: 'inbound', phone: from, body, status: 'received', twilioSid: sid });
+      await logSms(null, { direction: 'inbound', phone: from, body, status: 'received', twilioSid: sid });
     } catch (e) { console.error('[sms-inbound] log:', e.message); }
 
     // Alert the team that a reply came in

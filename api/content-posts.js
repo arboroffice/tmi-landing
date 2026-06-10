@@ -1,37 +1,36 @@
 const { requireAuth, cors } = require('./_auth');
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 
 module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (!requireAuth(req, res)) return;
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
+  try {
   if (req.method === 'GET') {
-    let q = db.from('content_posts')
-      .select('*, content_ideas(title, world, series)')
-      .order('created_at', { ascending: false });
-
     const { status, platform, month } = req.query || {};
-    if (status) q = q.eq('status', status);
-    if (platform) q = q.eq('platform', platform);
+    const where = [];
+    if (status) where.push(['status', '==', status]);
+    if (platform) where.push(['platform', '==', platform]);
+    let rows = await db.list('content_posts', { where, order: 'created_at', ascending: false });
+
     if (month) {
       const start = new Date(month + '-01');
       const end = new Date(start);
       end.setMonth(end.getMonth() + 1);
-      q = q.gte('scheduled_at', start.toISOString()).lt('scheduled_at', end.toISOString());
+      const startIso = start.toISOString();
+      const endIso = end.toISOString();
+      rows = rows.filter(r => r.scheduled_at && r.scheduled_at >= startIso && r.scheduled_at < endIso);
     }
 
-    const { data, error } = await q;
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json(data || []);
+    // Embedded join: content_posts.idea_id -> content_ideas
+    await db.hydrateMany(rows, 'idea_id', 'content_ideas', 'content_ideas');
+    return res.json(rows || []);
   }
 
   if (req.method === 'POST') {
     const { idea_id, platform, format, content_body, image_url, status, scheduled_at, posted_at, notes } = req.body || {};
-    const { data, error } = await db.from('content_posts').insert({
+    const row = await db.insert('content_posts', {
       idea_id: idea_id || null,
       platform: platform || null,
       format: format || null,
@@ -41,25 +40,25 @@ module.exports = async function handler(req, res) {
       scheduled_at: scheduled_at || null,
       posted_at: posted_at || null,
       notes: notes || null,
-    }).select().single();
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json(data);
+    });
+    return res.json(row);
   }
 
   if (req.method === 'PUT') {
     const { id, ...updates } = req.body || {};
     if (!id) return res.status(400).json({ error: 'id required' });
-    const { data, error } = await db.from('content_posts').update(updates).eq('id', id).select().single();
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json(data);
+    const row = await db.update('content_posts', id, updates);
+    return res.json(row);
   }
 
   if (req.method === 'DELETE') {
     const { id } = req.query || {};
     if (!id) return res.status(400).json({ error: 'id required' });
-    const { error } = await db.from('content_posts').delete().eq('id', id);
-    if (error) return res.status(500).json({ error: error.message });
+    await db.remove('content_posts', id);
     return res.json({ ok: true });
+  }
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
 
   return res.status(405).end();

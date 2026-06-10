@@ -610,14 +610,14 @@ async function handleSubmit(formId, successId) {
     if (termsEl && !termsEl.checked) { if (errEl) errEl.style.display = 'block'; return; }
     if (errEl) errEl.style.display = 'none';
     const wantsBrief = briefEl ? briefEl.checked : true;
-    const sources = ['founders-of-the-future'];
-    if (wantsBrief) sources.push('the-brief');
     saveEmail(email);
     form.style.display = 'none';
     success.style.display = 'block';
     const note = document.querySelector('.signup-note'); if (note) note.style.display = 'none';
     document.querySelectorAll('.signup-opt').forEach(function(o){ o.style.display = 'none'; });
-    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, sources }) }); } catch(err) {}
+    // The Brief is a separate external waitlist; fire-and-forget when opted in.
+    if (wantsBrief) { try { fetch('https://thebrief.foundersotf.com/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) }); } catch(err) {} }
+    try { fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, source: 'founders-of-the-future' }) }); } catch(err) {}
     try { if (typeof fbq === 'function') fbq('track', 'CompleteRegistration', { content_name: 'Founders of the Future' + (wantsBrief ? ' + The Brief' : '') }); } catch(err) {}
     try {
       const fd = new FormData();

@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { Resend } = require('resend');
 const twilio = require('twilio');
 
@@ -67,19 +67,14 @@ module.exports = async function handler(req, res) {
   const { leadId, name, email, phone, company, step = 'abandon_10min' } = req.body || {};
   if (!email) return res.status(400).json({ error: 'email required' });
 
-  let db;
-  try { db = getSupabase(); } catch (e) {
-    return res.status(503).json({ error: 'db not configured' });
-  }
-
   // Stop the whole sequence if the audit was completed.
-  const { data: submission } = await db
-    .from('audit_submissions')
-    .select('id')
-    .eq('email', email.toLowerCase().trim())
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const submissionRows = await db.list('audit_submissions', {
+    where: [['email', '==', email.toLowerCase().trim()]],
+    order: 'created_at',
+    ascending: false,
+    limit: 1,
+  });
+  const submission = submissionRows[0] || null;
   if (submission) {
     return res.status(200).json({ ok: true, skipped: 'audit_complete' });
   }
@@ -88,7 +83,7 @@ module.exports = async function handler(req, res) {
   // pre-call audit reminder instead of cold abandon chasing).
   let notes = {};
   if (leadId) {
-    const { data: lead } = await db.from('leads').select('notes, status').eq('id', leadId).single();
+    const lead = await db.getById('leads', leadId);
     try { notes = JSON.parse(lead?.notes || '{}'); } catch { notes = {}; }
     if (lead?.status && STOP_STATUSES.includes(lead.status)) {
       return res.status(200).json({ ok: true, skipped: `status_${lead.status}` });
@@ -152,7 +147,7 @@ module.exports = async function handler(req, res) {
   if (leadId) {
     const sent = Array.isArray(notes.abandon_sent) ? notes.abandon_sent : [];
     sent.push(step);
-    await db.from('leads').update({
+    await db.update('leads', leadId, {
       status: 'audit_nudge_sent',
       notes: JSON.stringify({
         ...notes,
@@ -160,7 +155,7 @@ module.exports = async function handler(req, res) {
         abandon_sent: sent,
         [`${step}_at`]: new Date().toISOString(),
       }),
-    }).eq('id', leadId);
+    });
   }
 
   return res.status(200).json({ ok: true, step, email_sent: emailSent, sms_sent: smsSent });

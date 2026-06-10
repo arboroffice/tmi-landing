@@ -1,4 +1,3 @@
-const { getSupabase } = require('./_supabase');
 const { requireAuth, cors } = require('./_auth');
 
 // Settings are stored as a single row in a settings table, or as key/value pairs.
@@ -7,9 +6,6 @@ module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (!requireAuth(req, res)) return;
-
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
 
   if (req.method === 'GET') {
     // Try to get settings from a simple key-value in contacts or a settings table

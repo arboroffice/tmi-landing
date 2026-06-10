@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+const db = require('./_db');
 const { Resend } = require('resend');
 const twilio = require('twilio');
 const { Client: QStashClient } = require('@upstash/qstash');
@@ -79,14 +79,10 @@ module.exports = async function handler(req, res) {
 
   const firstName = name.split(' ')[0];
 
-  // Support both env var names for Supabase key
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const supabase = createClient((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL), supabaseKey);
-
   // Write to applications table (CRM inbox)
-  const { data: app, error: dbError } = await supabase
-    .from('applications')
-    .insert({
+  let app;
+  try {
+    app = await db.insert('applications', {
       name,
       email: email.toLowerCase(),
       phone: phone || null,
@@ -96,11 +92,8 @@ module.exports = async function handler(req, res) {
       message: message || null,
       source: 'funnel',
       status: 'new',
-    })
-    .select()
-    .single();
-
-  if (dbError) {
+    });
+  } catch (dbError) {
     console.error('Supabase error:', dbError);
     return res.status(500).json({ error: 'Failed to save application' });
   }

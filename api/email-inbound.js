@@ -5,7 +5,6 @@
 // Accepts the common payload shapes across providers and pulls out the sender,
 // subject, and text body defensively.
 
-const { getSupabase } = require('./_supabase');
 const { logEmail } = require('./_comms');
 
 const FIRST_EMAIL = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
@@ -31,8 +30,7 @@ module.exports = async (req, res) => {
 
   if (fromEmail) {
     try {
-      const db = getSupabase();
-      await logEmail(db, { direction: 'inbound', address: fromEmail, subject, body: text });
+      await logEmail(null, { direction: 'inbound', address: fromEmail, subject, body: text });
     } catch (e) { console.error('[email-inbound] log:', e.message); }
   } else {
     console.error('[email-inbound] no sender email found in payload');

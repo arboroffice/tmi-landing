@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,47 +12,37 @@ module.exports = async function handler(req, res) {
 
   // Accept a single `source` or a `sources` array (e.g. ['founders-of-the-future','the-brief']).
   const tagList = (Array.isArray(sources) && sources.length) ? sources.filter(Boolean)
-    : (source ? [source] : null);
-
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
-  const first_name = name ? name.trim().split(' ')[0] : email.split('@')[0];
-  const last_name = name && name.includes(' ') ? name.trim().split(' ').slice(1).join(' ') : null;
+    : (source ? [source] : []);
 
   const emailNorm = email.toLowerCase().trim();
+  const first_name = name ? name.trim().split(' ')[0] : emailNorm.split('@')[0];
+  const last_name = name && name.includes(' ') ? name.trim().split(' ').slice(1).join(' ') : null;
 
-  // Already a contact? Treat as success (idempotent). This avoids upsert, which
-  // needs a unique constraint on email that production may not have yet.
-  let existing = null;
   try {
-    existing = (await db.from('contacts').select('id').eq('email', emailNorm).maybeSingle()).data;
-  } catch (e) { /* fall through to insert */ }
-  if (existing) return res.status(200).json({ success: true, existing: true });
+    const existing = await db.findOne('contacts', 'email', emailNorm);
+    if (existing) {
+      // Merge any new tags onto the existing contact (idempotent re-subscribe).
+      const merged = [...new Set([...(existing.tags || []), ...tagList])];
+      await db.update('contacts', existing.id, {
+        tags: merged,
+        unsubscribed: false,
+        audience: existing.audience || audience || null,
+        niche: existing.niche || niche || null,
+      });
+      return res.status(200).json({ success: true, existing: true });
+    }
 
-  const row = {
-    first_name,
-    last_name,
-    email: emailNorm,
-    audience: audience || null,
-    niche: niche || null,
-    tags: tagList,
-    unsubscribed: false,
-  };
-
-  // Resilience: optional columns (tags, unsubscribed) may not be migrated yet.
-  // Drop whichever column the schema reports as missing and retry, so the signup
-  // still succeeds. Run supabase-newsletter.sql for full functionality.
-  let error;
-  for (let attempt = 0; attempt < 5; attempt++) {
-    ({ error } = await db.from('contacts').insert(row));
-    if (!error) break;
-    const m = /find the '(\w+)' column/i.exec(error.message || '');
-    if (m && Object.prototype.hasOwnProperty.call(row, m[1])) { delete row[m[1]]; continue; }
-    break;
+    await db.insert('contacts', {
+      first_name,
+      last_name,
+      email: emailNorm,
+      audience: audience || null,
+      niche: niche || null,
+      tags: tagList,
+      unsubscribed: false,
+    });
+    return res.status(200).json({ success: true });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
-
-  if (error) return res.status(500).json({ error: error.message });
-
-  return res.status(200).json({ success: true });
 };

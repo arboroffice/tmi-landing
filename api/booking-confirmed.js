@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+const db = require('./_db');
 const { Client: QStashClient } = require('@upstash/qstash');
 const twilio = require('twilio');
 
@@ -21,19 +21,18 @@ module.exports = async function handler(req, res) {
 
   if (!email) return res.status(400).json({ error: 'No email in payload' });
 
-  const supabase = createClient((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL), process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
+  // Find the lead by email, then flip it to booked.
+  const existingLead = await db.findOne('leads', 'email', email.toLowerCase());
 
-  const { data: lead } = await supabase
-    .from('leads')
-    .update({ status: 'booked', booked_at: new Date().toISOString() })
-    .eq('email', email.toLowerCase())
-    .select()
-    .single();
-
-  if (!lead) {
+  if (!existingLead) {
     console.log('No lead found for:', email);
     return res.status(200).json({ ok: true, note: 'No matching lead' });
   }
+
+  const lead = await db.update('leads', existingLead.id, {
+    status: 'booked',
+    booked_at: new Date().toISOString(),
+  });
 
   const firstName = lead.name.split(' ')[0];
 
@@ -61,7 +60,7 @@ module.exports = async function handler(req, res) {
 
   const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   // Log the confirmation SMS to the lead (the phone filter excludes the team alert).
-  try { require('./_comms').instrument(supabase, { sms, leadId: lead.id, phone: lead.phone }); } catch (e) { console.error('comms instrument:', e.message); }
+  try { require('./_comms').instrument(db, { sms, leadId: lead.id, phone: lead.phone }); } catch (e) { console.error('comms instrument:', e.message); }
   const dateStr = startTime
     ? new Date(startTime).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
     : 'TBD';
@@ -73,12 +72,7 @@ module.exports = async function handler(req, res) {
   // gap for same-day / next-day bookings where those reminders can't fire.
   let auditDone = false;
   try {
-    const { data: a } = await supabase
-      .from('audit_submissions')
-      .select('id')
-      .eq('email', (lead.email || '').toLowerCase())
-      .limit(1)
-      .maybeSingle();
+    const a = await db.findOne('audit_submissions', 'email', (lead.email || '').toLowerCase());
     auditDone = !!a;
   } catch { /* best effort — default to the plain confirmation */ }
 

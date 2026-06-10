@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 
 // Public unsubscribe for the Founders of the Future newsletter.
 // GET ?e=<email> -> sets contacts.unsubscribed = true, shows a confirmation page.
@@ -8,8 +8,8 @@ module.exports = async (req, res) => {
   if (!email || !email.includes('@')) return res.status(400).send('Missing email');
 
   try {
-    const db = getSupabase();
-    await db.from('contacts').update({ unsubscribed: true }).eq('email', email);
+    const contact = await db.findOne('contacts', 'email', email);
+    if (contact) await db.update('contacts', contact.id, { unsubscribed: true });
   } catch (e) {
     // fall through to a friendly page regardless
     console.error('[nl-unsubscribe]', e.message);

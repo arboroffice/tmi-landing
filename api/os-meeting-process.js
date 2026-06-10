@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { cors } = require('./_auth');
 const { extractFromTranscript } = require('./_osclaude');
 
@@ -18,12 +18,13 @@ module.exports = async (req, res) => {
   const { meeting_id } = req.body || {};
   if (!meeting_id) return res.status(400).json({ error: 'meeting_id required' });
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
-  const { data: meeting, error: loadErr } = await db
-    .from('os_meetings').select('id, transcript').eq('id', meeting_id).single();
-  if (loadErr) return res.status(404).json({ error: 'meeting not found' });
+  let meeting;
+  try {
+    meeting = await db.getById('os_meetings', meeting_id);
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+  if (!meeting) return res.status(404).json({ error: 'meeting not found' });
 
   let extracted;
   try {
@@ -32,12 +33,15 @@ module.exports = async (req, res) => {
     return res.status(502).json({ error: e.message });
   }
 
-  const { error } = await db.from('os_meetings').update({
-    summary: extracted.summary || null,
-    extracted,
-    processed_at: new Date().toISOString()
-  }).eq('id', meeting_id);
-  if (error) return res.status(500).json({ error: error.message });
+  try {
+    await db.update('os_meetings', meeting_id, {
+      summary: extracted.summary || null,
+      extracted,
+      processed_at: new Date().toISOString()
+    });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
 
   return res.json({ ok: true, meeting_id, extracted });
 };

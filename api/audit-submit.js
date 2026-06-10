@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+const db = require('./_db');
 const { Resend } = require('resend');
 const twilio = require('twilio');
 const { Client: QStashClient } = require('@upstash/qstash');
@@ -164,50 +164,47 @@ module.exports = async function handler(req, res) {
   if (!contact?.email || !results?.tierKey) return res.status(400).json({ error: 'Missing required fields' });
 
   const firstName = (contact.name || 'there').split(' ')[0];
-  const supabase = createClient((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL), process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY);
 
   // 1. Get the lead row for the follow-up chain. Most audit takers already have
-  //    a lead from audit-start (status 'audit_started'), and email is unique, so
-  //    a blind insert collides and leaves us without a leadId. Try the insert,
-  //    and on conflict fall back to the existing lead so the campaign still
-  //    schedules. Never downgrade a lead that has already converted.
+  //    a lead from audit-start (status 'audit_started'). Firestore has no unique
+  //    constraint, so to avoid creating a duplicate (and to never downgrade a
+  //    lead that has already converted) we look the lead up by email first and
+  //    reuse it; only insert when none exists.
   const emailLc = contact.email.toLowerCase();
   let leadId = null;
-  const { data: lead, error: leadErr } = await supabase
-    .from('leads')
-    .insert({ name: contact.name, email: emailLc, phone: contact.phone || null, status: 'new' })
-    .select()
-    .single();
-  if (!leadErr && lead) {
-    leadId = lead.id;
-  } else {
-    const { data: existing } = await supabase
-      .from('leads')
-      .select('id')
-      .eq('email', emailLc)
-      .maybeSingle();
-    if (existing) leadId = existing.id;
-    else console.error('Lead insert:', leadErr?.message);
+  try {
+    const existing = await db.findOne('leads', 'email', emailLc);
+    if (existing) {
+      leadId = existing.id;
+    } else {
+      const lead = await db.insert('leads', { name: contact.name, email: emailLc, phone: contact.phone || null, status: 'new' });
+      leadId = lead.id;
+    }
+  } catch (e) {
+    console.error('Lead insert:', e.message);
   }
 
   // 2. Insert full audit record
-  const { error: auditErr } = await supabase.from('audit_submissions').insert({
-    lead_id: leadId,
-    name: contact.name,
-    company: contact.company || null,
-    email: contact.email.toLowerCase(),
-    phone: contact.phone || null,
-    tier: results.tierKey,
-    dep_pct: results.depPct,
-    composite_score: results.composite,
-    industry: answers?.q2 || null,
-    pain_group: results.painGroup,
-    worst_cat: results.worstCat,
-    second_cat: results.secondCat,
-    cat_scores: results.catPct,
-    answers: answers,
-  });
-  if (auditErr) console.error('Audit insert:', auditErr.message);
+  try {
+    await db.insert('audit_submissions', {
+      lead_id: leadId,
+      name: contact.name,
+      company: contact.company || null,
+      email: contact.email.toLowerCase(),
+      phone: contact.phone || null,
+      tier: results.tierKey,
+      dep_pct: results.depPct,
+      composite_score: results.composite,
+      industry: answers?.q2 || null,
+      pain_group: results.painGroup,
+      worst_cat: results.worstCat,
+      second_cat: results.secondCat,
+      cat_scores: results.catPct,
+      answers: answers,
+    });
+  } catch (e) {
+    console.error('Audit insert:', e.message);
+  }
 
   // Meta Conversions API — SubmitApplication conversion (fire and forget).
   // Completing the Intelligence Audit is the application. Sends every parameter
@@ -252,7 +249,7 @@ module.exports = async function handler(req, res) {
   const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   // Log lead-facing email/SMS to the timeline. The email/phone filter keeps the
   // internal alerts to the team out of the lead's record.
-  try { require('./_comms').instrument(supabase, { resend, sms, leadId, email: contact.email, phone: contact.phone }); } catch (e) { console.error('comms instrument:', e.message); }
+  try { require('./_comms').instrument(null, { resend, sms, leadId, email: contact.email, phone: contact.phone }); } catch (e) { console.error('comms instrument:', e.message); }
 
   // 3. Send personalized results email
   resend.emails.send({

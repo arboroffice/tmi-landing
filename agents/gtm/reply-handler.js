@@ -1,13 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@supabase/supabase-js';
+import * as db from './tools/db.js';
 import { sendEmail, sendDigest } from './tools/email.js';
 import { VOICE_SYSTEM } from './prompts/voice.js';
 
 const anthropic = new Anthropic();
-
-function db() {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-}
 
 // ── Classify the intent of a reply ────────────────────────────────────────
 
@@ -65,14 +61,8 @@ Return JSON: {"subject": "Re: ...", "body": "plain text response"}`
 // ── Main handler ───────────────────────────────────────────────────────────
 
 export async function handleReply({ fromEmail, subject, body, inReplyToMessageId }) {
-  const supabase = db();
-
-  // Find the lead by email
-  const { data: lead } = await supabase
-    .from('leads')
-    .select('*, outreach(*)')
-    .eq('email', fromEmail)
-    .single();
+  // Find the lead by email, with its outreach history attached.
+  const lead = await db.getLeadWithOutreach(fromEmail);
 
   // Find the specific outreach record by message ID
   const outreach = lead?.outreach?.find(o => o.resend_message_id === inReplyToMessageId)
@@ -122,10 +112,10 @@ export async function handleReply({ fromEmail, subject, body, inReplyToMessageId
   }
 
   if (lead) {
-    await supabase.from('leads').update(updates).eq('id', lead.id);
+    await db.updateLead(lead.id, updates);
 
-    // Log reply to replies table
-    await supabase.from('replies').insert({
+    // Log reply to replies collection
+    await db.logReply({
       lead_id: lead.id,
       outreach_id: outreach?.id || null,
       from_email: fromEmail,

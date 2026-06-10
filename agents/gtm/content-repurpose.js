@@ -16,13 +16,9 @@ if (!process.env.ANTHROPIC_API_KEY) {
 }
 
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@supabase/supabase-js';
+import * as db from './tools/db.js';
 
 const anthropic = new Anthropic();
-
-function db() {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-}
 
 // ── Extract article text from HTML ────────────────────────────────────────
 
@@ -100,8 +96,6 @@ Generate:
 // ── Main repurpose agent ───────────────────────────────────────────────────
 
 export async function runContentRepurpose(articleFilename) {
-  const supabase = db();
-
   // Get article to repurpose
   let article;
   if (articleFilename) {
@@ -120,13 +114,9 @@ export async function runContentRepurpose(articleFilename) {
   }
 
   // Check if already repurposed
-  const { data: existing } = await supabase
-    .from('content_queue')
-    .select('id')
-    .eq('source_article', article.filename)
-    .limit(1);
+  const alreadyRepurposed = await db.contentAlreadyRepurposed(article.filename);
 
-  if (existing?.length) {
+  if (alreadyRepurposed) {
     console.log(`${article.filename} already repurposed`);
     return;
   }
@@ -169,8 +159,7 @@ export async function runContentRepurpose(articleFilename) {
     });
   }
 
-  const { error } = await supabase.from('content_queue').insert(rows);
-  if (error) throw error;
+  await db.queueContent(rows);
 
   console.log(`Generated ${rows.length} pieces of content from ${article.filename}`);
   console.log(`  ${content.linkedin_posts?.length || 0} LinkedIn posts`);

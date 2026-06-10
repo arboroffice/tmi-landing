@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { verifyToken, cors } = require('./_auth');
 const { extractFromTranscript } = require('./_osclaude');
 
@@ -42,17 +42,16 @@ module.exports = async (req, res) => {
   const source = isWebhook ? 'fathom' : (body.source || 'manual');
   if (!transcript || transcript.length < 40) return res.status(400).json({ error: 'transcript required' });
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
   const today = new Date().toISOString().slice(0, 10);
 
   // Webhook path: store first, process async.
   if (isWebhook) {
-    const { data, error } = await db.from('os_meetings')
-      .insert({ title, source, transcript, met_on: today })
-      .select().single();
-    if (error) return res.status(500).json({ error: error.message });
+    let data;
+    try {
+      data = await db.insert('os_meetings', { title, source, transcript, met_on: today });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
     try {
       await enqueueProcess(data.id, expectedSecret);
       return res.status(202).json({ meeting_id: data.id, queued: true });
@@ -60,7 +59,7 @@ module.exports = async (req, res) => {
       // Fallback: process inline so nothing is lost when QStash isn't set up.
       try {
         const extracted = await extractFromTranscript(transcript);
-        await db.from('os_meetings').update({ summary: extracted.summary || null, extracted, processed_at: new Date().toISOString() }).eq('id', data.id);
+        await db.update('os_meetings', data.id, { summary: extracted.summary || null, extracted, processed_at: new Date().toISOString() });
         return res.status(201).json({ meeting_id: data.id, extracted });
       } catch (e) {
         return res.status(502).json({ error: e.message, meeting_id: data.id });
@@ -75,14 +74,18 @@ module.exports = async (req, res) => {
   } catch (e) {
     return res.status(502).json({ error: e.message });
   }
-  const { data, error } = await db.from('os_meetings').insert({
-    title, source, transcript,
-    summary: extracted.summary || null,
-    extracted,
-    met_on: today,
-    processed_at: new Date().toISOString()
-  }).select().single();
-  if (error) return res.status(500).json({ error: error.message });
+  let data;
+  try {
+    data = await db.insert('os_meetings', {
+      title, source, transcript,
+      summary: extracted.summary || null,
+      extracted,
+      met_on: today,
+      processed_at: new Date().toISOString()
+    });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
 
   return res.status(201).json({ meeting_id: data.id, extracted });
 };

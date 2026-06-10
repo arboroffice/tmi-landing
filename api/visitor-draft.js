@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
 
 // AI-drafted personalized first-touch for an identified visitor (Claude).
@@ -20,11 +20,10 @@ module.exports = async (req, res) => {
   const id = req.body && req.body.id;
   if (!id) return res.status(400).json({ error: 'id required' });
 
-  let db;
-  try { db = getSupabase(); } catch (e) { return res.status(503).json({ error: e.message }); }
-
-  const { data: v, error } = await db.from('site_visitors').select('*').eq('id', id).single();
-  if (error || !v) return res.status(404).json({ error: 'Visitor not found' });
+  let v;
+  try { v = await db.getById('site_visitors', id); }
+  catch (e) { return res.status(500).json({ error: e.message }); }
+  if (!v) return res.status(404).json({ error: 'Visitor not found' });
 
   const firstName = v.first_name || 'there';
   const ctx = [
@@ -54,6 +53,6 @@ module.exports = async (req, res) => {
   }
   if (!draft) return res.status(502).json({ error: 'Empty draft' });
 
-  await db.from('site_visitors').update({ ai_intro: draft }).eq('id', id);
+  await db.update('site_visitors', id, { ai_intro: draft });
   return res.json({ ok: true, ai_intro: draft });
 };

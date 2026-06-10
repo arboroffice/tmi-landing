@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { Resend } = require('resend');
 const twilio = require('twilio');
 
@@ -25,9 +25,7 @@ module.exports = async function handler(req, res) {
   const fullName = [first_name, last_name].filter(Boolean).join(' ');
 
   try {
-    const db = getSupabase();
-
-    const { data: record, error } = await db.from('city_leads').insert({
+    const record = await db.insert('city_leads', {
       first_name: first_name.trim(),
       last_name:  (last_name || '').trim() || null,
       email:      email.toLowerCase().trim(),
@@ -39,23 +37,21 @@ module.exports = async function handler(req, res) {
       revenue_goal: revenue_goal || null,
       source:     source || 'city-lead-page',
       status:     'new',
-    }).select('id').single();
-
-    if (error) console.error('city-lead-apply insert:', error.message);
+    });
 
     // Also upsert a contact and log activity
-    const { data: contact } = await db.from('contacts').upsert({
+    const contact = await db.upsertByField('contacts', 'email', email.toLowerCase().trim(), {
       first_name: first_name.trim(),
       last_name:  (last_name || '').trim() || null,
       email:      email.toLowerCase().trim(),
       phone:      phone || null,
       audience:   'physical',
       notes:      `City Lead applicant — ${city}`,
-    }, { onConflict: 'email' }).select('id').single();
+    });
 
     if (contact?.id && record?.id) {
-      await db.from('city_leads').update({ contact_id: contact.id }).eq('id', record.id).catch(() => {});
-      await db.from('activities').insert({
+      await db.update('city_leads', record.id, { contact_id: contact.id }).catch(() => {});
+      await db.insert('activities', {
         contact_id: contact.id,
         type: 'note',
         title: 'City Lead application submitted',

@@ -1,4 +1,4 @@
-const { getSupabase } = require('./_supabase');
+const db = require('./_db');
 const { Resend } = require('resend');
 const twilio = require('twilio');
 
@@ -27,9 +27,7 @@ module.exports = async function handler(req, res) {
   ].filter(Boolean).join('\n');
 
   try {
-    const db = getSupabase();
-
-    const { data: contact } = await db.from('contacts').upsert({
+    const contact = await db.upsertByField('contacts', 'email', email.toLowerCase().trim(), {
       first_name: firstName,
       last_name: (name || '').split(' ').slice(1).join(' ') || null,
       email: email.toLowerCase().trim(),
@@ -37,25 +35,25 @@ module.exports = async function handler(req, res) {
       audience: 'partner',
       niche: industries || null,
       notes: notes || null,
-    }, { onConflict: 'email' }).select('id').single();
+    });
 
-    const { data: lead } = await db.from('leads').insert({
+    const lead = await db.insert('leads', {
       contact_id: contact?.id || null,
       name: name || null,
       email: email.toLowerCase().trim(),
       status: 'new',
       source: 'partner-form',
       notes: notes || null,
-    }).select('id').single();
+    });
 
     if (contact?.id) {
-      db.from('activities').insert({
+      db.insert('activities', {
         contact_id: contact.id,
         lead_id: lead?.id || null,
         type: 'note',
         title: 'Partner application submitted',
         body: notes || null,
-      }).then(() => {}).catch(() => {});
+      }).catch(() => {});
     }
   } catch (e) {
     console.error('Supabase partner-submit:', e.message);
