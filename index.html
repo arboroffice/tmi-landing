@@ -208,30 +208,6 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     .dock-bar .btn{width:100%;}
   }
 
-  /* ── Router popup ───────────────────────────────────────────────── */
-  .rt-ov{position:fixed;inset:0;z-index:1000;background:rgba(10,11,20,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
-  .rt-ov.open{opacity:1;pointer-events:auto;}
-  .rt-card{background:#fff;border-radius:18px;max-width:560px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,0.32);transform:translateY(14px) scale(0.985);transition:transform 0.32s cubic-bezier(.2,.7,.2,1);position:relative;}
-  .rt-ov.open .rt-card{transform:none;}
-  .rt-x{position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:var(--bg-alt);border-radius:50%;cursor:pointer;color:var(--ink-2);font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
-  .rt-x:hover{background:#e8e8ed;color:var(--ink);}
-  .rt-hd{padding:36px 36px 20px;}
-  .rt-eyebrow{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
-  .rt-hd h2{font-family:var(--serif);font-size:clamp(26px,4vw,34px);font-weight:400;letter-spacing:-0.02em;line-height:1.08;color:var(--ink);}
-  .rt-opts{padding:0 24px 16px;display:flex;flex-direction:column;gap:8px;}
-  .rt-opt{display:flex;align-items:center;gap:16px;text-align:left;width:100%;background:var(--bg-alt);border:1px solid transparent;border-radius:12px;padding:18px 20px;cursor:pointer;transition:background 0.15s,border-color 0.15s,transform 0.15s;font-family:var(--sans);}
-  .rt-opt:hover{background:#fff;border-color:var(--chart-dark);transform:translateX(2px);}
-  .rt-ic{flex:none;width:42px;height:42px;border-radius:10px;background:var(--chart);color:#0a0b14;display:flex;align-items:center;justify-content:center;}
-  .rt-ic svg{width:21px;height:21px;}
-  .rt-txt{flex:1;}
-  .rt-t{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:3px;}
-  .rt-d{font-size:13px;color:var(--ink-2);line-height:1.5;}
-  .rt-arrow{flex:none;color:var(--muted);transition:transform 0.15s,color 0.15s;}
-  .rt-opt:hover .rt-arrow{transform:translateX(3px);color:var(--ink);}
-  .rt-ft{padding:6px 36px 30px;text-align:center;}
-  .rt-ft button{background:none;border:none;font-family:var(--sans);font-size:13px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;transition:color 0.15s;}
-  .rt-ft button:hover{color:var(--ink);}
-  @media(max-width:560px){.rt-hd{padding:28px 24px 16px;}.rt-opts{padding:0 16px 12px;}.rt-opt{padding:16px;gap:12px;}.rt-ic{width:38px;height:38px;}}
   /* intelligent-companies homepage additions */
   .g2{grid-template-columns:repeat(2,1fr);}
   .cmp-head{font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
@@ -247,60 +223,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 </head>
 <body>
 
-<!-- Router popup -->
-<div class="rt-ov" id="rt-ov" role="dialog" aria-modal="true" aria-labelledby="rt-title">
-  <div class="rt-card">
-    <button class="rt-x" id="rt-x" aria-label="Close">&times;</button>
-    <div class="rt-hd">
-      <div class="rt-eyebrow">Welcome to TMI</div>
-      <h2 id="rt-title">What brought you here?</h2>
-    </div>
-    <div class="rt-opts">
-      <a class="rt-opt" href="/audit">
-        <span class="rt-ic"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M9 11l3 3 8-8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke-linecap="round"/></svg></span>
-        <span class="rt-txt"><div class="rt-t">I want an audit of my business</div><div class="rt-d">See exactly where AI and better systems would change your numbers.</div></span>
-        <span class="rt-arrow"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="18" height="18"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      </a>
-      <a class="rt-opt" href="/physical">
-        <span class="rt-ic"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
-        <span class="rt-txt"><div class="rt-t">I want TMI to run my operations</div><div class="rt-d">Buy the done-for-you system - your AI department, built and run for the business you already have.</div></span>
-        <span class="rt-arrow"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="18" height="18"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      </a>
-      <a class="rt-opt" href="/dwy">
-        <span class="rt-ic"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <span class="rt-txt"><div class="rt-t">I want to build an AI-powered business with you</div><div class="rt-d">You have an idea, or you want to earn with AI. We build the vertical playbook with you - you own it.</div></span>
-        <span class="rt-arrow"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="18" height="18"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      </a>
-      <a class="rt-opt" href="/founders">
-        <span class="rt-ic"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke-linecap="round"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke-linecap="round"/></svg></span>
-        <span class="rt-txt"><div class="rt-t">I want to work for TMI</div><div class="rt-d">Learn high-ticket sales and build a career in AI - no tech skills required.</div></span>
-        <span class="rt-arrow"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="18" height="18"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      </a>
-      <button class="rt-opt" type="button" id="rt-learn">
-        <span class="rt-ic"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round"/></svg></span>
-        <span class="rt-txt"><div class="rt-t">I'm just learning what TMI does</div><div class="rt-d">Keep reading. This page walks through how it all works.</div></span>
-        <span class="rt-arrow"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" width="18" height="18"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      </button>
-    </div>
-    <div class="rt-ft"><button type="button" id="rt-skip">Just looking around &rarr;</button></div>
-  </div>
-</div>
-<script>
-(function(){
-  var KEY='tmi_router_seen';
-  try{ if(sessionStorage.getItem(KEY)) return; }catch(e){}
-  var ov=document.getElementById('rt-ov');
-  function dismiss(){ ov.classList.remove('open'); try{sessionStorage.setItem(KEY,'1');}catch(e){} }
-  // Mark seen as soon as it shows so it never nags twice in a session.
-  function open(){ ov.classList.add('open'); try{sessionStorage.setItem(KEY,'1');}catch(e){} }
-  document.getElementById('rt-x').addEventListener('click',dismiss);
-  document.getElementById('rt-skip').addEventListener('click',dismiss);
-  document.getElementById('rt-learn').addEventListener('click',dismiss);
-  ov.addEventListener('click',function(e){ if(e.target===ov) dismiss(); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && ov.classList.contains('open')) dismiss(); });
-  setTimeout(open, 1200);
-})();
-</script>
+
 
 <div class="progress" id="progress"></div>
 
@@ -527,7 +450,6 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
         <h5>Who it's for</h5>
         <a href="/audit">Business Owners</a>
         <a href="/dwy">Founders</a>
-        <a href="/partners">Partners &amp; Advisors</a>
         <a href="/founders">Partner with us</a>
       </div>
       <div class="foot-col">
