@@ -26,13 +26,16 @@ module.exports = async function handler(req, res) {
     unsubscribed: false,
   };
 
-  let { error } = await db.from('contacts').upsert(row, { onConflict: 'email' });
-
-  // Resilience: if the optional `tags` column hasn't been migrated yet, retry
-  // without it so the signup still succeeds (run supabase-newsletter.sql to add it).
-  if (error && /tags/i.test(error.message || '')) {
-    delete row.tags;
+  // Resilience: optional columns (tags, unsubscribed) may not be migrated yet.
+  // Drop whichever column the schema reports as missing and retry, so the signup
+  // still succeeds. Run supabase-newsletter.sql to add them for full functionality.
+  let error;
+  for (let attempt = 0; attempt < 5; attempt++) {
     ({ error } = await db.from('contacts').upsert(row, { onConflict: 'email' }));
+    if (!error) break;
+    const m = /find the '(\w+)' column/i.exec(error.message || '');
+    if (m && Object.prototype.hasOwnProperty.call(row, m[1])) { delete row[m[1]]; continue; }
+    break;
   }
 
   if (error) return res.status(500).json({ error: error.message });
