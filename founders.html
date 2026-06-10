@@ -326,7 +326,7 @@ footer {
 <script src="/rb2b.js"></script>
 <script src="/footer-signup.js" defer></script>
 </head>
-<body data-no-footer-signup>
+<body>
 
 <nav class="nav">
   <div class="nav-inner">
@@ -353,15 +353,14 @@ footer {
     The next generation of founders will build differently - with leverage, intelligence, and ownership.
     <strong>Join the movement, and get the dispatch from inside the build when something real drops.</strong>
   </p>
-  <div id="hero-form-wrap" style="display:flex;justify-content:center;">
-    <!-- Founders of the Future — letter signup embed -->
-    <iframe
-      data-fotf-embed
-      src="https://foundersotf.com/embed/signup?source=letter"
-      title="Join Founders of the Future"
-      loading="lazy"
-      style="width:100%;max-width:560px;border:0;height:440px"></iframe>
+  <div id="hero-form-wrap">
+    <form class="signup-form" id="signup-form">
+      <input type="email" class="signup-input" placeholder="your@email.com" required/>
+      <button type="submit" class="signup-btn">Join the letter &rarr;</button>
+    </form>
+    <p class="signup-note">No spam. Unsubscribe anytime.</p>
   </div>
+  <div class="signup-success" id="signup-success">You're in. We'll be in touch.</div>
 </section>
 
 <!-- WHAT IS IT -->
@@ -632,6 +631,5 @@ if (new URLSearchParams(location.search).get('admin') === 'the_letter') {
   });
 }
 </script>
-<script src="https://foundersotf.com/embed.js" async></script>
 </body>
 </html>
