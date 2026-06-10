@@ -293,6 +293,35 @@ footer {
 .reveal.in { opacity: 1; transform: translateY(0); }
 .reveal-d1 { transition-delay: 0.1s; }
 .reveal-d2 { transition-delay: 0.2s; }
+
+/* APPLY FORM */
+.apply-section { padding: 100px 0; background: var(--bg-dark); border-top: 1px solid rgba(255,255,255,0.06); }
+.apply-wrap { background: #1a1b2e; border-radius: 16px; padding: 56px; border: 1px solid rgba(255,255,255,0.07); }
+.apply-head { margin-bottom: 40px; }
+.apply-head .what-label { margin-bottom: 16px; }
+.apply-head h2 { font-family: var(--serif); font-size: clamp(30px,3vw,44px); font-weight: 400; letter-spacing: -0.02em; color: #fff; margin-bottom: 12px; }
+.apply-head h2 em { color: var(--chart); font-style: italic; }
+.apply-head p { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.form-full { grid-column: 1 / -1; }
+.form-field { display: flex; flex-direction: column; gap: 7px; }
+.form-field label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+.form-field label .opt { font-weight: 400; text-transform: none; letter-spacing: 0; opacity: 0.6; }
+.form-field input, .form-field select, .form-field textarea { padding: 13px 16px; border: 1.5px solid rgba(255,255,255,0.13); border-radius: 8px; font-family: var(--sans); font-size: 15px; color: #fff; background: rgba(255,255,255,0.04); outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
+.form-field textarea { resize: vertical; min-height: 110px; line-height: 1.55; }
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--chart); }
+.form-field input::placeholder, .form-field textarea::placeholder { color: rgba(255,255,255,0.25); }
+.form-field select option { background: #1a1b2e; color: #fff; }
+.form-submit-row { margin-top: 32px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.btn-submit { display: inline-flex; align-items: center; gap: 8px; padding: 15px 34px; border-radius: 999px; font-family: var(--sans); font-size: 15px; font-weight: 700; background: var(--chart); color: #0a0b14; border: none; cursor: pointer; transition: background 0.15s, transform 0.15s; }
+.btn-submit:hover { background: var(--chart-dark); transform: translateY(-1px); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.form-note { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.5; }
+.form-error { font-size: 13px; color: #ff8585; margin-top: 12px; display: none; }
+.apply-success { display: none; text-align: center; padding: 40px 20px; }
+.apply-success h2 { font-family: var(--serif); font-size: clamp(28px,3vw,40px); font-weight: 400; color: #fff; margin-bottom: 14px; }
+.apply-success p { font-size: 16px; color: rgba(255,255,255,0.55); line-height: 1.6; max-width: 44ch; margin: 0 auto; }
+@media(max-width:640px) { .apply-wrap { padding: 32px 24px; } .form-grid { grid-template-columns: 1fr; } .form-full { grid-column: 1; } }
 </style>
 <script src="/rb2b.js"></script>
 <script src="/footer-signup.js" defer></script>
@@ -392,12 +421,69 @@ footer {
         <div class="what-label">Build with us</div>
         <h2>Bring intelligent infrastructure <em>to your market.</em></h2>
         <p>Founders of the Future is also a partner network. If you know the operators in your market and want a recurring revenue model tied to something that actually works, partner with TMI. You bring the relationships, we build and run the systems.</p>
-        <a href="/citylead" class="signup-btn" style="display:inline-flex;align-items:center;text-decoration:none;margin-top:8px;">Become a partner &rarr;</a>
+        <a href="#apply" class="signup-btn" style="display:inline-flex;align-items:center;text-decoration:none;margin-top:8px;">Become a partner &rarr;</a>
       </div>
       <div class="what-pillars reveal reveal-d1">
         <div class="pillar"><div class="pillar-num">01</div><h4>Exclusive territory</h4><p>One partner per market. No internal competition.</p></div>
         <div class="pillar"><div class="pillar-num">02</div><h4>Recurring revenue share</h4><p>Earn on every client you bring in, as long as they stay.</p></div>
         <div class="pillar"><div class="pillar-num">03</div><h4>Full implementation support</h4><p>You own the relationship. TMI builds and runs the system.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APPLY TO PARTNER -->
+<section class="apply-section" id="apply">
+  <div class="container-sm">
+    <div class="apply-wrap reveal">
+      <div id="apply-form-container">
+        <div class="apply-head">
+          <div class="what-label">Apply to partner</div>
+          <h2>Bring TMI to <em>your market.</em></h2>
+          <p>Applications are reviewed within 3 business days. We confirm territory availability on the call.</p>
+        </div>
+        <form id="partner-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field"><label>First name</label><input type="text" id="pf-first" placeholder="First" required/></div>
+            <div class="form-field"><label>Last name</label><input type="text" id="pf-last" placeholder="Last" required/></div>
+            <div class="form-field"><label>Email</label><input type="email" id="pf-email" placeholder="you@company.com" required/></div>
+            <div class="form-field"><label>Phone</label><input type="tel" id="pf-phone" placeholder="+1 (555) 000-0000" required/></div>
+            <div class="form-field"><label>City / Metro</label><input type="text" id="pf-city" placeholder="Houston, TX" required/></div>
+            <div class="form-field"><label>LinkedIn <span class="opt">(optional)</span></label><input type="url" id="pf-linkedin" placeholder="linkedin.com/in/yourprofile"/></div>
+            <div class="form-field form-full"><label>Your background</label><textarea id="pf-background" placeholder="What industries have you worked in? What kinds of businesses are in your network?" required></textarea></div>
+            <div class="form-field form-full"><label>Why you want to build with TMI</label><textarea id="pf-why" placeholder="What drew you to this? What do you see in your market?" required></textarea></div>
+            <div class="form-field"><label>Monthly revenue goal</label>
+              <select id="pf-revenue">
+                <option value="">Select a range</option>
+                <option value="5k-10k">$5k - $10k/mo</option>
+                <option value="10k-25k">$10k - $25k/mo</option>
+                <option value="25k-50k">$25k - $50k/mo</option>
+                <option value="50k+">$50k+/mo</option>
+              </select>
+            </div>
+            <div class="form-field"><label>How did you hear about TMI</label>
+              <select id="pf-source">
+                <option value="">Select one</option>
+                <option value="referral">Referral</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="instagram">Instagram</option>
+                <option value="founders-of-the-future">Founders of the Future</option>
+                <option value="search">Search</option>
+                <option value="event">Event</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div id="pf-error" class="form-error">Something went wrong. Please try again or email us at support@tmitechai.com.</div>
+          <div class="form-submit-row">
+            <button type="submit" class="btn-submit" id="pf-submit">Submit application &rarr;</button>
+            <span class="form-note">We review every application personally and respond within 3 business days.</span>
+          </div>
+        </form>
+      </div>
+      <div class="apply-success" id="apply-success">
+        <h2>Application received</h2>
+        <p>We'll review your application and be in touch within 3 business days. Check your inbox.</p>
       </div>
     </div>
   </div>
@@ -461,6 +547,44 @@ const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// Partner application
+(function(){
+  const form = document.getElementById('partner-form');
+  if (!form) return;
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn = document.getElementById('pf-submit');
+    const errEl = document.getElementById('pf-error');
+    errEl.style.display = 'none';
+    const g = id => (document.getElementById(id).value || '').trim();
+    const first = g('pf-first'), last = g('pf-last'), email = g('pf-email'), phone = g('pf-phone'), city = g('pf-city');
+    if (!first || !last || !email || !phone || !city) {
+      errEl.textContent = 'Please fill in all required fields.';
+      errEl.style.display = 'block';
+      return;
+    }
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    const payload = {
+      first_name: first, last_name: last, email, phone, city,
+      linkedin: g('pf-linkedin'), background: g('pf-background'), why: g('pf-why'),
+      revenue_goal: document.getElementById('pf-revenue').value,
+      source: document.getElementById('pf-source').value || 'Founders of the Future',
+      type: 'city_lead'
+    };
+    try {
+      const res = await fetch('/api/city-lead-apply', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error('API error');
+      document.getElementById('apply-form-container').style.display = 'none';
+      document.getElementById('apply-success').style.display = 'block';
+      try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Founders of the Future Partner Application' }); } catch(e){}
+    } catch(err) {
+      errEl.textContent = 'Something went wrong. Please try again or email us at support@tmitechai.com.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Submit application →';
+    }
+  });
+})();
 
 const STORAGE_KEY = 'the_letter_signups';
 
