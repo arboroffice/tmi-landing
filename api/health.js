@@ -5,14 +5,14 @@ module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const url = process.env.FIREBASE_SERVICE_ACCOUNT || '';
+  const hasCreds = !!(process.env.FIREBASE_SERVICE_ACCOUNT || '');
 
-  let supabase_connect = 'not tested';
-  let supabase_error = null;
+  let firestore_connect = 'not tested';
+  let firestore_error = null;
   let visitors_table = 'not tested';
   try {
     await db.list('contacts', { limit: 1 });
-    supabase_connect = 'ok';
+    firestore_connect = 'ok';
 
     // RB2B pipeline: is the site_visitors collection reachable?
     try {
@@ -22,19 +22,20 @@ module.exports = async (req, res) => {
       visitors_table = 'missing';
     }
   } catch (e) {
-    supabase_connect = 'client_error';
-    supabase_error = e.message;
+    firestore_connect = 'client_error';
+    firestore_error = e.message;
   }
 
   return res.json({
-    supabase_url:          !!url,
-    supabase_url_value:    'firestore',
-    supabase_service_key:  !!url,
-    supabase_connect,
-    supabase_error,
-    supabase_role_key:     !!url,
-    next_public_url:       !!url,
-    jwt_secret:            !!process.env.JWT_SECRET,
+    db_backend:               'firestore',
+    firebase_service_account: hasCreds,
+    firestore_connect,
+    firestore_error,
+    // Back-compat aliases so the admin status badge (reads supabase_connect) keeps working.
+    supabase_connect:         firestore_connect,
+    supabase_error:           firestore_error,
+    next_public_url:          hasCreds,
+    jwt_secret:               !!process.env.JWT_SECRET,
     admin_password:        !!process.env.ADMIN_PASSWORD,
     resend:                !!process.env.RESEND_API_KEY,
     anthropic:             !!process.env.ANTHROPIC_API_KEY,

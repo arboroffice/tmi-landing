@@ -72,9 +72,11 @@ module.exports = async (req, res) => {
       if (leadFields.status && data.source === 'rb2b-visitor') {
         const CONVERTING = ['booked', 'won', 'client', 'building', 'customer', 'onboarding', 'paid'];
         if (CONVERTING.includes(data.status)) {
-          // Firestore can't update-by-query; look up the visitor by lead_id then patch.
-          db.findOne('site_visitors', 'lead_id', id)
-            .then(v => v && db.update('site_visitors', v.id, { converted: true, converted_at: new Date().toISOString() }))
+          // Firestore can't update-by-query; look up every visitor with this
+          // lead_id and patch them all (a lead can have multiple visitor hits).
+          db.list('site_visitors', { where: [['lead_id', '==', id]] })
+            .then(vs => Promise.all(vs.map(v =>
+              db.update('site_visitors', v.id, { converted: true, converted_at: new Date().toISOString() }).catch(() => {}))))
             .catch(() => {});
         }
       }

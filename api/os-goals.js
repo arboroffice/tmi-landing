@@ -74,6 +74,12 @@ module.exports = async (req, res) => {
     if (!id) return res.status(400).json({ error: 'id required' });
     const table = type === 'subtask' ? 'os_subtasks' : 'os_goals';
     await db.remove(table, id);
+    // Postgres had ON DELETE CASCADE on os_subtasks.goal_id; Firestore has no
+    // cascade, so delete a goal's subtasks here to avoid orphans.
+    if (table === 'os_goals') {
+      const subs = await db.list('os_subtasks', { where: [['goal_id', '==', String(id)]] });
+      await Promise.all(subs.map(s => db.remove('os_subtasks', s.id).catch(() => {})));
+    }
     return res.json({ ok: true });
   }
   } catch (e) {
