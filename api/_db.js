@@ -47,14 +47,66 @@ async function getById(coll, id) {
   return snap2obj(await db().collection(coll).doc(String(id)).get());
 }
 
+function applyOp(a, op, b) {
+  switch (op) {
+    case '==': return a === b;
+    case '!=': return a !== b;
+    case '>': return a > b;
+    case '>=': return a >= b;
+    case '<': return a < b;
+    case '<=': return a <= b;
+    case 'in': return Array.isArray(b) && b.includes(a);
+    case 'not-in': return Array.isArray(b) && !b.includes(a);
+    case 'array-contains': return Array.isArray(a) && a.includes(b);
+    case 'array-contains-any': return Array.isArray(a) && Array.isArray(b) && a.some(x => b.includes(x));
+    default: return true;
+  }
+}
+
 // where: array of [field, op, value]. op is a Firestore op ('==','in','>=', etc.)
+//
+// To avoid ever requiring a Firestore COMPOSITE index (which would have to be
+// declared and deployed per query), we push at most ONE constraint to Firestore
+// — a single where filter, or an orderBy+limit when there's no filter — and
+// evaluate any remaining where clauses, ordering, and limit in JS. Firestore
+// single-field indexes are auto-created, so every query "just works" in prod.
 async function list(coll, opts = {}) {
+  const where = opts.where || [];
   let q = db().collection(coll);
-  for (const w of (opts.where || [])) q = q.where(w[0], w[1], w[2]);
-  if (opts.order) q = q.orderBy(opts.order, opts.ascending === false ? 'desc' : 'asc');
-  if (opts.limit) q = q.limit(opts.limit);
+  let firestoreOrdered = false;
+
+  if (where.length) {
+    q = q.where(where[0][0], where[0][1], where[0][2]);            // one filter to Firestore
+  } else if (opts.order) {
+    q = q.orderBy(opts.order, opts.ascending === false ? 'desc' : 'asc');
+    if (opts.limit) { q = q.limit(opts.limit); firestoreOrdered = true; }
+  } else if (opts.limit) {
+    q = q.limit(opts.limit);
+    firestoreOrdered = true; // plain capped fetch, no ordering needed
+  }
+
   const snap = await q.get();
-  return snap.docs.map(snap2obj);
+  let rows = snap.docs.map(snap2obj);
+
+  for (let i = 1; i < where.length; i++) {                         // remaining filters in JS
+    const [f, op, v] = where[i];
+    rows = rows.filter(r => applyOp(r[f], op, v));
+  }
+
+  if (opts.order && !firestoreOrdered) {
+    const asc = opts.ascending !== false, key = opts.order;
+    rows.sort((a, b) => {
+      const av = a[key], bv = b[key];
+      if (av == null && bv == null) return 0;
+      if (av == null) return asc ? -1 : 1;
+      if (bv == null) return asc ? 1 : -1;
+      if (av < bv) return asc ? -1 : 1;
+      if (av > bv) return asc ? 1 : -1;
+      return 0;
+    });
+  }
+  if (opts.limit && !firestoreOrdered) rows = rows.slice(0, opts.limit);
+  return rows;
 }
 
 async function findOne(coll, field, value) {
