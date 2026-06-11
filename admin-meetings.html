@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Meetings — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .rec-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start;}
+  @media(max-width:1000px){.rec-grid{grid-template-columns:1fr;}}
+  .rec-dot{width:10px;height:10px;border-radius:50%;background:#e0414b;display:inline-block;margin-right:7px;}
+  .rec-dot.live{animation:recpulse 1.1s infinite;}
+  @keyframes recpulse{0%,100%{opacity:1;}50%{opacity:0.25;}}
+  .rec-timer{font-variant-numeric:tabular-nums;font-size:30px;font-weight:600;letter-spacing:-0.02em;color:var(--ink);}
+  .transcript-box{width:100%;min-height:240px;max-height:420px;overflow-y:auto;border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:14px 16px;font-size:14px;line-height:1.6;color:var(--ink);background:var(--bg);white-space:pre-wrap;}
+  .transcript-box .interim{color:var(--muted);}
+  .stage-pills{display:flex;flex-wrap:wrap;gap:6px;}
+  .stage-pill{font-size:12px;padding:5px 11px;border-radius:999px;border:1px solid var(--line-strong);cursor:pointer;color:var(--ink-2);transition:all .12s;}
+  .stage-pill.active{background:var(--chart);border-color:var(--chart);color:var(--ink);font-weight:600;}
+  .acct-result{border:1px solid var(--line);border-radius:var(--r-sm);margin-top:4px;max-height:230px;overflow-y:auto;}
+  .acct-opt{padding:9px 12px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);}
+  .acct-opt:last-child{border-bottom:none;}
+  .acct-opt:hover{background:var(--bg-alt);}
+  .acct-tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:none;}
+  .acct-chosen{display:flex;align-items:center;gap:10px;background:var(--bg-alt);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;}
+  .know-block{margin-bottom:16px;}
+  .know-block h4{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 7px;}
+  .know-block ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.65;color:var(--ink-2);}
+  .know-block p{margin:0;font-size:14px;line-height:1.6;color:var(--ink-2);}
+  .mtg-card{border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;cursor:pointer;transition:box-shadow .12s,border-color .12s;}
+  .mtg-card:hover{border-color:var(--line-strong);box-shadow:0 2px 10px rgba(0,0,0,.05);}
+  .mtg-card .mtg-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
+  .mtg-card h3{font-size:15px;margin:0 0 3px;}
+  .mtg-meta{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;}
+  .mtg-snip{font-size:13px;color:var(--ink-2);line-height:1.55;margin-top:8px;}
+  .doc-out{font-size:13.5px;line-height:1.65;color:var(--ink-2);white-space:pre-wrap;}
+  .doc-out h4{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:16px 0 5px;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Meetings</span></div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Meeting Recorder</h1>
+        <div class="sec-head-right">
+          <span class="filter-count" id="mtg-count"></span>
+        </div>
+      </div>
+
+      <div id="unsupported" style="display:none;" class="card">
+        <div style="padding:16px 18px;font-size:13.5px;color:var(--ink-2);line-height:1.6;">
+          Live transcription needs the Web Speech API, which runs in Chrome or Edge on desktop. You can still paste a transcript below and save it as company knowledge.
+        </div>
+      </div>
+
+      <div class="rec-grid">
+
+        <!-- LEFT: recorder + transcript -->
+        <div class="card" style="padding:20px 22px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;">
+            <div style="display:flex;align-items:center;">
+              <span class="rec-dot" id="rec-dot" style="visibility:hidden;"></span>
+              <span class="rec-timer" id="rec-timer">00:00</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-primary btn-sm" id="btn-rec" onclick="toggleRecord()">● Record</button>
+              <button class="btn btn-ghost btn-sm" id="btn-clear" onclick="clearAll()">Clear</button>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label">Live transcript</label>
+            <div class="transcript-box" id="transcript-box" contenteditable="false" aria-live="polite"></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px;">Editable after you stop recording. You can also paste a transcript here.</div>
+          </div>
+        </div>
+
+        <!-- RIGHT: meeting meta + attach -->
+        <div class="card" style="padding:20px 22px;">
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Meeting title</label>
+            <input class="form-input" id="m-title" placeholder="e.g. Discovery call"/>
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Where are we in the sale?</label>
+            <div class="stage-pills" id="stage-pills"></div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:8px;">
+            <label class="form-label">Attach to account</label>
+            <div id="acct-chosen-wrap" style="display:none;" class="acct-chosen">
+              <span id="acct-chosen-label" style="flex:1;"></span>
+              <button class="btn btn-ghost btn-sm" onclick="clearAccount()">Change</button>
+            </div>
+            <div id="acct-picker">
+              <div style="display:flex;gap:8px;">
+                <input class="form-input" id="acct-search" placeholder="Search leads &amp; clients..." oninput="renderAccts()" style="flex:1;"/>
+                <button class="btn btn-ghost btn-sm" onclick="newAccount()" style="flex:none;white-space:nowrap;">+ New</button>
+              </div>
+              <div class="acct-result" id="acct-result"></div>
+            </div>
+          </div>
+
+          <div class="panel-sep" style="margin:18px 0;"></div>
+
+          <button class="btn btn-primary" id="btn-save" onclick="saveMeeting()" style="width:100%;">Save &amp; build knowledge</button>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Saves the transcript to the account, then extracts company knowledge.</div>
+        </div>
+      </div>
+
+      <!-- Active meeting knowledge / docs -->
+      <div id="active-out" style="display:none;margin-top:22px;">
+        <div class="card" style="padding:22px 24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px;">
+            <h2 style="font-size:18px;margin:0;" id="out-title">Knowledge</h2>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-ghost btn-sm" onclick="genDoc('digest')" id="b-digest">Re-analyze</button>
+              <button class="btn btn-ghost btn-sm" onclick="genDoc('prd')" id="b-prd">Generate PRD</button>
+              <button class="btn btn-ghost btn-sm" onclick="genDoc('sop')" id="b-sop">Generate SOP</button>
+            </div>
+          </div>
+          <div id="out-body"></div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="sec-head" style="margin-top:34px;">
+        <h1 style="font-size:20px;">Recorded meetings</h1>
+        <div class="sec-head-right">
+          <div class="search-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" id="hist-search" placeholder="Search company, title..." oninput="renderHistory()"/>
+          </div>
+        </div>
+      </div>
+      <div id="history-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail panel -->
+<div class="panel-overlay" id="mtg-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('mtg-panel')"></div>
+  <div class="panel" style="max-width:680px;">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="dp-title">—</h2>
+      <div class="panel-actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteMeeting()">Delete</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="mtg-meta" id="dp-meta" style="margin-bottom:16px;"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+        <button class="btn btn-ghost btn-sm" onclick="panelGen('digest')">Re-analyze</button>
+        <button class="btn btn-ghost btn-sm" onclick="panelGen('prd')">Generate PRD</button>
+        <button class="btn btn-ghost btn-sm" onclick="panelGen('sop')">Generate SOP</button>
+      </div>
+      <div id="dp-body"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label">Transcript</div>
+      <div class="doc-out" id="dp-transcript" style="margin-top:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('meetings');
+
+const STAGES = ['Prospecting','Discovery','Demo','Proposal','Negotiation','Closing','Onboarding','Check-in'];
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let accounts = [];        // {type, id, contact_id, label, company, search}
+let chosen = null;        // selected account
+let chosenStage = '';
+let finalText = '';       // committed transcript
+let currentMeeting = null;// saved meeting being shown in active-out
+let history = [];
+
+// ---------- Stage pills ----------
+document.getElementById('stage-pills').innerHTML = STAGES.map(s =>
+  `<span class="stage-pill" data-stage="${s}" onclick="pickStage('${s}',this)">${s}</span>`).join('');
+function pickStage(s, el){
+  chosenStage = s;
+  document.querySelectorAll('.stage-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ---------- Account picker ----------
+async function loadAccounts(){
+  const [leads, clients] = await Promise.all([
+    TMIAdmin.api('/api/leads').catch(()=>[]),
+    TMIAdmin.api('/api/clients').catch(()=>[])
+  ]);
+  const fromRow = (r, type) => {
+    const c = r.contacts || {};
+    const name = [c.first_name, c.last_name].filter(Boolean).join(' ');
+    const company = c.company || r.title || '';
+    const label = [name, company].filter(Boolean).join(' · ') || name || company || 'Untitled';
+    return { type, id: r.id, contact_id: r.contact_id || c.id || null, label, company,
+             search: (label+' '+(c.email||'')).toLowerCase() };
+  };
+  accounts = [
+    ...(leads||[]).map(r=>fromRow(r,'lead')),
+    ...(clients||[]).map(r=>fromRow(r,'client'))
+  ];
+  renderAccts();
+}
+function renderAccts(){
+  const q = (document.getElementById('acct-search').value||'').toLowerCase().trim();
+  const box = document.getElementById('acct-result');
+  let list = accounts;
+  if (q) list = accounts.filter(a=>a.search.includes(q));
+  list = list.slice(0, 40);
+  if (!list.length){ box.innerHTML = `<div style="padding:11px 12px;font-size:13px;color:var(--muted);">No matches. Use + New to create one.</div>`; return; }
+  box.innerHTML = list.map(a=>`<div class="acct-opt" onclick="pickAccount('${a.type}','${a.id}')">
+    <span>${esc(a.label)}</span><span class="acct-tag">${a.type}</span></div>`).join('');
+}
+function pickAccount(type, id){
+  chosen = accounts.find(a=>a.type===type && a.id===id);
+  if(!chosen) return;
+  document.getElementById('acct-chosen-label').innerHTML = `${esc(chosen.label)} <span class="acct-tag" style="margin-left:6px;">${chosen.type}</span>`;
+  document.getElementById('acct-chosen-wrap').style.display = 'flex';
+  document.getElementById('acct-picker').style.display = 'none';
+}
+function clearAccount(){
+  chosen = null;
+  document.getElementById('acct-chosen-wrap').style.display = 'none';
+  document.getElementById('acct-picker').style.display = 'block';
+}
+async function newAccount(){
+  const out = await TMIAdmin.formModal({
+    title: 'New account',
+    submitLabel: 'Create lead',
+    fields: [
+      { name:'first_name', label:'First name *', required:true },
+      { name:'last_name',  label:'Last name' },
+      { name:'company',    label:'Company' },
+      { name:'email',      label:'Email', type:'text' },
+    ]
+  });
+  if(!out) return;
+  const res = await TMIAdmin.api('/api/leads','POST',{
+    contact: { first_name: out.first_name, last_name: out.last_name||'', company: out.company||'', email: out.email||'' },
+    lead: { status: 'new', source: 'Meeting' }
+  });
+  if(!res) return;
+  await loadAccounts();
+  pickAccount('lead', res.id);
+  TMIAdmin.toast('Lead created');
+}
+
+// ---------- Recording (Web Speech API) ----------
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null, recording = false, startTs = 0, timerInt = null, accumSec = 0;
+const tbox = document.getElementById('transcript-box');
+
+if(!SR){ document.getElementById('unsupported').style.display='block'; }
+
+function setTimer(){
+  const total = accumSec + (recording ? Math.floor((Date.now()-startTs)/1000) : 0);
+  const m = String(Math.floor(total/60)).padStart(2,'0');
+  const s = String(total%60).padStart(2,'0');
+  document.getElementById('rec-timer').textContent = `${m}:${s}`;
+}
+function renderTranscript(interim){
+  tbox.innerHTML = esc(finalText) + (interim ? `<span class="interim"> ${esc(interim)}</span>` : '');
+  tbox.scrollTop = tbox.scrollHeight;
+}
+function toggleRecord(){
+  if(recording){ stopRecord(); return; }
+  if(!SR){ TMIAdmin.toast('Recording not supported in this browser','error'); return; }
+  // Pull any manual edits into finalText before resuming
+  if(tbox.isContentEditable){ finalText = tbox.innerText.trim(); }
+  recog = new SR();
+  recog.continuous = true; recog.interimResults = true; recog.lang = 'en-US';
+  recog.onresult = (e)=>{
+    let interim = '';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal){ finalText = (finalText + ' ' + t).trim(); }
+      else interim += t;
+    }
+    renderTranscript(interim);
+  };
+  recog.onerror = (e)=>{ if(e.error==='not-allowed') TMIAdmin.toast('Microphone blocked','error'); };
+  recog.onend = ()=>{ if(recording){ try{ recog.start(); }catch(_){} } }; // auto-restart on silence
+  recording = true; startTs = Date.now();
+  tbox.contentEditable = 'false';
+  document.getElementById('btn-rec').innerHTML = '■ Stop';
+  document.getElementById('btn-rec').classList.remove('btn-primary');
+  document.getElementById('btn-rec').classList.add('btn-danger');
+  const dot = document.getElementById('rec-dot'); dot.style.visibility='visible'; dot.classList.add('live');
+  timerInt = setInterval(setTimer, 500);
+  try{ recog.start(); }catch(_){}
+}
+function stopRecord(){
+  recording = false;
+  if(recog){ try{ recog.stop(); }catch(_){} }
+  accumSec += Math.floor((Date.now()-startTs)/1000);
+  clearInterval(timerInt);
+  document.getElementById('btn-rec').innerHTML = '● Record';
+  document.getElementById('btn-rec').classList.add('btn-primary');
+  document.getElementById('btn-rec').classList.remove('btn-danger');
+  document.getElementById('rec-dot').classList.remove('live');
+  tbox.contentEditable = 'true';
+  renderTranscript('');
+}
+function clearAll(){
+  if(recording) stopRecord();
+  finalText=''; accumSec=0; currentMeeting=null;
+  tbox.innerHTML=''; tbox.contentEditable='true';
+  document.getElementById('rec-timer').textContent='00:00';
+  document.getElementById('active-out').style.display='none';
+}
+
+// ---------- Save + process ----------
+async function saveMeeting(){
+  if(recording) stopRecord();
+  const transcript = (tbox.isContentEditable ? tbox.innerText : finalText).trim();
+  if(transcript.length < 10){ TMIAdmin.toast('Record or paste a transcript first','error'); return; }
+  if(!chosen){ TMIAdmin.toast('Attach the meeting to an account','error'); return; }
+  finalText = transcript;
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true; btn.textContent = 'Saving...';
+
+  const payload = {
+    [chosen.type==='client'?'client_id':'lead_id']: chosen.id,
+    contact_id: chosen.contact_id,
+    company: chosen.company,
+    account_label: chosen.label,
+    title: document.getElementById('m-title').value.trim() || 'Sales call',
+    sales_stage: chosenStage || null,
+    transcript,
+    duration_sec: accumSec || null,
+  };
+  const m = await TMIAdmin.api('/api/meetings','POST',payload);
+  if(!m){ btn.disabled=false; btn.textContent='Save & build knowledge'; return; }
+  currentMeeting = m;
+  TMIAdmin.toast('Meeting saved');
+
+  btn.textContent = 'Analyzing...';
+  await genDoc('digest', true);
+  btn.disabled=false; btn.textContent='Save & build knowledge';
+  loadHistory();
+}
+
+// Generate digest/prd/sop for the active meeting and render it.
+async function genDoc(kind, silent){
+  if(!currentMeeting){ TMIAdmin.toast('Save the meeting first','error'); return; }
+  const map = { digest:'b-digest', prd:'b-prd', sop:'b-sop' };
+  const btn = document.getElementById(map[kind]);
+  const label = btn ? btn.textContent : '';
+  if(btn){ btn.disabled=true; btn.textContent='Working...'; }
+  const res = await TMIAdmin.api('/api/meeting-process','POST',{ meeting_id: currentMeeting.id, kind });
+  if(btn){ btn.disabled=false; btn.textContent=label; }
+  if(!res){ return; }
+  if(kind==='digest'){ currentMeeting.knowledge = res.result; currentMeeting.summary = res.result.summary; }
+  if(kind==='prd'){ currentMeeting.prd = res.result; }
+  if(kind==='sop'){ currentMeeting.sop = res.result; }
+  document.getElementById('active-out').style.display='block';
+  document.getElementById('out-body').innerHTML = renderArtifacts(currentMeeting);
+  if(!silent) TMIAdmin.toast(kind.toUpperCase()+' ready');
+  loadHistory();
+}
+
+function list(arr){ return (arr&&arr.length)?`<ul>${arr.map(x=>`<li>${esc(typeof x==='object'?(x.action||x.name||JSON.stringify(x)):x)}${x&&x.owner?` <span style="color:var(--muted)">(${esc(x.owner)})</span>`:''}${x&&x.role&&x.name?` <span style="color:var(--muted)">— ${esc(x.role)}</span>`:''}</li>`).join('')}</ul>`:'<p style="color:var(--muted)">None noted.</p>'; }
+
+function renderArtifacts(m){
+  let h = '';
+  const k = m.knowledge;
+  if(k){
+    h += `<div class="know-block"><h4>Summary</h4><p>${esc(k.summary||'')}</p></div>`;
+    if(k.stage_read) h += `<div class="know-block"><h4>Stage read</h4><p>${esc(k.stage_read)}</p></div>`;
+    h += `<div class="rec-grid">`;
+    h += `<div><div class="know-block"><h4>Company facts</h4>${list(k.company_facts)}</div>
+           <div class="know-block"><h4>Pains</h4>${list(k.pains)}</div>
+           <div class="know-block"><h4>Current systems</h4>${list(k.current_systems)}</div></div>`;
+    h += `<div><div class="know-block"><h4>Objections</h4>${list(k.objections)}</div>
+           <div class="know-block"><h4>Buying signals</h4>${list(k.buying_signals)}</div>
+           <div class="know-block"><h4>Stakeholders</h4>${list(k.stakeholders)}</div>
+           <div class="know-block"><h4>Next steps</h4>${list(k.next_steps)}</div></div>`;
+    h += `</div>`;
+  }
+  if(m.prd){ h += `<div class="panel-sep"></div><div class="doc-out"><h4 style="margin-top:0">Product Requirements</h4>${renderDoc(m.prd, ['overview','problem','goals','stories','requirements','nonfunc','outofscope','tech','criteria'])}</div>`; }
+  if(m.sop){ h += `<div class="panel-sep"></div><div class="doc-out"><h4 style="margin-top:0">Standard Operating Procedure</h4>${renderSop(m.sop)}</div>`; }
+  return h || '<p style="color:var(--muted)">No knowledge yet.</p>';
+}
+function renderDoc(d, keys){
+  const labels = {overview:'Overview',problem:'Problem',goals:'Goals & metrics',stories:'User stories',requirements:'Requirements',nonfunc:'Non-functional',outofscope:'Out of scope',tech:'Technical notes',criteria:'Acceptance criteria'};
+  return keys.filter(key=>d[key]).map(key=>`<h4>${labels[key]||key}</h4>${esc(d[key])}`).join('');
+}
+function renderSop(s){
+  let h='';
+  if(s.title) h+=`<h4>Title</h4>${esc(s.title)}`;
+  if(s.purpose) h+=`<h4>Purpose</h4>${esc(s.purpose)}`;
+  if(s.scope) h+=`<h4>Scope</h4>${esc(s.scope)}`;
+  if(s.roles) h+=`<h4>Roles</h4>${list(s.roles)}`;
+  if(s.tools) h+=`<h4>Tools</h4>${list(s.tools)}`;
+  if(s.steps) h+=`<h4>Steps</h4><ol style="padding-left:18px;margin:0;">${s.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`;
+  if(s.cadence) h+=`<h4>Cadence</h4>${esc(s.cadence)}`;
+  if(s.kpis) h+=`<h4>KPIs</h4>${list(s.kpis)}`;
+  return h;
+}
+
+// ---------- History ----------
+async function loadHistory(){
+  history = await TMIAdmin.api('/api/meetings') || [];
+  renderHistory();
+}
+function renderHistory(){
+  const q = (document.getElementById('hist-search').value||'').toLowerCase().trim();
+  let list = history;
+  if(q) list = history.filter(m=>(`${m.company||''} ${m.title||''} ${m.account_label||''}`).toLowerCase().includes(q));
+  document.getElementById('mtg-count').textContent = `${history.length} meeting${history.length===1?'':'s'}`;
+  const box = document.getElementById('history-list');
+  if(!list.length){ box.innerHTML=`<div style="font-size:13px;color:var(--muted);">No meetings yet.</div>`; return; }
+  box.innerHTML = list.map(m=>{
+    const dur = m.duration_sec ? `${Math.floor(m.duration_sec/60)}m` : '';
+    const badges = [m.prd?'PRD':null, m.sop?'SOP':null, m.knowledge?'Knowledge':null].filter(Boolean)
+      .map(b=>`<span class="badge badge-active">${b}</span>`).join(' ');
+    return `<div class="mtg-card" onclick='openMeeting("${m.id}")'>
+      <div class="mtg-top"><div><h3>${esc(m.account_label||m.company||'Account')}</h3>
+        <div class="mtg-meta"><span>${esc(m.title||'Sales call')}</span>${m.sales_stage?`<span>· ${esc(m.sales_stage)}</span>`:''}</div></div>
+        <span class="acct-tag">${esc(m.account_type||'')}</span></div>
+      <div class="mtg-meta" style="margin-top:7px;"><span>${TMIAdmin.fmt(m.created_at)}</span>${dur?`<span>${dur}</span>`:''}</div>
+      ${m.summary?`<div class="mtg-snip">${esc(m.summary).slice(0,160)}${m.summary.length>160?'…':''}</div>`:''}
+      ${badges?`<div style="margin-top:9px;display:flex;gap:5px;">${badges}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ---------- Detail panel ----------
+let panelMeeting = null;
+async function openMeeting(id){
+  panelMeeting = await TMIAdmin.api('/api/meetings?id='+encodeURIComponent(id));
+  if(!panelMeeting) return;
+  document.getElementById('dp-title').textContent = panelMeeting.account_label || panelMeeting.company || 'Meeting';
+  const dur = panelMeeting.duration_sec ? `${Math.floor(panelMeeting.duration_sec/60)}m` : '';
+  document.getElementById('dp-meta').innerHTML =
+    [panelMeeting.title, panelMeeting.sales_stage, TMIAdmin.fmt(panelMeeting.created_at), dur]
+    .filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join('');
+  document.getElementById('dp-body').innerHTML = renderArtifacts(panelMeeting);
+  document.getElementById('dp-transcript').textContent = panelMeeting.transcript || '';
+  TMIAdmin.openPanel('mtg-panel');
+}
+async function panelGen(kind){
+  if(!panelMeeting) return;
+  const res = await TMIAdmin.api('/api/meeting-process','POST',{ meeting_id: panelMeeting.id, kind });
+  if(!res) return;
+  if(kind==='digest'){ panelMeeting.knowledge=res.result; panelMeeting.summary=res.result.summary; }
+  if(kind==='prd') panelMeeting.prd=res.result;
+  if(kind==='sop') panelMeeting.sop=res.result;
+  document.getElementById('dp-body').innerHTML = renderArtifacts(panelMeeting);
+  TMIAdmin.toast(kind.toUpperCase()+' ready');
+  loadHistory();
+}
+async function deleteMeeting(){
+  if(!panelMeeting) return;
+  if(!await TMIAdmin.confirm('Delete this meeting and its knowledge?')) return;
+  await TMIAdmin.api('/api/meetings?id='+encodeURIComponent(panelMeeting.id),'DELETE');
+  TMIAdmin.closePanel('mtg-panel');
+  TMIAdmin.toast('Deleted');
+  loadHistory();
+}
+
+// ---------- Init ----------
+loadAccounts();
+loadHistory();
+</script>
+</body>
+</html>

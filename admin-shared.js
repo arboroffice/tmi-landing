@@ -22,6 +22,7 @@ const TMIAdmin = (() => {
     partners:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.98 2.98 0 0 0 18 8a3 3 0 1 0-3-3c0 .24.04.47.09.7L8.04 9.81A3 3 0 0 0 6 9a3 3 0 0 0 0 6c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65a3 3 0 1 0 3-3z"/></svg>`,
     activity:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     bookings:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke-linecap="round"/><circle cx="12" cy="15" r="1.5" fill="currentColor"/></svg>`,
+    meetings:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke-linecap="round"/><line x1="12" y1="19" x2="12" y2="23" stroke-linecap="round"/></svg>`,
     team:         `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M6 20v-1a6 6 0 0 1 12 0v1"/><circle cx="20" cy="8" r="3"/><path stroke-linecap="round" d="M23 20v-1a4 4 0 0 0-3-3.87"/></svg>`,
     glassBox:     `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12" stroke-linecap="round"/></svg>`,
     stageLetters: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.7"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6" stroke-linecap="round"/></svg>`,
@@ -236,6 +237,7 @@ const TMIAdmin = (() => {
     ${navItem('pipeline', 'Pipeline', I.pipeline, false, '/admin-sales#pipeline')}
     ${navItem('audits', 'Audits', I.audits, false, '/admin-sales#audits')}
     ${navItem('bookings', 'Bookings', I.bookings, false, '/admin-sales#bookings')}
+    ${navItem('meetings', 'Meetings', I.meetings)}
     ${navItem('applications', 'Applications', I.apps, true, '/admin-inbox#apps')}
     ${navItem('followups', 'Follow-ups', I.followup, true, '/admin-inbox#followups')}
     ${navItem('worklist', 'Today', I.level10)}
@@ -325,6 +327,7 @@ const TMIAdmin = (() => {
           { page:'pipeline',     label:'Pipeline',     icon:I.pipeline, href:'/admin-sales#pipeline' },
           { page:'audits',       label:'Audits',       icon:I.audits,   href:'/admin-sales#audits' },
           { page:'bookings',     label:'Bookings',     icon:I.bookings, href:'/admin-sales#bookings' },
+          { page:'meetings',     label:'Meetings',     icon:I.meetings },
           { page:'applications', label:'Applications', icon:I.apps,     href:'/admin-inbox#apps',      badge:'inbox' },
           { page:'followups',    label:'Follow-ups',   icon:I.followup, href:'/admin-inbox#followups', badge:'inbox' },
           { page:'proposals',    label:'Proposals',    icon:I.proposals },
