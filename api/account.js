@@ -47,19 +47,23 @@ module.exports = async (req, res) => {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   if (!requireAuth(req, res)) return;
 
-  const { leadId, contactId, email } = req.query;
-  if (!leadId && !contactId && !email) {
-    return res.status(400).json({ error: 'Provide leadId, contactId, or email' });
+  const { leadId, clientId, contactId, email } = req.query;
+  if (!leadId && !clientId && !contactId && !email) {
+    return res.status(400).json({ error: 'Provide leadId, clientId, contactId, or email' });
   }
 
-  // 1. Resolve the anchor lead (with its contact) from whatever key we got.
-  let lead = null;
+  // 1. Resolve the anchor (a lead or a client) with its contact.
+  let lead = null, client = null;
+  if (clientId) {
+    client = await db.getById('clients', clientId);
+    if (client) await db.hydrateOne(client, 'contact_id', 'contacts', 'contacts');
+  }
   if (leadId) {
     lead = await db.getById('leads', leadId);
-  } else if (email) {
+  } else if (!client && email) {
     const rows = await db.list('leads', { where: [['email', '==', email.toLowerCase().trim()]], order: 'created_at', ascending: false, limit: 1 });
     lead = rows[0] || null;
-  } else if (contactId) {
+  } else if (!client && contactId) {
     const rows = await db.list('leads', { where: [['contact_id', '==', contactId]], order: 'created_at', ascending: false, limit: 1 });
     lead = rows[0] || null;
   }
@@ -67,8 +71,12 @@ module.exports = async (req, res) => {
   // Embedded join contacts(*): attach the lead's contact under `contacts`.
   if (lead) await db.hydrateOne(lead, 'contact_id', 'contacts', 'contacts');
 
-  // Resolve a contact even if there's no lead.
-  let contact = lead?.contacts || null;
+  // The anchor is whichever record we're centering on (client wins if both).
+  const anchor = client || lead;
+  const anchorType = client ? 'client' : (lead ? 'lead' : null);
+
+  // Resolve a contact even if there's no lead/client.
+  let contact = anchor?.contacts || null;
   if (!contact) {
     if (contactId) contact = await db.getById('contacts', contactId);
     else if (email) contact = await db.findOne('contacts', 'email', email.toLowerCase().trim());
@@ -76,17 +84,19 @@ module.exports = async (req, res) => {
 
   // The set of keys that identify this person across collections.
   const lid = lead?.id || null;
-  const cid = lead?.contact_id || contact?.id || contactId || null;
+  const clid = client?.id || null;
+  const cid = anchor?.contact_id || contact?.id || contactId || null;
   const em  = (lead?.email || contact?.email || email || '').toLowerCase().trim() || null;
   const ph  = lead?.phone || contact?.phone || null;
 
   // 2. Gather everything, in parallel, each guarded.
-  const [audits, followups, activities, emails, sms] = await Promise.all([
+  const [audits, followups, activities, emails, sms, meetings] = await Promise.all([
     gather('audit_submissions', [['lead_id', lid], ['email', em]], 'created_at', 'audits'),
-    gather('followups', [['lead_id', lid], ['contact_id', cid]], 'due_at', 'followups'),
-    gather('activities', [['lead_id', lid], ['contact_id', cid]], 'created_at', 'activities'),
+    gather('followups', [['lead_id', lid], ['client_id', clid], ['contact_id', cid]], 'due_at', 'followups'),
+    gather('activities', [['lead_id', lid], ['client_id', clid], ['contact_id', cid]], 'created_at', 'activities'),
     gather('email_sends', [['contact_id', cid], ['email', em]], 'created_at', 'emails'),
     gather('sms_log', [['contact_id', cid], ['phone', ph]], 'created_at', 'sms'),
+    gather('sales_meetings', [['lead_id', lid], ['client_id', clid]], 'created_at', 'meetings'),
   ]);
 
   // 3. Booking summary (lives on the lead).
@@ -112,17 +122,27 @@ module.exports = async (req, res) => {
     });
   }
   for (const f of followups) timeline.push({ kind: 'followup', at: f.due_at || f.created_at, title: f.title || f.type, detail: f.completed ? 'completed' : 'scheduled', direction: null });
+  for (const m of meetings) timeline.push({ kind: 'meeting', at: m.created_at, title: m.title || 'Sales call', detail: m.sales_stage || '', direction: null, ref: m.id });
   timeline.sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0));
+
+  // 5. Living brief (Claude-maintained) is stored on the anchor record.
+  const brief = anchor ? (anchor.brief || null) : null;
+  const brief_at = anchor ? (anchor.brief_at || null) : null;
 
   return res.status(200).json({
     lead: lead || null,
+    client: client || null,
+    anchor_type: anchorType,
     contact: contact || null,
     booking,
+    brief,
+    brief_at,
     audits,
     followups,
     activities,
     emails,
     sms,
+    meetings,
     timeline,
     counts: {
       audits: audits.length,
@@ -130,6 +150,7 @@ module.exports = async (req, res) => {
       emails: emails.length,
       sms: sms.length,
       activities: activities.length,
+      meetings: meetings.length,
     },
   });
 };

@@ -176,6 +176,7 @@
     <div class="panel-hd">
       <h2 class="panel-title" id="panel-name">—</h2>
       <div class="panel-actions">
+        <a class="btn btn-ghost btn-sm" id="open-account-btn" href="#">Account 360 &rarr;</a>
         <button class="btn btn-ghost btn-sm" onclick="editFromPanel()">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="deleteFromPanel()">Delete</button>
       </div>
@@ -297,6 +298,7 @@ async function openPanel(cl) {
   const c = cl.contacts||{};
   const name = [c.first_name,c.last_name].filter(Boolean).join(' ') || '—';
   document.getElementById('panel-name').textContent = name;
+  document.getElementById('open-account-btn').href = `/admin-account?type=client&id=${encodeURIComponent(cl.id)}`;
   document.getElementById('pd-status').innerHTML  = TMIAdmin.badge(cl.status);
   document.getElementById('pd-plan').textContent   = cl.plan||'—';
   document.getElementById('pd-email').innerHTML    = c.email?`<a href="mailto:${c.email}" style="color:var(--blue)">${c.email}</a>`:'—';

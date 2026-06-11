@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Account 360 — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .acct-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;}
+  .acct-hd h1{font-size:24px;margin:0 0 4px;}
+  .acct-sub{font-size:13px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .chip{display:inline-block;padding:3px 11px;border:1px solid var(--line-strong);border-radius:999px;font-size:11px;color:var(--ink-2);}
+  .a-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;align-items:start;margin-top:18px;}
+  @media(max-width:980px){.a-grid{grid-template-columns:1fr;}}
+  .brief-card{background:linear-gradient(180deg,var(--bg-alt),var(--bg));border:1px solid var(--line-strong);}
+  .brief-headline{font-size:17px;font-weight:600;color:var(--ink);letter-spacing:-0.01em;margin:0 0 8px;}
+  .brief-body{font-size:14px;line-height:1.65;color:var(--ink-2);}
+  .nba{margin-top:14px;padding:12px 14px;border-left:3px solid var(--chart);background:var(--bg);border-radius:4px;font-size:13.5px;color:var(--ink);}
+  .nba b{font-weight:600;}
+  .kb{margin-bottom:14px;}
+  .kb h4{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;}
+  .kb ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--ink-2);}
+  .kb p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.6;}
+  .tl-row{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .tl-ic{flex:none;width:20px;text-align:center;}
+  .tl-row .t{font-size:13px;color:var(--ink);}
+  .tl-row .s{font-size:11px;color:var(--muted);margin-top:1px;}
+  .fu-row{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .fu-row input{margin-top:2px;}
+  .fu-row.done .t{text-decoration:line-through;color:var(--muted);}
+  .mtg-row{padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer;}
+  .mtg-row:hover .t{color:var(--blue);}
+  .mtg-row .t{font-size:13px;color:var(--ink);}
+  .mtg-row .s{font-size:11px;color:var(--muted);margin-top:1px;}
+  .loading{padding:40px;text-align:center;color:var(--muted);font-size:14px;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><a href="javascript:history.back()" id="back-link">Back</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Account 360</span></div>
+    </div>
+    <div class="content">
+      <div id="root"><div class="loading">Loading account…</div></div>
+    </div>
+  </div>
+</div>
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('');
+
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const P = new URLSearchParams(location.search);
+const type = P.get('type') || (P.get('clientId') ? 'client' : 'lead');
+const id   = P.get('id') || P.get('leadId') || P.get('clientId');
+
+let bundle = null;
+
+function ul(arr){ return (arr&&arr.length)?`<ul>${arr.map(x=>`<li>${esc(typeof x==='object'?(x.action||x.name||JSON.stringify(x)):x)}${x&&x.owner?` <span style="color:var(--muted)">(${esc(x.owner)})</span>`:''}${x&&x.role&&x.name?` — <span style="color:var(--muted)">${esc(x.role)}</span>`:''}</li>`).join('')}</ul>`:'<p style="color:var(--muted)">None noted.</p>'; }
+
+// Merge knowledge across all recorded meetings (newest-first, de-duped).
+function mergeKnowledge(meetings){
+  const acc = { company_facts:[], pains:[], current_systems:[], objections:[], buying_signals:[], stakeholders:[], next_steps:[] };
+  const seen = {}; for(const k in acc) seen[k]=new Set();
+  for(const m of (meetings||[])){
+    const k = m.knowledge; if(!k) continue;
+    for(const key in acc){
+      for(const item of (k[key]||[])){
+        const sig = (typeof item==='object'? JSON.stringify(item): String(item)).toLowerCase().trim();
+        if(!seen[key].has(sig)){ seen[key].add(sig); acc[key].push(item); }
+      }
+    }
+  }
+  return acc;
+}
+
+async function load(){
+  if(!id){ document.getElementById('root').innerHTML='<div class="loading">No account specified.</div>'; return; }
+  const q = type==='client' ? 'clientId='+encodeURIComponent(id) : 'leadId='+encodeURIComponent(id);
+  bundle = await TMIAdmin.api('/api/account?'+q);
+  if(!bundle){ document.getElementById('root').innerHTML='<div class="loading">Could not load account.</div>'; return; }
+  render();
+}
+
+function render(){
+  const anchor = bundle.client || bundle.lead || {};
+  const c = bundle.contact || anchor.contacts || {};
+  const name = [c.first_name,c.last_name].filter(Boolean).join(' ') || c.company || 'Account';
+  const atype = bundle.anchor_type || type;
+  const counts = bundle.counts || {};
+  const brief = bundle.brief;
+  const know = mergeKnowledge(bundle.meetings);
+  const audit = (bundle.audits||[])[0];
+
+  const chips = [
+    `${counts.meetings||0} meeting${counts.meetings===1?'':'s'}`,
+    `${counts.audits||0} audit${counts.audits===1?'':'s'}`,
+    `${(bundle.followups||[]).filter(f=>!f.completed).length} open task${(bundle.followups||[]).filter(f=>!f.completed).length===1?'':'s'}`,
+    `${counts.emails||0} emails`,
+    `${counts.sms||0} SMS`,
+  ].map(t=>`<span class="chip">${t}</span>`).join('');
+
+  // Brief card
+  let briefHtml;
+  if(brief){
+    briefHtml = `
+      ${brief.headline?`<div class="brief-headline">${esc(brief.headline)}</div>`:''}
+      <div class="brief-body">${esc(brief.summary||'')}</div>
+      ${brief.where_it_stands?`<div class="brief-body" style="margin-top:10px;"><b style="color:var(--ink)">Where it stands.</b> ${esc(brief.where_it_stands)}</div>`:''}
+      ${brief.next_best_action?`<div class="nba"><b>Next best move:</b> ${esc(brief.next_best_action)}</div>`:''}
+      <div style="font-size:11px;color:var(--muted);margin-top:12px;">Updated ${bundle.brief_at?TMIAdmin.reltime(bundle.brief_at):'—'}</div>`;
+  } else {
+    briefHtml = `<div class="brief-body" style="color:var(--muted)">No living brief yet. Generate one from this account's audit and recorded meetings.</div>`;
+  }
+
+  // Open follow-ups
+  const fus = (bundle.followups||[]).slice().sort((a,b)=>new Date(a.due_at||0)-new Date(b.due_at||0));
+  const fuHtml = fus.length ? fus.map(f=>`
+    <div class="fu-row ${f.completed?'done':''}">
+      <input type="checkbox" ${f.completed?'checked':''} onchange="toggleFu('${f.id}',this.checked)"/>
+      <div style="flex:1;min-width:0">
+        <div class="t">${esc(f.title)}</div>
+        <div style="font-size:11px;color:var(--muted)">${f.due_at?'due '+TMIAdmin.fmt(f.due_at):''}${f.notes?' · '+esc(f.notes):''}</div>
+      </div>
+    </div>`).join('') : '<p style="color:var(--muted);font-size:13px">No follow-ups.</p>';
+
+  // Meetings
+  const mtgHtml = (bundle.meetings||[]).length ? bundle.meetings.map(m=>`
+    <div class="mtg-row" onclick="location.href='/admin-meetings'">
+      <div class="t">${esc(m.title||'Sales call')} ${m.sales_stage?`<span style="color:var(--muted)">· ${esc(m.sales_stage)}</span>`:''}</div>
+      <div class="s">${TMIAdmin.fmt(m.created_at)}${m.summary?' · '+esc(m.summary).slice(0,80)+'…':''}</div>
+    </div>`).join('') : '<p style="color:var(--muted);font-size:13px">No recorded meetings. <a href="/admin-meetings" style="color:var(--blue)">Record one →</a></p>';
+
+  // Timeline
+  const icon = { email:'✉️', sms:'💬', activity:'•', followup:'⏰', meeting:'🎙️' };
+  const tl = (bundle.timeline||[]).slice(0,40);
+  const tlHtml = tl.length ? tl.map(e=>`
+    <div class="tl-row">
+      <span class="tl-ic">${icon[e.kind]||'•'}</span>
+      <div style="flex:1;min-width:0">
+        <div class="t">${esc(e.title)}</div>
+        <div class="s">${esc(e.kind)}${e.detail?' · '+esc(e.detail):''} · ${TMIAdmin.fmt(e.at)}</div>
+      </div>
+    </div>`).join('') : '<p style="color:var(--muted);font-size:13px">Nothing logged yet.</p>';
+
+  // Audit
+  let auditHtml = '';
+  if(audit){
+    auditHtml = `<div class="card" style="padding:18px 20px;margin-top:18px;">
+      <div class="panel-sec-label" style="margin-bottom:8px;">Latest audit</div>
+      <div style="font-size:14px;color:var(--ink-2)"><b style="color:var(--ink)">${esc(audit.tier||'—')}</b> · ${typeof audit.dep_pct==='number'?audit.dep_pct+'% dependency':'—'} · ${esc(audit.industry||'—')} <span style="color:var(--muted)">· ${TMIAdmin.fmt(audit.created_at)}</span></div>
+    </div>`;
+  }
+
+  document.getElementById('root').innerHTML = `
+    <div class="card" style="padding:22px 24px;">
+      <div class="acct-hd">
+        <div>
+          <h1>${esc(name)}</h1>
+          <div class="acct-sub">
+            ${TMIAdmin.badge(atype==='client'?'active':(anchor.status||'new'))}
+            ${c.company?`<span>${esc(c.company)}</span>`:''}
+            ${c.email?`<span>${esc(c.email)}</span>`:''}
+            ${c.phone?`<span>${esc(c.phone)}</span>`:''}
+          </div>
+          <div class="chips">${chips}</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <a class="btn btn-ghost btn-sm" href="/admin-meetings">Record meeting</a>
+          <button class="btn btn-primary btn-sm" id="brief-btn" onclick="regenBrief()">${brief?'Refresh brief':'Generate brief'}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="a-grid">
+      <div>
+        <div class="card brief-card" style="padding:20px 22px;">
+          <div class="panel-sec-label" style="margin-bottom:10px;">Living brief</div>
+          <div id="brief-slot">${briefHtml}</div>
+        </div>
+
+        <div class="card" style="padding:20px 22px;margin-top:18px;">
+          <div class="panel-sec-label" style="margin-bottom:12px;">What we know</div>
+          ${brief && brief.what_we_know && brief.what_we_know.length ? `<div class="kb"><h4>Brief facts</h4>${ul(brief.what_we_know)}</div>` : ''}
+          <div class="kb"><h4>Company facts</h4>${ul(know.company_facts)}</div>
+          <div class="kb"><h4>Pains</h4>${ul(brief&&brief.pains&&brief.pains.length?brief.pains:know.pains)}</div>
+          <div class="kb"><h4>Current systems</h4>${ul(know.current_systems)}</div>
+          <div class="kb"><h4>Objections</h4>${ul(know.objections)}</div>
+          <div class="kb"><h4>Buying signals</h4>${ul(know.buying_signals)}</div>
+          <div class="kb"><h4>Stakeholders</h4>${ul(know.stakeholders)}</div>
+        </div>
+        ${auditHtml}
+      </div>
+
+      <div>
+        <div class="card" style="padding:18px 20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div class="panel-sec-label" style="margin:0;">Open follow-ups</div>
+            <button class="btn btn-ghost btn-sm" onclick="addFu()">+ Add</button>
+          </div>
+          <div id="fu-slot">${fuHtml}</div>
+        </div>
+
+        <div class="card" style="padding:18px 20px;margin-top:18px;">
+          <div class="panel-sec-label" style="margin-bottom:10px;">Meetings</div>
+          ${mtgHtml}
+        </div>
+
+        <div class="card" style="padding:18px 20px;margin-top:18px;">
+          <div class="panel-sec-label" style="margin-bottom:10px;">Timeline</div>
+          ${tlHtml}
+        </div>
+      </div>
+    </div>`;
+}
+
+async function regenBrief(){
+  const btn = document.getElementById('brief-btn');
+  btn.disabled=true; const lbl=btn.textContent; btn.textContent='Writing…';
+  const res = await TMIAdmin.api('/api/account-brief','POST',{ type: bundle.anchor_type||type, id });
+  btn.disabled=false; btn.textContent=lbl;
+  if(!res) return;
+  bundle.brief = res.brief; bundle.brief_at = res.brief_at;
+  render();
+  TMIAdmin.toast('Brief updated');
+}
+
+async function toggleFu(fid, completed){
+  await TMIAdmin.api('/api/followups','PUT',{ id: fid, completed });
+  const f = (bundle.followups||[]).find(x=>x.id===fid); if(f) f.completed = completed;
+  TMIAdmin.toast(completed?'Done':'Reopened');
+}
+
+async function addFu(){
+  const out = await TMIAdmin.formModal({
+    title:'New follow-up', submitLabel:'Add',
+    fields:[
+      { name:'title', label:'Task *', required:true },
+      { name:'due_at', label:'Due date', type:'text', value:new Date(Date.now()+2*864e5).toISOString().slice(0,10), placeholder:'YYYY-MM-DD' },
+    ]
+  });
+  if(!out) return;
+  const anchor = bundle.client || bundle.lead || {};
+  const payload = {
+    [ (bundle.anchor_type||type)==='client' ? 'client_id':'lead_id' ]: id,
+    contact_id: anchor.contact_id || (bundle.contact||{}).id || null,
+    title: out.title,
+    due_at: out.due_at ? new Date(out.due_at).toISOString() : new Date(Date.now()+2*864e5).toISOString(),
+    type:'task', priority:'normal', completed:false,
+  };
+  const res = await TMIAdmin.api('/api/followups','POST',payload);
+  if(!res) return;
+  bundle.followups = bundle.followups || []; bundle.followups.push(res);
+  render(); TMIAdmin.toast('Follow-up added');
+}
+
+load();
+</script>
+</body>
+</html>

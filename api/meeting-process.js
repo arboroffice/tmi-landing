@@ -127,6 +127,7 @@ module.exports = async (req, res) => {
   }
 
   // Persist onto the meeting when one is referenced.
+  let followups_created = 0;
   if (b.meeting_id) {
     try {
       const patch =
@@ -138,7 +139,34 @@ module.exports = async (req, res) => {
       // Generation succeeded; surface the artifact even if the write hiccups.
       return res.status(200).json({ ok: true, kind, result, saved: false, save_error: e.message });
     }
+
+    // Auto-create follow-up tasks from a digest's next steps — once per meeting.
+    if (kind === 'digest' && Array.isArray(result.next_steps) && result.next_steps.length) {
+      try {
+        const meeting = await db.getById('sales_meetings', b.meeting_id);
+        if (meeting && !meeting.followups_created && (meeting.lead_id || meeting.client_id)) {
+          const due = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(); // +2 days
+          for (const s of result.next_steps) {
+            const title = (typeof s === 'object' ? s.action : s) || '';
+            if (!title) continue;
+            await db.insert('followups', {
+              lead_id: meeting.lead_id || null,
+              client_id: meeting.client_id || null,
+              contact_id: meeting.contact_id || null,
+              type: 'task',
+              title,
+              notes: `From meeting: ${meeting.title || 'Sales call'}${s && s.owner ? ` · owner: ${s.owner}` : ''}`,
+              due_at: due,
+              priority: 'normal',
+              completed: false,
+            });
+            followups_created++;
+          }
+          await db.update('sales_meetings', b.meeting_id, { followups_created: true });
+        }
+      } catch (_) { /* best-effort; never fail the digest over follow-ups */ }
+    }
   }
 
-  return res.status(200).json({ ok: true, kind, result, saved: !!b.meeting_id });
+  return res.status(200).json({ ok: true, kind, result, saved: !!b.meeting_id, followups_created });
 };

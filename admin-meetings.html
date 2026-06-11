@@ -154,6 +154,7 @@
     <div class="panel-hd">
       <h2 class="panel-title" id="dp-title">—</h2>
       <div class="panel-actions">
+        <a class="btn btn-ghost btn-sm" id="dp-account" href="#">Open account &rarr;</a>
         <button class="btn btn-danger btn-sm" onclick="deleteMeeting()">Delete</button>
       </div>
     </div>
@@ -455,6 +456,10 @@ async function openMeeting(id){
     .filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join('');
   document.getElementById('dp-body').innerHTML = renderArtifacts(panelMeeting);
   document.getElementById('dp-transcript').textContent = panelMeeting.transcript || '';
+  const acctBtn = document.getElementById('dp-account');
+  if (panelMeeting.client_id) acctBtn.href = `/admin-account?type=client&id=${encodeURIComponent(panelMeeting.client_id)}`;
+  else if (panelMeeting.lead_id) acctBtn.href = `/admin-account?type=lead&id=${encodeURIComponent(panelMeeting.lead_id)}`;
+  acctBtn.style.display = (panelMeeting.client_id || panelMeeting.lead_id) ? '' : 'none';
   TMIAdmin.openPanel('mtg-panel');
 }
 async function panelGen(kind){

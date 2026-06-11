@@ -183,7 +183,10 @@
       <div class="panel-sep"></div>
       <button class="btn btn-primary btn-sm" onclick="convertToClient()" id="convert-btn">Convert to Client &rarr;</button>
       <div class="panel-sep"></div>
-      <div class="panel-sec-label" style="margin-bottom:12px">Account 360</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="panel-sec-label" style="margin:0">Account 360</div>
+        <a class="btn btn-ghost btn-sm" id="open-account-btn" href="#">Open full view &rarr;</a>
+      </div>
       <div id="account-360" style="font-size:13px;color:var(--ink-2);">Loading…</div>
       <div class="panel-sep"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -363,6 +366,8 @@ function openPanel(lead) {
 async function loadAccount360(lead) {
   const box = document.getElementById('account-360');
   if (!box) return;
+  const openBtn = document.getElementById('open-account-btn');
+  if (openBtn) openBtn.href = `/admin-account?type=lead&id=${encodeURIComponent(lead.id)}`;
   box.innerHTML = 'Loading…';
   const data = await TMIAdmin.api(`/api/account?leadId=${lead.id}`);
   if (!data) { box.innerHTML = '<span style="color:var(--muted)">Could not load account.</span>'; return; }
