@@ -379,6 +379,30 @@ footer {
 .manifesto-item p em { color: var(--chart); font-style: italic; }
 .manifesto-close { text-align: center; margin-top: 56px; font-family: var(--serif); font-size: clamp(24px,3vw,38px); font-weight: 400; letter-spacing: -0.02em; color: #fff; }
 @media(max-width:640px) { .manifesto-item { gap: 16px; padding: 20px 0; } }
+
+/* TWO PATHS */
+.paths-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.path-card { border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 44px 40px; display: flex; flex-direction: column; transition: border-color 0.2s, background 0.2s; }
+.path-card:hover { border-color: rgba(228,255,151,0.25); background: rgba(228,255,151,0.02); }
+.path-card .pc-kicker { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(228,255,151,0.7); margin-bottom: 18px; }
+.path-card h3 { font-family: var(--serif); font-size: clamp(28px,2.6vw,40px); font-weight: 400; letter-spacing: -0.02em; color: #fff; margin-bottom: 12px; }
+.path-card h3 em { color: var(--chart); font-style: italic; }
+.path-card .pc-line { font-family: var(--serif); font-size: 19px; font-style: italic; color: rgba(255,255,255,0.55); margin-bottom: 26px; }
+.path-card .pc-body { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.5); margin-bottom: 34px; flex: 1; }
+.path-card .pc-cta { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; font-size: 13px; font-weight: 700; background: var(--chart); color: #0a0b14; padding: 12px 24px; border-radius: 999px; transition: background 0.15s; }
+.path-card .pc-cta:hover { background: var(--chart-dark); }
+@media(max-width:768px) { .paths-grid { grid-template-columns: 1fr; } .path-card { padding: 36px 28px; } }
+
+/* HOW IT WORKS BAND */
+.how-band { background: var(--bg-deep); border-top: 1px solid rgba(255,255,255,0.06); }
+.how-steps { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 24px; align-items: center; }
+.how-step { display: flex; flex-direction: column; gap: 14px; text-align: center; }
+.how-step .hs-num { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(228,255,151,0.6); }
+.how-step h4 { font-family: var(--serif); font-size: clamp(26px,2.8vw,40px); font-weight: 400; letter-spacing: -0.02em; color: #fff; }
+.how-step h4 em { color: var(--chart); font-style: italic; }
+.how-step p { font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.5); max-width: 26ch; margin: 0 auto; }
+.how-arrow { font-family: var(--serif); font-size: 30px; color: rgba(228,255,151,0.4); line-height: 1; }
+@media(max-width:860px) { .how-steps { grid-template-columns: 1fr; gap: 8px; } .how-arrow { transform: rotate(90deg); padding: 6px 0; } }
 </style>
 <script src="/rb2b.js"></script>
 <script src="/footer-signup.js" defer></script>
@@ -407,8 +431,8 @@ footer {
   </div>
   <h1>Build what's <em>next.</em></h1>
   <p class="hero-deck">
-    The next generation of founders will build differently - with leverage, intelligence, and ownership.
-    <strong>Join the movement, and get the dispatch from inside the build when something real drops.</strong>
+    Founders of the Future is where operators become owners of AI-powered companies. License a system we build for you and sell it, or bring your idea and build it with us.
+    <strong>You bring the market. We build the intelligence. You own the business.</strong>
   </p>
   <div id="hero-form-wrap">
     <form class="signup-form" id="signup-form">
@@ -424,202 +448,71 @@ footer {
   <p style="margin-top:28px;"><a href="https://foundersotf.com" target="_blank" rel="noopener" style="font-family:var(--sans);font-size:13px;font-weight:600;color:var(--chart);letter-spacing:0.02em;">Explore the movement at foundersotf.com &rarr;</a></p>
 </section>
 
-<!-- WHAT IS IT -->
+<!-- TWO PATHS -->
 <section class="what-section">
   <div class="container">
-    <div class="what-inner">
-      <div class="reveal">
-        <div class="what-label">What this is</div>
-        <h2>Written for founders <em>who are building.</em></h2>
-        <p>Founders of the Future is not a marketing email. It is not a newsletter with tips. It is a dispatch from inside the build - what we are working on, what is working in the field, what failed and why, and what the next version looks like.</p>
-        <p>We write when something is worth saying. Not on a schedule. Not to fill a cadence. When there is a real insight, a real result, or a real lesson - it goes out.</p>
+    <div class="sec-head reveal">
+      <div class="what-label">Two ways to build</div>
+      <h2>You do not need to know AI. <em>You need a market.</em></h2>
+      <p>There are two ways to become a Founder of the Future. Both end the same way: you own a real, AI-powered business. We do the building.</p>
+    </div>
+    <div class="paths-grid">
+      <div class="path-card reveal">
+        <div class="pc-kicker">Path one</div>
+        <h3>License &amp; <em>Sell.</em></h3>
+        <p class="pc-line">Sell the system. We build it.</p>
+        <p class="pc-body">License our AI operating systems and sell them high-ticket into a market you already understand. You never have to write code or know how the intelligence works. You bring the relationships and close the deals. We build the system and fulfil the work behind it, every time.</p>
+        <a href="#apply" class="pc-cta">Start selling &rarr;</a>
       </div>
-      <div class="what-pillars reveal reveal-d1">
-        <div class="pillar">
-          <div class="pillar-num">01</div>
-          <h4>What we are building</h4>
-          <p>The real work. What systems are being built, what problems they are solving, what decisions we made and why. Not product announcements - actual operator-level detail.</p>
-        </div>
-        <div class="pillar">
-          <div class="pillar-num">02</div>
-          <h4>What is working</h4>
-          <p>Results from the field. What the systems are doing in real operations. Specific numbers, specific industries, specific outcomes. The kind of thing you can actually use.</p>
-        </div>
-        <div class="pillar">
-          <div class="pillar-num">03</div>
-          <h4>What broke and what we learned</h4>
-          <p>The honest version. What did not work, what we got wrong, what we would do differently. Founders who are building need the real version - not the highlight reel.</p>
-        </div>
+      <div class="path-card reveal reveal-d1">
+        <div class="pc-kicker">Path two</div>
+        <h3>Partner &amp; <em>Build.</em></h3>
+        <p class="pc-line">Bring the idea. Build it with us.</p>
+        <p class="pc-body">Come with an idea for an AI-powered company. We partner with you to build it, or connect you to the partners who can, on infrastructure that already works. You stay close to every decision and walk away owning the code, the playbooks, and the business, with shared upside on what it becomes.</p>
+        <a href="#apply" class="pc-cta">Bring your idea &rarr;</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- THE MOVEMENT -->
-<section class="what-section" style="border-top:1px solid rgba(255,255,255,0.06);">
-  <div class="container">
-    <div class="what-inner">
-      <div class="reveal">
-        <div class="what-label">The movement</div>
-        <h2>The next generation will build <em>differently.</em></h2>
-        <p>Not with bigger teams. Not with more meetings. Not with more bureaucracy. With leverage. With intelligence. With ownership.</p>
-        <p>Founders of the Future exists to help builders understand what comes next, and build companies designed for it.</p>
-      </div>
-      <div class="what-pillars reveal reveal-d1">
-        <div class="pillar"><div class="pillar-num">01</div><h4>Leverage beats labor</h4><p>Scale with systems and intelligence, not headcount.</p></div>
-        <div class="pillar"><div class="pillar-num">02</div><h4>Intelligence beats bureaucracy</h4><p>Small teams, sharp systems, faster decisions.</p></div>
-        <div class="pillar"><div class="pillar-num">03</div><h4>Technology should create freedom</h4><p>The company serves the life, not the other way around.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- TWO KINDS OF FOUNDER -->
-<section class="what-section" style="border-top:1px solid rgba(255,255,255,0.06);">
+<!-- HOW IT WORKS -->
+<section class="what-section how-band">
   <div class="container">
     <div class="sec-head reveal">
-      <div class="what-label">Two kinds of founder</div>
-      <h2>The same business. <em>Two different lives.</em></h2>
-      <p>Every founder is building one of two companies. The difference is not the industry. It is what the company is built on.</p>
+      <div class="what-label">How it works</div>
+      <h2>You bring it. We build it. <em>You own it.</em></h2>
     </div>
-    <div class="two-grid">
-      <div class="founder-card reveal">
-        <div class="fc-kicker">The traditional founder</div>
-        <h3>Builds with labor.</h3>
-        <p class="fc-builds">Every problem gets solved by adding a person.</p>
-        <div class="fc-list">
-          <div class="fc-row"><span class="fc-n">01</span><span>Depends on headcount</span></div>
-          <div class="fc-row"><span class="fc-n">02</span><span>Creates complexity</span></div>
-          <div class="fc-row"><span class="fc-n">03</span><span>Becomes the bottleneck</span></div>
-          <div class="fc-row"><span class="fc-n">04</span><span>Works harder every year</span></div>
-        </div>
-        <p class="fc-foot">Scale costs them their life.</p>
+    <div class="how-steps reveal">
+      <div class="how-step">
+        <div class="hs-num">Step one</div>
+        <h4>You <em>bring</em></h4>
+        <p>An idea, or a market you already know. The thing only you can see.</p>
       </div>
-      <div class="founder-card future reveal reveal-d1">
-        <div class="fc-kicker">The founder of the future</div>
-        <h3>Builds with <em>leverage.</em></h3>
-        <p class="fc-builds">Every problem gets solved by building a system.</p>
-        <div class="fc-list">
-          <div class="fc-row"><span class="fc-n">01</span><span>Designs systems</span></div>
-          <div class="fc-row"><span class="fc-n">02</span><span>Uses intelligence</span></div>
-          <div class="fc-row"><span class="fc-n">03</span><span>Creates freedom</span></div>
-          <div class="fc-row"><span class="fc-n">04</span><span>Owns outcomes</span></div>
-        </div>
-        <p class="fc-foot">Builds a company that scales without consuming their life.</p>
+      <div class="how-arrow">&rarr;</div>
+      <div class="how-step">
+        <div class="hs-num">Step two</div>
+        <h4>We <em>build</em></h4>
+        <p>The AI operating system that runs it, on proven infrastructure, in weeks.</p>
+      </div>
+      <div class="how-arrow">&rarr;</div>
+      <div class="how-step">
+        <div class="hs-num">Step three</div>
+        <h4>You <em>own</em></h4>
+        <p>A real business with real revenue, yours, with shared upside on the build.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FOUR AGES -->
-<section class="what-section" style="border-top:1px solid rgba(255,255,255,0.06);">
-  <div class="container">
-    <div class="sec-head reveal">
-      <div class="what-label">The four ages of building</div>
-      <h2>Every founder is living in <em>one of four ages.</em></h2>
-      <p>The goal is not to work harder in the age you are in. It is to move to the next one.</p>
-    </div>
-    <div class="ages-grid">
-      <div class="age-card reveal">
-        <div class="age-num">1</div>
-        <h4>The Craftsman</h4>
-        <p>Everything depends on you.</p>
-        <div class="age-tag">Labor</div>
-      </div>
-      <div class="age-card reveal reveal-d1">
-        <div class="age-num">2</div>
-        <h4>The Manager</h4>
-        <p>People solve problems.</p>
-        <div class="age-tag">Headcount</div>
-      </div>
-      <div class="age-card reveal reveal-d2">
-        <div class="age-num">3</div>
-        <h4>The Operator</h4>
-        <p>Systems solve problems.</p>
-        <div class="age-tag">Process</div>
-      </div>
-      <div class="age-card reveal reveal-d2">
-        <div class="age-num">4</div>
-        <h4>Founder of the Future</h4>
-        <p>Intelligence solves problems.</p>
-        <div class="age-tag">Leverage</div>
-      </div>
-    </div>
-    <p class="ages-foot reveal">Where are you today?</p>
-  </div>
-</section>
-
-<!-- MANIFESTO -->
-<section class="what-section manifesto-section" style="border-top:1px solid rgba(255,255,255,0.06);">
-  <div class="container">
-    <div class="sec-head reveal">
-      <div class="what-label">The manifesto</div>
-      <h2>We believe the future <em>belongs to builders.</em></h2>
-    </div>
-    <div class="manifesto-list reveal">
-      <div class="manifesto-item"><span class="mi-num">01</span><p>We believe <em>leverage</em> beats labor.</p></div>
-      <div class="manifesto-item"><span class="mi-num">02</span><p>We believe <em>intelligence</em> beats bureaucracy.</p></div>
-      <div class="manifesto-item"><span class="mi-num">03</span><p>We believe small teams can outperform large organizations.</p></div>
-      <div class="manifesto-item"><span class="mi-num">04</span><p>We believe technology should create <em>freedom.</em></p></div>
-      <div class="manifesto-item"><span class="mi-num">05</span><p>We believe companies should serve life, not consume it.</p></div>
-      <div class="manifesto-item"><span class="mi-num">06</span><p>We believe <em>ownership</em> matters.</p></div>
-      <div class="manifesto-item"><span class="mi-num">07</span><p>We believe the future is built by those willing to learn faster than the world changes.</p></div>
-    </div>
-    <p class="manifesto-close reveal">We are Founders of the Future.</p>
-    <div class="reveal" style="text-align:center;margin-top:36px;">
-      <a href="https://foundersotf.com" target="_blank" rel="noopener" class="signup-btn" style="display:inline-flex;align-items:center;text-decoration:none;">Join the movement at foundersotf.com &rarr;</a>
-    </div>
-  </div>
-</section>
-
-<!-- DONE WITH YOU -->
-<section class="what-section" style="border-top:1px solid rgba(255,255,255,0.06);">
-  <div class="container">
-    <div class="what-inner">
-      <div class="reveal">
-        <div class="what-label">Done with you</div>
-        <h2>Bring us your idea. <em>We build it with you.</em></h2>
-        <p>The fastest way to become a Founder of the Future is to build one. Done With You is a build partnership, not a consulting engagement. TMI builds your intelligent company alongside you on proven infrastructure, in weeks, not years, while you stay close to every decision.</p>
-        <p>You do not hand it off and wait. You are part of the build, so you understand what was built and why. You walk away with working software, operational playbooks, and full ownership of the code and the company. No retainer, no strings. We teach as we build, so you can run it without us.</p>
-        <a href="/audit" class="signup-btn" style="display:inline-flex;align-items:center;text-decoration:none;margin-top:8px;">Start the conversation &rarr;</a>
-      </div>
-      <div class="what-pillars reveal reveal-d1">
-        <div class="pillar"><div class="pillar-num">01</div><h4>We build it with you</h4><p>TMI builds on its proven stack while you review every decision. Working software shipped in weeks, not a prototype.</p></div>
-        <div class="pillar"><div class="pillar-num">02</div><h4>We teach as we build</h4><p>You learn the system as it is built. Documented playbooks mean you can hire people who can actually run the company.</p></div>
-        <div class="pillar"><div class="pillar-num">03</div><h4>You own it outright</h4><p>The code, the IP, and the customer relationships are yours. You pay for the build and run it however you choose.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PARTNER -->
-<section class="what-section" style="border-top:1px solid rgba(255,255,255,0.06);">
-  <div class="container">
-    <div class="what-inner">
-      <div class="reveal">
-        <div class="what-label">Partner with us</div>
-        <h2>Bring intelligent infrastructure <em>to your market.</em></h2>
-        <p>Founders of the Future is also an affiliate and partner network. Consultants, software platforms, industry connectors, referral partners, and operators who know their market - bring intelligent infrastructure to the companies you serve and earn recurring revenue. You bring the relationships, we build and run the systems.</p>
-        <a href="#apply" class="signup-btn" style="display:inline-flex;align-items:center;text-decoration:none;margin-top:8px;">Become a partner &rarr;</a>
-      </div>
-      <div class="what-pillars reveal reveal-d1">
-        <div class="pillar"><div class="pillar-num">01</div><h4>Revenue share</h4><p>Earn a meaningful percentage of every engagement you bring in, recurring as long as they stay.</p></div>
-        <div class="pillar"><div class="pillar-num">02</div><h4>Co-selling support</h4><p>TMI handles scoping, proposals, and delivery. You stay as involved as you want.</p></div>
-        <div class="pillar"><div class="pillar-num">03</div><h4>Priority access</h4><p>Early access to new systems and capabilities as we build them.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- APPLY TO PARTNER -->
+<!-- APPLY -->
 <section class="apply-section" id="apply">
   <div class="container-sm">
     <div class="apply-wrap reveal">
       <div id="apply-form-container">
         <div class="apply-head">
-          <div class="what-label">Apply to partner</div>
-          <h2>Bring TMI to <em>your market.</em></h2>
-          <p>Applications are reviewed within 3 business days. We confirm territory availability on the call.</p>
+          <div class="what-label">Start building</div>
+          <h2>Sell the system, or build <em>your own.</em></h2>
+          <p>Tell us which path fits. Applications are reviewed within 3 business days, and we map out the build on the call.</p>
         </div>
         <form id="partner-form" novalidate>
           <div class="form-grid">
@@ -664,6 +557,26 @@ footer {
         <h2>Application received</h2>
         <p>We'll review your application and be in touch within 3 business days. Check your inbox.</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- A COMMUNITY OF BUILDERS -->
+<section class="what-section manifesto-section" style="border-top:1px solid rgba(255,255,255,0.06);">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="what-label">A community of builders</div>
+      <h2>You are not building <em>alone.</em></h2>
+      <p>Founders of the Future is the community around the build. Operators selling systems, founders building their own companies, and the people who help them get there, all in one room.</p>
+    </div>
+    <div class="manifesto-list reveal">
+      <div class="manifesto-item"><span class="mi-num">01</span><p>We believe <em>leverage</em> beats labor.</p></div>
+      <div class="manifesto-item"><span class="mi-num">02</span><p>We believe <em>intelligence</em> beats bureaucracy.</p></div>
+      <div class="manifesto-item"><span class="mi-num">03</span><p>We believe you should not have to know AI to <em>own</em> an AI-powered company.</p></div>
+      <div class="manifesto-item"><span class="mi-num">04</span><p>We believe <em>ownership</em> matters, and the builder should keep it.</p></div>
+    </div>
+    <div class="reveal" style="text-align:center;margin-top:48px;">
+      <a href="https://foundersotf.com" target="_blank" rel="noopener" class="signup-btn" style="display:inline-flex;align-items:center;text-decoration:none;">Read the manifesto at foundersotf.com &rarr;</a>
     </div>
   </div>
 </section>
