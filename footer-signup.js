@@ -46,7 +46,7 @@
 <p class="sub">Sharp dispatches for owners and builders. Zero AI hype.</p>\
 <form id="tmi-fs-form">\
 <div class="row"><input type="email" required placeholder="you@company.com"/><button type="submit">Sign up</button></div>\
-<label class="opt"><input type="checkbox" name="brief" checked/> <span>Also send me <b>The Brief</b> &mdash; a 2-minute daily read on running a company on systems.</span></label>\
+<label class="opt"><input type="checkbox" name="brief" checked/> <span>Also send me <b>The Brief</b>: a custom daily AI briefing, tuned to your job, your business, and your tech stack.</span></label>\
 <label class="opt"><input type="checkbox" name="terms"/> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">terms</a>.</span></label>\
 <div class="err" id="tmi-fs-err">Please agree to the terms to continue.</div>\
 </form>\
