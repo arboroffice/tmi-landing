@@ -157,6 +157,13 @@ TMI VOICE RULES - follow these exactly:
 - NO bullet points or numbered lists anywhere in the article body.
 - Category arc: what's the operational problem -> why it happens -> what the system-built version looks like -> what changes when you fix it.
 
+AEO / ANSWER-ENGINE OPTIMIZATION - this article must rank in search and be quotable by AI answer engines (Google AI Overviews, ChatGPT, Perplexity):
+- The title and the H1 must directly match a real question or query an industrial operator would type or ask out loud.
+- The first paragraph of the body must answer that question directly in 2 to 3 plain sentences, so a machine can lift a clean, correct, self-contained answer. Then widen into the narrative.
+- Phrase most H2 section headings as the specific questions a reader would ask (still in TMI voice, not generic).
+- Make factual claims specific and self-contained. An answer engine should be able to quote any single sentence without surrounding context.
+- The meta description must be a direct one-sentence answer to the title question, under 155 characters.
+
 OUTPUT: Return ONLY the complete HTML file. No preamble, no explanation, no markdown fences.`,
     messages: [{
       role: 'user',
@@ -197,6 +204,27 @@ And include this CSS in the <style> block:
   .oi-cta p{font-family:var(--sans);font-size:15px;line-height:1.6;color:rgba(255,255,255,0.78);max-width:48ch;margin:0 auto 26px;}
   .oi-cta .btn{display:inline-block;font-family:var(--sans);font-size:14px;font-weight:600;background:var(--chart);color:#0a0b14;padding:14px 28px;border-radius:999px;transition:background 0.15s;}
   .oi-cta .btn:hover{background:var(--chart-dark);}
+
+REQUIRED FOR AEO - an FAQ block and structured data:
+
+1. Immediately AFTER the closing </p> of the last body paragraph and BEFORE the oi-cta block, add a short FAQ section with 3 or 4 real questions an operator would ask about this topic, each answered in 2 to 3 self-contained sentences in TMI voice:
+<section class="article-faq">
+  <h2>Common questions</h2>
+  <div class="faq-q"><h3>[Question 1 - phrased exactly as a person would search it]</h3><p>[Direct answer, 2-3 sentences.]</p></div>
+  <div class="faq-q"><h3>[Question 2]</h3><p>[Direct answer.]</p></div>
+  <div class="faq-q"><h3>[Question 3]</h3><p>[Direct answer.]</p></div>
+</section>
+
+2. Add this CSS to the <style> block:
+  .article-faq{margin:3em 0 0;padding-top:2em;border-top:1px solid var(--line);}
+  .article-faq > h2{font-family:var(--serif);font-size:clamp(24px,2.2vw,32px);font-weight:400;letter-spacing:-0.02em;color:var(--ink);margin-bottom:1em;}
+  .article-faq .faq-q{margin-bottom:1.6em;}
+  .article-faq .faq-q h3{font-family:var(--sans);font-size:18px;font-weight:600;color:var(--ink);margin-bottom:8px;line-height:1.35;}
+  .article-faq .faq-q p{font-family:var(--serif);font-size:17px;line-height:1.7;color:var(--ink-2);}
+
+3. In the <head>, add TWO JSON-LD <script type="application/ld+json"> blocks:
+   a) An "Article" schema with headline (the title), description (the meta description), datePublished (${dateStr} in ISO 8601), author and publisher set to Organization "TMI Technology" (url https://www.tmitechai.com), and mainEntityOfPage set to https://www.tmitechai.com/${filename.replace('.html','')}.
+   b) A "FAQPage" schema whose mainEntity array contains EXACTLY the same questions and answers as the visible FAQ section above - same count, same wording. The acceptedAnswer text must match the visible answer text.
 
 Return ONLY the complete HTML file.`
     }]

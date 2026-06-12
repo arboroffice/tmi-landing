@@ -29,7 +29,7 @@ CSS variables:
 --sans: "Neue Haas Grotesk Display", system-ui, sans-serif
 ```
 
-### Founders of the Future Articles (article-*.html)
+### Field Notes Articles (article-*.html)
 Same design system as the main site — white background, Barlow, dark accent:
 ```css
 --bg: #ffffff
@@ -107,10 +107,19 @@ Font: `family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1
 
 ---
 
-## Daily Blog Poster Agent
+## Field Notes Writer Agent
 
 ### What it does
-Writes and publishes one new Founders of the Future article per day. Picks a topic not already covered, writes 800–1400 words in TMI's voice, generates the full HTML file, and adds it to news.html.
+Writes and publishes two new Field Notes articles per week, on Mondays and Thursdays. Picks a topic not already covered, writes 950–1200 words in TMI's voice, optimizes each piece for answer-engine search (AEO), generates the full HTML file, and adds it to news.html. Runs automatically via the `Field Notes (2x Weekly)` GitHub Action (`.github/workflows/daily-post.yml`), which runs research.js then writer.js then email-sender.js.
+
+### Answer-engine optimization (AEO)
+Every article is written to rank in search and be quotable by AI answer engines (Google AI Overviews, ChatGPT, Perplexity):
+- Title and H1 match a real question or query an industrial operator would type or ask out loud.
+- The first paragraph answers that question directly in 2 to 3 self-contained sentences, then widens into the narrative.
+- Most H2 headings are phrased as the specific questions a reader would ask, still in TMI voice.
+- Every factual claim is specific and self-contained, so an answer engine can quote a single sentence without surrounding context.
+- The meta description is a direct one-sentence answer, under 155 characters.
+- Each article includes a "Common questions" FAQ block (3 to 4 Q&As) plus matching `FAQPage` and `Article` JSON-LD structured data in the head. The FAQPage schema must match the visible FAQ wording exactly.
 
 ### TMI Voice & Tone
 - Direct. No hedging. No "leverage AI strategically."
@@ -233,7 +242,7 @@ Writes and publishes one new Founders of the Future article per day. Picks a top
   <div class="article-header-inner">
     <a href="stratum.html" class="ah-brand"><img src="logo.svg" alt="TMI"/> TMI</a>
     <nav class="ah-nav">
-      <a href="news.html">Founders of the Future</a>
+      <a href="news.html">Field Notes</a>
       <a href="about.html">About</a>
     </nav>
     <a href="/audit" class="ah-cta">Apply &rarr;</a>
@@ -242,7 +251,7 @@ Writes and publishes one new Founders of the Future article per day. Picks a top
 
 <section class="article-hero">
   <div class="container-article">
-    <a href="news.html" class="article-back">← Back to Founders of the Future</a>
+    <a href="news.html" class="article-back">← Back to Field Notes</a>
     <div class="article-meta"><span class="cat">{CATEGORY}</span><span>{READ_TIME} min read</span><span>{DATE}</span></div>
     <h1 class="article-title">{TITLE_LINE_1} <em>{TITLE_LINE_2_ITALIC}</em></h1>
     <p class="article-deck">{DECK — one sentence, 20–30 words, Playfair voice}</p>
@@ -276,7 +285,7 @@ Writes and publishes one new Founders of the Future article per day. Picks a top
     <p>{Closing paragraph — what changes when this is fixed.}</p>
 
     <div class="article-end">
-      <div class="byline">TMI Founders of the Future · {CATEGORY}</div>
+      <div class="byline">TMI Field Notes · {CATEGORY}</div>
       <a href="news.html" class="back-link">← All stories</a>
     </div>
   </div>
@@ -306,7 +315,7 @@ Writes and publishes one new Founders of the Future article per day. Picks a top
   <div class="container">
     <div class="foot-bottom">
       <span>&copy; 2026 TMI Technology</span>
-      <span>Founders of the Future</span>
+      <span>Field Notes</span>
     </div>
   </div>
 </footer>
@@ -358,7 +367,7 @@ Good TMI photo IDs by topic:
 After writing the article file and updating news.html:
 ```bash
 git add {ARTICLE_FILENAME} news.html
-git commit -m "Add Founders of the Future: {TITLE}"
+git commit -m "Add Field Notes: {TITLE}"
 git push origin main
 ```
 
@@ -373,4 +382,4 @@ git push origin main
 5. **Always deploy after changes** — push to main triggers live deploy
 6. **Article filenames** — `article-{short-slug}.html`, all lowercase, hyphens only
 7. **Read before writing** — use the Write tool only after reading the file (if it already exists)
-8. **One article per run** — quality over quantity. One well-written piece beats three mediocre ones
+8. **One article per run, two runs per week** — quality over quantity. One well-written, AEO-optimized piece per run beats three mediocre ones
