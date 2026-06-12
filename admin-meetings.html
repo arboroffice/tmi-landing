@@ -166,6 +166,10 @@
         <button class="btn btn-ghost btn-sm" onclick="panelGen('sop')">Generate SOP</button>
       </div>
       <div id="dp-body"></div>
+      <div id="dp-audio" style="display:none;margin-top:18px;">
+        <div class="panel-sec-label">Recording</div>
+        <audio id="dp-audio-el" controls style="width:100%;margin-top:8px;"></audio>
+      </div>
       <div class="panel-sep"></div>
       <div class="panel-sec-label">Transcript</div>
       <div class="doc-out" id="dp-transcript" style="margin-top:8px;"></div>
@@ -263,9 +267,10 @@ async function newAccount(){
   TMIAdmin.toast('Lead created');
 }
 
-// ---------- Recording (Web Speech API) ----------
+// ---------- Recording (Web Speech API + MediaRecorder) ----------
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recog = null, recording = false, startTs = 0, timerInt = null, accumSec = 0;
+let mediaRec = null, mediaStream = null, audioChunks = [], audioMime = '';
 const tbox = document.getElementById('transcript-box');
 
 if(!SR){ document.getElementById('unsupported').style.display='block'; }
@@ -306,10 +311,31 @@ function toggleRecord(){
   const dot = document.getElementById('rec-dot'); dot.style.visibility='visible'; dot.classList.add('live');
   timerInt = setInterval(setTimer, 500);
   try{ recog.start(); }catch(_){}
+  startAudioCapture();
+}
+
+// Capture the actual audio so the recording is saved to Firebase Storage
+// alongside the transcript. Best-effort: transcription works without it.
+async function startAudioCapture(){
+  if(!window.MediaRecorder || !navigator.mediaDevices) return;
+  try{
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioMime = ['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t)) || '';
+    mediaRec = audioMime ? new MediaRecorder(mediaStream, { mimeType: audioMime }) : new MediaRecorder(mediaStream);
+    audioMime = mediaRec.mimeType || audioMime || 'audio/webm';
+    mediaRec.ondataavailable = e => { if(e.data && e.data.size) audioChunks.push(e.data); };
+    mediaRec.start(1000);
+  }catch(_){ mediaRec = null; mediaStream = null; }
+}
+function stopAudioCapture(){
+  try{ if(mediaRec && mediaRec.state !== 'inactive') mediaRec.stop(); }catch(_){}
+  try{ if(mediaStream) mediaStream.getTracks().forEach(t=>t.stop()); }catch(_){}
+  mediaRec = null; mediaStream = null;
 }
 function stopRecord(){
   recording = false;
   if(recog){ try{ recog.stop(); }catch(_){} }
+  stopAudioCapture();
   accumSec += Math.floor((Date.now()-startTs)/1000);
   clearInterval(timerInt);
   document.getElementById('btn-rec').innerHTML = '● Record';
@@ -321,6 +347,7 @@ function stopRecord(){
 }
 function clearAll(){
   if(recording) stopRecord();
+  audioChunks = [];
   finalText=''; accumSec=0; currentMeeting=null;
   tbox.innerHTML=''; tbox.contentEditable='true';
   document.getElementById('rec-timer').textContent='00:00';
@@ -352,6 +379,27 @@ async function saveMeeting(){
   if(!m){ btn.disabled=false; btn.textContent='Save & build knowledge'; return; }
   currentMeeting = m;
   TMIAdmin.toast('Meeting saved');
+
+  // Upload the captured audio to Firebase Storage and attach it. Best-effort:
+  // the meeting is already saved, so a failed upload never blocks the digest.
+  if(audioChunks.length){
+    btn.textContent = 'Uploading audio...';
+    try{
+      const blob = new Blob(audioChunks, { type: audioMime || 'audio/webm' });
+      const ext = (audioMime||'').includes('mp4') ? 'm4a' : 'webm';
+      const t = await TMIAdmin.api('/api/storage','POST',{
+        action:'upload-url', folder:'meetings', filename:`${m.id}.${ext}`, content_type: blob.type
+      });
+      if(t && t.upload_url){
+        const up = await fetch(t.upload_url, { method:'PUT', headers:{'Content-Type': blob.type}, body: blob });
+        if(up.ok){
+          await TMIAdmin.api('/api/meetings','PUT',{ id: m.id, audio_path: t.path, audio_mime: blob.type, audio_size: blob.size });
+          currentMeeting.audio_path = t.path;
+          audioChunks = [];
+        }
+      }
+    }catch(_){ TMIAdmin.toast('Audio upload failed (transcript saved)','error'); }
+  }
 
   btn.textContent = 'Analyzing...';
   await genDoc('digest', true);
@@ -431,7 +479,7 @@ function renderHistory(){
   if(!list.length){ box.innerHTML=`<div style="font-size:13px;color:var(--muted);">No meetings yet.</div>`; return; }
   box.innerHTML = list.map(m=>{
     const dur = m.duration_sec ? `${Math.floor(m.duration_sec/60)}m` : '';
-    const badges = [m.prd?'PRD':null, m.sop?'SOP':null, m.knowledge?'Knowledge':null].filter(Boolean)
+    const badges = [m.prd?'PRD':null, m.sop?'SOP':null, m.knowledge?'Knowledge':null, m.audio_path?'Audio':null].filter(Boolean)
       .map(b=>`<span class="badge badge-active">${b}</span>`).join(' ');
     return `<div class="mtg-card" onclick='openMeeting("${m.id}")'>
       <div class="mtg-top"><div><h3>${esc(m.account_label||m.company||'Account')}</h3>
@@ -460,6 +508,15 @@ async function openMeeting(id){
   if (panelMeeting.client_id) acctBtn.href = `/admin-account?type=client&id=${encodeURIComponent(panelMeeting.client_id)}`;
   else if (panelMeeting.lead_id) acctBtn.href = `/admin-account?type=lead&id=${encodeURIComponent(panelMeeting.lead_id)}`;
   acctBtn.style.display = (panelMeeting.client_id || panelMeeting.lead_id) ? '' : 'none';
+  // Recording playback: signed read URL from Firebase Storage.
+  const audWrap = document.getElementById('dp-audio');
+  const audEl = document.getElementById('dp-audio-el');
+  audWrap.style.display = 'none'; audEl.removeAttribute('src');
+  if(panelMeeting.audio_path){
+    TMIAdmin.api('/api/storage?path='+encodeURIComponent(panelMeeting.audio_path)).then(r=>{
+      if(r && r.url){ audEl.src = r.url; audWrap.style.display = 'block'; }
+    }).catch(()=>{});
+  }
   TMIAdmin.openPanel('mtg-panel');
 }
 async function panelGen(kind){

@@ -9,6 +9,7 @@ const { requireAuth, cors } = require('./_auth');
 // Collection: sales_meetings
 //   { lead_id?, client_id?, contact_id?, account_type, company, account_label,
 //     title, sales_stage, transcript, duration_sec, met_on,
+//     audio_path, audio_mime, audio_size,   // recording in Firebase Storage
 //     summary, knowledge, prd, sop, processed_at, created_at }
 
 module.exports = async (req, res) => {
@@ -59,6 +60,9 @@ module.exports = async (req, res) => {
         sales_stage:  b.sales_stage || null,
         transcript:   String(b.transcript),
         duration_sec: b.duration_sec || null,
+        audio_path:   b.audio_path || null,
+        audio_mime:   b.audio_mime || null,
+        audio_size:   b.audio_size || null,
         met_on:       b.met_on || new Date().toISOString().slice(0, 10),
         summary:      null,
         knowledge:    null,
@@ -79,6 +83,11 @@ module.exports = async (req, res) => {
     if (req.method === 'DELETE') {
       const { id } = req.query;
       if (!id) return res.status(400).json({ error: 'id required' });
+      // Best-effort: delete the recording from Firebase Storage with the doc.
+      try {
+        const row = await db.getById('sales_meetings', id);
+        if (row && row.audio_path) await require('./_storage').remove(row.audio_path);
+      } catch (_) {}
       await db.remove('sales_meetings', id);
       return res.json({ ok: true });
     }
