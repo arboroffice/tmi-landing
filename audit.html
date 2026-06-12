@@ -1460,10 +1460,19 @@ function computeResults() {
   const dollarsSavedMonthly = Math.round((hoursFreedMonthly * laborRate + monthlyLoss * 0.7) / 500) * 500;
   const paybackMonths = Math.ceil(25000 / Math.max(dollarsSavedMonthly, 1000));
 
+  // Bonus: Intelligent Company Readiness Score (inverse of manual dependency)
+  const readiness = 100 - depPct;
+  const readinessLabel =
+    readiness >= 80 ? 'Intelligent Operator' :
+    readiness >= 60 ? 'System-Ready' :
+    readiness >= 40 ? 'Emerging' :
+    readiness >= 20 ? 'Manual-Heavy' : 'Founder-Dependent';
+
   return {
     tierKey,composite,depPct,catPct,worstCat,secondCat,painGroup,
     monthlyLoss,monthlyHoursCost,totalMonthlyWaste,annualWaste,
     hoursFreedMonthly,dollarsSavedMonthly,paybackMonths,
+    readiness,readinessLabel,
   };
 }
 
@@ -1577,6 +1586,14 @@ function buildResultsHTML(r) {
           <span>Prepared by TMI Technology</span>
           <span>${date}</span>
           <span>Founder Dependency: ${r.depPct}%</span>
+        </div>
+        <div style="margin-top:26px;display:inline-flex;align-items:center;gap:22px;padding:20px 28px;background:rgba(228,255,151,0.06);border:1px solid rgba(228,255,151,0.25);border-radius:14px;flex-wrap:wrap;">
+          <div style="font-family:var(--serif);font-size:56px;font-weight:900;color:var(--chart);line-height:1;letter-spacing:-0.03em;">${r.readiness}<span style="font-size:0.38em;font-weight:400;color:rgba(255,255,255,0.4);">/100</span></div>
+          <div>
+            <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.45);font-weight:700;">Intelligent Company Readiness Score</div>
+            <div style="font-family:var(--serif);font-size:21px;font-weight:700;color:#fff;margin-top:4px;">${r.readinessLabel}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:3px;max-width:44ch;line-height:1.5;">Your readiness signal going into the discovery call. We read this score and this roadmap before we get on the phone, so the call starts at the plan, not the pitch.</div>
+          </div>
         </div>
         <div id="ai-status-badge" class="ai-status-badge analyzing"><span class="ai-dot"></span> TMI is analyzing your operation&hellip;</div>
       </div>
@@ -1837,8 +1854,8 @@ function buildResultsHTML(r) {
         <div class="prop-steps-grid">
           <div class="prop-step-card">
             <div class="prop-step-num">Step 01</div>
-            <div class="prop-step-title">Book the Audit Call</div>
-            <div class="prop-step-body">30 minutes. We walk through exactly what we would build, in what order, and why. A clear picture before any commitment.</div>
+            <div class="prop-step-title">Book the Discovery Call</div>
+            <div class="prop-step-body">30 minutes. This audit is the required first step - your AI readiness roadmap. We arrive having read it, you arrive knowing your score, and we walk through exactly what we would build, in what order, and why.</div>
           </div>
           <div class="prop-step-card">
             <div class="prop-step-num">Step 02</div>
@@ -1853,9 +1870,9 @@ function buildResultsHTML(r) {
         </div>
         <div class="prop-cta-bar">
           <h2>Ready To Build This?</h2>
-          <p>Book a free audit. One call - we walk through exactly what we would build and what it would take to get there. No pitch. Just a plan.</p>
+          <p>You've done the required prep - this audit is your AI readiness roadmap, and your readiness score is ${r.readiness}/100. Book the discovery call and we both walk in prepared. No pitch. Just a plan.</p>
           <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;">
-            <a href="/booking" class="btn btn-primary" style="font-size:16px;padding:16px 40px;">Book Free Audit &rarr;</a>
+            <a href="/booking" class="btn btn-primary" style="font-size:16px;padding:16px 40px;">Book Discovery Call &rarr;</a>
             <span class="res-retake" onclick="retakeAudit()">Retake the audit</span>
           </div>
         </div>
