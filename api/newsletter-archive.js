@@ -1,7 +1,7 @@
 const db = require('./_db');
 const { renderIssue, SITE } = require('./_newsletter-render');
 
-// Public archive ("the vault") for Founders of the Future.
+// Public archive ("the vault") for Field Notes.
 // Only issues with status 'sent' are ever exposed - drafts and tests stay private.
 //   GET            -> { issues: [{id,title,subject,sent_at,format}] } (newest first)
 //   GET ?id=<id>   -> the rendered letter as a standalone HTML page

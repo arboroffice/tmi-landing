@@ -1,4 +1,4 @@
-// On-brand HTML renderer for Founders of the Future letters.
+// On-brand HTML renderer for Field Notes letters.
 // Shared by api/newsletter.js (real sends) and api/newsletter-test.js (test sends).
 //
 // Design: white background (force-held in dark mode via prefers-color-scheme +
@@ -106,7 +106,7 @@ function renderIssue(issue = {}, unsubUrl = SITE + '/api/nl-unsubscribe') {
   <tr><td style="padding:0 8px 20px;border-bottom:2px solid ${CHART};">
     <table role="presentation" width="100%"><tr>
       <td class="fc-ink" style="font-family:${HFONT};font-size:19px;font-weight:800;letter-spacing:0.06em;color:#111111;">TMI</td>
-      <td class="fc-mut" align="right" style="font-family:${FONT};font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#888888;">Founders of the Future</td>
+      <td class="fc-mut" align="right" style="font-family:${FONT};font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#888888;">Field Notes</td>
     </tr></table>
   </td></tr>
   <tr><td style="padding:36px 8px 8px;">
@@ -115,7 +115,7 @@ function renderIssue(issue = {}, unsubUrl = SITE + '/api/nl-unsubscribe') {
     ${cta}
   </td></tr>
   <tr><td class="fc-mut" style="padding:30px 8px 0;border-top:1px solid #e6e6e6;">
-    <p style="margin:18px 0 6px;font-family:${FONT};font-size:12px;color:#888888;line-height:1.6;">Founders of the Future &middot; the community we are building at TMI.</p>
+    <p style="margin:18px 0 6px;font-family:${FONT};font-size:12px;color:#888888;line-height:1.6;">Field Notes &middot; the community we are building at TMI.</p>
     <p style="margin:0;font-family:${FONT};font-size:11px;color:#aaaaaa;">TMI Technology &middot; intelligent infrastructure for any business &middot; <a href="${unsubUrl}" style="color:#888888;">Unsubscribe</a></p>
   </td></tr>
 </table>

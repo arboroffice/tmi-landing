@@ -11,7 +11,7 @@ const TMIAdmin = (() => {
     fotf: ['General','Enterprise','Partner']
   };
 
-  const SOURCES = ['Website','Referral','LinkedIn','Instagram','Cold Outreach','Event','Founders of the Future','Other'];
+  const SOURCES = ['Website','Referral','LinkedIn','Instagram','Cold Outreach','Event','Field Notes','Other'];
 
   // ── Icons ─────────────────────────────────────────────────────────────────
   const I = {
@@ -259,7 +259,7 @@ const TMIAdmin = (() => {
     ${navItem('email', 'Email', I.email, false, '/admin-comms#email')}
     ${navItem('sms', 'SMS', I.sms, false, '/admin-comms#sms')}
     <div class="sb-group-label">Content</div>
-    ${navItem('content', 'Founders of the Future', I.content, false, '/admin-content-hub#articles')}
+    ${navItem('content', 'Field Notes', I.content, false, '/admin-content-hub#articles')}
     ${navItem('newsletter', 'Newsletter', I.newsletter)}
     ${navItem('content-ideas', 'Social Ideas', I.ideas, false, '/admin-content-hub#ideas')}
     ${navItem('content-compose', 'Compose', I.content)}
@@ -347,7 +347,7 @@ const TMIAdmin = (() => {
           { page:'sms', label:'SMS', icon:I.sms, href:'/admin-comms#sms' },
         ]},
         { label: 'Content', items: [
-          { page:'content',          label:'Founders of the Future',  icon:I.content,  href:'/admin-content-hub#articles' },
+          { page:'content',          label:'Field Notes',  icon:I.content,  href:'/admin-content-hub#articles' },
           { page:'content-ideas',    label:'Social Ideas', icon:I.ideas,    href:'/admin-content-hub#ideas' },
           { page:'content-compose',  label:'Compose',      icon:I.content },
           { page:'content-calendar', label:'Calendar',     icon:I.rituals,  href:'/admin-content-hub#calendar' },

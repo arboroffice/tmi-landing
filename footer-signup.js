@@ -42,7 +42,7 @@
     sec.id = 'tmi-fsignup';
     sec.innerHTML = '<div class="in">\
 <div class="tag">Newsletter</div>\
-<h3>Join Founders of the Future</h3>\
+<h3>Join Field Notes</h3>\
 <p class="sub">Sharp dispatches for owners and builders. Zero AI hype.</p>\
 <form id="tmi-fs-form">\
 <div class="row"><input type="email" required placeholder="you@company.com"/><button type="submit">Sign up</button></div>\
@@ -80,7 +80,7 @@
         body: JSON.stringify({ email: email, source: 'founders-of-the-future' })
       }).then(function (r) {
         if (!r.ok) throw new Error('failed');
-        try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Founders of the Future' + (brief.checked ? ' + The Brief' : '') }); } catch (_) {}
+        try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Field Notes' + (brief.checked ? ' + The Brief' : '') }); } catch (_) {}
         sec.querySelector('.in').innerHTML = '<div class="ok">You\'re in. Check your inbox' + (brief.checked ? ' &mdash; The Brief lands tomorrow morning.' : '.') + '</div>';
       }).catch(function () { btn.disabled = false; btn.textContent = 'Sign up'; alert('Something went wrong. Please try again.'); });
     });

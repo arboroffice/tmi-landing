@@ -1,7 +1,7 @@
 const { Resend } = require('resend');
 const { renderIssue } = require('./_newsletter-render');
 
-// One-off test send of an on-brand Founders of the Future letter.
+// One-off test send of an on-brand Field Notes letter.
 // GET ?to=<addr> (defaults to mia@tmitechai.com). Recipient is restricted to
 // @tmitechai.com so this utility can never be used to email outsiders.
 // Used to preview the on-brand template in a real inbox.
@@ -49,8 +49,8 @@ module.exports = async (req, res) => {
     // tmitechai.com may not be verified in Resend yet; onboarding@resend.dev is
     // Resend's universal test sender and delivers to the account owner's inbox.
     const from = req.query.from === 'domain'
-      ? 'Founders of the Future <support@tmitechai.com>'
-      : 'Founders of the Future <onboarding@resend.dev>';
+      ? 'Field Notes <support@tmitechai.com>'
+      : 'Field Notes <onboarding@resend.dev>';
     const r = await resend.emails.send({
       from,
       to,

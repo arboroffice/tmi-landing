@@ -33,7 +33,7 @@ module.exports = async function handler(req, res) {
     });
     if (lead) leadId = lead.id;
 
-    // Also subscribe them to Founders of the Future (tag the contact). We never
+    // Also subscribe them to Field Notes (tag the contact). We never
     // touch `unsubscribed`, so anyone who previously opted out stays opted out.
     try {
       const em = email.toLowerCase().trim();

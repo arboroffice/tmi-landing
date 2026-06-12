@@ -3,7 +3,7 @@ const { requireAuth, cors } = require('./_auth');
 const { Resend } = require('resend');
 const { renderIssue } = require('./_newsletter-render');
 
-// Founders of the Future newsletter - admin compose/manage/send.
+// Field Notes newsletter - admin compose/manage/send.
 //   GET                     -> { issues:[...], subscriber_count }
 //   POST {id?, title, subject, preheader, format, body, audience_tag}
 //                           -> create or update a draft issue
@@ -12,7 +12,7 @@ const { renderIssue } = require('./_newsletter-render');
 //   DELETE ?id=             -> delete a draft
 
 const SITE = 'https://www.tmitechai.com';
-const FROM = 'Founders of the Future <support@tmitechai.com>';
+const FROM = 'Field Notes <support@tmitechai.com>';
 
 async function getSubscribers(audienceTag) {
   // Large read: pull up to 50k contacts then filter in JS. Firestore can't do
@@ -56,7 +56,7 @@ module.exports = async (req, res) => {
       if (!issue) return res.status(404).json({ error: 'Issue not found' });
 
       const resend = new Resend(process.env.RESEND_API_KEY);
-      const subject = issue.subject || issue.title || 'Founders of the Future';
+      const subject = issue.subject || issue.title || 'Field Notes';
 
       // Test send: single address, doesn't change issue status.
       if (body.test_email) {
