@@ -220,6 +220,23 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   .taglist{display:flex;flex-wrap:wrap;gap:10px;margin-top:36px;max-width:780px;}
   .taglist span{font-family:var(--sans);font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);padding:9px 18px;border-radius:999px;}
   @media(max-width:860px){.g2{grid-template-columns:1fr;}}
+
+  /* founders of the future signup */
+  .fotf-join{margin-top:32px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:24px 44px;}
+  .fotf-form{max-width:460px;flex:1;min-width:280px;}
+  .fotf-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .fotf-row input[type=email]{flex:1;min-width:200px;background:#fff;border:1px solid var(--line-strong,rgba(0,0,0,0.13));color:var(--ink);padding:13px 14px;border-radius:9px;font:inherit;font-size:14px;outline:none;}
+  .fotf-row input[type=email]:focus{border-color:var(--ink);}
+  .fotf-row button{background:var(--chart);color:#0a0b14;border:none;font:inherit;font-weight:700;font-size:13px;padding:13px 22px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:background .15s;}
+  .fotf-row button:hover{background:var(--chart-dark);}
+  .fotf-row button:disabled{opacity:.6;cursor:not-allowed;}
+  .fotf-opt{display:flex;align-items:flex-start;gap:9px;margin:14px 0 0;font-size:13px;color:var(--ink-2);line-height:1.45;cursor:pointer;}
+  .fotf-opt input{margin:2px 0 0;accent-color:#0a0b14;width:15px;height:15px;flex:none;}
+  .fotf-opt b{color:var(--ink);font-weight:700;}
+  .fotf-opt a{color:var(--ink);text-decoration:underline;}
+  .fotf-err{font-size:12px;color:#c0392b;margin:12px 0 0;display:none;}
+  .fotf-nt{font-size:11px;color:var(--muted);margin:14px 0 0;}
+  .fotf-ok{font-size:16px;color:var(--ink);font-weight:600;}
 </style>
 </head>
 <body>
@@ -404,12 +421,23 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 
 <!-- FOUNDERS OF THE FUTURE -->
 <section class="alt">
-  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
-    <div>
-      <div class="eyebrow" style="margin-bottom:8px;">Founders of the Future</div>
-      <p style="font-family:var(--serif);font-size:clamp(18px,1.8vw,24px);color:var(--ink);margin:0;">Not here to hand off the chaos, but to build? <span style="color:var(--ink-2);">Founders of the Future is the movement - where builders, dreamers, and visionaries start AI-powered companies and build them with us. Bring the vision. We build it with you.</span></p>
+  <div class="wrap">
+    <div class="eyebrow reveal" style="margin-bottom:8px;">Founders of the Future</div>
+    <h2 class="lead reveal" style="max-width:22ch;">Not here to hand off the chaos, <em>but to build?</em></h2>
+    <p class="sub reveal" style="max-width:56ch;">Founders of the Future is the movement - where builders, dreamers, and visionaries start AI-powered companies and build them with us. Bring the vision. We build it with you.</p>
+    <div class="fotf-join reveal">
+      <form id="fotf-form" class="fotf-form">
+        <div class="fotf-row">
+          <input type="email" id="fotf-email" required placeholder="you@company.com"/>
+          <button type="submit" id="fotf-btn">Join the movement</button>
+        </div>
+        <label class="fotf-opt"><input type="checkbox" id="fotf-brief" checked/> <span>Also send me <b>The Brief</b>: a custom daily AI briefing, tuned to your job, your business, and your tech stack.</span></label>
+        <label class="fotf-opt"><input type="checkbox" id="fotf-terms"/> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">terms</a>.</span></label>
+        <div class="fotf-err" id="fotf-err">Please agree to the terms to continue.</div>
+        <p class="fotf-nt">No spam &middot; unsubscribe anytime</p>
+      </form>
+      <a href="https://foundersotf.com" class="btn" onclick="lead()" target="_blank" rel="noopener" style="flex:none;">Visit foundersotf.com &rarr;</a>
     </div>
-    <a href="https://foundersotf.com" class="btn" onclick="lead()" style="flex:none;" target="_blank" rel="noopener">Join the movement &rarr;</a>
   </div>
 </section>
 
@@ -524,6 +552,40 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     es.forEach(function(e){ dock.classList.toggle('up', !e.isIntersecting); });
   }, {threshold:0});
   if(hero) dockIO.observe(hero);
+
+  // Founders of the Future signup (mirrors footer-signup.js: /api/subscribe + The Brief opt-in)
+  (function(){
+    var form = document.getElementById('fotf-form');
+    if(!form) return;
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var input = document.getElementById('fotf-email');
+      var brief = document.getElementById('fotf-brief');
+      var terms = document.getElementById('fotf-terms');
+      var btn = document.getElementById('fotf-btn');
+      var err = document.getElementById('fotf-err');
+      var email = (input.value || '').trim();
+      err.style.display = 'none';
+      if(!email || email.indexOf('@') < 0){ input.focus(); return; }
+      if(!terms.checked){ err.style.display = 'block'; return; }
+      btn.disabled = true; btn.textContent = '...';
+      if(brief.checked){
+        try { fetch('https://thebrief.foundersotf.com/api/waitlist', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email }) }); } catch(_){}
+      }
+      fetch('/api/subscribe', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: email, source: 'founders-of-the-future' })
+      }).then(function(r){
+        if(!r.ok) throw new Error('failed');
+        lead();
+        try { if(typeof fbq === 'function') fbq('track','Lead',{ content_name: 'Founders of the Future' + (brief.checked ? ' + The Brief' : '') }); } catch(_){}
+        form.innerHTML = '<div class="fotf-ok">You\'re in. Check your inbox' + (brief.checked ? ' &mdash; The Brief lands tomorrow morning.' : '.') + '</div>';
+      }).catch(function(){
+        btn.disabled = false; btn.textContent = 'Join the movement';
+        alert('Something went wrong. Please try again.');
+      });
+    });
+  })();
 </script>
 <script src="/rb2b.js"></script>
 </body>
