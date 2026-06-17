@@ -273,6 +273,27 @@ export async function logRun(stats) {
   return insert('gtm_runs', { ...stats, ran_at: new Date().toISOString() });
 }
 
+// Funnel snapshot for the daily briefing.
+export async function getFunnel() {
+  const c = (w) => count('leads', w).catch(() => 0);
+  const [total, inCampaign, sent, replied, booked] = await Promise.all([
+    c(),
+    c([['status', '==', 'in_campaign']]),
+    c([['status', '==', 'sent']]),
+    c([['status', '==', 'replied']]),
+    c([['status', '==', 'booked']]),
+  ]);
+  return { total, contacted: inCampaign + sent + replied + booked, replied: replied + booked, booked };
+}
+
+export async function getHotAccounts(limit = 10) {
+  return list('leads', { where: [['priority', '==', 'high']], order: 'created_at', ascending: false, limit }).catch(() => []);
+}
+
+export async function getRecentBookings(limit = 10) {
+  return list('leads', { where: [['status', '==', 'booked']], order: 'booked_at', ascending: false, limit }).catch(() => []);
+}
+
 // ── Suppression / do-not-contact (guardrail for unattended sending) ─────────
 // Never contact our own domains, opt-outs, current clients, or competitors.
 const OWN_DOMAINS = ['tmitechai.com', 'tmi-technology.com', 'arboroffice.io'];

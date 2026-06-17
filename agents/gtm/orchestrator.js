@@ -257,27 +257,42 @@ export async function run() {
   // Observability: record the run.
   await db.logRun({ ...stats, source: SOURCE, dry_run: dry, target, elapsed_s: elapsed }).catch(e => console.error('logRun:', e.message));
 
-  // 4. Send daily digest
-  const digestStats = await db.getDigestStats();
+  // 4. Send the operator's daily briefing (funnel + bookings + hot accounts).
+  const digestStats = await db.getDigestStats().catch(() => ({}));
+  const funnel = await db.getFunnel().catch(() => ({}));
+  const bookings = await db.getRecentBookings(8).catch(() => []);
+  const hot = await db.getHotAccounts(8).catch(() => []);
+
+  const line = (l) => l;
   const digestBody = [
-    `TMI GTM Agent - Daily Digest`,
+    `TMI Outbound — Daily Briefing`,
     `${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`,
     '',
-    `New leads added:    ${digestStats.newLeadsAdded}`,
-    `Emails sent:        ${digestStats.emailsSent}`,
-    `Replies received:   ${digestStats.repliesReceived}`,
+    `TODAY`,
+    `  New prospects:   ${stats.found}`,
+    `  Contacted:       ${stats.contacted}${dry ? ' (DRY RUN — nothing sent)' : ''}`,
+    `  Follow-ups:      ${stats.followupsSent}`,
+    `  Errors:          ${stats.errors}`,
     '',
-    `Skipped (no fit/email): ${stats.skipped}`,
-    `Errors:             ${stats.errors}`,
-    `Run time:           ${elapsed}s`,
+    `FUNNEL (all time)`,
+    `  Sourced:         ${funnel.total ?? '—'}`,
+    `  Contacted:       ${funnel.contacted ?? '—'}`,
+    `  Replied:         ${funnel.replied ?? '—'}`,
+    `  Booked:          ${funnel.booked ?? '—'}`,
     '',
-    'View leads: https://tmi-technology.com/admin',
-  ].join('\n');
+    bookings.length ? `CALLS BOOKED` : `No new bookings yet.`,
+    ...bookings.map(b => `  • ${b.company_name || b.email} — ${b.owner_name || ''} <${b.email}>`),
+    '',
+    hot.length ? `HOT ACCOUNTS (hiring-signal triggers)` : '',
+    ...hot.map(h => `  • ${h.company_name} — ${h.signals || 'signal'} ${h.audit_url ? '(' + h.audit_url + ')' : ''}`),
+    '',
+    `Manage: https://admin.tmitechai.com/outbound`,
+  ].filter(line => line !== '').join('\n');
 
   await sendDigest({
-    subject: `GTM Digest - ${digestStats.emailsSent} sent, ${digestStats.repliesReceived} replies`,
+    subject: `Outbound briefing — ${stats.contacted} contacted, ${funnel.booked ?? 0} booked total`,
     body: digestBody,
-  }).catch(e => console.error('Digest failed:', e.message));
+  }).catch(e => console.error('Briefing failed:', e.message));
 
   return stats;
 }
