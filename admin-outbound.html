@@ -59,7 +59,7 @@
 
       <div class="ladder">
         <div class="rung free"><h4>Intelligent Company Audit</h4><div class="p">The hook. Personalized microsite + score.</div><div class="price">Free</div></div>
-        <div class="rung"><h4>Operational Blueprint</h4><div class="p">The deeper map and plan.</div><div class="price">$2,500&ndash;$5,000</div></div>
+        <div class="rung free"><h4>Discovery call</h4><div class="p">Booked from the audit. Where we close.</div><div class="price">Free</div></div>
         <div class="rung"><h4>Intelligent Company OS</h4><div class="p">Delete, connect, build. 90 days.</div><div class="price">$25,000&ndash;$100,000+</div></div>
         <div class="rung"><h4>Command Layer</h4><div class="p">Ongoing AI + ops department.</div><div class="price">Optional retainer</div></div>
       </div>
@@ -131,7 +131,7 @@ async function loadProspects(){
       <td><span class="badge ${scl}">${stl}</span></td>
       <td>${l.outreach_count!=null?(l.outreach_count+'/4'):'—'}</td>
       <td>${auditCell}</td>
-      <td><a class="lnk" href="/admin-leads#${l.id}">Details</a></td>
+      <td>${l.audit_url ? `<a class="lnk" onclick="genBlueprint('${slug}','${l.id}')" style="cursor:pointer">Proposal</a> &middot; ` : ''}<a class="lnk" href="/admin-leads#${l.id}">Details</a></td>
     </tr>`;
   }).join('');
 }
@@ -151,6 +151,14 @@ async function runOutbound(){
     alert(r?.message || 'Outbound run started. Watch "Recent agent runs" + the GTM digest.');
     setTimeout(loadRuns, 4000);
   } catch(e){ alert('Run request failed: ' + e.message); }
+}
+
+async function genBlueprint(slug, leadId){
+  if(!confirm('Generate an Operational Blueprint draft from this audit? (emails the team)')) return;
+  try {
+    const r = await TMIAdmin.api('/api/blueprint', 'POST', { slug, leadId });
+    alert(r?.ok ? `Blueprint drafted for ${r.company}. Sent to the team inbox.` : 'Done.');
+  } catch(e){ alert('Blueprint failed: ' + e.message); }
 }
 
 async function enrollLead(){
