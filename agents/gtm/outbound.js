@@ -5,7 +5,7 @@ import { researchCompany } from './tools/research.js';
 import { buildAuditData } from './audit-build.js';
 import { writeAuditPage } from './audit-site.js';
 import { writeCardPng } from './audit-card.js';
-import { VOICE_SYSTEM, FOLLOWUP_1_SYSTEM, FOLLOWUP_2_SYSTEM, BREAKUP_SYSTEM } from './prompts/voice.js';
+import { VOICE_SYSTEM, FOLLOWUP_1_SYSTEM, FOLLOWUP_2_SYSTEM, FOLLOWUP_3_SYSTEM, PLAYBOOK_SYSTEM, BREAKUP_SYSTEM } from './prompts/voice.js';
 import { LIMITS } from './config.js';
 
 const anthropic = new Anthropic();
@@ -55,12 +55,15 @@ function getSequenceStep(outreachCount) {
   if (outreachCount === 0) return { step: 'cold', system: VOICE_SYSTEM };
   if (outreachCount === 1) return { step: 'followup_1', system: FOLLOWUP_1_SYSTEM };
   if (outreachCount === 2) return { step: 'followup_2', system: FOLLOWUP_2_SYSTEM };
-  if (outreachCount === 3) return { step: 'breakup', system: BREAKUP_SYSTEM };
+  if (outreachCount === 3) return { step: 'followup_3', system: FOLLOWUP_3_SYSTEM };
+  if (outreachCount === 4) return { step: 'playbook', system: PLAYBOOK_SYSTEM };
+  if (outreachCount === 5) return { step: 'breakup', system: BREAKUP_SYSTEM };
   return null;
 }
 
 function getNextFollowupDate(step) {
-  const days = { cold: 3, followup_1: 7, followup_2: 14, breakup: null };
+  // days until the next step (relative to this send): 0,3,7,14,21,28 absolute
+  const days = { cold: 3, followup_1: 4, followup_2: 7, followup_3: 7, playbook: 7, breakup: null };
   const d = days[step];
   if (!d) return null;
   const date = new Date();

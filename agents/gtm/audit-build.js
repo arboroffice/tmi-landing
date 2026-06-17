@@ -25,7 +25,11 @@ REVENUE (est): ${lead.revenue_est || lead.revenue || 'unknown'}
 OWNER: ${lead.owner_name || 'the owner'} (${lead.owner_title || 'Owner'})
 PRIMARY PAIN (research): ${research?.primaryPain || 'manual, disconnected operations'}
 LIKELY PAIN POINTS: ${research?.likelyPainPoints?.join(', ') || 'scheduling, dispatch, reporting, communication'}
+DETECTED TECH STACK: ${research?.techStack?.length ? research.techStack.join(', ') : 'none found (likely manual / off-the-shelf)'}
+HIRING SIGNALS (bottleneck tells): ${research?.signals?.length ? research.signals.join(', ') : 'none detected'}
 WEBSITE EXCERPT: ${(websiteText || '').slice(0, 1500) || 'n/a'}
+
+When you write the "current" list, reference their REAL detected tools where possible (and the gaps between them). When hiring signals exist, treat them as proof a human is moving information a system should move. Keep it specific and grounded in these facts.
 `.trim();
 
   const msg = await anthropic.messages.create({

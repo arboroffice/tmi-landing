@@ -47,8 +47,8 @@ export const ICP = {
 export const LIMITS = {
   leadsPerDay: 100,      // new prospects to find, audit, and contact per day
   maxCombosPerRun: 24,   // industry x city searches to try before stopping
-  maxFollowups: 3,       // cold + 2 follow-ups + 1 breakup
-  followupDays: [3, 7, 14],  // days after last contact to send each follow-up
+  maxFollowups: 5,       // cold + 3 follow-ups + playbook + breakup
+  followupDays: [3, 7, 14, 21, 28],  // approx send days after the cold email
 };
 
 export const SENDER = {

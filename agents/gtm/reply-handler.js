@@ -5,51 +5,71 @@ import { VOICE_SYSTEM } from './prompts/voice.js';
 
 const anthropic = new Anthropic();
 
-// ── Classify the intent of a reply ────────────────────────────────────────
+const BOOKING_URL = process.env.BOOKING_URL || 'https://www.tmitechai.com/audit';
+// Auto-send the drafted reply to the prospect when set; otherwise draft + notify the team.
+const AUTO_REPLY = String(process.env.AUTO_REPLY || '').toLowerCase() === 'true';
 
+// ── Classify the intent of a reply ──────────────────────────────────────────
 async function classifyReply(replyBody) {
   const message = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 200,
+    max_tokens: 260,
     messages: [{
       role: 'user',
-      content: `Classify the intent of this email reply to a cold outreach email. Return JSON only.
+      content: `Classify this reply to a cold outreach email that linked a personalized operational audit. Return JSON only.
 
 Reply:
-${replyBody.slice(0, 1000)}
+${replyBody.slice(0, 1200)}
 
-Return: {"intent": "interested"|"not_now"|"not_interested"|"wrong_person"|"unsubscribe"|"out_of_office", "summary": "one sentence", "urgency": "high"|"medium"|"low"}`
+intent options:
+- "interested" (positive, wants to learn more)
+- "meeting_request" (explicitly wants to book/talk)
+- "question" (asked something specific that needs answering)
+- "not_now" (timing, circle back later)
+- "not_interested"
+- "wrong_person" (forward / not the right contact)
+- "unsubscribe"
+- "out_of_office" (auto-reply)
+
+Return: {"intent": "...", "summary": "one sentence", "question": "the specific question if intent is question, else null", "urgency": "high"|"medium"|"low"}`
     }]
   });
-
   try {
     const json = message.content[0].text.match(/\{[\s\S]*\}/)?.[0];
-    return json ? JSON.parse(json) : { intent: 'not_interested', summary: 'Unclear', urgency: 'low' };
+    return json ? JSON.parse(json) : { intent: 'not_interested', summary: 'Unclear', question: null, urgency: 'low' };
   } catch {
-    return { intent: 'not_interested', summary: 'Parse error', urgency: 'low' };
+    return { intent: 'not_interested', summary: 'Parse error', question: null, urgency: 'low' };
   }
 }
 
-// ── Draft a response for interested replies ────────────────────────────────
-
-async function draftResponse({ lead, replyBody, classification }) {
+// ── Draft a response (interested / meeting / question) ──────────────────────
+async function draftReply({ lead, replyBody, classification }) {
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 400,
+    max_tokens: 450,
     system: VOICE_SYSTEM,
     messages: [{
       role: 'user',
-      content: `Draft a reply to this interested prospect. Short, warm, move them toward a 15-min call.
+      content: `Write a short, warm reply to this prospect who responded to the personalized audit we sent. You are Mia from TMI.
 
-Company: ${lead.company_name}
-Name: ${lead.owner_name || 'unknown'}
-Their reply: ${replyBody.slice(0, 800)}
-Classification: ${classification.summary}
+Company: ${lead?.company_name || 'their company'}
+Name: ${lead?.owner_name || 'there'}
+Their audit: ${lead?.audit_url || '(audit link)'}
+Booking link: ${BOOKING_URL}
+Their reply: ${replyBody.slice(0, 900)}
+Intent: ${classification.intent}
+${classification.question ? `Their question: ${classification.question}` : ''}
 
-Return JSON: {"subject": "Re: ...", "body": "plain text response"}`
+Rules:
+- If they asked a question, answer it directly and briefly first.
+- Reference something specific they said.
+- Move toward a short working session. Offer the booking link on its own line.
+- If useful, point back to their audit link.
+- Keep it under 90 words. Sign as Mia, TMI. No meeting-ask cliches, no hard sell.
+
+Return JSON: {"subject": "Re: ...", "body": "plain text with line breaks"}`
     }]
   });
-
   try {
     const json = message.content[0].text.match(/\{[\s\S]*\}/)?.[0];
     return json ? JSON.parse(json) : null;
@@ -58,63 +78,64 @@ Return JSON: {"subject": "Re: ...", "body": "plain text response"}`
   }
 }
 
-// ── Main handler ───────────────────────────────────────────────────────────
+const RESPOND_INTENTS = new Set(['interested', 'meeting_request', 'question']);
 
+// ── Main handler ─────────────────────────────────────────────────────────────
 export async function handleReply({ fromEmail, subject, body, inReplyToMessageId }) {
-  // Find the lead by email, with its outreach history attached.
   const lead = await db.getLeadWithOutreach(fromEmail);
+  const outreach = lead?.outreach?.find(o => o.resend_message_id === inReplyToMessageId) || lead?.outreach?.[0];
 
-  // Find the specific outreach record by message ID
-  const outreach = lead?.outreach?.find(o => o.resend_message_id === inReplyToMessageId)
-    || lead?.outreach?.[0];
-
-  // Classify intent
   const classification = await classifyReply(body);
   console.log(`Reply from ${fromEmail}: ${classification.intent} (${classification.summary})`);
 
-  // Update lead status based on intent
   const updates = { reply_received: true, reply_at: new Date().toISOString() };
-
-  let draftResponse = null;
+  let draft = null;
+  let autoSent = false;
 
   switch (classification.intent) {
     case 'interested':
+    case 'meeting_request':
+    case 'question':
       updates.status = 'replied';
       updates.score = 'hot';
       updates.next_followup_at = null;
-      draftResponse = await draftResponse({ lead, replyBody: body, classification });
+      draft = await draftReply({ lead, replyBody: body, classification });
+      // Optionally send the reply autonomously.
+      if (AUTO_REPLY && draft && lead?.email) {
+        try {
+          const mid = await sendEmail({ to: lead.email, toName: lead.owner_name || undefined, subject: draft.subject || `Re: ${subject}`, body: draft.body });
+          autoSent = true;
+          await db.logOutreach({ leadId: lead.id, step: 'reply', subject: draft.subject, body: draft.body, resendMessageId: mid });
+        } catch (e) { console.error('Auto-reply send failed:', e.message); }
+      }
       break;
 
-    case 'not_now':
+    case 'not_now': {
       updates.status = 'not_now';
-      // Schedule follow-up in 60 days
-      const followupDate = new Date();
-      followupDate.setDate(followupDate.getDate() + 60);
-      updates.next_followup_at = followupDate.toISOString();
+      const d = new Date(); d.setDate(d.getDate() + 60);
+      updates.next_followup_at = d.toISOString();
       break;
-
+    }
     case 'unsubscribe':
       updates.status = 'unsubscribed';
       updates.unsubscribed = true;
       updates.next_followup_at = null;
       break;
-
     case 'wrong_person':
       updates.status = 'wrong_person';
       updates.next_followup_at = null;
       break;
-
-    case 'not_interested':
     case 'out_of_office':
+      updates.status = 'sent'; // leave the sequence running
+      break;
+    case 'not_interested':
     default:
-      updates.status = classification.intent === 'out_of_office' ? 'sent' : 'not_interested';
+      updates.status = 'not_interested';
       updates.next_followup_at = null;
   }
 
   if (lead) {
     await db.updateLead(lead.id, updates);
-
-    // Log reply to replies collection
     await db.logReply({
       lead_id: lead.id,
       outreach_id: outreach?.id || null,
@@ -122,31 +143,32 @@ export async function handleReply({ fromEmail, subject, body, inReplyToMessageId
       subject,
       body: body.slice(0, 5000),
       intent: classification.intent,
-      draft_response: draftResponse?.body || null,
+      draft_response: draft?.body || null,
     });
   }
 
-  // Notify immediately for hot replies
-  if (classification.intent === 'interested') {
+  // Notify the team on any reply worth a human eye.
+  if (RESPOND_INTENTS.has(classification.intent)) {
     const digestBody = [
-      `HOT REPLY - ${lead?.company_name || fromEmail}`,
+      `${autoSent ? 'REPLIED (auto)' : 'HOT REPLY'} - ${lead?.company_name || fromEmail}`,
       `From: ${fromEmail}`,
-      `Summary: ${classification.summary}`,
+      `Intent: ${classification.intent} | ${classification.summary}`,
+      lead?.audit_url ? `Audit: ${lead.audit_url}` : '',
       '',
       '--- Their message ---',
-      body.slice(0, 800),
+      body.slice(0, 900),
       '',
-      '--- Suggested response ---',
-      draftResponse?.body || '(no draft generated)',
+      autoSent ? '--- Sent reply ---' : '--- Suggested reply ---',
+      draft?.body || '(no draft generated)',
       '',
-      'Reply to: ' + fromEmail,
-    ].join('\n');
+      `Reply to: ${fromEmail}`,
+    ].filter(Boolean).join('\n');
 
     await sendDigest({
-      subject: `HOT REPLY: ${lead?.company_name || fromEmail} is interested`,
+      subject: `${autoSent ? 'Auto-replied' : 'HOT REPLY'}: ${lead?.company_name || fromEmail} (${classification.intent})`,
       body: digestBody,
     }).catch(e => console.error('Digest error:', e.message));
   }
 
-  return { intent: classification.intent, leadId: lead?.id };
+  return { intent: classification.intent, leadId: lead?.id, autoSent };
 }
