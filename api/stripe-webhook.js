@@ -43,6 +43,17 @@ async function markPaid(session) {
       status: 'paid', paid_at: new Date().toISOString(), stripe_session: session.id,
     });
     alertTeam(`PAID Complete Audit: ${app.name || company || email} | ${email || 'no email'}`);
+    // Nudge to complete the intake if they paid and bailed (stops once intake exists).
+    try {
+      if (process.env.QSTASH_TOKEN && email) {
+        const { Client } = require('@upstash/qstash');
+        const qs = new Client({ token: process.env.QSTASH_TOKEN });
+        const nurl = 'https://www.tmitechai.com/api/funnel-nurture';
+        const base = { stage: 'paid_no_intake', email, session_id: session.id };
+        await qs.publishJSON({ url: nurl, delay: 10800, body: base });            // +3h
+        await qs.publishJSON({ url: nurl, delay: 86400, body: { ...base, touch: 'second' } }); // +24h
+      }
+    } catch (e) { console.error('schedule paid_no_intake:', e.message); }
   } else {
     // Paid but no captured lead on file (rare) - still log it so it is recoverable.
     await dbx.insert('applications', {

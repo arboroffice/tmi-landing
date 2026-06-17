@@ -81,6 +81,20 @@ module.exports = async function handler(req, res) {
             },
           }).catch(e => console.error('QStash audit-prep (app) error:', e));
         } catch (e) { console.error('audit-prep enqueue (app):', e.message); }
+
+        // Pre-call reminders for the audit customer (24h email + 2h SMS).
+        try {
+          if (startTime && process.env.QSTASH_TOKEN) {
+            const qs = new QStashClient({ token: process.env.QSTASH_TOKEN });
+            const nurl = `${SITE}/api/funnel-nurture`;
+            const callMs = new Date(startTime).getTime(), nowMs = Date.now();
+            const d24 = Math.floor((callMs - 86400000 - nowMs) / 1000);
+            const d2 = Math.floor((callMs - 7200000 - nowMs) / 1000);
+            if (d24 > 60) await qs.publishJSON({ url: nurl, delay: d24, body: { stage: 'precall_24h', applicationId: appLead.id } });
+            if (d2 > 60) await qs.publishJSON({ url: nurl, delay: d2, body: { stage: 'precall_2h', applicationId: appLead.id } });
+          }
+        } catch (e) { console.error('schedule precall (app):', e.message); }
+
         return res.status(200).json({ ok: true, note: 'audit customer booked' });
       }
     } catch (e) { console.error('applications booking lookup:', e.message); }

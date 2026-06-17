@@ -64,6 +64,9 @@
         <div class="rung"><h4>Command Layer</h4><div class="p">Ongoing AI + ops department.</div><div class="price">Optional retainer</div></div>
       </div>
 
+      <div class="sec-head" style="margin:6px 0 10px;"><h2 style="font-size:15px;">Revenue collected</h2></div>
+      <div class="ob-stats" id="rev-stats"><div class="ob-stat"><div class="n">…</div><div class="l">loading</div></div></div>
+
       <div class="sec-head" style="margin:6px 0 10px;"><h2 style="font-size:15px;">Audit funnel ($1,000 Complete Audit)</h2></div>
       <p class="muted" style="margin:-6px 0 12px;max-width:70ch;">Capture &rarr; pay &rarr; book. Captured-but-unpaid leads sit in the worklist below with a one-click resume link that drops them straight into checkout.</p>
       <div class="ob-stats" id="audit-stats"><div class="ob-stat"><div class="n">…</div><div class="l">loading</div></div></div>
@@ -317,10 +320,25 @@ async function genProposal(submissionId, btn){
   else if (btn) { btn.disabled = false; btn.textContent = 'Generate proposal'; }
 }
 
+async function loadRevenue(){
+  const box = document.getElementById('rev-stats');
+  let r;
+  try { r = await TMIAdmin.api('/api/revenue-summary'); } catch(e){ box.innerHTML='<div class="ob-stat"><div class="n">—</div><div class="l">no data yet</div></div>'; return; }
+  if (!r) { box.innerHTML='<div class="ob-stat"><div class="n">—</div><div class="l">no data yet</div></div>'; return; }
+  const m = n => '$' + Math.round(n||0).toLocaleString();
+  const stat = (n,l) => `<div class="ob-stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+  box.innerHTML =
+    stat(m(r.total), 'Total collected') +
+    stat(m(r.auditRevenue), `Audits (${r.auditsPaid||0} paid)`) +
+    stat(m(r.depositRevenue), `Build deposits (${r.depositsAccepted||0})`) +
+    stat(m(r.mtd && r.mtd.total), 'This month');
+}
+
 loadProspects();
 loadRuns();
 loadInstantly();
 loadFunnel();
+loadRevenue();
 loadAuditFunnel();
 </script>
 </body>

@@ -92,6 +92,18 @@ async function generateProposal(opts) {
         });
       }
     } catch (e) { console.error('proposal email:', e.message); }
+
+    // Nudge if they don't accept (stops once accepted). Two gentle touches.
+    try {
+      if (process.env.QSTASH_TOKEN) {
+        const { Client } = require('@upstash/qstash');
+        const qs = new Client({ token: process.env.QSTASH_TOKEN });
+        const nurl = `${SITE}/api/funnel-nurture`;
+        const base = { stage: 'proposal_no_accept', proposalId: proposal.id };
+        await qs.publishJSON({ url: nurl, delay: 172800, body: base });   // +2d
+        await qs.publishJSON({ url: nurl, delay: 518400, body: base });   // +6d
+      }
+    } catch (e) { console.error('schedule proposal_no_accept:', e.message); }
   }
 
   return { id: proposal.id, link, build, status: proposal.status };
