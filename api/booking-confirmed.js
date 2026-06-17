@@ -81,6 +81,21 @@ module.exports = async function handler(req, res) {
   const resumeParams = new URLSearchParams({ n: lead.name || '', e: lead.email || '', p: lead.phone || '', c: companyNote });
   const auditLink = `${SITE}/audit?resume=1&${resumeParams.toString()}`;
 
+  // Auto-generate the pre-call intelligence brief for the team (robust via QStash).
+  try {
+    const qs = new QStashClient({ token: process.env.QSTASH_TOKEN });
+    qs.publishJSON({
+      url: `${SITE}/api/audit-prep`,
+      body: {
+        companyName: companyNote || lead.name,
+        contactName: lead.name,
+        contactEmail: lead.email,
+        website: lead.website || null,
+        leadId: lead.id,
+      },
+    }).catch(e => console.error('QStash audit-prep error:', e));
+  } catch (e) { console.error('audit-prep enqueue:', e.message); }
+
   // Confirmation SMS to lead
   if (lead.phone) {
     sms.messages.create({
