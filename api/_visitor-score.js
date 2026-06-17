@@ -4,7 +4,7 @@
 const PHYSICAL = ['oil', 'gas', 'construction', 'trades', 'manufacturing', 'fleet', 'mining', 'utilities', 'home service', 'plumbing', 'hvac', 'roofing', 'electrical', 'landscaping', 'concrete', 'welding', 'pipeline', 'heavy', 'agriculture', 'field service', 'excavation', 'paving'];
 const SENIOR = ['owner', 'founder', 'co-founder', 'ceo', 'president', 'principal', 'partner', 'chief', 'coo', 'cfo', 'cto', 'vp ', 'vice president'];
 const MID = ['director', 'head of', 'gm', 'general manager', 'operations manager', 'ops manager', 'superintendent', 'manager', 'lead'];
-const INTENT_PAGES = ['/audit', '/complete-audit', '/booking', '/pricing', '/marketplace', '/contact', '/demo', '/buy', 'savings-calculator'];
+const INTENT_PAGES = ['/audit', '/complete-audit', '/booking', '/pricing', '/contact', '/demo', '/buy', 'savings-calculator'];
 
 function scoreVisitor(v = {}) {
   let score = 0;

@@ -73,9 +73,10 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     <div class="check-wrap">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M5 14l7 7L23 7" stroke="#E4FF97" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <h1>Application received.</h1>
-    <p class="sub">Pick a time below and we'll walk through your operation and show you exactly what TMI can do for your team.</p>
-    <div id="cal-embed"></div>
+    <h1>Book your strategy call.</h1>
+    <p class="sub">Pick a time below. You and the founder will walk through your Complete Audit together and choose your path.</p>
+    <div id="gate" style="font-size:15px;color:rgba(255,255,255,0.5);">Checking your audit&hellip;</div>
+    <div id="cal-embed" style="display:none;"></div>
   </div>
 </div>
 
@@ -93,21 +94,32 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 
 Cal('init', { origin: 'https://cal.com' });
 
-// Prefill name/email (and phone as a note) when arriving from the audit "skip
-// and book" path, so the Cal booking carries the same email we created the lead
-// with — that's what lets api/booking-confirmed match the lead and schedule the
-// pre-call texts pushing them to finish the audit.
+// Gate: nobody books a call until the Complete Audit is paid for. We require a
+// paid Stripe session and verify it server-side before rendering the calendar.
+// No valid paid session -> send them to the funnel.
 var _cp = new URLSearchParams(window.location.search);
-var _prefill = {};
-if (_cp.get('name')) _prefill.name = _cp.get('name');
-if (_cp.get('email')) _prefill.email = _cp.get('email');
-if (_cp.get('phone')) {
-  _prefill.notes = 'Phone: ' + _cp.get('phone');
-  _prefill.attendeePhoneNumber = _cp.get('phone');
+var _session = _cp.get('session_id') || '';
+
+function renderCalendar(prefill) {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('cal-embed').style.display = 'block';
+  Cal('inline', { elementOrSelector: '#cal-embed', calLink: 'mia-elianaa-a4n2hk/30min', layout: 'month_view', config: prefill });
+  Cal('ui', { styles: { branding: { brandColor: '#E4FF97' } }, hideEventTypeDetails: false, layout: 'month_view' });
 }
 
-Cal('inline', { elementOrSelector: '#cal-embed', calLink: 'mia-elianaa-a4n2hk/30min', layout: 'month_view', config: _prefill });
-Cal('ui', { styles: { branding: { brandColor: '#E4FF97' } }, hideEventTypeDetails: false, layout: 'month_view' });
+(async function gate() {
+  if (!_session) { window.location.replace('/complete-audit'); return; }
+  try {
+    var v = await (await fetch('/api/checkout-verify?session_id=' + encodeURIComponent(_session))).json();
+    if (!v || !v.paid) { window.location.replace('/complete-audit'); return; }
+    var prefill = {};
+    if (v.email) prefill.email = v.email;
+    if (v.company) prefill.notes = 'Complete Audit - ' + v.company;
+    renderCalendar(prefill);
+  } catch (e) {
+    window.location.replace('/complete-audit');
+  }
+})();
 
 // Meta Pixel — Schedule conversion when a call is booked. Deduped with the
 // server-side Conversions API event (api/booking-confirmed.js) via the Cal

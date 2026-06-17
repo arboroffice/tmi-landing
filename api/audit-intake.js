@@ -28,6 +28,16 @@ module.exports = async function handler(req, res) {
   } catch (e) { console.error('intake verify:', e.message); }
   if (!paid) return res.status(402).json({ error: 'payment required' });
 
+  // Mark the captured lead as paid so the payment-nurture chain stops.
+  try {
+    if (paidEmail) {
+      const lead = await dbx.findOne('applications', 'email', String(paidEmail).toLowerCase());
+      if (lead) await dbx.update('applications', lead.id, { status: 'paid', paid_at: new Date().toISOString() });
+    }
+  } catch (e) { console.error('intake mark paid:', e.message); }
+
+  const bookingLink = session_id ? `${BOOKING}?session_id=${encodeURIComponent(session_id)}` : BOOKING;
+
   try {
     const sub = await dbx.insert('audit_submissions', {
       email: paidEmail || null,
@@ -57,7 +67,7 @@ module.exports = async function handler(req, res) {
             from: 'TMI <support@tmitechai.com>',
             to: paidEmail,
             subject: `Your Complete Audit — ${company || answers.company || 'TMI'}`,
-            text: `${md}\n\n--\nBook your 30-minute strategy call: ${BOOKING}`,
+            text: `${md}\n\n--\nBook your 30-minute strategy call: ${bookingLink}`,
           });
         }
         // Notify the team (they prep + run the call).
@@ -73,7 +83,7 @@ module.exports = async function handler(req, res) {
       } catch (e) { console.error('deliverable gen:', e.message); }
     })();
 
-    return res.json({ ok: true, id: sub.id, booking: BOOKING });
+    return res.json({ ok: true, id: sub.id, booking: bookingLink });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }

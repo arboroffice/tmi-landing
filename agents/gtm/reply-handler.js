@@ -5,7 +5,9 @@ import { VOICE_SYSTEM } from './prompts/voice.js';
 
 const anthropic = new Anthropic();
 
-const BOOKING_URL = process.env.BOOKING_URL || 'https://www.tmitechai.com/booking';
+// The one next step for an interested reply is the paid Complete Audit. Nobody
+// books a call until the audit is paid for, so we never hand out a raw calendar.
+const BOOKING_URL = process.env.AUDIT_LINK || 'https://www.tmitechai.com/complete-audit';
 // Auto-send the drafted reply to the prospect when set; otherwise draft + notify the team.
 const AUTO_REPLY = String(process.env.AUTO_REPLY || '').toLowerCase() === 'true';
 
@@ -54,8 +56,8 @@ async function draftReply({ lead, replyBody, classification }) {
 
 Company: ${lead?.company_name || 'their company'}
 Name: ${lead?.owner_name || 'there'}
-Their audit: ${lead?.audit_url || '(audit link)'}
-Booking link: ${BOOKING_URL}
+Their audit preview: ${lead?.audit_url || '(audit link)'}
+Complete Audit link: ${BOOKING_URL}
 Their reply: ${replyBody.slice(0, 900)}
 Intent: ${classification.intent}
 ${classification.question ? `Their question: ${classification.question}` : ''}
@@ -63,8 +65,8 @@ ${classification.question ? `Their question: ${classification.question}` : ''}
 Rules:
 - If they asked a question, answer it directly and briefly first.
 - Reference something specific they said.
-- Move toward a short working session. Offer the booking link on its own line.
-- If useful, point back to their audit link.
+- Move them toward the Complete Audit: a $1,000 detailed operational audit plus a 30-minute strategy call with the founder and a strategist. Offer the Complete Audit link on its own line.
+- If useful, point back to their audit preview link.
 - Keep it under 90 words. Sign as Mia, TMI. No meeting-ask cliches, no hard sell.
 
 Return JSON: {"subject": "Re: ...", "body": "plain text with line breaks"}`

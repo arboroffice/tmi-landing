@@ -23,8 +23,6 @@ export function slugify(str) {
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-// Cal.com booking link (same as /booking) so prospects book directly on the audit.
-const CAL_LINK = process.env.CAL_LINK || 'mia-elianaa-a4n2hk/30min';
 const fmtMoney = (n) => '$' + Number(n || 0).toLocaleString('en-US');
 
 // Score ring color: chartreuse regardless, but label shifts by band
