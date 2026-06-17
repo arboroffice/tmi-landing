@@ -155,6 +155,17 @@ export async function processLead(lead) {
     };
   }
 
+  // ── Dry run: everything except the send. The audit is built and stored so you
+  // can review it; the lead is marked 'audited' and never contacted.
+  if (String(process.env.GTM_DRY_RUN || '').toLowerCase() === 'true') {
+    if (seq.step === 'cold') {
+      await db.updateLead(lead.id, { status: 'audited', next_followup_at: null });
+      console.log(`  [dry-run] audited, not sent: ${lead.company_name} (${lead.audit_url || 'no audit'})`);
+      return { sent: false, dryRun: true, step: 'cold', email: lead.email };
+    }
+    return { skipped: true, reason: 'dry_run' };
+  }
+
   // ── Instantly path: it owns sending + the sequence. We push the cold lead with
   // its personalized audit as custom variables; follow-ups happen inside Instantly.
   if (instantlyEnabled()) {

@@ -206,9 +206,13 @@ export async function run() {
   console.log(new Date().toISOString());
   console.log('');
 
+  // Runtime overrides (admin button / workflow inputs): batch size + dry run.
+  const target = Number(process.env.GTM_LEADS_PER_DAY) || LIMITS.leadsPerDay;
+  const dry = String(process.env.GTM_DRY_RUN || '').toLowerCase() === 'true';
+
   // 1. Find new leads
-  console.log(`--- Finding ${LIMITS.leadsPerDay} new leads ---`);
-  const newLeads = await findNewLeads(LIMITS.leadsPerDay);
+  console.log(`--- Finding ${target} new leads${dry ? ' (DRY RUN: build audits, do not send)' : ''} ---`);
+  const newLeads = await findNewLeads(target);
   stats.found = newLeads.length;
   console.log(`Found ${stats.found} new leads\n`);
 
@@ -248,7 +252,7 @@ export async function run() {
   console.log(stats);
 
   // Observability: record the run.
-  await db.logRun({ ...stats, source: SOURCE, elapsed_s: elapsed }).catch(e => console.error('logRun:', e.message));
+  await db.logRun({ ...stats, source: SOURCE, dry_run: dry, target, elapsed_s: elapsed }).catch(e => console.error('logRun:', e.message));
 
   // 4. Send daily digest
   const digestStats = await db.getDigestStats();

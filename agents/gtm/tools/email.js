@@ -34,8 +34,10 @@ function esc(s) {
 // Embed the personalized audit card image in cold emails by default; disable with EMBED_AUDIT_IMAGE=false
 const EMBED_IMAGE = String(process.env.EMBED_AUDIT_IMAGE ?? 'true').toLowerCase() !== 'false';
 
-export async function sendEmail({ to, toName, subject, body, imageUrl, auditUrl }) {
+export async function sendEmail({ to, toName, subject, body, imageUrl, auditUrl, cc }) {
   const box = pickInbox();
+  // Break-in safety: CC yourself on sends via OUTREACH_CC (or per-call cc).
+  const ccAddr = cc || process.env.OUTREACH_CC || undefined;
 
   const paras = body.split('\n').map(l => l.trim()).filter(Boolean)
     .map(l => `<p style="margin:0 0 14px;">${esc(l)}</p>`).join('');
@@ -55,6 +57,7 @@ ${paras}${imageBlock}
     from: `${box.name} <${box.from}>`,
     reply_to: SENDER.replyTo,
     to: toName ? `${toName} <${to}>` : to,
+    cc: ccAddr,
     subject,
     html,
     text,

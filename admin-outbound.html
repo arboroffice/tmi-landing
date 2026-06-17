@@ -42,6 +42,7 @@
         <button class="btn btn-ghost btn-sm" onclick="loadProspects()">Refresh</button>
         <button class="btn btn-ghost btn-sm" onclick="sendTest()">Send test</button>
         <button class="btn btn-ghost btn-sm" onclick="addSuppress()">Do-not-contact</button>
+        <button class="btn btn-ghost btn-sm" onclick="dryRun()">Dry run (5)</button>
         <button class="btn btn-primary btn-sm" onclick="runOutbound()">Run outbound now</button>
       </div>
     </div>
@@ -145,6 +146,15 @@ async function runOutbound(){
     alert(r?.message || 'Outbound run started. Watch "Recent agent runs" + the GTM digest.');
     setTimeout(loadRuns, 4000);
   } catch(e){ alert('Run request failed: ' + e.message); }
+}
+
+async function dryRun(){
+  if(!confirm('Dry run: find 5 prospects, build their audits, but DO NOT send anything?')) return;
+  try {
+    const r = await TMIAdmin.api('/api/gtm-run', 'POST', { limit: 5, dryRun: true });
+    alert(r?.message || 'Dry run started. Review the audits in Prospects (status: audited).');
+    setTimeout(() => { loadRuns(); loadProspects(); }, 5000);
+  } catch(e){ alert('Dry run failed: ' + e.message); }
 }
 
 async function sendTest(){

@@ -4,7 +4,17 @@ on:
   schedule:
     # 8am ET daily (1pm UTC)
     - cron: '0 13 * * 1-5'
-  workflow_dispatch: # allow manual trigger
+  workflow_dispatch:
+    inputs:
+      leads:
+        description: 'Batch size (leave blank for default 100)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run (build audits, do not send)'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -35,7 +45,13 @@ jobs:
           RESEND_OUTREACH_API_KEY: ${{ secrets.RESEND_OUTREACH_API_KEY }}
           OUTREACH_FROM_EMAIL: ${{ secrets.OUTREACH_FROM_EMAIL }}
           OUTREACH_REPLY_TO: ${{ secrets.OUTREACH_REPLY_TO }}
+          OUTREACH_INBOXES: ${{ secrets.OUTREACH_INBOXES }}
+          OUTREACH_CC: ${{ secrets.OUTREACH_CC }}
+          INSTANTLY_API_KEY: ${{ secrets.INSTANTLY_API_KEY }}
+          INSTANTLY_CAMPAIGN_ID: ${{ secrets.INSTANTLY_CAMPAIGN_ID }}
           GTM_DIGEST_EMAIL: ${{ secrets.GTM_DIGEST_EMAIL }}
+          GTM_LEADS_PER_DAY: ${{ inputs.leads }}
+          GTM_DRY_RUN: ${{ inputs.dry_run }}
         run: cd agents && node gtm/orchestrator.js
 
       - name: Commit generated audit microsites

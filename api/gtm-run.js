@@ -14,6 +14,11 @@ module.exports = async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
+  // Runtime overrides from the admin button: small batch + dry run.
+  const { limit, dryRun } = req.body || {};
+  if (limit) process.env.GTM_LEADS_PER_DAY = String(limit);
+  if (dryRun != null) process.env.GTM_DRY_RUN = dryRun ? 'true' : 'false';
+
   // Import and run the orchestrator (dynamic import since agents/ uses ESM)
   try {
     const { run } = await import('../agents/gtm/orchestrator.js');
