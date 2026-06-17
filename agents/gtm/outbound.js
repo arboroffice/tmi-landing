@@ -141,9 +141,11 @@ export async function processLead(lead) {
         cardImage,
       });
       lead.audit_url = out.url;
+      lead.audit_card = cardImage;
       await db.updateLead(lead.id, {
         audit_url: out.url,
         audit_slug: out.slug,
+        audit_card: cardImage,
         intel_score: auditData.score,
       });
       console.log(`  Audit built: ${out.url} (score ${auditData.score})`);
@@ -168,12 +170,14 @@ export async function processLead(lead) {
     auditUrl: lead.audit_url,
   });
 
-  // Send
+  // Send (embed the personalized audit card on the cold email)
   const messageId = await sendEmail({
     to: lead.email,
     toName: lead.owner_name || undefined,
     subject,
     body,
+    imageUrl: seq.step === 'cold' ? (lead.audit_card || null) : null,
+    auditUrl: lead.audit_url || null,
   });
 
   // Log outreach
