@@ -14,6 +14,12 @@ const API_DIR = path.join(ROOT, 'api');
 const app = express();
 
 app.disable('x-powered-by');
+
+// Stripe webhook needs the raw request body to verify the signature, so it is
+// mounted BEFORE express.json() with a raw body parser.
+const stripeWebhook = require('./api/stripe-webhook');
+app.post('/api/stripe-webhook', express.raw({ type: '*/*' }), (req, res) => stripeWebhook(req, res));
+
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 

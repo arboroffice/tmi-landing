@@ -58,10 +58,20 @@
       <div class="ob-stats" id="instantly-stats" style="display:none;"></div>
 
       <div class="ladder">
-        <div class="rung free"><h4>Free Review</h4><div class="p">The hook. Personalized microsite + score (from public data).</div><div class="price">Free</div></div>
-        <div class="rung"><h4>Complete Audit</h4><div class="p">Detailed intake + audit deliverable + 30-min call with founder &amp; strategist.</div><div class="price">$1,000</div></div>
+        <div class="rung"><h4>Personalized Preview</h4><div class="p">The hook. Personalized microsite + score (from public data) sent in the cold email.</div><div class="price">Outbound only</div></div>
+        <div class="rung"><h4>Complete Audit</h4><div class="p">Capture, then pay. Detailed intake + audit deliverable + 30-min call with founder &amp; strategist.</div><div class="price">$1,000</div></div>
         <div class="rung"><h4>Build: DIY / DWY / DFY</h4><div class="p">The plan you run, built with you, or done for you.</div><div class="price">Scoped on the call</div></div>
         <div class="rung"><h4>Command Layer</h4><div class="p">Ongoing AI + ops department.</div><div class="price">Optional retainer</div></div>
+      </div>
+
+      <div class="sec-head" style="margin:6px 0 10px;"><h2 style="font-size:15px;">Audit funnel ($1,000 Complete Audit)</h2></div>
+      <p class="muted" style="margin:-6px 0 12px;max-width:70ch;">Capture &rarr; pay &rarr; book. Captured-but-unpaid leads sit in the worklist below with a one-click resume link that drops them straight into checkout.</p>
+      <div class="ob-stats" id="audit-stats"><div class="ob-stat"><div class="n">…</div><div class="l">loading</div></div></div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:26px;">
+        <table class="ob-table">
+          <thead><tr><th>Captured</th><th>Name</th><th>Company</th><th>Contact</th><th>Last nudge</th><th></th></tr></thead>
+          <tbody id="audit-worklist"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+        </table>
       </div>
 
       <div class="sec-head" style="margin:6px 0 10px;"><h2 style="font-size:15px;">Recent agent runs</h2></div>
@@ -242,10 +252,36 @@ async function loadFunnel(){
     stat(`${f.booked||0}`, `Booked (${pct(f.booked, f.contacted)})`);
 }
 
+async function loadAuditFunnel(){
+  const box = document.getElementById('audit-stats');
+  const wl = document.getElementById('audit-worklist');
+  let f;
+  try { f = await TMIAdmin.api('/api/audit-funnel'); } catch(e){ box.innerHTML = '<div class="ob-stat"><div class="n">—</div><div class="l">no data yet</div></div>'; return; }
+  if (!f) { box.innerHTML = '<div class="ob-stat"><div class="n">—</div><div class="l">no data yet</div></div>'; return; }
+  const stat = (n,l)=>`<div class="ob-stat"><div class="n">${n ?? 0}</div><div class="l">${l}</div></div>`;
+  box.innerHTML =
+    stat(f.captured, 'Captured') +
+    stat(`${f.paid||0}`, `Paid (${(f.conversion&&f.conversion.capturedToPaid)||0}%)`) +
+    stat(`${f.booked||0}`, `Booked (${(f.conversion&&f.conversion.paidToBooked)||0}%)`) +
+    stat(`${f.unpaidCount||0}`, 'Unpaid to work');
+  const list = (f.worklist || []);
+  if (!list.length) { wl.innerHTML = '<tr><td colspan="6" class="empty">No captured-but-unpaid leads. Clean funnel.</td></tr>'; return; }
+  wl.innerHTML = list.map(r => `
+    <tr>
+      <td class="muted">${TMIAdmin.reltime ? TMIAdmin.reltime(r.captured_at) : (r.captured_at||'')}</td>
+      <td>${r.name || '<span class="muted">—</span>'}</td>
+      <td>${r.company || '<span class="muted">—</span>'}</td>
+      <td><div>${r.email || ''}</div>${r.phone ? `<div class="sub muted">${r.phone}</div>` : ''}</td>
+      <td class="muted">${r.last_nudge || '—'}</td>
+      <td><a class="lnk" href="${r.resume_url}" target="_blank" rel="noopener">Resume checkout</a></td>
+    </tr>`).join('');
+}
+
 loadProspects();
 loadRuns();
 loadInstantly();
 loadFunnel();
+loadAuditFunnel();
 </script>
 </body>
 </html>

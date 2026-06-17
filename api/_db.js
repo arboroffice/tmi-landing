@@ -114,6 +114,13 @@ async function findOne(coll, field, value) {
   return snap.empty ? null : snap2obj(snap.docs[0]);
 }
 
+// Count docs matching `where` (array of [field, op, value]). Uses list() so the
+// same single-filter-to-Firestore + JS-filter rules apply (no composite index).
+async function count(coll, where = []) {
+  const rows = await list(coll, { where });
+  return rows.length;
+}
+
 async function insert(coll, data) {
   const payload = Object.assign({}, data);
   const id = payload.id != null ? String(payload.id) : null;
@@ -167,6 +174,6 @@ async function hydrateMany(rows, fkField, coll, as) {
 module.exports = {
   db, admin, FieldValue, Timestamp,
   normalize, snap2obj,
-  getById, list, findOne, insert, update, remove, upsertByField,
+  getById, list, findOne, count, insert, update, remove, upsertByField,
   hydrateOne, hydrateMany,
 };

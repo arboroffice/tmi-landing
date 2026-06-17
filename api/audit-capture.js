@@ -100,6 +100,7 @@ module.exports = async function handler(req, res) {
       if (process.env.RESEND_API_KEY) {
         const { Resend } = require('resend');
         const unsub = app ? `${SITE}/api/unsubscribe?id=${app.id}` : `${SITE}`;
+        const resumeUrl = app ? `${SITE}/api/audit-resume?id=${app.id}` : `${SITE}/complete-audit`;
         await new Resend(process.env.RESEND_API_KEY).emails.send({
           from: 'TMI <support@tmitechai.com>',
           to: cleanEmail,
@@ -107,7 +108,7 @@ module.exports = async function handler(req, res) {
           html: `<!DOCTYPE html><html><body style="background:#fff;font-family:Arial,sans-serif;color:#111;max-width:560px;margin:0 auto;padding:40px 24px;line-height:1.7;">
 <p style="margin:0 0 16px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">You are one step from your Complete Audit. We map exactly how your business runs, where time and money leak, your Intelligence Score, and a 90-day plan to fix it. Then you sit down with the founder and a strategist for 30 minutes to walk through it and pick your path.</p>
-<p style="margin:0 0 24px;"><a href="${SITE}/complete-audit" style="background:#E4FF97;color:#0a0b14;font-weight:700;padding:13px 26px;border-radius:999px;text-decoration:none;display:inline-block;">Complete your audit ($1,000)</a></p>
+<p style="margin:0 0 24px;"><a href="${resumeUrl}" style="background:#E4FF97;color:#0a0b14;font-weight:700;padding:13px 26px;border-radius:999px;text-decoration:none;display:inline-block;">Complete your audit ($1,000)</a></p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI</span></p>
 <p style="margin:32px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsub}" style="color:#bbb;">Unsubscribe</a></p>
 </body></html>`,

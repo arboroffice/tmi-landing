@@ -16,15 +16,15 @@ function formatPhone(phone) {
   return digits.startsWith('1') ? `+${digits}` : `+1${digits}`;
 }
 
-function wrap(body, unsub) {
+function wrap(body, unsub, resumeUrl) {
   return `<!DOCTYPE html><html><body style="background:#fff;font-family:Arial,sans-serif;color:#111;max-width:560px;margin:0 auto;padding:40px 24px;line-height:1.7;">
 ${body}
-<p style="margin:28px 0 0;"><a href="${SITE}/complete-audit" style="background:#E4FF97;color:#0a0b14;font-weight:700;padding:13px 26px;border-radius:999px;text-decoration:none;display:inline-block;">Complete your audit ($1,000)</a></p>
+<p style="margin:28px 0 0;"><a href="${resumeUrl}" style="background:#E4FF97;color:#0a0b14;font-weight:700;padding:13px 26px;border-radius:999px;text-decoration:none;display:inline-block;">Complete your audit ($1,000)</a></p>
 <p style="margin:32px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsub}" style="color:#bbb;">Unsubscribe</a></p>
 </body></html>`;
 }
 
-function copy(step, firstName) {
+function copy(step, firstName, resumeUrl) {
   switch (step) {
     case 'hour1':
       return {
@@ -32,7 +32,7 @@ function copy(step, firstName) {
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">You started the Complete Audit but did not finish checkout. It is the one way in: a detailed map of where your business leaks time and money, your Intelligence Score, a 90-day plan, and a 30-minute call with the founder and a strategist where we pick your path.</p>
 <p style="margin:0 0 8px;">Takes two minutes to lock in.</p>`,
-        sms: `Hey ${firstName} - you started the Complete Audit but didn't finish. Lock it in here: ${SITE}/complete-audit`,
+        sms: `Hey ${firstName} - you started the Complete Audit but didn't finish. Lock it in here: ${resumeUrl}`,
       };
     case 'day1':
       return {
@@ -48,7 +48,7 @@ function copy(step, firstName) {
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">Almost every operation we audit is stuck on one of three things: the founder is the bottleneck, nobody can see what is happening in time, or things just take too long between steps. The audit tells you which one is costing you the most and what to build first.</p>
 <p style="margin:0 0 8px;">$1,000, and it applies toward whatever you build next.</p>`,
-        sms: `${firstName} - the Complete Audit pinpoints exactly where your business is stuck and what to fix first. $1,000, applies toward your build: ${SITE}/complete-audit`,
+        sms: `${firstName} - the Complete Audit pinpoints exactly where your business is stuck and what to fix first. $1,000, applies toward your build: ${resumeUrl}`,
       };
     case 'day7':
     default:
@@ -80,7 +80,8 @@ module.exports = async function handler(req, res) {
   }
 
   const firstName = (app.name || 'there').split(/\s+/)[0];
-  const c = copy(step, firstName);
+  const resumeUrl = `${SITE}/api/audit-resume?id=${app.id}`;
+  const c = copy(step, firstName, resumeUrl);
   const unsub = `${SITE}/api/unsubscribe?id=${app.id}`;
 
   try {
@@ -90,7 +91,7 @@ module.exports = async function handler(req, res) {
         from: 'TMI <support@tmitechai.com>',
         to: app.email,
         subject: c.subject,
-        html: wrap(c.html, unsub),
+        html: wrap(c.html, unsub, resumeUrl),
       });
     }
   } catch (e) { console.error('audit-followup email:', e.message); }

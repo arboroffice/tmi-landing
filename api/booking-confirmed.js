@@ -25,6 +25,39 @@ module.exports = async function handler(req, res) {
   const existingLead = await db.findOne('leads', 'email', email.toLowerCase());
 
   if (!existingLead) {
+    // Paid Complete Audit customers live in `applications`, not `leads`. If this
+    // booking is one of them, mark it booked, alert the team, and enqueue the
+    // pre-call brief so the strategist walks in prepared.
+    try {
+      const appLead = await db.findOne('applications', 'email', email.toLowerCase());
+      if (appLead) {
+        await db.update('applications', appLead.id, { status: 'booked', booked_at: new Date().toISOString() });
+        const dateStr = startTime
+          ? new Date(startTime).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+          : 'TBD';
+        try {
+          if (process.env.TWILIO_ACCOUNT_SID) {
+            twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN).messages.create({
+              body: `Complete Audit call booked: ${appLead.name || ''} | ${email} | ${dateStr} CT`,
+              from: FROM_NUMBER, to: ALERT_NUMBER,
+            }).catch(() => {});
+          }
+        } catch (e) { /* best effort */ }
+        try {
+          new QStashClient({ token: process.env.QSTASH_TOKEN }).publishJSON({
+            url: `${SITE}/api/audit-prep`,
+            body: {
+              companyName: appLead.company || appLead.name,
+              contactName: appLead.name,
+              contactEmail: appLead.email,
+              website: appLead.website || null,
+              leadId: appLead.id,
+            },
+          }).catch(e => console.error('QStash audit-prep (app) error:', e));
+        } catch (e) { console.error('audit-prep enqueue (app):', e.message); }
+        return res.status(200).json({ ok: true, note: 'audit customer booked' });
+      }
+    } catch (e) { console.error('applications booking lookup:', e.message); }
     console.log('No lead found for:', email);
     return res.status(200).json({ ok: true, note: 'No matching lead' });
   }
