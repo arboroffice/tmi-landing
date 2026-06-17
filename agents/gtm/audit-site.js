@@ -203,30 +203,15 @@ export function renderAuditPage(d) {
 ${demo}
 
 <section class="sec cta"><div class="wrap">
-  <div class="eyebrow">Free Intelligent Company Audit</div>
-  <h2>Grab a time and we'll go deeper on ${esc(d.companyName)}.</h2>
-  <p>Pick a slot below. We'll walk through the real numbers and what we'd build first. No pitch.</p>
-  <div id="cal-embed"></div>
+  <div class="eyebrow">This is the preview</div>
+  <h2>Want the complete picture for ${esc(d.companyName)}?</h2>
+  <p>The Complete Audit goes deep on your real operation, then you sit down with the founder and a strategist to map exactly what to fix and how. $1,000.</p>
+  <a href="/complete-audit?company=${encodeURIComponent(d.companyName)}" class="btn">Get the Complete Audit &rarr;</a>
   <p class="note">Prepared by TMI &middot; A preliminary review from public information.</p>
 </div></section>
 
 <div class="wrap"><div class="foot"><span>&copy; ${new Date().getFullYear()} TMI Technology</span><span>${esc(d.ownerFirstName ? `For ${d.ownerFirstName}` : 'Operational intelligence')}</span></div></div>
 
-<script>
-(function (C, A, L) {
-  let p = function (a, ar) { a.q.push(ar); };
-  let d = C.document;
-  C.Cal = C.Cal || function () {
-    let cal = C.Cal; let ar = arguments;
-    if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement('script')).src = A; cal.loaded = true; }
-    if (ar[0] === L) { const api = function () { p(api, arguments); }; const ns = ar[1]; api.q = api.q || []; typeof ns === 'string' ? (cal.ns[ns] = api) && p(api, ar) : p(cal, ar); return; }
-    p(cal, ar);
-  };
-})(window, 'https://app.cal.com/embed/embed.js', 'init');
-Cal('init', { origin: 'https://cal.com' });
-Cal('inline', { elementOrSelector: '#cal-embed', calLink: '${CAL_LINK}', layout: 'month_view' });
-Cal('ui', { styles: { branding: { brandColor: '#E4FF97' } }, hideEventTypeDetails: false, layout: 'month_view' });
-</script>
 </body>
 </html>`;
 }

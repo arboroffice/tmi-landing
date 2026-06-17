@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="robots" content="noindex"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<title>Your Complete Audit — Intake | TMI</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0a0b14;--card:#111324;--ink:#fff;--ink2:rgba(255,255,255,0.62);--ink3:rgba(255,255,255,0.4);--line:rgba(255,255,255,0.1);--chart:#E4FF97;--chart2:#D0FF6A;--serif:"Barlow",system-ui,sans-serif;--sans:"Neue Haas Grotesk Display","Neue Haas Grotesk",system-ui,-apple-system,sans-serif;}
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.55;}
+  .wrap{max-width:720px;margin:0 auto;padding:0 24px;}
+  .hd{height:60px;display:flex;align-items:center;border-bottom:1px solid var(--line);}
+  .brand{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;}
+  .brand img{height:22px;filter:brightness(0) invert(1);}
+  .eyebrow{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--chart);margin:48px 0 14px;}
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4vw,44px);line-height:1.05;margin:0 0 12px;}
+  .sub{color:var(--ink2);font-size:16px;max-width:54ch;margin-bottom:20px;}
+  .sect{margin:30px 0 8px;font-family:var(--serif);font-size:22px;color:var(--chart);}
+  .q{margin:18px 0;}
+  .q label{display:block;font-size:15px;color:var(--ink);margin-bottom:8px;font-weight:500;}
+  .q input[type=text],.q input[type=number],.q input[type=email],.q textarea,.q select{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--line);color:#fff;padding:12px 14px;border-radius:9px;font:inherit;font-size:15px;outline:none;}
+  .q textarea{min-height:84px;resize:vertical;}
+  .q input:focus,.q textarea:focus,.q select:focus{border-color:var(--chart);}
+  .q .opts label{display:flex;align-items:center;gap:9px;font-weight:400;color:var(--ink2);margin:6px 0;cursor:pointer;}
+  .q .opts input{width:auto;}
+  .btn{display:inline-flex;width:100%;align-items:center;justify-content:center;background:var(--chart);color:#0a0b14;font-family:var(--sans);font-size:16px;font-weight:700;padding:18px 32px;border:0;border-radius:999px;cursor:pointer;margin:24px 0 8px;}
+  .btn:disabled{opacity:.6;}
+  .gate{max-width:520px;margin:90px auto;text-align:center;color:var(--ink2);}
+  .gate a{color:var(--chart);text-decoration:underline;}
+  .err{color:#ff8585;font-size:13px;margin-top:8px;display:none;}
+  #cal-embed{background:#fff;border-radius:14px;overflow:hidden;min-height:560px;margin-top:18px;}
+  .done h1{margin-bottom:10px;}
+  @media(max-width:560px){.wrap{padding:0 18px;}}
+</style>
+</head>
+<body>
+<header class="hd"><div class="wrap"><a href="/" class="brand"><img src="/logo.svg" alt="TMI"/> TMI</a></div></header>
+
+<div class="wrap" id="root">
+  <div class="gate" id="loading">Checking your payment…</div>
+</div>
+
+<script>
+var params = new URLSearchParams(location.search);
+var SESSION = params.get('session_id') || '';
+var PAID_EMAIL = '';
+
+async function init(){
+  var root = document.getElementById('root');
+  if(!SESSION){ gate('We could not find your payment session. <a href="/complete-audit">Start your Complete Audit</a>.'); return; }
+  try {
+    var v = await (await fetch('/api/checkout-verify?session_id=' + encodeURIComponent(SESSION))).json();
+    if(!v.paid){ gate('Your payment is not confirmed yet. <a href="/complete-audit">Complete checkout</a>.'); return; }
+    PAID_EMAIL = v.email || '';
+    var intake = await (await fetch('/api/intake-questions')).json();
+    renderForm(intake, v.company || '');
+  } catch(e){ gate('Something went wrong loading your intake. Email support@tmitechai.com.'); }
+}
+
+function gate(html){ document.getElementById('root').innerHTML = '<div class="gate">' + html + '</div>'; }
+
+function field(q){
+  var id = 'q_' + q.id;
+  if(q.type === 'long') return '<textarea id="'+id+'" data-qid="'+q.id+'"></textarea>';
+  if(q.type === 'single') return '<div class="opts" data-qid="'+q.id+'">' + (q.options||[]).map(function(o,i){ return '<label><input type="radio" name="'+id+'" value="'+esc(o)+'"> '+esc(o)+'</label>'; }).join('') + '</div>';
+  if(q.type === 'multi') return '<div class="opts" data-qid="'+q.id+'" data-multi="1">' + (q.options||[]).map(function(o){ return '<label><input type="checkbox" value="'+esc(o)+'"> '+esc(o)+'</label>'; }).join('') + '</div>';
+  if(q.type === 'scale') return '<select id="'+id+'" data-qid="'+q.id+'"><option value="">—</option>' + [1,2,3,4,5,6,7,8,9,10].map(function(n){return '<option>'+n+'</option>';}).join('') + '</select>';
+  var t = q.type === 'number' || q.type === 'money' ? 'text' : 'text';
+  return '<input type="'+t+'" id="'+id+'" data-qid="'+q.id+'">';
+}
+
+function renderForm(intake, company){
+  var html = '<div class="eyebrow">Complete Audit · Intake</div>' +
+    '<h1>Tell us how your business really runs.</h1>' +
+    '<p class="sub">The more detail you give, the sharper your audit and the more we get done on your call. About 10-15 minutes.</p>';
+  intake.forEach(function(s){
+    html += '<div class="sect">' + esc(s.section) + '</div>';
+    s.questions.forEach(function(q){
+      html += '<div class="q"><label>' + esc(q.label) + (q.help?' <span style="color:var(--ink3)">'+esc(q.help)+'</span>':'') + '</label>' + field(q) + '</div>';
+    });
+  });
+  html += '<button class="btn" id="submit" onclick="submitForm()">Submit & get my audit &rarr;</button><div class="err" id="err"></div>';
+  document.getElementById('root').innerHTML = html;
+  // prefill company
+  var c = document.querySelector('[data-qid="company"]'); if(c && company) c.value = company;
+}
+
+function collect(){
+  var answers = {};
+  document.querySelectorAll('[data-qid]').forEach(function(el){
+    var qid = el.getAttribute('data-qid');
+    if(el.getAttribute('data-multi')){ answers[qid] = Array.from(el.querySelectorAll('input:checked')).map(function(i){return i.value;}).join(', '); }
+    else if(el.classList.contains('opts')){ var r = el.querySelector('input:checked'); answers[qid] = r ? r.value : ''; }
+    else { answers[qid] = el.value || ''; }
+  });
+  return answers;
+}
+
+async function submitForm(){
+  var btn=document.getElementById('submit'), err=document.getElementById('err');
+  err.style.display='none';
+  var answers = collect();
+  if(!answers.company){ err.textContent='Please add your company name.'; err.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Building your audit…';
+  try {
+    var r = await fetch('/api/audit-intake', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ session_id: SESSION, email: PAID_EMAIL, company: answers.company, industry: answers.industry, answers: answers }) });
+    var d = await r.json();
+    if(!d.ok) throw new Error(d.error || 'Submission failed');
+    showBooking(answers.company);
+  } catch(e){ err.textContent=e.message; err.style.display='block'; btn.disabled=false; btn.textContent='Submit & get my audit →'; }
+}
+
+function showBooking(company){
+  document.getElementById('root').innerHTML =
+    '<div class="done"><div class="eyebrow" style="margin-top:48px;">You\'re in</div>' +
+    '<h1>Your audit is being built.</h1>' +
+    '<p class="sub">It\'s landing in your inbox shortly. Last step: grab your 30-minute strategy call with the founder and a strategist - that\'s where we go deep and map your path.</p>' +
+    '<div id="cal-embed"></div></div>';
+  (function (C, A, L) {
+    var p=function(a,ar){a.q.push(ar);}; var d=C.document;
+    C.Cal=C.Cal||function(){var cal=C.Cal;var ar=arguments;if(!cal.loaded){cal.ns={};cal.q=cal.q||[];d.head.appendChild(d.createElement('script')).src=A;cal.loaded=true;}if(ar[0]===L){const api=function(){p(api,arguments);};const ns=ar[1];api.q=api.q||[];typeof ns==='string'?(cal.ns[ns]=api)&&p(api,ar):p(cal,ar);return;}p(cal,ar);};
+  })(window,'https://app.cal.com/embed/embed.js','init');
+  Cal('init',{origin:'https://cal.com'});
+  Cal('inline',{elementOrSelector:'#cal-embed',calLink:'mia-elianaa-a4n2hk/30min',layout:'month_view',config:{ email: PAID_EMAIL, name: '', notes: 'Complete Audit — ' + (company||'') }});
+  Cal('ui',{styles:{branding:{brandColor:'#E4FF97'}},hideEventTypeDetails:false,layout:'month_view'});
+}
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+init();
+</script>
+</body>
+</html>
