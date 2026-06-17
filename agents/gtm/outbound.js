@@ -6,6 +6,7 @@ import { buildAuditData } from './audit-build.js';
 import { slugify } from './audit-site.js';
 import { instantlyEnabled, addLeadToInstantly } from './tools/instantly.js';
 import { linkedinEnabled, pushToLinkedIn } from './tools/linkedin.js';
+import { SEGMENTS } from './config.js';
 import { VOICE_SYSTEM, FOLLOWUP_1_SYSTEM, FOLLOWUP_2_SYSTEM, FOLLOWUP_3_SYSTEM, PLAYBOOK_SYSTEM, BREAKUP_SYSTEM } from './prompts/voice.js';
 import { LIMITS } from './config.js';
 
@@ -185,6 +186,7 @@ export async function processLead(lead) {
         firstName: nm[0] || undefined,
         lastName: nm.length > 1 ? nm.slice(1).join(' ') : undefined,
         companyName: lead.company_name,
+        campaignId: (SEGMENTS[lead.segment] && SEGMENTS[lead.segment].campaignId) || undefined,
         variables: {
           audit_link: lead.audit_url || '',
           audit_card: lead.audit_card || '',

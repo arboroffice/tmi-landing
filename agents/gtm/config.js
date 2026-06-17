@@ -58,6 +58,44 @@ export const ICP = {
 // Lead source: 'apollo' (ICP search, default when APOLLO_API_KEY set) or 'maps' (Apify fallback)
 export const SOURCE = process.env.GTM_SOURCE || (process.env.APOLLO_API_KEY ? 'apollo' : 'maps');
 
+// $5M+ revenue floor (Apollo proxy). Used as a soft revenue filter.
+export const REVENUE_MIN = 5000000;
+
+// Outbound runs two parallel tracks, ~100/day each, both $5M+:
+//  - industrial: manufacturing, oil & gas, fleet, construction, etc.
+//  - service:    home service, aesthetics/med spa, wellness, healthcare groups,
+//                multi-location service businesses, etc.
+// Each can point at its own Instantly campaign so the copy fits the niche.
+export const SEGMENTS = {
+  industrial: {
+    label: 'Industrial',
+    leadsPerDay: 100,
+    employeeRanges: ['21,50', '51,100', '101,200', '201,500'],
+    titles: ['Owner', 'CEO', 'President', 'Founder', 'General Manager', 'VP Operations', 'Operations Manager', 'COO'],
+    industryKeywords: [
+      'manufacturing', 'industrial services', 'oil and gas', 'oilfield services',
+      'fleet', 'transportation', 'logistics', 'construction', 'equipment rental',
+      'marine', 'waste management', 'distribution', 'fabrication', 'mining',
+    ],
+    campaignId: process.env.INSTANTLY_CAMPAIGN_ID_INDUSTRIAL || process.env.INSTANTLY_CAMPAIGN_ID,
+  },
+  service: {
+    label: 'Service & Wellness',
+    leadsPerDay: 100,
+    // High-revenue service businesses can be leaner, so include 11-20.
+    employeeRanges: ['11,20', '21,50', '51,100', '101,200', '201,500'],
+    titles: ['Owner', 'CEO', 'President', 'Founder', 'Practice Manager', 'General Manager', 'Director of Operations', 'Operations Manager', 'COO'],
+    industryKeywords: [
+      'home services', 'hvac', 'plumbing', 'electrical', 'roofing', 'restoration',
+      'pest control', 'landscaping', 'med spa', 'medical spa', 'aesthetics',
+      'dental', 'orthodontics', 'wellness', 'physical therapy', 'chiropractic',
+      'veterinary', 'property management', 'auto repair', 'franchise', 'home health',
+      'multi location healthcare', 'fitness',
+    ],
+    campaignId: process.env.INSTANTLY_CAMPAIGN_ID_SERVICE || process.env.INSTANTLY_CAMPAIGN_ID,
+  },
+};
+
 export const LIMITS = {
   leadsPerDay: 100,      // new prospects to find, audit, and contact per day
   maxCombosPerRun: 24,   // industry x city searches to try before stopping

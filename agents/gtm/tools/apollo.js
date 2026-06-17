@@ -34,6 +34,7 @@ export async function searchProspects({
   employeeRanges,
   industries = [],
   locations = ['United States'],
+  revenueMin = null,
   page = 1,
   perPage = 25,
 }) {
@@ -45,6 +46,7 @@ export async function searchProspects({
     per_page: perPage,
   };
   if (industries.length) body.q_organization_keyword_tags = industries;
+  if (revenueMin) body['revenue_range[min]'] = revenueMin;
 
   const data = await post('/mixed_people/search', body);
   const people = data.people || [];

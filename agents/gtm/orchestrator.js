@@ -22,7 +22,7 @@ import { findContact, getEmail, enrichCompany, searchProspects } from './tools/a
 import { verifyEmail } from './tools/verify.js';
 import { processLead } from './outbound.js';
 import { sendDigest } from './tools/email.js';
-import { ICP, LIMITS, SOURCE } from './config.js';
+import { ICP, LIMITS, SOURCE, SEGMENTS, REVENUE_MIN } from './config.js';
 
 // ── Lead finding pipeline ──────────────────────────────────────────────────
 
@@ -85,10 +85,11 @@ async function processBusiness(biz, industry, city) {
   return saved ? { ...lead, id: saved.id } : null;
 }
 
-// ── Apollo-first sourcing: ICP search (revenue/headcount/industry/title) ────
-async function findLeadsApollo(targetCount) {
+// ── Apollo-first sourcing for one segment (industrial / service) ────────────
+async function findLeadsApollo(segmentKey, targetCount) {
+  const seg = SEGMENTS[segmentKey];
   const leads = [];
-  const keywords = shuffle(ICP.industryKeywords);
+  const keywords = shuffle(seg.industryKeywords);
 
   for (const kw of keywords) {
     if (leads.length >= targetCount) break;
@@ -96,19 +97,20 @@ async function findLeadsApollo(targetCount) {
       let prospects = [];
       try {
         prospects = await searchProspects({
-          titles: ICP.targetTitles,
-          employeeRanges: ICP.employeeRanges,
+          titles: seg.titles || ICP.targetTitles,
+          employeeRanges: seg.employeeRanges || ICP.employeeRanges,
           industries: [kw],
           locations: ICP.locations,
+          revenueMin: REVENUE_MIN,
           page,
           perPage: 25,
         });
       } catch (err) {
-        console.error(`Apollo "${kw}" p${page}: ${err.message}`);
+        console.error(`Apollo [${segmentKey}] "${kw}" p${page}: ${err.message}`);
         break;
       }
       if (!prospects.length) break;
-      console.log(`Apollo "${kw}" p${page}: ${prospects.length} prospects (${leads.length}/${targetCount})`);
+      console.log(`Apollo [${segmentKey}] "${kw}" p${page}: ${prospects.length} prospects (${leads.length}/${targetCount})`);
 
       for (const p of prospects) {
         if (leads.length >= targetCount) break;
@@ -137,6 +139,7 @@ async function findLeadsApollo(targetCount) {
           linkedin_url: p.linkedinUrl || null,
           phone: p.phone || null,
           source: 'apollo',
+          segment: segmentKey,
           status: 'new',
         };
         const saved = await db.insertLead(lead).catch(e => { console.warn(`insert ${email}: ${e.message}`); return null; });
@@ -150,14 +153,21 @@ async function findLeadsApollo(targetCount) {
   return leads;
 }
 
-// Dispatch sourcing by configured engine.
-async function findNewLeads(targetCount) {
+// Dispatch sourcing: run every segment (industrial + service), ~per-segment target.
+async function findNewLeads(perSegmentTarget) {
   if (SOURCE === 'apollo') {
-    const leads = await findLeadsApollo(targetCount);
-    if (leads.length) return leads;
+    const all = [];
+    for (const key of Object.keys(SEGMENTS)) {
+      const target = perSegmentTarget || SEGMENTS[key].leadsPerDay;
+      console.log(`--- Segment: ${SEGMENTS[key].label} (target ${target}) ---`);
+      const leads = await findLeadsApollo(key, target);
+      console.log(`  ${SEGMENTS[key].label}: ${leads.length} leads`);
+      all.push(...leads);
+    }
+    if (all.length) return all;
     console.log('Apollo returned no leads, falling back to maps');
   }
-  return findLeadsMaps(targetCount);
+  return findLeadsMaps(perSegmentTarget || LIMITS.leadsPerDay);
 }
 
 // Sweep across many industry x city combos until we hit the daily target (maps fallback).
@@ -209,13 +219,13 @@ export async function run() {
   console.log(new Date().toISOString());
   console.log('');
 
-  // Runtime overrides (admin button / workflow inputs): batch size + dry run.
-  const target = Number(process.env.GTM_LEADS_PER_DAY) || LIMITS.leadsPerDay;
+  // Runtime overrides (admin button / workflow inputs): per-segment batch + dry run.
+  const override = Number(process.env.GTM_LEADS_PER_DAY) || null;
   const dry = String(process.env.GTM_DRY_RUN || '').toLowerCase() === 'true';
 
-  // 1. Find new leads
-  console.log(`--- Finding ${target} new leads${dry ? ' (DRY RUN: build audits, do not send)' : ''} ---`);
-  const newLeads = await findNewLeads(target);
+  // 1. Find new leads across every segment (industrial + service), ~100 each.
+  console.log(`--- Sourcing${override ? ` (${override}/segment)` : ' (per-segment defaults)'}${dry ? ' (DRY RUN: build audits, do not send)' : ''} ---`);
+  const newLeads = await findNewLeads(override);
   stats.found = newLeads.length;
   console.log(`Found ${stats.found} new leads\n`);
 
@@ -255,7 +265,7 @@ export async function run() {
   console.log(stats);
 
   // Observability: record the run.
-  await db.logRun({ ...stats, source: SOURCE, dry_run: dry, target, elapsed_s: elapsed }).catch(e => console.error('logRun:', e.message));
+  await db.logRun({ ...stats, source: SOURCE, dry_run: dry, per_segment: override, segments: Object.keys(SEGMENTS).join('+'), elapsed_s: elapsed }).catch(e => console.error('logRun:', e.message));
 
   // 4. Send the operator's daily briefing (funnel + bookings + hot accounts).
   const digestStats = await db.getDigestStats().catch(() => ({}));
