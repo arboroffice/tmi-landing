@@ -51,6 +51,7 @@
       <p class="muted" style="margin:-6px 0 22px;max-width:70ch;">Every prospect gets researched, scored, and handed a personalized Intelligent Company Audit before we ever ask for a meeting. Generate the audit, then the rep links it in the cold email.</p>
 
       <div class="ob-stats" id="ob-stats"></div>
+      <div class="ob-stats" id="instantly-stats" style="display:none;"></div>
 
       <div class="ladder">
         <div class="rung free"><h4>Intelligent Company Audit</h4><div class="p">The hook. Personalized microsite + score.</div><div class="price">Free</div></div>
@@ -189,8 +190,24 @@ async function addSuppress(){
   } catch(e){ alert('Failed: ' + e.message); }
 }
 
+async function loadInstantly(){
+  const box = document.getElementById('instantly-stats');
+  let a;
+  try { a = await TMIAdmin.api('/api/instantly-analytics'); } catch(e){ return; }
+  if(!a || a.configured === false) return;
+  const stat = (n,l)=>`<div class="ob-stat"><div class="n">${n ?? '—'}</div><div class="l">${l}</div></div>`;
+  const rate = (x,y)=> (x!=null && y) ? Math.round((x/y)*100)+'%' : '—';
+  box.innerHTML =
+    stat(a.sent, 'Emails sent (Instantly)') +
+    stat(rate(a.opened, a.sent), 'Open rate') +
+    stat(rate(a.replied, a.sent), 'Reply rate') +
+    stat(a.bounced, 'Bounced');
+  box.style.display = 'grid';
+}
+
 loadProspects();
 loadRuns();
+loadInstantly();
 </script>
 </body>
 </html>

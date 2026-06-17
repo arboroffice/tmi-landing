@@ -19,6 +19,7 @@ if (!process.env.ANTHROPIC_API_KEY) {
 import * as db from './tools/db.js';
 import { findBusinessesOnMaps, extractDomain } from './tools/apify.js';
 import { findContact, getEmail, enrichCompany, searchProspects } from './tools/apollo.js';
+import { verifyEmail } from './tools/verify.js';
 import { processLead } from './outbound.js';
 import { sendDigest } from './tools/email.js';
 import { ICP, LIMITS, SOURCE } from './config.js';
@@ -120,6 +121,8 @@ async function findLeadsApollo(targetCount) {
         if (!email || /not_unlocked/i.test(email)) continue;
         if (await db.isSuppressed(email).catch(() => false)) continue;
         if (await db.leadExists(email).catch(() => false)) continue;
+        const verdict = await verifyEmail(email).catch(() => ({ ok: true }));
+        if (!verdict.ok) { console.log(`  Skip ${email} (${verdict.status})`); continue; }
 
         const lead = {
           company_name: p.company || p.domain,

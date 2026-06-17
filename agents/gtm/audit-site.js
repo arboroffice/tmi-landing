@@ -22,6 +22,9 @@ export function slugify(str) {
 }
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// Cal.com booking link (same as /booking) so prospects book directly on the audit.
+const CAL_LINK = process.env.CAL_LINK || 'mia-elianaa-a4n2hk/30min';
 const fmtMoney = (n) => '$' + Number(n || 0).toLocaleString('en-US');
 
 // Score ring color: chartreuse regardless, but label shifts by band
@@ -140,6 +143,7 @@ export function renderAuditPage(d) {
   .btn{display:inline-flex;align-items:center;gap:9px;background:var(--chart);color:#0a0b14;font-family:var(--sans);font-size:16px;font-weight:700;padding:18px 42px;border-radius:999px;transition:background .15s;}
   .btn:hover{background:var(--chart2);}
   .note{font-family:var(--sans);font-size:12px;color:var(--ink3);margin-top:16px;}
+  #cal-embed{max-width:920px;margin:30px auto 0;background:#fff;border-radius:14px;overflow:hidden;min-height:560px;}
   .foot{padding:40px 0;border-top:1px solid var(--line);font-family:var(--sans);font-size:12px;color:var(--ink3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
   @media(max-width:760px){.cf{grid-template-columns:1fr;gap:18px;}.cf .arrow{transform:rotate(90deg);}.metrics{grid-template-columns:1fr;}.cols{grid-template-columns:1fr;gap:24px;}.card{padding:28px 22px;}}
 </style>
@@ -199,14 +203,30 @@ export function renderAuditPage(d) {
 ${demo}
 
 <section class="sec cta"><div class="wrap">
-  <h2>Want the full version of this?</h2>
-  <p>The free Intelligent Company Audit goes deeper, with the real numbers for ${esc(d.companyName)}. No pitch.</p>
-  <a href="/audit" class="btn">Book the intelligent company audit &rarr;</a>
-  <p class="note">Prepared by TMI &middot; This is a preliminary review from public information.</p>
+  <div class="eyebrow">Free Intelligent Company Audit</div>
+  <h2>Grab a time and we'll go deeper on ${esc(d.companyName)}.</h2>
+  <p>Pick a slot below. We'll walk through the real numbers and what we'd build first. No pitch.</p>
+  <div id="cal-embed"></div>
+  <p class="note">Prepared by TMI &middot; A preliminary review from public information.</p>
 </div></section>
 
 <div class="wrap"><div class="foot"><span>&copy; ${new Date().getFullYear()} TMI Technology</span><span>${esc(d.ownerFirstName ? `For ${d.ownerFirstName}` : 'Operational intelligence')}</span></div></div>
 
+<script>
+(function (C, A, L) {
+  let p = function (a, ar) { a.q.push(ar); };
+  let d = C.document;
+  C.Cal = C.Cal || function () {
+    let cal = C.Cal; let ar = arguments;
+    if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement('script')).src = A; cal.loaded = true; }
+    if (ar[0] === L) { const api = function () { p(api, arguments); }; const ns = ar[1]; api.q = api.q || []; typeof ns === 'string' ? (cal.ns[ns] = api) && p(api, ar) : p(cal, ar); return; }
+    p(cal, ar);
+  };
+})(window, 'https://app.cal.com/embed/embed.js', 'init');
+Cal('init', { origin: 'https://cal.com' });
+Cal('inline', { elementOrSelector: '#cal-embed', calLink: '${CAL_LINK}', layout: 'month_view' });
+Cal('ui', { styles: { branding: { brandColor: '#E4FF97' } }, hideEventTypeDetails: false, layout: 'month_view' });
+</script>
 </body>
 </html>`;
 }
