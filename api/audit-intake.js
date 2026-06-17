@@ -59,15 +59,32 @@ module.exports = async function handler(req, res) {
           industry: industry || answers.industry,
           answers,
         });
-        await dbx.update('audit_submissions', sub.id, { deliverable: md, status: 'delivered', delivered_at: new Date().toISOString() });
+        const { parseAuditMeta } = require('./_audit-report-render');
+        const meta = parseAuditMeta(md);
+        await dbx.update('audit_submissions', sub.id, {
+          deliverable: md, status: 'delivered', delivered_at: new Date().toISOString(),
+          score: meta.score, categories: meta.categories || [],
+        });
+        const reportUrl = `https://www.tmitechai.com/audit-report?id=${sub.id}`;
 
         if (process.env.RESEND_API_KEY && paidEmail) {
           const { Resend } = require('resend');
+          const cn = company || answers.company || 'your operation';
           await new Resend(process.env.RESEND_API_KEY).emails.send({
             from: 'TMI <support@tmitechai.com>',
             to: paidEmail,
             subject: `Your Complete Audit — ${company || answers.company || 'TMI'}`,
-            text: `${md}\n\n--\nBook your 30-minute strategy call: ${bookingLink}`,
+            html: `<!DOCTYPE html><html><body style="background:#0a0b14;font-family:Arial,sans-serif;color:#fff;margin:0;padding:0;">
+<div style="max-width:560px;margin:0 auto;padding:40px 24px;">
+<p style="font-size:13px;letter-spacing:0.18em;text-transform:uppercase;color:#E4FF97;margin:0 0 18px;">The Complete Audit</p>
+<h1 style="font-weight:400;font-size:26px;margin:0 0 14px;">Your audit for ${cn} is ready.</h1>
+<p style="color:rgba(255,255,255,0.66);line-height:1.65;margin:0 0 8px;">We mapped how your operation runs, where time and money leak, your Intelligence Score${meta.score != null ? ` (<strong style="color:#fff;">${meta.score}/100</strong>)` : ''}, and a 90-day plan to fix it.</p>
+<p style="margin:26px 0;"><a href="${reportUrl}" style="background:#E4FF97;color:#0a0b14;font-weight:700;padding:14px 28px;border-radius:999px;text-decoration:none;display:inline-block;">View your audit</a></p>
+<p style="color:rgba(255,255,255,0.66);line-height:1.65;margin:0 0 8px;">Next, book your 30-minute strategy call with the founder and a strategist. That is where we walk through this together and pick your path.</p>
+<p style="margin:18px 0 0;"><a href="${bookingLink}" style="color:#E4FF97;">Book your strategy call &rarr;</a></p>
+<p style="color:rgba(255,255,255,0.4);font-size:12px;margin:34px 0 0;border-top:1px solid rgba(255,255,255,0.12);padding-top:16px;">TMI Technology</p>
+</div></body></html>`,
+            text: `Your Complete Audit for ${cn} is ready: ${reportUrl}\n\nBook your 30-minute strategy call: ${bookingLink}\n\n---\n\n${md}`,
           });
         }
         // Notify the team (they prep + run the call).

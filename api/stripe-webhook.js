@@ -53,6 +53,20 @@ async function markPaid(session) {
   }
 }
 
+async function markBuildDeposit(session) {
+  const proposalId = session.metadata && session.metadata.proposal_id;
+  const path = (session.metadata && session.metadata.path) || '';
+  if (!proposalId) return;
+  const prop = await dbx.getById('proposals', proposalId).catch(() => null);
+  if (!prop) return;
+  if (prop.status === 'accepted') return; // idempotent
+  await dbx.update('proposals', proposalId, {
+    status: 'accepted', accepted_path: path, accepted_at: new Date().toISOString(),
+    deposit_paid: (session.amount_total || 0) / 100, stripe_session: session.id,
+  });
+  alertTeam(`BUILD ACCEPTED (${path.toUpperCase()}): ${prop.company || prop.client_email || proposalId} - deposit $${((session.amount_total || 0) / 100).toLocaleString()}`);
+}
+
 async function markRefunded(event) {
   const obj = event.data.object || {};
   const email = obj.receipt_email || (obj.billing_details && obj.billing_details.email) || null;
@@ -90,7 +104,10 @@ module.exports = async function handler(req, res) {
   try {
     if (event.type === 'checkout.session.completed') {
       const s = event.data.object;
-      if (s.payment_status === 'paid') await markPaid(s);
+      if (s.payment_status === 'paid') {
+        if (s.metadata && s.metadata.product === 'build_deposit') await markBuildDeposit(s);
+        else await markPaid(s);
+      }
     } else if (event.type === 'charge.refunded' || event.type === 'refund.created' || event.type === 'charge.dispute.created') {
       await markRefunded(event);
     }

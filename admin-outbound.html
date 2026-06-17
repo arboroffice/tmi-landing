@@ -67,10 +67,19 @@
       <div class="sec-head" style="margin:6px 0 10px;"><h2 style="font-size:15px;">Audit funnel ($1,000 Complete Audit)</h2></div>
       <p class="muted" style="margin:-6px 0 12px;max-width:70ch;">Capture &rarr; pay &rarr; book. Captured-but-unpaid leads sit in the worklist below with a one-click resume link that drops them straight into checkout.</p>
       <div class="ob-stats" id="audit-stats"><div class="ob-stat"><div class="n">…</div><div class="l">loading</div></div></div>
-      <div class="card" style="padding:0;overflow:hidden;margin-bottom:26px;">
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:22px;">
         <table class="ob-table">
           <thead><tr><th>Captured</th><th>Name</th><th>Company</th><th>Contact</th><th>Last nudge</th><th></th></tr></thead>
           <tbody id="audit-worklist"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="sec-head" style="margin:6px 0 10px;"><h2 style="font-size:15px;">Paid audits &rarr; build proposals</h2></div>
+      <p class="muted" style="margin:-6px 0 12px;max-width:70ch;">After the strategy call, generate the build proposal (DIY / DWY / DFY, scoped and priced from their audit) and send it. They accept and pay the deposit on the proposal page.</p>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:26px;">
+        <table class="ob-table">
+          <thead><tr><th>Company</th><th>Email</th><th>Score</th><th>Audit</th><th>Proposal</th><th></th></tr></thead>
+          <tbody id="audit-completed"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
         </table>
       </div>
 
@@ -265,8 +274,8 @@ async function loadAuditFunnel(){
     stat(`${f.booked||0}`, `Booked (${(f.conversion&&f.conversion.paidToBooked)||0}%)`) +
     stat(`${f.unpaidCount||0}`, 'Unpaid to work');
   const list = (f.worklist || []);
-  if (!list.length) { wl.innerHTML = '<tr><td colspan="6" class="empty">No captured-but-unpaid leads. Clean funnel.</td></tr>'; return; }
-  wl.innerHTML = list.map(r => `
+  if (!list.length) { wl.innerHTML = '<tr><td colspan="6" class="empty">No captured-but-unpaid leads. Clean funnel.</td></tr>'; }
+  else wl.innerHTML = list.map(r => `
     <tr>
       <td class="muted">${TMIAdmin.reltime ? TMIAdmin.reltime(r.captured_at) : (r.captured_at||'')}</td>
       <td>${r.name || '<span class="muted">—</span>'}</td>
@@ -275,6 +284,36 @@ async function loadAuditFunnel(){
       <td class="muted">${r.last_nudge || '—'}</td>
       <td><a class="lnk" href="${r.resume_url}" target="_blank" rel="noopener">Resume checkout</a></td>
     </tr>`).join('');
+
+  const ca = document.getElementById('audit-completed');
+  const audits = (f.audits || []);
+  if (!audits.length) { ca.innerHTML = '<tr><td colspan="6" class="empty">No paid audits yet.</td></tr>'; return; }
+  ca.innerHTML = audits.map(a => {
+    const prop = a.proposal
+      ? `<a class="lnk" href="${a.proposal.url}" target="_blank" rel="noopener">${a.proposal.status || 'view'}</a>`
+      : '<span class="muted">none</span>';
+    const action = a.deliverable_ready
+      ? (a.proposal
+          ? `<a class="lnk" href="${a.proposal.url}" target="_blank" rel="noopener">Open</a>`
+          : `<button class="btn btn-primary btn-sm" onclick="genProposal('${a.id}', this)">Generate proposal</button>`)
+      : '<span class="muted">audit building…</span>';
+    return `<tr>
+      <td>${a.company || '<span class="muted">—</span>'}</td>
+      <td class="muted">${a.email || '—'}</td>
+      <td>${a.score != null ? a.score : '<span class="muted">—</span>'}</td>
+      <td><a class="lnk" href="${a.report_url}" target="_blank" rel="noopener">Report</a></td>
+      <td>${prop}</td>
+      <td>${action}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function genProposal(submissionId, btn){
+  const notes = prompt('Optional notes from the strategy call (chosen direction, scope, anything that should shape the proposal):', '') || '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+  const r = await TMIAdmin.api('/api/audit-proposal', 'POST', { submissionId, notes });
+  if (r && r.ok) { TMIAdmin.toast('Proposal generated and emailed'); loadAuditFunnel(); }
+  else if (btn) { btn.disabled = false; btn.textContent = 'Generate proposal'; }
 }
 
 loadProspects();

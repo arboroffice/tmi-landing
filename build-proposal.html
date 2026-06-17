@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="noindex"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<title>Your Build Proposal | TMI</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0a0b14;--card:#111324;--ink:#fff;--ink2:rgba(255,255,255,0.66);--ink3:rgba(255,255,255,0.42);--line:rgba(255,255,255,0.1);--chart:#E4FF97;--chart2:#D0FF6A;--serif:"Barlow",system-ui,sans-serif;}
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{font-family:var(--serif);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.6;}
+  a{color:inherit;}
+  .top{height:56px;border-bottom:1px solid var(--line);display:flex;align-items:center;}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 26px;}
+  .brand{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;}
+  .brand img{height:22px;filter:brightness(0) invert(1);}
+  .hero{padding:54px 0 8px;}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--chart);margin-bottom:14px;}
+  h1{font-weight:400;font-size:clamp(30px,4.4vw,48px);letter-spacing:-0.02em;line-height:1.04;margin:0 0 14px;}
+  .summary{color:var(--ink2);font-size:17px;max-width:62ch;}
+  .accepted{display:none;background:rgba(228,255,151,0.1);border:1px solid rgba(228,255,151,0.35);border-radius:12px;padding:16px 20px;margin:26px 0 0;color:var(--ink);font-size:15px;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:36px 0 30px;}
+  @media(max-width:820px){.grid{grid-template-columns:1fr;}}
+  .path{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 24px;display:flex;flex-direction:column;}
+  .path.rec{border-color:rgba(228,255,151,0.5);box-shadow:0 0 0 1px rgba(228,255,151,0.25);}
+  .rec-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#0a0b14;background:var(--chart);border-radius:999px;padding:3px 10px;margin-bottom:12px;align-self:flex-start;}
+  .path h3{font-weight:500;font-size:21px;margin:0 0 4px;}
+  .path .tl{font-size:12px;color:var(--ink3);margin-bottom:16px;}
+  .price{font-size:34px;color:var(--chart);line-height:1;margin:0 0 4px;}
+  .price small{font-size:13px;color:var(--ink3);}
+  .dep{font-size:12px;color:var(--ink3);margin-bottom:18px;}
+  .scope{list-style:none;margin:0 0 22px;padding:0;flex:1;}
+  .scope li{font-size:14px;color:var(--ink2);padding:8px 0 8px 22px;position:relative;border-top:1px solid var(--line);}
+  .scope li:first-child{border-top:none;}
+  .scope li:before{content:"";position:absolute;left:0;top:15px;width:7px;height:7px;border-radius:50%;background:var(--chart);}
+  .btn{display:block;text-align:center;background:var(--chart);color:#0a0b14;font-weight:700;font-size:14px;padding:14px 18px;border-radius:999px;text-decoration:none;transition:background .15s;}
+  .btn:hover{background:var(--chart2);}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  .foot{padding:30px 0 60px;color:var(--ink3);font-size:12px;border-top:1px solid var(--line);margin-top:20px;}
+  .loading,.error{padding:90px 0;text-align:center;color:var(--ink3);}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap"><a href="/" class="brand"><img src="/logo.svg" alt="TMI"/> TMI</a></div></div>
+<div class="wrap">
+  <div id="root"><div class="loading">Loading your proposal…</div></div>
+  <div class="foot">&copy; 2026 TMI Technology · This proposal is prepared for you. Pricing holds for 30 days.</div>
+</div>
+<script>
+var params = new URLSearchParams(location.search);
+var id = params.get('id') || '';
+var justAccepted = params.get('accepted') === '1';
+
+function money(n){ return '$' + (Number(n)||0).toLocaleString(); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function render(p){
+  var b = p.build || {};
+  var paths = b.paths || [];
+  var accepted = (p.status === 'accepted') || justAccepted;
+  var acceptedPath = p.accepted_path || '';
+  var cards = paths.map(function(path){
+    var rec = (b.recommended === path.key);
+    var isAcceptedOne = accepted && acceptedPath && acceptedPath === path.key;
+    var full = (path.key === 'diy') || (Number(path.deposit) >= Number(path.price));
+    var cta;
+    if (accepted) {
+      cta = isAcceptedOne
+        ? '<div class="btn" style="cursor:default;background:#1c1f2e;color:#E4FF97;">Selected ✓</div>'
+        : '<div class="btn ghost" style="cursor:default;opacity:.5;">—</div>';
+    } else {
+      var label = Number(path.price) <= 0 ? 'Choose this path' : (full ? 'Choose & pay ' + money(path.price) : 'Choose & pay ' + money(path.deposit) + ' deposit');
+      cta = '<a class="btn" href="/api/proposal-deposit?id=' + encodeURIComponent(id) + '&path=' + encodeURIComponent(path.key) + '">' + label + '</a>';
+    }
+    var priceBlock = Number(path.price) <= 0
+      ? '<div class="price">Included<small></small></div><div class="dep">Part of your audit engagement</div>'
+      : '<div class="price">' + money(path.price) + '</div>' + (full ? '<div class="dep">Paid in full</div>' : '<div class="dep">' + money(path.deposit) + ' deposit to start</div>');
+    return '<div class="path' + (rec ? ' rec' : '') + '">' +
+      (rec ? '<span class="rec-tag">Recommended</span>' : '') +
+      '<h3>' + esc(path.name) + '</h3>' +
+      '<div class="tl">' + esc(path.timeline || '') + '</div>' +
+      priceBlock +
+      '<ul class="scope">' + (path.scope||[]).map(function(s){return '<li>'+esc(s)+'</li>';}).join('') + '</ul>' +
+      cta + '</div>';
+  }).join('');
+
+  document.getElementById('root').innerHTML =
+    '<div class="hero"><div class="eyebrow">Your build proposal</div>' +
+    '<h1>' + esc(p.company || 'Your build') + '</h1>' +
+    '<p class="summary">' + esc(b.summary || '') + '</p>' +
+    (accepted ? '<div class="accepted" style="display:block;">You\'re in. We\'ll be in touch to kick off' + (acceptedPath ? ' your ' + esc((paths.find(function(x){return x.key===acceptedPath;})||{}).name || '') + ' build' : '') + '.</div>' : '') +
+    '</div>' +
+    '<div class="grid">' + cards + '</div>';
+}
+
+if (!id) {
+  document.getElementById('root').innerHTML = '<div class="error">No proposal specified.</div>';
+} else {
+  fetch('/api/proposals?id=' + encodeURIComponent(id))
+    .then(function(r){ if(!r.ok) throw new Error('not found'); return r.json(); })
+    .then(function(p){ if(!p || !p.build) throw new Error('not a build proposal'); render(p); })
+    .catch(function(){ document.getElementById('root').innerHTML = '<div class="error">This proposal could not be found.</div>'; });
+}
+</script>
+</body>
+</html>

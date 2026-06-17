@@ -41,6 +41,10 @@ app.all(/^\/api\/([a-zA-Z0-9_-]+)$/, async (req, res) => {
   }
 });
 
+// ── Branded hosted Complete Audit report: /audit-report?id=<id> ─────────────
+const auditReportHandler = require('./api/audit-report');
+app.get('/audit-report', (req, res) => auditReportHandler(req, res));
+
 // ── Dynamic personalized audit microsite: /audit/<slug> ────────────────────
 const auditPageHandler = require('./api/audit-page');
 app.get('/audit/:slug', (req, res, next) => {

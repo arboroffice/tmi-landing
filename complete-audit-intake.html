@@ -109,15 +109,17 @@ async function submitForm(){
     var r = await fetch('/api/audit-intake', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ session_id: SESSION, email: PAID_EMAIL, company: answers.company, industry: answers.industry, answers: answers }) });
     var d = await r.json();
     if(!d.ok) throw new Error(d.error || 'Submission failed');
-    showBooking(answers.company);
+    showBooking(answers.company, d.id);
   } catch(e){ err.textContent=e.message; err.style.display='block'; btn.disabled=false; btn.textContent='Submit & get my audit →'; }
 }
 
-function showBooking(company){
+function showBooking(company, id){
+  var reportLink = id ? '<p class="sub" style="margin-top:-8px;">It is also being published to your private report page: <a href="/audit-report?id='+encodeURIComponent(id)+'" style="color:#E4FF97;">view your audit &rarr;</a></p>' : '';
   document.getElementById('root').innerHTML =
     '<div class="done"><div class="eyebrow" style="margin-top:48px;">You\'re in</div>' +
     '<h1>Your audit is being built.</h1>' +
     '<p class="sub">It\'s landing in your inbox shortly. Last step: grab your 30-minute strategy call with the founder and a strategist - that\'s where we go deep and map your path.</p>' +
+    reportLink +
     '<div id="cal-embed"></div></div>';
   (function (C, A, L) {
     var p=function(a,ar){a.q.push(ar);}; var d=C.document;

@@ -38,6 +38,28 @@ module.exports = async function handler(req, res) {
       resume_url: `/api/audit-resume?id=${r.id}`,
     }));
 
+    // Completed paid audits + any build proposal already generated, so the
+    // strategist can generate / view the proposal after the call.
+    const [subs, props] = await Promise.all([
+      dbx.list('audit_submissions', { order: 'created_at', ascending: false, limit: 60 }).catch(() => []),
+      dbx.list('proposals', { where: [['kind', '==', 'build']], order: 'created_at', ascending: false, limit: 200 }).catch(() => []),
+    ]);
+    const propByAudit = {};
+    for (const p of props) if (p.audit_id) propByAudit[p.audit_id] = p;
+    const audits = subs.map(s => {
+      const p = propByAudit[s.id];
+      return {
+        id: s.id,
+        company: s.company || (s.answers && s.answers.company) || null,
+        email: s.email || null,
+        score: s.score != null ? s.score : null,
+        deliverable_ready: !!s.deliverable,
+        created_at: s.created_at || null,
+        report_url: `/audit-report?id=${s.id}`,
+        proposal: p ? { id: p.id, status: p.status, url: `/build-proposal?id=${p.id}` } : null,
+      };
+    });
+
     return res.json({
       captured, paid, booked, refunded,
       unpaidCount: unpaid.length,
@@ -46,6 +68,7 @@ module.exports = async function handler(req, res) {
         paidToBooked: pct(booked, paid),
       },
       worklist,
+      audits,
     });
   } catch (e) {
     return res.status(500).json({ error: e.message });
