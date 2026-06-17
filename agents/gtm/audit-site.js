@@ -44,7 +44,7 @@ export function renderAuditPage(d) {
   const url = `https://www.tmitechai.com/audit/${slug}`;
   const score = Math.max(0, Math.min(100, Math.round(d.score ?? 0)));
   const ring = (score / 100) * 339.292; // 2*pi*54
-  const cardImg = d.cardImage || `https://www.tmitechai.com/audit/${slug}-card.png`;
+  const cardImg = d.cardImage || `https://www.tmitechai.com/api/audit-card?slug=${slug}`;
   const cats = (d.categories || []).map(c => {
     const pct = Math.max(0, Math.min(100, (c.score / 10) * 100));
     return `<div class="cat"><div class="cat-top"><span>${esc(c.name)}</span><span class="cat-n">${c.score}/10</span></div><div class="cat-bar"><i style="width:${pct}%"></i></div></div>`;

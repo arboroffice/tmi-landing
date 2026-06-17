@@ -35,6 +35,15 @@ app.all(/^\/api\/([a-zA-Z0-9_-]+)$/, async (req, res) => {
   }
 });
 
+// ── Dynamic personalized audit microsite: /audit/<slug> ────────────────────
+const auditPageHandler = require('./api/audit-page');
+app.get('/audit/:slug', (req, res, next) => {
+  if (path.extname(req.params.slug)) return next(); // static asset (.png/.html) -> static
+  req.query = req.query || {};
+  req.query.slug = req.params.slug;
+  return auditPageHandler(req, res);
+});
+
 // ── Subdomain path rewrites (mirror vercel.json host rewrites) ───────────────
 const SUBDOMAIN_PREFIX = {
   'admin.': 'admin',     // admin.tmitechai.com/leads -> admin-leads.html

@@ -134,25 +134,39 @@ export async function researchCompany({ name, website, industry, location, emplo
   ].filter(Boolean).join('\n');
 
   const message = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 700,
-    system: `You are TMI's prospect research analyst. TMI is the fractional AI and ops department for operations-heavy businesses doing $5M+ (physical or digital). TMI runs a Delete / Connect / Build transformation: delete software they don't use, connect what's left, build the backend the company runs on.
-You reason over REAL signals (detected tech stack, hiring titles, website) to identify where this specific company is likely losing time and money. Hiring titles like Dispatcher, Operations Coordinator, Data Entry, Scheduler are bottleneck signals: the company is hiring humans to move information that a system should move. A pile of disconnected tools is a connect/delete opportunity. No tools at all means manual everything. Be concrete and specific to the niche. No AI hype. No em dashes.`,
+    model: 'claude-sonnet-4-6',
+    max_tokens: 900,
+    system: `You are TMI's senior prospect research analyst. TMI is the fractional AI and ops department for operations-heavy businesses doing $5M+ (physical or digital), running a Delete / Connect / Build transformation: delete software they don't use, connect what's left, build the backend the company runs on.
+
+Your job is to find the ONE TRUE BOTTLENECK in this specific company and back it with evidence, the way a sharp operator would after 20 minutes of digging. You diagnose through three lenses:
+1. Founder bottleneck - decisions, approvals, follow-up route through one person.
+2. Information bottleneck - status, numbers, history live in heads, texts, and disconnected tools; nobody can see the operation without calling someone.
+3. Operational latency - lag between stages (lead to response, job done to invoice, decision waiting on a person).
+
+Read the EVIDENCE and let it decide, do not guess generically:
+- Hiring titles (Dispatcher, Operations Coordinator, Data Entry, Scheduler, Project Administrator) are proof they are paying a human to move information a system should move. Name the role and what it implies.
+- A pile of disconnected tools (e.g. QuickBooks + a separate scheduler + spreadsheets) is a connect/delete problem: data is re-keyed between systems.
+- No detected tools at all means the operation likely runs on phone, email, paper, and spreadsheets - manual everything.
+- The website (services, locations, fleet size, team page) tells you scale and where volume concentrates.
+
+Be specific to the niche and to THIS company's evidence. No AI hype. No em dashes. No generic "they probably struggle with efficiency."`,
     messages: [{
       role: 'user',
-      content: `Analyze this company and return JSON only.
+      content: `Diagnose this company. Use the evidence. Return JSON only.
 
 ${context}
 
 {
   "companySize": "small/medium/large",
-  "techObservation": "one sentence on what their tech stack (or lack of it) implies about how work moves",
-  "signalObservation": "one sentence on what their hiring signals imply about bottlenecks, or 'none' if no signals",
-  "likelyPainPoints": ["3-5 specific operational pain points, niche-specific"],
-  "primaryPain": "the single most likely bottleneck in one concrete sentence",
-  "crewCount": "rough number of crews/trucks/teams based on size, or null",
+  "techObservation": "one sentence on what their detected stack (or lack of it) proves about how work moves",
+  "signalObservation": "one sentence on what their hiring signals prove about a bottleneck, or 'none'",
+  "bottleneckType": "founder | information | latency",
+  "primaryPain": "the ONE true bottleneck, named specifically, in one concrete sentence, citing the evidence (a hiring title, a tool gap, scale). Not generic.",
+  "evidence": "the specific signal(s) that point to it",
+  "likelyPainPoints": ["3-5 specific, niche-specific operational pain points ranked by likelihood"],
+  "crewCount": "rough number of crews/trucks/teams/locations based on size, or null",
   "goodFit": true/false,
-  "fitReason": "one sentence on fit for a $5M+ operations transformation"
+  "fitReason": "one sentence on fit for a $5M+ Delete/Connect/Build transformation"
 }`,
     }],
   });

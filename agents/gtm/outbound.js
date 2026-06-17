@@ -3,8 +3,7 @@ import * as db from './tools/db.js';
 import { sendEmail } from './tools/email.js';
 import { researchCompany } from './tools/research.js';
 import { buildAuditData } from './audit-build.js';
-import { writeAuditPage } from './audit-site.js';
-import { writeCardPng } from './audit-card.js';
+import { slugify } from './audit-site.js';
 import { instantlyEnabled, addLeadToInstantly } from './tools/instantly.js';
 import { VOICE_SYSTEM, FOLLOWUP_1_SYSTEM, FOLLOWUP_2_SYSTEM, FOLLOWUP_3_SYSTEM, PLAYBOOK_SYSTEM, BREAKUP_SYSTEM } from './prompts/voice.js';
 import { LIMITS } from './config.js';
@@ -114,42 +113,30 @@ export async function processLead(lead) {
       });
     }
 
-    // Build the personalized Intelligent Company Audit microsite (the BI-rep asset).
+    // Build the personalized Intelligent Company Audit and store it in Firestore.
+    // The microsite (/audit/<slug>) and card image render dynamically from this
+    // record, so they are live the instant the lead is created - no deploy lag.
     try {
       const auditData = await buildAuditData({ lead, research });
-
-      // Personalized executive card image (static PNG, host-agnostic).
-      let cardImage = null;
-      const provisionalSlug = (lead.company_name || '').toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').slice(0, 60);
-      try {
-        cardImage = await writeCardPng({
-          slug: provisionalSlug,
-          companyName: lead.company_name,
-          score: auditData.score,
-          industry: lead.industry,
-        });
-      } catch (e) {
-        console.warn(`  Card image failed for ${lead.company_name}: ${e.message}`);
-      }
-
-      const out = writeAuditPage({
+      const slug = slugify(lead.company_name);
+      await db.saveAudit(slug, {
         ...auditData,
         companyName: lead.company_name,
         ownerFirstName: (lead.owner_name || '').split(' ')[0] || '',
-        industry: lead.industry,
-        revenueEst: lead.revenue_est || lead.revenue,
-        employees: lead.employee_count,
-        cardImage,
+        industry: lead.industry || '',
+        revenueEst: lead.revenue_est || lead.revenue || '',
+        employees: lead.employee_count || '',
+        leadId: lead.id,
       });
-      lead.audit_url = out.url;
-      lead.audit_card = cardImage;
+      lead.audit_url = `https://www.tmitechai.com/audit/${slug}`;
+      lead.audit_card = `https://www.tmitechai.com/api/audit-card?slug=${slug}`;
       await db.updateLead(lead.id, {
-        audit_url: out.url,
-        audit_slug: out.slug,
-        audit_card: cardImage,
+        audit_url: lead.audit_url,
+        audit_slug: slug,
+        audit_card: lead.audit_card,
         intel_score: auditData.score,
       });
-      console.log(`  Audit built: ${out.url} (score ${auditData.score})`);
+      console.log(`  Audit stored: ${lead.audit_url} (score ${auditData.score})`);
     } catch (err) {
       console.warn(`  Audit generation failed for ${lead.company_name}: ${err.message}`);
     }

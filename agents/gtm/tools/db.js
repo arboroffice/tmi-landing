@@ -246,6 +246,16 @@ export async function insertAuditBrief(brief) {
   return insert('audit_briefs', brief);
 }
 
+// Prospect-facing audits, keyed by slug, served dynamically at /audit/<slug>.
+export async function saveAudit(slug, data) {
+  await update('prospect_audits', slug, { ...data, slug, updated_at: new Date().toISOString() });
+  return slug;
+}
+
+export async function getAudit(slug) {
+  return getById('prospect_audits', slug);
+}
+
 export async function insertCampaign(campaign) {
   return insert('email_campaigns', campaign);
 }
