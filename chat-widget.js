@@ -9,30 +9,10 @@
     "Hi - I'm TMI's AI assistant, here to help figure out where AI fits in your operation. Tell me what you do, roughly how big you are, and what's the thing eating the most of your time or margin right now.";
 
   const ROUTES = {
-    foundation: {
-      label: 'Buy Foundation Setup — $2,500',
-      url: 'https://buy.stripe.com/eVqeVecpOcCrgS85JLaEE00',
-      note: 'Instant access. Self-paced. No call.',
-    },
-    marketplace: {
-      label: 'Browse Pre-Built Systems',
-      url: '/marketplace',
-      note: 'Systems ready to install in your business.',
-    },
     audit: {
-      label: 'Book The Audit — $997',
-      url: 'https://buy.stripe.com/aFa7sM0H6byndFW2xzaEE01',
-      note: 'One session. Walk away with your build plan.',
-    },
-    build: {
-      label: 'Apply to Work with TMI',
+      label: 'Get the Complete Audit - $1,000',
       url: '/complete-audit',
-      note: 'Tell us about your build.',
-    },
-    'vertical-founder': {
-      label: 'Apply as a Vertical Founder',
-      url: '/complete-audit',
-      note: 'Limited spots. One new vertical per quarter.',
+      note: 'A detailed operational audit, then 30 minutes with the founder and a strategist.',
     },
   };
 

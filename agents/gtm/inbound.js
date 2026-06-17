@@ -51,12 +51,10 @@ Return JSON only:
 
 async function writeInboundFollowup({ lead, scoring, routeTag }) {
   const routeContext = {
-    foundation: 'They want to get started with AI basics. Recommend the Foundation Setup ($2,500).',
-    audit: 'They want a diagnosis. Recommend The Audit ($997) - one session to map their operation.',
-    build: 'They have a specific build in mind. Route to The Audit first, then Focused Build.',
-    marketplace: 'They want pre-built systems. Route to the marketplace and offer a free assessment.',
-    'vertical-founder': 'They want to build their own AI company. Route to the DWY or Vertical Founder conversation.',
+    audit: 'Move them to the Complete Audit ($1,000) at /complete-audit - a detailed operational audit plus a 30-minute strategy call with the founder and a strategist, where they map the three paths (DIY, done with you, done for you). This is the one entry point for everyone.',
   };
+  // Single funnel: every inbound route leads to the Complete Audit.
+  const routeNote = routeContext[routeTag] || routeContext.audit;
 
   const message = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
@@ -73,10 +71,10 @@ What they shared:
 - Primary pain: ${scoring?.primaryPain || 'operational challenges'}
 - Route: ${routeTag}
 
-Route context: ${routeContext[routeTag] || 'General inquiry'}
+Next step: ${routeNote}
 
 This is a warm follow-up - they already had a conversation with TMI. Be direct and specific.
-Reference something they shared. Move them to the next step.
+Reference something they shared. Move them to the Complete Audit as the next step.
 
 Return JSON: {"subject": "...", "body": "plain text"}`
     }]
