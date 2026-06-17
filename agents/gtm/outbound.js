@@ -4,6 +4,7 @@ import { sendEmail } from './tools/email.js';
 import { researchCompany } from './tools/research.js';
 import { buildAuditData } from './audit-build.js';
 import { writeAuditPage } from './audit-site.js';
+import { writeCardPng } from './audit-card.js';
 import { VOICE_SYSTEM, FOLLOWUP_1_SYSTEM, FOLLOWUP_2_SYSTEM, BREAKUP_SYSTEM } from './prompts/voice.js';
 import { LIMITS } from './config.js';
 
@@ -112,6 +113,21 @@ export async function processLead(lead) {
     // Build the personalized Intelligent Company Audit microsite (the BI-rep asset).
     try {
       const auditData = await buildAuditData({ lead, research });
+
+      // Personalized executive card image (static PNG, host-agnostic).
+      let cardImage = null;
+      const provisionalSlug = (lead.company_name || '').toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').slice(0, 60);
+      try {
+        cardImage = await writeCardPng({
+          slug: provisionalSlug,
+          companyName: lead.company_name,
+          score: auditData.score,
+          industry: lead.industry,
+        });
+      } catch (e) {
+        console.warn(`  Card image failed for ${lead.company_name}: ${e.message}`);
+      }
+
       const out = writeAuditPage({
         ...auditData,
         companyName: lead.company_name,
@@ -119,6 +135,7 @@ export async function processLead(lead) {
         industry: lead.industry,
         revenueEst: lead.revenue_est || lead.revenue,
         employees: lead.employee_count,
+        cardImage,
       });
       lead.audit_url = out.url;
       await db.updateLead(lead.id, {
