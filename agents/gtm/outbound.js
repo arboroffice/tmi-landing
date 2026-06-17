@@ -5,6 +5,7 @@ import { researchCompany } from './tools/research.js';
 import { buildAuditData } from './audit-build.js';
 import { writeAuditPage } from './audit-site.js';
 import { writeCardPng } from './audit-card.js';
+import { instantlyEnabled, addLeadToInstantly } from './tools/instantly.js';
 import { VOICE_SYSTEM, FOLLOWUP_1_SYSTEM, FOLLOWUP_2_SYSTEM, FOLLOWUP_3_SYSTEM, PLAYBOOK_SYSTEM, BREAKUP_SYSTEM } from './prompts/voice.js';
 import { LIMITS } from './config.js';
 
@@ -161,6 +162,47 @@ export async function processLead(lead) {
     };
   }
 
+  // ── Instantly path: it owns sending + the sequence. We push the cold lead with
+  // its personalized audit as custom variables; follow-ups happen inside Instantly.
+  if (instantlyEnabled()) {
+    if (seq.step !== 'cold') {
+      await db.updateLead(lead.id, { next_followup_at: null });
+      return { skipped: true, reason: 'instantly_owns_sequence' };
+    }
+    const nm = (lead.owner_name || '').trim().split(/\s+/);
+    try {
+      await addLeadToInstantly({
+        email: lead.email,
+        firstName: nm[0] || undefined,
+        lastName: nm.length > 1 ? nm.slice(1).join(' ') : undefined,
+        companyName: lead.company_name,
+        variables: {
+          audit_link: lead.audit_url || '',
+          audit_card: lead.audit_card || '',
+          intel_score: lead.intel_score != null ? String(lead.intel_score) : '',
+          primary_bottleneck: research?.primaryPain || '',
+          industry: lead.industry || '',
+          location: lead.location || '',
+        },
+      });
+    } catch (err) {
+      console.error(`  Instantly push failed for ${lead.email}: ${err.message}`);
+      return { skipped: true, reason: 'instantly_error', note: err.message };
+    }
+    const now = new Date().toISOString();
+    await db.updateLead(lead.id, {
+      status: 'in_campaign',
+      outreach_count: 1,
+      first_contact_at: lead.first_contact_at || now,
+      last_contact_at: now,
+      next_followup_at: null,
+      sent_via: 'instantly',
+    });
+    console.log(`  Pushed to Instantly: ${lead.company_name} <${lead.email}>`);
+    return { sent: true, step: 'cold', via: 'instantly', email: lead.email };
+  }
+
+  // ── Resend path (fallback when Instantly is not configured) ───────────────
   // Generate email
   const { subject, body } = await generateEmail({
     lead,
