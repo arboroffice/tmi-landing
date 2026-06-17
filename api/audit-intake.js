@@ -78,7 +78,7 @@ module.exports = async function handler(req, res) {
 <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
 <p style="font-size:13px;letter-spacing:0.18em;text-transform:uppercase;color:#E4FF97;margin:0 0 18px;">The Complete Audit</p>
 <h1 style="font-weight:400;font-size:26px;margin:0 0 14px;">Your audit for ${cn} is ready.</h1>
-<p style="color:rgba(255,255,255,0.66);line-height:1.65;margin:0 0 8px;">We mapped how your operation runs, where time and money leak, your Intelligence Score${meta.score != null ? ` (<strong style="color:#fff;">${meta.score}/100</strong>)` : ''}, and a 90-day plan to fix it.</p>
+<p style="color:rgba(255,255,255,0.66);line-height:1.65;margin:0 0 8px;">We mapped how your operation runs, where time and money leak, your Intelligence Score${meta.score != null ? ` (<strong style="color:#fff;">${meta.score}/100</strong>)` : ''}, and a 30-day plan to fix it.</p>
 <p style="margin:26px 0;"><a href="${reportUrl}" style="background:#E4FF97;color:#0a0b14;font-weight:700;padding:14px 28px;border-radius:999px;text-decoration:none;display:inline-block;">View your audit</a></p>
 <p style="color:rgba(255,255,255,0.66);line-height:1.65;margin:0 0 8px;">Next, book your 30-minute strategy call with the founder and a strategist. That is where we walk through this together and pick your path.</p>
 <p style="margin:18px 0 0;"><a href="${bookingLink}" style="color:#E4FF97;">Book your strategy call &rarr;</a></p>

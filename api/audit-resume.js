@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
           currency: 'usd',
           product_data: {
             name: 'TMI Complete Audit',
-            description: 'Detailed operational audit, Intelligence Score, 90-day plan, and a 30-minute strategy call with the founder and a strategist.',
+            description: 'Detailed operational audit, Intelligence Score, 30-day plan, and a 30-minute strategy call with the founder and a strategist.',
           },
           unit_amount: PRICE_CENTS,
         },

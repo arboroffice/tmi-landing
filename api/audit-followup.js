@@ -30,7 +30,7 @@ function copy(step, firstName, resumeUrl) {
       return {
         subject: 'Finish your Complete Audit',
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">You started the Complete Audit but did not finish checkout. It is the one way in: a detailed map of where your business leaks time and money, your Intelligence Score, a 90-day plan, and a 30-minute call with the founder and a strategist where we pick your path.</p>
+<p style="margin:0 0 16px;">You started the Complete Audit but did not finish checkout. It is the one way in: a detailed map of where your business leaks time and money, your Intelligence Score, a 30-day plan, and a 30-minute call with the founder and a strategist where we pick your path.</p>
 <p style="margin:0 0 8px;">Takes two minutes to lock in.</p>`,
         sms: `Hey ${firstName} - you started the Complete Audit but didn't finish. Lock it in here: ${resumeUrl}`,
       };

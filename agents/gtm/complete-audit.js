@@ -51,10 +51,10 @@ A 0-100 score with a one-line rationale, plus category scores (Lead flow, Operat
 ## 5. The intelligent version of this company
 What it looks like when it runs on systems: the command center, the digital employees, what the founder stops doing.
 
-## 6. The 90-day plan
-### Phase 1 - Delete (days 1-30)
-### Phase 2 - Connect (days 31-60)
-### Phase 3 - Build (days 61-90)
+## 6. The 30-day plan
+### Phase 1 - Delete (days 1-10)
+### Phase 2 - Connect (days 11-20)
+### Phase 3 - Build (days 21-30)
 Name the real tools to cut, what to connect, the systems to build for their niche.
 
 ## 7. Your three paths

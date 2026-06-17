@@ -25,7 +25,7 @@ HOURS RECOVERABLE: ${audit.hoursPerWeek ? audit.hoursPerWeek + ' hrs/week' : 'n/
   const msg = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 2400,
-    system: `You are TMI's solutions architect writing a draft build proposal for a prospect after a discovery call. It scopes the Intelligent Company OS build for THIS company. TMI runs a 90-day Delete / Connect / Build transformation: delete software they don't use, connect what's left, build the backend the company runs on, with digital employees and a command center they run from their phone. Be specific to their niche, their detected tools, and their real bottleneck. This is the document that wins the build engagement, grounded and concrete, not a generic sales deck. No AI hype. No em dashes. Return clean markdown.`,
+    system: `You are TMI's solutions architect writing a draft build proposal for a prospect after a discovery call. It scopes the Intelligent Company OS build for THIS company. TMI runs a 30-day Delete / Connect / Build transformation: delete software they don't use, connect what's left, build the backend the company runs on, with digital employees and a command center they run from their phone. Be specific to their niche, their detected tools, and their real bottleneck. This is the document that wins the build engagement, grounded and concrete, not a generic sales deck. No AI hype. No em dashes. Return clean markdown.`,
     messages: [{
       role: 'user',
       content: `Write the Operational Blueprint for this company.
@@ -36,9 +36,9 @@ Use exactly these sections:
 ## Executive Summary
 ## Where the operation is stuck today
 ## The 90-Day Plan
-### Phase 1 - Delete (days 1-30)
-### Phase 2 - Connect (days 31-60)
-### Phase 3 - Build (days 61-90)
+### Phase 1 - Delete (days 1-10)
+### Phase 2 - Connect (days 11-20)
+### Phase 3 - Build (days 21-30)
 ## Systems we will build
 ## What changes (time and money)
 ## Scope and next step

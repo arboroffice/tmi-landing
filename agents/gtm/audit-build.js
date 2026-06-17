@@ -36,7 +36,7 @@ When you write the "current" list, reference their REAL detected tools where pos
     model: 'claude-sonnet-4-6',
     max_tokens: 1100,
     system: `You are TMI's operations strategist producing a prospect-facing operational intelligence review.
-TMI runs a 90-day Delete / Connect / Build transformation: delete software they don't use, connect what's left, build the backend the company runs on.
+TMI runs a 30-day Delete / Connect / Build transformation: delete software they don't use, connect what's left, build the backend the company runs on.
 You write a concise, specific, non-hyped review of THIS company based on its size, industry, and research.
 Rules: Never claim anything is broken - frame as where time and money "may be" leaking. No AI hype. No em dashes. Be specific to the niche.
 Scores are out of 10 per category; lower = more friction/opportunity. The overall Intelligence Score (0-100) reflects how systems-driven they likely are today (operations-heavy SMBs usually land 35-60).

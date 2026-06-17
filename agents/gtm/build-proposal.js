@@ -12,10 +12,10 @@ const FALLBACK = (company) => ({
   recommended: 'dfy',
   paths: [
     { key: 'diy', name: 'Do It Yourself', price: 1500, deposit: 1500, timeline: 'Self-paced',
-      scope: ['Your 90-day plan and build order', 'Templates and the system map', 'Async guidance as you build it with your own team'] },
+      scope: ['Your 30-day plan and build order', 'Templates and the system map', 'Async guidance as you build it with your own team'] },
     { key: 'dwy', name: 'Done With You', price: 9000, deposit: 3000, timeline: '6 to 8 weeks',
       scope: ['TMI builds the core systems alongside your team', 'Weekly working sessions', 'Your team trained to run and extend it'] },
-    { key: 'dfy', name: 'Done For You', price: 18000, deposit: 6000, timeline: '90 days',
+    { key: 'dfy', name: 'Done For You', price: 18000, deposit: 6000, timeline: '30 days',
       scope: ['TMI builds and installs the full backend', 'Delete, connect, build across your operation', 'Deployed, wired into your tools, team trained, handed over running'] },
   ],
 });
@@ -40,7 +40,7 @@ export async function buildBuildProposal({ company, industry, auditMd = '', scor
     const msg = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 2200,
-      system: `You are TMI's solutions architect turning a paid Complete Audit into a build proposal for ${company || 'the client'}. TMI runs a 90-day Delete / Connect / Build transformation: delete the software they don't use, connect what's left, build the backend the company runs on, with digital employees and a command center they run from their phone.
+      system: `You are TMI's solutions architect turning a paid Complete Audit into a build proposal for ${company || 'the client'}. TMI runs a 30-day Delete / Connect / Build transformation: delete the software they don't use, connect what's left, build the backend the company runs on, with digital employees and a command center they run from their phone.
 
 You scope THREE paths, all built from this company's real audit:
 - DIY (Do It Yourself): they build it with TMI's plan and guidance. Lowest cost.
