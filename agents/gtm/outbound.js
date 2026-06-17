@@ -86,6 +86,12 @@ export async function processLead(lead) {
     return { skipped: true, reason: 'no_email' };
   }
 
+  // Guardrail: never contact suppressed / do-not-contact addresses.
+  if (await db.isSuppressed(lead.email).catch(() => false)) {
+    await db.updateLead(lead.id, { status: 'suppressed', next_followup_at: null });
+    return { skipped: true, reason: 'suppressed' };
+  }
+
   // Research (only on cold email, reuse notes for follow-ups)
   let research = null;
   if (seq.step === 'cold') {

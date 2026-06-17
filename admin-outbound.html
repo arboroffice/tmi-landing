@@ -41,6 +41,7 @@
       <div class="topbar-actions">
         <button class="btn btn-ghost btn-sm" onclick="loadProspects()">Refresh</button>
         <button class="btn btn-ghost btn-sm" onclick="sendTest()">Send test</button>
+        <button class="btn btn-ghost btn-sm" onclick="addSuppress()">Do-not-contact</button>
         <button class="btn btn-primary btn-sm" onclick="runOutbound()">Run outbound now</button>
       </div>
     </div>
@@ -166,6 +167,16 @@ async function loadRuns(){
     const when = r.ran_at ? new Date(r.ran_at).toLocaleString() : '—';
     return `<tr><td>${when}</td><td>${r.source||'—'}</td><td>${r.found??'—'}</td><td>${r.contacted??'—'}</td><td>${r.followupsSent??'—'}</td><td>${r.errors??0}</td><td>${r.elapsed_s?r.elapsed_s+'s':'—'}</td></tr>`;
   }).join('');
+}
+
+async function addSuppress(){
+  const v = prompt('Add an email or domain to never contact:');
+  if(!v) return;
+  const isEmail = v.includes('@');
+  try {
+    await TMIAdmin.api('/api/suppression', 'POST', isEmail ? { email: v } : { domain: v });
+    alert(`Added ${v} to do-not-contact.`);
+  } catch(e){ alert('Failed: ' + e.message); }
 }
 
 loadProspects();

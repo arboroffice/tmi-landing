@@ -120,6 +120,7 @@ export async function handleReply({ fromEmail, subject, body, inReplyToMessageId
       updates.status = 'unsubscribed';
       updates.unsubscribed = true;
       updates.next_followup_at = null;
+      await db.addSuppression({ email: fromEmail, reason: 'unsubscribe' }).catch(() => {});
       break;
     case 'wrong_person':
       updates.status = 'wrong_person';

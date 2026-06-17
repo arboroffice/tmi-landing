@@ -273,6 +273,26 @@ export async function logRun(stats) {
   return insert('gtm_runs', { ...stats, ran_at: new Date().toISOString() });
 }
 
+// ── Suppression / do-not-contact (guardrail for unattended sending) ─────────
+// Never contact our own domains, opt-outs, current clients, or competitors.
+const OWN_DOMAINS = ['tmitechai.com', 'tmi-technology.com', 'arboroffice.io'];
+
+export async function isSuppressed(email) {
+  if (!email) return true;
+  const lc = String(email).toLowerCase().trim();
+  const domain = lc.split('@')[1] || '';
+  if (OWN_DOMAINS.includes(domain)) return true;
+  if (await findOne('suppression', 'email', lc)) return true;
+  if (domain && await findOne('suppression', 'domain', domain)) return true;
+  return false;
+}
+
+export async function addSuppression({ email, domain, reason }) {
+  const lc = email ? String(email).toLowerCase().trim() : null;
+  const dm = domain ? String(domain).toLowerCase().trim() : (lc ? lc.split('@')[1] : null);
+  return insert('suppression', { email: lc, domain: dm, reason: reason || 'manual', added_at: new Date().toISOString() });
+}
+
 // Re-export the generic primitives for any future ad-hoc use.
 export {
   db, FieldValue, Timestamp,

@@ -118,6 +118,7 @@ async function findLeadsApollo(targetCount) {
           email = await getEmail({ apolloId: p.apolloId }).catch(() => null);
         }
         if (!email || /not_unlocked/i.test(email)) continue;
+        if (await db.isSuppressed(email).catch(() => false)) continue;
         if (await db.leadExists(email).catch(() => false)) continue;
 
         const lead = {
