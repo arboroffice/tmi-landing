@@ -13,6 +13,10 @@ module.exports = async function handler(req, res) {
   try {
     const data = await dbx.getById('prospect_audits', slug);
     if (data) {
+      // Engagement attribution (fire-and-forget): audit opened.
+      dbx.update('prospect_audits', slug, { last_viewed: new Date().toISOString(), views: (Number(data.views) || 0) + 1 }).catch(() => {});
+      if (data.leadId) dbx.update('leads', data.leadId, { audit_viewed_at: new Date().toISOString() }).catch(() => {});
+
       const { renderAuditPage } = await import('../agents/gtm/audit-site.js');
       const html = renderAuditPage({ ...data, slug });
       res.setHeader('Content-Type', 'text/html; charset=utf-8');

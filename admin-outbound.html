@@ -51,6 +51,9 @@
       <p class="muted" style="margin:-6px 0 22px;max-width:70ch;">Every prospect gets researched, scored, and handed a personalized Intelligent Company Audit before we ever ask for a meeting. Generate the audit, then the rep links it in the cold email.</p>
 
       <div class="ob-stats" id="ob-stats"></div>
+      <div class="sec-head" style="margin:6px 0 10px;"><h2 style="font-size:15px;">Funnel</h2></div>
+      <div class="ob-stats" id="funnel-stats"><div class="ob-stat"><div class="n">…</div><div class="l">loading</div></div></div>
+      <div class="sec-head" style="margin:6px 0 10px;"><h2 style="font-size:15px;">Campaign health (Instantly)</h2></div>
       <div class="ob-stats" id="instantly-stats" style="display:none;"></div>
 
       <div class="ladder">
@@ -119,7 +122,7 @@ async function loadProspects(){
       ? `<a class="lnk" href="${l.audit_url}" target="_blank">Open ↗</a>`
       : `<button class="btn btn-ghost btn-sm" onclick="genAudit('${l.id}')">Generate</button>`;
     return `<tr>
-      <td class="co"><div class="nm">${l.company_name||'—'}</div><div class="sub">${l.location||''}</div></td>
+      <td class="co"><div class="nm">${l.company_name||'—'}${l.priority==='high'?' <span class="badge b-replied" style="font-size:9px;">HOT</span>':''}</div><div class="sub">${l.location||''}${l.signals?' &middot; '+l.signals:''}</div></td>
       <td>${l.owner_name||'<span class=muted>—</span>'}<div class="sub">${l.owner_title||''}</div></td>
       <td>${l.industry||'<span class=muted>—</span>'}</td>
       <td>${l.revenue_est||l.revenue||'—'}<div class="sub">${l.employee_count?l.employee_count+' emp':''}</div></td>
@@ -205,9 +208,24 @@ async function loadInstantly(){
   box.style.display = 'grid';
 }
 
+async function loadFunnel(){
+  const box = document.getElementById('funnel-stats');
+  let f;
+  try { f = await TMIAdmin.api('/api/gtm-funnel'); } catch(e){ box.innerHTML = '<div class="ob-stat"><div class="n">—</div><div class="l">no data yet</div></div>'; return; }
+  const pct = (x,y)=> (y ? Math.round((x/y)*100)+'%' : '—');
+  const stat = (n,l)=>`<div class="ob-stat"><div class="n">${n ?? 0}</div><div class="l">${l}</div></div>`;
+  box.innerHTML =
+    stat(f.sourced, 'Sourced') +
+    stat(f.contacted, 'Contacted') +
+    stat(`${f.auditViewed||0}`, `Audit opened (${pct(f.auditViewed, f.contacted)})`) +
+    stat(`${f.replied||0}`, `Replied (${pct(f.replied, f.contacted)})`) +
+    stat(`${f.booked||0}`, `Booked (${pct(f.booked, f.contacted)})`);
+}
+
 loadProspects();
 loadRuns();
 loadInstantly();
+loadFunnel();
 </script>
 </body>
 </html>

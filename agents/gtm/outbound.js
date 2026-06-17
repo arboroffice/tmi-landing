@@ -113,9 +113,13 @@ export async function processLead(lead) {
     }
 
     if (research) {
+      // Trigger prioritization: hiring signals (Dispatcher, Ops Coordinator…) = hot account.
+      const priority = research.signals?.length ? 'high' : 'normal';
       await db.updateLead(lead.id, {
         research_notes: research.primaryPain,
         pain_points: research.likelyPainPoints?.join(', '),
+        signals: (research.signals || []).join(', '),
+        priority,
       });
     }
 

@@ -34,6 +34,10 @@ function esc(s) {
 // Embed the personalized audit card image in cold emails by default; disable with EMBED_AUDIT_IMAGE=false
 const EMBED_IMAGE = String(process.env.EMBED_AUDIT_IMAGE ?? 'true').toLowerCase() !== 'false';
 
+// CAN-SPAM: every send needs a physical address + a working unsubscribe.
+const POSTAL = process.env.OUTREACH_ADDRESS || 'TMI Technology, Louisiana, USA';
+const unsubUrl = (to) => `https://www.tmitechai.com/api/outreach-unsubscribe?email=${encodeURIComponent(to)}`;
+
 export async function sendEmail({ to, toName, subject, body, imageUrl, auditUrl, cc }) {
   const box = pickInbox();
   // Break-in safety: CC yourself on sends via OUTREACH_CC (or per-call cc).
@@ -47,11 +51,15 @@ export async function sendEmail({ to, toName, subject, body, imageUrl, auditUrl,
       <img src="${esc(imageUrl)}" alt="${esc(toName ? toName + "'s" : 'Your')} operational intelligence review" width="560" style="display:block;width:100%;max-width:560px;height:auto;border-radius:10px;border:1px solid #e6e8ee;"/>
     </a>` : '';
 
+  const footer = `<div style="margin-top:26px;padding-top:14px;border-top:1px solid #eee;font-family:Arial,sans-serif;font-size:12px;color:#9aa0aa;">${esc(POSTAL)}<br/><a href="${unsubUrl(to)}" style="color:#9aa0aa;">Unsubscribe</a></div>`;
+
   const html = `<div style="font-family:Georgia,serif;font-size:16px;line-height:1.7;color:#1a1a1a;max-width:580px;">
-${paras}${imageBlock}
+${paras}${imageBlock}${footer}
 </div>`;
 
-  const text = body + ((imageUrl && auditUrl && !body.includes(auditUrl)) ? `\n\n${auditUrl}` : '');
+  const text = body
+    + ((imageUrl && auditUrl && !body.includes(auditUrl)) ? `\n\n${auditUrl}` : '')
+    + `\n\n--\n${POSTAL}\nUnsubscribe: ${unsubUrl(to)}`;
 
   const { data, error } = await resend().emails.send({
     from: `${box.name} <${box.from}>`,
