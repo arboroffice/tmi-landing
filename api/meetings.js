@@ -49,6 +49,27 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'lead_id, client_id, or audit_id required (attach to an account)' });
       }
 
+      // Audit calls are pre-created (scheduled) on booking. Recording upserts into
+      // that meeting by audit_id so we never get a duplicate per audit.
+      if (b.audit_id) {
+        const existing = await db.findOne('sales_meetings', 'audit_id', b.audit_id).catch(() => null);
+        if (existing) {
+          const updated = await db.update('sales_meetings', existing.id, {
+            contact_id:   b.contact_id || existing.contact_id || null,
+            prep_brief:   b.prep_brief || existing.prep_brief || null,
+            company:      b.company || existing.company || null,
+            account_label: b.account_label || existing.account_label || null,
+            title:        b.title || existing.title || 'Complete Audit strategy call',
+            sales_stage:  b.sales_stage || existing.sales_stage || null,
+            transcript:   String(b.transcript),
+            duration_sec: b.duration_sec || existing.duration_sec || null,
+            status:       'recorded',
+            met_on:       existing.met_on || new Date().toISOString().slice(0, 10),
+          });
+          return res.status(200).json(updated);
+        }
+      }
+
       const row = await db.insert('sales_meetings', {
         lead_id:      b.lead_id || null,
         client_id:    b.client_id || null,

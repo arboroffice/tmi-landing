@@ -27,7 +27,15 @@ function clampMoney(n, lo, hi) {
   return n;
 }
 
-export async function buildBuildProposal({ company, industry, auditMd = '', score = null, notes = '' }) {
+function prdToText(prd) {
+  if (!prd) return '';
+  if (typeof prd === 'string') return prd;
+  const order = ['overview', 'problem', 'goals', 'stories', 'requirements', 'nonfunc', 'tech', 'criteria', 'outofscope'];
+  return order.filter(k => prd[k]).map(k => `${k.toUpperCase()}: ${prd[k]}`).join('\n\n');
+}
+
+export async function buildBuildProposal({ company, industry, auditMd = '', score = null, notes = '', prd = null }) {
+  const prdText = prdToText(prd);
   try {
     const msg = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
@@ -52,8 +60,9 @@ Be specific to their niche and the real systems their audit calls for. No AI hyp
 Industry: ${industry || 'from the audit'}
 Intelligence Score: ${score == null ? 'n/a' : score + '/100'}
 ${notes ? 'Strategist notes from the call: ' + notes + '\n' : ''}
+${prdText ? 'PRD FROM THE STRATEGY CALL (the spec for what to build - scope the three paths to deliver this):\n' + prdText.slice(0, 4000) + '\n' : ''}
 THEIR COMPLETE AUDIT:
-${String(auditMd).slice(0, 6000)}
+${String(auditMd).slice(0, prdText ? 4000 : 6000)}
 
 Return ONLY JSON in this exact shape, no prose:
 {

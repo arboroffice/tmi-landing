@@ -5,7 +5,7 @@
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { companyName, contactName, contactEmail, website, leadId, submissionId, applicationId } = req.body || {};
+  const { companyName, contactName, contactEmail, website, leadId, submissionId, applicationId, meetingId } = req.body || {};
   if (!companyName && !contactEmail) {
     return res.status(400).json({ error: 'companyName or contactEmail required' });
   }
@@ -14,13 +14,15 @@ module.exports = async function handler(req, res) {
     const { prepAudit } = await import('../agents/gtm/audit-prep.js');
     const result = await prepAudit({ companyName, contactName, contactEmail, website, leadId });
 
-    // Attach the brief to the audit record so it is ready in the call workspace.
-    if (result && result.briefing && (submissionId || applicationId)) {
+    // Attach the brief to the audit record + the scheduled meeting so it is ready
+    // in the call workspace.
+    if (result && result.briefing && (submissionId || applicationId || meetingId)) {
       try {
         const dbx = require('./_db');
         const patch = { prep_brief: result.briefing, prep_at: new Date().toISOString() };
         if (submissionId) await dbx.update('audit_submissions', submissionId, patch);
         if (applicationId) await dbx.update('applications', applicationId, patch);
+        if (meetingId) await dbx.update('sales_meetings', meetingId, patch);
       } catch (e) { console.error('attach prep:', e.message); }
     }
 

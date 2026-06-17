@@ -155,6 +155,15 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, kind, result, saved: false, save_error: e.message });
     }
 
+    // A PRD for an audit call auto-refreshes the build proposal (as a draft) so
+    // the three priced paths reflect the PRD. The strategist sends it from admin.
+    if (kind === 'prd' && auditId) {
+      try {
+        const { generateProposal } = require('./_proposal-gen');
+        await generateProposal({ submissionId: auditId, prd: result, send: false });
+      } catch (e) { console.error('auto proposal from prd:', e.message); }
+    }
+
     // Auto-create follow-up tasks from a digest's next steps — once per meeting.
     if (kind === 'digest' && Array.isArray(result.next_steps) && result.next_steps.length) {
       try {

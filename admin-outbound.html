@@ -292,11 +292,11 @@ async function loadAuditFunnel(){
     const prop = a.proposal
       ? `<a class="lnk" href="${a.proposal.url}" target="_blank" rel="noopener">${a.proposal.status || 'view'}</a>`
       : '<span class="muted">none</span>';
-    const action = a.deliverable_ready
-      ? (a.proposal
-          ? `<a class="lnk" href="${a.proposal.url}" target="_blank" rel="noopener">Open</a>`
-          : `<button class="btn btn-primary btn-sm" onclick="genProposal('${a.id}', this)">Generate proposal</button>`)
-      : '<span class="muted">audit building…</span>';
+    let action;
+    if (!a.deliverable_ready) action = '<span class="muted">audit building…</span>';
+    else if (a.proposal && a.proposal.status === 'accepted') action = `<a class="lnk" href="${a.proposal.url}" target="_blank" rel="noopener">Accepted ✓</a>`;
+    else if (a.proposal) action = `<a class="lnk" href="${a.proposal.url}" target="_blank" rel="noopener">Review</a> · <button class="btn btn-primary btn-sm" onclick="genProposal('${a.id}', this)">Send</button>`;
+    else action = `<button class="btn btn-primary btn-sm" onclick="genProposal('${a.id}', this)">Generate &amp; send</button>`;
     const call = `<a class="lnk" href="/admin-meetings" title="${a.prep_ready ? 'Pre-call brief ready' : 'Record the strategy call'}">Record call${a.prep_ready ? ' ✓' : ''}</a>`;
     return `<tr>
       <td>${a.company || '<span class="muted">—</span>'}</td>

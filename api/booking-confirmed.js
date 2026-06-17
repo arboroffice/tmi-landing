@@ -46,6 +46,29 @@ module.exports = async function handler(req, res) {
             }).catch(() => {});
           }
         } catch (e) { /* best effort */ }
+
+        // Pre-create the strategy call as a scheduled meeting so it is listed in
+        // the admin recorder before the call, ready to record into.
+        let meetingId = null;
+        if (sub) {
+          try {
+            const mtg = await db.insert('sales_meetings', {
+              audit_id: sub.id,
+              account_type: 'audit',
+              application_id: appLead.id,
+              company: appLead.company || appLead.name || null,
+              account_label: [appLead.name, appLead.company].filter(Boolean).join(' · ') || appLead.company || email,
+              contact_email: email,
+              title: 'Complete Audit strategy call',
+              sales_stage: 'Discovery',
+              transcript: '',
+              status: 'scheduled',
+              met_on: startTime ? new Date(startTime).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+            });
+            meetingId = mtg && mtg.id;
+          } catch (e) { console.error('pre-create meeting:', e.message); }
+        }
+
         try {
           new QStashClient({ token: process.env.QSTASH_TOKEN }).publishJSON({
             url: `${SITE}/api/audit-prep`,
@@ -57,6 +80,7 @@ module.exports = async function handler(req, res) {
               leadId: appLead.id,
               applicationId: appLead.id,
               submissionId: sub ? sub.id : null,
+              meetingId,
             },
           }).catch(e => console.error('QStash audit-prep (app) error:', e));
         } catch (e) { console.error('audit-prep enqueue (app):', e.message); }
