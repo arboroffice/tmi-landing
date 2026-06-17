@@ -40,6 +40,7 @@
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Outbound</span></div>
       <div class="topbar-actions">
         <button class="btn btn-ghost btn-sm" onclick="loadProspects()">Refresh</button>
+        <button class="btn btn-ghost btn-sm" onclick="enrollLead()">Enroll lead</button>
         <button class="btn btn-ghost btn-sm" onclick="sendTest()">Send test</button>
         <button class="btn btn-ghost btn-sm" onclick="addSuppress()">Do-not-contact</button>
         <button class="btn btn-ghost btn-sm" onclick="dryRun()">Dry run (5)</button>
@@ -150,6 +151,17 @@ async function runOutbound(){
     alert(r?.message || 'Outbound run started. Watch "Recent agent runs" + the GTM digest.');
     setTimeout(loadRuns, 4000);
   } catch(e){ alert('Run request failed: ' + e.message); }
+}
+
+async function enrollLead(){
+  const email = prompt('Enroll a contact into outbound — email:');
+  if(!email) return;
+  const company = prompt('Company (optional):') || undefined;
+  try {
+    const r = await TMIAdmin.api('/api/enroll-lead', 'POST', { email, company });
+    alert(r?.message || ('Enrolled ' + email));
+    setTimeout(loadProspects, 4000);
+  } catch(e){ alert('Enroll failed: ' + e.message); }
 }
 
 async function dryRun(){

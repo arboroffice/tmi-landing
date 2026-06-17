@@ -5,6 +5,7 @@ import { researchCompany } from './tools/research.js';
 import { buildAuditData } from './audit-build.js';
 import { slugify } from './audit-site.js';
 import { instantlyEnabled, addLeadToInstantly } from './tools/instantly.js';
+import { linkedinEnabled, pushToLinkedIn } from './tools/linkedin.js';
 import { VOICE_SYSTEM, FOLLOWUP_1_SYSTEM, FOLLOWUP_2_SYSTEM, FOLLOWUP_3_SYSTEM, PLAYBOOK_SYSTEM, BREAKUP_SYSTEM } from './prompts/voice.js';
 import { LIMITS } from './config.js';
 
@@ -197,6 +198,25 @@ export async function processLead(lead) {
       console.error(`  Instantly push failed for ${lead.email}: ${err.message}`);
       return { skipped: true, reason: 'instantly_error', note: err.message };
     }
+    // Multi-channel: also fire a LinkedIn touch when we have their profile.
+    if (linkedinEnabled() && lead.linkedin_url) {
+      try {
+        await pushToLinkedIn({
+          first_name: nm[0] || '',
+          last_name: nm.length > 1 ? nm.slice(1).join(' ') : '',
+          full_name: lead.owner_name || '',
+          linkedin_url: lead.linkedin_url,
+          company: lead.company_name,
+          title: lead.owner_title || '',
+          audit_link: lead.audit_url || '',
+          primary_bottleneck: research?.primaryPain || '',
+        });
+        console.log(`  Pushed to LinkedIn: ${lead.company_name}`);
+      } catch (err) {
+        console.warn(`  LinkedIn push failed for ${lead.company_name}: ${err.message}`);
+      }
+    }
+
     const now = new Date().toISOString();
     await db.updateLead(lead.id, {
       status: 'in_campaign',
@@ -204,7 +224,7 @@ export async function processLead(lead) {
       first_contact_at: lead.first_contact_at || now,
       last_contact_at: now,
       next_followup_at: null,
-      sent_via: 'instantly',
+      sent_via: linkedinEnabled() && lead.linkedin_url ? 'instantly+linkedin' : 'instantly',
     });
     console.log(`  Pushed to Instantly: ${lead.company_name} <${lead.email}>`);
     return { sent: true, step: 'cold', via: 'instantly', email: lead.email };
