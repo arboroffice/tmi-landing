@@ -21,13 +21,10 @@ module.exports = async function handler(req, res) {
 
   if (!email) return res.status(400).json({ error: 'No email in payload' });
 
-  // Find the lead by email, then flip it to booked.
-  const existingLead = await db.findOne('leads', 'email', email.toLowerCase());
-
-  if (!existingLead) {
-    // Paid Complete Audit customers live in `applications`, not `leads`. If this
-    // booking is one of them, mark it booked, alert the team, and enqueue the
-    // pre-call brief so the strategist walks in prepared.
+  // Paid Complete Audit customers take precedence. They may ALSO exist as a cold
+  // lead (e.g. an outbound prospect who later paid), so check applications first
+  // and handle the audit booking before the normal lead flow.
+  {
     try {
       const appLead = await db.findOne('applications', 'email', email.toLowerCase());
       if (appLead) {
@@ -87,6 +84,11 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, note: 'audit customer booked' });
       }
     } catch (e) { console.error('applications booking lookup:', e.message); }
+  }
+
+  // Otherwise, normal cold-lead booking flow.
+  const existingLead = await db.findOne('leads', 'email', email.toLowerCase());
+  if (!existingLead) {
     console.log('No lead found for:', email);
     return res.status(200).json({ ok: true, note: 'No matching lead' });
   }

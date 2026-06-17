@@ -156,12 +156,16 @@ module.exports = async (req, res) => {
     }
 
     // A PRD for an audit call auto-refreshes the build proposal (as a draft) so
-    // the three priced paths reflect the PRD. The strategist sends it from admin.
+    // the three priced paths reflect the PRD. Fire-and-forget so the PRD response
+    // is not held up by a second Claude call; the strategist sends it from admin.
     if (kind === 'prd' && auditId) {
-      try {
-        const { generateProposal } = require('./_proposal-gen');
-        await generateProposal({ submissionId: auditId, prd: result, send: false });
-      } catch (e) { console.error('auto proposal from prd:', e.message); }
+      const subId = auditId, prdResult = result;
+      (async () => {
+        try {
+          const { generateProposal } = require('./_proposal-gen');
+          await generateProposal({ submissionId: subId, prd: prdResult, send: false });
+        } catch (e) { console.error('auto proposal from prd:', e.message); }
+      })();
     }
 
     // Auto-create follow-up tasks from a digest's next steps — once per meeting.
