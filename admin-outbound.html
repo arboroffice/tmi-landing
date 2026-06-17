@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Outbound — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .ob-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  .ob-stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm,10px);padding:18px 20px;}
+  .ob-stat .n{font-size:28px;font-weight:700;color:var(--ink);line-height:1;}
+  .ob-stat .l{font-size:12px;color:var(--ink-2);margin-top:6px;}
+  .ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;border:1px solid var(--line);border-radius:var(--r-sm,10px);overflow:hidden;margin-bottom:24px;}
+  .rung{background:var(--surface);padding:16px 18px;}
+  .rung h4{margin:0 0 4px;font-size:13px;font-weight:600;color:var(--ink);}
+  .rung .p{font-size:12px;color:var(--ink-2);}
+  .rung .price{font-size:12px;font-weight:700;color:var(--ink);margin-top:8px;}
+  .rung.free .price{color:#0a7d2e;}
+  .score{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;font-size:13px;font-weight:700;color:var(--ink);position:relative;}
+  .score svg{position:absolute;inset:0;transform:rotate(-90deg);}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;}
+  .b-new{background:#eef1f6;color:#555;} .b-sent{background:#e6f0ff;color:#1d4ed8;}
+  .b-replied{background:#e8f8ee;color:#0a7d2e;} .b-done{background:#f3eaff;color:#7c3aed;} .b-notfit{background:#f6eaea;color:#a33;}
+  .ob-table{width:100%;border-collapse:collapse;}
+  .ob-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);padding:10px 12px;border-bottom:1px solid var(--line);}
+  .ob-table td{padding:12px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink);vertical-align:middle;}
+  .ob-table tr:hover td{background:var(--bg);}
+  .co .nm{font-weight:600;} .co .sub{font-size:12px;color:var(--ink-2);}
+  .lnk{color:#1d4ed8;font-weight:600;font-size:12px;}
+  .muted{color:var(--ink-2);}
+  .empty{padding:48px;text-align:center;color:var(--ink-2);}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Outbound</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadProspects()">Refresh</button>
+        <button class="btn btn-primary btn-sm" onclick="runOutbound()">Run outbound now</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head"><h1>Outbound — Business Intelligence Rep</h1></div>
+      <p class="muted" style="margin:-6px 0 22px;max-width:70ch;">Every prospect gets researched, scored, and handed a personalized Intelligent Company Audit before we ever ask for a meeting. Generate the audit, then the rep links it in the cold email.</p>
+
+      <div class="ob-stats" id="ob-stats"></div>
+
+      <div class="ladder">
+        <div class="rung free"><h4>Intelligent Company Audit</h4><div class="p">The hook. Personalized microsite + score.</div><div class="price">Free</div></div>
+        <div class="rung"><h4>Operational Blueprint</h4><div class="p">The deeper map and plan.</div><div class="price">$2,500&ndash;$5,000</div></div>
+        <div class="rung"><h4>Intelligent Company OS</h4><div class="p">Delete, connect, build. 90 days.</div><div class="price">$25,000&ndash;$100,000+</div></div>
+        <div class="rung"><h4>Command Layer</h4><div class="p">Ongoing AI + ops department.</div><div class="price">Optional retainer</div></div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table class="ob-table">
+          <thead><tr><th>Company</th><th>Owner</th><th>Industry</th><th>Size</th><th>Score</th><th>Status</th><th>Step</th><th>Audit</th><th></th></tr></thead>
+          <tbody id="rows"><tr><td colspan="9" class="empty">Loading prospects…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('outbound');
+
+const STATUS = { new:['New','b-new'], sent:['Contacted','b-sent'], replied:['Replied','b-replied'], sequence_complete:['Sequence done','b-done'], not_fit:['Not a fit','b-notfit'] };
+const slugify = s => String(s||'').toLowerCase().replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,60);
+
+function scoreRing(score){
+  if (score == null) return '<span class="muted">—</span>';
+  const r=16, dash=(score/100)*(2*Math.PI*r);
+  return `<span class="score"><svg width="38" height="38"><circle cx="19" cy="19" r="${r}" fill="none" stroke="#e6e8ee" stroke-width="3"/><circle cx="19" cy="19" r="${r}" fill="none" stroke="#86b300" stroke-width="3" stroke-linecap="round" stroke-dasharray="${dash.toFixed(1)} 999"/></svg>${score}</span>`;
+}
+
+async function loadProspects(){
+  const rows = document.getElementById('rows');
+  let leads = [];
+  try { leads = await TMIAdmin.api('/api/leads') || []; }
+  catch(e){ rows.innerHTML = `<tr><td colspan="9" class="empty">Could not load leads: ${e.message}</td></tr>`; return; }
+  // Outbound prospects = leads from cold sources
+  const prospects = leads.filter(l => ['apify_maps','cold','apollo','prospect','cold outreach'].includes((l.source||'').toLowerCase()) || l.outreach_count != null);
+  const list = prospects.length ? prospects : leads;
+
+  // stats
+  const stat = (n,l)=>`<div class="ob-stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+  document.getElementById('ob-stats').innerHTML =
+    stat(list.length,'Prospects') +
+    stat(list.filter(l=>['sent','replied','sequence_complete'].includes(l.status)).length,'Contacted') +
+    stat(list.filter(l=>l.status==='replied').length,'Replied') +
+    stat(list.filter(l=>l.audit_url).length,'Audits live');
+
+  if(!list.length){ rows.innerHTML = `<tr><td colspan="9" class="empty">No prospects yet. Hit “Run outbound now” to find and contact some.</td></tr>`; return; }
+
+  rows.innerHTML = list.map(l=>{
+    const [stl,scl] = STATUS[l.status] || ['New','b-new'];
+    const slug = l.audit_slug || slugify(l.company_name);
+    const auditCell = l.audit_url
+      ? `<a class="lnk" href="${l.audit_url}" target="_blank">Open ↗</a>`
+      : `<button class="btn btn-ghost btn-sm" onclick="genAudit('${l.id}')">Generate</button>`;
+    return `<tr>
+      <td class="co"><div class="nm">${l.company_name||'—'}</div><div class="sub">${l.location||''}</div></td>
+      <td>${l.owner_name||'<span class=muted>—</span>'}<div class="sub">${l.owner_title||''}</div></td>
+      <td>${l.industry||'<span class=muted>—</span>'}</td>
+      <td>${l.revenue_est||l.revenue||'—'}<div class="sub">${l.employee_count?l.employee_count+' emp':''}</div></td>
+      <td>${scoreRing(l.intel_score ?? null)}</td>
+      <td><span class="badge ${scl}">${stl}</span></td>
+      <td>${l.outreach_count!=null?(l.outreach_count+'/4'):'—'}</td>
+      <td>${auditCell}</td>
+      <td><a class="lnk" href="/admin-leads#${l.id}">Details</a></td>
+    </tr>`;
+  }).join('');
+}
+
+async function genAudit(id){
+  try {
+    const r = await TMIAdmin.api('/api/prospect', 'POST', { id, action: 'generate-audit' });
+    if (r?.audit_url) { TMIAdmin.toast?.('Audit generated'); loadProspects(); }
+    else TMIAdmin.toast?.('Queued. The rep will build and deploy it on the next run.');
+  } catch(e){ TMIAdmin.toast?.('Audit generation queued (agent will build it).'); }
+}
+
+async function runOutbound(){
+  if(!confirm('Find new prospects and send outreach now?')) return;
+  try {
+    const r = await TMIAdmin.api('/api/gtm-run', 'POST', {});
+    TMIAdmin.toast?.(r?.message || 'Outbound run started.');
+  } catch(e){ TMIAdmin.toast?.('Run requested. Check the GTM digest for results.'); }
+}
+
+loadProspects();
+</script>
+</body>
+</html>

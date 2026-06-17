@@ -6,13 +6,18 @@ on:
     - cron: '0 13 * * 1-5'
   workflow_dispatch: # allow manual trigger
 
+permissions:
+  contents: write
+
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 120
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -21,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: cd agents && npm install
 
-      - name: Run GTM outbound agent
+      - name: Run GTM outbound agent (find, audit, and contact ~100 businesses)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
@@ -32,3 +37,15 @@ jobs:
           OUTREACH_REPLY_TO: ${{ secrets.OUTREACH_REPLY_TO }}
           GTM_DIGEST_EMAIL: ${{ secrets.GTM_DIGEST_EMAIL }}
         run: cd agents && node gtm/orchestrator.js
+
+      - name: Commit generated audit microsites
+        run: |
+          git config user.name "TMI Bot"
+          git config user.email "bot@tmi-technology.com"
+          git add audit/
+          if git diff --staged --quiet; then
+            echo "No new audit pages this run"
+          else
+            git commit -m "Outbound: personalized audit microsites ($(date -u +%Y-%m-%d))"
+            git push
+          fi

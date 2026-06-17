@@ -25,94 +25,98 @@ import { ICP, LIMITS } from './config.js';
 
 // ── Lead finding pipeline ──────────────────────────────────────────────────
 
-async function findNewLeads(targetCount) {
-  const leads = [];
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
-  // Pick a random industry + city combo to avoid repeating the same search
-  const industry = ICP.industries[Math.floor(Math.random() * ICP.industries.length)];
-  const city = ICP.cities[Math.floor(Math.random() * ICP.cities.length)];
+// Enrich one maps business into a saved lead, or return null if not usable.
+async function processBusiness(biz, industry, city) {
+  const domain = extractDomain(biz.website);
+  if (!domain) return null;
 
-  console.log(`Finding businesses: "${industry}" in ${city}`);
+  const existing = await db.leadExists(`@${domain}`).catch(() => false);
+  if (existing) return null;
 
-  let businesses;
+  let contact = null;
+  let apolloCompany = null;
   try {
-    businesses = await findBusinessesOnMaps({
-      searchQuery: industry,
-      location: city,
-      maxResults: targetCount * 3, // fetch more than needed to account for filtering
-    });
+    [contact, apolloCompany] = await Promise.all([
+      findContact({ domain, targetTitles: ICP.targetTitles }),
+      enrichCompany({ domain }),
+    ]);
   } catch (err) {
-    console.error('Apify error:', err.message);
-    return [];
+    console.warn(`Apollo failed for ${domain}: ${err.message}`);
   }
 
-  // Filter by minimum reviews (signals established business)
-  const qualified = businesses.filter(b =>
-    b.reviewCount >= ICP.minReviews && b.website
-  );
+  if (contact && !contact.email && contact.apolloId) {
+    contact.email = await getEmail({ apolloId: contact.apolloId }).catch(() => null);
+  }
+  if (!contact?.email) return null;
 
-  console.log(`Found ${businesses.length} businesses, ${qualified.length} qualified`);
+  const emailExists = await db.leadExists(contact.email).catch(() => false);
+  if (emailExists) return null;
 
-  for (const biz of qualified) {
+  const lead = {
+    company_name: apolloCompany?.name || biz.name,
+    website: biz.website,
+    industry: apolloCompany?.industry || biz.category || industry,
+    revenue_est: apolloCompany?.revenue || null,
+    employee_count: apolloCompany?.employeeCount?.toString() || null,
+    location: apolloCompany?.location || `${biz.city || ''} ${biz.state || ''}`.trim() || city,
+    owner_name: contact.name || null,
+    owner_title: contact.title || null,
+    email: contact.email,
+    linkedin_url: contact.linkedinUrl || apolloCompany?.linkedinUrl || null,
+    phone: biz.phone || apolloCompany?.phone || null,
+    source: 'apify_maps',
+    status: 'new',
+  };
+
+  const saved = await db.insertLead(lead).catch(err => {
+    console.warn(`Failed to insert ${lead.email}: ${err.message}`);
+    return null;
+  });
+  return saved ? { ...lead, id: saved.id } : null;
+}
+
+// Sweep across many industry x city combos until we hit the daily target.
+async function findNewLeads(targetCount) {
+  const leads = [];
+  const combos = shuffle(
+    ICP.industries.flatMap(ind => ICP.cities.map(city => ({ ind, city })))
+  ).slice(0, LIMITS.maxCombosPerRun || 24);
+
+  for (const { ind, city } of combos) {
     if (leads.length >= targetCount) break;
+    console.log(`Searching "${ind}" in ${city} (${leads.length}/${targetCount})`);
 
-    const domain = extractDomain(biz.website);
-    if (!domain) continue;
-
-    // Skip if we already have this domain
-    const existing = await db.leadExists(`@${domain}`).catch(() => false);
-    if (existing) continue;
-
-    // Enrich with Apollo
-    let contact = null;
-    let apolloCompany = null;
+    let businesses;
     try {
-      [contact, apolloCompany] = await Promise.all([
-        findContact({ domain, targetTitles: ICP.targetTitles }),
-        enrichCompany({ domain }),
-      ]);
+      businesses = await findBusinessesOnMaps({ searchQuery: ind, location: city, maxResults: 40 });
     } catch (err) {
-      console.warn(`Apollo failed for ${domain}: ${err.message}`);
-    }
-
-    // If Apollo found a contact without email, try to reveal it
-    if (contact && !contact.email && contact.apolloId) {
-      contact.email = await getEmail({ apolloId: contact.apolloId }).catch(() => null);
-    }
-
-    if (!contact?.email) {
-      console.log(`  Skip ${biz.name} - no email found`);
+      console.error('Apify error:', err.message);
       continue;
     }
 
-    // Double-check this email isn't already in DB
-    const emailExists = await db.leadExists(contact.email).catch(() => false);
-    if (emailExists) continue;
+    const qualified = businesses.filter(b => b.reviewCount >= ICP.minReviews && b.website);
+    console.log(`  ${businesses.length} found, ${qualified.length} qualified`);
 
-    const lead = {
-      company_name: apolloCompany?.name || biz.name,
-      website: biz.website,
-      industry: apolloCompany?.industry || biz.category || industry,
-      revenue_est: apolloCompany?.revenue || null,
-      employee_count: apolloCompany?.employeeCount?.toString() || null,
-      location: apolloCompany?.location || `${biz.city || ''} ${biz.state || ''}`.trim() || city,
-      owner_name: contact.name || null,
-      owner_title: contact.title || null,
-      email: contact.email,
-      linkedin_url: contact.linkedinUrl || apolloCompany?.linkedinUrl || null,
-      phone: biz.phone || apolloCompany?.phone || null,
-      source: 'apify_maps',
-      status: 'new',
-    };
-
-    const saved = await db.insertLead(lead).catch(err => {
-      console.warn(`Failed to insert ${lead.email}: ${err.message}`);
-      return null;
-    });
-
-    if (saved) {
-      leads.push({ ...lead, id: saved.id });
-      console.log(`  Added: ${lead.company_name} <${lead.email}>`);
+    for (const biz of qualified) {
+      if (leads.length >= targetCount) break;
+      try {
+        const lead = await processBusiness(biz, ind, city);
+        if (lead) {
+          leads.push(lead);
+          console.log(`  Added: ${lead.company_name} <${lead.email}>`);
+        }
+      } catch (err) {
+        console.warn(`  Skip ${biz.name}: ${err.message}`);
+      }
     }
   }
 

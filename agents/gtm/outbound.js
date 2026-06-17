@@ -2,6 +2,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import * as db from './tools/db.js';
 import { sendEmail } from './tools/email.js';
 import { researchCompany } from './tools/research.js';
+import { buildAuditData } from './audit-build.js';
+import { writeAuditPage } from './audit-site.js';
 import { VOICE_SYSTEM, FOLLOWUP_1_SYSTEM, FOLLOWUP_2_SYSTEM, BREAKUP_SYSTEM } from './prompts/voice.js';
 import { LIMITS } from './config.js';
 
@@ -9,19 +11,20 @@ const anthropic = new Anthropic();
 
 // ── Email generation ───────────────────────────────────────────────────────
 
-async function generateEmail({ lead, research, systemPrompt, sequenceStep }) {
+async function generateEmail({ lead, research, systemPrompt, sequenceStep, auditUrl }) {
   const context = `
 Company: ${lead.company_name}
-Industry: ${lead.industry || 'trades/field service'}
+Industry: ${lead.industry || 'operations-heavy business'}
 Location: ${lead.location || 'unknown'}
 Website: ${lead.website || 'unknown'}
 Decision-maker: ${lead.owner_name || 'the owner'}
 Title: ${lead.owner_title || 'Owner/Operator'}
 Employee count: ${lead.employee_count || 'unknown'}
-Estimated crew count: ${research?.crewCount || 'unknown'}
 
-Primary pain point: ${research?.primaryPain || 'operational chaos from manual processes'}
-All pain points: ${research?.likelyPainPoints?.join(', ') || 'dispatch, invoicing, compliance'}
+Primary pain point: ${research?.primaryPain || 'manual, disconnected operations'}
+All pain points: ${research?.likelyPainPoints?.join(', ') || 'scheduling, dispatch, reporting'}
+
+AUDIT LINK (include this exact URL on its own line in cold emails): ${auditUrl || lead.audit_url || '(none yet - reference the review without a link)'}
 
 Previous outreach count: ${lead.outreach_count}
 Sequence step: ${sequenceStep}
@@ -105,6 +108,28 @@ export async function processLead(lead) {
         pain_points: research.likelyPainPoints?.join(', '),
       });
     }
+
+    // Build the personalized Intelligent Company Audit microsite (the BI-rep asset).
+    try {
+      const auditData = await buildAuditData({ lead, research });
+      const out = writeAuditPage({
+        ...auditData,
+        companyName: lead.company_name,
+        ownerFirstName: (lead.owner_name || '').split(' ')[0] || '',
+        industry: lead.industry,
+        revenueEst: lead.revenue_est || lead.revenue,
+        employees: lead.employee_count,
+      });
+      lead.audit_url = out.url;
+      await db.updateLead(lead.id, {
+        audit_url: out.url,
+        audit_slug: out.slug,
+        intel_score: auditData.score,
+      });
+      console.log(`  Audit built: ${out.url} (score ${auditData.score})`);
+    } catch (err) {
+      console.warn(`  Audit generation failed for ${lead.company_name}: ${err.message}`);
+    }
   } else {
     // Parse stored research for follow-ups
     research = {
@@ -120,6 +145,7 @@ export async function processLead(lead) {
     research,
     systemPrompt: seq.system,
     sequenceStep: seq.step,
+    auditUrl: lead.audit_url,
   });
 
   // Send

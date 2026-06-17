@@ -2,32 +2,32 @@
 // Edit this to target the right companies and geographies
 
 export const ICP = {
-  // Industries to search (used as Google Maps search terms)
+  // Priority industries (Google Maps search terms) - operations-heavy businesses $5M-$500M
   industries: [
-    'HVAC company',
-    'roofing company',
-    'plumbing company',
-    'electrical contractor',
-    'construction company',
+    'manufacturing company',
+    'industrial services company',
     'oilfield services company',
-    'trucking company',
     'fleet management company',
-    'landscaping company',
-    'property management company',
+    'trucking company',
+    'logistics company',
+    'construction company',
+    'equipment rental company',
+    'marine services company',
+    'waste management company',
+    'commercial HVAC company',
+    'electrical contractor',
+    'plumbing company',
+    'roofing company',
+    'machine shop',
+    'multi location medical group',
   ],
 
-  // Cities to prospect in (rotate through these)
+  // Cities to prospect in (rotate through these for volume)
   cities: [
-    'Houston TX',
-    'Dallas TX',
-    'Denver CO',
-    'Phoenix AZ',
-    'Atlanta GA',
-    'Charlotte NC',
-    'Nashville TN',
-    'Oklahoma City OK',
-    'Tulsa OK',
-    'Midland TX',
+    'Houston TX', 'Dallas TX', 'San Antonio TX', 'Midland TX', 'Fort Worth TX',
+    'Denver CO', 'Phoenix AZ', 'Atlanta GA', 'Charlotte NC', 'Nashville TN',
+    'Oklahoma City OK', 'Tulsa OK', 'Chicago IL', 'Cleveland OH', 'Pittsburgh PA',
+    'Birmingham AL', 'Kansas City MO', 'Indianapolis IN', 'Tampa FL', 'New Orleans LA',
   ],
 
   // Decision-maker titles to target (Apollo people search)
@@ -45,7 +45,8 @@ export const ICP = {
 };
 
 export const LIMITS = {
-  leadsPerDay: 20,       // max new leads to find and contact per day
+  leadsPerDay: 100,      // new prospects to find, audit, and contact per day
+  maxCombosPerRun: 24,   // industry x city searches to try before stopping
   maxFollowups: 3,       // cold + 2 follow-ups + 1 breakup
   followupDays: [3, 7, 14],  // days after last contact to send each follow-up
 };
