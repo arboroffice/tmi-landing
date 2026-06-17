@@ -40,6 +40,7 @@
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Outbound</span></div>
       <div class="topbar-actions">
         <button class="btn btn-ghost btn-sm" onclick="loadProspects()">Refresh</button>
+        <button class="btn btn-ghost btn-sm" onclick="sendTest()">Send test</button>
         <button class="btn btn-primary btn-sm" onclick="runOutbound()">Run outbound now</button>
       </div>
     </div>
@@ -56,6 +57,15 @@
         <div class="rung"><h4>Command Layer</h4><div class="p">Ongoing AI + ops department.</div><div class="price">Optional retainer</div></div>
       </div>
 
+      <div class="sec-head" style="margin:6px 0 10px;"><h2 style="font-size:15px;">Recent agent runs</h2></div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:26px;">
+        <table class="ob-table">
+          <thead><tr><th>When</th><th>Source</th><th>Found</th><th>Contacted</th><th>Follow-ups</th><th>Errors</th><th>Elapsed</th></tr></thead>
+          <tbody id="runs"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="sec-head" style="margin:6px 0 10px;"><h2 style="font-size:15px;">Prospects</h2></div>
       <div class="card" style="padding:0;overflow:hidden;">
         <table class="ob-table">
           <thead><tr><th>Company</th><th>Owner</th><th>Industry</th><th>Size</th><th>Score</th><th>Status</th><th>Step</th><th>Audit</th><th></th></tr></thead>
@@ -128,14 +138,38 @@ async function genAudit(id){
 }
 
 async function runOutbound(){
-  if(!confirm('Find new prospects and send outreach now?')) return;
+  if(!confirm('Find new prospects, build audits, and push to Instantly now?')) return;
   try {
     const r = await TMIAdmin.api('/api/gtm-run', 'POST', {});
-    TMIAdmin.toast?.(r?.message || 'Outbound run started.');
-  } catch(e){ TMIAdmin.toast?.('Run requested. Check the GTM digest for results.'); }
+    alert(r?.message || 'Outbound run started. Watch "Recent agent runs" + the GTM digest.');
+    setTimeout(loadRuns, 4000);
+  } catch(e){ alert('Run request failed: ' + e.message); }
+}
+
+async function sendTest(){
+  const email = prompt('Send a test audit email to:', 'mia@tmitechai.com');
+  if(!email) return;
+  const company = prompt('Test company name:', 'Apex Steel Fabrication') || undefined;
+  try {
+    const r = await TMIAdmin.api('/api/gtm-test', 'POST', { email, company });
+    alert(r?.message || ('Test send started to ' + email));
+  } catch(e){ alert('Test failed: ' + e.message); }
+}
+
+async function loadRuns(){
+  const el = document.getElementById('runs');
+  let runs = [];
+  try { runs = await TMIAdmin.api('/api/gtm-runs') || []; }
+  catch(e){ el.innerHTML = '<tr><td colspan="7" class="empty">No run log yet.</td></tr>'; return; }
+  if(!runs.length){ el.innerHTML = '<tr><td colspan="7" class="empty">No runs yet. Hit "Run outbound now".</td></tr>'; return; }
+  el.innerHTML = runs.map(r => {
+    const when = r.ran_at ? new Date(r.ran_at).toLocaleString() : '—';
+    return `<tr><td>${when}</td><td>${r.source||'—'}</td><td>${r.found??'—'}</td><td>${r.contacted??'—'}</td><td>${r.followupsSent??'—'}</td><td>${r.errors??0}</td><td>${r.elapsed_s?r.elapsed_s+'s':'—'}</td></tr>`;
+  }).join('');
 }
 
 loadProspects();
+loadRuns();
 </script>
 </body>
 </html>

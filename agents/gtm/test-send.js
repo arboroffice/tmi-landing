@@ -27,18 +27,17 @@ import { SAMPLE, slugify } from './audit-site.js';
 import * as db from './tools/db.js';
 import { sendEmail } from './tools/email.js';
 
-const TARGET = process.argv[2] || process.env.TEST_EMAIL || 'mia@tmitechai.com';
-const COMPANY = process.env.TEST_COMPANY || 'Apex Steel Fabrication';
-const DOMAIN = process.env.TEST_DOMAIN || '';
-
-async function main() {
+export async function runTest({ email, company, domain, industry } = {}) {
+  const TARGET = email || process.env.TEST_EMAIL || 'mia@tmitechai.com';
+  const COMPANY = company || process.env.TEST_COMPANY || 'Apex Steel Fabrication';
+  const DOMAIN = domain || process.env.TEST_DOMAIN || '';
   console.log(`TMI GTM tester → ${TARGET} (company: ${COMPANY}${DOMAIN ? `, ${DOMAIN}` : ''})`);
 
   const lead = {
     id: 'test',
     company_name: COMPANY,
     website: DOMAIN ? `https://${DOMAIN}` : '',
-    industry: process.env.TEST_INDUSTRY || 'Fabrication',
+    industry: industry || process.env.TEST_INDUSTRY || 'Fabrication',
     location: 'Houston, TX',
     owner_name: 'there',
     email: TARGET,
@@ -87,6 +86,11 @@ async function main() {
   console.log(`✅ Test email sent to ${TARGET} (message id: ${id})`);
   console.log(`   Audit:  ${auditUrl}`);
   console.log(`   Card:   ${cardUrl}`);
+  return { email: TARGET, company: COMPANY, auditUrl, cardUrl, messageId: id, score: auditData.score };
 }
 
-main().catch(e => { console.error('Tester failed:', e); process.exit(1); });
+// CLI: node gtm/test-send.js [recipient]
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+if (isMain) {
+  runTest({ email: process.argv[2] }).catch(e => { console.error('Tester failed:', e); process.exit(1); });
+}

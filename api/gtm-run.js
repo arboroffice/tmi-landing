@@ -1,16 +1,16 @@
-const { cors } = require('./_auth');
+const { cors, verifyToken } = require('./_auth');
 
-// Trigger GTM orchestrator via HTTP
-// Called by GitHub Actions: curl -X POST $URL -H "Authorization: Bearer $SECRET"
+// Trigger GTM orchestrator via HTTP. Auth: either the GTM_RUN_SECRET bearer
+// (GitHub Actions / cron) or a valid admin JWT (the admin command center button).
 module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  // Simple bearer token auth
-  const auth = req.headers.authorization || '';
-  const token = auth.replace('Bearer ', '');
-  if (token !== process.env.GTM_RUN_SECRET) {
+  const token = (req.headers.authorization || '').replace('Bearer ', '');
+  const okSecret = process.env.GTM_RUN_SECRET && token === process.env.GTM_RUN_SECRET;
+  const okAdmin = !!verifyToken(req);
+  if (!okSecret && !okAdmin) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
