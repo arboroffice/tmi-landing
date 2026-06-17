@@ -245,7 +245,7 @@ Every article is written to rank in search and be quotable by AI answer engines 
       <a href="news.html">Field Notes</a>
       <a href="about.html">About</a>
     </nav>
-    <a href="/audit" class="ah-cta">Apply &rarr;</a>
+    <a href="/complete-audit" class="ah-cta">Apply &rarr;</a>
   </div>
 </header>
 

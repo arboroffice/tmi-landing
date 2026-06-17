@@ -150,7 +150,7 @@ export function renderAuditPage(d) {
 </head>
 <body>
 
-<header class="hd"><div class="wrap"><a href="/" class="brand"><img src="/logo.svg" alt="TMI"/> TMI</a><a href="/audit" class="hd-cta">Book the audit &rarr;</a></div></header>
+<header class="hd"><div class="wrap"><a href="/" class="brand"><img src="/logo.svg" alt="TMI"/> TMI</a><a href="/complete-audit" class="hd-cta">Get the Complete Audit &rarr;</a></div></header>
 
 <section class="hero"><div class="wrap">
   <div class="meta">Operational intelligence review &middot; Prepared for ${esc(d.companyName)}</div>

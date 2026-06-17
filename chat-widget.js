@@ -26,12 +26,12 @@
     },
     build: {
       label: 'Apply to Work with TMI',
-      url: '/audit',
+      url: '/complete-audit',
       note: 'Tell us about your build.',
     },
     'vertical-founder': {
       label: 'Apply as a Vertical Founder',
-      url: '/audit',
+      url: '/complete-audit',
       note: 'Limited spots. One new vertical per quarter.',
     },
   };

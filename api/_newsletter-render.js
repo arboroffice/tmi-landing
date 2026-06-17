@@ -70,7 +70,7 @@ function renderIssue(issue = {}, unsubUrl = SITE + '/api/nl-unsubscribe') {
     ? `<h1 class="fc-ink" style="margin:0 0 26px;font-family:${HFONT};font-size:${titlePx}px;font-weight:500;letter-spacing:-0.025em;line-height:1.08;color:${INK};${center ? 'text-align:center;' : ''}">${inline(title)}</h1>`
     : '';
   const cta = (fmt === 'announcement' || fmt === 'standard')
-    ? `<div style="${center ? 'text-align:center;' : ''}margin:36px 0 4px;"><a class="fc-chart" href="${SITE}/audit" style="display:inline-block;background:${CHART};color:#0a0b14;font-family:${FONT};font-weight:700;font-size:14px;letter-spacing:0.01em;padding:15px 34px;border-radius:999px;text-decoration:none;">Get your free audit &rarr;</a></div>`
+    ? `<div style="${center ? 'text-align:center;' : ''}margin:36px 0 4px;"><a class="fc-chart" href="${SITE}/complete-audit" style="display:inline-block;background:${CHART};color:#0a0b14;font-family:${FONT};font-weight:700;font-size:14px;letter-spacing:0.01em;padding:15px 34px;border-radius:999px;text-decoration:none;">Get your Complete Audit &rarr;</a></div>`
     : '';
 
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>

@@ -5,7 +5,7 @@ import { VOICE_SYSTEM } from './prompts/voice.js';
 
 const anthropic = new Anthropic();
 
-const BOOKING_URL = process.env.BOOKING_URL || 'https://www.tmitechai.com/audit';
+const BOOKING_URL = process.env.BOOKING_URL || 'https://www.tmitechai.com/booking';
 // Auto-send the drafted reply to the prospect when set; otherwise draft + notify the team.
 const AUTO_REPLY = String(process.env.AUTO_REPLY || '').toLowerCase() === 'true';
 

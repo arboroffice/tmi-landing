@@ -35,5 +35,5 @@ module.exports = async function handler(req, res) {
   }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  return res.status(404).send('<!doctype html><meta charset="utf-8"><title>Not found</title><div style="font-family:system-ui;padding:60px;text-align:center;color:#555">This review link has expired or moved. <a href="https://www.tmitechai.com/audit">Take the audit</a></div>');
+  return res.status(404).send('<!doctype html><meta charset="utf-8"><title>Not found</title><div style="font-family:system-ui;padding:60px;text-align:center;color:#555">This review link has expired or moved. <a href="https://www.tmitechai.com/complete-audit">Take the Complete Audit</a></div>');
 };

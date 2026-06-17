@@ -195,7 +195,7 @@ REQUIRED: Include this audit CTA block immediately before <div class="article-en
 <div class="oi-cta">
   <h3>[Write a short punchy heading relevant to this article's topic]</h3>
   <p>[One sentence: what the TMI audit reveals for an operator in this situation. Max 25 words.]</p>
-  <a href="/audit" class="btn">Book the audit &nearr;</a>
+  <a href="/complete-audit" class="btn">Get the Complete Audit &nearr;</a>
 </div>
 
 And include this CSS in the <style> block:
