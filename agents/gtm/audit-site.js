@@ -44,6 +44,7 @@ export function renderAuditPage(d) {
   const url = `https://www.tmitechai.com/audit/${slug}`;
   const score = Math.max(0, Math.min(100, Math.round(d.score ?? 0)));
   const ring = (score / 100) * 339.292; // 2*pi*54
+  const cardImg = `https://www.tmitechai.com/api/audit-card?company=${encodeURIComponent(d.companyName)}&score=${score}&industry=${encodeURIComponent(d.industry || '')}`;
   const cats = (d.categories || []).map(c => {
     const pct = Math.max(0, Math.min(100, (c.score / 10) * 100));
     return `<div class="cat"><div class="cat-top"><span>${esc(c.name)}</span><span class="cat-n">${c.score}/10</span></div><div class="cat-bar"><i style="width:${pct}%"></i></div></div>`;
@@ -67,7 +68,9 @@ export function renderAuditPage(d) {
 <meta property="og:description" content="We mapped where efficiency may be getting lost at ${esc(d.companyName)}, and what the future state could look like."/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="${url}"/>
-<meta property="og:image" content="https://www.tmitechai.com/hero-bg.png"/>
+<meta property="og:image" content="${cardImg}"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="${cardImg}"/>
 <title>${esc(d.companyName)} — Intelligent Company Audit | TMI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
