@@ -297,11 +297,12 @@ async function loadAuditFunnel(){
           ? `<a class="lnk" href="${a.proposal.url}" target="_blank" rel="noopener">Open</a>`
           : `<button class="btn btn-primary btn-sm" onclick="genProposal('${a.id}', this)">Generate proposal</button>`)
       : '<span class="muted">audit building…</span>';
+    const call = `<a class="lnk" href="/admin-meetings" title="${a.prep_ready ? 'Pre-call brief ready' : 'Record the strategy call'}">Record call${a.prep_ready ? ' ✓' : ''}</a>`;
     return `<tr>
       <td>${a.company || '<span class="muted">—</span>'}</td>
       <td class="muted">${a.email || '—'}</td>
       <td>${a.score != null ? a.score : '<span class="muted">—</span>'}</td>
-      <td><a class="lnk" href="${a.report_url}" target="_blank" rel="noopener">Report</a></td>
+      <td><a class="lnk" href="${a.report_url}" target="_blank" rel="noopener">Report</a> · ${call}</td>
       <td>${prop}</td>
       <td>${action}</td>
     </tr>`;

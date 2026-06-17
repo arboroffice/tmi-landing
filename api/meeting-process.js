@@ -102,22 +102,37 @@ module.exports = async (req, res) => {
 
   let transcript = b.transcript;
   const ctx = { company: b.company, sales_stage: b.sales_stage, project_name: b.project_name };
+  let auditId = b.audit_id || null;
 
   // If only a meeting_id is supplied, pull the stored transcript + context.
-  if ((!transcript || transcript.length < 10) && b.meeting_id) {
+  if (b.meeting_id) {
     const m = await db.getById('sales_meetings', b.meeting_id);
     if (!m) return res.status(404).json({ error: 'meeting not found' });
-    transcript = m.transcript;
+    if (!transcript || transcript.length < 10) transcript = m.transcript;
     ctx.company = ctx.company || m.company;
     ctx.sales_stage = ctx.sales_stage || m.sales_stage;
     ctx.project_name = ctx.project_name || m.title;
+    auditId = auditId || m.audit_id || null;
   }
   if (!transcript || transcript.length < 10) {
     return res.status(400).json({ error: 'transcript required' });
   }
 
+  // Ground the artifact in the paid Complete Audit when this call is attached to
+  // one, so the PRD/digest reflects both the conversation and the audit findings.
+  let auditContext = '';
+  if (auditId) {
+    try {
+      const sub = await db.getById('audit_submissions', auditId);
+      if (sub && sub.deliverable) {
+        ctx.company = ctx.company || sub.company;
+        auditContext = `\n\nPAID COMPLETE AUDIT (already delivered to this client; treat it as ground truth alongside the call):\n\n${String(sub.deliverable).slice(0, 7000)}`;
+      }
+    } catch (e) { /* best effort */ }
+  }
+
   const system = PROMPTS[kind](ctx);
-  const user = `Transcript:\n\n${transcript}`;
+  const user = `Transcript:\n\n${transcript}${auditContext}`;
 
   let result;
   try {

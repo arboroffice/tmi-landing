@@ -45,15 +45,17 @@ module.exports = async (req, res) => {
       if (!b.transcript || String(b.transcript).trim().length < 10) {
         return res.status(400).json({ error: 'transcript required' });
       }
-      if (!b.lead_id && !b.client_id) {
-        return res.status(400).json({ error: 'lead_id or client_id required (attach to an account)' });
+      if (!b.lead_id && !b.client_id && !b.audit_id) {
+        return res.status(400).json({ error: 'lead_id, client_id, or audit_id required (attach to an account)' });
       }
 
       const row = await db.insert('sales_meetings', {
         lead_id:      b.lead_id || null,
         client_id:    b.client_id || null,
+        audit_id:     b.audit_id || null,
         contact_id:   b.contact_id || null,
-        account_type: b.client_id ? 'client' : 'lead',
+        account_type: b.client_id ? 'client' : (b.audit_id ? 'audit' : 'lead'),
+        prep_brief:   b.prep_brief || null,
         company:      b.company || null,
         account_label: b.account_label || b.company || null,
         title:        b.title || 'Sales call',

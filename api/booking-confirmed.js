@@ -32,6 +32,9 @@ module.exports = async function handler(req, res) {
       const appLead = await db.findOne('applications', 'email', email.toLowerCase());
       if (appLead) {
         await db.update('applications', appLead.id, { status: 'booked', booked_at: new Date().toISOString() });
+        // The paid audit (with the deliverable) lives in audit_submissions - link it
+        // so the prep brief and the PRD can be grounded in it.
+        const sub = await db.findOne('audit_submissions', 'email', email.toLowerCase()).catch(() => null);
         const dateStr = startTime
           ? new Date(startTime).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
           : 'TBD';
@@ -52,6 +55,8 @@ module.exports = async function handler(req, res) {
               contactEmail: appLead.email,
               website: appLead.website || null,
               leadId: appLead.id,
+              applicationId: appLead.id,
+              submissionId: sub ? sub.id : null,
             },
           }).catch(e => console.error('QStash audit-prep (app) error:', e));
         } catch (e) { console.error('audit-prep enqueue (app):', e.message); }

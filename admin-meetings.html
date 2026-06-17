@@ -110,6 +110,8 @@
             </div>
           </div>
 
+          <div id="prep-brief" style="display:none;margin-top:14px;padding:14px 16px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--bg);max-height:300px;overflow-y:auto;"></div>
+
           <div class="panel-sep" style="margin:18px 0;"></div>
 
           <button class="btn btn-primary" id="btn-save" onclick="saveMeeting()" style="width:100%;">Save &amp; build knowledge</button>
@@ -205,9 +207,10 @@ function pickStage(s, el){
 
 // ---------- Account picker ----------
 async function loadAccounts(){
-  const [leads, clients] = await Promise.all([
+  const [leads, clients, funnel] = await Promise.all([
     TMIAdmin.api('/api/leads').catch(()=>[]),
-    TMIAdmin.api('/api/clients').catch(()=>[])
+    TMIAdmin.api('/api/clients').catch(()=>[]),
+    TMIAdmin.api('/api/audit-funnel').catch(()=>null)
   ]);
   const fromRow = (r, type) => {
     const c = r.contacts || {};
@@ -217,7 +220,16 @@ async function loadAccounts(){
     return { type, id: r.id, contact_id: r.contact_id || c.id || null, label, company,
              search: (label+' '+(c.email||'')).toLowerCase() };
   };
+  // Paid Complete Audit clients: attach the call to the audit so the PRD grounds
+  // in it and the pre-call brief is right here.
+  const auditAccts = ((funnel && funnel.audits) || []).map(a => ({
+    type: 'audit', id: a.id, contact_id: null,
+    label: [a.company, a.email].filter(Boolean).join(' · ') || a.company || a.email || 'Audit client',
+    company: a.company || '', prep_brief: a.prep_brief || null,
+    search: ((a.company||'')+' '+(a.email||'')).toLowerCase()
+  }));
   accounts = [
+    ...auditAccts,
     ...(leads||[]).map(r=>fromRow(r,'lead')),
     ...(clients||[]).map(r=>fromRow(r,'client'))
   ];
@@ -239,11 +251,22 @@ function pickAccount(type, id){
   document.getElementById('acct-chosen-label').innerHTML = `${esc(chosen.label)} <span class="acct-tag" style="margin-left:6px;">${chosen.type}</span>`;
   document.getElementById('acct-chosen-wrap').style.display = 'flex';
   document.getElementById('acct-picker').style.display = 'none';
+  showPrep(chosen);
+}
+function showPrep(acct){
+  const el = document.getElementById('prep-brief');
+  if(!el) return;
+  if(acct && acct.type==='audit' && acct.prep_brief){
+    el.style.display = 'block';
+    el.innerHTML = `<div class="panel-sec-label" style="margin-bottom:8px;">Pre-call brief</div>`
+      + `<div style="white-space:pre-wrap;font-size:13px;line-height:1.6;color:var(--ink-2);">${esc(acct.prep_brief)}</div>`;
+  } else { el.style.display='none'; el.innerHTML=''; }
 }
 function clearAccount(){
   chosen = null;
   document.getElementById('acct-chosen-wrap').style.display = 'none';
   document.getElementById('acct-picker').style.display = 'block';
+  showPrep(null);
 }
 async function newAccount(){
   const out = await TMIAdmin.formModal({
@@ -366,15 +389,17 @@ async function saveMeeting(){
   btn.disabled = true; btn.textContent = 'Saving...';
 
   const payload = {
-    [chosen.type==='client'?'client_id':'lead_id']: chosen.id,
     contact_id: chosen.contact_id,
     company: chosen.company,
     account_label: chosen.label,
-    title: document.getElementById('m-title').value.trim() || 'Sales call',
+    title: document.getElementById('m-title').value.trim() || (chosen.type==='audit' ? 'Complete Audit strategy call' : 'Sales call'),
     sales_stage: chosenStage || null,
     transcript,
     duration_sec: accumSec || null,
   };
+  if (chosen.type === 'audit') { payload.audit_id = chosen.id; payload.prep_brief = chosen.prep_brief || null; }
+  else if (chosen.type === 'client') { payload.client_id = chosen.id; }
+  else { payload.lead_id = chosen.id; }
   const m = await TMIAdmin.api('/api/meetings','POST',payload);
   if(!m){ btn.disabled=false; btn.textContent='Save & build knowledge'; return; }
   currentMeeting = m;

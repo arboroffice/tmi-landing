@@ -54,6 +54,8 @@ module.exports = async function handler(req, res) {
         email: s.email || null,
         score: s.score != null ? s.score : null,
         deliverable_ready: !!s.deliverable,
+        prep_ready: !!s.prep_brief,
+        prep_brief: s.prep_brief || null,
         created_at: s.created_at || null,
         report_url: `/audit-report?id=${s.id}`,
         proposal: p ? { id: p.id, status: p.status, url: `/build-proposal?id=${p.id}` } : null,
