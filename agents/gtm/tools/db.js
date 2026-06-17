@@ -268,6 +268,11 @@ export async function logEmailSend(send) {
   return insert('email_sends', send);
 }
 
+// Observability: one record per GTM agent run.
+export async function logRun(stats) {
+  return insert('gtm_runs', { ...stats, ran_at: new Date().toISOString() });
+}
+
 // Re-export the generic primitives for any future ad-hoc use.
 export {
   db, FieldValue, Timestamp,

@@ -40,9 +40,23 @@ export const ICP = {
     'Operations Manager',
   ],
 
-  // Revenue signals (Google Maps: look for companies with 10+ reviews as proxy for established biz)
+  // Revenue signals (Google Maps fallback: 10+ reviews ~ established business)
   minReviews: 10,
+
+  // Apollo-first prospecting (ICP filters). Employee ranges use Apollo's format.
+  // 20-500 employees, operations-heavy. Revenue $5M-$500M correlates with this band.
+  employeeRanges: ['21,50', '51,100', '101,200', '201,500'],
+  // Industry keyword tags (matched against Apollo org keywords)
+  industryKeywords: [
+    'manufacturing', 'industrial services', 'oil and gas', 'oilfield services',
+    'fleet', 'transportation', 'logistics', 'construction', 'equipment rental',
+    'marine', 'waste management', 'distribution', 'fabrication',
+  ],
+  locations: ['United States'],
 };
+
+// Lead source: 'apollo' (ICP search, default when APOLLO_API_KEY set) or 'maps' (Apify fallback)
+export const SOURCE = process.env.GTM_SOURCE || (process.env.APOLLO_API_KEY ? 'apollo' : 'maps');
 
 export const LIMITS = {
   leadsPerDay: 100,      // new prospects to find, audit, and contact per day

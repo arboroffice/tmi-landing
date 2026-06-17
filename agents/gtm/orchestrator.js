@@ -18,10 +18,10 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 import * as db from './tools/db.js';
 import { findBusinessesOnMaps, extractDomain } from './tools/apify.js';
-import { findContact, getEmail, enrichCompany } from './tools/apollo.js';
+import { findContact, getEmail, enrichCompany, searchProspects } from './tools/apollo.js';
 import { processLead } from './outbound.js';
 import { sendDigest } from './tools/email.js';
-import { ICP, LIMITS } from './config.js';
+import { ICP, LIMITS, SOURCE } from './config.js';
 
 // ── Lead finding pipeline ──────────────────────────────────────────────────
 
@@ -84,8 +84,80 @@ async function processBusiness(biz, industry, city) {
   return saved ? { ...lead, id: saved.id } : null;
 }
 
-// Sweep across many industry x city combos until we hit the daily target.
+// ── Apollo-first sourcing: ICP search (revenue/headcount/industry/title) ────
+async function findLeadsApollo(targetCount) {
+  const leads = [];
+  const keywords = shuffle(ICP.industryKeywords);
+
+  for (const kw of keywords) {
+    if (leads.length >= targetCount) break;
+    for (let page = 1; page <= 4 && leads.length < targetCount; page++) {
+      let prospects = [];
+      try {
+        prospects = await searchProspects({
+          titles: ICP.targetTitles,
+          employeeRanges: ICP.employeeRanges,
+          industries: [kw],
+          locations: ICP.locations,
+          page,
+          perPage: 25,
+        });
+      } catch (err) {
+        console.error(`Apollo "${kw}" p${page}: ${err.message}`);
+        break;
+      }
+      if (!prospects.length) break;
+      console.log(`Apollo "${kw}" p${page}: ${prospects.length} prospects (${leads.length}/${targetCount})`);
+
+      for (const p of prospects) {
+        if (leads.length >= targetCount) break;
+        if (!p.domain) continue;
+
+        let email = p.email;
+        if ((!email || /not_unlocked/i.test(email)) && p.apolloId) {
+          email = await getEmail({ apolloId: p.apolloId }).catch(() => null);
+        }
+        if (!email || /not_unlocked/i.test(email)) continue;
+        if (await db.leadExists(email).catch(() => false)) continue;
+
+        const lead = {
+          company_name: p.company || p.domain,
+          website: p.website || `https://${p.domain}`,
+          industry: p.industry || kw,
+          revenue_est: p.revenue || null,
+          employee_count: p.employeeCount != null ? String(p.employeeCount) : null,
+          location: p.location || null,
+          owner_name: p.name || null,
+          owner_title: p.title || null,
+          email,
+          linkedin_url: p.linkedinUrl || null,
+          phone: p.phone || null,
+          source: 'apollo',
+          status: 'new',
+        };
+        const saved = await db.insertLead(lead).catch(e => { console.warn(`insert ${email}: ${e.message}`); return null; });
+        if (saved) {
+          leads.push({ ...lead, id: saved.id });
+          console.log(`  Added: ${lead.company_name} <${email}>`);
+        }
+      }
+    }
+  }
+  return leads;
+}
+
+// Dispatch sourcing by configured engine.
 async function findNewLeads(targetCount) {
+  if (SOURCE === 'apollo') {
+    const leads = await findLeadsApollo(targetCount);
+    if (leads.length) return leads;
+    console.log('Apollo returned no leads, falling back to maps');
+  }
+  return findLeadsMaps(targetCount);
+}
+
+// Sweep across many industry x city combos until we hit the daily target (maps fallback).
+async function findLeadsMaps(targetCount) {
   const leads = [];
   const combos = shuffle(
     ICP.industries.flatMap(ind => ICP.cities.map(city => ({ ind, city })))
@@ -173,6 +245,9 @@ export async function run() {
   const elapsed = Math.round((Date.now() - startTime) / 1000);
   console.log(`\nDone in ${elapsed}s`);
   console.log(stats);
+
+  // Observability: record the run.
+  await db.logRun({ ...stats, source: SOURCE, elapsed_s: elapsed }).catch(e => console.error('logRun:', e.message));
 
   // 4. Send daily digest
   const digestStats = await db.getDigestStats();

@@ -20,6 +20,56 @@ async function post(path, body) {
   return res.json();
 }
 
+function domainFromUrl(url) {
+  if (!url) return null;
+  try { return new URL(url.startsWith('http') ? url : `https://${url}`).hostname.replace(/^www\./, ''); }
+  catch { return null; }
+}
+
+// ICP-precise prospecting: search PEOPLE (decision-makers) constrained by company
+// size, industry keywords, and location. Returns company + contact in one shot.
+// employeeRanges use Apollo's format, e.g. ['21,50','51,100','101,200','201,500'].
+export async function searchProspects({
+  titles,
+  employeeRanges,
+  industries = [],
+  locations = ['United States'],
+  page = 1,
+  perPage = 25,
+}) {
+  const body = {
+    person_titles: titles,
+    organization_num_employees_ranges: employeeRanges,
+    person_locations: locations,
+    page,
+    per_page: perPage,
+  };
+  if (industries.length) body.q_organization_keyword_tags = industries;
+
+  const data = await post('/mixed_people/search', body);
+  const people = data.people || [];
+  return people.map(p => {
+    const org = p.organization || p.account || {};
+    return {
+      name: `${p.first_name || ''} ${p.last_name || ''}`.trim(),
+      firstName: p.first_name || '',
+      lastName: p.last_name || '',
+      title: p.title || '',
+      email: p.email || null,
+      apolloId: p.id,
+      linkedinUrl: p.linkedin_url || null,
+      company: org.name || null,
+      domain: org.primary_domain || domainFromUrl(org.website_url),
+      website: org.website_url || null,
+      industry: org.industry || null,
+      employeeCount: org.estimated_num_employees || null,
+      revenue: org.annual_revenue_printed || null,
+      location: [org.city, org.state].filter(Boolean).join(', ') || null,
+      phone: org.phone || org.sanitized_phone || null,
+    };
+  });
+}
+
 // Find a decision-maker at a company by domain + target titles
 export async function findContact({ domain, targetTitles }) {
   const data = await post('/mixed_people/search', {
