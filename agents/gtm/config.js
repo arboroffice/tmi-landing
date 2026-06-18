@@ -61,10 +61,10 @@ export const SOURCE = process.env.GTM_SOURCE || (process.env.APOLLO_API_KEY ? 'a
 // $5M+ revenue floor (Apollo proxy). Used as a soft revenue filter.
 export const REVENUE_MIN = 5000000;
 
-// Outbound runs two parallel tracks, ~100/day each, both $5M+:
-//  - industrial: manufacturing, oil & gas, fleet, construction, etc.
-//  - service:    home service, aesthetics/med spa, wellness, healthcare groups,
-//                multi-location service businesses, etc.
+// Outbound runs two parallel tracks, ~100/day each, both $5M+, both trades/industrial:
+//  - industrial:   manufacturing, oil & gas, fleet, construction, fabrication, etc.
+//  - fieldservice: HVAC, plumbing, electrical, roofing, restoration, and other
+//                  trades / field-service contractors.
 // Each can point at its own Instantly campaign so the copy fits the niche.
 export const SEGMENTS = {
   industrial: {
@@ -80,17 +80,16 @@ export const SEGMENTS = {
     campaignId: process.env.INSTANTLY_CAMPAIGN_ID_INDUSTRIAL || process.env.INSTANTLY_CAMPAIGN_ID,
   },
   service: {
-    label: 'Service & Wellness',
+    label: 'Trades & Field Service',
     leadsPerDay: 100,
-    // High-revenue service businesses can be leaner, so include 11-20.
+    // Trades contractors can be leaner at $5M+, so include 11-20.
     employeeRanges: ['11,20', '21,50', '51,100', '101,200', '201,500'],
-    titles: ['Owner', 'CEO', 'President', 'Founder', 'Practice Manager', 'General Manager', 'Director of Operations', 'Operations Manager', 'COO'],
+    titles: ['Owner', 'CEO', 'President', 'Founder', 'General Manager', 'Operations Manager', 'Director of Operations', 'Service Manager', 'COO'],
     industryKeywords: [
-      'home services', 'hvac', 'plumbing', 'electrical', 'roofing', 'restoration',
-      'pest control', 'landscaping', 'med spa', 'medical spa', 'aesthetics',
-      'dental', 'orthodontics', 'wellness', 'physical therapy', 'chiropractic',
-      'veterinary', 'property management', 'auto repair', 'franchise', 'home health',
-      'multi location healthcare', 'fitness',
+      'hvac', 'plumbing', 'electrical', 'roofing', 'mechanical contractor',
+      'restoration', 'fire protection', 'pest control', 'landscaping', 'paving',
+      'concrete', 'excavation', 'septic', 'garage door', 'overhead door',
+      'glass and glazing', 'drywall', 'insulation', 'utility contractor', 'specialty contractor',
     ],
     campaignId: process.env.INSTANTLY_CAMPAIGN_ID_SERVICE || process.env.INSTANTLY_CAMPAIGN_ID,
   },
