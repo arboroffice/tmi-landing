@@ -23,6 +23,7 @@ import { verifyEmail } from './tools/verify.js';
 import { processLead } from './outbound.js';
 import { sendDigest } from './tools/email.js';
 import { ICP, LIMITS, SOURCE, SEGMENTS, REVENUE_MIN } from './config.js';
+import { runIntentAgent } from './intent-agent.js';
 
 // ── Lead finding pipeline ──────────────────────────────────────────────────
 
@@ -223,9 +224,24 @@ export async function run() {
   const override = Number(process.env.GTM_LEADS_PER_DAY) || null;
   const dry = String(process.env.GTM_DRY_RUN || '').toLowerCase() === 'true';
 
+  // 0. Intent agent: watch job postings + LinkedIn/social for ICP-fit buying and
+  // hiring signals, score them with Claude, and route the strongest in as 'new'
+  // leads (and LinkedIn touches). Runs alongside outbound sourcing.
+  console.log('--- Intent agent (inbound signals) ---');
+  const intentStats = await runIntentAgent().catch(e => { console.error('intent agent:', e.message); return {}; });
+  console.log(`Intent: ${intentStats.signals || 0} signals, ${intentStats.routed || 0} routed\n`);
+
   // 1. Find new leads across every segment (industrial + service), ~100 each.
   console.log(`--- Sourcing${override ? ` (${override}/segment)` : ' (per-segment defaults)'}${dry ? ' (DRY RUN: build audits, do not send)' : ''} ---`);
   const newLeads = await findNewLeads(override);
+  // Pull in any signal-routed leads waiting at status 'new' so the intent agent's
+  // finds get audited and contacted on the same run as outbound sourcing.
+  try {
+    const sourced = new Set(newLeads.map(l => l.email));
+    const signalLeads = (await db.getNewLeads(50)).filter(l =>
+      ['intent_signal', 'job_posting_signal'].includes(l.source) && !sourced.has(l.email));
+    if (signalLeads.length) { console.log(`+ ${signalLeads.length} signal-routed leads to contact`); newLeads.push(...signalLeads); }
+  } catch (e) { console.error('signal lead merge:', e.message); }
   stats.found = newLeads.length;
   console.log(`Found ${stats.found} new leads\n`);
 

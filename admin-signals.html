@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Intent Signals — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .sig-filters{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+  .sig-filters .btn.active{background:var(--chart);color:var(--ink);border-color:var(--chart);}
+  .sig-grid{display:flex;flex-direction:column;gap:12px;}
+  .sig-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:grid;grid-template-columns:64px 1fr auto;gap:18px;align-items:start;}
+  .sig-score{text-align:center;}
+  .sig-score .n{font-size:26px;font-weight:800;line-height:1;color:var(--ink);}
+  .sig-score .l{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+  .sig-score.hot .n{color:#0a7d2e;}
+  .sig-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px;}
+  .sig-type{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--bg-alt,#f5f5f7);color:var(--ink);}
+  .sig-type.buying{background:#dcfce7;color:#166534;}
+  .sig-type.hiring{background:#dbeafe;color:#1e40af;}
+  .sig-src{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+  .sig-who{font-size:15px;font-weight:600;color:var(--ink);}
+  .sig-summary{font-size:13.5px;color:var(--ink);margin:4px 0 6px;}
+  .sig-rationale{font-size:13px;color:var(--ink-2,#505060);line-height:1.5;}
+  .sig-action{font-size:12px;color:var(--ink);margin-top:8px;}
+  .sig-action b{color:#0a7d2e;}
+  .sig-actions{display:flex;flex-direction:column;gap:8px;min-width:120px;}
+  .sig-badge{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;text-align:center;}
+  .sig-badge.routed{background:#dcfce7;color:#166534;}
+  .sig-badge.dismissed{background:#fee2e2;color:#991b1b;}
+  .sig-empty{text-align:center;color:var(--muted);padding:60px 0;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Intent Signals</span></div>
+    </div>
+    <div class="content">
+      <div class="sig-filters" id="filters">
+        <button class="btn btn-sm active" data-status="new">New</button>
+        <button class="btn btn-sm" data-status="routed">Routed</button>
+        <button class="btn btn-sm" data-status="dismissed">Dismissed</button>
+        <button class="btn btn-sm" data-status="">All</button>
+      </div>
+      <div class="sig-grid" id="grid"><div class="sig-empty">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('signals');
+
+let curStatus = 'new';
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+async function load(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="sig-empty">Loading…</div>';
+  const q = curStatus ? ('?status=' + curStatus) : '';
+  const rows = await TMIAdmin.api('/api/signals' + q) || [];
+  if (!rows.length){ grid.innerHTML = '<div class="sig-empty">No signals here yet.</div>'; return; }
+  grid.innerHTML = rows.map(card).join('');
+}
+
+function card(s){
+  const score = Number(s.score||0);
+  const who = esc(s.company || s.person_name || 'Unknown');
+  const sub = s.person_name && s.company ? esc(s.person_name) + (s.person_title?(' · '+esc(s.person_title)):'') : (s.person_title?esc(s.person_title):'');
+  const type = (s.signal_type||'').includes('buy') ? 'buying' : (s.signal_type||'').includes('hir') ? 'hiring' : '';
+  const right = s.status === 'new'
+    ? `<button class="btn btn-sm btn-primary" onclick="setStatus('${s.id}','routed')">Route</button>
+       <button class="btn btn-sm" onclick="setStatus('${s.id}','dismissed')">Dismiss</button>`
+    : `<span class="sig-badge ${s.status}">${s.status}</span>`;
+  const link = s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener" class="sig-src">${esc(s.source)} ↗</a>` : `<span class="sig-src">${esc(s.source)}</span>`;
+  return `<div class="sig-card">
+    <div class="sig-score ${score>=70?'hot':''}"><div class="n">${score}</div><div class="l">score</div></div>
+    <div>
+      <div class="sig-meta"><span class="sig-type ${type}">${esc(s.signal_type||'signal')}</span>${link}</div>
+      <div class="sig-who">${who}</div>
+      ${sub?`<div class="sig-src" style="margin-top:2px">${sub}</div>`:''}
+      <div class="sig-summary">${esc(s.summary||'')}</div>
+      <div class="sig-rationale">${esc(s.rationale||'')}</div>
+      ${s.recommended_action?`<div class="sig-action">Next: <b>${esc(s.recommended_action)}</b></div>`:''}
+      ${s.suggested_opener?`<div class="sig-rationale" style="margin-top:6px;font-style:italic">"${esc(s.suggested_opener)}"</div>`:''}
+    </div>
+    <div class="sig-actions">${right}</div>
+  </div>`;
+}
+
+async function setStatus(id, status){
+  await TMIAdmin.api('/api/signals', 'PATCH', { id, status });
+  load();
+}
+
+document.getElementById('filters').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-status]'); if(!b) return;
+  document.querySelectorAll('#filters .btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  curStatus = b.dataset.status;
+  load();
+});
+
+load();
+</script>
+</body>
+</html>

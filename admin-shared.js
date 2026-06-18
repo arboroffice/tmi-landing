@@ -235,6 +235,7 @@ const TMIAdmin = (() => {
     ${navItem('seo', 'SEO', I.flywheel)}
     <div class="sb-group-label">Sales</div>
     ${navItem('outbound', 'Outbound', I.command)}
+    ${navItem('signals', 'Intent Signals', I.vision)}
     ${navItem('pipeline', 'Pipeline', I.pipeline, false, '/admin-sales#pipeline')}
     ${navItem('audits', 'Audits', I.audits, false, '/admin-sales#audits')}
     ${navItem('bookings', 'Bookings', I.bookings, false, '/admin-sales#bookings')}
