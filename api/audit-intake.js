@@ -15,26 +15,25 @@ module.exports = async function handler(req, res) {
   const { session_id, email, company, industry, answers } = req.body || {};
   if (!answers || typeof answers !== 'object') return res.status(400).json({ error: 'answers required' });
 
-  // Verify payment.
-  let paid = false;
+  // The Complete Audit is free. Capture the email and proceed, no payment gate.
+  // (A legacy Stripe session is still honored if one happens to be present.)
   let paidEmail = email;
   try {
     if (process.env.STRIPE_SECRET_KEY && session_id) {
       const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
       const s = await stripe.checkout.sessions.retrieve(session_id);
-      paid = s.payment_status === 'paid';
       paidEmail = paidEmail || (s.customer_details && s.customer_details.email) || s.customer_email;
     }
   } catch (e) { console.error('intake verify:', e.message); }
-  if (!paid) return res.status(402).json({ error: 'payment required' });
+  if (!paidEmail) return res.status(400).json({ error: 'email required' });
 
-  // Mark the captured lead as paid so the payment-nurture chain stops.
+  // Mark any captured lead as completed so the old payment-nurture chain stops.
   try {
     if (paidEmail) {
       const lead = await dbx.findOne('applications', 'email', String(paidEmail).toLowerCase());
-      if (lead) await dbx.update('applications', lead.id, { status: 'paid', paid_at: new Date().toISOString() });
+      if (lead) await dbx.update('applications', lead.id, { status: 'audit_completed', paid_at: new Date().toISOString() });
     }
-  } catch (e) { console.error('intake mark paid:', e.message); }
+  } catch (e) { console.error('intake mark complete:', e.message); }
 
   const bookingLink = session_id ? `${BOOKING}?session_id=${encodeURIComponent(session_id)}` : BOOKING;
 
@@ -105,7 +104,7 @@ module.exports = async function handler(req, res) {
           await new Resend(process.env.RESEND_API_KEY).emails.send({
             from: 'TMI <support@tmitechai.com>',
             to: process.env.GTM_DIGEST_EMAIL || 'support@tmitechai.com',
-            subject: `PAID Complete Audit: ${company || answers.company} (${paidEmail})`,
+            subject: `New Complete Audit: ${company || answers.company} (${paidEmail})`,
             text: md,
           });
         }

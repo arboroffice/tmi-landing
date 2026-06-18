@@ -40,23 +40,32 @@
 <header class="hd"><div class="wrap"><a href="/" class="brand"><img src="/logo.svg" alt="TMI"/> TMI</a></div></header>
 
 <div class="wrap" id="root">
-  <div class="gate" id="loading">Checking your payment…</div>
+  <div class="gate" id="loading">Loading your audit…</div>
 </div>
 
 <script>
 var params = new URLSearchParams(location.search);
 var SESSION = params.get('session_id') || '';
+var EMAIL_PARAM = params.get('email') || '';
 var PAID_EMAIL = '';
 
 async function init(){
   var root = document.getElementById('root');
-  if(!SESSION){ gate('We could not find your payment session. <a href="/complete-audit">Start your Complete Audit</a>.'); return; }
   try {
-    var v = await (await fetch('/api/checkout-verify?session_id=' + encodeURIComponent(SESSION))).json();
-    if(!v.paid){ gate('Your payment is not confirmed yet. <a href="/complete-audit">Complete checkout</a>.'); return; }
-    PAID_EMAIL = v.email || '';
-    var intake = await (await fetch('/api/intake-questions')).json();
-    renderForm(intake, v.company || '');
+    if(SESSION){
+      // Legacy paid path: honor an existing Stripe session if present.
+      var v = await (await fetch('/api/checkout-verify?session_id=' + encodeURIComponent(SESSION))).json();
+      PAID_EMAIL = (v && v.email) || EMAIL_PARAM;
+      var intake = await (await fetch('/api/intake-questions')).json();
+      renderForm(intake, (v && v.company) || params.get('company') || '');
+    } else if(EMAIL_PARAM){
+      // Free path: the audit is open to everyone, no payment required.
+      PAID_EMAIL = EMAIL_PARAM;
+      var intake2 = await (await fetch('/api/intake-questions')).json();
+      renderForm(intake2, params.get('company') || '');
+    } else {
+      gate('To start your free audit, head to <a href="/complete-audit">the Complete Audit</a>.');
+    }
   } catch(e){ gate('Something went wrong loading your intake. Email support@tmitechai.com.'); }
 }
 
