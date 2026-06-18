@@ -1,0 +1,38 @@
+name: Intent Agent Scan
+
+on:
+  schedule:
+    # 10am, 2pm, 6pm ET (15/19/23 UTC), weekdays - fresher than the once-daily SDR run
+    - cron: '0 15,19,23 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: cd agents && npm install
+
+      - name: Run intent agent (watch jobs + LinkedIn/social, score, route signals)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+          APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
+          APIFY_LINKEDIN_POSTS_ACTOR: ${{ secrets.APIFY_LINKEDIN_POSTS_ACTOR }}
+          LINKEDIN_WEBHOOK_URL: ${{ secrets.LINKEDIN_WEBHOOK_URL }}
+          LINKEDIN_WEBHOOK_SECRET: ${{ secrets.LINKEDIN_WEBHOOK_SECRET }}
+          RESEND_OUTREACH_API_KEY: ${{ secrets.RESEND_OUTREACH_API_KEY }}
+          GTM_DIGEST_EMAIL: ${{ secrets.GTM_DIGEST_EMAIL }}
+        run: cd agents && node gtm/intent-agent.js

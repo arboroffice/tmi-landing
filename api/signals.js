@@ -14,6 +14,16 @@ module.exports = async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
+      if (req.query && req.query.summary) {
+        const [n, routed, dismissed, runs] = await Promise.all([
+          dbx.count('signals', [['status', '==', 'new']]).catch(() => 0),
+          dbx.count('signals', [['status', '==', 'routed']]).catch(() => 0),
+          dbx.count('signals', [['status', '==', 'dismissed']]).catch(() => 0),
+          dbx.list('intent_runs', { limit: 20 }).catch(() => []),
+        ]);
+        const lastRun = (runs || []).sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))[0] || null;
+        return res.json({ counts: { new: n, routed, dismissed }, lastRun });
+      }
       const status = (req.query && req.query.status) || null;
       const where = status ? [['status', '==', status]] : [];
       const rows = await dbx.list('signals', { where, limit: 300 }).catch(() => []);

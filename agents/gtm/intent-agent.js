@@ -74,9 +74,12 @@ async function classifyBatch(items) {
 }
 
 // Route a qualified signal into the SDR pipeline. Returns { routed, channel, leadId }.
-async function route(cand, verdict) {
+async function route(cand, verdict, priorCount = 0) {
   const combined = Math.round((verdict.icp_fit + verdict.intent + verdict.confidence) / 3);
-  if (combined < THRESHOLDS.autoRoute) return { routed: false };
+  // Multiple signals for the same company lower the routing bar: several weak
+  // signals add up to strong account-level intent.
+  const bar = Math.max(50, THRESHOLDS.autoRoute - Math.min(priorCount * 10, 20));
+  if (combined < bar) return { routed: false };
 
   // Company-resolvable: enrich via Apollo and hand to the outbound loop as a new lead.
   const companyName = verdict.company || cand.company;
@@ -159,13 +162,16 @@ export async function runIntentAgent() {
       if (!v || !v.is_signal) continue;
       if (v.icp_fit < THRESHOLDS.icpFit || v.intent < THRESHOLDS.intent || v.confidence < THRESHOLDS.confidence) continue;
 
-      const r = await route(cand, v).catch(() => ({ routed: false }));
+      const company = v.company || cand.company || null;
+      const priorCount = company ? await db.count('signals', [['company', '==', company]]).catch(() => 0) : 0;
+      const r = await route(cand, v, priorCount).catch(() => ({ routed: false }));
       const sig = await db.insert('signals', {
         source: cand.source,
         source_id: cand.sourceId,
         url: cand.url || null,
         signal_type: v.signal_type || 'none',
-        company: v.company || cand.company || null,
+        company,
+        company_signal_count: priorCount + 1,
         person_name: v.person_name || cand.person?.name || null,
         person_title: v.person_title || cand.person?.title || null,
         person_url: cand.person?.profileUrl || null,
@@ -204,6 +210,10 @@ export async function runIntentAgent() {
       ].join('\n'),
     }).catch(e => console.error('intent digest:', e.message));
   }
+
+  await db.insert('intent_runs', {
+    ...stats, by_source: JSON.stringify(stats.bySource || {}), created_at: new Date().toISOString(),
+  }).catch(() => {});
 
   console.log('intent-agent complete:', stats);
   return stats;
