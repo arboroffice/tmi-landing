@@ -149,6 +149,20 @@
   .ag .v{font-family:var(--serif);font-size:15px;color:var(--ink);margin-top:3px;}
   .ag .v.warn{color:var(--amber);}
   .ag .v.bad{color:#ff9a8b;}
+  /* crew & field ops mock */
+  .cr-row{display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;background:rgba(255,255,255,0.03);border:1px solid var(--line);margin-bottom:8px;}
+  .cr-av{width:32px;height:32px;border-radius:9px;background:rgba(228,255,151,0.14);color:var(--chart);font-family:var(--sans);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;}
+  .cr-b{flex:1;min-width:0;}
+  .cr-n{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cr-s{font-family:var(--sans);font-size:11px;color:var(--ink-3);margin-top:2px;}
+  .cr-pct{font-family:var(--serif);font-size:17px;color:var(--chart);flex:none;}
+  .cr-cost{background:rgba(228,255,151,0.06);border:1px solid rgba(228,255,151,0.22);border-radius:11px;padding:12px 13px;margin-top:4px;}
+  .cr-cost .k{font-family:var(--sans);font-size:9.5px;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-3);}
+  .cr-cost-row{display:flex;justify-content:space-between;gap:8px;font-family:var(--sans);font-size:12px;color:var(--ink-2);margin-top:8px;}
+  .cr-cost-row .good{color:var(--chart);font-weight:600;}
+  /* command center sources */
+  .cc-sources{display:flex;flex-wrap:wrap;align-items:center;gap:7px;font-family:var(--sans);font-size:10.5px;color:var(--ink-3);padding-top:2px;}
+  .cc-sources b{color:var(--chart);font-weight:600;background:rgba(228,255,151,0.08);border:1px solid rgba(228,255,151,0.2);border-radius:5px;padding:3px 8px;}
   /* more systems strip */
   .more-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;}
   .more-chip{display:inline-flex;align-items:center;gap:9px;font-family:var(--sans);font-size:13px;color:var(--ink-2);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:10px 16px;transition:color .15s,border-color .15s;}
@@ -166,6 +180,16 @@
   .agent .meta{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);margin-top:auto;padding-top:10px;}
   @media(min-width:861px) and (max-width:1060px){.agents{grid-template-columns:1fr 1fr;}}
   @media(max-width:860px){.agents{grid-template-columns:1fr;}}
+  /* problems we solve */
+  .ps-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:10px;}
+  .ps{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:24px 26px;transition:border-color .2s;}
+  .ps:hover{border-color:var(--line-2);}
+  .ps .pl{font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);}
+  .ps .prob{font-family:var(--serif);font-size:20px;color:var(--ink);letter-spacing:-0.01em;margin:9px 0 14px;line-height:1.2;}
+  .ps .fix{font-family:var(--sans);font-size:13.5px;color:var(--ink-2);line-height:1.55;margin:0;}
+  .ps .fix b{color:var(--ink);font-weight:600;}
+  .ps .res{display:inline-block;margin-top:15px;font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(--chart);background:rgba(228,255,151,0.08);border:1px solid rgba(228,255,151,0.28);border-radius:999px;padding:6px 14px;}
+  @media(max-width:760px){.ps-grid{grid-template-columns:1fr;}}
   /* how we build */
   .build{background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
   .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px;}
@@ -368,6 +392,69 @@
       </div>
     </div>
 
+    <!-- 4 CREW & FIELD OPS -->
+    <div class="feat rev reveal">
+      <div class="feat-copy">
+        <div class="kicker">Operations &middot; Field execution</div>
+        <h3>Crew &amp; Field Operations: the work, tracked as it happens</h3>
+        <span class="lab">The problem</span>
+        <p>A mechanical contractor ran jobs on group texts and paper. The office could not see where crews were, what got done, or which jobs were making money until the paperwork trickled in days later, if it came back at all.</p>
+        <span class="lab">What we built</span>
+        <p><b>One operations system the office and the field share.</b> A live dispatch board, mobile work orders with photos, parts, and time captured at the job, crew location and status, truck stock, and job cost that updates as the work happens instead of a week later.</p>
+        <div class="chips">
+          <span class="chip">Crews live on the board</span>
+          <span class="chip"><span>Real-time</span> job cost</span>
+          <span class="chip">Paper gone</span>
+        </div>
+        <a href="/system-dispatch" class="seebuild">See the build &rarr;</a>
+      </div>
+      <div class="mock reveal">
+        <div class="wt-bar"><span class="wt-logo">FIELD <b>OPS</b></span><span class="live"><i></i>live</span></div>
+        <div class="cr-row"><span class="cr-av">C1</span><div class="cr-b"><div class="cr-n">Crew 1 &middot; Rooftop install</div><div class="cr-s">Spring, TX &middot; day 2</div></div><span class="cr-pct">80%</span></div>
+        <div class="cr-row"><span class="cr-av">C2</span><div class="cr-b"><div class="cr-n">Crew 2 &middot; Service calls</div><div class="cr-s">Houston, TX &middot; 4 of 6</div></div><span class="cr-pct">66%</span></div>
+        <div class="cr-row"><span class="cr-av">C3</span><div class="cr-b"><div class="cr-n">Crew 3 &middot; Changeout</div><div class="cr-s">Conroe, TX &middot; en route</div></div><span class="cr-pct">20%</span></div>
+        <div class="cr-cost">
+          <div class="k">Job 240518 &middot; live cost vs estimate</div>
+          <div class="cr-cost-row"><span>Est $12,400</span><span class="good">Actual $9,180</span><span>Margin 26%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 COMMAND CENTER -->
+    <div class="feat reveal">
+      <div class="feat-copy">
+        <div class="kicker">Office + owner &middot; Centralized intelligence</div>
+        <h3>The Command Center: one brain over the whole company</h3>
+        <span class="lab">The problem</span>
+        <p>The owner could not step away and the office worked half-blind. The real state of the business, jobs, cash, crews, leads, and aging, lived across a dozen tools and three people's heads. No single place showed the truth.</p>
+        <span class="lab">What we built</span>
+        <p><b>A centralized intelligence layer that pulls every system and agent into one command view.</b> Live revenue, cash, capacity, and AR, a morning brief of the day's risks and wins, and drill-down into anything. The office runs the day from it, and the owner sees the whole company from their phone.</p>
+        <div class="chips">
+          <span class="chip">Whole company, one screen</span>
+          <span class="chip">One source of truth</span>
+          <span class="chip">Owner stepped away for a week</span>
+        </div>
+        <a href="/system-ops-twin" class="seebuild">See the build &rarr;</a>
+      </div>
+      <div class="mock reveal">
+        <div class="wt-bar"><span class="wt-logo">TMI <b>COMMAND</b></span><span class="live"><i></i>all systems</span></div>
+        <div class="hp-brief">
+          <span class="hp-spark">&#10043;</span>
+          <div>
+            <div class="hp-brief-t">Today: <b>$47.8k</b> signed, 6 quotes need a nudge</div>
+            <div class="hp-brief-s">2 crews behind schedule &middot; $14k of A/R over 60 days</div>
+          </div>
+        </div>
+        <div class="ib-stats" style="margin-bottom:12px;">
+          <div class="ib-stat"><div class="k">Revenue MTD</div><div class="v good">$413k</div></div>
+          <div class="ib-stat"><div class="k">Cash</div><div class="v">$96k</div></div>
+          <div class="ib-stat"><div class="k">Capacity</div><div class="v">87%</div></div>
+          <div class="ib-stat"><div class="k">A/R open</div><div class="v">$85k</div></div>
+        </div>
+        <div class="cc-sources"><span>Pulling live from</span><b>Sales</b><b>Field</b><b>Billing</b><b>Crew</b><b>Inventory</b></div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -503,6 +590,67 @@
   </div>
 </section>
 </div>
+
+<!-- PROBLEMS WE SOLVE -->
+<section>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="dot"></span>Problems we solve</div>
+      <h2>Real problems we have taken off owners' plates.</h2>
+      <p>The same leaks show up in every operation. Here is a sample of what we have found and fixed.</p>
+    </div>
+    <div class="ps-grid">
+      <div class="ps reveal">
+        <div class="pl">The problem</div>
+        <div class="prob">A third of calls went to voicemail at peak hours.</div>
+        <p class="fix">We put an <b>AI front desk</b> on the phones, web, and texts that answers, qualifies, and books in seconds, day or night.</p>
+        <div class="res">Zero missed calls &middot; +18% booked jobs</div>
+      </div>
+      <div class="ps reveal">
+        <div class="pl">The problem</div>
+        <div class="prob">Quotes took three days. The fast competitor won.</div>
+        <p class="fix">We built <b>instant estimates</b> off the price book that price the job while the customer is still on the phone.</p>
+        <div class="res">3 days to 3 minutes</div>
+      </div>
+      <div class="ps reveal">
+        <div class="pl">The problem</div>
+        <div class="prob">5 to 15% of work never made it onto an invoice.</div>
+        <p class="fix">We built <b>leakage detection</b> that compares work done to work billed and flags the gap before the invoice goes out.</p>
+        <div class="res">Six figures recovered, year one</div>
+      </div>
+      <div class="ps reveal">
+        <div class="pl">The problem</div>
+        <div class="prob">Nothing in the company moved without the owner.</div>
+        <p class="fix">We installed a <b>command layer and agents</b> so the office and the crews run the day without him in the loop.</p>
+        <div class="res">First week off in years</div>
+      </div>
+      <div class="ps reveal">
+        <div class="pl">The problem</div>
+        <div class="prob">An expired cert cost them a job and a fine.</div>
+        <p class="fix">We built a <b>compliance tracker</b> that watches every license and renews it before it lapses.</p>
+        <div class="res">Zero expired credentials</div>
+      </div>
+      <div class="ps reveal">
+        <div class="pl">The problem</div>
+        <div class="prob">Insurance money sat in 90-day aging.</div>
+        <p class="fix">We built <b>claim tracking, billing, and AR aging</b> onto every job so nothing slips through the cracks.</p>
+        <div class="res">Collection rate to 92%</div>
+      </div>
+      <div class="ps reveal">
+        <div class="pl">The problem</div>
+        <div class="prob">Nobody knew which jobs lost money until tax time.</div>
+        <p class="fix">We built <b>live job costing</b>, estimate versus actual by crew and job type, updated as the work happens.</p>
+        <div class="res">Killed the money-losers, margin up</div>
+      </div>
+      <div class="ps reveal">
+        <div class="pl">The problem</div>
+        <div class="prob">Callbacks kept coming and no one knew why.</div>
+        <p class="fix">We put <b>mobile work orders</b> with photos, readings, and accountability by tech on every job.</p>
+        <div class="res">Callbacks down, disputes settled in minutes</div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- HOW WE BUILD -->
 <div class="build">
