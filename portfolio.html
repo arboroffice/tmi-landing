@@ -201,6 +201,16 @@
   .ps .fix b{color:var(--ink);font-weight:600;}
   .ps .res{display:inline-block;margin-top:15px;font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(--chart);background:rgba(228,255,151,0.08);border:1px solid rgba(228,255,151,0.28);border-radius:999px;padding:6px 14px;}
   @media(max-width:760px){.ps-grid{grid-template-columns:1fr;}}
+  /* from the field scenarios */
+  .scn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;}
+  .scn{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:24px;display:flex;flex-direction:column;transition:border-color .2s,transform .2s;}
+  .scn:hover{border-color:var(--line-2);transform:translateY(-2px);}
+  .scn-tag{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--chart);margin-bottom:12px;}
+  .scn h3{font-family:var(--serif);font-size:21px;letter-spacing:-0.02em;line-height:1.18;color:var(--ink);margin-bottom:11px;}
+  .scn p{font-family:var(--sans);font-size:13.5px;color:var(--ink-2);line-height:1.55;margin:0;}
+  .scn .r{margin-top:auto;padding-top:16px;font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(--chart);}
+  @media(min-width:861px) and (max-width:1100px){.scn-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:860px){.scn-grid{grid-template-columns:1fr;}}
   /* how we build */
   .build{background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
   .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px;}
@@ -642,45 +652,79 @@
   </div>
 </section>
 
-<!-- PROBLEMS WE SOLVE -->
+<!-- FROM THE FIELD -->
 <section>
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="eyebrow"><span class="dot"></span>More we solve</div>
-      <h2>And the rest of the leaks we close.</h2>
-      <p>The same problems show up in every operation. Here are a few more we find and fix.</p>
+      <div class="eyebrow"><span class="dot"></span>From the field</div>
+      <h2>Real situations industrial operators are living with right now.</h2>
+      <p>Pulled from real operations. If one of these is your Tuesday, that is exactly the kind of thing we build away.</p>
     </div>
-    <div class="ps-grid">
-      <div class="ps reveal">
-        <div class="pl">The problem</div>
-        <div class="prob">A third of calls went to voicemail at peak hours.</div>
-        <p class="fix">We put an <b>AI front desk</b> on the phones, web, and texts that answers, qualifies, and books in seconds, day or night.</p>
-        <div class="res">Zero missed calls &middot; +18% booked jobs</div>
+    <div class="scn-grid">
+
+      <div class="scn reveal">
+        <div class="scn-tag">Oil &amp; gas</div>
+        <h3>The field ticket nobody signed.</h3>
+        <p>A crew finished at 2am and the paper ticket rode around in a truck for a week, never coded, the work sitting unbilled while AR aged past 60 days. We made tickets digital, signed on site, coded to the AFE, and pushed to billing the same shift.</p>
+        <div class="r">Billed in days, not weeks</div>
       </div>
-      <div class="ps reveal">
-        <div class="pl">The problem</div>
-        <div class="prob">5 to 15% of work never made it onto an invoice.</div>
-        <p class="fix">We built <b>leakage detection</b> that compares work done to work billed and flags the gap before the invoice goes out.</p>
-        <div class="res">Six figures recovered, year one</div>
+
+      <div class="scn reveal">
+        <div class="scn-tag">Manufacturing</div>
+        <h3>The hot job that bumped everything.</h3>
+        <p>A rush order jumped the queue on the whiteboard. Three jobs slipped, two shipped late, and nobody saw the cost until the customers called. We put work orders on live scheduling tied to real machine capacity, so the impact of every bump shows before you make it.</p>
+        <div class="r">On-time shipments up, no surprise slips</div>
       </div>
-      <div class="ps reveal">
-        <div class="pl">The problem</div>
-        <div class="prob">An expired cert cost them a job and a fine.</div>
-        <p class="fix">We built a <b>compliance tracker</b> that watches every license and renews it before it lapses.</p>
-        <div class="res">Zero expired credentials</div>
+
+      <div class="scn reveal">
+        <div class="scn-tag">Fabrication</div>
+        <h3>The cert that expired mid-project.</h3>
+        <p>A welder's AWS cert lapsed three weeks into a structural job, and every weld he laid was suddenly in question while the GC wanted documentation nobody had. We built a cert and WPS tracker that flags expirations before they hit a job and keeps the weld map per project.</p>
+        <div class="r">Zero rework, traceability on demand</div>
       </div>
-      <div class="ps reveal">
-        <div class="pl">The problem</div>
-        <div class="prob">Insurance money sat in 90-day aging.</div>
-        <p class="fix">We built <b>claim tracking, billing, and AR aging</b> onto every job so nothing slips through the cracks.</p>
-        <div class="res">Collection rate to 92%</div>
+
+      <div class="scn reveal">
+        <div class="scn-tag">Heavy equipment</div>
+        <h3>The machine that sat and still cost money.</h3>
+        <p>A $400k excavator sat idle at one yard for six weeks while a crew rented the same machine across town, because nobody could see what was earning and what was parked. We put utilization across every yard on one board: status, location, and earnings per asset.</p>
+        <div class="r">Idle iron back to work, rentals cut</div>
       </div>
-      <div class="ps reveal">
-        <div class="pl">The problem</div>
-        <div class="prob">Callbacks kept coming and no one knew why.</div>
-        <p class="fix">We put <b>mobile work orders</b> with photos, readings, and accountability by tech on every job.</p>
-        <div class="res">Callbacks down, disputes settled in minutes</div>
+
+      <div class="scn reveal">
+        <div class="scn-tag">Mining &amp; aggregates</div>
+        <h3>Production reported a day late.</h3>
+        <p>Tonnage and downtime got written on a clipboard and keyed in the next morning, so the owner always ran yesterday's numbers a day too late to act. We capture shift logs at the face, with production, downtime, and fuel rolling up live.</p>
+        <div class="r">Real numbers by the hour</div>
       </div>
+
+      <div class="scn reveal">
+        <div class="scn-tag">Industrial contractor</div>
+        <h3>The change order done on a handshake.</h3>
+        <p>The super told the crew to add scope on a verbal okay. The work got done, never documented, and at closeout the GC refused to pay for what was not on paper. We capture field change orders with photos and a signature before the work starts, tied to the job.</p>
+        <div class="r">Every extra documented and billed</div>
+      </div>
+
+      <div class="scn reveal">
+        <div class="scn-tag">Fleet &amp; logistics</div>
+        <h3>The DOT audit nobody was ready for.</h3>
+        <p>DVIRs lived in glove boxes and driver hours in a binder, so when the audit notice came the office spent two weeks reconstructing records. We log ELD hours, DVIRs, and maintenance digitally and keep them audit-ready at all times.</p>
+        <div class="r">Audit-ready in a click, not two weeks</div>
+      </div>
+
+      <div class="scn reveal">
+        <div class="scn-tag">Industrial services</div>
+        <h3>The turnaround run on spreadsheets.</h3>
+        <p>A plant shutdown with 300 tasks and a dozen subs was coordinated across a stack of spreadsheets and a group text. Tasks fell through and the plant came back online late. We put the whole turnaround on one board, every task, crew, and sub live, with daily progress to the client.</p>
+        <div class="r">Back online on schedule</div>
+      </div>
+
+      <div class="scn reveal">
+        <div class="scn-tag">Multi-site</div>
+        <h3>Three yards, three ways of doing everything.</h3>
+        <p>An owner with three locations had three processes, three sets of spreadsheets, and no way to compare them, so the good site could not teach the struggling one. We put every site on one system with the owner's roll-up across all of them.</p>
+        <div class="r">One playbook, every site, one screen</div>
+      </div>
+
     </div>
   </div>
 </section>
