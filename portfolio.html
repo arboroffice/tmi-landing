@@ -180,6 +180,17 @@
   .agent .meta{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);margin-top:auto;padding-top:10px;}
   @media(min-width:861px) and (max-width:1060px){.agents{grid-template-columns:1fr 1fr;}}
   @media(max-width:860px){.agents{grid-template-columns:1fr;}}
+  /* biggest leaks cases */
+  .cases{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:10px;}
+  .case{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:30px;display:flex;flex-direction:column;transition:border-color .2s;}
+  .case:hover{border-color:var(--line-2);}
+  .case .cn{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--chart);margin-bottom:14px;}
+  .case h3{font-family:var(--serif);font-size:24px;letter-spacing:-0.02em;line-height:1.15;color:var(--ink);margin-bottom:6px;}
+  .case .lab{font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);display:block;margin:14px 0 6px;}
+  .case p{font-family:var(--sans);font-size:14px;color:var(--ink-2);line-height:1.6;margin:0;}
+  .case p b{color:var(--ink);font-weight:600;}
+  .case .res{margin-top:auto;font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(--chart);background:rgba(228,255,151,0.08);border:1px solid rgba(228,255,151,0.28);border-radius:999px;padding:7px 15px;align-self:flex-start;margin-top:20px;}
+  @media(max-width:760px){.cases{grid-template-columns:1fr;}}
   /* problems we solve */
   .ps-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:10px;}
   .ps{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:24px 26px;transition:border-color .2s;}
@@ -591,13 +602,67 @@
 </section>
 </div>
 
+<!-- BIGGEST LEAKS -->
+<section>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="dot"></span>The leaks owners feel first</div>
+      <h2>Four problems that quietly cost owners the most.</h2>
+      <p>These come up in the first ten minutes of almost every audit, and they are the ones a system pays for itself by fixing.</p>
+    </div>
+    <div class="cases">
+
+      <div class="case reveal">
+        <div class="cn">Instant estimates</div>
+        <h3>The quote that took three days lost the job.</h3>
+        <span class="lab">The story</span>
+        <p>A home-service owner watched good leads go cold while quotes sat in someone's truck. The fast competitor down the road got there first, every time.</p>
+        <span class="lab">What we built</span>
+        <p>We built <b>instant estimates off your price book.</b> The customer gets a real, itemized price with financing attached while they are still on the phone or standing at the door.</p>
+        <div class="res">Quotes in minutes, not days</div>
+      </div>
+
+      <div class="case reveal">
+        <div class="cn">The owner bottleneck</div>
+        <h3>The business could not run without the owner in the room.</h3>
+        <span class="lab">The story</span>
+        <p>Every dispatch call, every price, every approval ran through one person. He had not taken a real week off in years, and the day fell apart whenever he tried.</p>
+        <span class="lab">What we built</span>
+        <p>We built a <b>command layer and a crew of agents</b> that run the day, dispatch, quoting, follow-up, and billing, with the owner approving only what actually matters.</p>
+        <div class="res">First week off in years, nothing broke</div>
+      </div>
+
+      <div class="case reveal">
+        <div class="cn">Unknown job margin</div>
+        <h3>He found out a job lost money months after it was done.</h3>
+        <span class="lab">The story</span>
+        <p>Estimates were guesses, and actual labor, materials, and rework never got tracked against them. The owner could not tell a profitable job from a money pit until the books closed, if ever.</p>
+        <span class="lab">What we built</span>
+        <p>We built <b>live job costing that tracks everything,</b> every hour, part, and change order, against the estimate, by job, by crew, and by service type, updated as the work happens.</p>
+        <div class="res">Margin on every job, in real time</div>
+      </div>
+
+      <div class="case reveal">
+        <div class="cn">Parts &amp; reordering</div>
+        <h3>Techs kept showing up to jobs missing the part.</h3>
+        <span class="lab">The story</span>
+        <p>Nobody knew what was on the trucks or the shelves. Crews drove back for parts, jobs stalled, and stock either ran out mid-job or piled up as dead cash in the warehouse.</p>
+        <span class="lab">What we built</span>
+        <p>We built <b>parts and inventory tracking that reorders itself.</b> It knows what is on every truck and shelf, ties each part to the job, and reorders automatically when stock drops below par.</p>
+        <div class="res">No empty-handed trips, no dead stock</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <!-- PROBLEMS WE SOLVE -->
 <section>
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="eyebrow"><span class="dot"></span>Problems we solve</div>
-      <h2>Real problems we have taken off owners' plates.</h2>
-      <p>The same leaks show up in every operation. Here is a sample of what we have found and fixed.</p>
+      <div class="eyebrow"><span class="dot"></span>More we solve</div>
+      <h2>And the rest of the leaks we close.</h2>
+      <p>The same problems show up in every operation. Here are a few more we find and fix.</p>
     </div>
     <div class="ps-grid">
       <div class="ps reveal">
@@ -608,21 +673,9 @@
       </div>
       <div class="ps reveal">
         <div class="pl">The problem</div>
-        <div class="prob">Quotes took three days. The fast competitor won.</div>
-        <p class="fix">We built <b>instant estimates</b> off the price book that price the job while the customer is still on the phone.</p>
-        <div class="res">3 days to 3 minutes</div>
-      </div>
-      <div class="ps reveal">
-        <div class="pl">The problem</div>
         <div class="prob">5 to 15% of work never made it onto an invoice.</div>
         <p class="fix">We built <b>leakage detection</b> that compares work done to work billed and flags the gap before the invoice goes out.</p>
         <div class="res">Six figures recovered, year one</div>
-      </div>
-      <div class="ps reveal">
-        <div class="pl">The problem</div>
-        <div class="prob">Nothing in the company moved without the owner.</div>
-        <p class="fix">We installed a <b>command layer and agents</b> so the office and the crews run the day without him in the loop.</p>
-        <div class="res">First week off in years</div>
       </div>
       <div class="ps reveal">
         <div class="pl">The problem</div>
@@ -635,12 +688,6 @@
         <div class="prob">Insurance money sat in 90-day aging.</div>
         <p class="fix">We built <b>claim tracking, billing, and AR aging</b> onto every job so nothing slips through the cracks.</p>
         <div class="res">Collection rate to 92%</div>
-      </div>
-      <div class="ps reveal">
-        <div class="pl">The problem</div>
-        <div class="prob">Nobody knew which jobs lost money until tax time.</div>
-        <p class="fix">We built <b>live job costing</b>, estimate versus actual by crew and job type, updated as the work happens.</p>
-        <div class="res">Killed the money-losers, margin up</div>
       </div>
       <div class="ps reveal">
         <div class="pl">The problem</div>
