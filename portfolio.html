@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="apple-touch-icon" href="favicon.svg"/>
-<meta name="description" content="The systems TMI builds for industrial and home-service operators: WellTrack equipment tracking, HomePro instant estimates and a complete backend OS, and more. See the work, then get your free audit."/>
+<meta name="description" content="The systems and digital employees TMI builds for industrial and home-service operators. Ops systems like WellTrack and HomePro, run by AI agents: a dispatcher, estimator, collector, recruiter, and more. See the work, then get your free audit."/>
 <meta property="og:title" content="The Work | TMI"/>
-<meta property="og:description" content="We don't sell software. We build the system your company runs on. See the builds, then get your free audit."/>
+<meta property="og:description" content="We don't sell software. We build the system your company runs on, and the digital employees that run it. See the builds, then get your free audit."/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://www.tmitechai.com/portfolio"/>
 <meta property="og:image" content="https://www.tmitechai.com/hero-bg.png"/>
@@ -47,7 +47,7 @@
   section{padding:92px 0;position:relative;}
   .eyebrow{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.24em;text-transform:uppercase;color:var(--chart);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
   .eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--chart);}
-  .hero{padding:78px 0 64px;}
+  .hero{padding:78px 0 60px;}
   h1{font-size:clamp(36px,6vw,72px);line-height:1.0;letter-spacing:-0.03em;max-width:17ch;}
   h1 em{font-style:italic;color:var(--ink-3);}
   .hero-sub{font-family:var(--sans);font-size:clamp(16px,1.4vw,19px);color:var(--ink-2);max-width:58ch;line-height:1.62;margin-top:24px;}
@@ -64,6 +64,15 @@
   .proof-item .n{font-family:var(--serif);font-size:clamp(24px,3vw,36px);color:var(--chart);line-height:1;}
   .proof-item .l{font-size:12px;color:var(--ink-2);margin-top:10px;line-height:1.4;}
   @media(max-width:860px){.proof .wrap{grid-template-columns:1fr 1fr;}.proof-item:not(:last-child)::after{display:none;}.proof-item{border-bottom:1px solid var(--line);}}
+  /* tabs */
+  .tabsec{padding:64px 0 0;text-align:center;}
+  .tabs{display:inline-flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px;}
+  .tab{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink-2);padding:11px 24px;border-radius:999px;cursor:pointer;border:none;background:transparent;transition:color .15s,background .15s;}
+  .tab.active{background:var(--chart);color:#0a0b14;}
+  .tab:hover:not(.active){color:var(--ink);}
+  .tab-sub{font-family:var(--sans);font-size:15px;color:var(--ink-2);max-width:62ch;margin:22px auto 0;line-height:1.6;}
+  .panel{display:none;}
+  .panel.active{display:block;}
   /* section head */
   .sec-head{margin-bottom:18px;}
   .sec-head h2{font-size:clamp(28px,3.4vw,44px);letter-spacing:-0.025em;max-width:20ch;}
@@ -83,8 +92,6 @@
   .seebuild:hover{gap:13px;color:var(--chart);border-color:var(--chart);}
   /* mockups */
   .mock{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line-2);border-radius:18px;padding:20px;box-shadow:0 40px 90px rgba(0,0,0,0.55);}
-  .mock-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-  .mt-title{font-family:var(--sans);font-size:13px;font-weight:700;color:#fff;letter-spacing:0.02em;}
   .live{font-family:var(--sans);font-size:11px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:7px;}
   .live i{width:7px;height:7px;border-radius:50%;background:var(--chart);box-shadow:0 0 8px var(--chart);animation:pulse 1.8s ease-in-out infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -121,11 +128,44 @@
   .hp-conv .hot{font-size:8.5px;font-weight:800;letter-spacing:0.08em;color:#0a0b14;background:var(--chart);border-radius:4px;padding:2px 6px;}
   .hp-conv .sc{font-size:10.5px;color:var(--ink-3);}
   .hp-conv .ai{font-size:11px;color:var(--ink-2);margin-left:auto;}
+  /* insurance billing mock */
+  .ib-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px;}
+  .ib-stat{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:10px;padding:10px 11px;}
+  .ib-stat .k{font-family:var(--sans);font-size:8.5px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-3);}
+  .ib-stat .v{font-family:var(--serif);font-size:17px;color:var(--ink);margin-top:4px;line-height:1;}
+  .ib-stat .v.good{color:var(--chart);}
+  .ib-claim{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:11px;padding:13px;margin-bottom:12px;}
+  .ib-claim-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px;}
+  .ib-job{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--ink);}
+  .ib-ins{font-family:var(--sans);font-size:10.5px;color:var(--ink-3);}
+  .ib-line{display:flex;justify-content:space-between;font-family:var(--sans);font-size:12.5px;color:var(--ink-2);padding:5px 0;}
+  .ib-line b{color:var(--ink);font-weight:600;}
+  .ib-bar{height:6px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;margin:9px 0 7px;}
+  .ib-bar i{display:block;height:100%;background:var(--chart);border-radius:999px;}
+  .ib-paid{font-family:var(--sans);font-size:10.5px;color:var(--ink-3);}
+  .ib-aging{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .ag{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:9px;padding:9px;text-align:center;}
+  .ag .k{font-family:var(--sans);font-size:9px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-3);}
+  .ag .v{font-family:var(--serif);font-size:15px;color:var(--ink);margin-top:3px;}
+  .ag .v.warn{color:var(--amber);}
+  .ag .v.bad{color:#ff9a8b;}
   /* more systems strip */
   .more-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;}
   .more-chip{display:inline-flex;align-items:center;gap:9px;font-family:var(--sans);font-size:13px;color:var(--ink-2);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:10px 16px;transition:color .15s,border-color .15s;}
   .more-chip:hover{color:var(--ink);border-color:var(--line-2);}
   .more-chip b{color:var(--chart);font-weight:700;}
+  /* agents */
+  .agents{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;}
+  .agent{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:24px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s,transform .2s;}
+  .agent:hover{border-color:var(--line-2);transform:translateY(-2px);}
+  .agent .ico{width:40px;height:40px;border-radius:10px;background:rgba(228,255,151,0.10);border:1px solid rgba(228,255,151,0.28);color:var(--chart);display:flex;align-items:center;justify-content:center;}
+  .agent .ico svg{width:20px;height:20px;}
+  .agent .role{font-family:var(--serif);font-size:21px;letter-spacing:-0.02em;color:var(--ink);margin-top:2px;}
+  .agent .tag{font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--chart);line-height:1.4;}
+  .agent p{font-family:var(--sans);font-size:13.5px;color:var(--ink-2);line-height:1.55;margin:0;}
+  .agent .meta{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);margin-top:auto;padding-top:10px;}
+  @media(min-width:861px) and (max-width:1060px){.agents{grid-template-columns:1fr 1fr;}}
+  @media(max-width:860px){.agents{grid-template-columns:1fr;}}
   /* how we build */
   .build{background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
   .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px;}
@@ -174,10 +214,10 @@
   <div class="wrap">
     <div class="eyebrow reveal"><span class="dot"></span>The Work</div>
     <h1 class="reveal">We don't sell software. We build the system <em>your company runs on.</em></h1>
-    <p class="hero-sub reveal">Custom operating systems for industrial and home-service operators. We take a business running on whiteboards, spreadsheets, binders, and phone calls and replace it with one system the whole company runs from, owner, office, field, and everyone in between. Here is what that looks like in practice.</p>
+    <p class="hero-sub reveal">Two things make up a TMI build: the ops systems we install and hand over, and the digital employees, AI agents, that run them. We take a business on whiteboards, spreadsheets, binders, and phone calls and replace it with one operation that runs itself.</p>
     <div class="hero-cta reveal">
       <a href="/complete-audit" class="btn">Get your free audit &rarr;</a>
-      <a href="#builds" class="btn btn-ghost">See the builds &darr;</a>
+      <a href="#what" class="btn btn-ghost">See the work &darr;</a>
     </div>
   </div>
 </section>
@@ -193,11 +233,24 @@
   </div>
 </div>
 
-<!-- BUILDS -->
-<section id="builds" style="padding-bottom:24px;">
+<!-- TABS -->
+<div class="tabsec" id="what">
+  <div class="wrap">
+    <div class="eyebrow reveal" style="justify-content:center;"><span class="dot"></span>What we build</div>
+    <div class="tabs reveal" role="tablist">
+      <button class="tab active" data-tab="systems">Ops systems</button>
+      <button class="tab" data-tab="agents">Digital employees</button>
+    </div>
+    <p class="tab-sub reveal">Stack the right digital employees together and you get a system. We install that system and hand it to you. That is your operating infrastructure, owned outright, no monthly license.</p>
+  </div>
+</div>
+
+<!-- PANEL: SYSTEMS -->
+<div class="panel active" id="panel-systems">
+<section style="padding-top:40px;padding-bottom:24px;">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="eyebrow"><span class="dot"></span>Featured builds</div>
+      <div class="eyebrow"><span class="dot"></span>Ops systems &middot; installable infrastructure</div>
       <h2>Real systems. Shipped and running.</h2>
       <p>Client names stay private, the work does not. Each of these replaced a pile of spreadsheets, whiteboards, binders, and phone calls with a single system the whole company runs on.</p>
     </div>
@@ -274,10 +327,50 @@
       </div>
     </div>
 
+    <!-- 3 INSURANCE BILLING -->
+    <div class="feat reveal">
+      <div class="feat-copy">
+        <div class="kicker">Home service &middot; Insurance billing</div>
+        <h3>The insurance-billing back office, automated</h3>
+        <span class="lab">The problem</span>
+        <p>A tree and storm-damage service did most of its work through insurance. Claims, adjusters, supplements, and invoices lived in email and spreadsheets. Money sat in 60 and 90 day aging, and nobody could say which carrier owed what.</p>
+        <span class="lab">What we built</span>
+        <p><b>A command center where every job carries its claim, adjuster, and billing.</b> The system bills the carrier, tracks payments and balance due on each claim, ages the receivables, and flags the invoices awaiting payment, so the collection rate climbs and cash stops aging out.</p>
+        <div class="chips">
+          <span class="chip"><span>92%</span> collection rate</span>
+          <span class="chip"><span>$182k</span> billed / month</span>
+          <span class="chip">A/R aged to 90+ days</span>
+        </div>
+        <a href="/system-invoicing" class="seebuild">See the build &rarr;</a>
+      </div>
+      <div class="mock reveal">
+        <div class="wt-bar"><span class="wt-logo">TMI <b>COMMAND</b></span><span class="live"><i></i>insurance billing</span></div>
+        <div class="ib-stats">
+          <div class="ib-stat"><div class="k">Billed</div><div class="v good">$182.6k</div></div>
+          <div class="ib-stat"><div class="k">Received</div><div class="v">$97.4k</div></div>
+          <div class="ib-stat"><div class="k">Outstanding</div><div class="v">$85.2k</div></div>
+          <div class="ib-stat"><div class="k">Collection</div><div class="v good">92%</div></div>
+        </div>
+        <div class="ib-claim">
+          <div class="ib-claim-top"><span class="ib-job">Fallen Oak Removal</span><span class="ib-ins">State Farm &middot; #56-7890-12</span></div>
+          <div class="ib-line"><span>Billed to insurance</span><b>$14,750</b></div>
+          <div class="ib-line"><span>Payments received</span><b style="color:var(--chart)">$9,250</b></div>
+          <div class="ib-line"><span>Balance due</span><b>$5,500</b></div>
+          <div class="ib-bar"><i style="width:62%"></i></div>
+          <div class="ib-paid">62% paid &middot; Invoice #INV-240518</div>
+        </div>
+        <div class="ib-aging">
+          <div class="ag"><div class="k">0-30</div><div class="v">$38k</div></div>
+          <div class="ag"><div class="k">31-60</div><div class="v">$27k</div></div>
+          <div class="ag"><div class="k">61-90</div><div class="v warn">$14k</div></div>
+          <div class="ag"><div class="k">90+</div><div class="v bad">$6k</div></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
-<!-- MORE SYSTEMS -->
 <section style="padding-top:24px;">
   <div class="wrap">
     <div class="sec-head reveal">
@@ -297,6 +390,119 @@
     </div>
   </div>
 </section>
+</div>
+
+<!-- PANEL: AGENTS -->
+<div class="panel" id="panel-agents">
+<section style="padding-top:40px;">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="eyebrow"><span class="dot"></span>Digital employees &middot; the agents</div>
+      <h2>Hire the workers your systems are built from.</h2>
+      <p>Every system we build is run by digital employees, AI agents that each own a job and never clock out. You hire them once. They work around the clock, do not quit, call in, or forget, and they make up the systems above. Here are the ones operators ask for most.</p>
+    </div>
+    <div class="agents">
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13a8 8 0 0 1 16 0"/><rect x="2.5" y="13" width="4" height="6" rx="1.5"/><rect x="17.5" y="13" width="4" height="6" rx="1.5"/><path d="M20 19a3 3 0 0 1-3 3h-2.5"/></svg></div>
+        <div class="role">The Dispatcher</div>
+        <div class="tag">Answers every call and sends the right tech.</div>
+        <p>Routes each job by license, location, and travel time, and handles after-hours emergencies on its own. No more lost calls in the middle of a heat wave.</p>
+        <div class="meta">24/7 &middot; never misses a call</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2.5M8 15h2.5M14.5 11v6"/></svg></div>
+        <div class="role">The Estimator</div>
+        <div class="tag">Prices the job on the spot.</div>
+        <p>Builds the quote from your price book while the customer is still on the phone, so the slow quote stops losing you the work.</p>
+        <div class="meta">Instant &middot; on every lead</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.5" fill="currentColor"/></svg></div>
+        <div class="role">The Closer</div>
+        <div class="tag">Chases every quote until it is won or dead.</div>
+        <p>Follows up, answers objections, drops in financing options, and wins back the cold bids your office forgot about.</p>
+        <div class="meta">Never forgets a follow-up</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.2c-.6-.8-1.6-1.2-2.6-1.2-1.5 0-2.6.8-2.6 1.9 0 2.6 5.4 1.3 5.4 4 0 1.2-1.1 2-2.6 2-1 0-2-.4-2.7-1.2M12 6v1.7M12 16.3V18"/></svg></div>
+        <div class="role">The Collector</div>
+        <div class="tag">Invoices at job close and gets you paid.</div>
+        <p>Generates the invoice from the job record, sends a payment link before the tech leaves the driveway, and chases anything unpaid until the cash lands.</p>
+        <div class="meta">Same-day cash</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8 8 0 0 1-11.5 7.2L4 20.5l1.8-5.3A8 8 0 1 1 21 11.5Z"/></svg></div>
+        <div class="role">The Front Desk</div>
+        <div class="tag">Answers leads in 4 seconds, day or night.</div>
+        <p>Texts, web forms, and missed calls answered, qualified, and scored before a competitor even picks up the phone.</p>
+        <div class="meta">4-second response</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></div>
+        <div class="role">The Parts Runner</div>
+        <div class="tag">Knows every truck and reorders before you run out.</div>
+        <p>Tracks van and yard stock, ties every part to the job, and never lets a tech show up to a job missing the part.</p>
+        <div class="meta">No more empty-handed trips</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <div class="role">The Compliance Clerk</div>
+        <div class="tag">Renews every license and cert before it lapses.</div>
+        <p>Watches EPA, NATE, OSHA, backflow, and state licenses so an expired credential never turns into a fine or a shut-down job.</p>
+        <div class="meta">Zero expired credentials</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.6"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M19 8v6M16 11h6"/></svg></div>
+        <div class="role">The Recruiter</div>
+        <div class="tag">Sources and screens techs while you sleep.</div>
+        <p>Posts the role, screens applicants against your bar, and books the interviews, so the labor shortage stops running your calendar.</p>
+        <div class="meta">Always hiring</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><rect x="5" y="11" width="3" height="7"/><rect x="10.5" y="6" width="3" height="12"/><rect x="16" y="13" width="3" height="5"/></svg></div>
+        <div class="role">The Job-Cost Analyst</div>
+        <div class="tag">Tells you which jobs actually made money.</div>
+        <p>Captures actuals at close, compares them to the estimate, and flags the work and the crews quietly losing you margin.</p>
+        <div class="meta">Margin, by job and crew</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.4 2.4-2.6-.7-.7-2.6Z"/></svg></div>
+        <div class="role">The Maintenance Planner</div>
+        <div class="tag">Calls the failure before it becomes an emergency.</div>
+        <p>Watches equipment runtime and readings, flags the units about to fail, and books the proactive visit instead of the 2am callout.</p>
+        <div class="meta">Fewer breakdowns</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg></div>
+        <div class="role">The Account Manager</div>
+        <div class="tag">Renews agreements and brings customers back.</div>
+        <p>Fires service-agreement renewals 60 to 90 days out, asks for the review, and works referrals after every completed job.</p>
+        <div class="meta">Recurring revenue on autopilot</div>
+      </div>
+
+      <div class="agent reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+        <div class="role">The Chief of Staff</div>
+        <div class="tag">Watches the whole operation and briefs you every morning.</div>
+        <p>Pulls every agent and system into one board, then texts you the day's risks and wins before you have your coffee.</p>
+        <div class="meta">Your business on one screen</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+</div>
 
 <!-- HOW WE BUILD -->
 <div class="build">
@@ -310,7 +516,7 @@
       <div class="steps">
         <div class="stepc reveal"><div class="sn">01</div><h4>Delete</h4><p>We audit your stack and cut everything nobody uses. Fewer tools and smaller bills on day one.</p></div>
         <div class="stepc reveal"><div class="sn">02</div><h4>Connect</h4><p>We wire what is left into one system so everything talks and nothing lives in someone's head.</p></div>
-        <div class="stepc reveal"><div class="sn">03</div><h4>Build</h4><p>We build the backend you own and run from your phone. By day 30 the company runs on systems.</p></div>
+        <div class="stepc reveal"><div class="sn">03</div><h4>Build</h4><p>We build the backend and the agents you own and run from your phone. By day 30 the company runs on systems.</p></div>
       </div>
     </div>
   </section>
@@ -322,7 +528,7 @@
     <div class="reveal">
       <div class="eyebrow" style="justify-content:center;"><span class="dot"></span>Start here</div>
       <h2>We will show you exactly what to build for your operation.</h2>
-      <p>The free audit maps how your business runs, scores it, and shows where the money leaks, plus the first system worth building. Then you book a call to go over it.</p>
+      <p>The free audit maps how your business runs, scores it, and shows where the money leaks, plus the first system and the agents worth building. Then you book a call to go over it.</p>
       <a href="/complete-audit" class="btn">Get your free audit &rarr;</a>
       <div class="cta-note">Free. No card. You keep the audit whether or not you build with us.</div>
     </div>
@@ -343,6 +549,18 @@ const obs = new IntersectionObserver((entries)=>{
   entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
 },{threshold:0.08});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+function activate(tab){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===tab));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  var p = document.getElementById('panel-'+tab);
+  if(p){ p.classList.add('active'); p.querySelectorAll('.reveal').forEach(el=>el.classList.add('in')); }
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  activate(t.dataset.tab);
+  history.replaceState(null,'', t.dataset.tab==='agents' ? '#agents' : '#what');
+}));
+if(location.hash==='#agents'){ activate('agents'); }
 </script>
 </body>
 </html>
