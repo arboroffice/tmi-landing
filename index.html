@@ -326,6 +326,30 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   .fmodal-card .alt{display:block;text-align:center;margin-top:16px;font-family:var(--sans);font-size:13px;color:var(--ink-3);}
   .fmodal-card .alt a{color:var(--chart);}
   .fmodal-ok{display:none;}
+  /* side nav */
+  .menu-btn{flex:none;width:40px;height:40px;border:1px solid var(--line-2);border-radius:9px;background:rgba(255,255,255,0.03);display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;margin-left:14px;padding:0;}
+  .menu-btn span{display:block;width:17px;height:1.6px;background:#fff;border-radius:2px;transition:transform .25s,opacity .25s;}
+  .menu-btn.open span:nth-child(1){transform:translateY(5.6px) rotate(45deg);}
+  .menu-btn.open span:nth-child(2){opacity:0;}
+  .menu-btn.open span:nth-child(3){transform:translateY(-5.6px) rotate(-45deg);}
+  .side-overlay{position:fixed;inset:0;z-index:200;background:rgba(4,5,12,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s;}
+  .side-overlay.open{opacity:1;pointer-events:auto;}
+  .side-nav{position:fixed;top:0;left:0;bottom:0;z-index:201;width:300px;max-width:84vw;background:#0a0b14;border-right:1px solid var(--line);transform:translateX(-100%);transition:transform .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;padding:22px 0 28px;overflow-y:auto;}
+  .side-nav.open{transform:none;box-shadow:24px 0 60px rgba(0,0,0,0.55);}
+  .side-nav-top{display:flex;align-items:center;justify-content:space-between;padding:0 22px 18px;border-bottom:1px solid var(--line);margin-bottom:4px;}
+  .side-nav-top .sb{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:15px;font-weight:700;color:#fff;}
+  .side-nav-top .sb img{height:20px;filter:brightness(0) invert(1);}
+  .side-nav-x{background:none;border:none;color:var(--ink-3);font-size:26px;line-height:1;cursor:pointer;padding:0 4px;}
+  .side-nav-x:hover{color:#fff;}
+  .side-sec{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);padding:18px 22px 6px;}
+  .side-nav a.sl{display:block;font-family:var(--sans);font-size:14.5px;color:var(--ink-2);padding:10px 22px;transition:color .15s,background .15s;}
+  .side-nav a.sl:hover{color:#fff;background:rgba(255,255,255,0.04);}
+  .side-cta{padding:18px 22px 0;margin-top:auto;border-top:1px solid var(--line);}
+  .side-cta .btn{width:100%;justify-content:center;}
+  @media(max-width:680px){.hdx{display:none;}}
+  /* work chips */
+  .wchips{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 4px;}
+  .wchips span{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);background:rgba(255,255,255,0.04);border:1px solid var(--line);border-radius:999px;padding:9px 15px;}
 </style>
 </head>
 <body>
@@ -334,12 +358,48 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 
 <header class="hd" id="hd">
   <div class="wrap">
-    <a href="/" class="brand"><img src="logo.svg" alt="TMI"/> TMI</a>
-    <a href="/portfolio" style="margin-left:16px;font-size:13px;font-weight:600;color:rgba(244,245,247,0.62);">Work</a>
-    <a href="/founders-of-the-future" style="margin-right:auto;margin-left:14px;font-size:13px;font-weight:600;color:rgba(244,245,247,0.62);">Founders</a>
+    <a href="/" class="brand" style="margin-right:auto;"><img src="logo.svg" alt="TMI"/> TMI</a>
+    <a href="/portfolio" class="hdx" style="margin-left:16px;font-size:13px;font-weight:600;color:rgba(244,245,247,0.62);">Work</a>
+    <a href="/founders-of-the-future" class="hdx" style="margin-left:14px;font-size:13px;font-weight:600;color:rgba(244,245,247,0.62);">Founders</a>
     <a href="/audit" class="hd-cta" onclick="lead()">Take the Audit &rarr;</a>
+    <button class="menu-btn" id="menu-btn" onclick="toggleNav()" aria-label="Open menu"><span></span><span></span><span></span></button>
   </div>
 </header>
+
+<!-- SIDE NAV -->
+<div class="side-overlay" id="side-overlay" onclick="toggleNav()"></div>
+<aside class="side-nav" id="side-nav" aria-label="Site navigation">
+  <div class="side-nav-top">
+    <span class="sb"><img src="logo.svg" alt="TMI"/> TMI</span>
+    <button class="side-nav-x" onclick="toggleNav()" aria-label="Close menu">&times;</button>
+  </div>
+  <div class="side-sec">Explore</div>
+  <a class="sl" href="/">Home</a>
+  <a class="sl" href="/portfolio">The Work</a>
+  <a class="sl" href="/founders-of-the-future">Founders of the Future</a>
+  <a class="sl" href="/operations">The Whole Operation</a>
+  <div class="side-sec">Industries</div>
+  <a class="sl" href="/physical">All Playbooks</a>
+  <a class="sl" href="/ai-for-hvac-companies">HVAC &amp; Trades</a>
+  <a class="sl" href="/ai-for-construction-companies">Construction</a>
+  <a class="sl" href="/ai-for-manufacturing">Manufacturing</a>
+  <a class="sl" href="/physical/oil-gas">Oil, Gas &amp; Industrial</a>
+  <div class="side-sec">Company</div>
+  <a class="sl" href="/about">About</a>
+  <a class="sl" href="/news">Field Notes</a>
+  <a class="sl" href="/faq">FAQ</a>
+  <div class="side-cta">
+    <a href="/audit" class="btn" onclick="lead()">Take the Audit &rarr;</a>
+  </div>
+</aside>
+<script>
+function toggleNav(){
+  var n=document.getElementById('side-nav'),o=document.getElementById('side-overlay'),b=document.getElementById('menu-btn');
+  var open=n.classList.toggle('open'); o.classList.toggle('open',open); if(b)b.classList.toggle('open',open);
+  document.body.style.overflow=open?'hidden':'';
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=document.getElementById('side-nav'); if(n&&n.classList.contains('open')) toggleNav(); } });
+</script>
 
 <!-- HERO -->
 <section class="hero">
@@ -603,8 +663,19 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   </div>
 </section>
 
-<!-- FOUNDERS OF THE FUTURE -->
+<!-- THE WORK -->
 <section>
+  <div class="wrap">
+    <div class="eyebrow reveal">The Work</div>
+    <h2 class="lead reveal">Real systems. <em>Shipped and running.</em></h2>
+    <p class="sub reveal">WellTrack, HomePro, insurance billing, crew operations, and a live command center, all run by digital employees. See the builds, the agents behind them, and the problems we have taken off owners' plates.</p>
+    <div class="wchips reveal"><span>WellTrack</span><span>HomePro</span><span>Insurance billing</span><span>Crew &amp; field ops</span><span>Command center</span></div>
+    <a href="/portfolio" class="btn reveal" style="margin-top:26px;">Explore the portfolio <span class="arr">&rarr;</span></a>
+  </div>
+</section>
+
+<!-- FOUNDERS OF THE FUTURE -->
+<section style="border-top:1px solid var(--line);">
   <div class="wrap">
     <div class="eyebrow reveal">Founders of the Future</div>
     <h2 class="lead reveal">More than software. <em>A movement.</em></h2>
