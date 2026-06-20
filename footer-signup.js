@@ -1,7 +1,7 @@
 // Global signup, injected site-wide: one form that subscribes to Founders of the
-// Future, with an opt-in for The Brief (daily) and a required terms agreement.
-// Feeds /api/subscribe with a `sources` array. Self-skips on admin/embed/news pages
-// and any page that opts out via [data-no-footer-signup] or its own #newsletter-form.
+// Future, with a required terms agreement. Feeds /api/subscribe with the
+// `founders-of-the-future` source. Self-skips on admin/embed/news pages and any
+// page that opts out via [data-no-footer-signup] or its own #newsletter-form.
 (function () {
   if (window.__tmiFooterSignup) return;
   window.__tmiFooterSignup = true;
@@ -42,11 +42,10 @@
     sec.id = 'tmi-fsignup';
     sec.innerHTML = '<div class="in">\
 <div class="tag">Newsletter</div>\
-<h3>Join Field Notes</h3>\
+<h3>Join Founders of the Future</h3>\
 <p class="sub">Sharp dispatches for owners and builders. Zero AI hype.</p>\
 <form id="tmi-fs-form">\
 <div class="row"><input type="email" required placeholder="you@company.com"/><button type="submit">Sign up</button></div>\
-<label class="opt"><input type="checkbox" name="brief" checked/> <span>Also send me <b>The Brief</b>: a custom daily AI briefing, tuned to your job, your business, and your tech stack.</span></label>\
 <label class="opt"><input type="checkbox" name="terms"/> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">terms</a>.</span></label>\
 <div class="err" id="tmi-fs-err">Please agree to the terms to continue.</div>\
 </form>\
@@ -62,7 +61,6 @@
       var form = document.getElementById('tmi-fs-form');
       if (!form) return;
       var input = form.querySelector('input[type=email]');
-      var brief = form.querySelector('input[name=brief]');
       var terms = form.querySelector('input[name=terms]');
       var btn = form.querySelector('button');
       var err = document.getElementById('tmi-fs-err');
@@ -71,17 +69,13 @@
       if (!email || email.indexOf('@') < 0) { input.focus(); return; }
       if (!terms.checked) { err.style.display = 'block'; return; }
       btn.disabled = true; btn.textContent = '...';
-      // The Brief is a separate service (external waitlist) — fire-and-forget opt-in.
-      if (brief.checked) {
-        try { fetch('https://thebrief.foundersotf.com/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) }); } catch (_) {}
-      }
       fetch('/api/subscribe', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, source: 'founders-of-the-future' })
       }).then(function (r) {
         if (!r.ok) throw new Error('failed');
-        try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Field Notes' + (brief.checked ? ' + The Brief' : '') }); } catch (_) {}
-        sec.querySelector('.in').innerHTML = '<div class="ok">You\'re in. Check your inbox' + (brief.checked ? ' &mdash; The Brief lands tomorrow morning.' : '.') + '</div>';
+        try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Founders of the Future' }); } catch (_) {}
+        sec.querySelector('.in').innerHTML = '<div class="ok">You\'re in. Check your inbox.</div>';
       }).catch(function () { btn.disabled = false; btn.textContent = 'Sign up'; alert('Something went wrong. Please try again.'); });
     });
   }

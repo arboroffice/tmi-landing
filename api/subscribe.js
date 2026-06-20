@@ -10,7 +10,7 @@ module.exports = async function handler(req, res) {
   const { email, source, sources, audience, niche, name } = req.body || {};
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Invalid email' });
 
-  // Accept a single `source` or a `sources` array (e.g. ['founders-of-the-future','the-brief']).
+  // Accept a single `source` or a `sources` array (e.g. ['founders-of-the-future']).
   const tagList = (Array.isArray(sources) && sources.length) ? sources.filter(Boolean)
     : (source ? [source] : []);
 
