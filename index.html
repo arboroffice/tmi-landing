@@ -299,6 +299,33 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     .rung{transform:none!important;}
     .ladder-note{margin-top:26px;}
   }
+  /* FOTF band */
+  .fotf-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:28px;}
+  .fotf-news{display:flex;gap:8px;flex:1;min-width:260px;max-width:440px;}
+  .fotf-news input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--line-2);color:#fff;font:inherit;font-size:14px;padding:13px 16px;border-radius:999px;outline:none;}
+  .fotf-news input:focus{border-color:var(--chart);}
+  .fotf-news button{flex:none;background:var(--chart);color:#070810;border:none;font:inherit;font-weight:700;font-size:13px;padding:13px 22px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .15s;}
+  .fotf-news button:hover{background:var(--chart-dark);}
+  .fotf-ok{color:var(--chart);font-family:var(--sans);font-size:14px;font-weight:600;display:none;margin-top:14px;}
+  /* FOTF freebie modal */
+  .fmodal{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(4,5,12,0.74);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+  .fmodal.show{display:flex;animation:fmfade .3s ease;}
+  @keyframes fmfade{from{opacity:0}to{opacity:1}}
+  .fmodal-card{position:relative;max-width:440px;width:100%;background:linear-gradient(180deg,#11131f,#0a0b14);border:1px solid var(--line-2);border-radius:20px;padding:40px 34px 34px;box-shadow:0 40px 100px rgba(0,0,0,0.6);animation:fmup .35s cubic-bezier(.2,.7,.2,1);}
+  @keyframes fmup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .fmodal-x{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--ink-3);font-size:24px;line-height:1;cursor:pointer;padding:4px;}
+  .fmodal-x:hover{color:#fff;}
+  .fmodal-card .fe{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--chart);}
+  .fmodal-card h3{font-family:var(--serif);font-size:28px;font-weight:400;letter-spacing:-0.02em;color:#fff;margin:14px 0 10px;line-height:1.1;}
+  .fmodal-card p{font-family:var(--sans);font-size:14.5px;color:var(--ink-2);line-height:1.6;margin:0 0 22px;}
+  .fmodal-form{display:flex;flex-direction:column;gap:10px;}
+  .fmodal-form input{background:rgba(255,255,255,0.05);border:1px solid var(--line-2);color:#fff;font:inherit;font-size:15px;padding:14px 16px;border-radius:11px;outline:none;}
+  .fmodal-form input:focus{border-color:var(--chart);}
+  .fmodal-form button{background:var(--chart);color:#070810;border:none;font:inherit;font-weight:700;font-size:15px;padding:14px;border-radius:11px;cursor:pointer;transition:background .15s;}
+  .fmodal-form button:hover{background:var(--chart-dark);}
+  .fmodal-card .alt{display:block;text-align:center;margin-top:16px;font-family:var(--sans);font-size:13px;color:var(--ink-3);}
+  .fmodal-card .alt a{color:var(--chart);}
+  .fmodal-ok{display:none;}
 </style>
 </head>
 <body>
@@ -308,7 +335,8 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 <header class="hd" id="hd">
   <div class="wrap">
     <a href="/" class="brand"><img src="logo.svg" alt="TMI"/> TMI</a>
-    <a href="/portfolio" style="margin-right:auto;margin-left:16px;font-size:13px;font-weight:600;color:rgba(244,245,247,0.62);">Work</a>
+    <a href="/portfolio" style="margin-left:16px;font-size:13px;font-weight:600;color:rgba(244,245,247,0.62);">Work</a>
+    <a href="/founders-of-the-future" style="margin-right:auto;margin-left:14px;font-size:13px;font-weight:600;color:rgba(244,245,247,0.62);">Founders</a>
     <a href="/audit" class="hd-cta" onclick="lead()">Take the Audit &rarr;</a>
   </div>
 </header>
@@ -575,6 +603,23 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   </div>
 </section>
 
+<!-- FOUNDERS OF THE FUTURE -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow reveal">Founders of the Future</div>
+    <h2 class="lead reveal">More than software. <em>A movement.</em></h2>
+    <p class="sub reveal">Founders of the Future is the community we are building at TMI, for the people turning traditional businesses into intelligent ones. Dinners, build labs, and company tours, plus a newsletter for owners and builders. The future is AI. The community is human.</p>
+    <div class="fotf-cta reveal">
+      <a href="/founders-of-the-future" class="btn">Explore the community <span class="arr">&rarr;</span></a>
+      <form class="fotf-news" id="fotf-news" onsubmit="return false;">
+        <input id="fotf-news-email" type="email" placeholder="Get the newsletter" autocomplete="email"/>
+        <button onclick="fotfNews()">Subscribe</button>
+      </form>
+    </div>
+    <div class="fotf-ok" id="fotf-news-ok">You're in. Welcome to Founders of the Future.</div>
+  </div>
+</section>
+
 <!-- GUARANTEE -->
 <section class="guarantee">
   <div class="narrow reveal">
@@ -685,6 +730,60 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     es.forEach(function(e){ dock.classList.toggle('up', !e.isIntersecting); });
   }, {threshold:0});
   if(hero) dockIO.observe(hero);
+</script>
+<!-- FOTF FREEBIE MODAL -->
+<div class="fmodal" id="fmodal" role="dialog" aria-modal="true" aria-label="Free download">
+  <div class="fmodal-card">
+    <button class="fmodal-x" onclick="fmClose()" aria-label="Close">&times;</button>
+    <div id="fmodal-main">
+      <div class="fe">Free download</div>
+      <h3>The Intelligent Company Playbook</h3>
+      <p>The 30-day path to turning your operation into an AI-run company: the systems to build, the software to delete, and where the money leaks. Plus the Founders of the Future newsletter.</p>
+      <form class="fmodal-form" id="fmodal-form" onsubmit="return false;">
+        <input id="fmodal-email" type="email" placeholder="you@company.com" autocomplete="email"/>
+        <button onclick="fmSubmit()">Get it free &rarr;</button>
+      </form>
+      <span class="alt">or <a href="/founders-of-the-future">explore the community &rarr;</a></span>
+    </div>
+    <div class="fmodal-ok" id="fmodal-ok">
+      <div class="fe">You're in</div>
+      <h3>Check your inbox.</h3>
+      <p>The playbook is on its way, and you are on the Founders of the Future list.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  function post(payload){ try{ fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); }catch(e){} }
+  // Inline FOTF newsletter (landing band)
+  window.fotfNews=function(){
+    var el=document.getElementById('fotf-news-email'); var email=(el.value||'').trim();
+    if(!email||email.indexOf('@')<0){ el.focus(); el.style.borderColor='#ff8585'; return; }
+    post({ email:email, source:'founders-of-the-future', sources:['founders-of-the-future'] });
+    try{ if(typeof fbq==='function') fbq('track','Lead',{content_name:'Founders of the Future'}); }catch(e){}
+    document.getElementById('fotf-news').style.display='none';
+    document.getElementById('fotf-news-ok').style.display='block';
+  };
+  // Freebie modal
+  var modal=document.getElementById('fmodal');
+  window.fmClose=function(){ if(modal) modal.classList.remove('show'); try{ localStorage.setItem('fotf_modal','1'); }catch(e){} };
+  window.fmSubmit=function(){
+    var el=document.getElementById('fmodal-email'); var email=(el.value||'').trim();
+    if(!email||email.indexOf('@')<0){ el.focus(); el.style.borderColor='#ff8585'; return; }
+    post({ email:email, source:'founders-of-the-future', sources:['founders-of-the-future','playbook'] });
+    try{ if(typeof fbq==='function') fbq('track','Lead',{content_name:'FOTF Playbook'}); }catch(e){}
+    document.getElementById('fmodal-main').style.display='none';
+    document.getElementById('fmodal-ok').style.display='block';
+    try{ localStorage.setItem('fotf_modal','1'); }catch(e){}
+  };
+  if(modal){
+    modal.addEventListener('click',function(e){ if(e.target===modal) fmClose(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') fmClose(); });
+    var seen; try{ seen=localStorage.getItem('fotf_modal'); }catch(e){}
+    if(!seen){ setTimeout(function(){ modal.classList.add('show'); }, 2200); }
+  }
+})();
 </script>
 <script src="/rb2b.js"></script>
 </body>

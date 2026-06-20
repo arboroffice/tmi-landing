@@ -11,7 +11,7 @@ const TMIAdmin = (() => {
     fotf: ['General','Enterprise','Partner']
   };
 
-  const SOURCES = ['Website','Referral','LinkedIn','Instagram','Cold Outreach','Event','Field Notes','Other'];
+  const SOURCES = ['Website','Referral','LinkedIn','Instagram','Cold Outreach','Event','Field Notes','Founders of the Future','Other'];
 
   // ── Icons ─────────────────────────────────────────────────────────────────
   const I = {
