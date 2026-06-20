@@ -37,10 +37,12 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-glow3"></div>
   <div class="hero-grid"></div>
   <div class="hero-inner">
     <div class="eyebrow"><span class="dot"></span>Founders of the Future &middot; a division of TMI</div>
-    <h1>Building the <em>intelligent economy.</em></h1>
+    <h1>Building the intelligent <span class="rotw" id="rotw"><span class="w">economy.</span></span></h1>
     <p class="lede">A community for the founders, operators, investors, and acquisition entrepreneurs building AI-powered companies, and turning traditional businesses into intelligent ones.</p>
     <div class="cta-row">
       <a href="#apply" class="btn">Apply to join &rarr;</a>
@@ -55,6 +57,24 @@
   <div class="wrap reveal">
     <h2>The future is AI. <em>The community is human.</em></h2>
     <p>Most AI communities are a Discord, a Zoom link, and a LinkedIn feed. We do the opposite. We get founders in the same room, around the same table, building real things together.</p>
+  </div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marq" aria-hidden="true">
+  <div class="marq-track" id="marq">
+    <span><b>Manufacturing OS</b></span><span><i>&middot;</i></span>
+    <span><b>AI Call Centers</b></span><span><i>&middot;</i></span>
+    <span><b>Vertical AI</b></span><span><i>&middot;</i></span>
+    <span><b>Industrial Intelligence</b></span><span><i>&middot;</i></span>
+    <span><b>Acquisition Entrepreneurs</b></span><span><i>&middot;</i></span>
+    <span><b>Construction Ops</b></span><span><i>&middot;</i></span>
+    <span><b>Agentic Workflows</b></span><span><i>&middot;</i></span>
+    <span><b>Operators</b></span><span><i>&middot;</i></span>
+    <span><b>Healthcare Automation</b></span><span><i>&middot;</i></span>
+    <span><b>Data Infrastructure</b></span><span><i>&middot;</i></span>
+    <span><b>Investors</b></span><span><i>&middot;</i></span>
+    <span><b>AI Products</b></span><span><i>&middot;</i></span>
   </div>
 </div>
 
@@ -132,6 +152,18 @@
     <p>The companies that win the next decade will not be the ones with the most people. They will be the ones with the best systems, where AI runs the operation and the humans do the work only humans can. We are gathering the people building that future, and helping each other get there faster.</p>
   </div>
 </div>
+
+<!-- STATS -->
+<section>
+  <div class="wrap">
+    <div class="stats reveal">
+      <div class="stat"><div class="n" data-count="12">12</div><div class="l">founders per table</div></div>
+      <div class="stat"><div class="n" data-count="5">5</div><div class="l">launch cities</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">slides, sponsors, or pitching</div></div>
+      <div class="stat"><div class="n">Monthly</div><div class="l">we get in a room</div></div>
+    </div>
+  </div>
+</section>
 
 <!-- FOUNDER QUOTE -->
 <section>
@@ -396,6 +428,27 @@
 <script>
 const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}})},{threshold:0.08});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// Rotating hero word
+(function(){
+  var el=document.getElementById('rotw'); if(!el) return;
+  var words=['economy.','future.','company.','era.','machine.'];
+  var i=0;
+  setInterval(function(){ i=(i+1)%words.length; el.innerHTML='<span class="w">'+words[i]+'</span>'; }, 2300);
+})();
+
+// Seamless marquee (duplicate content)
+(function(){ var m=document.getElementById('marq'); if(m) m.innerHTML+=m.innerHTML; })();
+
+// Count-up stats on scroll
+function countUp(el){
+  var target=parseInt(el.getAttribute('data-count'),10); if(isNaN(target)) return;
+  var dur=950, t0=null;
+  function step(ts){ if(!t0)t0=ts; var p=Math.min((ts-t0)/dur,1); el.textContent=Math.round(target*p); if(p<1) requestAnimationFrame(step); else el.textContent=target; }
+  requestAnimationFrame(step);
+}
+var statObs=new IntersectionObserver(function(es){es.forEach(function(e){ if(e.isIntersecting){ e.target.querySelectorAll('[data-count]').forEach(countUp); statObs.unobserve(e.target);} })},{threshold:0.3});
+document.querySelectorAll('.stats').forEach(function(s){ statObs.observe(s); });
 
 async function submitForm(){
   var g=function(id){var el=document.getElementById(id);return el?el.value.trim():'';};
