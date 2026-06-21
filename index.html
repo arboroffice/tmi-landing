@@ -350,6 +350,22 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   /* work chips */
   .wchips{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 4px;}
   .wchips span{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);background:rgba(255,255,255,0.04);border:1px solid var(--line);border-radius:999px;padding:9px 15px;}
+  /* command center showcase */
+  .cc{margin-top:44px;}
+  .cc-frame{position:relative;border:1px solid var(--line-2);border-radius:14px;overflow:hidden;box-shadow:0 40px 110px rgba(0,0,0,0.55);}
+  .cc-bar{display:flex;align-items:center;gap:7px;padding:11px 16px;background:#0a0b14;border-bottom:1px solid var(--line);}
+  .cc-bar i{width:11px;height:11px;border-radius:50%;background:#2a2d3a;display:block;flex:none;}
+  .cc-bar .u{margin-left:14px;font-family:var(--sans);font-size:11px;color:var(--ink-3);letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cc-stage{position:relative;aspect-ratio:3/2;background:#0d0f1a;}
+  .cc-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;opacity:0;transition:opacity .6s ease;}
+  .cc-stage img.on{opacity:1;}
+  .cc-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
+  .cc-tab{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink-2);background:rgba(255,255,255,0.04);border:1px solid var(--line);border-radius:999px;padding:8px 15px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;}
+  .cc-tab:hover{border-color:var(--line-2);color:var(--ink);}
+  .cc-tab.on{background:var(--chart);color:#070810;border-color:var(--chart);}
+  .cc-own{display:flex;flex-wrap:wrap;gap:12px 26px;margin:30px 0 4px;}
+  .cc-own span{font-size:14px;color:var(--ink-2);display:flex;align-items:center;gap:9px;}
+  .cc-own span b{color:var(--chart);}
   /* 4-up build grid + before/after compare */
   .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:46px;}
   .cmp{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:42px;}
@@ -512,40 +528,53 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
   </div>
 </section>
 
-<!-- OWNERSHIP + ONE APP -->
+<!-- COMMAND CENTER -->
 <section>
   <div class="wrap">
-    <div class="own">
-      <div>
-        <div class="eyebrow reveal">The command center</div>
-        <h2 class="lead reveal">Your whole operation. <em>On one screen.</em></h2>
-        <p class="sub reveal">Jobs, money, crew, cash, and alerts in one place, on your phone. The morning meeting becomes a glance. We build it around how your company actually works, then hand it over. When it's built, it's yours.</p>
-        <ul class="ownlist reveal">
-          <li><span class="ck">&#10003;</span> No rented software</li>
-          <li><span class="ck">&#10003;</span> No per-seat fees</li>
-          <li><span class="ck">&#10003;</span> No lock-in</li>
-          <li><span class="ck">&#10003;</span> You own it forever</li>
-        </ul>
-        <a href="/audit" class="btn reveal" onclick="lead()" style="margin-top:30px;">Get a free Business Intelligence Audit <span class="arr">&rarr;</span></a>
-      </div>
-      <div class="phone reveal">
-        <div class="phone-screen">
-          <div class="phone-top"><span class="t">TMI &middot; Command</span><span class="dot"></span></div>
-          <div class="tile-row">
-            <div class="tile"><div class="k">Revenue MTD</div><div class="v good">$412k</div></div>
-            <div class="tile"><div class="k">New leads</div><div class="v">38</div></div>
-          </div>
-          <div class="tile"><div class="k">Team capacity</div><div class="v">87%</div><div class="bar"><i style="width:87%"></i></div></div>
-          <div class="tile-row">
-            <div class="tile"><div class="k">Cash in</div><div class="v">$96k</div></div>
-            <div class="tile"><div class="k">Alerts</div><div class="v good">2</div></div>
-          </div>
-          <div class="tile"><div class="k">On track</div><div class="v">31 of 38 goals</div><div class="bar"><i style="width:82%"></i></div></div>
+    <div class="eyebrow reveal">The command center</div>
+    <h2 class="lead reveal">Your whole operation. <em>On one screen.</em></h2>
+    <p class="sub reveal">Jobs, money, crew, cash, and alerts in one live view, built around how your company actually works and tuned to your industry. The morning meeting becomes a glance. When it is built, it is yours.</p>
+    <div class="cc reveal">
+      <div class="cc-frame">
+        <div class="cc-bar"><i></i><i></i><i></i><span class="u">app.tmitechai.com / command-center</span></div>
+        <div class="cc-stage" id="cc-stage">
+          <img class="on" src="dash-construction.jpg" alt="TMI command center for a construction company" width="1536" height="1024"/>
+          <img src="dash-agriculture.jpg" alt="TMI command center for an agriculture operation" width="1402" height="1122" loading="lazy"/>
+          <img src="dash-field-ops.jpg" alt="TMI command center for field operations" width="1536" height="1024" loading="lazy"/>
+          <img src="dash-home-services.jpg" alt="TMI command center for a home services company" width="1536" height="1024" loading="lazy"/>
+          <img src="dash-oil-gas.jpg" alt="TMI command center for an oil and gas operation" width="1536" height="1024" loading="lazy"/>
         </div>
       </div>
+      <div class="cc-tabs" id="cc-tabs">
+        <button class="cc-tab on" onclick="ccGo(0)">Construction</button>
+        <button class="cc-tab" onclick="ccGo(1)">Agriculture</button>
+        <button class="cc-tab" onclick="ccGo(2)">Field Operations</button>
+        <button class="cc-tab" onclick="ccGo(3)">Home Services</button>
+        <button class="cc-tab" onclick="ccGo(4)">Oil &amp; Gas</button>
+      </div>
     </div>
+    <div class="cc-own reveal">
+      <span><b>&#10003;</b> No rented software</span>
+      <span><b>&#10003;</b> No per-seat fees</span>
+      <span><b>&#10003;</b> No lock-in</span>
+      <span><b>&#10003;</b> You own it forever</span>
+    </div>
+    <a href="/audit" class="btn reveal" onclick="lead()" style="margin-top:28px;">Get a free Business Intelligence Audit <span class="arr">&rarr;</span></a>
   </div>
 </section>
+
+<script>
+(function(){
+  var stage=document.getElementById('cc-stage'); if(!stage) return;
+  var imgs=stage.querySelectorAll('img');
+  var tabs=document.querySelectorAll('#cc-tabs .cc-tab');
+  var i=0,t;
+  function show(n){ i=n; imgs.forEach(function(im,k){ im.classList.toggle('on',k===n); }); tabs.forEach(function(tb,k){ tb.classList.toggle('on',k===n); }); }
+  window.ccGo=function(n){ show(n); clearInterval(t); t=setInterval(adv,5000); };
+  function adv(){ show((i+1)%imgs.length); }
+  t=setInterval(adv,5000);
+})();
+</script>
 
 <!-- WHAT WE BUILD -->
 <section>
