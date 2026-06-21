@@ -138,6 +138,10 @@
       <div id="pd-cat-scores" style="margin-bottom:4px;"></div>
 
       <div class="panel-sep"></div>
+      <div class="panel-sec-label">What we researched</div>
+      <div id="pd-research" class="answers-wrap" style="margin-bottom:4px;"></div>
+
+      <div class="panel-sep"></div>
       <div class="panel-sec-label">Answers</div>
       <div id="pd-answers" class="answers-wrap"></div>
 
@@ -331,6 +335,21 @@ function openPanel(audit) {
       <div class="cat-score-val">${val !== null ? val : '—'}</div>
     </div>`;
   }).join('');
+
+  // What we researched (AI pre-fill before the owner answered)
+  const resEl = document.getElementById('pd-research');
+  const r = audit.research && typeof audit.research === 'object' ? audit.research : null;
+  if (r && (r.summary || (r.found && r.found.length) || (r.techStack && r.techStack.length))) {
+    let rh = '';
+    if (r.summary) rh += `<div class="answer-row"><div class="answer-q">Summary</div><div class="answer-a">${r.summary}</div></div>`;
+    if (r.techStack && r.techStack.length) rh += `<div class="answer-row"><div class="answer-q">Detected stack</div><div class="answer-a">${r.techStack.join(', ')}</div></div>`;
+    if (r.signals && r.signals.length) rh += `<div class="answer-row"><div class="answer-q">Role signals</div><div class="answer-a">${r.signals.join(', ')}</div></div>`;
+    if (r.found && r.found.length) rh += `<div class="answer-row"><div class="answer-q">What we found</div><div class="answer-a">${r.found.map(x => '&bull; ' + x).join('<br>')}</div></div>`;
+    if (r.website) rh += `<div class="answer-row"><div class="answer-q">Website</div><div class="answer-a"><a href="https://${r.website}" target="_blank" rel="noopener" style="color:var(--blue)">${r.website}</a></div></div>`;
+    resEl.innerHTML = rh;
+  } else {
+    resEl.textContent = 'No research on file.';
+  }
 
   // Answers
   const answersEl = document.getElementById('pd-answers');

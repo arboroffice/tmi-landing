@@ -6,8 +6,25 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { fetchPage, baseUrl, detectTechStack, findSignals } from './tools/research.js';
+import { enrichCompany } from './tools/apollo.js';
 
 const anthropic = new Anthropic();
+
+// Detected tools map deterministically onto specific intake answers, so the
+// owner just confirms them instead of listing their stack from memory.
+function mapToolsToFields(tech) {
+  const has = (n) => tech.includes(n);
+  const out = {};
+  const fieldTool = ['ServiceTitan', 'Jobber', 'Housecall Pro', 'FieldEdge', 'Service Fusion', 'Procore', 'Buildertrend'].find(has);
+  if (fieldTool) { out.system_of_record = fieldTool; out.crm = fieldTool; }
+  else {
+    const crm = ['HubSpot', 'Salesforce', 'Zoho', 'ActiveCampaign'].find(has);
+    if (crm) out.crm = crm;
+  }
+  if (has('QuickBooks')) out.books = 'QuickBooks';
+  if (tech.length) out.tools_list = tech.join(', ');
+  return out;
+}
 
 // Personal / ISP domains we never treat as a company website.
 const GENERIC = new Set([
@@ -40,11 +57,17 @@ export async function researchForAudit({ company, website, email } = {}) {
     signals = findSignals((home && home.text) || '');
   }
 
+  // Apollo firmographics (fast, single call) — headcount, revenue range, founded
+  // year, industry, HQ. Best-effort; returns null if no key or no match.
+  let firmo = null;
+  if (site) { try { firmo = await enrichCompany({ domain: site }); } catch (e) { firmo = null; } }
+
   const context = [
     `Company name: ${company || 'unknown'}`,
     site ? `Website: ${site}` : 'Website: none (personal email or no site provided)',
     tech.length ? `Detected software/tools on their site: ${tech.join(', ')}` : 'Detected software/tools: none detected',
     signals.length ? `Role/hiring signals seen: ${signals.join(', ')}` : '',
+    firmo ? `Firmographics (Apollo): industry=${firmo.industry || '?'}, employees=${firmo.employeeCount || '?'}, revenue=${firmo.revenue || '?'}, founded=${firmo.foundedYear || '?'}, HQ=${firmo.location || '?'}` : '',
     home && home.text ? `\nWebsite text excerpt:\n${home.text.slice(0, 3500)}` : '',
   ].filter(Boolean).join('\n');
 
@@ -67,7 +90,8 @@ Return ONLY this JSON object:
     "website": "${site || ''}",
     "tools_list": "comma separated detected tools, or empty",
     "lead_sources": "only if the site clearly shows how they win customers, else empty",
-    "locations": "number of locations/sites only if clearly stated, else empty"
+    "locations": "number of locations/sites only if clearly stated, else empty",
+    "seasonality": "Very | Somewhat | Not really — best guess from the industry only, else empty"
   },
   "confidence": "high | medium | low"
 }`;
@@ -87,19 +111,48 @@ Return ONLY this JSON object:
     parsed = {};
   }
 
-  const prefill = Object.assign({ company: company || '', website: site || '' }, parsed.prefill || {});
+  // Firmographics that owners normally type but can just confirm.
+  const firmoFields = {};
+  if (firmo) {
+    if (firmo.employeeCount) firmoFields.headcount = String(firmo.employeeCount);
+    if (firmo.revenue) firmoFields.revenue = firmo.revenue;
+    if (firmo.foundedYear) firmoFields.years = String(new Date().getFullYear() - Number(firmo.foundedYear));
+    if (firmo.industry && !(parsed.prefill && parsed.prefill.industry)) firmoFields.industry = firmo.industry;
+  }
+
+  // Precedence: company/website base, then website-derived (Claude), then the
+  // deterministic tool map, then firmographics.
+  const prefill = Object.assign(
+    { company: company || '', website: site || '' },
+    parsed.prefill || {},
+    mapToolsToFields(tech),
+    firmoFields,
+  );
   for (const k of Object.keys(prefill)) {
     const v = prefill[k];
     if (v == null || String(v).trim() === '' || String(v).toLowerCase() === 'unknown') delete prefill[k];
   }
 
+  // "What we found" — lead with firmographics, then the model's facts.
+  const found = [];
+  if (firmo) {
+    const bits = [];
+    if (firmo.employeeCount) bits.push(`~${firmo.employeeCount} employees`);
+    if (firmo.revenue) bits.push(`~${firmo.revenue} revenue`);
+    if (firmo.foundedYear) bits.push(`founded ${firmo.foundedYear}`);
+    if (bits.length) found.push(bits.join(', '));
+    if (firmo.location) found.push(`HQ ${firmo.location}`);
+  }
+  if (Array.isArray(parsed.found)) for (const f of parsed.found) if (found.indexOf(f) < 0) found.push(f);
+
   return {
     website: site || null,
     techStack: tech,
     signals,
+    firmographics: firmo || null,
     summary: parsed.summary || '',
-    found: Array.isArray(parsed.found) ? parsed.found.slice(0, 6) : [],
+    found: found.slice(0, 7),
     prefill,
-    confidence: parsed.confidence || 'low',
+    confidence: parsed.confidence || (firmo ? 'medium' : 'low'),
   };
 }

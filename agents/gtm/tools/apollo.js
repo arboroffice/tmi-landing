@@ -124,6 +124,7 @@ export async function enrichCompany({ domain }) {
       industry: org.industry,
       employeeCount: org.estimated_num_employees,
       revenue: org.annual_revenue_printed,
+      foundedYear: org.founded_year,
       location: [org.city, org.state].filter(Boolean).join(', '),
       linkedinUrl: org.linkedin_url,
       phone: org.phone,

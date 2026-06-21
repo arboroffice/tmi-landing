@@ -609,6 +609,18 @@ function deriveResults(){
   if((s.Accountability||5)<=2){ add("dispatcher",2); leak("Dropped balls","Outcomes without one clear owner fall through the cracks between people."); }
   if((s.Predictability||5)<=2){ add("reporter",1.5); }
   if((s.Control||5)<=2){ add("reactivator",1); add("crew",1); leak("The business still needs you daily","It cannot run a full week without you in it. That is the gap between a job and an asset."); }
+  // What our research actually found on THEM (hiring signals + detected tools)
+  var rr=state.research||{};
+  var sigs=((rr.signals||[]).join(" ")).toLowerCase();
+  var tech=rr.techStack||[];
+  if(/dispatch|scheduler|scheduling/.test(sigs)){ add("dispatcher",3); leak("You are paying a human to dispatch","We saw the role. A coordinator moving jobs and updates by hand is a role a system runs without forgetting."); }
+  if(/receivable|billing|collection/.test(sigs)){ add("collector",3); leak("A human is chasing the money","We saw the role. Collections is the most automatable admin job, and most clients pay at the first automated reminder."); }
+  if(/estimator/.test(sigs)){ add("estimator",3); }
+  if(/customer service|office admin|administrative|data entry|coordinator/.test(sigs)){ add("intake",1.5); add("reporter",1); }
+  var fieldTools=["ServiceTitan","Jobber","Housecall Pro","FieldEdge","Service Fusion","Procore","Buildertrend"];
+  var hasField=tech.some(function(t){ return fieldTools.indexOf(t)>=0; });
+  if(tech.length && !hasField){ add("intake",1); }
+  if(!tech.length && state.researched){ add("reporter",1); leak("No system of record found","Work likely runs on phone, email, spreadsheets, and memory. Centralizing that is the first move."); }
   // Universal baselines so we always surface 3 strong picks
   add("collector",1.6); add("intake",0.8); add("estimator",0.7);
   var ranked=Object.keys(pts).sort(function(x,y){ return pts[y]-pts[x]; }).slice(0,3);
