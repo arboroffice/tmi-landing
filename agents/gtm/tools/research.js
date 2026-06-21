@@ -3,7 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 const anthropic = new Anthropic();
 
 // ── Fetch a page, return { text, html } ─────────────────────────────────────
-async function fetchPage(url) {
+export async function fetchPage(url) {
   if (!url) return null;
   try {
     const full = url.startsWith('http') ? url : `https://${url}`;
@@ -25,7 +25,7 @@ async function fetchPage(url) {
   }
 }
 
-function baseUrl(url) {
+export function baseUrl(url) {
   try { return new URL(url.startsWith('http') ? url : `https://${url}`).origin; }
   catch { return null; }
 }
@@ -75,7 +75,7 @@ const TECH_FINGERPRINTS = [
   [/hotjar/i, 'Hotjar'],
 ];
 
-function detectTechStack(html) {
+export function detectTechStack(html) {
   if (!html) return [];
   const found = new Set();
   for (const [re, name] of TECH_FINGERPRINTS) {
@@ -93,7 +93,7 @@ const SIGNAL_TITLES = [
   'estimator', 'service coordinator',
 ];
 
-function findSignals(text) {
+export function findSignals(text) {
   if (!text) return [];
   const lc = text.toLowerCase();
   const hits = new Set();

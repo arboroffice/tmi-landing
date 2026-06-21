@@ -265,7 +265,7 @@ const FALLBACK_INTAKE = [
 
 /* ─── STATE ─────────────────────────────────────────────────────── */
 var lead = { name:"", email:"", company:"", phone:"" };
-var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null };
+var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null, research:null, researching:false, researched:false, prefilled:{} };
 function isMob(){ return window.innerWidth < 640; }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function sum(o){ return Object.values(o).reduce(function(a,b){return a+b;},0); }
@@ -285,8 +285,48 @@ function gateSubmit(){
   document.getElementById("gate").style.display="none";
   document.getElementById("appRoot").style.display="block";
   render();
+  runResearch();
 }
-(function(){ try{ var s=localStorage.getItem("ica_lead"); if(s){ lead=JSON.parse(s); state.answers.company=lead.company||""; document.getElementById("gate").style.display="none"; document.getElementById("appRoot").style.display="block"; render(); } }catch(e){} })();
+
+/* ─── AI RESEARCH (do the homework before we ask) ───────────────── */
+function runResearch(){
+  if(state.researching || state.researched) return;
+  if(!lead.email && !lead.company && !state.answers.company) return;
+  state.researching=true;
+  if(state.sec==="intake"||state.sec==="intro") render();
+  fetch("/api/audit-research",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ company:lead.company||state.answers.company||"", email:lead.email||"", website:state.answers.website||"" })})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      state.researching=false; state.researched=true;
+      if(d && d.ok!==false){
+        state.research=d;
+        var pf=d.prefill||{};
+        Object.keys(pf).forEach(function(k){
+          var cur=state.answers[k];
+          if(cur==null || String(cur).trim()===""){ state.answers[k]=pf[k]; state.prefilled[k]=true; }
+        });
+      }
+      if(state.sec==="intake"||state.sec==="intro") render();
+    })
+    .catch(function(){ state.researching=false; state.researched=true; if(state.sec==="intake"||state.sec==="intro") render(); });
+}
+function researchStatus(full){
+  var co=esc(lead.company||state.answers.company||"your company");
+  if(state.researching){
+    return '<div style="background:linear-gradient(160deg,#F8FCE8,#fff);border:1.5px solid #D8ECCC;border-radius:14px;padding:16px 18px;margin:0 0 22px;display:flex;gap:12px;align-items:center;"><span class="pulse" style="width:10px;height:10px;border-radius:50%;background:#C8F135;flex-shrink:0;"></span><div style="font-size:14px;color:#3A6A28;line-height:1.5;"><b>Researching '+co+'…</b> Reading your site and software so you do not have to type it all. This fills in as you work.</div></div>';
+  }
+  if(state.researched && state.research && (state.research.found||[]).length){
+    var f=state.research.found;
+    var h='<div style="background:#0A0A0A;border-radius:16px;padding:'+(full?"22px 24px":"16px 18px")+';margin:0 0 22px;">';
+    h+='<div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#C8F135;margin-bottom:'+(full?12:8)+'px;">&#10003; We did our homework</div>';
+    h+='<div style="font-size:15px;color:#E8E8E8;line-height:1.6;'+(full?"margin-bottom:14px;":"")+'font-weight:600;">Here is what we found on '+co+'. We pre-filled what we could below. Confirm or fix it, then answer the few things only you know.</div>';
+    if(full){ h+='<div style="display:flex;flex-wrap:wrap;gap:8px;">'; f.forEach(function(x){ h+='<span style="font-size:12px;color:#C8C8C8;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:100px;padding:6px 12px;">'+esc(x)+'</span>'; }); h+='</div>'; }
+    h+='</div>';
+    return h;
+  }
+  return '';
+}
+(function(){ try{ var s=localStorage.getItem("ica_lead"); if(s){ lead=JSON.parse(s); state.answers.company=lead.company||""; document.getElementById("gate").style.display="none"; document.getElementById("appRoot").style.display="block"; render(); runResearch(); } }catch(e){} })();
 
 /* ─── ACTIONS ───────────────────────────────────────────────────── */
 function go(id){ state.sec=id; state.selAgent=null; render(); window.scrollTo({top:0,behavior:"smooth"}); if(id==="intake" && !state.intakeLoaded) loadIntake(); }
@@ -311,7 +351,7 @@ async function submitAudit(){
   var btn=document.getElementById("submitBtn"); if(btn){ btn.disabled=true; btn.textContent="Sending..."; }
   var answers=Object.assign({}, state.answers, { company: state.answers.company||lead.company||"", phone: state.answers.phone||lead.phone||"", _diagnostic_scores: state.scores, _diagnostic_total: sum(state.scores), _checklist_progress: state.checks });
   try{
-    var r=await fetch("/api/audit-intake",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ email:lead.email, name:lead.name, phone:lead.phone||answers.phone||"", company:answers.company, website:state.answers.website||"", industry: state.answers.industry||"", answers:answers })});
+    var r=await fetch("/api/audit-intake",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ email:lead.email, name:lead.name, phone:lead.phone||answers.phone||"", company:answers.company, website:state.answers.website||(state.research&&state.research.website)||"", industry: state.answers.industry||"", answers:answers, research:state.research||null })});
     state.result = await r.json();
   }catch(e){ state.result=null; }
   try{ if(typeof fbq==="function") fbq("track","SubmitApplication",{content_name:"Intelligent Company Audit"}); }catch(e){}
@@ -352,9 +392,11 @@ function render(){
 }
 
 function renderIntro(mob){
+  var _rs=researchStatus(false);
   var stats=[{stat:20,suf:"+",label:"Avg info locations in a 10-person business",note:"Every one is somewhere a job can fall through"},{stat:40,suf:"%",label:"Of operating spend leaking on average",note:"Tools, rework, invisible labor, slow collections"},{stat:21,suf:"x",label:"More likely to close in under 5 minutes",note:"The fastest follow-up wins. Almost every time."}];
   var cards=[{n:"01",label:"Your Diagnostic",sub:"Rate your business across the 5 wants and see where you stand before you start",id:"diag",color:"#C8F135"},{n:"02",label:"Your Operation",sub:"The detailed intake so we know your entire backend, tools, team, and money flow",id:"intake",color:"#00B4D8"},{n:"03",label:"The Framework",sub:"The 5 things every owner wants and exactly how to get each one in sequence",id:"five",color:"#FF6B35"},{n:"04",label:"30-Day Playbook",sub:"Day-by-day with deliverables, step lists, time estimates, and reflection questions",id:"play",color:"#6C5CE7"},{n:"05",label:"8 Money Leaks",sub:"Where your money goes and numbered fix protocols you can start this week",id:"leaks",color:"#00B4D8"},{n:"06",label:"AI Org Chart",sub:"10 digital employees with build-this-weekend instructions and tool lists",id:"agents",color:"#C8F135"}];
   var h='<div>';
+  if(_rs) h+='<div style="padding-top:'+(mob?20:30)+'px;">'+_rs+'</div>';
   h+='<div style="padding-top:'+(mob?40:80)+'px;padding-bottom:'+(mob?40:72)+'px;display:grid;grid-template-columns:'+(mob?"1fr":"1fr 400px")+';gap:'+(mob?32:72)+'px;align-items:center;">';
   h+='<div><div style="display:inline-flex;align-items:center;gap:8px;background:#F5F5F0;border:1.5px solid #E8E8E4;border-radius:100px;padding:6px 14px 6px 8px;margin-bottom:28px;"><span class="pulse" style="width:8px;height:8px;border-radius:50%;background:#C8F135;display:block;flex-shrink:0;"></span><span style="font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:#6A6A60;">The Intelligent Company Audit</span></div>';
   h+='<h1 class="d" style="font-size:clamp(40px,5.5vw,68px);font-weight:700;letter-spacing:-0.03em;line-height:1.0;color:#0A0A0A;margin-bottom:24px;">Your business grew<br>faster than its<br><span style="position:relative;">systems.<span style="position:absolute;bottom:6px;left:0;right:0;height:10px;background:#C8F135;z-index:-1;border-radius:3px;"></span></span></h1>';
@@ -417,12 +459,14 @@ function renderIntake(mob){
   var h='<div><div style="padding-top:'+(mob?36:72)+'px;padding-bottom:'+(mob?28:40)+'px;">'+sectionRule("Your Operation");
   h+='<h2 class="d" style="font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#0A0A0A;margin-bottom:16px;">Tell us how it really runs.</h2>';
   h+='<p style="font-size:17px;color:#5A5A5A;max-width:600px;line-height:1.75;">The more detail you give, the sharper your audit and the more exact the backend we design for you, the systems to install, the digital employees to add, and the operating system that runs it. About 10 to 15 minutes.</p></div>';
+  h+=researchStatus(true);
   if(!state.intake){ h+='<div style="padding:40px 0;color:#9A9A9A;">Loading your intake...</div></div>'; return h; }
   state.intake.forEach(function(sec){
     h+='<div style="margin:8px 0 4px;"><div class="d" style="font-size:22px;color:#0A0A0A;font-weight:700;margin:26px 0 6px;">'+esc(sec.section||"")+'</div></div>';
     (sec.questions||[]).forEach(function(q){
       var v=state.answers[q.id];
-      h+='<div class="fld" style="margin:16px 0;"><label style="display:block;font-size:14px;font-weight:600;color:#0A0A0A;margin-bottom:8px;">'+esc(q.label)+(q.help?' <span style="color:#AAAAAA;font-weight:400;">'+esc(q.help)+'</span>':'')+'</label>';
+      var pre=state.prefilled[q.id];
+      h+='<div class="fld" style="margin:16px 0;'+(pre?'border-left:3px solid #C8F135;padding-left:14px;':'')+'"><label style="display:block;font-size:14px;font-weight:600;color:#0A0A0A;margin-bottom:8px;">'+esc(q.label)+(q.help?' <span style="color:#AAAAAA;font-weight:400;">'+esc(q.help)+'</span>':'')+(pre?' <span style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4A6010;background:#EEF8C8;border-radius:100px;padding:2px 9px;margin-left:6px;vertical-align:middle;">Researched &middot; confirm</span>':'')+'</label>';
       if(q.type==="long"){ h+='<textarea oninput="setAns(\''+q.id+'\',this.value)">'+esc(v||"")+'</textarea>'; }
       else if(q.type==="single"){ (q.options||[]).forEach(function(o){ h+='<label class="opt"><input type="radio" name="'+q.id+'" value="'+esc(o)+'" '+(v===o?"checked":"")+' onchange="setAns(\''+q.id+'\',this.value)"> '+esc(o)+'</label>'; }); }
       else if(q.type==="multi"){ var arr=Array.isArray(v)?v:[]; (q.options||[]).forEach(function(o){ h+='<label class="opt"><input type="checkbox" value="'+esc(o)+'" '+(arr.indexOf(o)>=0?"checked":"")+' onchange="toggleMulti(\''+q.id+'\',\''+esc(o).replace(/'/g,"\\'")+'\')"> '+esc(o)+'</label>'; }); }

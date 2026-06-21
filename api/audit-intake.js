@@ -12,7 +12,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { session_id, email, company, industry, answers, name, phone, website } = req.body || {};
+  const { session_id, email, company, industry, answers, name, phone, website, research } = req.body || {};
   if (!answers || typeof answers !== 'object') return res.status(400).json({ error: 'answers required' });
 
   // The Complete Audit is free. Capture the email and proceed, no payment gate.
@@ -62,6 +62,7 @@ module.exports = async function handler(req, res) {
       industry: industry || answers.industry || null,
       application_id: appId,
       answers,
+      research: research || null,
       paid: true,
       session_id: session_id || null,
       status: 'submitted',
@@ -72,10 +73,16 @@ module.exports = async function handler(req, res) {
     (async () => {
       try {
         const { buildCompleteAudit } = await import('../agents/gtm/complete-audit.js');
+        const enriched = research
+          ? Object.assign({}, answers, {
+              _public_research: research.summary || '',
+              _detected_tools: (research.techStack || []).join(', '),
+            })
+          : answers;
         const md = await buildCompleteAudit({
           company: company || answers.company,
           industry: industry || answers.industry,
-          answers,
+          answers: enriched,
         });
         const { parseAuditMeta } = require('./_audit-report-render');
         const meta = parseAuditMeta(md);
