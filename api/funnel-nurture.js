@@ -9,6 +9,7 @@
 const db = require('./_db');
 
 const SITE = 'https://www.tmitechai.com';
+const CAL_LINK = 'https://cal.com/mia-elianaa-a4n2hk/30min';
 const FROM_NUMBER = '+18557171044';
 
 function formatPhone(p) {
@@ -73,11 +74,11 @@ module.exports = async function handler(req, res) {
       if (app && app.status === 'booked') return res.json({ ok: true, skipped: 'already booked' });
       if (stopped(app)) return res.json({ ok: true, skipped: 'opted out' });
       const name = (app && app.name || 'there').split(/\s+/)[0];
-      const url = b.session_id ? `${SITE}/booking?session_id=${encodeURIComponent(b.session_id)}` : `${SITE}/complete-audit-intake`;
+      const url = b.session_id ? `${SITE}/booking?session_id=${encodeURIComponent(b.session_id)}` : CAL_LINK;
       const unsub = app ? `${SITE}/api/unsubscribe?id=${app.id}` : null;
       await email(b.email, 'Book your strategy call',
         `<p style="margin:0 0 16px;">Hey ${name},</p>
-<p style="margin:0 0 16px;">Your audit is the map. The 30-minute call with the founder and a strategist is where it gets real - we walk through it together and pick your path. You already paid for it, so grab a time.</p>${cta(url, 'Book my strategy call')}`, unsub);
+<p style="margin:0 0 16px;">Your audit is the map. The 30-minute call with the founder and a strategist is where it gets real - we walk through it together and pick your path. It is free, so grab a time.</p>${cta(url, 'Book my strategy call')}`, unsub);
       if (b.touch === 'second') await sms(app && app.phone, `${name} - your audit is done. Last step is the 30-min strategy call you already paid for. Grab a time: ${url}`);
       return ack();
     }

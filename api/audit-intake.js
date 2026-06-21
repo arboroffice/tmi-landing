@@ -12,7 +12,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { session_id, email, company, industry, answers } = req.body || {};
+  const { session_id, email, company, industry, answers, name, phone, website } = req.body || {};
   if (!answers || typeof answers !== 'object') return res.status(400).json({ error: 'answers required' });
 
   // The Complete Audit is free. Capture the email and proceed, no payment gate.
@@ -27,21 +27,40 @@ module.exports = async function handler(req, res) {
   } catch (e) { console.error('intake verify:', e.message); }
   if (!paidEmail) return res.status(400).json({ error: 'email required' });
 
-  // Mark any captured lead as completed so the old payment-nurture chain stops.
+  // Upsert the lead into `applications` so it (a) lands in the admin pipeline and
+  // (b) the booking webhook (booking-confirmed.js) and the follow-up nurture
+  // (funnel-nurture.js) can find it — both key off applications, not audit_submissions.
+  let appId = null;
   try {
     if (paidEmail) {
-      const lead = await dbx.findOne('applications', 'email', String(paidEmail).toLowerCase());
-      if (lead) await dbx.update('applications', lead.id, { status: 'audit_completed', paid_at: new Date().toISOString() });
+      const emailNorm = String(paidEmail).toLowerCase();
+      const existing = await dbx.findOne('applications', 'email', emailNorm);
+      const fields = {
+        name: name || (existing && existing.name) || null,
+        phone: phone || answers.phone || (existing && existing.phone) || null,
+        company: company || answers.company || (existing && existing.company) || null,
+        website: website || answers.website || (existing && existing.website) || null,
+        industry: industry || answers.industry || (existing && existing.industry) || null,
+        source: (existing && existing.source) || 'intelligent-company-audit',
+        intake_at: new Date().toISOString(),
+      };
+      // Never downgrade someone who already booked the call.
+      if (!existing || existing.status !== 'booked') fields.status = 'audit_submitted';
+      if (existing) { await dbx.update('applications', existing.id, fields); appId = existing.id; }
+      else { const created = await dbx.insert('applications', Object.assign({ email: emailNorm }, fields)); appId = created.id; }
     }
-  } catch (e) { console.error('intake mark complete:', e.message); }
+  } catch (e) { console.error('intake upsert application:', e.message); }
 
   const bookingLink = session_id ? `${BOOKING}?session_id=${encodeURIComponent(session_id)}` : BOOKING;
 
   try {
     const sub = await dbx.insert('audit_submissions', {
       email: paidEmail || null,
+      name: name || null,
+      phone: phone || answers.phone || null,
       company: company || answers.company || null,
       industry: industry || answers.industry || null,
+      application_id: appId,
       answers,
       paid: true,
       session_id: session_id || null,
@@ -111,7 +130,7 @@ module.exports = async function handler(req, res) {
       } catch (e) { console.error('deliverable gen:', e.message); }
     })();
 
-    return res.json({ ok: true, id: sub.id, booking: bookingLink });
+    return res.json({ ok: true, id: sub.id, booking: bookingLink, report: `/audit-report?id=${sub.id}` });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }

@@ -91,6 +91,8 @@ button { font-family: inherit; }
     <input id="g-email" type="email" placeholder="you@company.com" autocomplete="email"/>
     <label for="g-company">Company</label>
     <input id="g-company" type="text" placeholder="Smith Industries" autocomplete="organization"/>
+    <label for="g-phone">Mobile (for your results + call reminders)</label>
+    <input id="g-phone" type="tel" placeholder="(555) 123-4567" autocomplete="tel"/>
     <button onclick="gateSubmit()">Start the audit &rarr;</button>
     <div class="err" id="g-err">Please enter a valid email.</div>
     <div class="note">Free. No card. Your results are yours to keep.</div>
@@ -262,8 +264,8 @@ const FALLBACK_INTAKE = [
 ];
 
 /* ─── STATE ─────────────────────────────────────────────────────── */
-var lead = { name:"", email:"", company:"" };
-var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false };
+var lead = { name:"", email:"", company:"", phone:"" };
+var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null };
 function isMob(){ return window.innerWidth < 640; }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function sum(o){ return Object.values(o).reduce(function(a,b){return a+b;},0); }
@@ -275,7 +277,8 @@ function gateSubmit(){
   lead.name=(document.getElementById("g-name").value||"").trim();
   lead.email=em;
   lead.company=(document.getElementById("g-company").value||"").trim();
-  try{ fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ name:lead.name, email:lead.email, company:lead.company, source:"intelligent-company-audit", sources:["founders-of-the-future","audit"] })}); }catch(e){}
+  var ph=document.getElementById("g-phone"); lead.phone=ph?(ph.value||"").trim():"";
+  try{ fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ name:lead.name, email:lead.email, company:lead.company, phone:lead.phone, source:"intelligent-company-audit", sources:["founders-of-the-future","audit"] })}); }catch(e){}
   try{ if(typeof fbq==="function") fbq("track","Lead",{content_name:"Intelligent Company Audit"}); }catch(e){}
   try{ localStorage.setItem("ica_lead", JSON.stringify(lead)); }catch(e){}
   state.answers.company = lead.company;
@@ -306,8 +309,12 @@ async function loadIntake(){
 
 async function submitAudit(){
   var btn=document.getElementById("submitBtn"); if(btn){ btn.disabled=true; btn.textContent="Sending..."; }
-  var answers=Object.assign({}, state.answers, { company: state.answers.company||lead.company||"", _diagnostic_scores: state.scores, _diagnostic_total: sum(state.scores), _checklist_progress: state.checks });
-  try{ await fetch("/api/audit-intake",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ email:lead.email, company:answers.company, industry: state.answers.industry||"", answers:answers })}); }catch(e){}
+  var answers=Object.assign({}, state.answers, { company: state.answers.company||lead.company||"", phone: state.answers.phone||lead.phone||"", _diagnostic_scores: state.scores, _diagnostic_total: sum(state.scores), _checklist_progress: state.checks });
+  try{
+    var r=await fetch("/api/audit-intake",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ email:lead.email, name:lead.name, phone:lead.phone||answers.phone||"", company:answers.company, website:state.answers.website||"", industry: state.answers.industry||"", answers:answers })});
+    state.result = await r.json();
+  }catch(e){ state.result=null; }
+  try{ if(typeof fbq==="function") fbq("track","SubmitApplication",{content_name:"Intelligent Company Audit"}); }catch(e){}
   state.submitted=true; render(); window.scrollTo({top:0,behavior:"smooth"});
   setTimeout(mountCal, 60);
 }
@@ -539,6 +546,35 @@ function renderAgents(mob){
   return h;
 }
 
+/* ─── INSTANT CUSTOM RESULTS ───────────────────────────────────── */
+function agentById(id){ for(var i=0;i<AGENTS.length;i++){ if(AGENTS[i].id===id) return AGENTS[i]; } return null; }
+function deriveResults(){
+  var a=state.answers||{}, s=state.scores||{};
+  var pts={}; function add(id,n){ pts[id]=(pts[id]||0)+n; }
+  var leaks=[]; function leak(t,note){ for(var i=0;i<leaks.length;i++){ if(leaks[i].title===t) return; } leaks.push({title:t,note:note}); }
+  // Lead response speed
+  var rt=a.response_time;
+  if(rt==="When we get to it"||rt==="Next day"||rt==="Hours"){ add("intake",3); leak("Leads waiting for a response","The fastest reply wins the job. Hours of delay is revenue handed to whoever answered first."); }
+  else { add("intake",1); }
+  // Job margin visibility
+  if(a.job_costing==="No"||a.job_costing==="Not really"){ add("reporter",3); leak("Invisible job margins","You finish the job and never really know what it earned. You cannot protect a number you cannot see."); }
+  else if(a.job_costing==="Roughly"){ add("reporter",1.5); }
+  if(a.gut_vs_data==="Gut and experience"){ add("reporter",2); leak("Decisions made on gut, not numbers","The business is too big to run from memory, but the numbers still live in heads and texts."); }
+  // Diagnostic weak spots
+  if((s.Visibility||5)<=2){ add("reporter",2); leak("No single source of truth","Status lives across tools, group chats, and people. Nobody can see the whole picture at once."); }
+  if((s.Accountability||5)<=2){ add("dispatcher",2); leak("Dropped balls","Outcomes without one clear owner fall through the cracks between people."); }
+  if((s.Predictability||5)<=2){ add("reporter",1.5); }
+  if((s.Control||5)<=2){ add("reactivator",1); add("crew",1); leak("The business still needs you daily","It cannot run a full week without you in it. That is the gap between a job and an asset."); }
+  // Universal baselines so we always surface 3 strong picks
+  add("collector",1.6); add("intake",0.8); add("estimator",0.7);
+  var ranked=Object.keys(pts).sort(function(x,y){ return pts[y]-pts[x]; }).slice(0,3);
+  var agents=ranked.map(agentById).filter(Boolean);
+  // Pad leaks from the weakest categories if we have fewer than 3
+  var weak=FIVE_WANTS.slice().sort(function(x,y){ return (s[x.label]||0)-(s[y.label]||0); });
+  for(var w=0; w<weak.length && leaks.length<3; w++){ leak("Low "+weak[w].label.toLowerCase(), weak[w].q); }
+  return { sm:scoreMeta(), agents:agents, leaks:leaks.slice(0,3) };
+}
+
 /* submitted confirmation overrides main */
 var _render = render;
 render = function(){
@@ -546,10 +582,34 @@ render = function(){
     renderNav();
     var mob=isMob();
     document.getElementById("main").style.padding = mob?"0 16px 80px":"0 32px 120px";
-    var h='<div style="padding-top:'+(mob?48:96)+'px;max-width:760px;margin:0 auto;">'+sectionRule("You're in");
-    h+='<h2 class="d" style="font-size:clamp(30px,4vw,52px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#0A0A0A;margin-bottom:16px;">Your audit is being built.</h2>';
-    h+='<p style="font-size:17px;color:#5A5A5A;line-height:1.75;margin-bottom:8px;">Thanks '+(esc(lead.name||"").split(" ")[0]||"")+'. Your written diagnosis, money-leak map, and the exact systems and digital employees to install are on the way to '+esc(lead.email)+'. Last step: grab a 30-minute call to walk through it.</p>';
-    h+='<div id="cal-embed" style="background:#fff;border-radius:14px;overflow:hidden;min-height:560px;margin-top:18px;border:1.5px solid #EBEBEB;"></div>';
+    var R=deriveResults(), sm=R.sm;
+    var fn=(esc(lead.name||"").split(" ")[0])||"";
+    var reportUrl=(state.result&&state.result.report)||"";
+    var h='<div style="padding-top:'+(mob?40:80)+'px;max-width:880px;margin:0 auto;">'+sectionRule("Your results");
+    h+='<h2 class="d" style="font-size:clamp(30px,4vw,52px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#0A0A0A;margin-bottom:14px;">'+(fn?fn+", here is your operation, scored.":"Here is your operation, scored.")+'</h2>';
+    h+='<p style="font-size:17px;color:#5A5A5A;line-height:1.75;margin-bottom:36px;max-width:600px;">This is your instant read. Your full written audit, money-leak map, and 30-day build plan are being generated now and sent to '+esc(lead.email)+'.</p>';
+    // Score + category bars
+    h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"260px 1fr")+';gap:'+(mob?20:28)+'px;margin-bottom:40px;">';
+    h+='<div style="background:#0A0A0A;border-radius:20px;padding:30px 26px;"><div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#4A4A4A;margin-bottom:16px;">Operational score</div><div class="d" style="font-size:72px;font-weight:700;line-height:1;color:'+sm.color+';">'+sm.t+'</div><div style="font-size:14px;color:#6A6A6A;margin-bottom:20px;">out of 25 &middot; '+sm.label+'</div><div style="height:6px;background:#1A1A1A;border-radius:100px;overflow:hidden;"><div style="height:100%;width:'+((sm.t/25)*100)+'%;background:'+sm.color+';border-radius:100px;"></div></div></div>';
+    h+='<div style="background:#F8F8F5;border:1.5px solid #EBEBEB;border-radius:20px;padding:26px 24px;">';
+    FIVE_WANTS.forEach(function(wt){ var v=state.scores[wt.label]; h+='<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:600;color:#3A3A3A;">'+wt.label+'</span><span style="font-size:13px;font-weight:700;color:'+wt.color+';">'+v+'/5</span></div><div class="score-track"><div class="score-fill" style="width:'+((v/5)*100)+'%;background:'+wt.color+';"></div></div></div>'; });
+    h+='</div></div>';
+    // Leaks
+    h+=sectionRule("Where you are leaking");
+    h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"repeat(3,1fr)")+';gap:12px;margin-bottom:40px;">';
+    R.leaks.forEach(function(lk){ h+='<div class="card" style="padding:22px 22px;border-top:3px solid #FF6B35;"><div class="d" style="font-size:16px;font-weight:700;color:#0A0A0A;margin-bottom:8px;line-height:1.25;">'+esc(lk.title)+'</div><div style="font-size:13px;color:#7A7A7A;line-height:1.6;">'+esc(lk.note)+'</div></div>'; });
+    h+='</div>';
+    // Recommended digital employees
+    h+=sectionRule("The digital employees we would install first");
+    h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"repeat(3,1fr)")+';gap:12px;margin-bottom:40px;">';
+    R.agents.forEach(function(ag){ h+='<div class="card" style="padding:22px 22px;background:'+ag.bg+';border-bottom:2px solid '+ag.accent+';"><span style="display:inline-block;background:#0A0A0A;color:'+ag.accent+';font-size:10px;font-weight:700;letter-spacing:0.12em;padding:3px 8px;border-radius:4px;margin-bottom:12px;">'+ag.cat+'</span><div class="d" style="font-size:20px;font-weight:700;color:#0A0A0A;margin-bottom:4px;">'+ag.role+'</div><div style="font-size:13px;color:'+ag.dark+';font-style:italic;line-height:1.4;margin-bottom:12px;">'+ag.tagline+'</div><div style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#0A0A0A;">'+ag.gain+' &middot; '+ag.readiness+'% ready</div></div>'; });
+    h+='</div>';
+    // Deep report handoff
+    h+='<div style="background:#0A0A0A;border-radius:20px;padding:28px 28px;margin-bottom:40px;display:grid;grid-template-columns:'+(mob?"1fr":"1fr auto")+';gap:18px;align-items:center;"><div><div class="d" style="font-size:18px;font-weight:700;color:#C8F135;margin-bottom:6px;">Your full written audit is on the way.</div><div style="font-size:14px;color:#9A9A9A;line-height:1.6;">A complete diagnosis, your Intelligence Score, where time and money leak with the cost, and a 30-day Delete / Connect / Build plan, written from your answers. Sent to '+esc(lead.email)+'.</div></div>'+(reportUrl?'<a href="'+esc(reportUrl)+'" style="background:#C8F135;color:#0A0A0A;font-weight:700;font-size:13px;padding:13px 24px;border-radius:10px;white-space:nowrap;text-transform:uppercase;letter-spacing:0.05em;">View report</a>':'')+'</div>';
+    // Booking
+    h+=sectionRule("Book your strategy call");
+    h+='<p style="font-size:16px;color:#5A5A5A;line-height:1.7;margin-bottom:18px;max-width:600px;">The audit is the map. The 30-minute call is where we walk through it together and pick your path to build it. Grab a time.</p>';
+    h+='<div id="cal-embed" style="background:#fff;border-radius:14px;overflow:hidden;min-height:560px;border:1.5px solid #EBEBEB;"></div>';
     h+='<div style="margin-top:28px;">'+btnGhost("Back to the audit","backToAudit()")+'</div></div>';
     document.getElementById("main").innerHTML=h;
     return;
