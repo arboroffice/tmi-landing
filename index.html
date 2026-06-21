@@ -356,13 +356,23 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   .cc-bar{display:flex;align-items:center;gap:7px;padding:11px 16px;background:#0a0b14;border-bottom:1px solid var(--line);}
   .cc-bar i{width:11px;height:11px;border-radius:50%;background:#2a2d3a;display:block;flex:none;}
   .cc-bar .u{margin-left:14px;font-family:var(--sans);font-size:11px;color:var(--ink-3);letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .cc-stage{position:relative;aspect-ratio:3/2;background:#0d0f1a;}
-  .cc-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;opacity:0;transition:opacity .6s ease;}
+  .cc-stage{position:relative;aspect-ratio:3/2;background:#0d0f1a;touch-action:pan-y;}
+  .cc-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;opacity:0;transition:opacity .5s ease;}
   .cc-stage img.on{opacity:1;}
+  .cc-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:44px;height:44px;border-radius:50%;background:rgba(10,11,20,0.66);border:1px solid var(--line-2);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:background .15s,color .15s,border-color .15s;padding:0;}
+  .cc-arrow:hover{background:var(--chart);color:#070810;border-color:var(--chart);}
+  .cc-arrow svg{width:20px;height:20px;}
+  .cc-arrow.prev{left:14px;}
+  .cc-arrow.next{right:14px;}
   .cc-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
-  .cc-tab{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink-2);background:rgba(255,255,255,0.04);border:1px solid var(--line);border-radius:999px;padding:8px 15px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;}
+  .cc-tab{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink-2);background:rgba(255,255,255,0.04);border:1px solid var(--line);border-radius:999px;padding:8px 15px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;white-space:nowrap;flex:none;}
   .cc-tab:hover{border-color:var(--line-2);color:var(--ink);}
   .cc-tab.on{background:var(--chart);color:#070810;border-color:var(--chart);}
+  @media(max-width:560px){
+    .cc-arrow{width:38px;height:38px;}
+    .cc-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+    .cc-tabs::-webkit-scrollbar{display:none;}
+  }
   .cc-own{display:flex;flex-wrap:wrap;gap:12px 26px;margin:30px 0 4px;}
   .cc-own span{font-size:14px;color:var(--ink-2);display:flex;align-items:center;gap:9px;}
   .cc-own span b{color:var(--chart);}
@@ -536,7 +546,7 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
     <p class="sub reveal">Jobs, money, crew, cash, and alerts in one live view, built around how your company actually works and tuned to your industry. The morning meeting becomes a glance. When it is built, it is yours.</p>
     <div class="cc reveal">
       <div class="cc-frame">
-        <div class="cc-bar"><i></i><i></i><i></i><span class="u">app.tmitechai.com / command-center</span></div>
+        <div class="cc-bar"><i></i><i></i><i></i><span class="u" id="cc-label">Construction &middot; command center</span></div>
         <div class="cc-stage" id="cc-stage">
           <img class="on" src="dash-construction.jpg" alt="TMI command center for a construction company" width="1536" height="1024"/>
           <img src="dash-agriculture.jpg" alt="TMI command center for an agriculture operation" width="1402" height="1122" loading="lazy"/>
@@ -544,6 +554,8 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
           <img src="dash-home-services.jpg" alt="TMI command center for a home services company" width="1536" height="1024" loading="lazy"/>
           <img src="dash-oil-gas.jpg" alt="TMI command center for an oil and gas operation" width="1536" height="1024" loading="lazy"/>
         </div>
+        <button class="cc-arrow prev" onclick="ccPrev()" aria-label="Previous industry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="cc-arrow next" onclick="ccNext()" aria-label="Next industry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
       <div class="cc-tabs" id="cc-tabs">
         <button class="cc-tab on" onclick="ccGo(0)">Construction</button>
@@ -567,12 +579,34 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
 (function(){
   var stage=document.getElementById('cc-stage'); if(!stage) return;
   var imgs=stage.querySelectorAll('img');
-  var tabs=document.querySelectorAll('#cc-tabs .cc-tab');
-  var i=0,t;
-  function show(n){ i=n; imgs.forEach(function(im,k){ im.classList.toggle('on',k===n); }); tabs.forEach(function(tb,k){ tb.classList.toggle('on',k===n); }); }
-  window.ccGo=function(n){ show(n); clearInterval(t); t=setInterval(adv,5000); };
-  function adv(){ show((i+1)%imgs.length); }
-  t=setInterval(adv,5000);
+  var tabsWrap=document.getElementById('cc-tabs');
+  var tabs=Array.prototype.slice.call(tabsWrap.querySelectorAll('.cc-tab'));
+  var label=document.getElementById('cc-label');
+  var names=["Construction","Agriculture","Field Operations","Home Services","Oil & Gas"];
+  var n=imgs.length, i=0, t;
+  function show(k){
+    i=(k+n)%n;
+    imgs.forEach(function(im,j){ im.classList.toggle('on',j===i); });
+    tabs.forEach(function(tb,j){ tb.classList.toggle('on',j===i); });
+    if(label) label.textContent=names[i]+' · command center';
+    var at=tabs[i];
+    if(at && tabsWrap.scrollWidth>tabsWrap.clientWidth && at.scrollIntoView) at.scrollIntoView({inline:'center',block:'nearest'});
+  }
+  function go(k){ show(k); reset(); }
+  function reset(){ clearInterval(t); t=setInterval(function(){ show(i+1); }, 5500); }
+  window.ccGo=go;
+  window.ccNext=function(){ go(i+1); };
+  window.ccPrev=function(){ go(i-1); };
+  reset();
+  // Swipe on touch devices
+  var x0=null, y0=null;
+  stage.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; y0=e.touches[0].clientY; },{passive:true});
+  stage.addEventListener('touchend',function(e){
+    if(x0===null) return;
+    var dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0;
+    if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)){ if(dx<0) window.ccNext(); else window.ccPrev(); }
+    x0=null; y0=null;
+  },{passive:true});
 })();
 </script>
 
