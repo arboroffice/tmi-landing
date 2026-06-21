@@ -586,21 +586,28 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
   var tabs=Array.prototype.slice.call(tabsWrap.querySelectorAll('.cc-tab'));
   var label=document.getElementById('cc-label');
   var names=["Construction","Agriculture","Field Operations","Home Services","Oil & Gas"];
-  var n=imgs.length, i=0, t;
+  var n=imgs.length, i=0, t=null, visible=false;
   function show(k){
     i=(k+n)%n;
     imgs.forEach(function(im,j){ im.classList.toggle('on',j===i); });
     tabs.forEach(function(tb,j){ tb.classList.toggle('on',j===i); });
     if(label) label.textContent=names[i]+' · command center';
+    // Center the active tab WITHIN the strip only — never scroll the page.
     var at=tabs[i];
-    if(at && tabsWrap.scrollWidth>tabsWrap.clientWidth && at.scrollIntoView) at.scrollIntoView({inline:'center',block:'nearest'});
+    if(at && tabsWrap.scrollWidth>tabsWrap.clientWidth+2){
+      tabsWrap.scrollTo({ left: at.offsetLeft-(tabsWrap.clientWidth/2)+(at.offsetWidth/2), behavior:'smooth' });
+    }
   }
-  function go(k){ show(k); reset(); }
-  function reset(){ clearInterval(t); t=setInterval(function(){ show(i+1); }, 5500); }
+  function stop(){ if(t){ clearInterval(t); t=null; } }
+  function play(){ stop(); if(visible) t=setInterval(function(){ show(i+1); }, 5500); }
+  function go(k){ show(k); play(); }
   window.ccGo=go;
   window.ccNext=function(){ go(i+1); };
   window.ccPrev=function(){ go(i-1); };
-  reset();
+  // Only autoplay while the showcase is actually on screen.
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){ es.forEach(function(e){ visible=e.isIntersecting; play(); }); }, {threshold:0.35}).observe(stage);
+  } else { visible=true; play(); }
   // Swipe on touch devices
   var x0=null, y0=null;
   stage.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; y0=e.touches[0].clientY; },{passive:true});
