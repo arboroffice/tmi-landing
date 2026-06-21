@@ -637,7 +637,6 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
         <a href="/portfolio">The Work</a>
         <a href="/founders-of-the-future">Founders of the Future</a>
         <a href="/operations">The Whole Operation</a>
-        <a href="/complete-audit">Complete Audit</a>
       </div>
       <div class="foot-col">
         <h5>Industry Playbooks</h5>
@@ -720,8 +719,9 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
     </div>
     <div class="fmodal-ok" id="fmodal-ok">
       <div class="fe">You're in</div>
-      <h3>Check your inbox.</h3>
-      <p>The Playbook and Digital Employee Map are on their way, and you are on the Founders of the Future list.</p>
+      <h3>Now see it for your company.</h3>
+      <p>The Playbook and Digital Employee Map are on their way. Next, run the free interactive audit and watch your company's operating system map itself in real time.</p>
+      <a href="/intelligent-company-audit" class="fmodal-form" style="display:block;text-align:center;background:var(--chart);color:#070810;font-weight:700;font-size:15px;padding:14px;border-radius:11px;">Start your audit &rarr;</a>
     </div>
   </div>
 </div>
@@ -746,6 +746,7 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
     if(!email||email.indexOf('@')<0){ el.focus(); el.style.borderColor='#ff8585'; return; }
     post({ email:email, source:'founders-of-the-future', sources:['founders-of-the-future','playbook'] });
     try{ if(typeof fbq==='function') fbq('track','Lead',{content_name:'FOTF Playbook'}); }catch(e){}
+    try{ localStorage.setItem('ica_lead', JSON.stringify({ name:'', email:email, company:'' })); }catch(e){}
     document.getElementById('fmodal-main').style.display='none';
     document.getElementById('fmodal-ok').style.display='block';
     try{ localStorage.setItem('fotf_modal','1'); }catch(e){}
