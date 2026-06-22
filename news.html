@@ -333,6 +333,8 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     <a href="#" data-filter="Mining">Mining</a>
     <a href="#" data-filter="Manufacturing">Manufacturing</a>
     <a href="#" data-filter="Operations">Operations</a>
+    <a href="#" data-filter="AI &amp; Tech">AI &amp; Tech</a>
+    <a href="#" data-filter="Finance">Finance</a>
   </div>
 </div>
 
@@ -1152,15 +1154,22 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 // Article filter
 const filterLinks = document.querySelectorAll('.filter-inner a[data-filter]');
 const stories = document.querySelectorAll('.story[data-cat]');
+const featured = document.querySelector('.featured');
 filterLinks.forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
     filterLinks.forEach(l => l.classList.remove('active'));
     link.classList.add('active');
     const filter = link.getAttribute('data-filter');
+    // Featured story has no category — only show it on "All".
+    if (featured) featured.style.display = (filter === 'all') ? '' : 'none';
+    let shown = 0;
     stories.forEach(story => {
       const cat = story.getAttribute('data-cat');
-      story.style.display = (filter === 'all' || cat === filter) ? '' : 'none';
+      const match = (filter === 'all' || cat === filter);
+      story.style.display = match ? '' : 'none';
+      // Force-reveal matches that the scroll animation never reached.
+      if (match) { story.classList.add('visible'); shown++; }
     });
   });
 });
