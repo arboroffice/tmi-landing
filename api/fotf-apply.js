@@ -40,7 +40,10 @@ module.exports = async function handler(req, res) {
   try {
     const existing = await db.findOne('contacts', 'email', email);
     const tags = Array.isArray(existing && existing.tags) ? existing.tags.slice() : [];
-    for (const t of ['founders-of-the-future', 'fotf-applicant']) {
+    const wantTags = ['founders-of-the-future', 'fotf-applicant'];
+    // Opt-in to The Brief newsletter (default on in the form).
+    if (b.brief !== false) wantTags.push('the-brief');
+    for (const t of wantTags) {
       if (!tags.includes(t)) tags.push(t);
     }
     contact = await db.upsertByField('contacts', 'email', email, {
@@ -93,6 +96,7 @@ module.exports = async function handler(req, res) {
         text:
           `Hi ${first},\n\n` +
           `Thanks for applying to Founders of the Future. We review every application personally and will be in touch about the next dinner, build lab, or company tour.\n\n` +
+          (b.brief !== false ? `You're also signed up for The Brief, our newsletter on building intelligent companies and getting the chaos off your plate. Watch your inbox.\n\n` : '') +
           `If you want your systems built in the meantime, you can book a TMI audit here: https://www.tmitechai.com/complete-audit\n\n` +
           `— The TMI team`,
       });
