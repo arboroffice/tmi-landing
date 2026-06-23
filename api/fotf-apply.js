@@ -96,7 +96,7 @@ module.exports = async function handler(req, res) {
         text:
           `Hi ${first},\n\n` +
           `Thanks for applying to Founders of the Future. We review every application personally and will be in touch about the next dinner, build lab, or company tour.\n\n` +
-          (b.brief !== false ? `You're also signed up for The Brief, our newsletter on building intelligent companies and getting the chaos off your plate. Watch your inbox.\n\n` : '') +
+          (b.brief !== false ? `You're also signed up for The Brief, a custom daily AI briefing tuned to your job, your business, and your tech stack. Watch your inbox.\n\n` : '') +
           `If you want your systems built in the meantime, you can book a TMI audit here: https://www.tmitechai.com/complete-audit\n\n` +
           `— The TMI team`,
       });

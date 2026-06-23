@@ -804,6 +804,10 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
         <button onclick="fotfNews()">Subscribe</button>
       </form>
     </div>
+    <label class="reveal" id="fotf-brief-opt" for="fotf-brief" style="display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:13px;color:var(--ink-2);line-height:1.5;cursor:pointer;max-width:540px;">
+      <input type="checkbox" id="fotf-brief" checked style="margin-top:2px;accent-color:var(--chart);width:15px;height:15px;flex:none;"/>
+      <span>Also send me <b style="color:#fff;font-weight:600;">The Brief</b>: a custom daily AI briefing, tuned to your job, your business, and your tech stack.</span>
+    </label>
     <div class="fotf-ok" id="fotf-news-ok">You're in. Welcome to Founders of the Future.</div>
   </div>
 </section>
@@ -926,6 +930,10 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
         <input id="fmodal-email" type="email" placeholder="you@company.com" autocomplete="email"/>
         <button onclick="fmSubmit()">Get it free &rarr;</button>
       </form>
+      <label for="fmodal-brief" style="display:flex;gap:9px;align-items:flex-start;margin:14px 0 0;font-size:12.5px;color:var(--ink-2);line-height:1.45;cursor:pointer;">
+        <input type="checkbox" id="fmodal-brief" checked style="margin-top:2px;accent-color:var(--chart);width:14px;height:14px;flex:none;"/>
+        <span>Also send me <b style="color:#fff;font-weight:600;">The Brief</b>: a custom daily AI briefing tuned to your business.</span>
+      </label>
       <span class="alt">or <a href="/founders-of-the-future">explore the community &rarr;</a></span>
     </div>
     <div class="fmodal-ok" id="fmodal-ok">
@@ -944,9 +952,11 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
   window.fotfNews=function(){
     var el=document.getElementById('fotf-news-email'); var email=(el.value||'').trim();
     if(!email||email.indexOf('@')<0){ el.focus(); el.style.borderColor='#ff8585'; return; }
-    post({ email:email, source:'founders-of-the-future', sources:['founders-of-the-future'] });
+    var cb=document.getElementById('fotf-brief'); var srcs=['founders-of-the-future']; if(cb&&cb.checked) srcs.push('the-brief');
+    post({ email:email, source:'founders-of-the-future', sources:srcs });
     try{ if(typeof fbq==='function') fbq('track','Lead',{content_name:'Founders of the Future'}); }catch(e){}
     document.getElementById('fotf-news').style.display='none';
+    var bo=document.getElementById('fotf-brief-opt'); if(bo) bo.style.display='none';
     document.getElementById('fotf-news-ok').style.display='block';
   };
   // Freebie modal
@@ -955,7 +965,8 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
   window.fmSubmit=function(){
     var el=document.getElementById('fmodal-email'); var email=(el.value||'').trim();
     if(!email||email.indexOf('@')<0){ el.focus(); el.style.borderColor='#ff8585'; return; }
-    post({ email:email, source:'founders-of-the-future', sources:['founders-of-the-future','playbook'] });
+    var mcb=document.getElementById('fmodal-brief'); var msrcs=['founders-of-the-future','playbook']; if(mcb&&mcb.checked) msrcs.push('the-brief');
+    post({ email:email, source:'founders-of-the-future', sources:msrcs });
     try{ if(typeof fbq==='function') fbq('track','Lead',{content_name:'FOTF Playbook'}); }catch(e){}
     try{ localStorage.setItem('ica_lead', JSON.stringify({ name:'', email:email, company:'' })); }catch(e){}
     document.getElementById('fmodal-main').style.display='none';

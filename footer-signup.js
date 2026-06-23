@@ -46,6 +46,7 @@
 <p class="sub">Sharp dispatches for owners and builders. Zero AI hype.</p>\
 <form id="tmi-fs-form">\
 <div class="row"><input type="email" required placeholder="you@company.com"/><button type="submit">Sign up</button></div>\
+<label class="opt"><input type="checkbox" name="brief" checked/> <span>Also send me <b>The Brief</b>: a custom daily AI briefing, tuned to your job, your business, and your tech stack.</span></label>\
 <label class="opt"><input type="checkbox" name="terms"/> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">terms</a>.</span></label>\
 <div class="err" id="tmi-fs-err">Please agree to the terms to continue.</div>\
 </form>\
@@ -61,6 +62,7 @@
       var form = document.getElementById('tmi-fs-form');
       if (!form) return;
       var input = form.querySelector('input[type=email]');
+      var brief = form.querySelector('input[name=brief]');
       var terms = form.querySelector('input[name=terms]');
       var btn = form.querySelector('button');
       var err = document.getElementById('tmi-fs-err');
@@ -68,14 +70,17 @@
       err.style.display = 'none';
       if (!email || email.indexOf('@') < 0) { input.focus(); return; }
       if (!terms.checked) { err.style.display = 'block'; return; }
+      var wantsBrief = !!(brief && brief.checked);
+      var sources = ['founders-of-the-future'];
+      if (wantsBrief) sources.push('the-brief');
       btn.disabled = true; btn.textContent = '...';
       fetch('/api/subscribe', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, source: 'founders-of-the-future' })
+        body: JSON.stringify({ email: email, source: 'founders-of-the-future', sources: sources })
       }).then(function (r) {
         if (!r.ok) throw new Error('failed');
-        try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Founders of the Future' }); } catch (_) {}
-        sec.querySelector('.in').innerHTML = '<div class="ok">You\'re in. Check your inbox.</div>';
+        try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Founders of the Future' + (wantsBrief ? ' + The Brief' : '') }); } catch (_) {}
+        sec.querySelector('.in').innerHTML = '<div class="ok">You\'re in. Check your inbox' + (wantsBrief ? ' &mdash; The Brief lands soon.' : '.') + '</div>';
       }).catch(function () { btn.disabled = false; btn.textContent = 'Sign up'; alert('Something went wrong. Please try again.'); });
     });
   }

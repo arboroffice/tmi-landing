@@ -1085,6 +1085,10 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
           <input type="email" id="newsletter-email" placeholder="you@yourcompany.com" required/>
           <button type="submit" id="newsletter-btn">Subscribe &#8594;</button>
         </form>
+        <label for="newsletter-brief" id="newsletter-brief-wrap" style="display:flex;gap:9px;align-items:flex-start;margin-top:12px;font-size:12.5px;color:rgba(255,255,255,0.6);line-height:1.45;cursor:pointer;">
+          <input type="checkbox" id="newsletter-brief" checked style="margin-top:2px;accent-color:#E4FF97;width:14px;height:14px;flex:none;"/>
+          <span>Also send me <b style="color:#fff;font-weight:600;">The Brief</b>: a custom daily AI briefing, tuned to your job, business, and tech stack.</span>
+        </label>
         <div class="newsletter-note" id="newsletter-note">No spam &middot; unsubscribe anytime</div>
         <a href="/founders-vault" style="display:inline-block;margin-top:16px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--chart);">Read the vault &rarr;</a>
       </div>
@@ -1171,16 +1175,20 @@ if (newsletterForm) {
     const email = document.getElementById('newsletter-email').value.trim();
     const btn = document.getElementById('newsletter-btn');
     const note = document.getElementById('newsletter-note');
+    const briefCb = document.getElementById('newsletter-brief');
+    const sources = ['field-notes'];
+    if (briefCb && briefCb.checked) sources.push('the-brief');
     btn.disabled = true;
     btn.textContent = 'Subscribing...';
     try {
       const r = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'field-notes' }),
+        body: JSON.stringify({ email, source: 'field-notes', sources }),
       });
       if (r.ok) {
         newsletterForm.innerHTML = '';
+        const bw = document.getElementById('newsletter-brief-wrap'); if (bw) bw.style.display = 'none';
         note.textContent = "You're in. First issue hits Monday.";
         note.style.color = 'rgba(228,255,151,0.9)';
         try { if (typeof fbq === 'function') fbq('track', 'CompleteRegistration', { content_name: 'Newsletter' }); } catch (e) {}
