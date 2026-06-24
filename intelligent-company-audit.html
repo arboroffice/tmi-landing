@@ -93,10 +93,6 @@ button { font-family: inherit; }
     <input id="g-company" type="text" placeholder="Smith Industries" autocomplete="organization"/>
     <label for="g-phone">Mobile (for your results + call reminders)</label>
     <input id="g-phone" type="tel" placeholder="(555) 123-4567" autocomplete="tel"/>
-    <label for="g-brief" style="display:flex;gap:9px;align-items:flex-start;margin:4px 0 2px;font-size:13px;color:#6A6A6A;line-height:1.45;cursor:pointer;">
-      <input type="checkbox" id="g-brief" checked style="margin-top:2px;accent-color:#C8F135;width:15px;height:15px;flex:none;"/>
-      <span>Also send me <b style="color:#0A0A0A;font-weight:600;">The Brief</b>: a custom daily AI briefing, tuned to your job, business, and tech stack.</span>
-    </label>
     <button onclick="gateSubmit()">Start the audit &rarr;</button>
     <div class="err" id="g-err">Please enter a valid email.</div>
     <div class="note">Free. No card. Your results are yours to keep.</div>
@@ -282,8 +278,7 @@ function gateSubmit(){
   lead.email=em;
   lead.company=(document.getElementById("g-company").value||"").trim();
   var ph=document.getElementById("g-phone"); lead.phone=ph?(ph.value||"").trim():"";
-  var gb=document.getElementById("g-brief"); var gsrc=["founders-of-the-future","audit"]; if(!gb||gb.checked) gsrc.push("the-brief");
-  try{ fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ name:lead.name, email:lead.email, company:lead.company, phone:lead.phone, source:"intelligent-company-audit", sources:gsrc })}); }catch(e){}
+  try{ fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ name:lead.name, email:lead.email, company:lead.company, phone:lead.phone, source:"intelligent-company-audit", sources:["founders-of-the-future","audit"] })}); }catch(e){}
   try{ if(typeof fbq==="function") fbq("track","Lead",{content_name:"Intelligent Company Audit"}); }catch(e){}
   try{ localStorage.setItem("ica_lead", JSON.stringify(lead)); }catch(e){}
   state.answers.company = lead.company;

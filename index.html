@@ -801,58 +801,6 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
   }, {threshold:0});
   if(hero) dockIO.observe(hero);
 </script>
-<!-- FOTF FREEBIE MODAL -->
-<div class="fmodal" id="fmodal" role="dialog" aria-modal="true" aria-label="Free download">
-  <div class="fmodal-card">
-    <button class="fmodal-x" onclick="fmClose()" aria-label="Close">&times;</button>
-    <div id="fmodal-main">
-      <div class="fe">Free download</div>
-      <h3>The Intelligent Company Playbook</h3>
-      <p>The 30-day path to turning your operation into an AI-run company, plus the <b style="color:#fff;font-weight:600;">Digital Employee Map</b>: exactly which roles become AI agents, from dispatcher to collector.</p>
-      <form class="fmodal-form" id="fmodal-form" onsubmit="return false;">
-        <input id="fmodal-email" type="email" placeholder="you@company.com" autocomplete="email"/>
-        <button onclick="fmSubmit()">Get it free &rarr;</button>
-      </form>
-      <label for="fmodal-brief" style="display:flex;gap:9px;align-items:flex-start;margin:14px 0 0;font-size:12.5px;color:var(--ink-2);line-height:1.45;cursor:pointer;">
-        <input type="checkbox" id="fmodal-brief" checked style="margin-top:2px;accent-color:var(--chart);width:14px;height:14px;flex:none;"/>
-        <span>Also send me <b style="color:#fff;font-weight:600;">The Brief</b>: a custom daily AI briefing tuned to your business.</span>
-      </label>
-      <span class="alt">or <a href="/founders-of-the-future">explore the community &rarr;</a></span>
-    </div>
-    <div class="fmodal-ok" id="fmodal-ok">
-      <div class="fe">You're in</div>
-      <h3>Now see it for your company.</h3>
-      <p>The Playbook and Digital Employee Map are on their way. Next, run the free interactive audit and watch your company's operating system map itself in real time.</p>
-      <a href="/intelligent-company-audit" class="fmodal-form" style="display:block;text-align:center;background:var(--chart);color:#070810;font-weight:700;font-size:15px;padding:14px;border-radius:11px;">Start your audit &rarr;</a>
-    </div>
-  </div>
-</div>
-
-<script>
-(function(){
-  function post(payload){ try{ fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); }catch(e){} }
-  // Freebie modal
-  var modal=document.getElementById('fmodal');
-  window.fmClose=function(){ if(modal) modal.classList.remove('show'); try{ localStorage.setItem('fotf_modal','1'); }catch(e){} };
-  window.fmSubmit=function(){
-    var el=document.getElementById('fmodal-email'); var email=(el.value||'').trim();
-    if(!email||email.indexOf('@')<0){ el.focus(); el.style.borderColor='#ff8585'; return; }
-    var mcb=document.getElementById('fmodal-brief'); var msrcs=['founders-of-the-future','playbook']; if(mcb&&mcb.checked) msrcs.push('the-brief');
-    post({ email:email, source:'founders-of-the-future', sources:msrcs });
-    try{ if(typeof fbq==='function') fbq('track','Lead',{content_name:'FOTF Playbook'}); }catch(e){}
-    try{ localStorage.setItem('ica_lead', JSON.stringify({ name:'', email:email, company:'' })); }catch(e){}
-    document.getElementById('fmodal-main').style.display='none';
-    document.getElementById('fmodal-ok').style.display='block';
-    try{ localStorage.setItem('fotf_modal','1'); }catch(e){}
-  };
-  if(modal){
-    modal.addEventListener('click',function(e){ if(e.target===modal) fmClose(); });
-    document.addEventListener('keydown',function(e){ if(e.key==='Escape') fmClose(); });
-    var seen; try{ seen=localStorage.getItem('fotf_modal'); }catch(e){}
-    if(!seen){ setTimeout(function(){ modal.classList.add('show'); }, 2200); }
-  }
-})();
-</script>
 <script src="/rb2b.js"></script>
 </body>
 </html>

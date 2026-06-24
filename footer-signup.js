@@ -1,12 +1,11 @@
-// Global signup, injected site-wide: one form that subscribes to Founders of the
-// Future, with a required terms agreement. Feeds /api/subscribe with the
-// `founders-of-the-future` source. Self-skips on admin/embed/news pages and any
-// page that opts out via [data-no-footer-signup] or its own #newsletter-form.
+// Global signup REMOVED: TMI has no newsletter / email-list capture.
+// Kept as a no-op so existing <script src="/footer-signup.js"> tags stay valid.
 (function () {
   if (window.__tmiFooterSignup) return;
   window.__tmiFooterSignup = true;
 
   function start() {
+    return; // no newsletter signup
     var path = location.pathname.toLowerCase();
     if (/(^|\/)admin/.test(path) || /founders-embed|proposal-sign|\/news\b|news\.html/.test(path)) return;
     if (document.getElementById('newsletter-form')) return;
