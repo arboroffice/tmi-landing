@@ -16,6 +16,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { crawlSite, baseUrl } from './tools/research.js';
 import { enrichCompany } from './tools/apollo.js';
 import { lookupBusinessOnMaps, scrapeLinkedInCompany } from './tools/apify.js';
+import { webResearch } from './tools/brave.js';
 
 const anthropic = new Anthropic();
 
@@ -63,10 +64,13 @@ export async function researchForAudit({ company, website, email } = {}) {
   const origin = site ? baseUrl(site) : null;
 
   // ── Phase 1: gather every source we can, in parallel, each time-boxed ──────
-  const [crawl, firmo, maps] = await Promise.all([
+  // Brave web search is the primary "other sites" engine (one key, whole web).
+  // Apollo + Apify are optional boosters - they only run if their own key is set.
+  const [crawl, web, firmo, maps] = await Promise.all([
     site ? withTimeout(crawlSite(site, { maxPages: 9 }), 22000) : Promise.resolve(null),
-    site ? withTimeout(enrichCompany({ domain: site }), 8000) : Promise.resolve(null),
-    company ? withTimeout(lookupBusinessOnMaps({ name: company, website: site }), 24000) : Promise.resolve(null),
+    company && process.env.BRAVE_API_KEY ? withTimeout(webResearch({ company, website: site }), 12000) : Promise.resolve(null),
+    site && process.env.APOLLO_API_KEY ? withTimeout(enrichCompany({ domain: site }), 8000) : Promise.resolve(null),
+    company && process.env.APIFY_API_TOKEN ? withTimeout(lookupBusinessOnMaps({ name: company, website: site }), 24000) : Promise.resolve(null),
   ]);
 
   const tech = (crawl && crawl.tech) || [];
@@ -98,6 +102,9 @@ export async function researchForAudit({ company, website, email } = {}) {
     firmo ? `Apollo firmographics: industry=${firmo.industry || '?'}, employees=${firmo.employeeCount || '?'}, revenue=${firmo.revenue || '?'}, founded=${firmo.foundedYear || '?'}, HQ=${firmo.location || '?'}` : '',
     linkedin ? `LinkedIn: ${[linkedin.industry, linkedin.employeeCount ? linkedin.employeeCount + ' employees' : '', linkedin.founded ? 'founded ' + linkedin.founded : '', Array.isArray(linkedin.specialties) ? 'specialties: ' + linkedin.specialties.slice(0, 8).join(', ') : ''].filter(Boolean).join('; ')}` : '',
     maps ? `Google Maps: ${[maps.category, maps.rating ? maps.rating + ' stars' : '', maps.reviewCount ? maps.reviewCount + ' reviews' : '', maps.address, maps.hours ? 'hours listed' : ''].filter(Boolean).join('; ')}` : '',
+    web && web.results && web.results.length
+      ? `\nWeb search results about them (other sites - Google profile, Yelp, BBB, LinkedIn, news, directories). Extract review counts/ratings, headcount, founded year, categories, and notable mentions from these snippets:\n${web.results.map((r, i) => `${i + 1}. ${r.title}${r.source ? ' [' + r.source + ']' : ''}\n   ${r.description}\n   ${r.url}`).join('\n')}`
+      : '',
     siteText ? `\nWebsite copy excerpt:\n${siteText}` : '',
   ].filter(Boolean).join('\n');
 
@@ -209,10 +216,11 @@ Return ONLY this JSON object:
     firmographics: firmo || null,
     linkedin: linkedin || null,
     maps: maps || null,
+    web: web || null,
     summary: parsed.summary || '',
     found: found.slice(0, 12),
     prefill,
     hypotheses: parsed.hypotheses || {},
-    confidence: parsed.confidence || ((firmo || maps || tech.length) ? 'medium' : 'low'),
+    confidence: parsed.confidence || ((firmo || maps || web || tech.length) ? 'medium' : 'low'),
   };
 }
