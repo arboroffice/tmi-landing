@@ -19,8 +19,19 @@ module.exports = async function handler(req, res) {
     RESEND_API_KEY: !!process.env.RESEND_API_KEY,
   };
 
+  // Fast probe: just confirm the research module (and its @anthropic-ai/sdk
+  // dependency) resolves and loads in the deployed function. Returns instantly.
+  if (req.query && req.query.probe === '1') {
+    try {
+      const mod = await import('../agents/gtm/audit-research.js');
+      return res.json({ env, moduleLoads: typeof mod.researchForAudit === 'function' });
+    } catch (e) {
+      return res.json({ env, moduleLoads: false, error: e.message });
+    }
+  }
+
   if (!req.query || req.query.run !== '1') {
-    return res.json({ env, note: 'add ?run=1 to execute a live research pass on a fixed company (Roto-Rooter)' });
+    return res.json({ env, note: 'add ?probe=1 to confirm the module loads, or ?run=1 to execute a full research pass' });
   }
 
   const t0 = Date.now();
