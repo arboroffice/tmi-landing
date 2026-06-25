@@ -45,13 +45,53 @@ const TECH_FINGERPRINTS = [
   [/housecallpro|housecall/i, 'Housecall Pro'],
   [/fieldedge/i, 'FieldEdge'],
   [/servicefusion/i, 'Service Fusion'],
+  [/servicem8/i, 'ServiceM8'],
+  [/workiz/i, 'Workiz'],
+  [/mhelpdesk/i, 'mHelpDesk'],
+  [/jobnimbus/i, 'JobNimbus'],
+  [/acculynx/i, 'AccuLynx'],
+  [/roofr/i, 'Roofr'],
+  [/knowify/i, 'Knowify'],
+  [/tradify/i, 'Tradify'],
+  [/companycam/i, 'CompanyCam'],
+  [/simpro/i, 'simPRO'],
+  [/fergus/i, 'Fergus'],
   [/calendly/i, 'Calendly'],
   [/acuityscheduling/i, 'Acuity Scheduling'],
   [/procore/i, 'Procore'],
   [/buildertrend/i, 'Buildertrend'],
+  [/contractorforeman/i, 'Contractor Foreman'],
   [/quickbooks|intuit/i, 'QuickBooks'],
+  [/xero/i, 'Xero'],
+  [/sage(accounting|intacct|50|100|300)?/i, 'Sage'],
+  [/freshbooks/i, 'FreshBooks'],
+  [/bill\.com/i, 'Bill.com'],
+  // Fleet / GPS / telematics
   [/samsara/i, 'Samsara'],
   [/fleetio/i, 'Fleetio'],
+  [/gomotive|keeptruckin/i, 'Motive'],
+  [/verizonconnect|fleetmatics/i, 'Verizon Connect'],
+  [/gpsinsight/i, 'GPS Insight'],
+  [/geotab/i, 'Geotab'],
+  // Payroll / HR / scheduling labor
+  [/adp\.com|workforcenow/i, 'ADP'],
+  [/gusto/i, 'Gusto'],
+  [/paychex/i, 'Paychex'],
+  [/tsheets|quickbooks-time/i, 'QuickBooks Time'],
+  [/wheniwork/i, 'When I Work'],
+  [/deputy\.com/i, 'Deputy'],
+  // Payments
+  [/js\.stripe\.com|stripe/i, 'Stripe'],
+  [/squareup|squarecdn/i, 'Square'],
+  [/authorize\.net/i, 'Authorize.net'],
+  // Project / work management
+  [/monday\.com/i, 'Monday.com'],
+  [/asana/i, 'Asana'],
+  [/trello/i, 'Trello'],
+  [/clickup/i, 'ClickUp'],
+  [/airtable/i, 'Airtable'],
+  [/notion\.so|notion\.site/i, 'Notion'],
+  [/smartsheet/i, 'Smartsheet'],
   // Website platform
   [/wp-content|wp-includes/i, 'WordPress'],
   [/static\.wixstatic|wix\.com/i, 'Wix'],
@@ -59,7 +99,7 @@ const TECH_FINGERPRINTS = [
   [/assets\.webflow|webflow\.io/i, 'Webflow'],
   [/cdn\.shopify|shopify/i, 'Shopify'],
   [/duda(mobile)?/i, 'Duda'],
-  // Forms / chat / reviews
+  // Forms / chat / reviews / lead marketplaces
   [/gravityforms|gform_/i, 'Gravity Forms'],
   [/typeform/i, 'Typeform'],
   [/jotform/i, 'JotForm'],
@@ -68,6 +108,13 @@ const TECH_FINGERPRINTS = [
   [/tawk\.to/i, 'Tawk.to'],
   [/podium/i, 'Podium'],
   [/birdeye/i, 'Birdeye'],
+  [/nicejob/i, 'NiceJob'],
+  [/(^|\W)angi(\.com|leads)/i, 'Angi'],
+  [/thumbtack/i, 'Thumbtack'],
+  [/nextdoor/i, 'Nextdoor'],
+  [/yelp\.com\/biz|yelp-reviews/i, 'Yelp'],
+  [/servicetitan-marketing|marketing-pro/i, 'ServiceTitan Marketing Pro'],
+  [/salesrabbit/i, 'SalesRabbit'],
   // Analytics
   [/googletagmanager|gtag\(/i, 'Google Tag Manager'],
   [/google-analytics|ga\('create/i, 'Google Analytics'],
@@ -101,6 +148,115 @@ export function findSignals(text) {
     if (lc.includes(t)) hits.add(t.replace(/\b\w/g, c => c.toUpperCase()));
   }
   return [...hits];
+}
+
+// ── Operational signals (how they run + win work) from site copy ────────────
+const OPS_PATTERNS = [
+  [/24\/7|24-7|24 hours|around the clock|after[- ]hours/i, '24/7 / after-hours service'],
+  [/emergency (service|repair|response|call)/i, 'Emergency service offered'],
+  [/same[- ]day|next[- ]day service/i, 'Same/next-day service promise'],
+  [/financing (available|options)|apply for financing|0% (apr|financing)/i, 'Offers customer financing'],
+  [/free (estimate|quote|inspection|consultation)/i, 'Free estimates/quotes'],
+  [/family[- ]owned|family operated|since (18|19|20)\d\d|established (in )?(18|19|20)\d\d/i, 'Family-owned / long-established'],
+  [/licensed (and|&) insured|fully insured|bonded/i, 'Licensed and insured'],
+  [/membership|maintenance plan|service agreement|service plan/i, 'Recurring membership/maintenance plans'],
+  [/we'?re hiring|join our team|now hiring|careers/i, 'Actively hiring'],
+  [/commercial (and|&) residential|residential (and|&) commercial/i, 'Both commercial and residential'],
+  [/fleet of|our trucks|service vehicles/i, 'Operates a fleet'],
+  [/warranty|guaranteed|satisfaction guarantee/i, 'Warranty / guarantee'],
+  [/online (booking|scheduling)|book online|schedule online/i, 'Online booking on site'],
+  [/text us|text message|sms/i, 'Texting as a channel'],
+];
+
+export function findOpsSignals(text) {
+  if (!text) return [];
+  const out = new Set();
+  for (const [re, label] of OPS_PATTERNS) if (re.test(text)) out.add(label);
+  return [...out];
+}
+
+// ── Extract phones, emails, service-area mentions, and counts from site ──────
+const US_STATES = '(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)';
+
+export function extractFacts(text, html) {
+  const facts = {};
+  const phones = [...new Set((text.match(/(\(\d{3}\)\s?|\d{3}[.\-\s])\d{3}[.\-\s]\d{4}/g) || []).map(s => s.trim()))].slice(0, 6);
+  if (phones.length) facts.phones = phones;
+  // Service areas: "serving X, Y, Z" or "areas we serve"
+  const serveBlock = (text.match(/(serving|areas? (we )?serve|service areas?|proudly serving)[^.]{0,220}/i) || [])[0];
+  if (serveBlock) facts.service_area_text = serveBlock.trim().slice(0, 220);
+  // City, ST pairs (rough proxy for locations / coverage)
+  const cityState = [...new Set((text.match(new RegExp(`[A-Z][a-zA-Z.\\- ]{2,24},\\s?${US_STATES}\\b`, 'g')) || []).map(s => s.trim()))].slice(0, 12);
+  if (cityState.length) facts.locations_mentioned = cityState;
+  // Years in business / "since YYYY"
+  const since = (text.match(/\b(since|established|est\.?|serving since)\s+((18|19|20)\d\d)/i) || [])[2];
+  if (since) facts.since_year = since;
+  // Team / crew size claims
+  const team = (text.match(/(\d{2,4})\+?\s+(employees|team members|technicians|professionals|trucks|crews)/i) || [])[0];
+  if (team) facts.team_claim = team.trim();
+  return facts;
+}
+
+// ── Pull internal links from homepage HTML, prioritized for ops research ─────
+const PRIORITY_PATHS = [
+  '/about', '/about-us', '/services', '/our-services', '/what-we-do',
+  '/service-area', '/service-areas', '/locations', '/areas-we-serve',
+  '/team', '/our-team', '/staff', '/careers', '/jobs', '/employment',
+  '/contact', '/contact-us', '/pricing', '/financing', '/reviews',
+  '/testimonials', '/projects', '/gallery', '/fleet', '/commercial', '/residential',
+];
+
+export function extractLinks(html, origin) {
+  if (!html || !origin) return [];
+  const hrefs = [...html.matchAll(/href=["']([^"'#]+)["']/gi)].map(m => m[1]);
+  const internal = new Set();
+  for (const h of hrefs) {
+    let path = null;
+    if (h.startsWith('/') && !h.startsWith('//')) path = h;
+    else if (h.startsWith(origin)) { try { path = new URL(h).pathname; } catch {} }
+    if (!path) continue;
+    path = path.replace(/\/+$/, '') || '/';
+    if (/\.(jpg|jpeg|png|gif|svg|webp|pdf|zip|mp4|css|js)$/i.test(path)) continue;
+    if (path.split('/').length > 3) continue; // shallow only
+    internal.add(path);
+  }
+  return [...internal];
+}
+
+// ── Deep (but fast) site crawl: homepage + prioritized internal pages ────────
+// Fetches in parallel with short timeouts so it fits inside a serverless window.
+export async function crawlSite(website, { maxPages = 9 } = {}) {
+  const origin = baseUrl(website);
+  if (!origin) return null;
+  const home = await fetchPage(origin);
+  if (!home) return { origin, pages: [], combinedText: '', tech: [], roleSignals: [], opsSignals: [], facts: {} };
+
+  const discovered = extractLinks(home.html, origin);
+  // Rank: priority paths first (in our order), then any other discovered shallow links.
+  const ranked = [];
+  for (const p of PRIORITY_PATHS) {
+    const hit = discovered.find(d => d.toLowerCase() === p);
+    if (hit && !ranked.includes(hit)) ranked.push(hit);
+  }
+  for (const d of discovered) {
+    if (d === '/' || ranked.includes(d)) continue;
+    if (ranked.length >= maxPages) break;
+    ranked.push(d);
+  }
+  const toFetch = ranked.slice(0, maxPages);
+
+  const fetched = await Promise.all(toFetch.map(p => fetchPage(origin + p).then(r => ({ path: p, r })).catch(() => ({ path: p, r: null }))));
+  const pages = [{ path: '/', text: home.text, html: home.html }];
+  for (const { path, r } of fetched) if (r && r.text) pages.push({ path, text: r.text, html: r.html });
+
+  const allHtml = pages.map(p => p.html || '').join('\n');
+  const combinedText = pages.map(p => `[${p.path}] ${p.text}`).join('\n\n');
+  const tech = detectTechStack(allHtml);
+  const roleSignals = findSignals(combinedText);
+  const opsSignals = findOpsSignals(combinedText);
+  const facts = extractFacts(combinedText, allHtml);
+
+  return { origin, pagesCrawled: pages.map(p => p.path), pages, combinedText, tech, roleSignals, opsSignals, facts };
 }
 
 async function gatherSignals(origin) {

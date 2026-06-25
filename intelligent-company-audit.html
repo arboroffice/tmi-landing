@@ -265,7 +265,7 @@ const FALLBACK_INTAKE = [
 
 /* ─── STATE ─────────────────────────────────────────────────────── */
 var lead = { name:"", email:"", company:"", phone:"" };
-var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null, research:null, researching:false, researched:false, prefilled:{} };
+var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null, research:null, researching:false, researched:false, prefilled:{}, hypothesis:{} };
 function isMob(){ return window.innerWidth < 640; }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function sum(o){ return Object.values(o).reduce(function(a,b){return a+b;},0); }
@@ -304,6 +304,14 @@ function runResearch(){
         Object.keys(pf).forEach(function(k){
           var cur=state.answers[k];
           if(cur==null || String(cur).trim()===""){ state.answers[k]=pf[k]; state.prefilled[k]=true; }
+        });
+        // Open-ended questions come pre-drafted from our research as "our read" so
+        // the owner confirms or corrects instead of writing from a blank box.
+        var hy=d.hypotheses||{};
+        Object.keys(hy).forEach(function(k){
+          var v=hy[k]; if(!v || String(v).trim()==="") return;
+          var cur=state.answers[k];
+          if(cur==null || String(cur).trim()===""){ state.answers[k]=String(v); state.prefilled[k]=true; state.hypothesis[k]=true; }
         });
       }
       if(state.sec==="intake"||state.sec==="intro") render();
@@ -466,7 +474,9 @@ function renderIntake(mob){
     (sec.questions||[]).forEach(function(q){
       var v=state.answers[q.id];
       var pre=state.prefilled[q.id];
-      h+='<div class="fld" style="margin:16px 0;'+(pre?'border-left:3px solid #C8F135;padding-left:14px;':'')+'"><label style="display:block;font-size:14px;font-weight:600;color:#0A0A0A;margin-bottom:8px;">'+esc(q.label)+(q.help?' <span style="color:#AAAAAA;font-weight:400;">'+esc(q.help)+'</span>':'')+(pre?' <span style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4A6010;background:#EEF8C8;border-radius:100px;padding:2px 9px;margin-left:6px;vertical-align:middle;">Researched &middot; confirm</span>':'')+'</label>';
+      var hyp=state.hypothesis[q.id];
+      var badge=hyp?'Our read &middot; edit':'Researched &middot; confirm';
+      h+='<div class="fld" style="margin:16px 0;'+(pre?'border-left:3px solid #C8F135;padding-left:14px;':'')+'"><label style="display:block;font-size:14px;font-weight:600;color:#0A0A0A;margin-bottom:8px;">'+esc(q.label)+(q.help?' <span style="color:#AAAAAA;font-weight:400;">'+esc(q.help)+'</span>':'')+(pre?' <span style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4A6010;background:#EEF8C8;border-radius:100px;padding:2px 9px;margin-left:6px;vertical-align:middle;">'+badge+'</span>':'')+'</label>';
       if(q.type==="long"){ h+='<textarea oninput="setAns(\''+q.id+'\',this.value)">'+esc(v||"")+'</textarea>'; }
       else if(q.type==="single"){ (q.options||[]).forEach(function(o){ h+='<label class="opt"><input type="radio" name="'+q.id+'" value="'+esc(o)+'" '+(v===o?"checked":"")+' onchange="setAns(\''+q.id+'\',this.value)"> '+esc(o)+'</label>'; }); }
       else if(q.type==="multi"){ var arr=Array.isArray(v)?v:[]; (q.options||[]).forEach(function(o){ h+='<label class="opt"><input type="checkbox" value="'+esc(o)+'" '+(arr.indexOf(o)>=0?"checked":"")+' onchange="toggleMulti(\''+q.id+'\',\''+esc(o).replace(/'/g,"\\'")+'\')"> '+esc(o)+'</label>'; }); }

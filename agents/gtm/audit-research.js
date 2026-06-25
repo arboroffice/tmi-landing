@@ -1,27 +1,36 @@
 // AI research pass for the Intelligent Company Audit. Before we ask the owner a
-// single question, we do the homework: resolve their site from the email domain,
-// read it, fingerprint the software they run, and let Claude extract what is
-// PUBLICLY knowable. We pre-fill those fields so the audit only has to ask the
-// owner for what only the owner knows. We never invent internal numbers.
+// single question, we do the homework across multiple sources, the way a sharp
+// analyst would after an hour of digging:
+//   1. Their own site  - a deep (but fast) multi-page crawl: home, about, services,
+//      service-area, team, careers, contact, pricing, reviews. We read the copy,
+//      fingerprint every software tool they run, and pull phones, locations,
+//      service-area language, "since YYYY", and team-size claims.
+//   2. Google Maps     - rating, review count, category, hours, address (Apify).
+//   3. Apollo          - firmographics: industry, employees, revenue, founded, HQ.
+//   4. LinkedIn        - description, headcount band, specialties (only if the
+//      firmographics came back thin).
+// Then Claude synthesizes ALL of it into pre-filled answers so the audit only has
+// to ask the owner for what only the owner knows. We never invent internal numbers.
 
 import Anthropic from '@anthropic-ai/sdk';
-import { fetchPage, baseUrl, detectTechStack, findSignals } from './tools/research.js';
+import { crawlSite, baseUrl } from './tools/research.js';
 import { enrichCompany } from './tools/apollo.js';
+import { lookupBusinessOnMaps, scrapeLinkedInCompany } from './tools/apify.js';
 
 const anthropic = new Anthropic();
 
-// Detected tools map deterministically onto specific intake answers, so the
-// owner just confirms them instead of listing their stack from memory.
+// Resolve a tool name to the specific intake field(s) the owner just confirms.
 function mapToolsToFields(tech) {
   const has = (n) => tech.includes(n);
   const out = {};
-  const fieldTool = ['ServiceTitan', 'Jobber', 'Housecall Pro', 'FieldEdge', 'Service Fusion', 'Procore', 'Buildertrend'].find(has);
+  const fieldTool = ['ServiceTitan', 'Jobber', 'Housecall Pro', 'FieldEdge', 'Service Fusion', 'ServiceM8', 'Workiz', 'JobNimbus', 'AccuLynx', 'Procore', 'Buildertrend', 'Knowify', 'simPRO', 'Tradify', 'Contractor Foreman'].find(has);
   if (fieldTool) { out.system_of_record = fieldTool; out.crm = fieldTool; }
   else {
     const crm = ['HubSpot', 'Salesforce', 'Zoho', 'ActiveCampaign'].find(has);
     if (crm) out.crm = crm;
   }
-  if (has('QuickBooks')) out.books = 'QuickBooks';
+  const books = ['QuickBooks', 'Xero', 'Sage', 'FreshBooks'].find(has);
+  if (books) out.books = books;
   if (tech.length) out.tools_list = tech.join(', ');
   return out;
 }
@@ -41,57 +50,90 @@ function siteFromEmail(email) {
   return dom;
 }
 
+// Time-box a best-effort source so a slow scraper can never blow the request window.
+function withTimeout(promise, ms) {
+  return Promise.race([
+    Promise.resolve(promise).catch(() => null),
+    new Promise((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
+
 export async function researchForAudit({ company, website, email } = {}) {
   const site = (website && String(website).trim()) || siteFromEmail(email);
+  const origin = site ? baseUrl(site) : null;
 
-  let home = null, tech = [], signals = [];
-  if (site) {
-    home = await fetchPage(site);
-    const origin = baseUrl(site);
-    tech = detectTechStack(home && home.html);
-    // One extra page for context — services or about — no deep crawl (keeps it fast).
-    if (origin) {
-      const extra = (await fetchPage(origin + '/services')) || (await fetchPage(origin + '/about'));
-      if (extra && extra.text) home = { text: ((home && home.text) || '') + ' ' + extra.text, html: home && home.html };
-    }
-    signals = findSignals((home && home.text) || '');
+  // ── Phase 1: gather every source we can, in parallel, each time-boxed ──────
+  const [crawl, firmo, maps] = await Promise.all([
+    site ? withTimeout(crawlSite(site, { maxPages: 9 }), 22000) : Promise.resolve(null),
+    site ? withTimeout(enrichCompany({ domain: site }), 8000) : Promise.resolve(null),
+    company ? withTimeout(lookupBusinessOnMaps({ name: company, website: site }), 24000) : Promise.resolve(null),
+  ]);
+
+  const tech = (crawl && crawl.tech) || [];
+  const roleSignals = (crawl && crawl.roleSignals) || [];
+  const opsSignals = (crawl && crawl.opsSignals) || [];
+  const facts = (crawl && crawl.facts) || {};
+
+  // ── Phase 2: LinkedIn only if firmographics came back thin (avoids dup work) ─
+  let linkedin = null;
+  const firmoThin = !firmo || (!firmo.employeeCount && !firmo.revenue && !firmo.foundedYear);
+  if (firmo && firmo.linkedinUrl && firmoThin) {
+    linkedin = await withTimeout(scrapeLinkedInCompany({ linkedinUrl: firmo.linkedinUrl }), 12000);
   }
 
-  // Apollo firmographics (fast, single call) — headcount, revenue range, founded
-  // year, industry, HQ. Best-effort; returns null if no key or no match.
-  let firmo = null;
-  if (site) { try { firmo = await enrichCompany({ domain: site }); } catch (e) { firmo = null; } }
-
+  // ── Build the evidence packet for the model ───────────────────────────────
+  const siteText = crawl && crawl.combinedText ? crawl.combinedText.slice(0, 8000) : '';
   const context = [
     `Company name: ${company || 'unknown'}`,
     site ? `Website: ${site}` : 'Website: none (personal email or no site provided)',
-    tech.length ? `Detected software/tools on their site: ${tech.join(', ')}` : 'Detected software/tools: none detected',
-    signals.length ? `Role/hiring signals seen: ${signals.join(', ')}` : '',
-    firmo ? `Firmographics (Apollo): industry=${firmo.industry || '?'}, employees=${firmo.employeeCount || '?'}, revenue=${firmo.revenue || '?'}, founded=${firmo.foundedYear || '?'}, HQ=${firmo.location || '?'}` : '',
-    home && home.text ? `\nWebsite text excerpt:\n${home.text.slice(0, 3500)}` : '',
+    crawl && crawl.pagesCrawled ? `Pages read: ${crawl.pagesCrawled.join(', ')}` : '',
+    tech.length ? `Software/tools detected on their site: ${tech.join(', ')}` : 'Software/tools detected: none (likely runs on phone, email, paper, spreadsheets)',
+    roleSignals.length ? `Back-office roles they hire/list: ${roleSignals.join(', ')}` : '',
+    opsSignals.length ? `How they operate / win work (from site copy): ${opsSignals.join('; ')}` : '',
+    facts.service_area_text ? `Service-area language: "${facts.service_area_text}"` : '',
+    facts.locations_mentioned ? `Cities/locations named on site: ${facts.locations_mentioned.join('; ')}` : '',
+    facts.since_year ? `In business since: ${facts.since_year}` : '',
+    facts.team_claim ? `Team-size claim on site: ${facts.team_claim}` : '',
+    facts.phones ? `Phone numbers listed: ${facts.phones.join(', ')}` : '',
+    firmo ? `Apollo firmographics: industry=${firmo.industry || '?'}, employees=${firmo.employeeCount || '?'}, revenue=${firmo.revenue || '?'}, founded=${firmo.foundedYear || '?'}, HQ=${firmo.location || '?'}` : '',
+    linkedin ? `LinkedIn: ${[linkedin.industry, linkedin.employeeCount ? linkedin.employeeCount + ' employees' : '', linkedin.founded ? 'founded ' + linkedin.founded : '', Array.isArray(linkedin.specialties) ? 'specialties: ' + linkedin.specialties.slice(0, 8).join(', ') : ''].filter(Boolean).join('; ')}` : '',
+    maps ? `Google Maps: ${[maps.category, maps.rating ? maps.rating + ' stars' : '', maps.reviewCount ? maps.reviewCount + ' reviews' : '', maps.address, maps.hours ? 'hours listed' : ''].filter(Boolean).join('; ')}` : '',
+    siteText ? `\nWebsite copy excerpt:\n${siteText}` : '',
   ].filter(Boolean).join('\n');
 
-  const system = `You are TMI's research agent. Before TMI audits a company, you do the homework so the owner is never asked something you can already find out. You research operations-heavy businesses (trades, industrial, field service, manufacturing, logistics) and extract only what is PUBLICLY knowable from the evidence.
+  const system = `You are TMI's research agent. Before TMI audits a company, you do the homework so the owner is never asked something you can already find out from public evidence. You research operations-heavy businesses (trades, industrial, field service, manufacturing, logistics, services) and pre-fill the intake from what you actually saw.
 
 Hard rules:
-- Only fill a field when the evidence supports it. NEVER invent revenue, margins, headcount, hours, close rates, or anything internal. Those belong to the owner.
-- Detected tools are real evidence of their software stack. Put them in tools_list.
+- Only fill a field when the evidence supports it. NEVER invent revenue, margins, headcount, hours, close rates, response times, or anything internal that is not in the evidence. Those belong to the owner.
+- Detected tools are hard evidence of their stack. List them. The presence of a field-service platform (ServiceTitan, Jobber, etc.) versus none at all tells you how work moves.
+- Back-office hiring titles (Dispatcher, Coordinator, Data Entry) are proof they pay a human to move information a system should move.
 - Be specific and concrete, grounded in what you actually saw. No AI hype. No em dashes.
+- For "hypotheses", you MAY make an educated read of how they likely operate, but phrase each as a confirmable statement, never as fact, and base it on the evidence.
 - Output ONLY a JSON object. No prose before or after.`;
 
   const user = `${context}
 
 Return ONLY this JSON object:
 {
-  "summary": "2 to 3 sentences on what this company does and how it likely operates today, built only from the evidence",
-  "found": ["3 to 6 short factual statements of what you learned, one fact each, e.g. 'Runs ServiceTitan and QuickBooks', 'Lists 3 service areas', 'Hiring a dispatcher'"],
+  "summary": "3 to 4 sentences on what this company does, who they serve, and how they likely operate today, built only from the evidence",
+  "found": ["5 to 9 short, specific factual statements, one fact each, e.g. 'Runs ServiceTitan and QuickBooks', 'Serves 4 counties around Lafayette LA', '4.7 stars on 312 Google reviews', 'Hiring a dispatcher', 'Family-owned since 1998', 'Offers 24/7 emergency service'"],
   "prefill": {
-    "industry": "what the business actually does, in one concrete line, or empty",
+    "industry": "what the business actually does, one concrete line, or empty",
     "website": "${site || ''}",
     "tools_list": "comma separated detected tools, or empty",
-    "lead_sources": "only if the site clearly shows how they win customers, else empty",
-    "locations": "number of locations/sites only if clearly stated, else empty",
-    "seasonality": "Very | Somewhat | Not really — best guess from the industry only, else empty"
+    "crm": "the CRM/field system holding leads and customers, or empty",
+    "books": "their accounting system if detected, or empty",
+    "system_of_record": "the system that holds true job status if detected, or empty",
+    "lead_sources": "how they appear to win customers (reviews, Angi/Thumbtack, free estimates, referrals, commercial bids) only if the site/Maps shows it, else empty",
+    "locations": "number of locations/sites only if clearly supported, else empty",
+    "years": "years in business if founded/since is known (compute from the year), else empty",
+    "seasonality": "Very | Somewhat | Not really - best read from the trade, else empty",
+    "compliance": "licenses/certs/insurance they advertise (e.g. 'Licensed and insured, EPA') only if shown, else empty"
+  },
+  "hypotheses": {
+    "work_flow": "our read on how a job likely flows from sold to delivered to paid, one confirmable sentence, or empty",
+    "biggest_bottleneck": "our single best read on the most likely operational bottleneck, named specifically and tied to the evidence, or empty",
+    "founder_role": "our read on what the owner is likely still doing personally given the size/stack, or empty"
   },
   "confidence": "high | medium | low"
 }`;
@@ -100,7 +142,7 @@ Return ONLY this JSON object:
   try {
     const msg = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 1200,
+      max_tokens: 1600,
       system,
       messages: [{ role: 'user', content: user }],
     });
@@ -113,15 +155,17 @@ Return ONLY this JSON object:
 
   // Firmographics that owners normally type but can just confirm.
   const firmoFields = {};
-  if (firmo) {
-    if (firmo.employeeCount) firmoFields.headcount = String(firmo.employeeCount);
-    if (firmo.revenue) firmoFields.revenue = firmo.revenue;
-    if (firmo.foundedYear) firmoFields.years = String(new Date().getFullYear() - Number(firmo.foundedYear));
-    if (firmo.industry && !(parsed.prefill && parsed.prefill.industry)) firmoFields.industry = firmo.industry;
+  const empCount = (firmo && firmo.employeeCount) || (linkedin && linkedin.employeeCount) || null;
+  const founded = (firmo && firmo.foundedYear) || (linkedin && linkedin.founded) || facts.since_year || null;
+  if (empCount) firmoFields.headcount = String(empCount);
+  if (firmo && firmo.revenue) firmoFields.revenue = firmo.revenue;
+  if (founded) { const y = parseInt(String(founded).match(/\d{4}/), 10); if (y) firmoFields.years = String(new Date().getFullYear() - y); }
+  if (maps && maps.reviewCount && !(parsed.prefill && parsed.prefill.lead_sources)) {
+    firmoFields.lead_sources = `Google reviews (${maps.rating || '?'} stars, ${maps.reviewCount} reviews)`;
   }
+  if ((firmo && firmo.industry) && !(parsed.prefill && parsed.prefill.industry)) firmoFields.industry = firmo.industry;
 
-  // Precedence: company/website base, then website-derived (Claude), then the
-  // deterministic tool map, then firmographics.
+  // Precedence: base, then model's website read, then deterministic tool map, then firmographics.
   const prefill = Object.assign(
     { company: company || '', website: site || '' },
     parsed.prefill || {},
@@ -133,26 +177,42 @@ Return ONLY this JSON object:
     if (v == null || String(v).trim() === '' || String(v).toLowerCase() === 'unknown') delete prefill[k];
   }
 
-  // "What we found" — lead with firmographics, then the model's facts.
+  // "What we found" - lead with the hard third-party facts, then the model's reads.
   const found = [];
-  if (firmo) {
+  if (maps) {
     const bits = [];
-    if (firmo.employeeCount) bits.push(`~${firmo.employeeCount} employees`);
-    if (firmo.revenue) bits.push(`~${firmo.revenue} revenue`);
-    if (firmo.foundedYear) bits.push(`founded ${firmo.foundedYear}`);
+    if (maps.rating && maps.reviewCount) bits.push(`${maps.rating} stars on ${maps.reviewCount} Google reviews`);
+    else if (maps.reviewCount) bits.push(`${maps.reviewCount} Google reviews`);
+    if (maps.category) bits.push(`listed as ${maps.category}`);
     if (bits.length) found.push(bits.join(', '));
-    if (firmo.location) found.push(`HQ ${firmo.location}`);
   }
+  if (empCount || (firmo && firmo.revenue) || founded) {
+    const bits = [];
+    if (empCount) bits.push(`~${empCount} employees`);
+    if (firmo && firmo.revenue) bits.push(`~${firmo.revenue} revenue`);
+    if (founded) { const y = (String(founded).match(/\d{4}/) || [founded])[0]; bits.push(`since ${y}`); }
+    if (bits.length) found.push(bits.join(', '));
+  }
+  if (firmo && firmo.location) found.push(`HQ ${firmo.location}`);
+  if (tech.length) found.push(`Runs ${tech.slice(0, 6).join(', ')}`);
+  if (roleSignals.length) found.push(`Lists back-office roles: ${roleSignals.slice(0, 4).join(', ')}`);
   if (Array.isArray(parsed.found)) for (const f of parsed.found) if (found.indexOf(f) < 0) found.push(f);
 
   return {
     website: site || null,
+    origin,
+    pagesCrawled: (crawl && crawl.pagesCrawled) || [],
     techStack: tech,
-    signals,
+    signals: roleSignals,
+    opsSignals,
+    facts,
     firmographics: firmo || null,
+    linkedin: linkedin || null,
+    maps: maps || null,
     summary: parsed.summary || '',
-    found: found.slice(0, 7),
+    found: found.slice(0, 12),
     prefill,
-    confidence: parsed.confidence || (firmo ? 'medium' : 'low'),
+    hypotheses: parsed.hypotheses || {},
+    confidence: parsed.confidence || ((firmo || maps || tech.length) ? 'medium' : 'low'),
   };
 }

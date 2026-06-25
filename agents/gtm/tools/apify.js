@@ -47,6 +47,45 @@ export async function findBusinessesOnMaps({ searchQuery, location, maxResults =
   })).filter(b => b.name && b.website); // only businesses with a website
 }
 
+// Look up ONE specific business on Google Maps (for the audit research pass).
+// Returns the best match's public profile: rating, review count, category, hours,
+// address, service-area flags. Best-effort and time-boxed; returns null on miss.
+export async function lookupBusinessOnMaps({ name, location, website }) {
+  if (!process.env.APIFY_API_TOKEN || !name) return null;
+  try {
+    const items = await runActor('compass/crawler-google-places', {
+      searchStringsArray: [location ? `${name} ${location}` : name],
+      maxCrawledPlaces: 3,
+      language: 'en',
+      exportPlaceUrls: false,
+      additionalInfo: true,
+    }, { timeoutSecs: 50 });
+
+    const list = items || [];
+    if (!list.length) return null;
+    const dom = website ? extractDomain(website) : null;
+    const match = (dom && list.find(i => i.website && extractDomain(i.website) === dom)) || list[0];
+    if (!match) return null;
+    return {
+      name: match.title || null,
+      rating: match.totalScore || null,
+      reviewCount: match.reviewsCount || 0,
+      category: match.categoryName || null,
+      categories: match.categories || [],
+      address: match.address || null,
+      city: match.city || null,
+      state: match.state || null,
+      phone: match.phone || null,
+      website: match.website || null,
+      hours: Array.isArray(match.openingHours) ? match.openingHours.map(h => `${h.day}: ${h.hours}`) : null,
+      permanentlyClosed: !!match.permanentlyClosed,
+      googleMapsUrl: match.url || null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 // Scrape a LinkedIn company page for more details
 // Returns: { name, description, employeeCount, industry, website }
 export async function scrapeLinkedInCompany({ linkedinUrl }) {

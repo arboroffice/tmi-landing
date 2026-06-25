@@ -77,6 +77,11 @@ module.exports = async function handler(req, res) {
           ? Object.assign({}, answers, {
               _public_research: research.summary || '',
               _detected_tools: (research.techStack || []).join(', '),
+              _ops_signals: (research.opsSignals || []).join('; '),
+              _role_signals: (research.signals || []).join(', '),
+              _reviews: research.maps ? `${research.maps.rating || '?'} stars, ${research.maps.reviewCount || 0} Google reviews${research.maps.category ? ', ' + research.maps.category : ''}` : '',
+              _firmographics: research.firmographics ? `industry=${research.firmographics.industry || '?'}, employees=${research.firmographics.employeeCount || '?'}, revenue=${research.firmographics.revenue || '?'}, founded=${research.firmographics.foundedYear || '?'}` : '',
+              _service_area: (research.facts && research.facts.service_area_text) || '',
             })
           : answers;
         const md = await buildCompleteAudit({
