@@ -208,7 +208,9 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   .close h2 em{font-style:normal;color:var(--chart);}
 
   footer{background:var(--panel);border-top:1px solid var(--line);padding:64px 0 32px;}
-  .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px;}
+  .foot-grid{margin-bottom:44px;}
+  .foot-brand-block{max-width:440px;margin-bottom:42px;}
+  .foot-cols{display:grid;grid-template-columns:repeat(6,1fr);gap:30px;}
   .foot-brand{display:flex;align-items:center;gap:10px;font-family:var(--sans);font-size:15px;font-weight:600;color:#fff;margin-bottom:14px;}
   .foot-brand img{height:24px;filter:brightness(0) invert(1);}
   .foot-desc{font-size:13px;color:var(--ink-3);line-height:1.65;max-width:34ch;margin-bottom:20px;}
@@ -238,7 +240,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     .model,.install,.why{grid-template-columns:1fr;}
     .own{grid-template-columns:1fr;gap:42px;}
     .case{grid-template-columns:1fr;gap:24px;}
-    .foot-grid{grid-template-columns:1fr 1fr;gap:36px;}
+    .foot-cols{grid-template-columns:repeat(3,1fr);gap:32px 24px;}
   }
   @media(max-width:560px){
     section{padding:76px 0;}.wrap,.narrow{padding:0 20px;}
@@ -254,7 +256,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     .founder{grid-template-columns:1fr;gap:20px;}
     .step{grid-template-columns:48px 1fr;}
     .dock-bar span{display:none;}.dock-bar{justify-content:center;}.dock-bar .btn{width:100%;}
-    .foot-grid{grid-template-columns:1fr;}.foot-bottom{flex-direction:column;gap:8px;}
+    .foot-cols{grid-template-columns:1fr 1fr;}.foot-bottom{flex-direction:column;gap:8px;}
   }
   /* IT WORKS LIKE A COMPANY */
   .flow-head{margin-bottom:46px;}
@@ -739,41 +741,64 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
 <footer>
   <div class="wrap">
     <div class="foot-grid">
-      <div>
+      <div class="foot-brand-block">
         <div class="foot-brand"><img src="logo.svg" alt="TMI"/> TMI</div>
         <p class="foot-desc">We build intelligent operations for companies doing $5M+ a year. The system, the AI workforce, and the command center that run the operation, so the company stops depending on you. You own it forever.</p>
         <a href="/audit" class="foot-apply" onclick="lead()">Get a free Business Intelligence Audit &rarr;</a>
       </div>
-      <div class="foot-col">
-        <h5>Start here</h5>
-        <a href="/audit" onclick="lead()">Free Business Intelligence Audit</a>
-        <a href="/portfolio">The Work</a>
-        <a href="/founders-of-the-future">Founders of the Future</a>
-        <a href="/operations">The Whole Operation</a>
-      </div>
-      <div class="foot-col">
-        <h5>Divisions</h5>
-        <a href="/ai-employees">AI Employees</a>
-        <a href="/outbound">Outbound Call Agency</a>
-        <a href="/inbound">Inbound Front Desk</a>
-        <a href="/visibility">AI Visibility</a>
-        <a href="/back-office">Back Office</a>
-        <a href="/personal-brand">Personal Brand Studio</a>
-      </div>
-      <div class="foot-col">
-        <h5>Industry Playbooks</h5>
-        <a href="/physical">All Playbooks</a>
-        <a href="/physical/oil-gas">Oil, Gas &amp; Industrial</a>
-        <a href="/ai-for-construction-companies">Construction</a>
-        <a href="/ai-for-hvac-companies">HVAC &amp; Trades</a>
-        <a href="/ai-for-manufacturing">Manufacturing</a>
-      </div>
-      <div class="foot-col">
-        <h5>Company</h5>
-        <a href="about.html">About</a>
-        <a href="faq.html">FAQ</a>
-        <a href="news.html">Field Notes</a>
-        <a href="/citylead">Work With Us</a>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h5>Start here</h5>
+          <a href="/audit" onclick="lead()">Free Business Intelligence Audit</a>
+          <a href="/portfolio">The Work</a>
+          <a href="/operations">The Whole Operation</a>
+          <a href="/savings-calculator">Savings Calculator</a>
+          <a href="/state-of-ai-report">State of AI Report</a>
+        </div>
+        <div class="foot-col">
+          <h5>Divisions</h5>
+          <a href="/ai-employees">AI Employees</a>
+          <a href="/outbound">Outbound Call Agency</a>
+          <a href="/inbound">Inbound Front Desk</a>
+          <a href="/visibility">AI Visibility</a>
+          <a href="/back-office">Back Office</a>
+          <a href="/personal-brand">Personal Brand Studio</a>
+        </div>
+        <div class="foot-col">
+          <h5>Solutions</h5>
+          <a href="/platform">All Solutions</a>
+          <a href="/system-dispatch">Dispatch</a>
+          <a href="/system-estimating">Estimating</a>
+          <a href="/system-invoicing">Invoicing</a>
+          <a href="/system-fleet">Fleet</a>
+          <a href="/system-predictive-maintenance">Predictive Maintenance</a>
+        </div>
+        <div class="foot-col">
+          <h5>Switching from</h5>
+          <a href="/article-servicetitan-alternative">ServiceTitan</a>
+          <a href="/jobber-alternative">Jobber</a>
+          <a href="/housecall-pro-alternative">Housecall Pro</a>
+          <a href="/procore-alternative">Procore</a>
+          <a href="/samsara-alternative">Samsara</a>
+        </div>
+        <div class="foot-col">
+          <h5>Who we help</h5>
+          <a href="/physical">All Industries</a>
+          <a href="/physical/oil-gas">Oil, Gas &amp; Industrial</a>
+          <a href="/ai-for-construction-companies">Construction</a>
+          <a href="/ai-for-hvac-companies">HVAC &amp; Trades</a>
+          <a href="/software">Software Companies</a>
+          <a href="/online">Online Businesses</a>
+        </div>
+        <div class="foot-col">
+          <h5>Company</h5>
+          <a href="/about">About</a>
+          <a href="/contact">Contact</a>
+          <a href="/news">Field Notes</a>
+          <a href="/faq">FAQ</a>
+          <a href="/founders-of-the-future">Founders of the Future</a>
+          <a href="/citylead">Work With Us</a>
+        </div>
       </div>
     </div>
     <div class="foot-bottom">
