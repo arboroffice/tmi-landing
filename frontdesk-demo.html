@@ -194,7 +194,7 @@ nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0
 .tree-hotspot:hover { background: rgba(200,241,53,0.35); border-style: solid; transform: scale(1.05) translate(-48%, -48%); }
 .tree-hotspot.selected { background: rgba(200,241,53,0.5); border: 3px solid #C8F135; box-shadow: 0 0 20px rgba(200,241,53,0.8); }
 .tree-hotspot::before { content: '+'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 900; font-size: 24px; text-shadow: 0 0 4px black; }
-.tree-hotspot.selected::before { content: '✓'; color: #000; text-shadow: none; }
+.tree-hotspot.selected::before { content: ''; color: #000; text-shadow: none; }
 .map-label { position: absolute; background: rgba(0,0,0,0.85); color: var(--lime); padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; font-family: 'Barlow', sans-serif; border: 1px solid var(--lime); z-index: 4; pointer-events: none; }
 .tree-list { background: var(--white); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin-top: 12px; }
 .tree-list h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
@@ -219,7 +219,7 @@ nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0
 .everything-label { font-family: 'Playfair Display', serif; font-style: italic; font-size: 17px; color: var(--lime); margin-bottom: 14px; }
 .everything-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
 .everything-list li { font-size: 13px; color: rgba(255,255,255,0.8); padding-left: 18px; position: relative; }
-.everything-list li::before { content: '✓'; position: absolute; left: 0; color: var(--lime); font-weight: 900; }
+.everything-list li::before { content: ''; position: absolute; left: 0; color: var(--lime); font-weight: 900; }
 @media (max-width: 500px) { .everything-list { grid-template-columns: 1fr; } }
 .price-cta { display: block; text-align: center; background: var(--lime); color: var(--black); padding: 16px; border-radius: 8px; font-family: 'Barlow', sans-serif; font-weight: 900; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; }
 .price-math { background: var(--white); border-radius: 16px; padding: 32px 28px; border: 1px solid var(--border); }
@@ -289,42 +289,34 @@ footer .lime { color: var(--lime); font-weight: 700; }
     <p>We'll show you exactly how TMI FrontDesk works for your business. Real demo. Real numbers. Your customers' pains.</p>
     <div class="trade-grid">
       <div class="trade-card" data-trade="roofing">
-        <div class="trade-emoji">🏠</div>
         <div class="trade-name">Roofing</div>
         <div class="trade-tag">Repairs, replacements, leaks</div>
       </div>
       <div class="trade-card" data-trade="tree">
-        <div class="trade-emoji">🌳</div>
         <div class="trade-name">Tree Service</div>
         <div class="trade-tag">Removal, trimming, stump</div>
       </div>
       <div class="trade-card" data-trade="lawn">
-        <div class="trade-emoji">🌱</div>
         <div class="trade-name">Lawn Care</div>
         <div class="trade-tag">Mowing, treatment, full care</div>
       </div>
       <div class="trade-card" data-trade="pressure">
-        <div class="trade-emoji">🚿</div>
         <div class="trade-name">Pressure Wash</div>
         <div class="trade-tag">House, driveway, soft wash</div>
       </div>
       <div class="trade-card" data-trade="hvac">
-        <div class="trade-emoji">❄️</div>
         <div class="trade-name">HVAC</div>
         <div class="trade-tag">Repair, install, maintenance</div>
       </div>
       <div class="trade-card" data-trade="plumbing">
-        <div class="trade-emoji">🔧</div>
         <div class="trade-name">Plumbing</div>
         <div class="trade-tag">Leaks, drains, water heater</div>
       </div>
       <div class="trade-card" data-trade="solar">
-        <div class="trade-emoji">☀️</div>
         <div class="trade-name">Solar</div>
         <div class="trade-tag">Install, battery, off-grid</div>
       </div>
       <div class="trade-card" data-trade="other">
-        <div class="trade-emoji">🔨</div>
         <div class="trade-name">Other Trade</div>
         <div class="trade-tag">80+ trades supported</div>
       </div>
@@ -396,14 +388,14 @@ footer .lime { color: var(--lime); font-weight: 700; }
           <div class="form-step" data-step="2">
             <label class="form-label">Your Address</label>
             <input type="text" class="form-input" id="address-input" value="412 Maple St, Lafayette LA">
-            <button class="form-btn next-step">📡 Pull Up My Property</button>
+            <button class="form-btn next-step">Pull Up My Property</button>
             <p style="margin-top:10px;font-size:12px;color:var(--muted);text-align:center;">We measure from satellite. No one comes out.</p>
           </div>
 
           <div class="form-step" data-step="3">
             <div class="satellite-wrap">
               <div class="satellite-label">
-                <span>🛰️ Satellite measurement</span>
+                <span>Satellite measurement</span>
                 <span class="addr" id="sat-addr">412 Maple St</span>
               </div>
               <div class="satellite-view" id="satellite-view">
@@ -426,7 +418,7 @@ footer .lime { color: var(--lime); font-weight: 700; }
             </div>
             <label class="form-label">Phone (for your estimate)</label>
             <input type="tel" class="form-input" placeholder="(337) 555-0123" id="phone-input">
-            <button class="form-btn lime" id="show-price-btn">Show Me My Price ⚡</button>
+            <button class="form-btn lime" id="show-price-btn">Show Me My Price</button>
           </div>
 
           <div class="form-step" data-step="4">
@@ -666,7 +658,7 @@ footer .lime { color: var(--lime); font-weight: 700; }
 const TRADES = {
   roofing: {
     name: 'Roofing',
-    emoji: '🏠',
+    emoji: '',
     heroEyebrow: 'For Roofers · Built by TMI',
     heroH1: 'Stop driving across town for <span class="italic">free roof inspections</span> that <span class="lime">never close.</span>',
     heroSub: 'TMI FrontDesk gives every homeowner an instant satellite-measured roof estimate, qualifies them like a real human, and books the inspection before you ever pick up the phone.',
@@ -700,10 +692,10 @@ const TRADES = {
       { h: 'Lead in CRM', d: 'With photo, measurements, customer info, all ready before your crew loads the truck.' }
     ],
     dmScenarios: [
-      { key: 'leak', name: 'Apex Roofing · Facebook', avatar: 'A', time: '11:23 PM · Storm in area', label: '⛈️ Storm leak emergency', meta: '<strong>Emergency leak at night</strong> · Storm hit, ceiling dripping. AI calms them down and books a tarp visit fast.',
+      { key: 'leak', name: 'Apex Roofing · Facebook', avatar: 'A', time: '11:23 PM · Storm in area', label: 'Storm leak emergency', meta: '<strong>Emergency leak at night</strong> · Storm hit, ceiling dripping. AI calms them down and books a tarp visit fast.',
         messages: [
           { side: 'them', text: 'omg my ceilings leaking RIGHT NOW from the storm please help', delay: 300 },
-          { side: 'ai', text: 'okay first take a deep breath 🫶 i got you', delay: 1100 },
+          { side: 'ai', text: 'okay first take a deep breath i got you', delay: 1100 },
           { side: 'ai', text: 'where is it leaking, one room or multiple?', delay: 800 },
           { side: 'them', text: 'just one for now the kids bedroom', delay: 1400 },
           { side: 'ai', text: 'ok good. grab a bucket under it, move anything valuable. is the drip slow or pouring?', delay: 1200 },
@@ -715,13 +707,13 @@ const TRADES = {
           { side: 'them', text: '4412 Oakhaven Dr', delay: 1100 },
           { side: 'ai', text: 'got it. tech name is Carlos, hell text you around 6:30am to confirm hes 20 min out', delay: 1300 },
           { side: 'them', text: 'thank you so much seriously', delay: 1500 },
-          { side: 'ai', text: 'youre good. try to get some sleep, we got it 💪', delay: 1000 }
+          { side: 'ai', text: 'youre good. try to get some sleep, we got it', delay: 1000 }
         ]
       },
-      { key: 'insurance', name: 'Apex Roofing · Instagram', avatar: 'A', time: 'Wed 3:14 PM', label: '📋 Insurance claim help', meta: '<strong>Insurance claim qualified</strong> · Customer wants to file a claim. AI walks them through it and books the assessment.',
+      { key: 'insurance', name: 'Apex Roofing · Instagram', avatar: 'A', time: 'Wed 3:14 PM', label: 'Insurance claim help', meta: '<strong>Insurance claim qualified</strong> · Customer wants to file a claim. AI walks them through it and books the assessment.',
         messages: [
           { side: 'them', text: 'hi we had hail last month, my neighbor said his insurance covered a new roof. do u guys do that?', delay: 400 },
-          { side: 'ai', text: 'yes we work with insurance daily 💪 have you filed a claim yet?', delay: 1100 },
+          { side: 'ai', text: 'yes we work with insurance daily have you filed a claim yet?', delay: 1100 },
           { side: 'them', text: 'no i wasnt sure if its worth it', delay: 1300 },
           { side: 'ai', text: 'totally fair. couple quick things, are you seeing any granule loss in the gutters or dings on the metal vents?', delay: 1300 },
           { side: 'them', text: 'yeah the gutters are full of little black bits', delay: 1500 },
@@ -735,7 +727,7 @@ const TRADES = {
           { side: 'ai', text: 'inspector is Tom, hell be there thursday 10am with the drone. Complete Audit. ill text you the report afterward', delay: 1300 }
         ]
       },
-      { key: 'replace', name: 'Apex Roofing · Google', avatar: 'A', time: 'Sat 10:42 AM', label: '🏠 Full replacement quote', meta: '<strong>Old roof replacement</strong> · Homeowner shopping for a full roof replacement. AI gives instant satellite quote and locks in inspection.',
+      { key: 'replace', name: 'Apex Roofing · Google', avatar: 'A', time: 'Sat 10:42 AM', label: 'Full replacement quote', meta: '<strong>Old roof replacement</strong> · Homeowner shopping for a full roof replacement. AI gives instant satellite quote and locks in inspection.',
         messages: [
           { side: 'them', text: 'looking to replace my roof, can i get a ballpark before someone comes out?', delay: 400 },
           { side: 'ai', text: 'absolutely, whats the address? ill pull it up from satellite', delay: 1000 },
@@ -744,29 +736,29 @@ const TRADES = {
           { side: 'them', text: 'yes its 30 year shingles, original to the house in 1998', delay: 1700 },
           { side: 'ai', text: 'gotcha, definitely time. for a standard architectural shingle replacement on that size, ballpark $14,500-17,500. includes tear off, new underlayment, ice and water shield, drip edge, ridge venting, all of it', delay: 1800 },
           { side: 'them', text: 'thats more affordable than i thought tbh', delay: 1400 },
-          { side: 'ai', text: 'most folks think roofs are way more than they are 🙂 if you want, we can come out free, walk the roof, give you a hard number + financing options if you need it', delay: 1500 },
+          { side: 'ai', text: 'most folks think roofs are way more than they are if you want, we can come out free, walk the roof, give you a hard number + financing options if you need it', delay: 1500 },
           { side: 'them', text: 'yeah lets do that', delay: 800 },
           { side: 'ai', text: 'tuesday or wednesday work?', delay: 700 },
           { side: 'them', text: 'wed afternoon', delay: 700 },
-          { side: 'ai', text: 'wed 2pm, Tom will be there. ill text the day before to confirm 🙌', delay: 1100 }
+          { side: 'ai', text: 'wed 2pm, Tom will be there. ill text the day before to confirm', delay: 1100 }
         ]
       }
     ],
     smsScenarios: [
-      { key: 'cold', name: 'Apex Roofing', avatar: 'A', time: 'Day 2 · 4:18 PM', label: '😶 Cold lead saved', meta: '<strong>Quote went cold</strong> · Customer got a roof estimate and went quiet. AI follows up without being pushy.',
+      { key: 'cold', name: 'Apex Roofing', avatar: 'A', time: 'Day 2 · 4:18 PM', label: 'Cold lead saved', meta: '<strong>Quote went cold</strong> · Customer got a roof estimate and went quiet. AI follows up without being pushy.',
         messages: [
           { side: 'ai', text: 'hey Jamie its Tom @ Apex! saw you got that roof quote yesterday, any q\'s? no pressure', delay: 1400 },
           { side: 'them', text: 'hey ya was gonna grab 2 more quotes first', delay: 1900 },
           { side: 'ai', text: 'totally fair, i always tell folks to do that', delay: 1100 },
           { side: 'ai', text: 'just a heads up tho - our $14,800 includes tear off, ice & water shield, drip edge, AND a 25 year workmanship warranty', delay: 1400 },
-          { side: 'ai', text: 'most quotes come in lower then add those on at the end. just want u to compare apples to apples 🙃', delay: 1200 },
+          { side: 'ai', text: 'most quotes come in lower then add those on at the end. just want u to compare apples to apples', delay: 1200 },
           { side: 'them', text: 'oh thats good to know actually', delay: 1500 },
           { side: 'ai', text: 'np! ill hold a tuesday install slot for you while you shop. no charge to hold it', delay: 1300 },
           { side: 'them', text: 'k sure hold it', delay: 800 },
-          { side: 'ai', text: 'done ✅ ill text you sunday to confirm or move it', delay: 800 }
+          { side: 'ai', text: 'done ill text you sunday to confirm or move it', delay: 800 }
         ]
       },
-      { key: 'missedcall', name: 'Apex Roofing', avatar: 'A', time: 'Tue 11:42 AM · Missed call', label: '📞 Missed call back', meta: '<strong>Missed call rescued</strong> · Customer called and hung up. AI texts them back in 30 sec before they call a competitor.',
+      { key: 'missedcall', name: 'Apex Roofing', avatar: 'A', time: 'Tue 11:42 AM · Missed call', label: 'Missed call back', meta: '<strong>Missed call rescued</strong> · Customer called and hung up. AI texts them back in 30 sec before they call a competitor.',
         messages: [
           { side: 'ai', text: 'Hey! Apex Roofing here. Sorry we just missed your call. Crew was on a roof. Can I help over text?', delay: 1200 },
           { side: 'them', text: 'oh hi yeah just wanted a quote for an inspection', delay: 1700 },
@@ -780,7 +772,7 @@ const TRADES = {
           { side: 'them', text: 'yes perfect', delay: 700 },
           { side: 'ai', text: 'booked! Tom will text 30 min before. whats your name?', delay: 1000 },
           { side: 'them', text: 'David', delay: 500 },
-          { side: 'ai', text: 'thanks David, see you thursday 🙌', delay: 900 }
+          { side: 'ai', text: 'thanks David, see you thursday', delay: 900 }
         ]
       }
     ],
@@ -803,7 +795,7 @@ const TRADES = {
 
   tree: {
     name: 'Tree Service',
-    emoji: '🌳',
+    emoji: '',
     heroEyebrow: 'For Tree Services · Built by TMI',
     heroH1: 'Quote <span class="lime">every tree</span> from satellite. Skip the <span class="italic">Complete Audits.</span>',
     heroSub: 'TMI FrontDesk lets homeowners click their trees on the satellite, picks the size and species, adds stump grinding and haul-away, and books the crew in minutes.',
@@ -837,12 +829,12 @@ const TRADES = {
       { h: 'Insurance docs auto-generated', d: 'For storm jobs, the AI prepares the damage photos and report for the homeowner\'s claim.' }
     ],
     dmScenarios: [
-      { key: 'leaning', name: 'BigOak Tree · IG', avatar: 'B', time: 'Sun 2:08 PM', label: '🌳 Photo of leaning tree', meta: '<strong>Photo to quote</strong> · Customer sends a pic of a leaning tree. AI uses vision to size it up and book emergency assessment.',
+      { key: 'leaning', name: 'BigOak Tree · IG', avatar: 'B', time: 'Sun 2:08 PM', label: 'Photo of leaning tree', meta: '<strong>Photo to quote</strong> · Customer sends a pic of a leaning tree. AI uses vision to size it up and book emergency assessment.',
         messages: [
           { side: 'them', text: 'hey this tree in my yard is leaning bad after the storm, can yall come look', delay: 300 },
           { side: 'ai', text: 'absolutely, leaning trees are no joke after storms', delay: 1100 },
           { side: 'ai', text: 'can you send a pic? as far back as you can stand', delay: 800 },
-          { side: 'them', text: '[📷 photo of tree]', delay: 2000 },
+          { side: 'them', text: '[photo of tree]', delay: 2000 },
           { side: 'ai', text: 'okay i can see it. looks like a pine maybe 50ft? leaning toward the house?', delay: 1600 },
           { side: 'them', text: 'yes exactly im scared its gonna fall on us', delay: 1300 },
           { side: 'ai', text: 'understandable. tree that size with that lean is a crane job for safety. usually $1,800-2,400 with full cleanup', delay: 1500 },
@@ -853,10 +845,10 @@ const TRADES = {
           { side: 'ai', text: 'got it. arborist is Dale, hell be there 9am tmrw', delay: 1300 },
           { side: 'ai', text: 'do NOT park or stand under it. if lean gets worse text this # and well bump priority', delay: 1400 },
           { side: 'them', text: 'thank u so much', delay: 900 },
-          { side: 'ai', text: 'youre good. take care 🌳', delay: 800 }
+          { side: 'ai', text: 'youre good. take care', delay: 800 }
         ]
       },
-      { key: 'trim', name: 'BigOak Tree · FB', avatar: 'B', time: 'Tue 6:14 PM', label: '✂️ Routine trim quote', meta: '<strong>Routine trim job</strong> · Homeowner wants a few oaks trimmed before hurricane season. AI quotes from satellite.',
+      { key: 'trim', name: 'BigOak Tree · FB', avatar: 'B', time: 'Tue 6:14 PM', label: 'Routine trim quote', meta: '<strong>Routine trim job</strong> · Homeowner wants a few oaks trimmed before hurricane season. AI quotes from satellite.',
         messages: [
           { side: 'them', text: 'hi do u guys do tree trimming? i have a few oaks that need shaping before hurricane season', delay: 400 },
           { side: 'ai', text: 'yes we do! how many trees roughly?', delay: 1000 },
@@ -869,16 +861,16 @@ const TRADES = {
           { side: 'them', text: 'sounds reasonable', delay: 900 },
           { side: 'ai', text: 'we can come out free to walk it and give you a firm number. or if you trust the ballpark we can just book the crew', delay: 1300 },
           { side: 'them', text: 'lets just book it', delay: 800 },
-          { side: 'ai', text: 'love that 🙌 we have friday or next monday open, both 8am starts (3-4 hr job)', delay: 1200 },
+          { side: 'ai', text: 'love that we have friday or next monday open, both 8am starts (3-4 hr job)', delay: 1200 },
           { side: 'them', text: 'friday', delay: 500 },
           { side: 'ai', text: 'booked! crew lead is Dale. ill text thursday night to confirm', delay: 1000 }
         ]
       }
     ],
     smsScenarios: [
-      { key: 'reactivate', name: 'BigOak Tree', avatar: 'B', time: 'Spring · 8 mo later', label: '💤 Old customer back', meta: '<strong>Old customer reactivate</strong> · Customer used you 2 storms ago. AI checks in when storm season starts.',
+      { key: 'reactivate', name: 'BigOak Tree', avatar: 'B', time: 'Spring · 8 mo later', label: 'Old customer back', meta: '<strong>Old customer reactivate</strong> · Customer used you 2 storms ago. AI checks in when storm season starts.',
         messages: [
-          { side: 'ai', text: 'hey Karen! Dale from BigOak. hurricane season is back 🌪️ how are those oaks looking after the winter?', delay: 1400 },
+          { side: 'ai', text: 'hey Karen! Dale from BigOak. hurricane season is back how are those oaks looking after the winter?', delay: 1400 },
           { side: 'them', text: 'oh hey, honestly there are some dead limbs i need taken care of', delay: 1800 },
           { side: 'ai', text: 'good catch, those become projectiles in storms. want us to come out and do a hurricane prep trim?', delay: 1300 },
           { side: 'them', text: 'how much was it last time', delay: 1100 },
@@ -888,15 +880,15 @@ const TRADES = {
           { side: 'them', text: 'monday', delay: 600 },
           { side: 'ai', text: 'booked. crew lead is Dale same as last time. card on file from last year still good?', delay: 1100 },
           { side: 'them', text: 'yep', delay: 500 },
-          { side: 'ai', text: 'welcome back 🌳', delay: 800 }
+          { side: 'ai', text: 'welcome back', delay: 800 }
         ]
       },
-      { key: 'confirm', name: 'BigOak Tree', avatar: 'B', time: 'Day before · 7:02 PM', label: '✅ Day before confirm', meta: '<strong>Tomorrow\'s job confirmed</strong> · AI confirms tomorrow\'s big tree job so the crew doesn\'t show up to an empty house.',
+      { key: 'confirm', name: 'BigOak Tree', avatar: 'B', time: 'Day before · 7:02 PM', label: 'Day before confirm', meta: '<strong>Tomorrow\'s job confirmed</strong> · AI confirms tomorrow\'s big tree job so the crew doesn\'t show up to an empty house.',
         messages: [
           { side: 'ai', text: 'hey Marcus! reminder, Dale + crew at your place tmrw 8-9am for the oak removal + stump grind', delay: 1400 },
           { side: 'them', text: 'thanks for the reminder', delay: 1300 },
           { side: 'ai', text: 'np! couple quick things', delay: 800 },
-          { side: 'ai', text: '1. theyll need access to the back yard, gate unlocked 🔓', delay: 1000 },
+          { side: 'ai', text: '1. theyll need access to the back yard, gate unlocked', delay: 1000 },
           { side: 'ai', text: '2. itll be loud ~3 hrs, FYI for wfh or dogs', delay: 1000 },
           { side: 'ai', text: '3. parking truck on street ok? blocks driveway otherwise', delay: 1100 },
           { side: 'them', text: 'all good. gate open, street parking fine', delay: 1700 },
@@ -904,7 +896,7 @@ const TRADES = {
           { side: 'them', text: 'wife is home, ill be at work', delay: 1300 },
           { side: 'ai', text: 'got it. final price $1,650 like we discussed. no surprises', delay: 1100 },
           { side: 'them', text: 'awesome see you tmrw', delay: 900 },
-          { side: 'ai', text: '🌳 well leave it better than we found it', delay: 900 }
+          { side: 'ai', text: 'well leave it better than we found it', delay: 900 }
         ]
       }
     ],
@@ -927,7 +919,7 @@ const TRADES = {
 
   lawn: {
     name: 'Lawn Care',
-    emoji: '🌱',
+    emoji: '',
     heroEyebrow: 'For Lawn Care · Built by TMI',
     heroH1: 'Fill your <span class="italic">route</span> with recurring customers. <span class="lime">From satellite.</span>',
     heroSub: 'TMI FrontDesk measures any lawn from satellite, prices it on the spot, sets up autopay, and books recurring weekly mow customers while you\'re on the mower.',
@@ -961,7 +953,7 @@ const TRADES = {
       { h: 'Crew shows up prepared', d: 'Lead knows the lawn size, obstacles, gates, dogs, parking. Everything.' }
     ],
     dmScenarios: [
-      { key: 'newhomeowner', name: 'GreenCut Lawn · Google', avatar: 'G', time: 'Sat 8:14 AM', label: '🏡 New homeowner inquiry', meta: '<strong>Recurring service signup</strong> · New homeowner wants weekly mowing. AI prices, schedules, sets up autopay.',
+      { key: 'newhomeowner', name: 'GreenCut Lawn · Google', avatar: 'G', time: 'Sat 8:14 AM', label: 'New homeowner inquiry', meta: '<strong>Recurring service signup</strong> · New homeowner wants weekly mowing. AI prices, schedules, sets up autopay.',
         messages: [
           { side: 'them', text: 'hi do you guys do weekly mowing in the broussard area?', delay: 300 },
           { side: 'ai', text: 'yes we sure do! whats your address?', delay: 1000 },
@@ -975,32 +967,32 @@ const TRADES = {
           { side: 'them', text: 'yeah perfect', delay: 700 },
           { side: 'ai', text: 'awesome. starting next tuesday. crew lead is Jose, hes great. want him to text when hes on the way each week?', delay: 1400 },
           { side: 'them', text: 'yeah that would be ideal', delay: 1100 },
-          { side: 'ai', text: 'done ✅ also we autobill, ill send a link for card on file. takes 30 sec', delay: 1200 },
+          { side: 'ai', text: 'done also we autobill, ill send a link for card on file. takes 30 sec', delay: 1200 },
           { side: 'them', text: 'ok sounds great', delay: 800 },
-          { side: 'ai', text: 'welcome to the family 🌱 link coming over now', delay: 900 }
+          { side: 'ai', text: 'welcome to the family link coming over now', delay: 900 }
         ]
       },
-      { key: 'overgrown', name: 'GreenCut Lawn · IG', avatar: 'G', time: 'Mon 11:14 AM', label: '🌿 Overgrown yard rescue', meta: '<strong>Overgrown one-time cut</strong> · Customer ignored the yard, needs a rescue cut, gets converted to recurring.',
+      { key: 'overgrown', name: 'GreenCut Lawn · IG', avatar: 'G', time: 'Mon 11:14 AM', label: 'Overgrown yard rescue', meta: '<strong>Overgrown one-time cut</strong> · Customer ignored the yard, needs a rescue cut, gets converted to recurring.',
         messages: [
           { side: 'them', text: 'hey i let my yard go too long, can someone come knock it down', delay: 400 },
-          { side: 'ai', text: 'ha we get this every spring, no judgment 😅 how tall are we talking?', delay: 1200 },
+          { side: 'ai', text: 'ha we get this every spring, no judgment how tall are we talking?', delay: 1200 },
           { side: 'them', text: 'almost knee high in spots', delay: 1100 },
           { side: 'ai', text: 'gotcha, thats a brush cut not a normal mow. address?', delay: 1100 },
           { side: 'them', text: '614 Acadia Lane', delay: 900 },
           { side: 'ai', text: 'pulling it up... about 9,000 sqft. for an overgrowth like that runs $120-180 first cut, then back to normal pricing after', delay: 1500 },
           { side: 'them', text: 'whats normal weekly look like?', delay: 1200 },
-          { side: 'ai', text: 'weekly mow on that size $65. want me to set you up on weekly after the first cut? we could prevent this next time 🙃', delay: 1500 },
+          { side: 'ai', text: 'weekly mow on that size $65. want me to set you up on weekly after the first cut? we could prevent this next time', delay: 1500 },
           { side: 'them', text: 'haha yeah lets do that', delay: 1000 },
           { side: 'ai', text: 'love that. crew can come thursday for the rescue cut, then weekly thursdays after', delay: 1200 },
           { side: 'them', text: 'perfect', delay: 700 },
-          { side: 'ai', text: 'awesome 🙌 ill send autopay link, takes 30 sec. crew lead is Jose', delay: 1000 }
+          { side: 'ai', text: 'awesome ill send autopay link, takes 30 sec. crew lead is Jose', delay: 1000 }
         ]
       }
     ],
     smsScenarios: [
-      { key: 'reactivate', name: 'GreenCut Lawn', avatar: 'G', time: 'Spring · season open', label: '🌱 Spring reactivation', meta: '<strong>Old customer reactivate</strong> · Customer went quiet last fall. AI checks back when grass starts growing.',
+      { key: 'reactivate', name: 'GreenCut Lawn', avatar: 'G', time: 'Spring · season open', label: 'Spring reactivation', meta: '<strong>Old customer reactivate</strong> · Customer went quiet last fall. AI checks back when grass starts growing.',
         messages: [
-          { side: 'ai', text: 'hey Karen! Mia from GreenCut. winter is finally over 🌱 hows the yard?', delay: 1400 },
+          { side: 'ai', text: 'hey Karen! Mia from GreenCut. winter is finally over hows the yard?', delay: 1400 },
           { side: 'them', text: 'omg honestly its a jungle', delay: 1800 },
           { side: 'ai', text: 'haha first cuts of the season are always rough', delay: 1000 },
           { side: 'ai', text: 'want Jose out for a cleanup + back on weekly? you were on tues last year', delay: 1200 },
@@ -1011,20 +1003,20 @@ const TRADES = {
           { side: 'them', text: 'perfect', delay: 700 },
           { side: 'ai', text: 'pulling your card on file from last year, still good?', delay: 1000 },
           { side: 'them', text: 'yep same one', delay: 700 },
-          { side: 'ai', text: 'youre set! welcome back 🌿', delay: 900 },
+          { side: 'ai', text: 'youre set! welcome back', delay: 900 },
           { side: 'them', text: 'thanks for reaching out i totally forgot', delay: 1300 },
-          { side: 'ai', text: 'thats my job 😊', delay: 700 }
+          { side: 'ai', text: 'thats my job', delay: 700 }
         ]
       },
-      { key: 'skip', name: 'GreenCut Lawn', avatar: 'G', time: 'Mon 6:18 PM', label: '⏸️ Skip request handled', meta: '<strong>Skip week handled</strong> · Customer asks to skip this week. AI handles it without losing the recurring revenue.',
+      { key: 'skip', name: 'GreenCut Lawn', avatar: 'G', time: 'Mon 6:18 PM', label: '⏸ Skip request handled', meta: '<strong>Skip week handled</strong> · Customer asks to skip this week. AI handles it without losing the recurring revenue.',
         messages: [
           { side: 'them', text: 'hey can we skip this week, going out of town', delay: 400 },
           { side: 'ai', text: 'no prob! ill take you off this weeks route', delay: 1000 },
           { side: 'ai', text: 'just so you know, if we skip more than one week the grass gets ahead of us and itll be a $95 catchup cut next time instead of $55', delay: 1300 },
           { side: 'them', text: 'oh good to know, ill only be gone a week', delay: 1500 },
-          { side: 'ai', text: 'perfect, back on schedule next tuesday then ✅', delay: 1100 },
+          { side: 'ai', text: 'perfect, back on schedule next tuesday then', delay: 1100 },
           { side: 'them', text: 'thanks', delay: 500 },
-          { side: 'ai', text: 'have a good trip! 🌴', delay: 800 }
+          { side: 'ai', text: 'have a good trip!', delay: 800 }
         ]
       }
     ],
@@ -1047,7 +1039,7 @@ const TRADES = {
 
   pressure: {
     name: 'Pressure Washing',
-    emoji: '🚿',
+    emoji: '',
     heroEyebrow: 'For Pressure Washers · Built by TMI',
     heroH1: 'Quote every <span class="italic">driveway, house, and roof</span> from <span class="lime">satellite.</span>',
     heroSub: 'TMI FrontDesk measures every surface on the property, calculates your soft wash chemistry mix, and books the job before the customer even sees you.',
@@ -1081,10 +1073,10 @@ const TRADES = {
       { h: 'Weather-aware booking', d: 'If rain in forecast, AI auto-reschedules and notifies customer.' }
     ],
     dmScenarios: [
-      { key: 'driveway', name: 'CrystalClean Wash · IG', avatar: 'C', time: 'Sun 4:14 PM', label: '🚗 Driveway booking', meta: '<strong>Driveway quote</strong> · Customer\'s driveway is stained. AI prices from satellite and books for next week.',
+      { key: 'driveway', name: 'CrystalClean Wash · IG', avatar: 'C', time: 'Sun 4:14 PM', label: 'Driveway booking', meta: '<strong>Driveway quote</strong> · Customer\'s driveway is stained. AI prices from satellite and books for next week.',
         messages: [
           { side: 'them', text: 'hey my driveways got oil stains and mildew, can you guys clean it?', delay: 400 },
-          { side: 'ai', text: 'oh ya thats our specialty 💪 whats your address?', delay: 1100 },
+          { side: 'ai', text: 'oh ya thats our specialty whats your address?', delay: 1100 },
           { side: 'them', text: '218 Magnolia Bend', delay: 900 },
           { side: 'ai', text: 'pulling it up... looks like a 540 sqft driveway. correct?', delay: 1500 },
           { side: 'them', text: 'yeah 2 car wide', delay: 800 },
@@ -1094,15 +1086,15 @@ const TRADES = {
           { side: 'them', text: 'thursday', delay: 600 },
           { side: 'ai', text: 'booked! we autobill after the job, ill send a link for card on file. crew lead is Marcus', delay: 1200 },
           { side: 'them', text: 'k', delay: 400 },
-          { side: 'ai', text: '🙌 also we do annual driveway cleans (cheaper if u keep up). want me to add u to that?', delay: 1300 },
+          { side: 'ai', text: 'also we do annual driveway cleans (cheaper if u keep up). want me to add u to that?', delay: 1300 },
           { side: 'them', text: 'sure', delay: 500 },
-          { side: 'ai', text: 'love that. ill text u in 11 months 🚿', delay: 900 }
+          { side: 'ai', text: 'love that. ill text u in 11 months', delay: 900 }
         ]
       },
-      { key: 'fullhouse', name: 'CrystalClean Wash · FB', avatar: 'C', time: 'Fri 7:42 AM', label: '🏠 Full property quote', meta: '<strong>Full property bundle</strong> · Selling the house. Wants the whole property cleaned. AI bundles services.',
+      { key: 'fullhouse', name: 'CrystalClean Wash · FB', avatar: 'C', time: 'Fri 7:42 AM', label: 'Full property quote', meta: '<strong>Full property bundle</strong> · Selling the house. Wants the whole property cleaned. AI bundles services.',
         messages: [
           { side: 'them', text: 'we\'re putting our house on the market and need the whole exterior washed', delay: 400 },
-          { side: 'ai', text: 'smart move, clean houses sell faster 💯 whats the address?', delay: 1200 },
+          { side: 'ai', text: 'smart move, clean houses sell faster whats the address?', delay: 1200 },
           { side: 'them', text: '922 Live Oak Dr', delay: 900 },
           { side: 'ai', text: 'pulling it up... 2-story house, 540sf driveway, looks like a back patio and walkway too. anything else?', delay: 1600 },
           { side: 'them', text: 'yeah the roof has black streaks too', delay: 1300 },
@@ -1115,18 +1107,18 @@ const TRADES = {
       }
     ],
     smsScenarios: [
-      { key: 'annual', name: 'CrystalClean Wash', avatar: 'C', time: '12 months later', label: '🔄 Annual reminder', meta: '<strong>Annual auto-reminder</strong> · 12 months after first wash, AI checks in to rebook.',
+      { key: 'annual', name: 'CrystalClean Wash', avatar: 'C', time: '12 months later', label: 'Annual reminder', meta: '<strong>Annual auto-reminder</strong> · 12 months after first wash, AI checks in to rebook.',
         messages: [
-          { side: 'ai', text: 'hey Jamie! its been 12 months since we cleaned your driveway. just gave you a sat check, looks like the mildew is creeping back 👀', delay: 1400 },
+          { side: 'ai', text: 'hey Jamie! its been 12 months since we cleaned your driveway. just gave you a sat check, looks like the mildew is creeping back', delay: 1400 },
           { side: 'them', text: 'omg you can see that from satellite?', delay: 1500 },
-          { side: 'ai', text: 'sort of 😄 we just know the timing. its always 10-14 months before stuff comes back', delay: 1200 },
+          { side: 'ai', text: 'sort of we just know the timing. its always 10-14 months before stuff comes back', delay: 1200 },
           { side: 'ai', text: 'want to rebook? returning customer rate is $165 (vs $195 first time)', delay: 1200 },
           { side: 'them', text: 'yes please', delay: 700 },
           { side: 'ai', text: 'awesome. saturday 9am or monday 8am?', delay: 1000 },
           { side: 'them', text: 'sat 9am', delay: 500 },
           { side: 'ai', text: 'booked. card on file from last year? same one?', delay: 1000 },
           { side: 'them', text: 'yep', delay: 400 },
-          { side: 'ai', text: 'see u sat 🚿', delay: 700 }
+          { side: 'ai', text: 'see u sat', delay: 700 }
         ]
       }
     ],
@@ -1149,7 +1141,7 @@ const TRADES = {
 
   hvac: {
     name: 'HVAC',
-    emoji: '❄️',
+    emoji: '',
     heroEyebrow: 'For HVAC · Built by TMI',
     heroH1: 'Never miss <span class="italic">an emergency call</span> at <span class="lime">2am</span> again.',
     heroSub: 'TMI FrontDesk handles every channel 24/7. When their AC dies at midnight in July, you don\'t lose them to whoever\'s on call. The AI books it instantly.',
@@ -1183,10 +1175,10 @@ const TRADES = {
       { h: 'After-hours coverage', d: 'AI handles 2am emergency calls. Books them or routes to your on-call tech.' }
     ],
     dmScenarios: [
-      { key: 'midnight', name: 'Mike\'s HVAC · IG', avatar: 'M', time: '9:47 PM · Tuesday', label: '🌙 Late night AC died', meta: '<strong>Late night DM</strong> · AC died after dinner. AI books a same-day or next-AM visit before bedtime.',
+      { key: 'midnight', name: 'Mike\'s HVAC · IG', avatar: 'M', time: '9:47 PM · Tuesday', label: 'Late night AC died', meta: '<strong>Late night DM</strong> · AC died after dinner. AI books a same-day or next-AM visit before bedtime.',
         messages: [
           { side: 'them', text: 'hey yall do AC stuff? mine just died lol', delay: 300 },
-          { side: 'ai', text: 'oh no 😩 yeah we do, sorry', delay: 1100 },
+          { side: 'ai', text: 'oh no yeah we do, sorry', delay: 1100 },
           { side: 'ai', text: 'is it not turning on at all or running just not cold?', delay: 900 },
           { side: 'them', text: 'running but blowing warm', delay: 1600 },
           { side: 'ai', text: 'gotcha thats usually refrigerant or a capacitor, common fixes. how old is the unit?', delay: 1300 },
@@ -1196,16 +1188,16 @@ const TRADES = {
           { side: 'them', text: 'wait free??', delay: 900 },
           { side: 'ai', text: 'yep no charge to look. we only charge if you fix it', delay: 800 },
           { side: 'them', text: 'ok yeah lets do it', delay: 900 },
-          { side: 'ai', text: 'awesome 🙌 zip?', delay: 700 },
+          { side: 'ai', text: 'awesome zip?', delay: 700 },
           { side: 'them', text: '70508', delay: 500 },
           { side: 'ai', text: '8am or 10am tmrw?', delay: 800 },
           { side: 'them', text: '10', delay: 500 },
           { side: 'ai', text: 'booked! whats your name + cell?', delay: 700 },
           { side: 'them', text: '337-555-0142 sarah', delay: 1300 },
-          { side: 'ai', text: 'nice Sarah! booked 10am tmrw. tech texts 30min before. hang in there tonight 😅', delay: 1200 }
+          { side: 'ai', text: 'nice Sarah! booked 10am tmrw. tech texts 30min before. hang in there tonight', delay: 1200 }
         ]
       },
-      { key: 'install', name: 'Mike\'s HVAC · FB', avatar: 'M', time: 'Sat 10:18 AM', label: '🆕 New install shopping', meta: '<strong>Replacement quote</strong> · Old unit dying. Customer shopping for full system. AI prequalifies and gives ballpark.',
+      { key: 'install', name: 'Mike\'s HVAC · FB', avatar: 'M', time: 'Sat 10:18 AM', label: 'New install shopping', meta: '<strong>Replacement quote</strong> · Old unit dying. Customer shopping for full system. AI prequalifies and gives ballpark.',
         messages: [
           { side: 'them', text: 'looking to replace my AC, the current ones 18 years old and dying. can i get a ballpark?', delay: 400 },
           { side: 'ai', text: 'yes! couple quick questions. whats your house size and zip?', delay: 1100 },
@@ -1221,27 +1213,27 @@ const TRADES = {
       }
     ],
     smsScenarios: [
-      { key: 'pm', name: 'Mike\'s HVAC', avatar: 'M', time: 'Spring · PM season', label: '🔧 PM plan reminder', meta: '<strong>PM plan reminder</strong> · Spring is coming. AI hits up all PM plan customers to book their tune-up.',
+      { key: 'pm', name: 'Mike\'s HVAC', avatar: 'M', time: 'Spring · PM season', label: 'PM plan reminder', meta: '<strong>PM plan reminder</strong> · Spring is coming. AI hits up all PM plan customers to book their tune-up.',
         messages: [
-          { side: 'ai', text: 'hey Jamie its Mike! 🌷 spring is here which means time for your AC tune-up. covered by your PM plan, $0 to you', delay: 1400 },
+          { side: 'ai', text: 'hey Jamie its Mike! spring is here which means time for your AC tune-up. covered by your PM plan, $0 to you', delay: 1400 },
           { side: 'them', text: 'oh forgot about that, when can u come', delay: 1700 },
           { side: 'ai', text: 'i got tuesday at 9am or thursday 2pm open this week', delay: 1100 },
           { side: 'them', text: 'thursday', delay: 600 },
-          { side: 'ai', text: 'booked ✅ tech is Carlos, hell text 30 min before. usually takes about an hour', delay: 1200 },
+          { side: 'ai', text: 'booked tech is Carlos, hell text 30 min before. usually takes about an hour', delay: 1200 },
           { side: 'them', text: 'thanks', delay: 500 },
-          { side: 'ai', text: '🙌 ill text again in fall for the heater check', delay: 900 }
+          { side: 'ai', text: 'ill text again in fall for the heater check', delay: 900 }
         ]
       },
-      { key: 'cold', name: 'Mike\'s HVAC', avatar: 'M', time: 'Day 2 · 4:18 PM', label: '😶 Cold quote followup', meta: '<strong>Quote went cold</strong> · Customer got a quote and went quiet. AI follows up without pressure.',
+      { key: 'cold', name: 'Mike\'s HVAC', avatar: 'M', time: 'Day 2 · 4:18 PM', label: 'Cold quote followup', meta: '<strong>Quote went cold</strong> · Customer got a quote and went quiet. AI follows up without pressure.',
         messages: [
           { side: 'ai', text: 'hey Jamie its Mike! saw you grabbed that AC estimate yesterday, just checking in, no pressure', delay: 1400 },
           { side: 'them', text: 'hey ya was gonna grab 1 more quote first', delay: 2000 },
           { side: 'ai', text: 'totally fair i always tell folks to do that', delay: 1100 },
-          { side: 'ai', text: 'just a heads up, our $475 includes diagnostic, parts up to $200, AND a 90 day warranty. most guys quote $300 then surprise you with parts 🙃', delay: 1500 },
+          { side: 'ai', text: 'just a heads up, our $475 includes diagnostic, parts up to $200, AND a 90 day warranty. most guys quote $300 then surprise you with parts', delay: 1500 },
           { side: 'them', text: 'oh ok that helps', delay: 1500 },
           { side: 'ai', text: 'np! ill hold thursday 1pm for you while you shop. no charge to hold', delay: 1300 },
           { side: 'them', text: 'k sure', delay: 700 },
-          { side: 'ai', text: 'done ✅ stay cool out there', delay: 900 }
+          { side: 'ai', text: 'done stay cool out there', delay: 900 }
         ]
       }
     ],
@@ -1264,7 +1256,7 @@ const TRADES = {
 
   plumbing: {
     name: 'Plumbing',
-    emoji: '🔧',
+    emoji: '',
     heroEyebrow: 'For Plumbers · Built by TMI',
     heroH1: 'Book the <span class="italic">burst pipe call</span> while your competition is <span class="lime">at dinner.</span>',
     heroSub: 'TMI FrontDesk catches plumbing emergencies 24/7, triages by photo, dispatches your on-call tech, and books non-emergency work for next day.',
@@ -1298,15 +1290,15 @@ const TRADES = {
       { h: 'Permit-required jobs flagged', d: 'AI knows which jobs need permits in your municipality and starts that paperwork early.' }
     ],
     dmScenarios: [
-      { key: 'burst', name: 'AcadiaFlow Plumbing · FB', avatar: 'A', time: '11:14 PM · Friday', label: '💦 Burst pipe emergency', meta: '<strong>Burst pipe at night</strong> · Pipe bursting in the wall. AI triages, dispatches, calms the customer.',
+      { key: 'burst', name: 'AcadiaFlow Plumbing · FB', avatar: 'A', time: '11:14 PM · Friday', label: 'Burst pipe emergency', meta: '<strong>Burst pipe at night</strong> · Pipe bursting in the wall. AI triages, dispatches, calms the customer.',
         messages: [
           { side: 'them', text: 'pipe is BURSTING in my kitchen wall water everywhere please help', delay: 200 },
-          { side: 'ai', text: 'okay first FIND YOUR MAIN WATER SHUTOFF and turn it off NOW. usually by the front of the house near the spigot 🚰', delay: 800 },
+          { side: 'ai', text: 'okay first FIND YOUR MAIN WATER SHUTOFF and turn it off NOW. usually by the front of the house near the spigot', delay: 800 },
           { side: 'them', text: 'ok ok turning off', delay: 1100 },
           { side: 'them', text: 'ok off', delay: 2400 },
-          { side: 'ai', text: 'good. youre safe now. water damage is limited. take a deep breath 🫶', delay: 1100 },
+          { side: 'ai', text: 'good. youre safe now. water damage is limited. take a deep breath', delay: 1100 },
           { side: 'ai', text: 'can you send a pic of the burst area? doesnt matter if its wet', delay: 900 },
-          { side: 'them', text: '[📷 photo]', delay: 1800 },
+          { side: 'them', text: '[photo]', delay: 1800 },
           { side: 'ai', text: 'okay i can see it. looks like a half inch copper, probably failed at a fitting. ill dispatch our on-call tech now', delay: 1700 },
           { side: 'ai', text: 'after-hours emergency is $325 service fee + parts. usually $450-650 total for a fix like this', delay: 1100 },
           { side: 'them', text: 'i dont care please just come', delay: 1100 },
@@ -1315,10 +1307,10 @@ const TRADES = {
           { side: 'them', text: '414 Bayou Tortue Rd', delay: 1100 },
           { side: 'ai', text: 'got it. Brian is coming. open the garage if u can. while you wait, put towels around the damaged area to soak up what spilled', delay: 1500 },
           { side: 'them', text: 'thank you', delay: 600 },
-          { side: 'ai', text: 'youre good. were on it 💪', delay: 800 }
+          { side: 'ai', text: 'youre good. were on it', delay: 800 }
         ]
       },
-      { key: 'heater', name: 'AcadiaFlow Plumbing · IG', avatar: 'A', time: 'Sun 8:42 AM', label: '🔥 Water heater dying', meta: '<strong>Water heater quote</strong> · Old heater making noises. Customer shopping. AI gives instant ballpark.',
+      { key: 'heater', name: 'AcadiaFlow Plumbing · IG', avatar: 'A', time: 'Sun 8:42 AM', label: 'Water heater dying', meta: '<strong>Water heater quote</strong> · Old heater making noises. Customer shopping. AI gives instant ballpark.',
         messages: [
           { side: 'them', text: 'my water heater is making weird noises and the water is barely warm anymore', delay: 400 },
           { side: 'ai', text: 'sounds like sediment buildup or its on its last leg. how old?', delay: 1100 },
@@ -1338,7 +1330,7 @@ const TRADES = {
       }
     ],
     smsScenarios: [
-      { key: 'drain', name: 'AcadiaFlow Plumbing', avatar: 'A', time: 'Wed 6:42 PM', label: '🚿 Drain backup', meta: '<strong>Drain backup</strong> · Kitchen sink not draining. AI books snake service for next day.',
+      { key: 'drain', name: 'AcadiaFlow Plumbing', avatar: 'A', time: 'Wed 6:42 PM', label: 'Drain backup', meta: '<strong>Drain backup</strong> · Kitchen sink not draining. AI books snake service for next day.',
         messages: [
           { side: 'ai', text: 'hey Sarah! AcadiaFlow here. saw your call go to vm. can i help over text?', delay: 1200 },
           { side: 'them', text: 'oh hi yes, my kitchen sink wont drain', delay: 1500 },
@@ -1348,7 +1340,7 @@ const TRADES = {
           { side: 'them', text: 'when can u come', delay: 700 },
           { side: 'ai', text: 'tomorrow 9am or 1pm?', delay: 800 },
           { side: 'them', text: '1pm', delay: 500 },
-          { side: 'ai', text: 'booked ✅ tech is Brian, texts 30 min before. dont run water tonight', delay: 1100 }
+          { side: 'ai', text: 'booked tech is Brian, texts 30 min before. dont run water tonight', delay: 1100 }
         ]
       }
     ],
@@ -1371,7 +1363,7 @@ const TRADES = {
 
   solar: {
     name: 'Solar',
-    emoji: '☀️',
+    emoji: '',
     heroEyebrow: 'For Solar · Built by TMI',
     heroH1: 'Quote a <span class="italic">full solar system</span> from <span class="lime">satellite alone.</span>',
     heroSub: 'TMI FrontDesk analyzes the roof, calculates panel capacity, estimates savings against the utility bill, and books the design consult before the customer even speaks to a human.',
@@ -1405,10 +1397,10 @@ const TRADES = {
       { h: 'Financing options shown', d: 'Cash. Loan. PPA. Lease. AI explains all four and their tradeoffs.' }
     ],
     dmScenarios: [
-      { key: 'curious', name: 'SunMax Solar · IG', avatar: 'S', time: 'Wed 2:14 PM', label: '🤔 Just exploring', meta: '<strong>Curious explorer</strong> · Customer\'s bill went up. Looking into solar. AI educates and books the consult.',
+      { key: 'curious', name: 'SunMax Solar · IG', avatar: 'S', time: 'Wed 2:14 PM', label: 'Just exploring', meta: '<strong>Curious explorer</strong> · Customer\'s bill went up. Looking into solar. AI educates and books the consult.',
         messages: [
           { side: 'them', text: 'my power bill keeps going up im curious about solar', delay: 400 },
-          { side: 'ai', text: 'yeah bills are wild rn 😩 happy to walk u through it. whats your address?', delay: 1100 },
+          { side: 'ai', text: 'yeah bills are wild rn happy to walk u through it. whats your address?', delay: 1100 },
           { side: 'them', text: '1812 Cypress Ridge', delay: 900 },
           { side: 'ai', text: 'pulling it up... ok i see a south-facing roof, looks ideal. minimal shading. about 680sf usable', delay: 1500 },
           { side: 'ai', text: 'how much is your monthly bill on average?', delay: 800 },
@@ -1425,9 +1417,9 @@ const TRADES = {
       }
     ],
     smsScenarios: [
-      { key: 'nurture', name: 'SunMax Solar', avatar: 'S', time: 'Day 30 nurture', label: '📅 Long-cycle nurture', meta: '<strong>30-day check-in</strong> · Solar leads take months to close. AI keeps them warm with bill updates.',
+      { key: 'nurture', name: 'SunMax Solar', avatar: 'S', time: 'Day 30 nurture', label: 'Long-cycle nurture', meta: '<strong>30-day check-in</strong> · Solar leads take months to close. AI keeps them warm with bill updates.',
         messages: [
-          { side: 'ai', text: 'hey Jamie! Sara from SunMax 🌞 checking in. how have your power bills been since we last chatted?', delay: 1400 },
+          { side: 'ai', text: 'hey Jamie! Sara from SunMax checking in. how have your power bills been since we last chatted?', delay: 1400 },
           { side: 'them', text: 'ugh got another $320 bill last week', delay: 1800 },
           { side: 'ai', text: 'yeahhh thats brutal. quick reminder, your system would offset that down to like $40-60/mo total', delay: 1300 },
           { side: 'ai', text: 'also fyi, the federal 30% credit gets reduced after 2032. if u finance now you basically lock in the savings forever', delay: 1300 },
@@ -1457,7 +1449,7 @@ const TRADES = {
 
   other: {
     name: 'Your Trade',
-    emoji: '🔨',
+    emoji: '',
     heroEyebrow: 'For Every Trade · Built by TMI',
     heroH1: 'If you run a <span class="italic">truck and a crew,</span> <span class="lime">this works for you.</span>',
     heroSub: 'TMI FrontDesk is trained on 80+ home service trades. Painting, fencing, concrete, cleaning, junk removal, pest control, pool, garage doors, electrical, septic, foundation. Tell us yours.',
@@ -1491,7 +1483,7 @@ const TRADES = {
       { h: '80+ trades supported', d: 'Roofing, painting, fencing, concrete, cleaning, junk removal, pest control, pool, etc.' }
     ],
     dmScenarios: [
-      { key: 'generic', name: 'Your Business · IG', avatar: 'Y', time: 'Today', label: '📩 Sample inquiry', meta: '<strong>Sample inquiry</strong> · This shows the basic AI flow. We customize it to your trade and customers.',
+      { key: 'generic', name: 'Your Business · IG', avatar: 'Y', time: 'Today', label: 'Sample inquiry', meta: '<strong>Sample inquiry</strong> · This shows the basic AI flow. We customize it to your trade and customers.',
         messages: [
           { side: 'them', text: 'hey can i get a quote', delay: 400 },
           { side: 'ai', text: 'absolutely! for what service?', delay: 900 },
@@ -1503,12 +1495,12 @@ const TRADES = {
           { side: 'them', text: 'yes', delay: 600 },
           { side: 'ai', text: 'tuesday 9am or thursday 1pm?', delay: 900 },
           { side: 'them', text: 'thursday', delay: 500 },
-          { side: 'ai', text: 'booked! ill text day before to confirm 🙌', delay: 1000 }
+          { side: 'ai', text: 'booked! ill text day before to confirm', delay: 1000 }
         ]
       }
     ],
     smsScenarios: [
-      { key: 'generic', name: 'Your Business', avatar: 'Y', time: 'Today', label: '💬 Sample followup', meta: '<strong>Sample followup</strong> · The AI follows up like a real person. We tune the messages to your voice.',
+      { key: 'generic', name: 'Your Business', avatar: 'Y', time: 'Today', label: 'Sample followup', meta: '<strong>Sample followup</strong> · The AI follows up like a real person. We tune the messages to your voice.',
         messages: [
           { side: 'ai', text: 'hey [name]! just checking in on that quote, any thoughts? no pressure', delay: 1400 },
           { side: 'them', text: 'was gonna get another quote first', delay: 1500 },
@@ -1516,7 +1508,7 @@ const TRADES = {
           { side: 'them', text: 'oh good to know', delay: 1200 },
           { side: 'ai', text: 'ill hold a slot for you while you shop, no charge to hold', delay: 1100 },
           { side: 'them', text: 'k', delay: 400 },
-          { side: 'ai', text: 'done ✅', delay: 700 }
+          { side: 'ai', text: 'done', delay: 700 }
         ]
       }
     ],
@@ -1728,7 +1720,7 @@ function runSatelliteAnimation() {
 
   const measuring = document.createElement('div');
   measuring.className = 'measuring';
-  measuring.textContent = '🛰️ Scanning property...';
+  measuring.textContent = ' Scanning property...';
   view.appendChild(measuring);
 
   const scan = document.createElement('div');
@@ -1737,7 +1729,7 @@ function runSatelliteAnimation() {
   setTimeout(() => scan.classList.add('active'), 200);
 
   setTimeout(() => {
-    measuring.textContent = '✓ Property scanned';
+    measuring.textContent = ' Property scanned';
     measuring.style.background = 'rgba(200,241,53,0.95)';
     measuring.style.color = '#000';
     measuring.style.animation = 'none';
@@ -1799,7 +1791,7 @@ function getStatsForTrade() {
     { label: 'Likely fixtures', value: '3 bath + kitchen', delay: 1700 }
   ];
   return [
-    { label: 'Property scanned', value: '✓ Complete', delay: 1200 },
+    { label: 'Property scanned', value: ' Complete', delay: 1200 },
     { label: 'Ready for quote', value: 'Yes', delay: 1700 }
   ];
 }
@@ -1865,7 +1857,7 @@ function drawOverlayForTrade(overlay, treeWrap, treeExtras) {
       <polygon points="30,38 48,38 48,58 30,58" fill="rgba(200,241,53,0.22)" stroke="#C8F135" stroke-width="0.5" opacity="0"><animate attributeName="opacity" from="0" to="1" dur="0.5s" begin="0.2s" fill="freeze"/></polygon>
       ${panels}
     </svg>
-    <div class="map-label" style="top:18%;right:8%;">☀️ SOUTH FACING</div>
+    <div class="map-label" style="top:18%;right:8%;">SOUTH FACING</div>
     <div class="map-label" style="top:88%;left:50%;transform:translateX(-50%);">12 PANELS · 4.8 kW</div>`;
   }
   else {
@@ -1946,7 +1938,7 @@ function calculatePrice() {
 }
 
 document.getElementById('book-now').addEventListener('click', () => {
-  alert('✓ Booked!\n\nIn real life: SMS sent to customer, lead added to CRM with the satellite photo, calendar updated, you get notified.');
+  alert(' Booked!\n\nIn real life: SMS sent to customer, lead added to CRM with the satellite photo, calendar updated, you get notified.');
 });
 
 // ====== DM CHAT ======
