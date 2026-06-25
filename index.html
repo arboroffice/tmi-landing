@@ -409,6 +409,16 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   .cmp .col.after li .m{color:var(--chart);}
   @media(max-width:920px){.grid4{grid-template-columns:1fr 1fr;}.cmp{grid-template-columns:1fr;}}
   @media(max-width:560px){.grid4{grid-template-columns:1fr;}}
+  /* what we do: linked cards, no icons, 2-up on mobile */
+  .do-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px;}
+  .docard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px 22px;transition:border-color .2s,transform .2s,background .2s;}
+  .docard:hover{border-color:var(--line-2);transform:translateY(-2px);background:var(--panel-2);}
+  .docard h3{font-size:19px;color:#fff;margin-bottom:7px;letter-spacing:-0.01em;}
+  .docard p{font-size:13px;color:var(--ink-2);line-height:1.55;margin:0;}
+  .docard .go{display:inline-flex;align-items:center;gap:6px;margin-top:13px;font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--chart);transition:gap .2s;}
+  .docard:hover .go{gap:10px;}
+  @media(max-width:920px){.do-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:640px){.do-grid{grid-template-columns:1fr 1fr;gap:10px;}.docard{padding:20px 18px;}.docard h3{font-size:17px;}}
 </style>
 </head>
 <body>
@@ -676,37 +686,19 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
     <div class="eyebrow reveal">What we do</div>
     <h2 class="lead reveal">The build, <em>and beyond it.</em></h2>
     <p class="sub reveal">One operation you own, plus the team training and the growth to get everything out of it.</p>
-    <div class="grid4 reveal">
-      <div class="mcard">
-        <div class="micon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg></div>
-        <h3>Operations OS</h3>
-        <p>The central operating system your whole company runs on.</p>
-      </div>
-      <div class="mcard">
-        <div class="micon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-        <h3>AI Workforce</h3>
-        <p>Digital workers that handle the repetitive administrative work.</p>
-      </div>
-      <div class="mcard">
-        <div class="micon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></div>
-        <h3>Command Center</h3>
-        <p>Real-time visibility across your entire operation.</p>
-      </div>
-      <div class="mcard">
-        <div class="micon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 3-3 3 2 5-6"/></svg></div>
-        <h3>Business Intelligence</h3>
-        <p>Know what's happening before it becomes a problem.</p>
-      </div>
-      <div class="mcard">
-        <div class="micon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg></div>
-        <h3>AI Training</h3>
-        <p>We teach your team to use AI day to day, so the whole company saves real time and money.</p>
-      </div>
-      <div class="mcard">
-        <div class="micon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
-        <h3>Get Seen</h3>
-        <p>Show up where buyers look now, on social and in AI search, and turn attention into clients.</p>
-      </div>
+    <div class="do-grid reveal">
+      <a class="docard" href="/platform"><h3>Operations OS</h3><p>The central operating system your whole company runs on.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/ai-employees"><h3>AI Workforce</h3><p>Digital employees that handle the repetitive work, hired by the month.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/platform"><h3>Command Center</h3><p>Real-time visibility across your entire operation, on one screen.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/platform"><h3>Business Intelligence</h3><p>Know what's happening before it becomes a problem.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/system-training"><h3>AI Training</h3><p>We train your team to use AI day to day, so the company saves real time and money.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/ai-employees"><h3>AI Employees</h3><p>Hire a single digital worker by the month: dispatcher, collector, estimator, and more.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/outbound"><h3>Outbound</h3><p>A human call agency: cold outreach, follow-up, reactivation, and reviews.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/inbound"><h3>Inbound</h3><p>Never miss a call. We answer, text back, qualify, and book every lead.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/visibility"><h3>AI Visibility</h3><p>Be the answer AI and search give your buyers. The inbound side of growth.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/back-office"><h3>Back Office</h3><p>Invoicing, AR, collections, and bookkeeping, run for you by a team plus AI.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/personal-brand"><h3>Personal Brand</h3><p>A done-for-you founder brand that turns attention into clients and talent.</p><span class="go">Explore &rarr;</span></a>
+      <a class="docard" href="/audit" onclick="lead()" style="background:linear-gradient(160deg,rgba(228,255,151,0.10),rgba(228,255,151,0.02));border-color:rgba(228,255,151,0.4);"><h3>Free Audit</h3><p>Not sure where to start? Map your operation and see what we'd build first.</p><span class="go">Start free &rarr;</span></a>
     </div>
     <a href="/audit" class="btn reveal" onclick="lead()" style="margin-top:30px;">Start with a free audit <span class="arr">&rarr;</span></a>
   </div>
@@ -750,7 +742,7 @@ document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var n=doc
         <div class="foot-col">
           <h5>Start here</h5>
           <a href="/audit" onclick="lead()">Free Business Intelligence Audit</a>
-          <a href="/portfolio">The Work</a>
+          <a href="/portfolio">The Work <span style="color:var(--chart);">(proof &amp; testimonials)</span></a>
           <a href="/operations">The Whole Operation</a>
           <a href="/savings-calculator">Savings Calculator</a>
           <a href="/state-of-ai-report">State of AI Report</a>
