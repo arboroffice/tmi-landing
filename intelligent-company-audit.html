@@ -241,6 +241,7 @@ const FIVE_WANTS = [
 
 const NAV = [
   { id:"intro", label:"Overview" },
+  { id:"dossier", label:"What We Found" },
   { id:"diag", label:"Your Score" },
   { id:"intake", label:"Your Operation" },
   { id:"five", label:"The Framework" },
@@ -265,7 +266,7 @@ const FALLBACK_INTAKE = [
 
 /* ─── STATE ─────────────────────────────────────────────────────── */
 var lead = { name:"", email:"", company:"", phone:"" };
-var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null, research:null, researching:false, researched:false, prefilled:{}, hypothesis:{} };
+var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null, research:null, researching:false, researched:false, prefilled:{}, hypothesis:{}, removedFacts:{}, userFacts:[] };
 function isMob(){ return window.innerWidth < 640; }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function sum(o){ return Object.values(o).reduce(function(a,b){return a+b;},0); }
@@ -284,6 +285,7 @@ function gateSubmit(){
   state.answers.company = lead.company;
   document.getElementById("gate").style.display="none";
   document.getElementById("appRoot").style.display="block";
+  state.sec="dossier";
   render();
   runResearch();
 }
@@ -293,7 +295,7 @@ function runResearch(){
   if(state.researching || state.researched) return;
   if(!lead.email && !lead.company && !state.answers.company) return;
   state.researching=true;
-  if(state.sec==="intake"||state.sec==="intro") render();
+  if(state.sec==="intake"||state.sec==="intro"||state.sec==="dossier") render();
   fetch("/api/audit-research",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ company:lead.company||state.answers.company||"", email:lead.email||"", website:state.answers.website||"" })})
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -314,9 +316,9 @@ function runResearch(){
           if(cur==null || String(cur).trim()===""){ state.answers[k]=String(v); state.prefilled[k]=true; state.hypothesis[k]=true; }
         });
       }
-      if(state.sec==="intake"||state.sec==="intro") render();
+      if(state.sec==="intake"||state.sec==="intro"||state.sec==="dossier") render();
     })
-    .catch(function(){ state.researching=false; state.researched=true; if(state.sec==="intake"||state.sec==="intro") render(); });
+    .catch(function(){ state.researching=false; state.researched=true; if(state.sec==="intake"||state.sec==="intro"||state.sec==="dossier") render(); });
 }
 function researchStatus(full){
   var co=esc(lead.company||state.answers.company||"your company");
@@ -357,7 +359,7 @@ async function loadIntake(){
 
 async function submitAudit(){
   var btn=document.getElementById("submitBtn"); if(btn){ btn.disabled=true; btn.textContent="Sending..."; }
-  var answers=Object.assign({}, state.answers, { company: state.answers.company||lead.company||"", phone: state.answers.phone||lead.phone||"", _diagnostic_scores: state.scores, _diagnostic_total: sum(state.scores), _checklist_progress: state.checks });
+  var answers=Object.assign({}, state.answers, { company: state.answers.company||lead.company||"", phone: state.answers.phone||lead.phone||"", _verified_facts: dossierFacts().join(" | "), _diagnostic_scores: state.scores, _diagnostic_total: sum(state.scores), _checklist_progress: state.checks });
   try{
     var r=await fetch("/api/audit-intake",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ email:lead.email, name:lead.name, phone:lead.phone||answers.phone||"", company:answers.company, website:state.answers.website||(state.research&&state.research.website)||"", industry: state.answers.industry||"", answers:answers, research:state.research||null })});
     state.result = await r.json();
@@ -395,7 +397,7 @@ function render(){
   var mob=isMob();
   var pad = mob? "0 16px 80px" : "0 32px 120px";
   document.getElementById("main").style.padding = pad;
-  var fn = {intro:renderIntro, diag:renderDiag, intake:renderIntake, five:renderFive, play:renderPlay, leaks:renderLeaks, agents:renderAgents}[state.sec] || renderIntro;
+  var fn = {intro:renderIntro, dossier:renderDossier, diag:renderDiag, intake:renderIntake, five:renderFive, play:renderPlay, leaks:renderLeaks, agents:renderAgents}[state.sec] || renderIntro;
   document.getElementById("main").innerHTML = fn(mob);
 }
 
@@ -460,6 +462,76 @@ function renderDiag(mob){
   [{range:"5–8",label:"Fragmented",desc:"Your business runs on memory. Start at Day 1."},{range:"9–14",label:"Developing",desc:"Some systems exist. The gaps are expensive. Start at Week 2."},{range:"15–19",label:"Coordinated",desc:"Solid foundation. Focus on Week 3 and 4."},{range:"20–25",label:"Intelligent",desc:"Strong operations. The AI Org Chart is your next layer."}].forEach(function(s,i){ h+='<div style="padding:10px 0;border-bottom:'+(i<3?"1px solid #F0F0F0":"none")+';display:flex;gap:12px;align-items:flex-start;"><div class="d" style="font-size:12px;font-weight:700;color:#CCCCCC;min-width:36px;">'+s.range+'</div><div><div style="font-size:13px;font-weight:600;color:#0A0A0A;margin-bottom:2px;">'+s.label+'</div><div style="font-size:12px;color:#8A8A8A;">'+s.desc+'</div></div></div>'; });
   h+='</div></div></div>';
   h+='<div style="margin-top:40px;display:flex;gap:12px;">'+btnGhost("&larr; Back","go('intro')")+btnBlack("Map your operation &rarr;","go('intake')")+'</div></div>';
+  return h;
+}
+
+var DOSSIER_FIELDS=[
+  {id:"company",label:"Company name",ph:"Your company"},
+  {id:"website",label:"Website",ph:"yourcompany.com"},
+  {id:"industry",label:"What you do",ph:"e.g. Commercial HVAC service + install"},
+  {id:"years",label:"Years in business",ph:"e.g. 18"},
+  {id:"locations",label:"Locations / yards",ph:"e.g. 2"},
+  {id:"headcount",label:"Team size",ph:"e.g. 35"},
+  {id:"revenue",label:"Revenue range",ph:"e.g. $5M - $20M"},
+  {id:"crm",label:"Main system of record",ph:"e.g. ServiceTitan"},
+  {id:"books",label:"Accounting",ph:"e.g. QuickBooks"},
+  {id:"tools_list",label:"Software you run",ph:"Comma separated",wide:true},
+  {id:"lead_sources",label:"How you win customers",ph:"Referrals, Google, Angi...",wide:true},
+  {id:"seasonality",label:"Seasonality",ph:"Very / Somewhat / Not really"},
+  {id:"compliance",label:"Licensing / compliance",ph:"Licenses, certs, insurance",wide:true}
+];
+
+function dossierFacts(){
+  var f=(state.research&&state.research.found)||[]; var out=[];
+  f.forEach(function(x,i){ if(!state.removedFacts[i]) out.push(x); });
+  state.userFacts.forEach(function(x){ out.push(x); });
+  return out;
+}
+function removeFact(i){ state.removedFacts[i]=true; render(); }
+function addUserFact(){ var el=document.getElementById('df-add'); if(!el)return; var v=(el.value||'').trim(); if(!v)return; state.userFacts.push(v); el.value=''; render(); }
+function reRunResearch(){ lead.company=(state.answers.company||lead.company||''); state.researched=false; state.researching=false; state.research=null; render(); runResearch(); }
+
+function renderDossier(mob){
+  var h='<div><div style="padding-top:'+(mob?36:72)+'px;padding-bottom:'+(mob?20:28)+'px;">'+sectionRule("What We Found", state.research&&state.research.confidence?("Confidence: "+state.research.confidence):"");
+  h+='<h2 class="d" style="font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#0A0A0A;margin-bottom:16px;">We did the homework. Confirm it.</h2>';
+  h+='<p style="font-size:17px;color:#5A5A5A;max-width:620px;line-height:1.75;">We researched your business so you barely have to type. Read what we found, fix anything wrong, and add what we missed. The more accurate this is, the sharper your audit.</p></div>';
+
+  if(state.researching){ h+='<div style="padding:24px 0;">'+researchStatus(false)+'</div></div>'; return h; }
+  if(!state.researched || !state.research){
+    h+='<div style="background:#F8F8F5;border:1.5px solid #EBEBEB;border-radius:16px;padding:28px;color:#6A6A6A;font-size:15px;display:flex;flex-direction:column;gap:16px;align-items:flex-start;">We have not run research yet.'+btnBlack("Research my company &rarr;","reRunResearch()")+'</div></div>'; return h;
+  }
+
+  if(state.research.summary){ h+='<div style="background:#0A0A0A;border-radius:16px;padding:'+(mob?"22px":"26px 28px")+';margin-bottom:24px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#C8F135;margin-bottom:10px;">How we read your operation</div><div style="font-size:15px;color:#E8E8E8;line-height:1.65;">'+esc(state.research.summary)+'</div></div>'; }
+
+  h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"1fr 1fr")+';gap:14px;">';
+  DOSSIER_FIELDS.forEach(function(f){
+    var v=state.answers[f.id]; var pre=state.prefilled[f.id]; var hyp=state.hypothesis[f.id];
+    var tag=hyp?'Our read':(pre?'Researched':'Add yours');
+    var tagcol=hyp?'#8A5A00':(pre?'#4A6010':'#AAAAAA'); var tagbg=hyp?'#FFF2D6':(pre?'#EEF8C8':'#F2F2EE');
+    var span=(f.wide&&!mob)?'grid-column:1 / -1;':'';
+    h+='<div style="'+span+'background:#fff;border:1.5px solid '+(pre?'#E4F0C8':'#EBEBEB')+';border-radius:12px;padding:14px 16px;">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px;"><label style="font-size:12px;font-weight:700;color:#0A0A0A;">'+f.label+'</label><span style="font-size:9px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:'+tagcol+';background:'+tagbg+';border-radius:100px;padding:2px 8px;flex-shrink:0;">'+tag+'</span></div>';
+    if(f.wide){ h+='<textarea oninput="setAns(\''+f.id+'\',this.value)" style="min-height:54px;" placeholder="'+f.ph+'">'+esc(v||'')+'</textarea>'; }
+    else { h+='<input type="text" value="'+esc(v||'')+'" oninput="setAns(\''+f.id+'\',this.value)" placeholder="'+f.ph+'">'; }
+    h+='</div>';
+  });
+  h+='</div>';
+
+  var facts=(state.research.found||[]);
+  var anyFacts=facts.some(function(x,i){return !state.removedFacts[i];})||state.userFacts.length;
+  h+='<div style="margin-top:26px;"><div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#BBBBBB;margin-bottom:12px;">Facts we pulled &middot; remove any that are wrong</div>';
+  if(anyFacts){ h+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    facts.forEach(function(x,i){ if(state.removedFacts[i])return; h+='<span style="display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#0A0A0A;background:#F2F8DF;border:1px solid #D8ECCC;border-radius:100px;padding:6px 8px 6px 13px;">'+esc(x)+'<button onclick="removeFact('+i+')" style="border:none;background:#E0E8D0;color:#5A6A40;width:18px;height:18px;border-radius:50%;cursor:pointer;font-size:11px;line-height:1;">&#10005;</button></span>'; });
+    state.userFacts.forEach(function(x){ h+='<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#0A0A0A;background:#EAF4FF;border:1px solid #CCE4F5;border-radius:100px;padding:6px 13px;">'+esc(x)+'</span>'; });
+    h+='</div>'; }
+  h+='<div style="display:flex;gap:8px;margin-top:14px;max-width:520px;"><input id="df-add" type="text" placeholder="Add something we missed" style="flex:1;"><button onclick="addUserFact()" style="background:#0A0A0A;color:#fff;border:none;border-radius:10px;padding:0 18px;font-size:13px;font-weight:600;cursor:pointer;">Add</button></div></div>';
+
+  var searched=[]; if(state.research.pagesCrawled&&state.research.pagesCrawled.length) searched.push('your site ('+state.research.pagesCrawled.length+' pages)'); if(state.research.web) searched.push('web search'); if(state.research.maps) searched.push('Google reviews'); if(state.research.firmographics) searched.push('firmographics'); if(state.research.linkedin) searched.push('LinkedIn');
+  h+='<div style="margin-top:26px;background:#F8F8F5;border:1.5px solid #EBEBEB;border-radius:14px;padding:18px 20px;">';
+  h+='<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;">We searched: '+(searched.length?esc(searched.join(', ')):'your company name')+'. Wrong company or site? Fix it and we will look again.</div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><input type="text" value="'+esc(state.answers.company||lead.company||'')+'" oninput="setAns(\'company\',this.value)" placeholder="Company name" style="flex:1;min-width:150px;"><input type="text" value="'+esc(state.answers.website||'')+'" oninput="setAns(\'website\',this.value)" placeholder="Website" style="flex:1;min-width:150px;"><button onclick="reRunResearch()" style="background:#fff;border:1.5px solid #DDDDD8;border-radius:10px;padding:11px 18px;font-size:13px;color:#0A0A0A;cursor:pointer;font-weight:600;">Re-run research</button></div></div>';
+
+  h+='<div style="margin-top:32px;display:flex;gap:12px;">'+btnGhost("&larr; Overview","go('intro')")+btnBlack("Looks right, continue &rarr;","go('diag')")+'</div></div>';
   return h;
 }
 
