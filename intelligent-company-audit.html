@@ -278,7 +278,7 @@ function gateSubmit(){
   lead.email=em;
   lead.company=(document.getElementById("g-company").value||"").trim();
   var ph=document.getElementById("g-phone"); lead.phone=ph?(ph.value||"").trim():"";
-  try{ fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ name:lead.name, email:lead.email, company:lead.company, phone:lead.phone, source:"intelligent-company-audit", sources:["founders-of-the-future","audit"] })}); }catch(e){}
+  try{ fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ name:lead.name, email:lead.email, company:lead.company, phone:lead.phone, source:"intelligent-company-audit", sources:["audit"] })}); }catch(e){}
   try{ if(typeof fbq==="function") fbq("track","Lead",{content_name:"Intelligent Company Audit"}); }catch(e){}
   try{ localStorage.setItem("ica_lead", JSON.stringify(lead)); }catch(e){}
   state.answers.company = lead.company;
@@ -470,7 +470,7 @@ function renderIntake(mob){
       if(q.type==="long"){ h+='<textarea oninput="setAns(\''+q.id+'\',this.value)">'+esc(v||"")+'</textarea>'; }
       else if(q.type==="single"){ (q.options||[]).forEach(function(o){ h+='<label class="opt"><input type="radio" name="'+q.id+'" value="'+esc(o)+'" '+(v===o?"checked":"")+' onchange="setAns(\''+q.id+'\',this.value)"> '+esc(o)+'</label>'; }); }
       else if(q.type==="multi"){ var arr=Array.isArray(v)?v:[]; (q.options||[]).forEach(function(o){ h+='<label class="opt"><input type="checkbox" value="'+esc(o)+'" '+(arr.indexOf(o)>=0?"checked":"")+' onchange="toggleMulti(\''+q.id+'\',\''+esc(o).replace(/'/g,"\\'")+'\')"> '+esc(o)+'</label>'; }); }
-      else if(q.type==="scale"){ h+='<select onchange="setAns(\''+q.id+'\',this.value)"><option value="">—</option>'; for(var n=1;n<=10;n++){ h+='<option '+(String(v)===String(n)?"selected":"")+'>'+n+'</option>'; } h+='</select>'; }
+      else if(q.type==="scale"){ h+='<select onchange="setAns(\''+q.id+'\',this.value)"><option value="">Select</option>'; for(var n=1;n<=10;n++){ h+='<option '+(String(v)===String(n)?"selected":"")+'>'+n+'</option>'; } h+='</select>'; }
       else { h+='<input type="text" value="'+esc(v||"")+'" oninput="setAns(\''+q.id+'\',this.value)">'; }
       h+='</div>';
     });
