@@ -12,7 +12,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { session_id, email, company, industry, answers, name, phone, website, research } = req.body || {};
+  const { session_id, email, company, industry, answers, name, phone, website, research, diagnosis } = req.body || {};
   if (!answers || typeof answers !== 'object') return res.status(400).json({ error: 'answers required' });
 
   // The Complete Audit is free. Capture the email and proceed, no payment gate.
@@ -63,6 +63,7 @@ module.exports = async function handler(req, res) {
       application_id: appId,
       answers,
       research: research || null,
+      diagnosis: diagnosis || null,
       paid: true,
       session_id: session_id || null,
       status: 'submitted',
@@ -84,6 +85,11 @@ module.exports = async function handler(req, res) {
               _service_area: (research.facts && research.facts.service_area_text) || '',
             })
           : answers;
+        // Ground the deliverable in the diagnosis we already showed them.
+        if (diagnosis && Array.isArray(diagnosis.issues) && diagnosis.issues.length) {
+          enriched._diagnosed_issues = diagnosis.issues.map(it => `${it.title} (${it.lens}, ${it.severity}; cost: ${it.cost}; fix: ${it.fix} via ${it.offering} ${it.path})`).join('\n');
+          if (diagnosis.headline) enriched._diagnosis_headline = diagnosis.headline;
+        }
         const md = await buildCompleteAudit({
           company: company || answers.company,
           industry: industry || answers.industry,
