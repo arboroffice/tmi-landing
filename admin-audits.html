@@ -142,6 +142,10 @@
       <div id="pd-research" class="answers-wrap" style="margin-bottom:4px;"></div>
 
       <div class="panel-sep"></div>
+      <div class="panel-sec-label">Diagnosis &middot; their problems &amp; the fix</div>
+      <div id="pd-diagnosis" class="answers-wrap" style="margin-bottom:4px;"></div>
+
+      <div class="panel-sep"></div>
       <div class="panel-sec-label">Answers</div>
       <div id="pd-answers" class="answers-wrap"></div>
 
@@ -349,6 +353,30 @@ function openPanel(audit) {
     resEl.innerHTML = rh;
   } else {
     resEl.textContent = 'No research on file.';
+  }
+
+  // Diagnosis (the AI-found problems + the mapped fix) for the pre-call brief.
+  const diagEl = document.getElementById('pd-diagnosis');
+  if (diagEl) {
+    const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const dg = audit.diagnosis && typeof audit.diagnosis === 'object' ? audit.diagnosis : null;
+    const issues = dg && Array.isArray(dg.issues) ? dg.issues : [];
+    if (dg && (dg.headline || issues.length)) {
+      let dh = '';
+      if (dg.headline) dh += `<div class="answer-row"><div class="answer-q">Core constraint</div><div class="answer-a">${esc(dg.headline)}</div></div>`;
+      if (dg.fit && dg.fit.reason) dh += `<div class="answer-row"><div class="answer-q">Fit</div><div class="answer-a">${dg.fit.good ? '&#10003; ' : ''}${esc(dg.fit.reason)}</div></div>`;
+      issues.forEach((it, i) => {
+        dh += `<div class="answer-row"><div class="answer-q">#${i + 1} ${esc(it.lens || '')} &middot; ${esc(it.severity || '')}</div><div class="answer-a"><strong>${esc(it.title || '')}</strong>`
+          + (it.evidence ? `<br><span style="color:var(--muted)">Saw:</span> ${esc(it.evidence)}` : '')
+          + (it.cost ? `<br><span style="color:var(--muted)">Cost:</span> ${esc(it.cost)}` : '')
+          + (it.fix ? `<br><span style="color:var(--muted)">Fix:</span> ${esc(it.fix)} <em>(${esc(it.offering || '')} &middot; ${esc(it.path || '')})</em>` : '')
+          + `</div></div>`;
+      });
+      if (dg.summary) dh += `<div class="answer-row"><div class="answer-q">Through-line</div><div class="answer-a">${esc(dg.summary)}</div></div>`;
+      diagEl.innerHTML = dh;
+    } else {
+      diagEl.textContent = 'No diagnosis on file.';
+    }
   }
 
   // Answers

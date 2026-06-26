@@ -798,11 +798,19 @@ render = function(){
     h+='<div style="background:#F8F8F5;border:1.5px solid #EBEBEB;border-radius:20px;padding:26px 24px;">';
     FIVE_WANTS.forEach(function(wt){ var v=state.scores[wt.label]; h+='<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:600;color:#3A3A3A;">'+wt.label+'</span><span style="font-size:13px;font-weight:700;color:'+wt.color+';">'+v+'/5</span></div><div class="score-track"><div class="score-fill" style="width:'+((v/5)*100)+'%;background:'+wt.color+';"></div></div></div>'; });
     h+='</div></div>';
-    // Leaks
-    h+=sectionRule("Where you are leaking");
-    h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"repeat(3,1fr)")+';gap:12px;margin-bottom:40px;">';
-    R.leaks.forEach(function(lk){ h+='<div class="card" style="padding:22px 22px;border-top:3px solid #FF6B35;"><div class="d" style="font-size:16px;font-weight:700;color:#0A0A0A;margin-bottom:8px;line-height:1.25;">'+esc(lk.title)+'</div><div style="font-size:13px;color:#7A7A7A;line-height:1.6;">'+esc(lk.note)+'</div></div>'; });
-    h+='</div>';
+    // Diagnosis (the real AI-found problems) if we have it, else the derived leaks.
+    var dgi=(state.diagnosis&&state.diagnosis.issues)||[];
+    if(dgi.length){
+      h+=sectionRule("What we found is costing you");
+      h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"1fr 1fr")+';gap:12px;margin-bottom:40px;">';
+      dgi.slice(0,6).forEach(function(it){ var lc=LENS_COLOR[it.lens]||"#00B4D8"; var rx=state.issueReact[it.id]; h+='<div class="card" style="padding:22px 22px;border-top:3px solid '+lc+';"><div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;"><span style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fff;background:'+lc+';border-radius:4px;padding:2px 7px;">'+esc(it.lens)+'</span>'+((rx==="yes"||rx==="sort")?'<span style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#4A6010;background:#EEF8C8;border-radius:4px;padding:2px 7px;">'+(rx==="yes"?"You confirmed":"Partly")+'</span>':'')+'</div><div class="d" style="font-size:16px;font-weight:700;color:#0A0A0A;margin-bottom:8px;line-height:1.25;">'+esc(it.title)+'</div><div style="font-size:13px;color:#8A5020;font-weight:600;line-height:1.5;margin-bottom:8px;">'+esc(it.cost)+'</div>'+(it.offering?'<a href="'+esc(it.offering_url||"/audit")+'" style="font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#0A0A0A;">Fix: '+esc(it.offering)+' &rarr;</a>':'')+'</div>'; });
+      h+='</div>';
+    } else {
+      h+=sectionRule("Where you are leaking");
+      h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"repeat(3,1fr)")+';gap:12px;margin-bottom:40px;">';
+      R.leaks.forEach(function(lk){ h+='<div class="card" style="padding:22px 22px;border-top:3px solid #FF6B35;"><div class="d" style="font-size:16px;font-weight:700;color:#0A0A0A;margin-bottom:8px;line-height:1.25;">'+esc(lk.title)+'</div><div style="font-size:13px;color:#7A7A7A;line-height:1.6;">'+esc(lk.note)+'</div></div>'; });
+      h+='</div>';
+    }
     // Recommended digital employees
     h+=sectionRule("The digital employees we would install first");
     h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"repeat(3,1fr)")+';gap:12px;margin-bottom:40px;">';
