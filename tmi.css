@@ -3,6 +3,8 @@
    One shared stylesheet for the whole site. Black + chartreuse, huge Barlow
    headlines, massive whitespace, no icons, no gradient cards, no AI graphics.
    ========================================================================== */
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
 :root{
   --bg:#ffffff;
   --bg-alt:#f6f6f4;
@@ -13,18 +15,20 @@
   --line-2:rgba(10,11,20,0.16);
   --chart:#E4FF97;
   --chart-dark:#cdee72;
-  --serif:"Barlow",system-ui,sans-serif;
-  --sans:"Neue Haas Grotesk Display","Neue Haas Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --sans:"General Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --maxw:1200px;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 html{scroll-behavior:smooth;scroll-padding-top:80px;-webkit-text-size-adjust:100%;}
-body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden;}
+body{font-family:var(--sans);font-weight:500;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.6;overflow-x:hidden;}
 a{color:inherit;text-decoration:none;}
 img{display:block;max-width:100%;}
 ::selection{background:var(--ink);color:#fff;}
-h1,h2,h3,h4{font-family:var(--serif);font-weight:800;letter-spacing:-0.03em;line-height:1.0;margin:0;}
+h1,h2,h3,h4{font-family:var(--sans);font-weight:700;letter-spacing:-0.03em;line-height:1.0;margin:0;}
+/* Accent words: Instrument Serif Italic */
+.lime,.display em,.h-lead em,.h-sec em,h1 em,h2 em,h3 em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:0;}
 p{margin:0;}
 
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 40px;}
@@ -32,11 +36,13 @@ p{margin:0;}
 
 /* ---- type scale ---------------------------------------------------------- */
 .kicker{font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);}
-.display{font-size:clamp(44px,7vw,104px);font-weight:800;line-height:0.98;letter-spacing:-0.035em;color:var(--ink);}
-.h-lead{font-size:clamp(34px,5vw,68px);font-weight:800;line-height:1.0;letter-spacing:-0.03em;color:var(--ink);}
-.h-sec{font-size:clamp(28px,3.6vw,46px);font-weight:800;line-height:1.04;letter-spacing:-0.025em;color:var(--ink);}
+.display{font-size:clamp(44px,7vw,104px);font-weight:700;line-height:0.98;letter-spacing:-0.035em;color:var(--ink);}
+.h-lead{font-size:clamp(34px,5vw,68px);font-weight:700;line-height:1.0;letter-spacing:-0.03em;color:var(--ink);}
+.h-sec{font-size:clamp(28px,3.6vw,46px);font-weight:700;line-height:1.04;letter-spacing:-0.025em;color:var(--ink);}
 .accent{color:var(--ink);} /* default */
-.lime{color:#9bbf3c;} /* chartreuse is too light on white for text; use a readable deep variant */
+/* Instrument Serif italic reads larger; nudge accent size up to match the grotesk */
+.lime{color:#7fa52c;line-height:0.95;}
+.display .lime,.h-lead .lime,.h-sec .lime{font-size:1.06em;}
 .sub{font-family:var(--sans);font-size:clamp(16px,1.35vw,19px);color:var(--ink-2);line-height:1.65;font-weight:400;}
 .sub b{color:var(--ink);font-weight:600;}
 
@@ -63,7 +69,7 @@ p{margin:0;}
 /* ---- nav ----------------------------------------------------------------- */
 .nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,0.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);}
 .nav-in{max-width:var(--maxw);margin:0 auto;padding:0 40px;height:72px;display:flex;align-items:center;gap:28px;}
-.nav-brand{display:flex;align-items:center;gap:9px;font-family:var(--serif);font-weight:800;font-size:20px;letter-spacing:-0.02em;color:var(--ink);}
+.nav-brand{display:flex;align-items:center;gap:9px;font-family:var(--sans);font-weight:700;font-size:20px;letter-spacing:-0.02em;color:var(--ink);}
 .nav-brand img{height:24px;width:auto;}
 .nav-links{display:flex;align-items:center;gap:26px;margin-left:18px;}
 .nav-links a{font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-2);transition:color .15s;}
@@ -97,13 +103,13 @@ p{margin:0;}
 .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
 .stage{padding:8px 32px;border-left:1px solid var(--line);}
 .stage:first-child{padding-left:0;border-left:none;}
-.stage .amt{font-family:var(--serif);font-size:clamp(30px,3vw,40px);font-weight:800;letter-spacing:-0.02em;color:var(--ink);}
+.stage .amt{font-family:var(--sans);font-size:clamp(30px,3vw,40px);font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
 .stage .amt em{font-style:normal;color:#9bbf3c;}
 .stage p{font-size:16px;color:var(--ink-2);line-height:1.55;margin-top:12px;}
 
 /* ---- typographic flow ---------------------------------------------------- */
 .flow{display:flex;flex-direction:column;align-items:center;gap:0;text-align:center;}
-.flow .node{font-family:var(--serif);font-size:clamp(20px,2.4vw,30px);font-weight:800;letter-spacing:-0.02em;color:var(--ink);padding:6px 0;}
+.flow .node{font-family:var(--sans);font-size:clamp(20px,2.4vw,30px);font-weight:700;letter-spacing:-0.02em;color:var(--ink);padding:6px 0;}
 .flow .node.limey{color:#9bbf3c;}
 .flow .arr{width:1px;height:22px;background:var(--line-2);}
 
@@ -155,5 +161,5 @@ p{margin:0;}
 .drawer{position:fixed;inset:0;z-index:300;background:#fff;transform:translateX(100%);transition:transform .28s ease;display:flex;flex-direction:column;padding:24px 22px;}
 .drawer.open{transform:none;}
 .drawer-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
-.drawer a{font-family:var(--serif);font-size:28px;font-weight:800;letter-spacing:-0.02em;color:var(--ink);padding:14px 0;border-bottom:1px solid var(--line);}
+.drawer a{font-family:var(--sans);font-size:28px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);padding:14px 0;border-bottom:1px solid var(--line);}
 .drawer .x{font-size:30px;background:none;border:none;cursor:pointer;color:var(--ink);}
