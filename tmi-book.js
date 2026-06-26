@@ -50,11 +50,11 @@
     if (document.getElementById('tbwLaunch')) return;
     var w = document.createElement('div');
     w.innerHTML =
-      '<button class="tbw-launch" id="tbwLaunch" type="button" aria-label="Book a discovery call"><span class="pulse"></span><span>Book a discovery call</span></button>' +
-      '<div class="tbw-panel" id="tbwPanel" role="dialog" aria-label="Book a discovery call">' +
+      '<button class="tbw-launch" id="tbwLaunch" type="button" aria-label="Book a call with Mia Eliana"><img class="tbw-ava" src="/mia.jpg" alt="Mia Eliana"/><span>Book a call with Mia</span></button>' +
+      '<div class="tbw-panel" id="tbwPanel" role="dialog" aria-label="Book a call with Mia Eliana">' +
         '<button class="tbw-x" id="tbwX" aria-label="Close">&times;</button>' +
         '<div class="book-card">' +
-          '<div class="bc-title">Book your discovery call</div>' +
+          '<div class="bc-host"><img class="bc-avatar" src="/mia.jpg" alt="Mia Eliana"/><div><div class="bc-host-l">Book a call with</div><div class="bc-host-n">Mia Eliana</div><div class="bc-host-t">Founder &amp; CEO, TMI</div></div></div>' +
           '<div class="bc-sub">A 30-minute call to walk through your operation and the systems that would fix it. The free audit on the site is the fastest start, but you can grab a call here.</div>' +
           '<div class="bc-dates" id="tbwDates"></div>' +
           '<button class="btn btn-lime bc-btn" type="button" id="tbwBtn" data-cal-link="' + CAL_LINK + '" data-cal-config=\'{"layout":"month_view"}\'>Schedule my call</button>' +
