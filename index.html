@@ -43,6 +43,16 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.tmitechai.com/#organization","name":"TMI Technology","url":"https://www.tmitechai.com","logo":"https://www.tmitechai.com/logo.svg","description":"TMI installs operational intelligence into companies doing $5M+ a year - the operations system, the AI workforce, and the command center that run the operation, so the company stops depending on its owner. Built in 30 days. You own it forever.","foundingDate":"2024","contactPoint":{"@type":"ContactPoint","contactType":"customer service","email":"support@tmitechai.com"}},{"@type":"WebSite","@id":"https://www.tmitechai.com/#website","url":"https://www.tmitechai.com","name":"TMI Technology","publisher":{"@id":"https://www.tmitechai.com/#organization"}}]}
 </script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"What does it cost?","acceptedAnswer":{"@type":"Answer","text":"Every engagement starts with the audit. From there, scope and price depend on what we delete, connect, and build. Most owners recover the cost from the software we cut and the time we hand back. No monthly license, you own what we build."}},
+{"@type":"Question","name":"How long does it take?","acceptedAnswer":{"@type":"Answer","text":"It is a 30-day transformation. We Delete in the first phase, Connect in the second, and Build the backend in the third, so by day 30 your company runs on systems, not people."}},
+{"@type":"Question","name":"Do I have to replace all my tools?","acceptedAnswer":{"@type":"Answer","text":"No. We delete the ones you do not use, connect the ones you do, and build only what is missing. Most owners end up paying for less software than they did before, not more."}},
+{"@type":"Question","name":"What if my team will not use it?","acceptedAnswer":{"@type":"Answer","text":"That is our job to solve. We build around how your team already works and train them on it. If a system needs a thick manual to use, we built it wrong."}},
+{"@type":"Question","name":"Who is this for?","acceptedAnswer":{"@type":"Answer","text":"Operations-heavy companies doing $5M+ a year, trades, industrial, field service, manufacturing, and logistics. If you are earlier or in another space and serious about this, we still want to talk."}},
+{"@type":"Question","name":"What is the free audit, exactly?","acceptedAnswer":{"@type":"Answer","text":"We research your business, map how it runs today, show you where time and money leak, and hand you a 30-day plan. It is genuinely free, there is no pitch, and it takes about 15 minutes of your time."}}
+]}
+</script>
 <style>
   /* Page-specific pieces layered on /tmi.css */
   .hero{padding:84px 0 64px;text-align:left;}
@@ -83,12 +93,28 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   /* fotf bullets */
   .fotf-list{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:24px;}
   .fotf-list span{font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:0.04em;color:rgba(255,255,255,0.78);border:1px solid rgba(255,255,255,0.16);border-radius:999px;padding:9px 16px;}
+  /* method strip (dark) */
+  .method-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:48px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.12);border-radius:14px;overflow:hidden;}
+  .ms{background:var(--ink);padding:26px 24px;display:flex;flex-direction:column;gap:9px;}
+  .ms .ms-n{font-family:var(--sans);font-weight:700;font-size:14px;color:var(--chart);letter-spacing:0.04em;}
+  .ms .ms-t{font-family:var(--sans);font-weight:700;font-size:18px;color:#fff;letter-spacing:-0.01em;line-height:1.15;}
+  .ms .ms-d{font-size:13px;color:rgba(255,255,255,0.55);line-height:1.5;}
+  /* landing faq */
+  .lfaq{max-width:820px;margin:40px 0 0;}
+  .lfaq details{border-bottom:1px solid var(--line);}
+  .lfaq summary{list-style:none;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:clamp(18px,2vw,22px);color:var(--ink);padding:22px 40px 22px 0;position:relative;letter-spacing:-0.01em;}
+  .lfaq summary::-webkit-details-marker{display:none;}
+  .lfaq summary::after{content:"+";position:absolute;right:4px;top:20px;font-size:22px;color:var(--ink-3);}
+  .lfaq details[open] summary::after{content:"\2013";}
+  .lfaq p{font-size:15px;color:var(--ink-2);line-height:1.7;margin:-4px 0 22px;max-width:70ch;}
   @media(max-width:920px){
     .cc-wall{grid-template-columns:1fr;padding:40px 22px 0;}
     .cc-screen:not(:nth-child(2)){display:none;}
     .builds{grid-template-columns:1fr;}
     .photostrip{grid-template-columns:1fr 1fr;}
+    .method-strip{grid-template-columns:1fr 1fr;}
   }
+  @media(max-width:480px){.method-strip{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -269,6 +295,24 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   </div>
 </section>
 
+<!-- THE METHOD -->
+<section class="sec dark">
+  <div class="wrap">
+    <p class="kicker reveal" style="color:rgba(255,255,255,0.5);">How we work</p>
+    <h2 class="h-sec reveal" style="margin:14px 0 0;max-width:24ch;">A method, not a project.</h2>
+    <p class="sub reveal" style="margin-top:14px;max-width:56ch;">Six steps from an operation that runs on people to one that runs on systems. The same order, every time.</p>
+    <div class="method-strip reveal">
+      <div class="ms"><span class="ms-n">01</span><span class="ms-t">Intelligence Audit</span><span class="ms-d">We diagnose how your operation runs and where it leaks.</span></div>
+      <div class="ms"><span class="ms-n">02</span><span class="ms-t">Operational Blueprint</span><span class="ms-d">The plan: every bottleneck named, fixed in order.</span></div>
+      <div class="ms"><span class="ms-n">03</span><span class="ms-t">Infrastructure Design</span><span class="ms-d">The system designed around your business, not a template.</span></div>
+      <div class="ms"><span class="ms-n">04</span><span class="ms-t">Implementation</span><span class="ms-d">Built and installed in about 30 days, adopted by your team.</span></div>
+      <div class="ms"><span class="ms-n">05</span><span class="ms-t">Command Layer</span><span class="ms-d">The whole operation on one screen, in real time.</span></div>
+      <div class="ms"><span class="ms-n">06</span><span class="ms-t">Continuous Optimization</span><span class="ms-d">We keep tuning it as you grow, so it gets smarter, not heavier.</span></div>
+    </div>
+    <a href="/method" class="btn btn-on-dark reveal" style="margin-top:34px;">See the full method</a>
+  </div>
+</section>
+
 <!-- THE TRANSFORMATION -->
 <section class="sec alt">
   <div class="wrap">
@@ -301,6 +345,22 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     <p class="sub reveal" style="max-width:58ch;">More than a service. A community of owners turning traditional businesses into intelligent companies. The future is intelligent. The network is human.</p>
     <div class="fotf-list reveal"><span>Private dinners</span><span>Factory tours</span><span>Build labs</span><span>Founder network</span><span>Events</span></div>
     <a href="/founders-of-the-future" class="btn btn-on-dark" style="margin-top:30px;">Explore the community</a>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec">
+  <div class="wrap">
+    <p class="kicker reveal">Questions</p>
+    <h2 class="h-sec reveal" style="margin:14px 0 0;max-width:20ch;">Before you book the audit.</h2>
+    <div class="lfaq reveal">
+      <details><summary>What does it cost?</summary><p>Every engagement starts with the audit. From there, scope and price depend on what we delete, connect, and build. Most owners recover the cost from the software we cut and the time we hand back. No monthly license, you own what we build.</p></details>
+      <details><summary>How long does it take?</summary><p>It is a 30-day transformation. We Delete in the first phase, Connect in the second, and Build the backend in the third, so by day 30 your company runs on systems, not people.</p></details>
+      <details><summary>Do I have to replace all my tools?</summary><p>No. We delete the ones you do not use, connect the ones you do, and build only what is missing. Most owners end up paying for less software than they did before, not more.</p></details>
+      <details><summary>What if my team will not use it?</summary><p>That is our job to solve. We build around how your team already works and train them on it. If a system needs a thick manual to use, we built it wrong.</p></details>
+      <details><summary>Who is this for?</summary><p>Operations-heavy companies doing $5M+ a year, trades, industrial, field service, manufacturing, and logistics. If you are earlier or in another space and serious about this, we still want to talk.</p></details>
+      <details><summary>What is the free audit, exactly?</summary><p>We research your business, map how it runs today, show you where time and money leak, and hand you a 30-day plan. It is genuinely free, there is no pitch, and it takes about 15 minutes of your time.</p></details>
+    </div>
   </div>
 </section>
 
