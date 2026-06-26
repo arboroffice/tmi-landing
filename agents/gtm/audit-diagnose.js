@@ -82,10 +82,17 @@ Return ONLY this JSON:
       "path": "DFY | DWY | DIY"
     }
   ],
-  "summary": "2 to 3 sentences: the through-line across these problems and what changes when they are fixed"
+  "summary": "2 to 3 sentences: the through-line across these problems and what changes when they are fixed",
+  "scores": {
+    "Visibility": "1 to 5: can they see the operation in real time? 1 = runs on memory/texts, 5 = a live dashboard",
+    "Traceability": "1 to 5: can any job/number/decision be traced to a system of record? 1 = lives in heads, 5 = fully logged",
+    "Accountability": "1 to 5: does work get owned and followed up without the owner chasing? 1 = owner chases everything, 5 = systems hold it",
+    "Predictability": "1 to 5: can they forecast capacity, cash, and outcomes? 1 = pure reaction, 5 = predictable",
+    "Control": "1 to 5: can the owner step away without it breaking? 1 = it runs through them, 5 = it runs without them"
+  }
 }
 
-Return 3 to 6 issues, ranked most to least severe.`;
+Score the 5 dimensions honestly from the evidence (a manual, disconnected operation scores low; one already on an integrated platform scores higher). Return 3 to 6 issues, ranked most to least severe.`;
 
   let parsed = {};
   try {
@@ -116,10 +123,22 @@ Return 3 to 6 issues, ranked most to least severe.`;
     path: it.path || 'DFY',
   })) : [];
 
+  // Clamp the 5-dimension scores to 1-5 integers (only keep valid ones).
+  let scores = null;
+  if (parsed.scores && typeof parsed.scores === 'object') {
+    scores = {};
+    for (const k of ['Visibility', 'Traceability', 'Accountability', 'Predictability', 'Control']) {
+      const n = parseInt(String(parsed.scores[k]).match(/[1-5]/), 10);
+      if (n >= 1 && n <= 5) scores[k] = n;
+    }
+    if (!Object.keys(scores).length) scores = null;
+  }
+
   return {
     headline: parsed.headline || '',
     fit: parsed.fit || null,
     issues,
     summary: parsed.summary || '',
+    scores,
   };
 }

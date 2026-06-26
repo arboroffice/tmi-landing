@@ -251,23 +251,30 @@ const NAV = [
   { id:"agents", label:"AI Org Chart" }
 ];
 
-const FALLBACK_INTAKE = [
-  { section:"Your operation", questions:[
-    { id:"company", label:"Company name", type:"text" },
-    { id:"industry", label:"Industry / trade", type:"text", help:"HVAC, manufacturing, construction, oil & gas..." },
-    { id:"team_size", label:"How many people on the team?", type:"text" },
+// The intake is now just the few things our research cannot know. Everything
+// public was already gathered and verified in the dossier, so the owner only
+// fills in their real numbers, their words, and their intent.
+const OWNER_INTAKE = [
+  { section:"The few things only you know", questions:[
     { id:"revenue", label:"Annual revenue range", type:"single", options:["Under $1M","$1M - $5M","$5M - $20M","$20M+"] },
-    { id:"bottleneck", label:"What is the single biggest bottleneck in the business right now?", type:"long" },
-    { id:"tools", label:"What software and tools does the team use today?", type:"long", help:"CRM, scheduling, invoicing, spreadsheets, group chats..." },
-    { id:"info_lives", label:"Where does job and customer information live today?", type:"long" },
-    { id:"manual", label:"What does your team do manually every day that a system should handle?", type:"long" },
-    { id:"runs_on_you", label:"What still has to run through you personally?", type:"long" }
+    { id:"close_rate", label:"Rough close rate on your quotes (%)", type:"text", help:"Your best guess is fine" },
+    { id:"founder_hours", label:"Hours a week you (the owner) actually work", type:"text" },
+    { id:"biggest_bottleneck", label:"In your words, the single biggest thing holding the business back", type:"long" },
+    { id:"tried", label:"What have you already tried to fix it, and what happened?", type:"long" }
+  ]},
+  { section:"Where you want to go", questions:[
+    { id:"goal_12mo", label:"Where do you want the business in 12 months?", type:"long" },
+    { id:"urgency", label:"How urgent is solving this?", type:"scale" },
+    { id:"path", label:"How would you want to build this with us?", type:"single", options:["DIY (we hand you the plan)","DWY (we build it with your team)","DFY (we build and run it for you)","Not sure yet"] },
+    { id:"budget", label:"Rough budget range you have in mind", type:"text", help:"Helps us recommend the right path" },
+    { id:"timeline", label:"When would you want to start?", type:"single", options:["Now","This quarter","This year","Just exploring"] }
   ]}
 ];
+const FALLBACK_INTAKE = OWNER_INTAKE;
 
 /* ─── STATE ─────────────────────────────────────────────────────── */
 var lead = { name:"", email:"", company:"", phone:"" };
-var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null, research:null, researching:false, researched:false, prefilled:{}, hypothesis:{}, removedFacts:{}, userFacts:[], diagnosis:null, diagnosing:false, diagnosed:false, issueReact:{} };
+var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null, research:null, researching:false, researched:false, prefilled:{}, hypothesis:{}, removedFacts:{}, userFacts:[], diagnosis:null, diagnosing:false, diagnosed:false, issueReact:{}, autoScored:false };
 function isMob(){ return window.innerWidth < 640; }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function sum(o){ return Object.values(o).reduce(function(a,b){return a+b;},0); }
@@ -351,10 +358,11 @@ function selectAgent(id){ state.selAgent = state.selAgent===id?null:id; render()
 function setAns(id,v){ state.answers[id]=v; }
 function toggleMulti(id,v){ var a=Array.isArray(state.answers[id])?state.answers[id].slice():[]; var i=a.indexOf(v); if(i<0)a.push(v); else a.splice(i,1); state.answers[id]=a; }
 
-async function loadIntake(){
+function loadIntake(){
+  // We deliberately ask only the owner-only questions now; research + the dossier
+  // already captured everything public, so there is no big schema to fetch.
   state.intakeLoaded=true;
-  try{ var r=await fetch("/api/intake-questions"); var d=await r.json(); state.intake=(Array.isArray(d)&&d.length)?d:FALLBACK_INTAKE; }
-  catch(e){ state.intake=FALLBACK_INTAKE; }
+  state.intake=OWNER_INTAKE;
   if(state.sec==="intake") render();
 }
 
@@ -450,7 +458,9 @@ function renderDiag(mob){
   var sm=scoreMeta();
   var h='<div><div style="padding-top:'+(mob?36:72)+'px;padding-bottom:'+(mob?28:48)+'px;">'+sectionRule("Your Score");
   h+='<h2 class="d" style="font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#0A0A0A;margin-bottom:16px;">Where are you right now?</h2>';
-  h+='<p style="font-size:17px;color:#5A5A5A;max-width:560px;line-height:1.75;">Rate your business on each of the 5 wants. Be honest. This is the gap this audit closes. Your score today is your starting line, not your limit.</p></div>';
+  h+='<p style="font-size:17px;color:#5A5A5A;max-width:560px;line-height:1.75;">'+(state.autoScored?'We pre-scored these from our research. Adjust anything that does not match. ':'Rate your business on each of the 5 wants. Be honest. ')+'This is the gap this audit closes. Your score today is your starting line, not your limit.</p>';
+  if(state.autoScored){ h+='<div style="display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:#EEF8C8;border:1px solid #D8ECCC;border-radius:100px;padding:5px 14px;"><span style="width:7px;height:7px;border-radius:50%;background:#7AA830;"></span><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4A6010;">AI estimated &middot; adjust if needed</span></div>'; }
+  h+='</div>';
   h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"1fr 320px")+';gap:32px;align-items:start;"><div>';
   FIVE_WANTS.forEach(function(w){ var sc=state.scores[w.label];
     h+='<div style="border-top:1.5px solid #F0F0F0;padding:28px 0;"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:16px;"><div><div style="display:inline-block;background:#0A0A0A;color:'+w.color+';font-size:10px;font-weight:700;letter-spacing:0.14em;padding:3px 8px;border-radius:4px;margin-bottom:10px;">'+w.n+'</div><div class="d" style="font-size:20px;font-weight:700;color:#0A0A0A;margin-bottom:4px;">'+w.label+'</div><div style="font-size:13px;color:#8A8A8A;font-style:italic;">'+w.q+'</div></div><div class="d" style="font-size:32px;font-weight:700;color:'+(sc>=4?w.color:sc>=3?"#F5A623":"#FF6060")+';min-width:48px;text-align:right;">'+sc+'<span style="font-size:16px;color:#CCCCCC;">/5</span></div></div><div style="display:flex;gap:8px;margin-bottom:12px;">';
@@ -545,7 +555,7 @@ function runDiagnose(){
   if(state.sec==="issues") render();
   fetch("/api/audit-diagnose",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ company:state.answers.company||lead.company||"", industry:state.answers.industry||"", email:lead.email||"", research:state.research||null, answers:state.answers })})
     .then(function(r){ return r.json(); })
-    .then(function(d){ state.diagnosing=false; state.diagnosed=true; if(d && d.ok!==false){ state.diagnosis=d; } if(state.sec==="issues") render(); })
+    .then(function(d){ state.diagnosing=false; state.diagnosed=true; if(d && d.ok!==false){ state.diagnosis=d; if(d.scores){ Object.keys(d.scores).forEach(function(k){ if(state.scores.hasOwnProperty(k)) state.scores[k]=d.scores[k]; }); state.autoScored=true; } } if(state.sec==="issues") render(); })
     .catch(function(){ state.diagnosing=false; state.diagnosed=true; if(state.sec==="issues") render(); });
 }
 function reactIssue(id,v){ state.issueReact[id]=(state.issueReact[id]===v?null:v); render(); }
@@ -593,8 +603,8 @@ function renderIssues(mob){
 
 function renderIntake(mob){
   var h='<div><div style="padding-top:'+(mob?36:72)+'px;padding-bottom:'+(mob?28:40)+'px;">'+sectionRule("Your Operation");
-  h+='<h2 class="d" style="font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#0A0A0A;margin-bottom:16px;">Tell us how it really runs.</h2>';
-  h+='<p style="font-size:17px;color:#5A5A5A;max-width:600px;line-height:1.75;">The more detail you give, the sharper your audit and the more exact the backend we design for you, the systems to install, the digital employees to add, and the operating system that runs it. About 10 to 15 minutes.</p></div>';
+  h+='<h2 class="d" style="font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#0A0A0A;margin-bottom:16px;">Just the few things only you know.</h2>';
+  h+='<p style="font-size:17px;color:#5A5A5A;max-width:600px;line-height:1.75;">We already did the homework and you confirmed it. All that is left is your real numbers, your words, and where you want to go. Two minutes.</p></div>';
   h+=researchStatus(true);
   if(!state.intake){ h+='<div style="padding:40px 0;color:#9A9A9A;">Loading your intake...</div></div>'; return h; }
   state.intake.forEach(function(sec){
