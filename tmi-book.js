@@ -21,7 +21,7 @@
     Cal('ui', { styles: { branding: { brandColor: '#0a0b14' } }, hideEventTypeDetails: false, layout: 'month_view' });
   } catch (e) {}
 
-  function track() { try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Business Intelligence Audit' }); } catch (e) {} }
+  function track() { try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Discovery Call' }); } catch (e) {} }
 
   function renderDates(host) {
     if (!host || host.dataset.filled) return;
@@ -50,12 +50,12 @@
     if (document.getElementById('tbwLaunch')) return;
     var w = document.createElement('div');
     w.innerHTML =
-      '<button class="tbw-launch" id="tbwLaunch" type="button" aria-label="Book a call"><span class="pulse"></span><span>Book a 30-min call</span></button>' +
-      '<div class="tbw-panel" id="tbwPanel" role="dialog" aria-label="Book a call">' +
+      '<button class="tbw-launch" id="tbwLaunch" type="button" aria-label="Book a discovery call"><span class="pulse"></span><span>Book a discovery call</span></button>' +
+      '<div class="tbw-panel" id="tbwPanel" role="dialog" aria-label="Book a discovery call">' +
         '<button class="tbw-x" id="tbwX" aria-label="Close">&times;</button>' +
         '<div class="book-card">' +
-          '<div class="bc-title">Book your audit</div>' +
-          '<div class="bc-sub">A 30-minute look at where your operation is leaking, and the first system we would build to fix it.</div>' +
+          '<div class="bc-title">Book your discovery call</div>' +
+          '<div class="bc-sub">A 30-minute call to walk through your operation and the systems that would fix it. The free audit on the site is the fastest start, but you can grab a call here.</div>' +
           '<div class="bc-dates" id="tbwDates"></div>' +
           '<button class="btn btn-lime bc-btn" type="button" id="tbwBtn" data-cal-link="' + CAL_LINK + '" data-cal-config=\'{"layout":"month_view"}\'>Schedule my call</button>' +
           '<div class="bc-foot">Free &middot; No pitch &middot; 30 min</div>' +
