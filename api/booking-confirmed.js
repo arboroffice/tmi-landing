@@ -11,6 +11,24 @@ function formatPhone(phone) {
   return digits.startsWith('1') ? `+${digits}` : `+1${digits}`;
 }
 
+// Branded confirmation email to the booked prospect (best-effort).
+function confirmEmail(to, firstName, dateStr) {
+  if (!process.env.RESEND_API_KEY || !to) return Promise.resolve();
+  const { Resend } = require('resend');
+  return new Resend(process.env.RESEND_API_KEY).emails.send({
+    from: 'TMI <support@tmitechai.com>', to,
+    subject: `You're booked${dateStr && dateStr !== 'TBD' ? ` for ${dateStr} CT` : ''}`,
+    html: `<!DOCTYPE html><html><body style="background:#fff;font-family:Arial,sans-serif;color:#111;max-width:560px;margin:0 auto;padding:40px 24px;line-height:1.7;">
+<p style="margin:0 0 16px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">You're confirmed for your discovery call${dateStr && dateStr !== 'TBD' ? ` on <strong>${dateStr} CT</strong>` : ''}. It's 30 minutes with me, walking through your operation and the first systems we would build.</p>
+<p style="margin:0 0 8px;">To get the most out of it, come with:</p>
+<p style="margin:0 0 16px;color:#444;">1. The one thing you most want off your plate.<br>2. A rough sense of your numbers (revenue, team size, close rate).<br>3. Your audit results, if you have run it.</p>
+<p style="margin:0 0 16px;">If anything comes up before then, just reply to this email.</p>
+<p style="margin:24px 0 0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>
+</body></html>`,
+  }).catch(e => console.error('confirm email:', e.message));
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
@@ -94,6 +112,19 @@ module.exports = async function handler(req, res) {
             if (d2 > 60) await qs.publishJSON({ url: nurl, delay: d2, body: { stage: 'precall_2h', applicationId: appLead.id } });
           }
         } catch (e) { console.error('schedule precall (app):', e.message); }
+
+        // Confirmation to the prospect (email + SMS) - this path previously only
+        // sent an internal alert.
+        try {
+          const fn = (appLead.name || 'there').split(/\s+/)[0];
+          await confirmEmail(email, fn, dateStr);
+          if (appLead.phone && process.env.TWILIO_ACCOUNT_SID) {
+            twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN).messages.create({
+              body: `You're confirmed for your TMI discovery call${dateStr && dateStr !== 'TBD' ? ` on ${dateStr} CT` : ''}, ${fn}. Come with the one thing you most want off your plate. Reply here if anything comes up. - Mia`,
+              from: FROM_NUMBER, to: formatPhone(appLead.phone),
+            }).catch(() => {});
+          }
+        } catch (e) { console.error('apps confirm prospect:', e.message); }
 
         return res.status(200).json({ ok: true, note: 'audit customer booked' });
       }
@@ -184,6 +215,9 @@ module.exports = async function handler(req, res) {
       to: formatPhone(lead.phone),
     }).catch(e => console.error('Confirmation SMS error:', e));
   }
+
+  // Confirmation email to the lead.
+  confirmEmail(lead.email, firstName, dateStr);
 
   // Internal alert
   sms.messages.create({

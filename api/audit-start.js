@@ -68,6 +68,35 @@ module.exports = async function handler(req, res) {
     console.error('audit-start db:', e.message);
   }
 
+  // Instant "you're in" touch, so the prospect has their resume link the moment
+  // they enter their info - catches the early bail before the 10-minute nudge.
+  try {
+    const first = (name || '').trim().split(' ')[0] || 'there';
+    const rp = new URLSearchParams({ n: name || '', e: email, p: phone || '', c: company || '' });
+    const resumeLink = `${SITE}/audit?resume=1&${rp.toString()}`;
+    if (process.env.RESEND_API_KEY) {
+      const { Resend } = require('resend');
+      await new Resend(process.env.RESEND_API_KEY).emails.send({
+        from: 'TMI <support@tmitechai.com>', to: email,
+        subject: `${first}, your Business Intelligence Audit is saved`,
+        html: `<!DOCTYPE html><html><body style="background:#fff;font-family:Arial,sans-serif;color:#111;max-width:560px;margin:0 auto;padding:40px 24px;line-height:1.7;">
+<p style="margin:0 0 16px;">Hey ${first},</p>
+<p style="margin:0 0 16px;">You started your free Business Intelligence Audit. It is saved, so you can pick it back up any time and your answers will be waiting.</p>
+<p style="margin:0 0 16px;">It takes about 15 minutes, and most of it we already did for you. At the end you get your operation scored, your biggest leaks named with the cost, and the first system to fix.</p>
+<p style="margin:24px 0;"><a href="${resumeLink}" style="background:#E4FF97;color:#0a0b14;font-weight:700;padding:13px 26px;border-radius:999px;text-decoration:none;display:inline-block;">Pick up where I left off</a></p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>
+</body></html>`,
+      });
+    }
+    if (phone && process.env.TWILIO_ACCOUNT_SID) {
+      const d = String(phone).replace(/\D/g, ''); const to = d.startsWith('1') ? `+${d}` : `+1${d}`;
+      await require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN).messages.create({
+        body: `Hey ${first}, it's Mia at TMI. Your Business Intelligence Audit is saved - pick it back up any time here: ${resumeLink} (about 15 min, most of it we already did for you).`,
+        from: '+18557171044', to,
+      });
+    }
+  } catch (e) { console.error('audit-start instant touch:', e.message); }
+
   // Schedule the abandon-chaser sequence via QStash. Each step no-ops once the
   // audit is completed, the lead converts/books, or unsubscribes (see audit-nudge.js).
   try {
