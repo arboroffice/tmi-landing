@@ -287,7 +287,9 @@ function gateSubmit(){
   lead.email=em;
   lead.company=(document.getElementById("g-company").value||"").trim();
   var ph=document.getElementById("g-phone"); lead.phone=ph?(ph.value||"").trim():"";
-  try{ fetch("/api/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ name:lead.name, email:lead.email, company:lead.company, phone:lead.phone, source:"intelligent-company-audit", sources:["audit"] })}); }catch(e){}
+  // Capture the lead to admin immediately and start the abandon-chaser (email +
+  // text nudges to finish). It no-ops the moment they complete or book.
+  try{ fetch("/api/audit-start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ name:lead.name, email:lead.email, company:lead.company, phone:lead.phone })}); }catch(e){}
   try{ if(typeof fbq==="function") fbq("track","Lead",{content_name:"Intelligent Company Audit"}); }catch(e){}
   try{ localStorage.setItem("ica_lead", JSON.stringify(lead)); }catch(e){}
   state.answers.company = lead.company;
@@ -344,7 +346,19 @@ function researchStatus(full){
   }
   return '';
 }
-(function(){ try{ var s=localStorage.getItem("ica_lead"); if(s){ lead=JSON.parse(s); state.answers.company=lead.company||""; document.getElementById("gate").style.display="none"; document.getElementById("appRoot").style.display="block"; render(); runResearch(); } }catch(e){} })();
+(function(){
+  // Resume from an email/text "finish your audit" link: /audit?resume=1&n=&e=&p=&c=
+  try{
+    var q=new URLSearchParams(location.search); var e=q.get("e");
+    if(e){
+      var set=function(id,v){ var el=document.getElementById(id); if(el&&v!=null&&v!=="") el.value=v; };
+      set("g-name",q.get("n")); set("g-email",e); set("g-company",q.get("c")); set("g-phone",q.get("p"));
+      gateSubmit();
+      return;
+    }
+  }catch(_){}
+  try{ var s=localStorage.getItem("ica_lead"); if(s){ lead=JSON.parse(s); state.answers.company=lead.company||""; document.getElementById("gate").style.display="none"; document.getElementById("appRoot").style.display="block"; state.sec="dossier"; render(); runResearch(); } }catch(e){}
+})();
 
 /* ─── ACTIONS ───────────────────────────────────────────────────── */
 function go(id){ state.sec=id; state.selAgent=null; render(); window.scrollTo({top:0,behavior:"smooth"}); if(id==="intake" && !state.intakeLoaded) loadIntake(); if(id==="issues" && !state.diagnosed && !state.diagnosing) runDiagnose(); }

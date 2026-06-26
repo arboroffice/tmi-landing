@@ -33,20 +33,37 @@ module.exports = async function handler(req, res) {
     });
     if (lead) leadId = lead.id;
 
-    // Also subscribe them to Field Notes (tag the contact). We never
-    // touch `unsubscribed`, so anyone who previously opted out stays opted out.
+    // Tag the contact for the audit funnel (no newsletter). We never touch
+    // `unsubscribed`, so anyone who previously opted out stays opted out.
     try {
       const em = email.toLowerCase().trim();
       const ex = await db.findOne('contacts', 'email', em);
       const tags = Array.isArray(ex && ex.tags) ? ex.tags.slice() : [];
-      if (!tags.includes('founders-of-the-future')) tags.push('founders-of-the-future');
       if (!tags.includes('audit')) tags.push('audit');
       const first = (name || '').trim().split(' ')[0] || em.split('@')[0];
       const last = (name && name.trim().includes(' ')) ? name.trim().split(' ').slice(1).join(' ') : null;
       await db.upsertByField('contacts', 'email', em,
         { first_name: first, last_name: last, email: em, company: company || null, tags }
       );
-    } catch (e) { console.error('audit-start fotf subscribe:', e.message); }
+    } catch (e) { console.error('audit-start contact tag:', e.message); }
+
+    // Land them in the admin pipeline right away so the team sees started-but-
+    // not-finished audits, and booking-confirmed can match them by email later.
+    // (We do NOT create an audit_submissions row here - that is the signal the
+    // abandon-chaser uses to know the audit is actually finished.)
+    try {
+      const em = email.toLowerCase().trim();
+      const existing = await db.findOne('applications', 'email', em);
+      if (!existing) {
+        await db.insert('applications', {
+          email: em, name: name || null, phone: phone || null, company: company || null,
+          source: 'intelligent-company-audit', status: skippedToBook ? 'audit_skipped' : 'audit_started',
+          started_at: new Date().toISOString(),
+        });
+      } else if (!['booked', 'audit_submitted', 'won', 'client', 'building', 'closed'].includes(existing.status)) {
+        await db.update('applications', existing.id, { phone: phone || existing.phone, company: company || existing.company, started_at: new Date().toISOString() });
+      }
+    } catch (e) { console.error('audit-start application:', e.message); }
   } catch (e) {
     console.error('audit-start db:', e.message);
   }

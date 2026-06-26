@@ -79,7 +79,7 @@ module.exports = async function handler(req, res) {
       await email(b.email, 'Book your strategy call',
         `<p style="margin:0 0 16px;">Hey ${name},</p>
 <p style="margin:0 0 16px;">Your audit is the map. The 30-minute call with the founder and a strategist is where it gets real - we walk through it together and pick your path. It is free, so grab a time.</p>${cta(url, 'Book my strategy call')}`, unsub);
-      if (b.touch === 'second') await sms(app && app.phone, `${name} - your audit is done. Last step is the 30-min strategy call you already paid for. Grab a time: ${url}`);
+      if (b.touch === 'second') await sms(app && app.phone, `${name} - your audit is done. Last step is your free 30-min strategy call. Grab a time: ${url}`);
       return ack();
     }
 
