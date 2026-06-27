@@ -107,6 +107,38 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   .lfaq summary::after{content:"+";position:absolute;right:4px;top:20px;font-size:22px;color:var(--ink-3);}
   .lfaq details[open] summary::after{content:"\2013";}
   .lfaq p{font-size:15px;color:var(--ink-2);line-height:1.7;margin:-4px 0 22px;max-width:70ch;}
+  /* intelligence flywheel */
+  .flywheel{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px 12px;max-width:860px;margin:0 auto;}
+  .fw-node{font-family:var(--sans);font-weight:700;font-size:clamp(15px,1.7vw,19px);letter-spacing:-0.01em;color:var(--ink);background:#fff;border:1px solid rgba(0,0,0,0.13);border-radius:999px;padding:13px 22px;}
+  .fw-node.back{color:var(--ink);background:var(--chart);border-color:var(--chart);}
+  .fw-arr{width:26px;height:2px;background:#c8c8d0;position:relative;flex:none;}
+  .fw-arr::after{content:"";position:absolute;right:-1px;top:-3px;border-left:6px solid #c8c8d0;border-top:4px solid transparent;border-bottom:4px solid transparent;}
+  .fw-arr.loop{opacity:0.5;}
+  .fw-cap{font-family:var(--sans);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;font-size:12px;color:#9a9aa6;margin-top:28px;}
+  /* both sides: growth + operational infrastructure */
+  .infra{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .infra-col{border:1px solid var(--line);border-radius:16px;padding:32px 30px;background:#fff;}
+  .infra-eyebrow{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink);margin-bottom:12px;}
+  .infra-col h3{font-size:23px;color:var(--ink);margin-bottom:14px;letter-spacing:-0.01em;max-width:22ch;}
+  .infra-col ul{list-style:none;margin:0;padding:0;}
+  .infra-col li{font-family:var(--sans);font-size:15px;color:var(--ink-2);line-height:1.5;padding:11px 0;border-top:1px solid var(--line);}
+  /* compounding assets */
+  .assets{display:flex;flex-wrap:wrap;gap:12px;}
+  .assets span{font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:-0.01em;color:var(--ink);background:#fff;border:1px solid rgba(0,0,0,0.13);border-radius:999px;padding:12px 20px;}
+  /* four forms of capital */
+  .capital{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .cap{border-top:2px solid var(--ink);padding:18px 0 0;}
+  .cap-n{font-family:var(--sans);font-weight:700;font-size:13px;color:#9a9aa6;letter-spacing:0.06em;}
+  .cap h4{font-family:var(--sans);font-weight:700;font-size:19px;letter-spacing:-0.01em;color:var(--ink);margin:10px 0 8px;}
+  .cap p{font-size:14px;color:var(--ink-2);line-height:1.55;}
+  /* the real advantage, underlined words */
+  .own{display:flex;flex-wrap:wrap;gap:10px 16px;}
+  .own span{font-family:var(--sans);font-size:clamp(16px,1.9vw,20px);font-weight:700;letter-spacing:-0.01em;color:var(--ink);border-bottom:3px solid var(--chart);padding:2px 1px 4px;}
+  @media(max-width:920px){
+    .infra{grid-template-columns:1fr;}
+    .capital{grid-template-columns:1fr 1fr;}
+  }
+  @media(max-width:480px){.capital{grid-template-columns:1fr;}}
   @media(max-width:920px){
     .cc-wall{grid-template-columns:1fr;padding:40px 22px 0;}
     .cc-screen:not(:nth-child(2)){display:none;}
@@ -207,6 +239,34 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   </div>
 </section>
 
+<!-- BELIEF: WHAT'S ACTUALLY SCARCE -->
+<section class="sec">
+  <div class="wrap measure">
+    <p class="kicker reveal">What actually wins now</p>
+    <h2 class="h-lead reveal" style="margin:16px 0 28px;">Intelligence is no longer scarce. <span class="lime">Attention is. Trust is. Distribution is.</span></h2>
+    <p class="sub reveal" style="font-size:21px;line-height:1.6;">Every company has the same models now. That is the point. The advantage stopped being who has AI and became who executes faster, who owns the customer relationship, and who controls their own distribution.</p>
+    <p class="sub reveal" style="font-size:21px;line-height:1.6;margin-top:22px;">The companies that win the next decade will not have better AI. They will have better systems, faster execution, and direct relationships with the people they serve. That is what we build.</p>
+  </div>
+</section>
+
+<!-- INTELLIGENCE FLYWHEEL -->
+<section class="sec alt">
+  <div class="wrap" style="text-align:center;">
+    <p class="kicker reveal">The intelligence flywheel</p>
+    <h2 class="h-sec reveal" style="margin:14px auto 10px;max-width:24ch;">We don't automate tasks. We build systems that compound.</h2>
+    <p class="sub reveal" style="margin:0 auto 48px;max-width:54ch;">Attention brings leads. Operations turn leads into results. Results become content. Content brings more attention. Each turn makes the next one cheaper.</p>
+    <div class="flywheel reveal">
+      <div class="fw-node">Attention</div><div class="fw-arr"></div>
+      <div class="fw-node">Leads</div><div class="fw-arr"></div>
+      <div class="fw-node">Operations</div><div class="fw-arr"></div>
+      <div class="fw-node">Customer results</div><div class="fw-arr"></div>
+      <div class="fw-node">Content</div><div class="fw-arr loop"></div>
+      <div class="fw-node back">Back to attention</div>
+    </div>
+    <p class="fw-cap reveal">It compounds.</p>
+  </div>
+</section>
+
 <!-- OPERATING SYSTEM FLOW -->
 <section class="sec dark">
   <div class="wrap" style="text-align:center;">
@@ -286,12 +346,64 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   </div>
 </section>
 
+<!-- BOTH SIDES OF THE BUSINESS -->
+<section class="sec alt">
+  <div class="wrap">
+    <p class="kicker reveal">The whole business, not half of it</p>
+    <h2 class="h-sec reveal" style="margin:14px 0 8px;max-width:24ch;">Most firms stop at operations. We build both engines.</h2>
+    <p class="sub reveal" style="max-width:62ch;margin-bottom:44px;">A business that runs well but no one can find still loses. A business with attention but no operations to hold it loses faster. You need both sides built to feed each other.</p>
+    <div class="infra reveal">
+      <div class="infra-col">
+        <div class="infra-eyebrow">Growth Infrastructure</div>
+        <h3>How the business attracts and keeps customers.</h3>
+        <ul>
+          <li>CRM and customer database</li>
+          <li>Marketing and follow-up automation</li>
+          <li>Lead routing and attribution</li>
+          <li>Content and newsletter systems</li>
+          <li>Review and referral engines</li>
+        </ul>
+      </div>
+      <div class="infra-col">
+        <div class="infra-eyebrow">Operational Infrastructure</div>
+        <h3>How the business delivers and runs itself.</h3>
+        <ul>
+          <li>SOPs and knowledge management</li>
+          <li>Dashboards and reporting</li>
+          <li>The AI workforce and internal workflows</li>
+          <li>Scheduling, dispatch, and billing</li>
+          <li>The command layer over all of it</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- WHY CUSTOM WINS -->
 <section class="sec">
   <div class="wrap measure">
     <p class="kicker reveal">Why custom wins</p>
     <h2 class="h-lead reveal" style="margin:16px 0 28px;">Software gives everyone the same system. We don't.</h2>
     <p class="sub reveal" style="font-size:20px;line-height:1.6;">Every build starts with your operation. Your people. Your workflows. Your terminology. Your reporting. Nothing is generic, because a business that runs on someone else's defaults still runs on a middleman. You own what we build, the data it holds, and the decisions it makes.</p>
+  </div>
+</section>
+
+<!-- COMPOUNDING ASSETS -->
+<section class="sec alt">
+  <div class="wrap">
+    <p class="kicker reveal">What you keep</p>
+    <h2 class="h-sec reveal" style="margin:14px 0 8px;max-width:22ch;">We don't install subscriptions. <span class="lime">We install assets.</span></h2>
+    <p class="sub reveal" style="max-width:62ch;margin-bottom:40px;">Software you rent disappears the day you stop paying. Everything we build is yours to keep, and every engagement leaves you holding more than you started with.</p>
+    <div class="assets reveal">
+      <span>Customer database</span>
+      <span>AI operating system</span>
+      <span>Internal documentation</span>
+      <span>Dashboards</span>
+      <span>Automation library</span>
+      <span>Content library</span>
+      <span>Knowledge base</span>
+      <span>Documented SOPs</span>
+    </div>
   </div>
 </section>
 
@@ -337,6 +449,33 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   </div>
 </section>
 
+<!-- FOUR FORMS OF CAPITAL -->
+<section class="sec">
+  <div class="wrap">
+    <p class="kicker reveal">A founder's view</p>
+    <h2 class="h-sec reveal" style="margin:14px 0 8px;max-width:24ch;">Every business holds four kinds of capital.</h2>
+    <p class="sub reveal" style="max-width:60ch;margin-bottom:44px;">Most owners spend a whole career building the first two. The companies that pull away build all four, because the last two are the ones that compound.</p>
+    <div class="capital reveal">
+      <div class="cap"><div class="cap-n">01</div><h4>Financial capital</h4><p>Cash, margin, and the runway to make moves.</p></div>
+      <div class="cap"><div class="cap-n">02</div><h4>Human capital</h4><p>The people, and how well their work is organized.</p></div>
+      <div class="cap"><div class="cap-n">03</div><h4>Intellectual capital</h4><p>What the company knows, captured so it does not walk out the door.</p></div>
+      <div class="cap"><div class="cap-n">04</div><h4>Attention capital</h4><p>The audience, the relationships, and the distribution you own.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- THE REAL ADVANTAGE -->
+<section class="sec alt">
+  <div class="wrap measure">
+    <p class="kicker reveal">The real advantage</p>
+    <h2 class="h-lead reveal" style="margin:14px 0 28px;">The next competitive advantage isn't AI. It's owning the five things AI only accelerates.</h2>
+    <div class="own reveal">
+      <span>Distribution</span><span>Customer relationships</span><span>Operational speed</span><span>Institutional knowledge</span><span>Execution</span>
+    </div>
+    <p class="sub reveal" style="margin-top:30px;max-width:60ch;font-size:20px;line-height:1.6;">Competitors can copy an automation in a weekend. They cannot copy a business with a compounding engine built into how it earns attention, serves customers, captures what it learns, and grows.</p>
+  </div>
+</section>
+
 <!-- FOUNDERS OF THE FUTURE -->
 <section class="sec dark">
   <div class="wrap">
@@ -367,8 +506,8 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 <!-- FINAL CTA -->
 <section class="sec dark" style="text-align:center;border-top:1px solid rgba(255,255,255,0.1);">
   <div class="wrap on-dark">
-    <h2 class="display reveal" style="font-size:clamp(38px,5.5vw,76px);margin:0 auto 18px;max-width:16ch;">Build the company you'll own.<br><span class="lime" style="color:var(--chart);">Not the one that owns you.</span></h2>
-    <p class="sub reveal" style="margin:0 auto 32px;max-width:58ch;">We install intelligent operations for companies doing $5M+ that are ready to remove chaos, eliminate bottlenecks, and own the infrastructure that scales.</p>
+    <h2 class="display reveal" style="font-size:clamp(38px,5.5vw,76px);margin:0 auto 18px;max-width:18ch;">Every company will become an intelligent company.<br><span class="lime" style="color:var(--chart);">The only question is who builds it first.</span></h2>
+    <p class="sub reveal" style="margin:0 auto 32px;max-width:60ch;">The question is not if. It is whether you build the infrastructure before your competitors do. Start with the free Business Intelligence Audit.</p>
     <a href="/audit" class="btn btn-lime reveal" onclick="lead()">Book Your Business Intelligence Audit</a>
     <div class="checks reveal" style="justify-content:center;margin-top:26px;"><span>Built in 30 days</span><span>You own it forever</span><span>No monthly software license</span></div>
   </div>
