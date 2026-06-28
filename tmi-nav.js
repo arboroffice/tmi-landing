@@ -28,7 +28,16 @@
     ".tmi-dd.open .tmi-dd-panel{display:block;}"+
     ".tmi-dd-panel .tmi-ind-box{display:block;}"+
     ".tmi-dd-panel .tmi-ind-l2{color:#0a0b14;}"+
-    ".tmi-dd-panel .tmi-ind-list a{color:#0a0b14;}";
+    ".tmi-dd-panel .tmi-ind-list a{color:#0a0b14;}"+
+    ".side-nav .tmi-ind{margin:0;}"+
+    ".side-nav .tmi-ind-l1{padding:10px 12px;font-size:14px;font-weight:600;color:var(--ink,#1a1a1a);border-radius:8px;}"+
+    ".side-nav .tmi-ind-l1:hover{background:var(--bg-alt,#f5f5f7);}"+
+    ".side-nav .tmi-ind-box{padding:0;}"+
+    ".side-nav .tmi-ind-grp{margin:0;}"+
+    ".side-nav .tmi-ind-l2{padding:9px 12px 9px 24px;font-size:13.5px;font-weight:600;color:var(--ink-2,#505060);border-radius:8px;}"+
+    ".side-nav .tmi-ind-l2:hover{background:var(--bg-alt,#f5f5f7);}"+
+    ".side-nav .tmi-ind-list{padding-left:32px;border-left:none;max-height:38vh;}"+
+    ".side-nav .tmi-ind-list a{padding:8px 12px;font-size:13px;}";
     document.head.appendChild(st);
   }
 
