@@ -242,7 +242,7 @@ export const SAMPLE = {
   ],
   bottlenecks: ['Customer communication', 'Scheduling', 'Work order flow', 'Manual approvals', 'Reporting', 'Data visibility'],
   current: ['5 software tools', '12 spreadsheets', 'Phone calls', 'Text messages'],
-  future: ['One command center', 'Scheduling &amp; dispatch', 'Reporting', 'Approvals'],
+  future: ['One command center', 'Scheduling & dispatch', 'Reporting', 'Approvals'],
   savingsAnnual: 184000,
   hoursPerWeek: 31,
   demoUrl: '',
