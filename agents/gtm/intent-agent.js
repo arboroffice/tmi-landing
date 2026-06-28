@@ -28,15 +28,16 @@ import { findContact, getEmail, enrichCompany } from './tools/apollo.js';
 import { extractDomain } from './tools/apify.js';
 import { linkedinEnabled, pushToLinkedIn } from './tools/linkedin.js';
 import { sendDigest } from './tools/email.js';
-import { TMI_CONTEXT, JOB_QUERIES, SOCIAL_QUERIES, SUBREDDITS, THRESHOLDS, INTENT_LIMITS } from './intent-config.js';
+import { TMI_CONTEXT, JOB_QUERIES, SOCIAL_QUERIES, SUBREDDITS, THRESHOLDS, INTENT_LIMITS, PERMIT_SOURCES, EXPANSION_QUERIES } from './intent-config.js';
 import { fetchJobSignals, fetchLinkedInSignals, fetchRedditSignals } from './intent-sources.js';
+import { fetchPermitSignals, fetchExpansionSignals, fetchFmcsaSignals } from './tools/filings.js';
 
 const anthropic = new Anthropic();
 const shuffle = (a) => [...a].sort(() => Math.random() - 0.5);
 
 const SYSTEM = `You are the intent analyst on TMI's go-to-market team. ${TMI_CONTEXT}
 
-You read raw items pulled from job boards and social/LinkedIn and decide, for each, whether it is a genuine buying or hiring signal that TMI should act on. Be strict: a vague mention of "AI" is not a signal. A real signal is a specific operator or ICP-fit company either hiring for a coordination/dispatch/admin/ops role a digital employee replaces (signal_type "hiring_intent"), or publicly shopping for, evaluating, or frustrated with AI/automation/operations software for an ICP-fit business (signal_type "buying_intent"). A job seeker, a vendor selling tools, a student, or an enterprise far outside the ICP is not a signal.
+You read raw items pulled from job boards and social/LinkedIn and decide, for each, whether it is a genuine buying or hiring signal that TMI should act on. Be strict: a vague mention of "AI" is not a signal. A real signal is a specific operator or ICP-fit company either hiring for a coordination/dispatch/admin/ops role a digital employee replaces (signal_type "hiring_intent"), or publicly shopping for, evaluating, or frustrated with AI/automation/operations software for an ICP-fit business (signal_type "buying_intent"); or an ICP-fit physical operator with a fresh trigger event that means active operations and new ops strain, such as a newly pulled building/trade permit, brand-new motor-carrier authority, or expansion/new-facility/new-contract news (signal_type "trigger_event"). A job seeker, a vendor selling tools, a student, or an enterprise far outside the ICP is not a signal.
 
 For EACH input item return one object. Output ONLY a valid JSON array, no prose, no code fences, exactly one object per input item in the same order:
 [{
@@ -131,12 +132,15 @@ export async function runIntentAgent() {
   if (!process.env.ANTHROPIC_API_KEY) { console.warn('intent-agent: no ANTHROPIC_API_KEY, skipping'); return stats; }
 
   // 1) Gather candidates from the sources that are configured.
-  const [jobs, li, reddit] = await Promise.all([
+  const [jobs, li, reddit, permits, expansion, fmcsa] = await Promise.all([
     fetchJobSignals(shuffle(JOB_QUERIES).slice(0, INTENT_LIMITS.jobQueriesPerRun), INTENT_LIMITS.jobsPerQuery),
     fetchLinkedInSignals(shuffle(SOCIAL_QUERIES).slice(0, INTENT_LIMITS.socialQueriesPerRun), INTENT_LIMITS.socialPerQuery),
     fetchRedditSignals(shuffle(SUBREDDITS).slice(0, INTENT_LIMITS.subredditsPerRun), INTENT_LIMITS.redditPerSub),
+    fetchPermitSignals(PERMIT_SOURCES, INTENT_LIMITS.permitsPerSource),
+    fetchExpansionSignals(shuffle(EXPANSION_QUERIES).slice(0, INTENT_LIMITS.expansionQueriesPerRun), INTENT_LIMITS.expansionPerQuery),
+    fetchFmcsaSignals(25),
   ]);
-  let candidates = [...jobs, ...li, ...reddit];
+  let candidates = [...jobs, ...li, ...reddit, ...permits, ...expansion, ...fmcsa];
   stats.pulled = candidates.length;
   for (const c of candidates) stats.bySource[c.source] = (stats.bySource[c.source] || 0) + 1;
 

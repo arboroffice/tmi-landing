@@ -88,3 +88,23 @@ Prospect  → Research → Audit → Personalize → Send/Sequence → (Book →
 | `tools/instantly.js` | push lead + audit variables into a campaign |
 | `audit-prep.js` | pre-call brief on booking |
 | `reply-handler.js` | (available, not wired — replies handled by a human) |
+
+---
+
+## Prospect-gen agents (top-of-funnel expansion)
+
+Run by `prospect-gen.js` (CLI: `node gtm/prospect-gen.js`, HTTP: `POST /api/prospect-gen`,
+scheduled by `.github/workflows/gtm-prospect-gen.yml` at 9am ET). Each agent feeds the
+same SDR pipeline (creates `new` leads the orchestrator audits + contacts) and degrades
+to a no-op without its keys.
+
+| Agent | File | What it adds | Keys |
+|---|---|---|---|
+| Intent + trigger events | `intent-agent.js` + `tools/filings.js` | job/social/reddit signals PLUS new permits, expansion news, new carrier authority | `APIFY_API_TOKEN`, `BRAVE_API_KEY`, `SOCRATA_APP_TOKEN` (opt), `FMCSA_NEW_AUTHORITY_URL` (opt); set `PERMIT_SOURCES` in `intent-config.js` per metro |
+| CRM reactivation | `reactivate.js` | re-works dormant leads you already own (abandoned audits, no-reply) | none (Firestore only) |
+| Lookalike expansion | `lookalike.js` | clones your wins (booked/won/client) into near-identical companies via Apollo | `APOLLO_API_KEY` |
+| SMS / phone channel | `sms-outreach.js` | texts owners whose audit is ready; queues hottest as call tasks | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `OUTREACH_SMS_FROM` |
+| Email enrichment waterfall | `tools/enrich.js` | Apollo → Findymail → Dropcontact → verify, for higher deliverable-email rate | `FINDYMAIL_API_KEY` (opt), `DROPCONTACT_API_KEY` (opt) |
+| Website visitor de-anon | `api/visitor-reveal.js` | turns identified site visitors into warm `new` leads | `VISITOR_REVEAL_SECRET` + a reveal vendor (RB2B/Vector/Clearbit) posting to `/api/visitor-reveal?secret=…` |
+
+Tuning knobs (env): `GTM_REACTIVATE_LIMIT` (25), `GTM_LOOKALIKE_LIMIT` (60), `GTM_SMS_LIMIT` (40).

@@ -1,0 +1,44 @@
+name: GTM Prospect Gen
+
+# Top-of-funnel agents that feed the SDR pipeline: intent signals (jobs/social/
+# permits/expansion/new-authority), CRM reactivation, lookalike expansion, and the
+# SMS sweep. Runs after the main daily outbound so new leads it creates get audited
+# and contacted on the next orchestrator run.
+
+on:
+  schedule:
+    # 9am ET on weekdays (1 hour after gtm-daily)
+    - cron: '0 14 * * 1-5'
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: cd agents && npm install
+      - name: Run prospect-gen agents
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
+          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+          APIFY_LINKEDIN_POSTS_ACTOR: ${{ secrets.APIFY_LINKEDIN_POSTS_ACTOR }}
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+          NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
+          FINDYMAIL_API_KEY: ${{ secrets.FINDYMAIL_API_KEY }}
+          DROPCONTACT_API_KEY: ${{ secrets.DROPCONTACT_API_KEY }}
+          SOCRATA_APP_TOKEN: ${{ secrets.SOCRATA_APP_TOKEN }}
+          FMCSA_NEW_AUTHORITY_URL: ${{ secrets.FMCSA_NEW_AUTHORITY_URL }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          OUTREACH_SMS_FROM: ${{ secrets.OUTREACH_SMS_FROM }}
+          GTM_REACTIVATE_LIMIT: ${{ secrets.GTM_REACTIVATE_LIMIT }}
+          GTM_LOOKALIKE_LIMIT: ${{ secrets.GTM_LOOKALIKE_LIMIT }}
+          GTM_SMS_LIMIT: ${{ secrets.GTM_SMS_LIMIT }}
+        run: cd agents && node gtm/prospect-gen.js

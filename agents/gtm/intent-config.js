@@ -49,5 +49,30 @@ export const INTENT_LIMITS = {
   socialQueriesPerRun: 4,
   redditPerSub: 10,
   subredditsPerRun: 4,
+  permitsPerSource: 15,
+  expansionPerQuery: 6,
+  expansionQueriesPerRun: 5,
   maxClassifyPerRun: 80,
 };
+
+// Building/trade permit datasets on Socrata (public; no key needed for modest
+// volume). Each new permit = an active operator with fresh ops pain. Add your
+// target cities here; field names vary per dataset, so each source declares which
+// columns hold the company / description / date. Empty by default (opt in per metro).
+export const PERMIT_SOURCES = [
+  // { id: 'chicago', label: 'Chicago, IL', url: 'https://data.cityofchicago.org/resource/ydr8-5enu.json',
+  //   companyField: 'contact_1_name', textFields: ['work_description','reported_cost'], dateField: 'issue_date', portalUrl: 'https://data.cityofchicago.org' },
+];
+
+// Expansion / new-contract / new-facility news (Brave). A growing operator is a
+// strained operator. Tuned to the trades/industrial ICP.
+export const EXPANSION_QUERIES = [
+  'contractor opens new facility',
+  'manufacturer breaks ground new plant',
+  'fleet company expands operations',
+  'industrial services company wins contract',
+  'oilfield services company adds crews',
+  'construction company announces expansion',
+  'HVAC company acquires',
+  'logistics company new warehouse',
+];
