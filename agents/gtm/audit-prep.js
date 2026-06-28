@@ -69,7 +69,7 @@ The specific operational problems this company probably has based on size and in
 5 sharp questions to ask on the call that will surface the highest-leverage problem. Make them specific to this company.
 
 ## Recommended TMI Path
-Everyone enters through the $1,000 Complete Audit. Based on what we know, which of the three paths should we likely steer them toward on the call: DIY (they build with our guidance), done with you (we build alongside their team), or done for you (we build and install it, $5k-$25k+, full department builds from ~$25k, plus an optional AI Department Retainer at $3k-$15k+/mo)? Why.
+Everyone enters through the free Complete Audit. Based on what we know, which of the three paths should we likely steer them toward on the call: DIY (they build with our guidance), done with you (we build alongside their team), or done for you (we build and install it, $5k-$25k+, full department builds from ~$25k, plus an optional AI Department Retainer at $3k-$15k+/mo)? Why.
 
 ## Talk Track
 2-3 sentences on how to open the call and the angle that will resonate with this specific operator.`

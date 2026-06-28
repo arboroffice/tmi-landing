@@ -65,7 +65,7 @@ ${classification.question ? `Their question: ${classification.question}` : ''}
 Rules:
 - If they asked a question, answer it directly and briefly first.
 - Reference something specific they said.
-- Move them toward the Complete Audit: a $1,000 detailed operational audit plus a 30-minute strategy call with the founder and a strategist. Offer the Complete Audit link on its own line.
+- Move them toward the free Complete Audit: a detailed operational audit plus a 30-minute strategy call with the founder and a strategist, free with no pitch. Offer the Complete Audit link on its own line.
 - If useful, point back to their audit preview link.
 - Keep it under 90 words. Sign as Mia, TMI. No meeting-ask cliches, no hard sell.
 

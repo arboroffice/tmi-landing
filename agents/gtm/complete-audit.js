@@ -15,7 +15,7 @@ export async function buildCompleteAudit({ company, industry, answers = {} }) {
   const msg = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4000,
-    system: `You are TMI's senior operations strategist writing a paid Complete Audit for ${company || 'a client'}. The client paid $1,000 and answered a detailed intake. This deliverable must feel worth far more than that, and it is the document the founder and a TMI strategist walk through on a 30-minute call.
+    system: `You are TMI's senior operations strategist writing the free Complete Audit for ${company || 'a client'}. The client requested the free Complete Audit and answered a detailed intake. This deliverable must feel like a premium paid engagement even though it is free, and it is the document the founder and a TMI strategist walk through on a 30-minute call.
 
 TMI runs a Delete / Connect / Build transformation: delete the software they don't use, connect what's left, build the backend the company runs on, with digital employees and a command center they run from their phone.
 
