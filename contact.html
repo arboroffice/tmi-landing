@@ -47,7 +47,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
-  body { font-family: var(--sans); color: var(--ink); background: var(--bg-dark); -webkit-font-smoothing: antialiased; line-height: 1.55; overflow-x: hidden; min-height: 100vh; }
+  body { font-family: var(--sans); color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.55; overflow-x: hidden; min-height: 100vh; }
   a { color: inherit; text-decoration: none; }
   img { display: block; max-width: 100%; }
   h1, h2, h3, h4 { margin: 0; }
@@ -62,7 +62,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 
   /* LEFT PANEL */
   .left-panel {
-    background: var(--bg-dark);
+    background: var(--bg-alt);
     padding: 56px 64px 56px 56px;
     display: flex;
     flex-direction: column;
@@ -78,16 +78,16 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     font-family: var(--sans);
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: var(--ink);
     margin-bottom: 64px;
   }
-  .panel-logo img { height: 28px; filter: brightness(0) invert(1); }
+  .panel-logo img { height: 28px; }
   .panel-eyebrow {
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--chart);
+    color: var(--muted);
     margin-bottom: 20px;
   }
   .left-panel h1 {
@@ -96,13 +96,13 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     font-weight: 400;
     letter-spacing: -0.02em;
     line-height: 1.08;
-    color: #fff;
+    color: var(--ink);
     margin-bottom: 24px;
   }
-  .left-panel h1 em { color: rgba(255,255,255,0.55); font-style: italic; }
+  .left-panel h1 em { color: var(--muted); font-style: italic; }
   .left-panel .lede {
     font-size: 16px;
-    color: rgba(255,255,255,0.55);
+    color: var(--ink-2);
     line-height: 1.65;
     max-width: 42ch;
     margin-bottom: 48px;
@@ -115,39 +115,39 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.3);
+    color: var(--muted);
     margin-bottom: 20px;
   }
   .step {
     display: flex;
     gap: 16px;
     padding: 16px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
   }
   .step:last-child { border-bottom: none; }
   .step-num {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(0,0,0,0.18);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 11px;
     font-weight: 600;
-    color: rgba(255,255,255,0.4);
+    color: var(--ink-2);
     flex: none;
     margin-top: 2px;
   }
   .step-content h4 {
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
+    color: var(--ink);
     margin-bottom: 4px;
   }
   .step-content p {
     font-size: 13px;
-    color: rgba(255,255,255,0.45);
+    color: var(--ink-2);
     line-height: 1.55;
   }
 
@@ -157,19 +157,19 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     gap: 32px;
     margin-top: auto;
     padding-top: 40px;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(0,0,0,0.08);
   }
   .pstat-val {
     font-family: var(--serif);
     font-size: 28px;
     font-weight: 400;
-    color: var(--chart);
+    color: var(--ink);
     letter-spacing: -0.02em;
     line-height: 1;
   }
   .pstat-label {
     font-size: 11px;
-    color: rgba(255,255,255,0.35);
+    color: var(--muted);
     margin-top: 4px;
     line-height: 1.4;
   }
@@ -284,7 +284,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     width: 100%;
     padding: 16px 24px;
     background: var(--chart);
-    color: var(--bg-dark);
+    color: var(--ink);
     border: none;
     border-radius: 12px;
     font-family: var(--sans);
@@ -417,6 +417,28 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     .check-group { grid-template-columns: 1fr; }
     .panel-stats { flex-wrap: wrap; gap: 24px; }
   }
+
+  /* side-nav drawer (ported, was missing) */
+  .nav-btn { position: fixed; top: 20px; left: 20px; z-index: 201; width: 44px; height: 44px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(0,0,0,0.1); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; padding: 0; transition: background 0.2s, box-shadow 0.2s; }
+  .nav-btn:hover { background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .nav-btn span { display: block; width: 18px; height: 1.5px; background: var(--ink); border-radius: 2px; transition: transform 0.25s, opacity 0.25s; }
+  .nav-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .nav-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+  .side-overlay { position: fixed; inset: 0; z-index: 198; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .side-overlay.open { opacity: 1; pointer-events: auto; }
+  .side-nav { position: fixed; left: 0; top: 0; bottom: 0; z-index: 200; width: 280px; background: #fff; border-right: 1px solid var(--line); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; padding: 28px 0 40px; overflow-y: auto; }
+  .side-nav.open { transform: translateX(0); box-shadow: 8px 0 48px rgba(0,0,0,0.15); }
+  .side-nav-top { display: flex; align-items: center; padding: 0 24px 28px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+  .side-nav-brand { display: flex; align-items: center; gap: 10px; font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--ink); }
+  .side-nav-brand img { height: 28px; }
+  .side-nav-links { display: flex; flex-direction: column; padding: 0 12px; flex: 1; }
+  .side-nav-section { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 20px 12px 6px; }
+  .side-nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-2); padding: 10px 12px; border-radius: 8px; transition: color 0.15s, background 0.15s; display: block; }
+  .side-nav-links a:hover { color: var(--ink); background: var(--bg-alt); }
+  .side-nav-cta { padding: 24px 24px 0; border-top: 1px solid var(--line); margin-top: 16px; }
+  .side-nav-cta .btn { width: 100%; justify-content: center; }
+  .panel-logo img { height: 28px; }
 </style>
 <script src="/rb2b.js"></script>
 <script src="/footer-signup.js" defer></script>
@@ -676,5 +698,36 @@ document.getElementById('contact-form').addEventListener('submit', async functio
 });
 </script>
 <script src="/tmi-nav.js" defer></script>
+<footer style="background:#f5f5f7;border-top:1px solid rgba(0,0,0,0.08);padding:56px 0 32px;font-family:'Barlow',system-ui,sans-serif;">
+  <div style="max-width:1320px;margin:0 auto;padding:0 32px;">
+    <div style="display:flex;flex-wrap:wrap;gap:32px;justify-content:space-between;">
+      <div style="max-width:320px;">
+        <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;color:#0a0b14;"><img src="/logo.svg" alt="TMI" style="height:22px;"/> TMI</div>
+        <p style="color:#55576a;font-size:14px;line-height:1.6;margin-top:12px;">We install operational intelligence into companies doing $5M+. One operating system you own forever.</p>
+      </div>
+      <div style="display:flex;gap:48px;flex-wrap:wrap;font-size:14px;">
+        <div><div style="font-weight:700;color:#0a0b14;margin-bottom:10px;">Company</div>
+          <a href="/solutions" style="display:block;color:#55576a;text-decoration:none;padding:4px 0;">Solutions</a>
+          <a href="/physical" style="display:block;color:#55576a;text-decoration:none;padding:4px 0;">Industries</a>
+          <a href="/about" style="display:block;color:#55576a;text-decoration:none;padding:4px 0;">About</a>
+          <a href="/news" style="display:block;color:#55576a;text-decoration:none;padding:4px 0;">Journal</a></div>
+        <div><div style="font-weight:700;color:#0a0b14;margin-bottom:10px;">Get started</div>
+          <a href="/audit" style="display:block;color:#55576a;text-decoration:none;padding:4px 0;">Book an Audit</a>
+          <a href="/contact" style="display:block;color:#55576a;text-decoration:none;padding:4px 0;">Contact</a></div>
+      </div>
+    </div>
+    <div style="margin-top:36px;padding-top:20px;border-top:1px solid rgba(0,0,0,0.08);font-size:12px;color:#86868b;">&copy; 2026 TMI Technology</div>
+  </div>
+</footer>
+<script>
+  (function(){
+    var navBtn=document.getElementById('nav-btn'), sideNav=document.getElementById('side-nav'), sideOverlay=document.getElementById('side-overlay');
+    if(!navBtn||!sideNav||!sideOverlay) return;
+    function openNav(){navBtn.classList.add('open');sideNav.classList.add('open');sideOverlay.classList.add('open');sideNav.removeAttribute('aria-hidden');}
+    function closeNav(){navBtn.classList.remove('open');sideNav.classList.remove('open');sideOverlay.classList.remove('open');sideNav.setAttribute('aria-hidden','true');}
+    navBtn.addEventListener('click',function(){navBtn.classList.contains('open')?closeNav():openNav();});
+    sideOverlay.addEventListener('click',closeNav);
+  })();
+</script>
 </body>
 </html>

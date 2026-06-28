@@ -88,6 +88,25 @@
     indSec.parentNode.removeChild(indSec);
   }
 
+  function makeDropdown(){
+    var dd=mk('div','tmi-dd');
+    var btn=mk('button','tmi-dd-btn','Industries'); btn.type='button';
+    var panel=mk('div','tmi-dd-panel'); panel.appendChild(buildBox());
+    dd.appendChild(btn); dd.appendChild(panel);
+    btn.addEventListener('click',function(e){e.stopPropagation();dd.classList.toggle('open');});
+    panel.addEventListener('click',function(e){e.stopPropagation();});
+    document.addEventListener('click',function(){dd.classList.remove('open');});
+    return dd;
+  }
+  function enhanceTopnav(){
+    var nr=document.querySelector('.topnav .nav-right'); if(!nr || nr.querySelector('.tmi-dd')) return;
+    nr.insertBefore(makeDropdown(), nr.firstChild);
+  }
+  function enhanceArticleHeader(){
+    var nav=document.querySelector('.ah-nav'); if(!nav || nav.querySelector('.tmi-dd')) return;
+    nav.appendChild(makeDropdown());
+  }
+
   function enhanceDesktop(){
     var nl=document.querySelector('.nav-links'); if(!nl) return;
     var a=nl.querySelector('a[href="/physical"],a[href="physical.html"]'); if(!a) return;
@@ -101,6 +120,6 @@
     document.addEventListener('click',function(){dd.classList.remove('open');});
   }
 
-  function init(){ enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); }
+  function init(){ enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
