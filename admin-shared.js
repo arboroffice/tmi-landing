@@ -329,6 +329,10 @@ const TMIAdmin = (() => {
         { label: 'Overview', items: [
           { page:'revenue',   label:'Revenue',   icon:I.revenue,   href:'/admin-reports#revenue' },
           { page:'analytics', label:'Analytics', icon:I.analytics, href:'/admin-reports#analytics' },
+          { page:'brief',     label:'Command Brief', icon:I.command },
+          { page:'worklist',  label:'Today',     icon:I.level10 },
+          { page:'seo',       label:'SEO',       icon:I.flywheel },
+          { page:'financial-model', label:'Financial Model', icon:I.revenue },
         ]},
         { label: 'Sales', items: [
           { page:'outbound',     label:'Outbound',     icon:I.command,  href:'/admin-outbound' },
@@ -339,12 +343,18 @@ const TMIAdmin = (() => {
           { page:'applications', label:'Applications', icon:I.apps,     href:'/admin-inbox#apps',      badge:'inbox' },
           { page:'followups',    label:'Follow-ups',   icon:I.followup, href:'/admin-inbox#followups', badge:'inbox' },
           { page:'proposals',    label:'Proposals',    icon:I.proposals },
+          { page:'signals',      label:'Intent Signals', icon:I.vision },
+          { page:'call-tasks',   label:'Call Queue',   icon:I.command },
+          { page:'visitors',     label:'Site Visitors', icon:I.vision },
+          { page:'prospect',     label:'Prospecting',  icon:I.recruiting },
         ]},
         { label: 'Clients', items: [
           { page:'client-health', label:'Client Health', icon:I.clientHealth, href:'/admin-clients#health' },
           { page:'projects',      label:'Projects',      icon:I.projects,  href:'/admin-work#projects' },
           { page:'invoices',      label:'Invoices',      icon:I.invoices,  href:'/admin-work#invoices' },
           { page:'onboarding',    label:'Onboarding',    icon:I.onboarding },
+          { page:'lifecycle',     label:'Lifecycle Agents', icon:I.recruiting },
+          { page:'retention-plan', label:'Retention Plan', icon:I.clientHealth },
         ]},
         { label: 'People', items: [
           { page:'contacts', label:'Contacts', icon:I.contacts, href:'/admin-people#contacts' },
@@ -360,11 +370,13 @@ const TMIAdmin = (() => {
           { page:'content-compose',  label:'Compose',      icon:I.content },
           { page:'content-calendar', label:'Calendar',     icon:I.rituals,  href:'/admin-content-hub#calendar' },
           { page:'brand-plan',       label:'Brand Plan',   icon:I.identity },
+          { page:'newsletter',       label:'Newsletter',   icon:I.newsletter },
         ]},
         { label: 'Partners', items: [
           { page:'city-leads', label:'Applications', icon:I.cityPin, href:'/admin-city-leads' },
         ]},
         { label: 'System', items: [
+          { page:'system', label:'System', icon:I.command },
           { page:'settings', label:'Settings', icon:I.settings },
         ]},
       ];
