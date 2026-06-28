@@ -20,6 +20,7 @@ import { runIntentAgent } from './intent-agent.js';
 import { reactivateLeads } from './reactivate.js';
 import { expandLookalikes } from './lookalike.js';
 import { sweepSms } from './sms-outreach.js';
+import { sendDigest } from './tools/email.js';
 
 const num = (v, d) => (v != null && !Number.isNaN(parseInt(v, 10)) ? parseInt(v, 10) : d);
 
@@ -40,6 +41,23 @@ export async function runProspectGen(opts = {}) {
   const elapsed = Math.round((Date.now() - started) / 1000);
   const summary = { kind: 'prospect-gen', elapsed_s: elapsed, ...out, at: new Date().toISOString() };
   try { await db.logRun(summary); } catch {}
+
+  // Email briefing so the new agents do not run blind.
+  try {
+    const n = (o, k) => (o && typeof o === 'object' && o[k] != null) ? o[k] : 0;
+    const body = [
+      `Prospect-gen run — ${elapsed}s`,
+      ``,
+      `Intent signals:   ${n(out.intent, 'signals')} found, ${n(out.intent, 'routed')} routed`,
+      `Reactivation:     ${n(out.reactivation, 'reactivated')} dormant leads re-queued`,
+      `Lookalike:        ${n(out.lookalike, 'inserted')} new from ${n(out.lookalike, 'seeds')} wins`,
+      `SMS sweep:        ${n(out.sms, 'sent')} texted, ${n(out.sms, 'queuedCalls')} calls queued`,
+      ``,
+      `Work the call queue: https://admin.tmitechai.com/admin-call-tasks`,
+    ].join('\n');
+    await sendDigest({ subject: `Prospect-gen — ${n(out.lookalike, 'inserted') + n(out.intent, 'routed')} new, ${n(out.sms, 'queuedCalls')} to call`, body });
+  } catch (e) { console.error('prospect-gen digest:', e.message); }
+
   console.log(`Prospect-gen: done in ${elapsed}s`, JSON.stringify(out));
   return summary;
 }

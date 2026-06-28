@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Call Queue — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .pg-panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px;}
+  .pg-stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
+  .pg-stat .n{font-size:24px;font-weight:800;color:var(--ink);line-height:1;}
+  .pg-stat .l{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+  .pg-when{font-size:12px;color:var(--muted);margin:-8px 0 18px;}
+  .ct-filters{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+  .ct-filters .btn.active{background:var(--chart);color:var(--ink);border-color:var(--chart);}
+  .ct-grid{display:flex;flex-direction:column;gap:12px;}
+  .ct-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:start;}
+  .ct-co{font-size:17px;font-weight:700;color:var(--ink);}
+  .ct-who{font-size:13px;color:var(--ink-2,#505060);margin-top:3px;}
+  .ct-links{display:flex;gap:14px;align-items:center;margin-top:10px;flex-wrap:wrap;}
+  .ct-phone{font-size:18px;font-weight:700;color:#0a7d2e;text-decoration:none;}
+  .ct-audit{font-size:12px;color:var(--ink);text-transform:uppercase;letter-spacing:.08em;}
+  .ct-notes{margin-top:10px;width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical;min-height:38px;}
+  .ct-actions{display:flex;flex-direction:column;gap:8px;min-width:120px;}
+  .ct-badge{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;text-align:center;}
+  .ct-badge.called{background:#dbeafe;color:#1e40af;}
+  .ct-badge.booked{background:#dcfce7;color:#166534;}
+  .ct-badge.dead{background:#f3f4f6;color:#6b7280;}
+  .ct-empty{color:var(--muted);padding:40px 0;text-align:center;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Call Queue</span></div>
+    </div>
+    <div class="content">
+      <div class="pg-panel" id="pg-panel"></div>
+      <div class="pg-when" id="pg-when"></div>
+      <div class="ct-filters" id="filters">
+        <button class="btn btn-sm active" data-status="open">Open</button>
+        <button class="btn btn-sm" data-status="called">Called</button>
+        <button class="btn btn-sm" data-status="booked">Booked</button>
+        <button class="btn btn-sm" data-status="dead">Dead</button>
+        <button class="btn btn-sm" data-status="all">All</button>
+      </div>
+      <div class="ct-grid" id="grid"><div class="ct-empty">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('call-tasks');
+
+let curStatus = 'open';
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function telHref(p){ return 'tel:' + String(p||'').replace(/[^0-9+]/g,''); }
+
+async function loadPanel(){
+  const s = await TMIAdmin.api('/api/prospect-gen-summary');
+  if (!s) return;
+  const b = s.bySource || {};
+  const stat = (n,l) => `<div class="pg-stat"><div class="n">${n||0}</div><div class="l">${l}</div></div>`;
+  document.getElementById('pg-panel').innerHTML =
+    stat(s.openCalls, 'Open calls') +
+    stat(b.site_visitor, 'Site visitors') +
+    stat(b.lookalike, 'Lookalikes') +
+    stat(b.intent_signal, 'Intent leads') +
+    stat(b.reactivated, 'Reactivated');
+  const lr = s.lastRun;
+  document.getElementById('pg-when').textContent = lr
+    ? `Last prospect-gen run: ${new Date(lr.ran_at).toLocaleString()} · ${lr.elapsed_s||0}s`
+    : 'Prospect-gen has not run yet.';
+}
+
+async function load(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="ct-empty">Loading…</div>';
+  const rows = await TMIAdmin.api('/api/call-tasks?status=' + curStatus) || [];
+  if (!rows.length){ grid.innerHTML = '<div class="ct-empty">No calls in this bucket.</div>'; return; }
+  grid.innerHTML = rows.map(card).join('');
+}
+
+function card(t){
+  const who = [t.owner, t.owner_title].filter(Boolean).map(esc).join(' · ');
+  const right = (t.status === 'open' || t.status === 'called')
+    ? `<button class="btn btn-sm btn-primary" onclick="setStatus('${t.id}','booked')">Booked</button>
+       ${t.status==='open'?`<button class="btn btn-sm" onclick="setStatus('${t.id}','called')">Mark called</button>`:''}
+       <button class="btn btn-sm" onclick="setStatus('${t.id}','dead')">Dead</button>`
+    : `<span class="ct-badge ${t.status}">${t.status}</span>`;
+  return `<div class="ct-card">
+    <div>
+      <div class="ct-co">${esc(t.company || 'Unknown company')}</div>
+      ${who?`<div class="ct-who">${who}</div>`:''}
+      <div class="ct-links">
+        ${t.phone?`<a class="ct-phone" href="${telHref(t.phone)}">${esc(t.phone)}</a>`:'<span class="ct-who">no phone</span>'}
+        ${t.audit_url?`<a class="ct-audit" href="${esc(t.audit_url)}" target="_blank" rel="noopener">Their audit ↗</a>`:''}
+      </div>
+      <textarea class="ct-notes" id="notes-${t.id}" placeholder="Call notes…" onblur="saveNotes('${t.id}')">${esc(t.notes||'')}</textarea>
+    </div>
+    <div class="ct-actions">${right}</div>
+  </div>`;
+}
+
+async function setStatus(id, status){
+  const notes = (document.getElementById('notes-'+id)||{}).value;
+  await TMIAdmin.api('/api/call-tasks', 'PATCH', { id, status, notes });
+  loadPanel(); load();
+}
+async function saveNotes(id){
+  const notes = (document.getElementById('notes-'+id)||{}).value;
+  await TMIAdmin.api('/api/call-tasks', 'PATCH', { id, notes });
+}
+
+document.getElementById('filters').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-status]'); if(!b) return;
+  document.querySelectorAll('#filters .btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); curStatus = b.dataset.status; load();
+});
+
+loadPanel();
+load();
+</script>
+</body>
+</html>
