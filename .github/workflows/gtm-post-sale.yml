@@ -1,0 +1,32 @@
+name: GTM Post-Sale
+
+# Lifecycle agents that run after a deal closes: onboarding, delivery, client
+# success / QBR, case studies, expansion, collections, and the founder brief.
+
+on:
+  schedule:
+    # 7:30am ET on weekdays
+    - cron: '30 12 * * 1-5'
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: cd agents && npm install
+      - name: Run post-sale agents
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          RESEND_OUTREACH_API_KEY: ${{ secrets.RESEND_OUTREACH_API_KEY }}
+          OUTREACH_FROM_EMAIL: ${{ secrets.OUTREACH_FROM_EMAIL }}
+          OUTREACH_REPLY_TO: ${{ secrets.OUTREACH_REPLY_TO }}
+          OUTREACH_CC: ${{ secrets.OUTREACH_CC }}
+          GTM_DIGEST_EMAIL: ${{ secrets.GTM_DIGEST_EMAIL }}
+        run: cd agents && node gtm/post-sale.js

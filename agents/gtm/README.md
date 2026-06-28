@@ -108,3 +108,26 @@ to a no-op without its keys.
 | Website visitor de-anon | `api/visitor-reveal.js` | turns identified site visitors into warm `new` leads | `VISITOR_REVEAL_SECRET` + a reveal vendor (RB2B/Vector/Clearbit) posting to `/api/visitor-reveal?secret=…` |
 
 Tuning knobs (env): `GTM_REACTIVATE_LIMIT` (25), `GTM_LOOKALIKE_LIMIT` (60), `GTM_SMS_LIMIT` (40).
+
+---
+
+## Post-sale agents (onboard -> deliver -> retain -> expand)
+
+The lifecycle after a deal closes. Run by `post-sale.js` (CLI: `node gtm/post-sale.js`,
+HTTP: `POST /api/post-sale`, scheduled by `.github/workflows/gtm-post-sale.yml` at 7:30am ET).
+Managed in admin at **/admin-lifecycle**. Each agent operates on `clients`/`invoices` and
+degrades to a no-op without its keys.
+
+| Agent | File | What it does |
+|---|---|---|
+| Onboarding | `onboarding.js` | kicks off newly closed clients: welcome + intake + access checklist + kickoff |
+| Delivery / build | `delivery.js` | drafts the client's deliverables (SOPs, OS build plan, docs) from their blueprint |
+| Client success + QBR | `client-success.js` | health scoring (healthy/watch/at_risk) + monthly value reports emailed to clients |
+| Case study / testimonial | `case-study.js` | turns wins into a case study + testimonial + referral ask (closes the flywheel) |
+| Expansion / upsell | `expansion.js` | surfaces the next tier (audit -> done-for-you -> retainer) as a reviewed recommendation |
+| AR / collections | `collections.js` | chases overdue invoices with bucket-appropriate reminders (1-30/31-60/61-90/90+) |
+| Founder daily brief | `founder-brief.js` | one daily brief: funnel, calls to make, bookings, at-risk clients, overdue AR |
+
+All write to their own collections (`onboarding`, `deliverables`, `client_health`,
+`qbr_reports`, `case_studies`, `expansion_opportunities`, `collection_log`, `founder_briefs`)
+and each list/trigger endpoint is at `/api/<name>`.

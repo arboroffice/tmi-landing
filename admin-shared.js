@@ -254,6 +254,7 @@ const TMIAdmin = (() => {
     ${navItem('projects', 'Projects', I.projects, false, '/admin-work#projects')}
     ${navItem('invoices', 'Invoices', I.invoices, false, '/admin-work#invoices')}
     ${navItem('onboarding', 'Onboarding', I.onboarding)}
+    ${navItem('lifecycle', 'Lifecycle Agents', I.recruiting)}
     <div class="sb-group-label">People</div>
     ${navItem('contacts', 'Contacts', I.contacts, false, '/admin-people#contacts')}
     ${navItem('partners', 'Partners', I.partners, false, '/admin-people#partners')}

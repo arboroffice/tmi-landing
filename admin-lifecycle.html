@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Lifecycle Agents — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .lc-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+  .lc-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+  .lc-tabs .btn.active{background:var(--chart);color:var(--ink);border-color:var(--chart);}
+  .lc-grid{display:flex;flex-direction:column;gap:12px;}
+  .lc-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 20px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;}
+  .lc-co{font-size:16px;font-weight:700;color:var(--ink);}
+  .lc-sub{font-size:12.5px;color:var(--ink-2,#505060);margin-top:3px;}
+  .lc-body{font-size:13px;color:var(--ink-2,#505060);line-height:1.5;margin-top:8px;white-space:pre-wrap;max-height:160px;overflow:auto;}
+  .lc-badge{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--bg-alt,#f5f5f7);color:var(--ink);white-space:nowrap;}
+  .lc-badge.at_risk,.lc-badge.dead,.lc-badge.lost,.lc-badge.overdue{background:#fee2e2;color:#b91c1c;}
+  .lc-badge.healthy,.lc-badge.booked,.lc-badge.won,.lc-badge.published,.lc-badge.paid{background:#dcfce7;color:#166534;}
+  .lc-badge.watch,.lc-badge.requested,.lc-badge.proposed,.lc-badge.draft{background:#fef9c3;color:#854d0e;}
+  .lc-empty{color:var(--muted);padding:40px 0;text-align:center;}
+  .lc-when{font-size:12px;color:var(--muted);margin-bottom:14px;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Lifecycle Agents</span></div>
+    </div>
+    <div class="content">
+      <div class="lc-head">
+        <div class="lc-when" id="lastrun"></div>
+        <button class="btn btn-primary" id="runbtn" onclick="runNow()">Run post-sale now</button>
+      </div>
+      <div class="lc-tabs" id="tabs"></div>
+      <div class="lc-grid" id="grid"><div class="lc-empty">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('lifecycle');
+
+const TABS = [
+  { key:'onboarding',     label:'Onboarding',    api:'/api/onboarding' },
+  { key:'delivery',       label:'Delivery',      api:'/api/delivery' },
+  { key:'client-success', label:'Client Health', api:'/api/client-success' },
+  { key:'case-study',     label:'Case Studies',  api:'/api/case-study' },
+  { key:'expansion',      label:'Expansion',     api:'/api/expansion' },
+  { key:'collections',    label:'Collections',   api:'/api/collections' },
+];
+let cur = TABS[0];
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function when(r){ const d = r.created_at||r.computed_at||r.sent_at||r.ran_at; return d? new Date(d).toLocaleDateString() : ''; }
+function pick(o, keys){ for(const k of keys){ if(o[k]!=null && o[k]!=='') return o[k]; } return ''; }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = TABS.map(t =>
+    `<button class="btn btn-sm${t.key===cur.key?' active':''}" data-key="${t.key}">${t.label}</button>`).join('');
+}
+
+function card(r){
+  const title = esc(pick(r, ['company','company_name','title','name']) || (r.contacts && r.contacts.company) || 'Record');
+  const status = String(pick(r, ['band','stage','status','bucket']) || '').toLowerCase();
+  const sub = esc(pick(r, ['recommended_tier','type','period','recommended_action','owner_title']));
+  const bodyText = pick(r, ['pitch','rationale','reasons','draft','plan','body','summary','notes']);
+  const amt = r.amount!=null ? ('$'+Number(r.amount).toLocaleString()) : '';
+  return `<div class="lc-card">
+    <div>
+      <div class="lc-co">${title}${amt?` · ${amt}`:''}</div>
+      ${sub?`<div class="lc-sub">${sub}</div>`:''}
+      ${bodyText?`<div class="lc-body">${esc(String(bodyText).slice(0,600))}</div>`:''}
+      <div class="lc-sub" style="margin-top:6px;">${when(r)}</div>
+    </div>
+    <div>${status?`<span class="lc-badge ${status}">${esc(status)}</span>`:''}</div>
+  </div>`;
+}
+
+async function load(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="lc-empty">Loading…</div>';
+  const rows = await TMIAdmin.api(cur.api) || [];
+  grid.innerHTML = rows.length ? rows.map(card).join('') : `<div class="lc-empty">Nothing here yet. Run the agents or close a deal.</div>`;
+}
+
+async function runNow(){
+  const b = document.getElementById('runbtn'); b.disabled = true; b.textContent = 'Running…';
+  await TMIAdmin.api('/api/post-sale', 'POST', {});
+  TMIAdmin.toast && TMIAdmin.toast('Post-sale agents started');
+  setTimeout(()=>{ b.disabled=false; b.textContent='Run post-sale now'; load(); }, 2500);
+}
+
+document.getElementById('tabs').addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-key]'); if(!btn) return;
+  cur = TABS.find(t=>t.key===btn.dataset.key); renderTabs(); load();
+});
+
+renderTabs();
+load();
+</script>
+</body>
+</html>
