@@ -235,6 +235,7 @@ const TMIAdmin = (() => {
     ${navItem('analytics', 'Analytics', I.analytics, false, '/admin-reports#analytics')}
     ${navItem('seo', 'SEO', I.flywheel)}
     <div class="sb-group-label">Sales</div>
+    ${navItem('cockpit', 'Sales Cockpit', I.command)}
     ${navItem('outbound', 'Outbound', I.command)}
     ${navItem('signals', 'Intent Signals', I.vision)}
     ${navItem('call-tasks', 'Call Queue', I.command)}
@@ -335,6 +336,7 @@ const TMIAdmin = (() => {
           { page:'financial-model', label:'Financial Model', icon:I.revenue },
         ]},
         { label: 'Sales', items: [
+          { page:'cockpit',      label:'Sales Cockpit', icon:I.command },
           { page:'outbound',     label:'Outbound',     icon:I.command,  href:'/admin-outbound' },
           { page:'pipeline',     label:'Pipeline',     icon:I.pipeline, href:'/admin-sales#pipeline' },
           { page:'audits',       label:'Audits',       icon:I.audits,   href:'/admin-sales#audits' },

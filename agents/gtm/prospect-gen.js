@@ -20,6 +20,7 @@ import { runIntentAgent } from './intent-agent.js';
 import { reactivateLeads } from './reactivate.js';
 import { expandLookalikes } from './lookalike.js';
 import { sweepSms } from './sms-outreach.js';
+import { routeLeads } from './lead-router.js';
 import { sendDigest } from './tools/email.js';
 
 const num = (v, d) => (v != null && !Number.isNaN(parseInt(v, 10)) ? parseInt(v, 10) : d);
@@ -36,6 +37,7 @@ export async function runProspectGen(opts = {}) {
   await step('intent', () => runIntentAgent());
   await step('reactivation', () => reactivateLeads({ limit: opts.reactivateLimit ?? num(process.env.GTM_REACTIVATE_LIMIT, 25) }));
   await step('lookalike', () => expandLookalikes({ limit: opts.lookalikeLimit ?? num(process.env.GTM_LOOKALIKE_LIMIT, 60) }));
+  await step('routing', () => routeLeads({}));
   await step('sms', () => sweepSms({ limit: opts.smsLimit ?? num(process.env.GTM_SMS_LIMIT, 40) }));
 
   const elapsed = Math.round((Date.now() - started) / 1000);
