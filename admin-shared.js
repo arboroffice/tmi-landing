@@ -231,6 +231,7 @@ const TMIAdmin = (() => {
     ${navItem('brief', 'Command Brief', I.command)}
     ${navItem('dashboard', 'Dashboard', I.dashboard)}
     ${navItem('revenue', 'Revenue', I.revenue, false, '/admin-reports#revenue')}
+    ${navItem('financial-model', 'Financial Model', I.revenue)}
     ${navItem('analytics', 'Analytics', I.analytics, false, '/admin-reports#analytics')}
     ${navItem('seo', 'SEO', I.flywheel)}
     <div class="sb-group-label">Sales</div>
@@ -251,6 +252,7 @@ const TMIAdmin = (() => {
     <div class="sb-group-label">Clients</div>
     ${navItem('clients', 'Clients', I.clients, false, '/admin-clients')}
     ${navItem('client-health', 'Client Health', I.clientHealth, false, '/admin-clients#health')}
+    ${navItem('retention-plan', 'Retention Plan', I.clientHealth)}
     ${navItem('projects', 'Projects', I.projects, false, '/admin-work#projects')}
     ${navItem('invoices', 'Invoices', I.invoices, false, '/admin-work#invoices')}
     ${navItem('onboarding', 'Onboarding', I.onboarding)}
@@ -272,6 +274,7 @@ const TMIAdmin = (() => {
     <div class="sb-group-label">Partners</div>
     ${navItem('city-leads', 'Applications', I.cityPin, false, '/admin-city-leads')}
     <div class="sb-sep"></div>
+    ${navItem('system', 'System', I.command)}
     ${navItem('settings', 'Settings', I.settings)}
   </nav>
   <div class="sb-foot">

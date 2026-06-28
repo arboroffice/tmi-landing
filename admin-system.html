@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>System &amp; Activation — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .sy-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+  @media(max-width:920px){.sy-grid{grid-template-columns:1fr;}}
+  .sy-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:18px;}
+  .sy-card h3{font-size:14px;font-weight:700;color:var(--ink);margin:0 0 14px;letter-spacing:-0.01em;}
+  .sy-ready{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .sy-pill{font-size:12px;font-weight:700;padding:7px 14px;border-radius:999px;background:#f3f4f6;color:#6b7280;}
+  .sy-pill.yes{background:#dcfce7;color:#166534;}
+  .sy-pill.no{background:#fee2e2;color:#b91c1c;}
+  .cap{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13px;}
+  .cap:first-child{border-top:none;}
+  .cap .dot{width:8px;height:8px;border-radius:50%;flex:none;margin-top:5px;}
+  .cap .dot.ok{background:#16a34a;} .cap .dot.no{background:#d1d5db;} .cap .dot.req{background:#dc2626;}
+  .cap .nm{color:var(--ink);font-weight:600;}
+  .cap .ms{color:var(--muted);font-size:12px;}
+  .cap .tag{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  .sy-run{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  .sy-run input[type=number]{width:70px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font:inherit;}
+  .sy-run label{font-size:12px;color:var(--ink-2,#505060);display:flex;align-items:center;gap:6px;}
+  .runs-row{display:grid;grid-template-columns:140px 90px 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:12.5px;align-items:center;}
+  .runs-row:first-child{border-top:none;}
+  .runs-kind{font-weight:700;color:var(--ink);}
+  .runs-when{color:var(--muted);}
+  .runs-meta{color:var(--ink-2,#505060);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .muted{color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">System &amp; Activation</span></div>
+    </div>
+    <div class="content">
+      <div class="sy-grid">
+        <div>
+          <div class="sy-card">
+            <h3>Readiness (pre-flight)</h3>
+            <div class="sy-ready" id="ready"></div>
+            <div id="firestore" class="muted" style="font-size:12.5px;margin-bottom:10px;"></div>
+            <div id="caps"></div>
+            <div id="modules" class="muted" style="font-size:12px;margin-top:10px;"></div>
+          </div>
+        </div>
+        <div>
+          <div class="sy-card">
+            <h3>Run the agents</h3>
+            <div class="sy-run">
+              <input type="number" id="leads" placeholder="100" min="1"/>
+              <label><input type="checkbox" id="dry" checked/> dry run</label>
+              <button class="btn btn-sm btn-primary" onclick="run('/api/gtm-run', {leads:true})">Run outbound</button>
+            </div>
+            <div class="sy-run">
+              <button class="btn btn-sm" onclick="run('/api/prospect-gen')">Run prospect-gen</button>
+              <button class="btn btn-sm" onclick="run('/api/post-sale')">Run post-sale</button>
+              <button class="btn btn-sm" onclick="loadPreflight()">Re-check readiness</button>
+            </div>
+            <div id="runmsg" class="muted" style="font-size:12.5px;"></div>
+          </div>
+          <div class="sy-card">
+            <h3>Recent runs</h3>
+            <div id="runs"><div class="muted">Loading…</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('system');
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+async function loadPreflight(){
+  const r = await TMIAdmin.api('/api/preflight');
+  if(!r){ document.getElementById('caps').innerHTML='<div class="muted">Could not load.</div>'; return; }
+  const pill=(b,l)=>`<span class="sy-pill ${b?'yes':'no'}">${l}: ${b?'YES':'NO'}</span>`;
+  document.getElementById('ready').innerHTML = pill(r.ready.dryRun,'Dry run') + pill(r.ready.send,'Send') + pill(r.ready.sms,'SMS');
+  document.getElementById('firestore').textContent = 'Firestore: ' + (r.firestore.connected ? `connected (${r.firestore.leads} leads)` : `not connected (${r.firestore.error})`);
+  document.getElementById('caps').innerHTML = r.caps.map(c=>{
+    const cls = c.ok ? 'ok' : (c.min ? 'req' : 'no');
+    return `<div class="cap"><span class="dot ${cls}"></span><div><div class="nm">${esc(c.name)} <span class="tag">${c.min?'required':'optional'}</span></div>${c.missing.length?`<div class="ms">missing: ${esc(c.missing.join(', '))}</div>`:''}</div></div>`;
+  }).join('');
+  document.getElementById('modules').textContent = `Agent modules: ${r.modules.ok} ok` + (r.modules.failed.length?`, ${r.modules.failed.length} FAILED`:'');
+}
+
+async function run(path, opts){
+  const msg=document.getElementById('runmsg'); msg.textContent='Starting…';
+  let body={};
+  if(opts && opts.leads){ const l=document.getElementById('leads').value; if(l) body.limit=parseInt(l,10); body.dryRun=document.getElementById('dry').checked; }
+  const r = await TMIAdmin.api(path,'POST',body);
+  msg.textContent = r && r.ok ? (r.message||'Started') + ' at ' + new Date().toLocaleTimeString() : 'Failed to start';
+  setTimeout(loadRuns, 1500);
+}
+
+async function loadRuns(){
+  const rows = await TMIAdmin.api('/api/gtm-runs') || [];
+  const box=document.getElementById('runs');
+  if(!rows.length){ box.innerHTML='<div class="muted">No runs yet.</div>'; return; }
+  box.innerHTML = rows.slice(0,20).map(r=>{
+    const kind = r.kind || (r.source ? 'outbound' : 'run');
+    const when = r.ran_at ? new Date(r.ran_at).toLocaleString() : '';
+    const meta = Object.entries(r).filter(([k])=>!['id','kind','ran_at','at'].includes(k)).map(([k,v])=>`${k}:${typeof v==='object'?(v&&(v.inserted??v.sent??v.reactivated??v.routed??v.drafted??JSON.stringify(v).slice(0,20))):v}`).slice(0,5).join('  ');
+    return `<div class="runs-row"><div class="runs-kind">${esc(kind)}</div><div class="runs-when">${esc(when)}</div><div class="runs-meta">${esc(meta)}</div></div>`;
+  }).join('');
+}
+
+loadPreflight();
+loadRuns();
+</script>
+</body>
+</html>
