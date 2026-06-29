@@ -170,7 +170,7 @@ export async function getLeadsDueForFollowup() {
   return rows.filter(r =>
     r.next_followup_at != null &&
     r.next_followup_at <= nowIso &&
-    (r.outreach_count || 0) < 4
+    (r.outreach_count || 0) < 6
   );
 }
 
@@ -315,6 +315,17 @@ export async function addSuppression({ email, domain, reason }) {
 }
 
 // Re-export the generic primitives for any future ad-hoc use.
+// Hydrate foreign-key children (used by post-sale agents for contact names/emails).
+export async function hydrateOne(obj, fk, coll, as) {
+  if (!obj) return obj;
+  obj[as] = obj[fk] ? await getById(coll, obj[fk]) : null;
+  return obj;
+}
+export async function hydrateMany(rows, fk, coll, as) {
+  for (const r of (rows || [])) { if (r) r[as] = r[fk] ? await getById(coll, r[fk]) : null; }
+  return rows;
+}
+
 export {
   db, FieldValue, Timestamp,
   getById, list, findOne, insert, insertMany, update, count,

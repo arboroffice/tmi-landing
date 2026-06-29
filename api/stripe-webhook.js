@@ -48,7 +48,7 @@ async function markPaid(session) {
       if (process.env.QSTASH_TOKEN && email) {
         const { Client } = require('@upstash/qstash');
         const qs = new Client({ token: process.env.QSTASH_TOKEN });
-        const nurl = 'https://www.tmitechai.com/api/funnel-nurture';
+        const nurl = `https://www.tmitechai.com/api/funnel-nurture?secret=${process.env.GTM_RUN_SECRET || ''}`;
         const base = { stage: 'paid_no_intake', email, session_id: session.id };
         await qs.publishJSON({ url: nurl, delay: 10800, body: base });            // +3h
         await qs.publishJSON({ url: nurl, delay: 86400, body: { ...base, touch: 'second' } }); // +24h
@@ -103,9 +103,9 @@ module.exports = async function handler(req, res) {
     if (secret && sig && (Buffer.isBuffer(raw) || typeof raw === 'string')) {
       event = stripe.webhooks.constructEvent(raw, sig, secret);
     } else {
-      // No signing secret configured (e.g. local dev): accept the parsed body.
-      event = Buffer.isBuffer(raw) ? JSON.parse(raw.toString('utf8'))
-        : typeof raw === 'string' ? JSON.parse(raw) : raw;
+      // Fail closed: never trust an unsigned body in any environment.
+      console.error('stripe webhook: signing secret or signature missing; rejecting');
+      return res.status(400).send('Webhook signature required');
     }
   } catch (e) {
     console.error('stripe webhook verify:', e.message);

@@ -101,7 +101,7 @@ module.exports = async function handler(req, res) {
   // audit is completed, the lead converts/books, or unsubscribes (see audit-nudge.js).
   try {
     const qstash = new QStashClient({ token: process.env.QSTASH_TOKEN });
-    const nudgeUrl = `${SITE}/api/audit-nudge`;
+    const nudgeUrl = `${SITE}/api/audit-nudge?secret=${process.env.GTM_RUN_SECRET || ''}`;
     const schedule = [
       { delay: 600,    step: 'abandon_10min' }, // 10 min — finish the audit
       { delay: 86400,  step: 'abandon_day1' },  // 1 day  — text the booking link, still push the audit

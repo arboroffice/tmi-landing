@@ -104,7 +104,7 @@ module.exports = async function handler(req, res) {
         try {
           if (startTime && process.env.QSTASH_TOKEN) {
             const qs = new QStashClient({ token: process.env.QSTASH_TOKEN });
-            const nurl = `${SITE}/api/funnel-nurture`;
+            const nurl = `${SITE}/api/funnel-nurture?secret=${process.env.GTM_RUN_SECRET || ''}`;
             const callMs = new Date(startTime).getTime(), nowMs = Date.now();
             const d24 = Math.floor((callMs - 86400000 - nowMs) / 1000);
             const d2 = Math.floor((callMs - 7200000 - nowMs) / 1000);

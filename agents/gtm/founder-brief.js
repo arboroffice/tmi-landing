@@ -50,7 +50,7 @@ async function gather() {
 
   // Clients needing attention: client_health band at_risk if the field exists.
   const atRiskClients = await safe(
-    () => db.list('clients', { where: [['client_health', '==', 'at_risk']], limit: 10 }),
+    () => db.list('client_health', { where: [['band', '==', 'at_risk']], order: 'computed_at', ascending: false, limit: 10 }),
     [],
   );
 

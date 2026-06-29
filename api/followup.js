@@ -116,7 +116,7 @@ async function handler(req, res) {
   const worstLine = (audit && WORST_LINE[audit.worst_cat]) || 'most of what keeps the business running still routes through you';
   const industryLine = audit && audit.industry ? audit.industry : 'your operation';
 
-  const firstName = lead.name.split(' ')[0];
+  const firstName = String(lead.name || lead.owner_name || '').split(' ')[0] || 'there';
   const unsubUrl = `${SITE}/api/unsubscribe?id=${leadId}`;
   const resend = new Resend(process.env.RESEND_API_KEY);
   const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);

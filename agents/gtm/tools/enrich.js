@@ -75,6 +75,7 @@ export async function findBestEmail({ domain, name, title, apolloId } = {}) {
     ['findymail', () => fromFindymail({ domain, name })],
     ['dropcontact', () => fromDropcontact({ domain, name })],
   ];
+  let held = null;
   for (const [source, fn] of providers) {
     const email = await fn().catch(() => null);
     if (!email) continue;
@@ -85,8 +86,7 @@ export async function findBestEmail({ domain, name, title, apolloId } = {}) {
     } catch { /* verifier optional; keep the email */ }
     if (verified) return { email, source, verified: true };
     // hold the first found but unverified email as a last resort
-    if (!findBestEmail._held) findBestEmail._held = { email, source, verified: false };
+    if (!held) held = { email, source, verified: false };
   }
-  const held = findBestEmail._held; findBestEmail._held = null;
-  return held || null;
+  return held;
 }

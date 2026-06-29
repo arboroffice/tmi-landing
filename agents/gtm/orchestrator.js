@@ -221,7 +221,7 @@ export async function run() {
   console.log('');
 
   // Runtime overrides (admin button / workflow inputs): per-segment batch + dry run.
-  const override = Number(process.env.GTM_LEADS_PER_DAY) || null;
+  const override = process.env.GTM_LEADS_PER_DAY ? Math.min(Number(process.env.GTM_LEADS_PER_DAY) || 0, 500) : null;
   const dry = String(process.env.GTM_DRY_RUN || '').toLowerCase() === 'true';
 
   // 0. Intent agent: watch job postings + LinkedIn/social for ICP-fit buying and

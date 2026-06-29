@@ -85,7 +85,9 @@ async function route(cand, verdict, priorCount = 0) {
   // Company-resolvable: enrich via Apollo and hand to the outbound loop as a new lead.
   const companyName = verdict.company || cand.company;
   if (companyName) {
-    const domain = extractDomain('https://' + companyName.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
+    const realUrl = cand.companyDomain || cand.domain || cand.website || null;
+    const domain = realUrl ? extractDomain(realUrl.startsWith('http') ? realUrl : 'https://' + realUrl) : null;
+    if (!domain) return { routed: false, reason: 'no_verified_domain' };
     try {
       const [contact, org] = await Promise.all([
         findContact({ domain, targetTitles: ['Owner', 'CEO', 'President', 'Founder', 'General Manager', 'Operations Manager'] }).catch(() => null),

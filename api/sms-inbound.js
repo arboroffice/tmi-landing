@@ -3,6 +3,8 @@
 // Logs the reply to the timeline and alerts the team. Returns empty TwiML.
 
 const { logSms } = require('./_comms');
+const db = require('./_db');
+const STOP_RE = /^\s*(stop|stopall|unsubscribe|cancel|end|quit)\s*$/i;
 const twilio = require('twilio');
 
 const FROM_NUMBER = '+18557171044';
@@ -26,6 +28,16 @@ module.exports = async (req, res) => {
     try {
       await logSms(null, { direction: 'inbound', phone: from, body, status: 'received', twilioSid: sid });
     } catch (e) { console.error('[sms-inbound] log:', e.message); }
+
+    // Honor opt-out: STOP / UNSUBSCRIBE etc. suppress the number.
+    if (STOP_RE.test(String(body))) {
+      try {
+        const lead = await db.findOne('leads', 'phone', from).catch(() => null);
+        if (lead) await db.update('leads', lead.id, { unsubscribed: true, sms_status: 'stopped' });
+        await db.insert('suppression', { phone: from, reason: 'sms_stop', created_at: new Date().toISOString() }).catch(() => {});
+      } catch (e) { console.error('[sms-inbound] stop:', e.message); }
+      return twiml(res);
+    }
 
     // Alert the team that a reply came in
     try {

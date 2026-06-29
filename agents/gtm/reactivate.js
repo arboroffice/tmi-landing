@@ -72,6 +72,7 @@ export async function reactivateLeads({ limit = 25, minAgeDays = 45 } = {}) {
         reactivation_count: (lead.reactivation_count || 0) + 1,
         // clear any audit-completion / followup markers so the pipeline re-touches cleanly
         next_followup_at: null,
+        outreach_count: 0,
         research_notes: `${lead.research_notes || ''}\n[reactivated ${new Date().toISOString().slice(0, 10)} from status "${lead.status}"]`.trim(),
       });
       stats.reactivated++;

@@ -98,7 +98,7 @@ async function generateProposal(opts) {
       if (process.env.QSTASH_TOKEN) {
         const { Client } = require('@upstash/qstash');
         const qs = new Client({ token: process.env.QSTASH_TOKEN });
-        const nurl = `${SITE}/api/funnel-nurture`;
+        const nurl = `${SITE}/api/funnel-nurture?secret=${process.env.GTM_RUN_SECRET || ''}`;
         const base = { stage: 'proposal_no_accept', proposalId: proposal.id };
         await qs.publishJSON({ url: nurl, delay: 172800, body: base });   // +2d
         await qs.publishJSON({ url: nurl, delay: 518400, body: base });   // +6d

@@ -1,11 +1,13 @@
 const jwt = require('jsonwebtoken');
 
 function verifyToken(req) {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) return null;            // fail closed: no secret -> no valid tokens
   const auth = req.headers.authorization || '';
   if (!auth.startsWith('Bearer ')) return null;
   const token = auth.slice(7);
   try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-change-me');
+    return jwt.verify(token, secret);
   } catch {
     return null;
   }

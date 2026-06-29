@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
 
   // ── Pipeline: counts of leads by status ───────────────────────────────────
   try {
-    const data = await db.list('leads', {});
+    const data = await db.list('leads', { order: 'created_at', ascending: false, limit: 1000 });
     if (Array.isArray(data)) {
       const by_status = {};
       for (const l of data) {
@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
   // ── New leads in the last 7 days ──────────────────────────────────────────
   // Firestore has no head/count query - fetch matching rows and count in JS.
   try {
-    const data = await db.list('leads', { where: [['created_at', '>=', since]] });
+    const data = await db.list('leads', { where: [['created_at', '>=', since]], limit: 2000 });
     if (Array.isArray(data)) brief.new_leads_7d = data.length;
   } catch (e) { /* skip */ }
 

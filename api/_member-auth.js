@@ -6,7 +6,7 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-const SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+const SECRET = process.env.JWT_SECRET;
 const TTL = '30d';
 
 function hashPassword(pw) {
@@ -23,9 +23,11 @@ function verifyPassword(pw, stored) {
 }
 
 function signMember(member) {
+  if (!SECRET) throw new Error('JWT_SECRET not configured');
   return jwt.sign({ sub: member.id, email: member.email, kind: 'member' }, SECRET, { expiresIn: TTL });
 }
 function verifyMember(req) {
+  if (!SECRET) return null;
   const auth = req.headers.authorization || '';
   if (!auth.startsWith('Bearer ')) return null;
   try {

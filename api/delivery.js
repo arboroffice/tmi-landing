@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
     try {
       // Summary: counts by status.
       if (req.query.summary) {
-        const rows = await dbx.list('deliverables', {});
+        const rows = await dbx.list('deliverables', { limit: 1000 });
         const byStatus = {};
         for (const r of rows) {
           const s = r.status || 'unknown';

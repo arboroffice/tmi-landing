@@ -1,10 +1,11 @@
-const { cors } = require('./_auth');
+const { cors, verifyToken } = require('./_auth');
 const db = require('./_db');
 
 module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  const authed = !!verifyToken(req);
   const hasCreds = !!(process.env.FIREBASE_SERVICE_ACCOUNT || '');
 
   let firestore_connect = 'not tested';
@@ -34,18 +35,19 @@ module.exports = async (req, res) => {
     // Back-compat aliases so the admin status badge (reads supabase_connect) keeps working.
     supabase_connect:         firestore_connect,
     supabase_error:           firestore_error,
-    next_public_url:          hasCreds,
-    jwt_secret:               !!process.env.JWT_SECRET,
-    admin_password:        !!process.env.ADMIN_PASSWORD,
-    resend:                !!process.env.RESEND_API_KEY,
-    anthropic:             !!process.env.ANTHROPIC_API_KEY,
-    openai:                !!process.env.OPENAI_API_KEY,
-
-    // RB2B visitor-identification pipeline
     visitors_table,
-    rb2b_webhook_secret:     !!process.env.RB2B_WEBHOOK_SECRET,
-    meta_capi_token:         !!process.env.META_CAPI_ACCESS_TOKEN,
-    meta_custom_audience_id: !!process.env.META_CUSTOM_AUDIENCE_ID,
-    meta_ad_account_id:      !!process.env.META_AD_ACCOUNT_ID,
+    // Env-presence flags are reconnaissance-sensitive: only for authenticated admins.
+    ...(authed ? {
+      next_public_url:          hasCreds,
+      jwt_secret:               !!process.env.JWT_SECRET,
+      admin_password:           !!process.env.ADMIN_PASSWORD,
+      resend:                   !!process.env.RESEND_API_KEY,
+      anthropic:                !!process.env.ANTHROPIC_API_KEY,
+      openai:                   !!process.env.OPENAI_API_KEY,
+      rb2b_webhook_secret:      !!process.env.RB2B_WEBHOOK_SECRET,
+      meta_capi_token:          !!process.env.META_CAPI_ACCESS_TOKEN,
+      meta_custom_audience_id:  !!process.env.META_CUSTOM_AUDIENCE_ID,
+      meta_ad_account_id:       !!process.env.META_AD_ACCOUNT_ID,
+    } : {}),
   });
 };

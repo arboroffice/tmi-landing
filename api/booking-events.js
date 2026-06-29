@@ -37,6 +37,9 @@ function cta(url, label) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+  const _CS = process.env.CAL_WEBHOOK_SECRET;
+  if (_CS && req.query && req.query.secret !== _CS) return res.status(401).json({ error: 'unauthorized' });
+
   const body = req.body || {};
   const trigger = body.triggerEvent || body.event || '';
   const payload = body.payload || {};

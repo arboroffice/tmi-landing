@@ -64,6 +64,9 @@ function copy(step, firstName, resumeUrl) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+  const _S = process.env.GTM_RUN_SECRET;
+  if (_S && req.query && req.query.secret !== _S) return res.status(401).json({ error: 'unauthorized' });
+
   const { applicationId, step } = req.body || {};
   if (!applicationId) return res.status(400).json({ error: 'applicationId required' });
 

@@ -25,10 +25,10 @@ module.exports = async (req, res) => {
     if (needsCrm) {
       try {
         const [clients, leads, proposals, invoices] = await Promise.all([
-          db.list('clients', {}),
-          db.list('leads', {}),
-          db.list('proposals', {}).catch(() => []),
-          db.list('invoices', {}).catch(() => [])
+          db.list('clients', { limit: 3000 }),
+          db.list('leads', { limit: 3000 }),
+          db.list('proposals', { limit: 3000 }).catch(() => []),
+          db.list('invoices', { limit: 3000 }).catch(() => [])
         ]);
         const active = clients.filter(c => c.status === 'active');
         crm.active_clients = active.length;

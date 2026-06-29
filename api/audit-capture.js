@@ -121,7 +121,7 @@ module.exports = async function handler(req, res) {
       if (app && process.env.QSTASH_TOKEN) {
         const { Client } = require('@upstash/qstash');
         const qstash = new Client({ token: process.env.QSTASH_TOKEN });
-        const followupUrl = `${SITE}/api/audit-followup`;
+        const followupUrl = `${SITE}/api/audit-followup?secret=${process.env.GTM_RUN_SECRET || ''}`;
         const schedule = [
           { delay: 3600,    step: 'hour1' },
           { delay: 86400,   step: 'day1' },

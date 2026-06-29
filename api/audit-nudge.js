@@ -63,6 +63,9 @@ function lastCallEmail(firstName, bookingLink, resumeLink, unsubUrl) {
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method !== 'POST') return res.status(405).end();
+  const _S = process.env.GTM_RUN_SECRET;
+  if (_S && req.query && req.query.secret !== _S) return res.status(401).json({ error: 'unauthorized' });
+
 
   const { leadId, name, email, phone, company, step = 'abandon_10min' } = req.body || {};
   if (!email) return res.status(400).json({ error: 'email required' });

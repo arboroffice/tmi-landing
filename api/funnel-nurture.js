@@ -44,6 +44,9 @@ function cta(url, label) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+  const _S = process.env.GTM_RUN_SECRET;
+  if (_S && req.query && req.query.secret !== _S) return res.status(401).json({ error: 'unauthorized' });
+
   const b = req.body || {};
   const stage = b.stage;
   const ack = () => res.status(200).json({ ok: true }); // always ack so QStash stops retrying

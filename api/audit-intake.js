@@ -108,7 +108,7 @@ module.exports = async function handler(req, res) {
           if (process.env.QSTASH_TOKEN && paidEmail) {
             const { Client } = require('@upstash/qstash');
             const qs = new Client({ token: process.env.QSTASH_TOKEN });
-            const nurl = 'https://www.tmitechai.com/api/funnel-nurture';
+            const nurl = `https://www.tmitechai.com/api/funnel-nurture?secret=${process.env.GTM_RUN_SECRET || ''}`;
             const base = { stage: 'delivered_no_booking', email: paidEmail, submissionId: sub.id, session_id: session_id || null };
             await qs.publishJSON({ url: nurl, delay: 86400, body: base });
             await qs.publishJSON({ url: nurl, delay: 259200, body: { ...base, touch: 'second' } });

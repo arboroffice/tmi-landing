@@ -5,7 +5,8 @@ module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const secret = process.env.JWT_SECRET || 'dev-secret-change-me';
+  const secret = process.env.JWT_SECRET;
+  if (!secret) return res.status(503).json({ error: 'JWT_SECRET not configured' });
   const adminPw = process.env.ADMIN_PASSWORD;
 
   // POST /api/auth — login

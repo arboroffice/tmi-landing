@@ -44,6 +44,7 @@ async function getSeeds() {
 
 export async function expandLookalikes({ perSeed = 20, limit = 60 } = {}) {
   const stats = { seeds: 0, found: 0, inserted: 0, deduped: 0, noEmail: 0 };
+  let enrichBudget = 150;
   if (!process.env.APOLLO_API_KEY) { console.log('Lookalike: APOLLO_API_KEY missing, skipping.'); return stats; }
 
   const seeds = await getSeeds();
@@ -71,7 +72,7 @@ export async function expandLookalikes({ perSeed = 20, limit = 60 } = {}) {
       if (stats.inserted >= limit) break;
       let email = p.email;
       if (!email) {
-        const hit = await findBestEmail({ domain: p.domain, name: p.name, title: p.title, apolloId: p.apolloId }).catch(() => null);
+        const hit = enrichBudget > 0 ? (enrichBudget--, await findBestEmail({ domain: p.domain, name: p.name, title: p.title, apolloId: p.apolloId }).catch(() => null)) : null;
         email = hit?.email || null;
       }
       if (!email) { stats.noEmail++; continue; }
