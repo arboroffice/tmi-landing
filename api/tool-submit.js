@@ -43,7 +43,7 @@ module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
-  const { tool, answers, email, name, company } = req.body || {};
+  const { tool, answers, email, name, company, phone } = req.body || {};
   const def = TOOLS[tool];
   if (!def) return res.status(400).json({ error: 'Unknown tool', tools: Object.keys(TOOLS) });
 
@@ -53,16 +53,16 @@ module.exports = async function handler(req, res) {
   // Store the assessment + capture the lead (email optional but enables capture).
   try {
     const em = email ? String(email).toLowerCase().trim() : null;
-    await db.insert('assessments', { tool, tool_label: def.label, email: em, name: name || null, company: company || null, answers: answers || {}, result, created_at: new Date().toISOString() });
+    await db.insert('assessments', { tool, tool_label: def.label, email: em, name: name || null, company: company || null, phone: phone || null, answers: answers || {}, result, created_at: new Date().toISOString() });
     if (em && em.includes('@')) {
       const existing = await db.findOne('leads', 'email', em);
       const note = `${def.label}: ${JSON.stringify(result)}`;
       if (!existing) {
-        await db.insert('leads', { email: em, owner_name: name || null, company_name: company || null, source: `tool:${tool}`, status: 'new', score: 'warm', unsubscribed: false, research_notes: note, created_at: new Date().toISOString() });
+        await db.insert('leads', { email: em, owner_name: name || null, company_name: company || null, phone: phone || null, source: `tool:${tool}`, status: 'new', score: 'warm', unsubscribed: false, research_notes: note, created_at: new Date().toISOString() });
       } else if (!['won', 'client', 'building', 'unsubscribed'].includes(existing.status)) {
-        await db.update('leads', existing.id, { research_notes: `${existing.research_notes || ''}\n${note}`.trim(), score: 'hot' });
+        await db.update('leads', existing.id, { research_notes: `${existing.research_notes || ''}\n${note}`.trim(), score: 'hot', phone: existing.phone || phone || null });
       }
-      try { await db.upsertByField('contacts', 'email', em, { email: em, first_name: (name || '').split(' ')[0] || null, company: company || null, tags: ['tool'] }); } catch {}
+      try { await db.upsertByField('contacts', 'email', em, { email: em, first_name: (name || '').split(' ')[0] || null, company: company || null, phone: phone || null, tags: ['tool'] }); } catch {}
     }
   } catch (e) { console.error('tool-submit store:', e.message); }
 

@@ -22,7 +22,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { first_name, last_name, email, company, team_size, industry, areas, biggest_problem } = req.body || {};
+  const { first_name, last_name, email, phone, company, team_size, industry, areas, biggest_problem } = req.body || {};
 
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid email required' });
   if (!first_name) return res.status(400).json({ error: 'First name required' });
@@ -46,6 +46,7 @@ module.exports = async function handler(req, res) {
       last_name: (last_name || '').trim() || null,
       email: email.toLowerCase().trim(),
       company: company || null,
+      phone: phone || null,
       audience,
       niche: industry || null,
       tags: areasArr.length ? areasArr : null,
@@ -59,6 +60,7 @@ module.exports = async function handler(req, res) {
       contact_id: contactId,
       name,
       email: email.toLowerCase().trim(),
+      phone: phone || null,
       status: 'new',
       source: 'contact-form',
       notes: notesText || null,
@@ -139,7 +141,7 @@ module.exports = async function handler(req, res) {
   try {
     const sms = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
     sms.messages.create({
-      body: `Strategy call: ${name} | ${company || '—'} | ${email} | ${industry || '—'} | team: ${team_size || '—'}`,
+      body: `Strategy call: ${name} | ${company || '—'} | ${email} | ${phone || 'no phone'} | ${industry || '—'} | team: ${team_size || '—'}`,
       from: FROM_NUMBER,
       to: ALERT_NUMBER,
     }).catch(e => console.error('alert SMS:', e.message));

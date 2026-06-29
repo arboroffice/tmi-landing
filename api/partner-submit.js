@@ -14,7 +14,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { name, email, company, partner_type, industries, platform, opportunity, website } = req.body || {};
+  const { name, email, phone, company, partner_type, industries, platform, opportunity, website } = req.body || {};
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid email required' });
 
   const firstName = (name || 'there').split(' ')[0];
@@ -31,6 +31,7 @@ module.exports = async function handler(req, res) {
       first_name: firstName,
       last_name: (name || '').split(' ').slice(1).join(' ') || null,
       email: email.toLowerCase().trim(),
+      phone: phone || null,
       company: company || null,
       audience: 'partner',
       niche: industries || null,

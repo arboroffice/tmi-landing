@@ -203,8 +203,11 @@
       <div class="field">
         <div class="row">
           <div><label for="company">Company</label><input id="company" type="text" autocomplete="organization" placeholder="Smith Industries"/></div>
-          <div><label for="website">Website</label><input id="website" type="text" placeholder="smithindustries.com"/></div>
+          <div><label for="phone">Mobile number</label><input id="phone" type="tel" autocomplete="tel" placeholder="(555) 123-4567"/></div>
         </div>
+      </div>
+      <div class="field">
+        <label for="website">Website</label><input id="website" type="text" placeholder="smithindustries.com"/>
       </div>
       <div class="field">
         <label for="building">What are you building?</label>
@@ -305,7 +308,7 @@ async function submitForm(){
   if(!email || email.indexOf('@')<0){ return fail('Please add a valid email.'); }
   btn.disabled=true; btn.textContent='Sending...';
   var payload={
-    name:name, email:email, company:g('company'), website:g('website'),
+    name:name, email:email, phone:g('phone'), company:g('company'), website:g('website'),
     building:g('building'), ai_stage:rad('ai'), industry:g('industry'),
     location:g('location'), revenue:g('revenue'), tmi_interest:rad('tmi')
   };

@@ -7,7 +7,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, source, sources, audience, niche, name } = req.body || {};
+  const { email, phone, source, sources, audience, niche, name } = req.body || {};
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Invalid email' });
 
   // Accept a single `source` or a `sources` array (e.g. ['founders-of-the-future']).
@@ -36,6 +36,7 @@ module.exports = async function handler(req, res) {
       first_name,
       last_name,
       email: emailNorm,
+      phone: phone || null,
       audience: audience || null,
       niche: niche || null,
       tags: tagList,
