@@ -9,19 +9,30 @@ import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic();
 
-// The TMI offering catalog the model maps each problem onto. Keep names + urls
-// in sync with the live division/system/program pages.
-const CATALOG = `TMI offerings to map fixes onto (use the exact name and url):
-- Operations OS - the central system the company runs on | /platform
-- Command Center & Business Intelligence - real-time visibility, one screen | /platform
-- AI Employees - a digital dispatcher, collector, estimator, CSR, or scheduler by the month | /ai-employees
-- Inbound - never miss a call: answer, text back, qualify, book every lead | /inbound
-- Outbound - human call agency: cold outreach, follow-up, reactivation, reviews | /outbound
-- Back Office - invoicing, AR, collections, bookkeeping run for you | /back-office
-- AI Visibility - be the answer AI and search give buyers | /visibility
-- Personal Brand - done-for-you founder brand | /personal-brand
-- AI Training - train the team to use AI day to day | /system-training
-- Coaching, Consulting & Masterminds (programs from $10k) | /contact`;
+// The TMI offering catalog the model maps each problem onto. These are the
+// installable "offices" of the digital workforce plus the platform layers. Keep
+// names + urls in sync with the live solutions / departments / platform pages.
+const CATALOG = `TMI offices and layers to map fixes onto (use the exact name and url):
+- Sales Office - answers, qualifies, books, follows up, reactivates, reports | /departments
+- Dispatch Office - estimates, scheduling, dispatch, customer updates, reviews | /departments
+- Customer Success Office - receptionist, support, scheduling, onboarding, FAQ | /departments
+- Marketing Office - content, social, ads, SEO, reputation | /departments
+- Operations Office - scheduling, SOPs, knowledge base, vendor and job-cost tracking | /departments
+- Back Office - invoicing, AR, AP, collections, bookkeeping, financial reporting | /back-office
+- HR Office - recruiting, screening, onboarding, training, scheduling | /departments
+- Executive Office - chief of staff, daily digest, KPIs, decision support | /departments
+- Compliance Office - certs, safety docs, permits, audit prep | /departments
+- Intelligence Office - command center, organizational memory, dashboards, forecasting | /platform
+- Operations OS - the central system every office runs on | /platform`;
+
+// The seven business functions we score for company intelligence (0-100 each).
+const FUNCTIONS = ['Sales', 'Marketing', 'Operations', 'Finance', 'Customer Service', 'HR', 'Leadership'];
+
+function clamp100(n, dflt = 30) {
+  n = parseInt(String(n).match(/\d{1,3}/), 10);
+  if (!Number.isFinite(n)) return dflt;
+  return Math.max(0, Math.min(100, n));
+}
 
 export async function diagnoseOperation({ company, industry, research, answers = {} } = {}) {
   const r = research || {};
@@ -90,10 +101,23 @@ Return ONLY this JSON:
     "Accountability": "1 to 5: does work get owned and followed up without the owner chasing? 1 = owner chases everything, 5 = systems hold it",
     "Predictability": "1 to 5: can they forecast capacity, cash, and outcomes? 1 = pure reaction, 5 = predictable",
     "Control": "1 to 5: can the owner step away without it breaking? 1 = it runs through them, 5 = it runs without them"
-  }
+  },
+  "companyScore": "0 to 100: overall Company Intelligence Score - how systems-driven the whole operation is today (manual, disconnected operations land 20 to 45)",
+  "departments": [
+    {"name":"Sales","score":"0 to 100, how intelligent/systematized this function is today","note":"one short phrase on why"},
+    {"name":"Marketing","score":"0 to 100","note":"one short phrase"},
+    {"name":"Operations","score":"0 to 100","note":"one short phrase"},
+    {"name":"Finance","score":"0 to 100","note":"one short phrase"},
+    {"name":"Customer Service","score":"0 to 100","note":"one short phrase"},
+    {"name":"HR","score":"0 to 100","note":"one short phrase"},
+    {"name":"Leadership","score":"0 to 100","note":"one short phrase"}
+  ],
+  "pitch": [
+    {"office":"the office to install first (e.g. Sales Office), exact name from the catalog","url":"matching url","why":"one line tying it to the lowest-scoring, highest-cost function","path":"DFY | DWY | DIY"}
+  ]
 }
 
-Score the 5 dimensions honestly from the evidence (a manual, disconnected operation scores low; one already on an integrated platform scores higher). Return 3 to 6 issues, ranked most to least severe.`;
+Score the 5 dimensions 1 to 5 honestly from the evidence. Then score each of the 7 business functions 0 to 100 for how intelligent (systematized, connected, self-running) it is today, lowest where the evidence shows manual work or gaps. The companyScore is the weighted read across them. In "pitch", rank 2 to 4 offices to install in priority order, lowest-scoring and highest-cost function first - this is the internal recommendation for what to sell them. Return 3 to 6 issues, ranked most to least severe.`;
 
   let parsed = {};
   try {
@@ -135,11 +159,35 @@ Score the 5 dimensions honestly from the evidence (a manual, disconnected operat
     if (!Object.keys(scores).length) scores = null;
   }
 
+  // Per-function company-intelligence scores (0-100) + overall.
+  let departments = [];
+  if (Array.isArray(parsed.departments)) {
+    departments = parsed.departments
+      .filter(d => d && d.name && FUNCTIONS.includes(d.name))
+      .map(d => ({ name: d.name, score: clamp100(d.score), note: String(d.note || '').slice(0, 80) }));
+  }
+  const companyScore = parsed.companyScore != null
+    ? clamp100(parsed.companyScore, departments.length ? Math.round(departments.reduce((s, d) => s + d.score, 0) / departments.length) : 30)
+    : (departments.length ? Math.round(departments.reduce((s, d) => s + d.score, 0) / departments.length) : null);
+
+  // Internal pitch map: which offices to install, in priority order.
+  const pitch = Array.isArray(parsed.pitch)
+    ? parsed.pitch.filter(p => p && p.office).slice(0, 4).map(p => ({
+        office: String(p.office).slice(0, 60),
+        url: p.url || '/departments',
+        why: String(p.why || '').slice(0, 160),
+        path: ['DFY', 'DWY', 'DIY'].includes(String(p.path).toUpperCase()) ? String(p.path).toUpperCase() : 'DFY',
+      }))
+    : [];
+
   return {
     headline: parsed.headline || '',
     fit: parsed.fit || null,
     issues,
     summary: parsed.summary || '',
     scores,
+    companyScore,
+    departments,
+    pitch,
   };
 }

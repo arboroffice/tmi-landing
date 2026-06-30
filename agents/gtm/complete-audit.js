@@ -45,8 +45,8 @@ A clear, honest picture built from their answers - the flow from lead to deliver
 ## 3. Where time and money are leaking
 The specific bottlenecks, mapped to founder / information / latency. Tie each to what they told you. Where possible, estimate the cost (hours/week, dollars) using their numbers.
 
-## 4. Your Intelligence Score
-A 0-100 score with a one-line rationale, plus category scores (Lead flow, Operations, Visibility, Automation, Reporting) out of 10.
+## 4. Your Company Architecture
+Score how intelligent each function of the company is today, 0-100, from their answers: Sales, Marketing, Operations, Finance, Customer Service, HR, Leadership. Use a simple list like "Sales - 42 / 100 - one line why." Score low where work is manual, knowledge is trapped, or systems do not talk. Then give an overall Company Intelligence Score (0-100) with a one-line rationale. End with one sentence naming the lowest-scoring, highest-cost function as where to start.
 
 ## 5. How you compare
 One honest paragraph on how an operation this size and type typically runs, and where this company sits against that. Frame as "most companies at your size..." Never shame; orient.

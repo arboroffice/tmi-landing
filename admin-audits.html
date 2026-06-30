@@ -373,6 +373,19 @@ function openPanel(audit) {
           + `</div></div>`;
       });
       if (dg.summary) dh += `<div class="answer-row"><div class="answer-q">Through-line</div><div class="answer-a">${esc(dg.summary)}</div></div>`;
+      // Company Architecture: per-function intelligence scores (lowest = where to sell).
+      const depts = Array.isArray(dg.departments) ? dg.departments : [];
+      if (depts.length || dg.companyScore != null) {
+        const bars = depts.slice().sort((a, b) => (a.score || 0) - (b.score || 0)).map(d =>
+          `<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;"><span>${esc(d.name)}${d.note ? ` <span style="color:var(--muted)">&middot; ${esc(d.note)}</span>` : ''}</span><strong>${d.score}%</strong></div>`).join('');
+        dh += `<div class="answer-row"><div class="answer-q">Company Architecture${dg.companyScore != null ? ` (overall ${dg.companyScore}/100)` : ''}</div><div class="answer-a">${bars || ''}</div></div>`;
+      }
+      // The internal pitch map: which offices to sell, in priority order.
+      const pitch = Array.isArray(dg.pitch) ? dg.pitch : [];
+      if (pitch.length) {
+        const rows = pitch.map((p, i) => `<div style="padding:4px 0;"><strong>${i + 1}. ${esc(p.office || '')}</strong> <em>(${esc(p.path || 'DFY')})</em>${p.why ? `<br><span style="color:var(--muted)">${esc(p.why)}</span>` : ''}</div>`).join('');
+        dh += `<div class="answer-row"><div class="answer-q" style="color:var(--chart,#9bbf3c)">What to pitch</div><div class="answer-a">${rows}</div></div>`;
+      }
       diagEl.innerHTML = dh;
     } else {
       diagEl.textContent = 'No diagnosis on file.';

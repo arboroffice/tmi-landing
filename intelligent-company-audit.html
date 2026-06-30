@@ -812,6 +812,19 @@ render = function(){
     h+='<div style="background:#F8F8F5;border:1.5px solid #EBEBEB;border-radius:20px;padding:26px 24px;">';
     FIVE_WANTS.forEach(function(wt){ var v=state.scores[wt.label]; h+='<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:600;color:#3A3A3A;">'+wt.label+'</span><span style="font-size:13px;font-weight:700;color:'+wt.color+';">'+v+'/5</span></div><div class="score-track"><div class="score-fill" style="width:'+((v/5)*100)+'%;background:'+wt.color+';"></div></div></div>'; });
     h+='</div></div>';
+    // Company Architecture: how intelligent each function of the company is today.
+    var depts=(state.diagnosis&&state.diagnosis.departments)||[];
+    var cScore=(state.diagnosis&&state.diagnosis.companyScore);
+    if(depts.length){
+      function dColor(n){ return n>=66?"#C8F135":n>=40?"#F5A623":"#FF6B35"; }
+      h+=sectionRule("Your Company Architecture");
+      h+='<p style="font-size:16px;color:#5A5A5A;line-height:1.7;margin-bottom:20px;max-width:640px;">How intelligent each part of the company is today. Lower means more of it still runs on people, memory, and disconnected tools. This is where the build pays off first.</p>';
+      h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"260px 1fr")+';gap:'+(mob?20:28)+'px;margin-bottom:40px;align-items:start;">';
+      if(cScore!=null){ h+='<div style="background:#0A0A0A;border-radius:20px;padding:30px 26px;"><div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#4A4A4A;margin-bottom:16px;">Company Intelligence</div><div class="d" style="font-size:72px;font-weight:700;line-height:1;color:'+dColor(cScore)+';">'+cScore+'</div><div style="font-size:14px;color:#6A6A6A;margin-bottom:20px;">out of 100</div><div style="height:6px;background:#1A1A1A;border-radius:100px;overflow:hidden;"><div style="height:100%;width:'+cScore+'%;background:'+dColor(cScore)+';border-radius:100px;"></div></div></div>'; }
+      h+='<div style="background:#F8F8F5;border:1.5px solid #EBEBEB;border-radius:20px;padding:26px 24px;">';
+      depts.forEach(function(d){ var c=dColor(d.score); h+='<div style="margin-bottom:15px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:600;color:#3A3A3A;">'+esc(d.name)+(d.note?' <span style="color:#9A9A9A;font-weight:500;">&middot; '+esc(d.note)+'</span>':'')+'</span><span style="font-size:13px;font-weight:700;color:'+c+';">'+d.score+'%</span></div><div class="score-track"><div class="score-fill" style="width:'+d.score+'%;background:'+c+';"></div></div></div>'; });
+      h+='</div></div>';
+    }
     // Diagnosis (the real AI-found problems) if we have it, else the derived leaks.
     var dgi=(state.diagnosis&&state.diagnosis.issues)||[];
     if(dgi.length){
