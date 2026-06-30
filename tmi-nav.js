@@ -37,7 +37,14 @@
     ".side-nav .tmi-ind-l2{padding:9px 12px 9px 24px;font-size:13.5px;font-weight:600;color:var(--ink-2,#505060);border-radius:8px;}"+
     ".side-nav .tmi-ind-l2:hover{background:var(--bg-alt,#f5f5f7);}"+
     ".side-nav .tmi-ind-list{padding-left:32px;border-left:none;max-height:38vh;}"+
-    ".side-nav .tmi-ind-list a{padding:8px 12px;font-size:13px;}";
+    ".side-nav .tmi-ind-list a{padding:8px 12px;font-size:13px;}"+
+    /* mobile drawer: the injected Industries toggle must match the big drawer links */
+    ".drawer .tmi-ind-l1{font-family:var(--sans,inherit);font-size:28px;font-weight:700;letter-spacing:-0.02em;color:var(--ink,#0a0b14);padding:14px 0;border-bottom:1px solid var(--line,rgba(0,0,0,0.08));}"+
+    ".drawer .tmi-ind-l1 .tmi-ind-ct{font-size:0.7em;}"+
+    ".drawer .tmi-ind-box{padding:2px 0 6px;}"+
+    ".drawer .tmi-ind-l2{font-size:18px;font-weight:700;color:var(--ink,#0a0b14);padding:10px 0 6px;}"+
+    ".drawer .tmi-ind-list{padding-left:14px;border-left:1px solid var(--line,rgba(0,0,0,0.1));max-height:44vh;}"+
+    ".drawer .tmi-ind-list a{font-size:15px;font-weight:500;padding:8px 0;border-bottom:none;}";
     document.head.appendChild(st);
   }
 
@@ -129,25 +136,30 @@
     document.addEventListener('click',function(){dd.classList.remove('open');});
   }
 
-  // Ensure a "Digital Workforce" link (/departments) lives in every nav surface,
-  // cloning a neutral sibling link so it inherits each surface's styling. Idempotent.
-  function ensureWorkforce(){
+  // Ensure a link exists in a nav surface, cloning a neutral sibling so it inherits
+  // that surface's styling. refSel is a comma list tried in order; where = before|after.
+  function ensureLink(c, href, text, refSel, where){
+    if(!c) return;
+    if(c.querySelector('a[href="'+href+'"]')) return;
+    var ref=null, parts=refSel.split(',');
+    for(var i=0;i<parts.length && !ref;i++) ref=c.querySelector(parts[i].trim());
+    if(!ref) return;
+    var a=ref.cloneNode(true);
+    a.removeAttribute('style'); a.removeAttribute('onclick');
+    a.href=href; a.textContent=text;
+    ref.parentNode.insertBefore(a, where==='before' ? ref : ref.nextSibling);
+  }
+
+  // Inject the offering links (Digital Workforce, The Work) into every nav surface.
+  function ensureExtras(){
     var sels=['.nav-links','#drawer','.ah-nav','.topnav .nav-right','#side-nav'];
     sels.forEach(function(sel){
       var c=document.querySelector(sel); if(!c) return;
-      if(c.querySelector('a[href="/departments"],a[href="departments.html"]')) return;
-      // Prefer a plain text link to clone (About/Solutions), never the lime CTA.
-      var ref=c.querySelector('a[href="/solutions"],a[href="solutions.html"]')
-            ||c.querySelector('a[href="/about"],a[href="about.html"]');
-      if(!ref) return;
-      var a=ref.cloneNode(true);
-      a.removeAttribute('style'); a.removeAttribute('onclick');
-      a.href='/departments'; a.textContent='Digital Workforce';
-      // Place it right after the Solutions/About link so order reads naturally.
-      ref.parentNode.insertBefore(a, ref.nextSibling);
+      ensureLink(c,'/departments','Digital Workforce','a[href="/solutions"],a[href="solutions.html"],a[href="/about"],a[href="about.html"]','after');
+      ensureLink(c,'/portfolio','The Work','a[href="/about"],a[href="about.html"],a[href="/news"],a[href="news.html"]','before');
     });
   }
 
-  function init(){ ensureWorkforce(); enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); }
+  function init(){ ensureExtras(); enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
