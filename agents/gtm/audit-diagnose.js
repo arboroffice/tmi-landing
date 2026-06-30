@@ -37,6 +37,7 @@ export async function diagnoseOperation({ company, industry, research, answers =
     (r.techStack && r.techStack.length) ? `Software detected: ${r.techStack.join(', ')}` : 'Software detected: none (likely manual: phone, email, paper, spreadsheets)',
     (r.signals && r.signals.length) ? `Back-office roles they staff: ${r.signals.join(', ')}` : '',
     (r.opsSignals && r.opsSignals.length) ? `How they operate: ${r.opsSignals.join('; ')}` : '',
+    (r.frictionSignals && r.frictionSignals.length) ? `Gaps detected (what is missing): ${r.frictionSignals.join('; ')}` : '',
     r.maps ? `Google: ${[r.maps.rating ? r.maps.rating + ' stars' : '', r.maps.reviewCount ? r.maps.reviewCount + ' reviews' : '', r.maps.category].filter(Boolean).join(', ')}` : '',
     r.firmographics ? `Firmographics: employees=${r.firmographics.employeeCount || '?'}, revenue=${r.firmographics.revenue || '?'}, founded=${r.firmographics.foundedYear || '?'}` : '',
     (r.found && r.found.length) ? `Verified facts:\n- ${r.found.join('\n- ')}` : '',

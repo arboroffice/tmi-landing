@@ -120,6 +120,26 @@ const TECH_FINGERPRINTS = [
   [/google-analytics|ga\('create/i, 'Google Analytics'],
   [/connect\.facebook\.net|fbevents/i, 'Meta Pixel'],
   [/hotjar/i, 'Hotjar'],
+  // Phone / voice / call handling
+  [/dialpad/i, 'Dialpad'],
+  [/ringcentral/i, 'RingCentral'],
+  [/aircall/i, 'Aircall'],
+  [/grasshopper\.com/i, 'Grasshopper'],
+  [/openphone/i, 'OpenPhone'],
+  [/callrail/i, 'CallRail'],
+  [/twilio/i, 'Twilio'],
+  [/justcall/i, 'JustCall'],
+  // AI / chat / booking / receptionist
+  [/intaker|smith\.ai|smithai/i, 'AI receptionist'],
+  [/tidio|landbot|manychat|chatbot/i, 'Chatbot'],
+  [/calendly|youcanbook|setmore|book(ing)?like/i, 'Online booking'],
+  // Estimating / takeoff / proposals
+  [/stack(ct|estimating)|planswift|bluebeam/i, 'Estimating/takeoff software'],
+  [/proposify|pandadoc|qwilr|better proposals/i, 'Proposal software'],
+  [/docusign|hellosign|signnow/i, 'E-signature'],
+  // Inventory / supply / e-commerce
+  [/woocommerce|bigcommerce|magento/i, 'E-commerce platform'],
+  [/fishbowl|cin7|katana|sortly/i, 'Inventory software'],
 ];
 
 export function detectTechStack(html) {
@@ -175,6 +195,29 @@ export function findOpsSignals(text) {
   return [...out];
 }
 
+// ── Friction signals: what is MISSING. Absence is evidence too. A company that
+// advertises 24/7 service but has no online booking, no detected CRM, and a
+// mailto-only contact is moving everything by phone and a human. These gaps are
+// often the sharpest tells of where a system should be and isn't.
+export function findFrictionSignals({ text = '', html = '', tech = [], opsSignals = [] } = {}) {
+  const out = [];
+  const has = (n) => tech.includes(n);
+  const fieldSystem = ['ServiceTitan', 'Jobber', 'Housecall Pro', 'FieldEdge', 'Service Fusion', 'ServiceM8', 'Workiz', 'JobNimbus', 'AccuLynx', 'Procore', 'Buildertrend', 'Knowify', 'simPRO', 'Tradify', 'Contractor Foreman'].some(has);
+  const hasBooking = has('Online booking') || /book online|schedule online|online (booking|scheduling)/i.test(text);
+  const hasChat = has('Chatbot') || has('AI receptionist') || has('Intercom') || has('Drift') || has('Tawk.to') || has('Podium');
+  const hasForm = /<form[\s>]|gravityforms|typeform|jotform|contact-form/i.test(html) || has('Gravity Forms') || has('Typeform') || has('JotForm');
+  const mailtoOnly = /mailto:/i.test(html) && !hasForm;
+  const promisesSpeed = opsSignals.some(s => /24\/7|emergency|same|next-day/i.test(s));
+
+  if (!fieldSystem) out.push('No field-service/CRM platform detected (lead and job data likely lives in phone, email, spreadsheets)');
+  if (!hasBooking) out.push('No online booking (every job has to be scheduled by a person)');
+  if (!hasChat) out.push('No live chat or text-back capture (after-hours and web leads can go unanswered)');
+  if (mailtoOnly) out.push('Contact is a raw email link, not a tracked form (inbound is not captured or routed)');
+  if (promisesSpeed && !hasBooking && !hasChat) out.push('Promises fast/emergency response but has no instant-capture channel to back it');
+  if (fieldSystem && (has('QuickBooks') || has('Xero')) && !/integrat|sync|connect/i.test(text)) out.push('Runs a field system and separate accounting with no stated integration (data likely re-keyed between them)');
+  return out;
+}
+
 // ── Extract phones, emails, service-area mentions, and counts from site ──────
 const US_STATES = '(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)';
 
@@ -194,6 +237,17 @@ export function extractFacts(text, html) {
   // Team / crew size claims
   const team = (text.match(/(\d{2,4})\+?\s+(employees|team members|technicians|professionals|trucks|crews)/i) || [])[0];
   if (team) facts.team_claim = team.trim();
+  // Fleet size claim
+  const fleet = (text.match(/(?:fleet of|over|more than)\s+(\d{1,4})\s+(trucks|vehicles|units|rigs)/i) || [])[0];
+  if (fleet) facts.fleet_claim = fleet.trim();
+  // Licenses / certifications advertised
+  const certs = [...new Set((text.match(/\b(EPA|OSHA|NATE|ASE|LEED|ISO ?\d{3,5}|NACE|API ?\d{2,4}|UL listed|bonded|licensed (and|&) insured)\b/gi) || []).map(s => s.trim()))].slice(0, 8);
+  if (certs.length) facts.certifications = certs;
+  // Social presence (count of distinct platforms linked)
+  const socials = [...new Set((html.match(/(facebook|instagram|linkedin|youtube|twitter|x\.com|tiktok)\.com/gi) || []).map(s => s.toLowerCase().split('.')[0]))];
+  if (socials.length) facts.social_platforms = socials;
+  // Awards / recognition
+  if (/\b(award|best of|top rated|#1|voted)\b/i.test(text)) facts.awards_mentioned = true;
   return facts;
 }
 
@@ -255,8 +309,9 @@ export async function crawlSite(website, { maxPages = 9 } = {}) {
   const roleSignals = findSignals(combinedText);
   const opsSignals = findOpsSignals(combinedText);
   const facts = extractFacts(combinedText, allHtml);
+  const frictionSignals = findFrictionSignals({ text: combinedText, html: allHtml, tech, opsSignals });
 
-  return { origin, pagesCrawled: pages.map(p => p.path), pages, combinedText, tech, roleSignals, opsSignals, facts };
+  return { origin, pagesCrawled: pages.map(p => p.path), pages, combinedText, tech, roleSignals, opsSignals, frictionSignals, facts };
 }
 
 async function gatherSignals(origin) {

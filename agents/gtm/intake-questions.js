@@ -90,6 +90,17 @@ export const INTAKE = [
     ],
   },
   {
+    section: 'Where a digital department would help first',
+    questions: [
+      { id: 'missed_calls', label: 'What happens to calls you miss after hours or when everyone is busy?', type: 'long' },
+      { id: 'review_followup', label: 'How do you ask for reviews and follow up with past customers today?', type: 'long' },
+      { id: 'most_broken_function', label: 'Which part of the business feels most broken right now?', type: 'single', options: ['Sales / lead follow-up', 'Scheduling / dispatch', 'Customer service', 'Back office (invoicing, AR, books)', 'Reporting / visibility', 'Hiring / HR'] },
+      { id: 'first_to_offload', label: 'If you could hand one repetitive job to a digital employee tomorrow, what would it be?', type: 'long' },
+      { id: 'reports_wished', label: 'What report or number do you wish landed on your phone every morning?', type: 'long' },
+      { id: 'ai_today', label: 'Is anyone on the team using AI tools today? For what?', type: 'long' },
+    ],
+  },
+  {
     section: 'Goals & path',
     questions: [
       { id: 'biggest_bottleneck', label: 'In your words, what is the single biggest thing holding the business back?', type: 'long' },

@@ -76,6 +76,7 @@ export async function researchForAudit({ company, website, email } = {}) {
   const tech = (crawl && crawl.tech) || [];
   const roleSignals = (crawl && crawl.roleSignals) || [];
   const opsSignals = (crawl && crawl.opsSignals) || [];
+  const frictionSignals = (crawl && crawl.frictionSignals) || [];
   const facts = (crawl && crawl.facts) || {};
 
   // ── Phase 2: LinkedIn only if firmographics came back thin (avoids dup work) ─
@@ -94,6 +95,10 @@ export async function researchForAudit({ company, website, email } = {}) {
     tech.length ? `Software/tools detected on their site: ${tech.join(', ')}` : 'Software/tools detected: none (likely runs on phone, email, paper, spreadsheets)',
     roleSignals.length ? `Back-office roles they hire/list: ${roleSignals.join(', ')}` : '',
     opsSignals.length ? `How they operate / win work (from site copy): ${opsSignals.join('; ')}` : '',
+    frictionSignals.length ? `Gaps detected (what is MISSING - absence is evidence): ${frictionSignals.join('; ')}` : '',
+    facts.certifications ? `Certifications/licenses advertised: ${facts.certifications.join(', ')}` : '',
+    facts.fleet_claim ? `Fleet claim: ${facts.fleet_claim}` : '',
+    facts.social_platforms ? `Social presence: ${facts.social_platforms.join(', ')}` : '',
     facts.service_area_text ? `Service-area language: "${facts.service_area_text}"` : '',
     facts.locations_mentioned ? `Cities/locations named on site: ${facts.locations_mentioned.join('; ')}` : '',
     facts.since_year ? `In business since: ${facts.since_year}` : '',
@@ -203,6 +208,7 @@ Return ONLY this JSON object:
   if (firmo && firmo.location) found.push(`HQ ${firmo.location}`);
   if (tech.length) found.push(`Runs ${tech.slice(0, 6).join(', ')}`);
   if (roleSignals.length) found.push(`Lists back-office roles: ${roleSignals.slice(0, 4).join(', ')}`);
+  if (facts.certifications && facts.certifications.length) found.push(`Advertises ${facts.certifications.slice(0, 4).join(', ')}`);
   if (Array.isArray(parsed.found)) for (const f of parsed.found) if (found.indexOf(f) < 0) found.push(f);
 
   return {
@@ -212,6 +218,7 @@ Return ONLY this JSON object:
     techStack: tech,
     signals: roleSignals,
     opsSignals,
+    frictionSignals,
     facts,
     firmographics: firmo || null,
     linkedin: linkedin || null,

@@ -27,6 +27,7 @@ PRIMARY PAIN (research): ${research?.primaryPain || 'manual, disconnected operat
 LIKELY PAIN POINTS: ${research?.likelyPainPoints?.join(', ') || 'scheduling, dispatch, reporting, communication'}
 DETECTED TECH STACK: ${research?.techStack?.length ? research.techStack.join(', ') : 'none found (likely manual / off-the-shelf)'}
 HIRING SIGNALS (bottleneck tells): ${research?.signals?.length ? research.signals.join(', ') : 'none detected'}
+GAPS DETECTED (what is missing): ${research?.frictionSignals?.length ? research.frictionSignals.join('; ') : 'none detected'}
 WEBSITE EXCERPT: ${(websiteText || '').slice(0, 1500) || 'n/a'}
 
 When you write the "current" list, reference their REAL detected tools where possible (and the gaps between them). When hiring signals exist, treat them as proof a human is moving information a system should move. Keep it specific and grounded in these facts.
@@ -34,11 +35,11 @@ When you write the "current" list, reference their REAL detected tools where pos
 
   const msg = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 1100,
+    max_tokens: 1700,
     system: `You are TMI's operations strategist producing a prospect-facing operational intelligence review.
-TMI runs a 30-day Delete / Connect / Build transformation: delete software they don't use, connect what's left, build the backend the company runs on.
+TMI runs a 30-day Delete / Connect / Build transformation: delete software they don't use, connect what's left, build the backend the company runs on, then staff it with AI departments (a digital sales department, dispatch department, back office) and a command center they run from their phone.
 You write a concise, specific, non-hyped review of THIS company based on its size, industry, and research.
-Rules: Never claim anything is broken - frame as where time and money "may be" leaking. No AI hype. No em dashes. Be specific to the niche.
+Rules: Never claim anything is broken - frame as where time and money "may be" leaking. No AI hype. No em dashes. Be specific to the niche. Never say "AI agents" - say digital employees, AI departments, or the system.
 Scores are out of 10 per category; lower = more friction/opportunity. The overall Intelligence Score (0-100) reflects how systems-driven they likely are today (operations-heavy SMBs usually land 35-60).
 Return ONLY valid JSON, no markdown fences, exactly this shape:
 {
@@ -48,6 +49,10 @@ Return ONLY valid JSON, no markdown fences, exactly this shape:
   "bottlenecks": ["<4-6 short observed-friction phrases, niche-specific>"],
   "current": ["<3-5 short current-state items, e.g. '5 software tools', '12 spreadsheets', 'phone & text'>"],
   "future": ["<3-5 short future-state items, e.g. 'one command center', 'reporting', 'dispatch & approvals'>"],
+  "quickWins": ["<3 specific, low-effort fixes that would pay off in the first 30 days, niche-specific>"],
+  "roadmap": [ {"phase":"Delete","detail":"<one line: what to cut for this company>"}, {"phase":"Connect","detail":"<one line: what to wire together>"}, {"phase":"Build","detail":"<one line: the backend + AI department to build>"} ],
+  "peerNote": "<one sentence on how a company this size and type typically compares, framed as 'most operations at your size...'>",
+  "riskIfIgnored": "<one sentence on what compounds if this stays manual as they grow>",
   "savingsAnnual": <int, conservative potential annual dollars>,
   "hoursPerWeek": <int, potential hours recovered per week>
 }`,
@@ -64,6 +69,11 @@ Return ONLY valid JSON, no markdown fences, exactly this shape:
     .map(c => ({ name: c.name, score: clampScore(c.score) }));
   const score = Math.max(0, Math.min(100, Math.round(Number(d.score) || Math.round(categories.reduce((s, c) => s + c.score, 0) / categories.length * 10))));
 
+  const roadmap = (Array.isArray(d.roadmap) ? d.roadmap : [])
+    .filter(r => r && r.phase && r.detail)
+    .map(r => ({ phase: String(r.phase).slice(0, 24), detail: String(r.detail).slice(0, 160) }))
+    .slice(0, 3);
+
   return {
     score,
     summary: d.summary || '',
@@ -71,6 +81,10 @@ Return ONLY valid JSON, no markdown fences, exactly this shape:
     bottlenecks: Array.isArray(d.bottlenecks) ? d.bottlenecks.slice(0, 6) : [],
     current: Array.isArray(d.current) ? d.current.slice(0, 5) : [],
     future: Array.isArray(d.future) ? d.future.slice(0, 5) : [],
+    quickWins: Array.isArray(d.quickWins) ? d.quickWins.slice(0, 3) : [],
+    roadmap,
+    peerNote: d.peerNote || '',
+    riskIfIgnored: d.riskIfIgnored || '',
     savingsAnnual: Math.max(0, Math.round(Number(d.savingsAnnual) || 0)),
     hoursPerWeek: Math.max(0, Math.round(Number(d.hoursPerWeek) || 0)),
   };

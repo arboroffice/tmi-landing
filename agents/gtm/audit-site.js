@@ -53,6 +53,31 @@ export function renderAuditPage(d) {
   const bottlenecks = (d.bottlenecks || []).map(b => `<li>${esc(b)}</li>`).join('\n');
   const current = (d.current || []).map(c => `<li>${esc(c)}</li>`).join('\n');
   const future = (d.future || []).map(f => `<li>${esc(f)}</li>`).join('\n');
+
+  const quickWins = (d.quickWins || []).filter(Boolean);
+  const quickWinsBlock = quickWins.length ? `
+<section class="sec"><div class="wrap">
+  <div class="eyebrow">First 30 days</div>
+  <h2 class="big">Three things we'd fix first.</h2>
+  <p class="sub">Low effort, fast payoff. These do not need the full build to start working.</p>
+  <div class="wins">${quickWins.map((w, i) => `<div class="win"><span class="win-n">${i + 1}</span><p>${esc(w)}</p></div>`).join('\n')}</div>
+</div></section>` : '';
+
+  const roadmap = (d.roadmap || []).filter(r => r && r.phase && r.detail);
+  const roadmapBlock = roadmap.length ? `
+<section class="sec"><div class="wrap">
+  <div class="eyebrow">The 30-day path</div>
+  <h2 class="big">How we'd build it.</h2>
+  <p class="sub">Delete what is dead weight, connect what is left, build the backend the company runs on.</p>
+  <div class="road">${roadmap.map((r, i) => `<div class="step"><div class="step-h"><span class="step-n">0${i + 1}</span><span class="step-p">${esc(r.phase)}</span></div><p>${esc(r.detail)}</p></div>`).join('\n')}</div>
+</div></section>` : '';
+
+  const benchBlock = (d.peerNote || d.riskIfIgnored) ? `
+<section class="sec"><div class="wrap">
+  <div class="eyebrow">Where you stand</div>
+  ${d.peerNote ? `<h2 class="big">${esc(d.peerNote)}</h2>` : ''}
+  ${d.riskIfIgnored ? `<p class="sub" style="margin-top:18px">${esc(d.riskIfIgnored)}</p>` : ''}
+</div></section>` : '';
   const demo = d.demoUrl
     ? `<section class="sec demo"><div class="wrap"><div class="eyebrow">90-second walkthrough</div><h2>How we'd build it</h2><div class="vid"><iframe src="${esc(d.demoUrl)}" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe></div></div></section>`
     : '';
@@ -134,6 +159,19 @@ export function renderAuditPage(d) {
   .list li:before{content:"";position:absolute;left:0;top:18px;width:7px;height:7px;border-radius:50%;background:var(--chart);}
   .vid{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#000;margin-top:24px;}
   .vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+  /* quick wins */
+  .wins{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px;}
+  .win{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 22px;}
+  .win-n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--chart);color:#0a0b14;font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:14px;}
+  .win p{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.55;}
+  /* roadmap */
+  .road{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .step{background:var(--card);padding:28px 24px;}
+  .step-h{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;}
+  .step-n{font-family:var(--serif);font-size:26px;color:var(--chart);line-height:1;}
+  .step-p{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink3);}
+  .step p{font-family:var(--sans);font-size:14px;color:var(--ink2);line-height:1.55;}
+  @media(max-width:760px){.wins,.road{grid-template-columns:1fr;}}
   /* cta */
   .cta{text-align:center;background:var(--bg2);}
   .cta h2{font-family:var(--serif);font-size:clamp(28px,3.4vw,46px);max-width:20ch;margin:0 auto 16px;}
@@ -197,6 +235,12 @@ export function renderAuditPage(d) {
     <div><h2 class="big">What we'd build</h2><ul class="list"><li>A single command center for the whole operation</li><li>Scheduling, dispatch, and approvals in one place</li><li>Reporting that builds itself</li><li>The backend you own, run from your phone</li></ul></div>
   </div>
 </div></section>
+
+${quickWinsBlock}
+
+${roadmapBlock}
+
+${benchBlock}
 
 ${demo}
 
