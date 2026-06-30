@@ -129,6 +129,25 @@
     document.addEventListener('click',function(){dd.classList.remove('open');});
   }
 
-  function init(){ enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); }
+  // Ensure a "Digital Workforce" link (/departments) lives in every nav surface,
+  // cloning a neutral sibling link so it inherits each surface's styling. Idempotent.
+  function ensureWorkforce(){
+    var sels=['.nav-links','#drawer','.ah-nav','.topnav .nav-right','#side-nav'];
+    sels.forEach(function(sel){
+      var c=document.querySelector(sel); if(!c) return;
+      if(c.querySelector('a[href="/departments"],a[href="departments.html"]')) return;
+      // Prefer a plain text link to clone (About/Solutions), never the lime CTA.
+      var ref=c.querySelector('a[href="/solutions"],a[href="solutions.html"]')
+            ||c.querySelector('a[href="/about"],a[href="about.html"]');
+      if(!ref) return;
+      var a=ref.cloneNode(true);
+      a.removeAttribute('style'); a.removeAttribute('onclick');
+      a.href='/departments'; a.textContent='Digital Workforce';
+      // Place it right after the Solutions/About link so order reads naturally.
+      ref.parentNode.insertBefore(a, ref.nextSibling);
+    });
+  }
+
+  function init(){ ensureWorkforce(); enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
