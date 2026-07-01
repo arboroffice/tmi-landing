@@ -43,9 +43,32 @@
   }
 
   function build() {
-    // Fill any inline booking cards on the page. The floating bottom-right
-    // "Book a call with Mia" launcher has been removed by request.
+    // Fill any inline booking cards on the page.
     document.querySelectorAll('.bc-dates').forEach(renderDates);
+
+    // Inject the floating widget once (generic, no personal photo/name).
+    if (document.getElementById('tbwLaunch')) return;
+    var w = document.createElement('div');
+    w.innerHTML =
+      '<button class="tbw-launch" id="tbwLaunch" type="button" aria-label="Book a call"><span class="pulse"></span><span>Book a call</span></button>' +
+      '<div class="tbw-panel" id="tbwPanel" role="dialog" aria-label="Book a call">' +
+        '<button class="tbw-x" id="tbwX" aria-label="Close">&times;</button>' +
+        '<div class="book-card">' +
+          '<div class="bc-host"><div><div class="bc-host-l">Book a</div><div class="bc-host-n">30-minute call</div><div class="bc-host-t">With the TMI team</div></div></div>' +
+          '<div class="bc-sub">A 30-minute call to walk through your operation and the systems that would fix it. The free audit on the site is the fastest start, but you can grab a call here.</div>' +
+          '<div class="bc-dates" id="tbwDates"></div>' +
+          '<button class="btn btn-lime bc-btn" type="button" id="tbwBtn" data-cal-link="' + CAL_LINK + '" data-cal-config=\'{"layout":"month_view"}\'>Schedule my call</button>' +
+          '<div class="bc-foot">Free &middot; No pitch &middot; 30 min</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(w);
+
+    renderDates(document.getElementById('tbwDates'));
+    var panel = document.getElementById('tbwPanel');
+    var launch = document.getElementById('tbwLaunch');
+    launch.addEventListener('click', function () { panel.classList.toggle('open'); launch.classList.toggle('hide'); });
+    document.getElementById('tbwX').addEventListener('click', function () { panel.classList.remove('open'); launch.classList.remove('hide'); });
+    document.getElementById('tbwBtn').addEventListener('click', track);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
