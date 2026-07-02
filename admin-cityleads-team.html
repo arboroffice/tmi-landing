@@ -14,6 +14,7 @@
     <div class="topbar">
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">City Team</span></div>
       <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openBulk()">Bulk assign</button>
         <button class="btn btn-primary btn-sm" onclick="openCreate()">+ Add rep</button>
       </div>
     </div>
@@ -42,6 +43,19 @@
         <div style="display:flex;gap:10px;margin-top:16px;">
           <button class="btn btn-primary btn-sm" onclick="createRep()">Create rep</button>
           <button class="btn btn-ghost btn-sm" onclick="closeCreate()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- bulk assign -->
+      <div class="card" id="bulk-card" style="display:none;margin-bottom:20px;">
+        <div class="panel-sec-label" style="margin-bottom:8px;">Bulk assign businesses</div>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 10px;">One business per line. Format: <b>Business, Phone, Industry, Contact</b> — only the business name is required. Up to 150 at a time.</p>
+        <textarea class="form-input" id="bulk-text" rows="7" placeholder="ABC Roofing, (337) 555-0100, Roofing, Mike&#10;Bayou HVAC, , HVAC&#10;Delta Plumbing"></textarea>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap;">
+          <select class="form-input" id="bulk-rep" style="max-width:280px;"></select>
+          <button class="btn btn-primary btn-sm" onclick="submitBulk()">Assign leads</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeBulk()">Cancel</button>
+          <span id="bulk-count" style="font-size:12px;color:var(--muted);"></span>
         </div>
       </div>
 
@@ -96,6 +110,7 @@ TMIAdmin.requireAuth();
 TMIAdmin.initSidebar('city-team');
 
 let reps = [], current = null;
+const TARGET = 20; // daily walk-in / log target from the playbook
 const esc = (s) => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const SL = {new:'New',attempted:'Attempted',contacted:'Contacted',booked:'Booked',callback:'Callback',not_interested:'Not interested',won:'Won',lost:'Lost'};
 
@@ -103,6 +118,8 @@ async function load(){
   reps = await TMIAdmin.api('/api/reps-admin').catch(()=>[]) || [];
   reps.sort((a,b)=>(b.today_count||0)-(a.today_count||0)||(b.booked_count||0)-(a.booked_count||0)||(b.lead_count||0)-(a.lead_count||0));
   document.getElementById('rep-count').textContent = reps.length + (reps.length===1?' rep':' reps');
+  const sel = document.getElementById('bulk-rep');
+  if(sel) sel.innerHTML = '<option value="__split">Split across all reps</option>' + reps.map(r=>`<option value="${r.id}">${esc(r.name||r.email)}</option>`).join('');
   const tb = document.getElementById('rep-tbody');
   const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.booked_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
   const stat=(n,l)=>`<div class="card" style="text-align:center;padding:16px 12px;margin:0;"><div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;line-height:1;">${n}</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;">${l}</div></div>`;
@@ -115,7 +132,7 @@ async function load(){
       <td>${esc(r.email)}</td>
       <td>${r.lead_count||0}</td>
       <td>${r.booked_count||0}</td>
-      <td>${r.today_count||0}</td>
+      <td><span style="font-weight:700;color:${(r.today_count||0)>=TARGET?'#3f6d12':'inherit'}">${r.today_count||0}</span> <span style="color:var(--muted);font-size:12px">/ ${TARGET}</span></td>
       <td>${r.status==='disabled'
         ? '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#e6e6ea;color:#55576a;">Disabled</span>'
         : '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#e9f7d0;color:#3f6d12;">Active</span>'}</td>
@@ -123,6 +140,27 @@ async function load(){
     </tr>`).join('');
 }
 
+function openBulk(){ document.getElementById('bulk-card').style.display='block'; }
+function closeBulk(){ document.getElementById('bulk-card').style.display='none'; document.getElementById('bulk-text').value=''; document.getElementById('bulk-count').textContent=''; }
+function parseBulk(text){
+  return text.split(/\n+/).map(l=>l.trim()).filter(Boolean).map(l=>{
+    const p=l.split(',').map(s=>(s||'').trim());
+    return { business_name:p[0]||'', phone:p[1]||'', industry:p[2]||'', contact_name:p[3]||'' };
+  }).filter(x=>x.business_name);
+}
+document.getElementById('bulk-text').addEventListener('input',(e)=>{ const n=parseBulk(e.target.value).length; document.getElementById('bulk-count').textContent=n?(n+' business'+(n===1?'':'es')):''; });
+async function submitBulk(){
+  const leads=parseBulk(document.getElementById('bulk-text').value);
+  if(!leads.length){ TMIAdmin.toast('Add at least one business'); return; }
+  const sel=document.getElementById('bulk-rep').value;
+  const body={ action:'bulk_add', leads };
+  if(sel==='__split') body.split=true; else body.rep_id=sel;
+  try{
+    const r=await TMIAdmin.api('/api/reps-admin','POST',body);
+    TMIAdmin.toast('Assigned '+r.created+' lead'+(r.created===1?'':'s')+(body.split?(' across '+r.reps+' reps'):''));
+    closeBulk(); load();
+  }catch(ex){ TMIAdmin.toast(ex.message); }
+}
 function openCreate(){ document.getElementById('create-card').style.display='block'; }
 function closeCreate(){ document.getElementById('create-card').style.display='none'; ['c-name','c-city','c-email','c-phone','c-pass'].forEach(i=>document.getElementById(i).value=''); }
 function genPass(){ const w=['Field','Route','Door','City','North','Bold','Prime','Solid']; const p=w[Math.floor(Date.now()%w.length)]+'-'+Math.floor(1000+Date.now()%9000); document.getElementById('c-pass').value=p; }

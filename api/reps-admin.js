@@ -37,7 +37,35 @@ module.exports = async (req, res) => {
 
     if (req.method === 'POST') {
       const body = req.body || {};
-      // Assign / seed a lead to a rep's field queue.
+      // Bulk assign a pasted list of businesses, to one rep or split across all.
+      if (body.action === 'bulk_add') {
+        const items = (Array.isArray(body.leads) ? body.leads : []).filter((x) => x && (x.business_name || x.contact_name)).slice(0, 150);
+        if (!items.length) return res.status(400).json({ error: 'No valid businesses to add (need at least a name per line)' });
+        let targets;
+        if (body.split) {
+          const reps = await db.list('reps', { limit: 200 });
+          targets = (reps || []).filter((r) => r.status !== 'disabled').map((r) => r.id);
+          if (!targets.length) return res.status(400).json({ error: 'No active reps to split across' });
+        } else {
+          if (!body.rep_id) return res.status(400).json({ error: 'Pick a rep, or choose split across all' });
+          if (!(await db.getById('reps', body.rep_id))) return res.status(404).json({ error: 'Rep not found' });
+          targets = [body.rep_id];
+        }
+        const now = new Date().toISOString();
+        let created = 0, i = 0;
+        for (const it of items) {
+          const rid = targets[i % targets.length]; i++;
+          await db.insert('rep_leads', {
+            rep_id: rid, business_name: it.business_name || null, contact_name: it.contact_name || null,
+            phone: it.phone || null, email: null, address: it.address || null, industry: it.industry || null,
+            lat: null, lng: null, status: 'new', notes: it.notes || null, next_action_at: null,
+            source: 'assigned', created_at: now, updated_at: now, visited_at: null,
+          });
+          created++;
+        }
+        return res.status(201).json({ ok: true, created, reps: targets.length });
+      }
+      // Assign / seed a single lead to a rep's field queue.
       if (body.action === 'add_lead') {
         const { rep_id } = body;
         if (!rep_id) return res.status(400).json({ error: 'rep_id required' });
@@ -90,3 +118,5 @@ module.exports = async (req, res) => {
     return res.status(405).end();
   } catch (e) { return res.status(500).json({ error: e.message }); }
 };
+
+module.exports.config = { maxDuration: 60 };
