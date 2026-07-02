@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#0a0b14"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="TMI City Leads"/>
+<meta name="robots" content="noindex"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="/favicon.svg"/>
+<title>TMI City Leads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+<style>
+  :root{
+    --bg:#f4f5ef;--card:#ffffff;--ink:#0a0b14;--ink-2:#454654;--muted:#7c7d89;
+    --line:rgba(10,11,20,0.10);--line-2:rgba(10,11,20,0.16);
+    --chart:#E4FF97;--chart-d:#c8ec6f;--dark:#0a0b14;
+    --blue:#2f6bd6;--amber:#c98a12;--purple:#7a5bd0;--red:#d1483a;--green:#3f8f2a;
+    --sans:"Barlow",system-ui,-apple-system,sans-serif;
+    --safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.5;overscroll-behavior-y:none;-webkit-font-smoothing:antialiased;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  input,select,textarea{font-family:inherit;font-size:16px;width:100%;padding:13px 14px;border:1px solid var(--line-2);border-radius:12px;background:#fff;color:var(--ink);}
+  input:focus,select,textarea:focus,button:focus-visible{outline:2px solid var(--chart-d);outline-offset:1px;}
+  label{display:block;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;}
+  .field{margin-bottom:14px;}
+  a{color:inherit;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--chart);color:#0a0b14;font-weight:800;font-size:15px;padding:14px 18px;border-radius:12px;width:100%;transition:filter .1s,transform .05s;}
+  .btn:active{transform:scale(0.99);} .btn:disabled{opacity:0.5;}
+  .btn.dark{background:var(--dark);color:#fff;}
+  .btn.ghost{background:#fff;border:1px solid var(--line-2);color:var(--ink);font-weight:700;}
+  .btn.sm{width:auto;padding:9px 14px;font-size:13px;border-radius:10px;}
+  .btn.rec{background:var(--red);color:#fff;}
+
+  /* login */
+  #login{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;padding:28px 24px calc(28px + var(--safe-b));background:var(--dark);color:#fff;}
+  #login .brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:22px;letter-spacing:-0.02em;margin-bottom:6px;}
+  #login .brand .m{width:34px;height:34px;border-radius:8px;background:var(--chart);color:#0a0b14;display:grid;place-items:center;font-size:15px;font-weight:900;}
+  #login h1{font-size:30px;font-weight:800;letter-spacing:-0.03em;margin:24px 0 6px;}
+  #login p{color:rgba(255,255,255,0.62);margin:0 0 26px;font-size:15px;}
+  #login label{color:rgba(255,255,255,0.6);}
+  #login input{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.16);color:#fff;}
+  #login .err{color:#ffb4ab;font-size:13px;min-height:18px;margin:4px 0 12px;}
+
+  /* app shell */
+  #app{display:none;flex-direction:column;height:100%;}
+  .topbar{position:sticky;top:0;z-index:20;padding:calc(14px + var(--safe-t)) 18px 12px;background:rgba(244,245,239,0.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+  .topbar .m{width:28px;height:28px;border-radius:7px;background:var(--dark);color:var(--chart);display:grid;place-items:center;font-size:12px;font-weight:900;flex:none;}
+  .topbar h2{font-size:19px;font-weight:800;letter-spacing:-0.02em;margin:0;flex:1;}
+  .topbar .who{font-size:12px;color:var(--muted);font-weight:600;}
+
+  #view{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(96px + var(--safe-b));}
+  .screen{display:none;} .screen.on{display:block;}
+
+  /* bottom tab bar */
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(255,255,255,0.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:var(--safe-b);}
+  .tab{padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:10.5px;font-weight:700;letter-spacing:0.02em;}
+  .tab .ic{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .tab.on{color:var(--ink);} .tab.on .ic{stroke:var(--ink);}
+  .tab.add{color:#0a0b14;} .tab.add .badge{width:44px;height:44px;border-radius:50%;background:var(--chart);display:grid;place-items:center;margin-top:-14px;box-shadow:0 8px 20px rgba(0,0,0,0.18);}
+  .tab.add .badge .ic{width:26px;height:26px;stroke:#0a0b14;stroke-width:2.4;}
+
+  /* cards + bits */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;}
+  .row{display:flex;align-items:center;gap:10px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 12px;text-align:center;}
+  .stat .n{font-size:28px;font-weight:900;letter-spacing:-0.03em;line-height:1;}
+  .stat .l{font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;line-height:1.2;}
+  .h-eyebrow{font-size:12px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin:20px 2px 10px;}
+  .empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px;}
+
+  .lead{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:9px;display:flex;align-items:center;gap:12px;}
+  .lead:active{background:#fafbf6;}
+  .lead .body{flex:1;min-width:0;}
+  .lead .name{font-weight:700;font-size:15.5px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lead .sub{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+  .chip{font-size:10.5px;font-weight:800;letter-spacing:0.03em;text-transform:uppercase;padding:4px 9px;border-radius:999px;white-space:nowrap;color:#fff;}
+  .chip.new{background:var(--muted);} .chip.attempted{background:var(--amber);} .chip.contacted{background:var(--blue);}
+  .chip.booked{background:var(--green);} .chip.callback{background:var(--purple);} .chip.not_interested{background:#9aa;color:#fff;}
+  .chip.won{background:#186b1e;} .chip.lost{background:var(--red);}
+
+  .filters{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch;}
+  .filters button{flex:none;font-size:12.5px;font-weight:700;color:var(--ink-2);background:#fff;border:1px solid var(--line-2);border-radius:999px;padding:7px 13px;}
+  .filters button.on{background:var(--dark);color:#fff;border-color:var(--dark);}
+  .search{margin-bottom:8px;}
+
+  /* map */
+  #map{width:100%;height:calc(100vh - 220px);min-height:340px;border-radius:16px;border:1px solid var(--line);overflow:hidden;background:#dfe1d8;}
+  .map-actions{display:flex;gap:8px;margin-bottom:10px;}
+
+  /* sheet (lead detail) */
+  .sheet{position:fixed;inset:0;z-index:60;background:var(--bg);display:none;flex-direction:column;}
+  .sheet.on{display:flex;}
+  .sheet-top{position:sticky;top:0;padding:calc(12px + var(--safe-t)) 16px 12px;display:flex;align-items:center;gap:12px;background:var(--bg);border-bottom:1px solid var(--line);}
+  .sheet-top h3{flex:1;font-size:18px;font-weight:800;letter-spacing:-0.02em;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sheet-body{flex:1;overflow-y:auto;padding:16px 16px calc(28px + var(--safe-b));}
+  .x{width:34px;height:34px;border-radius:10px;background:#fff;border:1px solid var(--line-2);display:grid;place-items:center;font-size:20px;color:var(--ink);flex:none;}
+  .quickact{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 6px;}
+  .quickact a{display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;border:1px solid var(--line-2);border-radius:12px;padding:12px;font-weight:700;font-size:14px;text-decoration:none;color:var(--ink);}
+  .statuses{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 4px;}
+  .statuses button{font-size:12px;font-weight:700;padding:8px 12px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--ink-2);}
+  .statuses button.on{color:#fff;border-color:transparent;}
+  .note-item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px;font-size:14px;}
+  .note-item .t{font-size:11px;color:var(--muted);margin-bottom:3px;}
+  .recbar{display:flex;align-items:center;gap:10px;margin:10px 0;}
+  .recbar .dot{width:10px;height:10px;border-radius:50%;background:var(--red);animation:pulse 1s infinite;}
+  @keyframes pulse{50%{opacity:0.3;}}
+  @media(prefers-reduced-motion:reduce){.recbar .dot{animation:none;}}
+
+  .toast{position:fixed;left:50%;bottom:calc(90px + var(--safe-b));transform:translateX(-50%);background:var(--dark);color:#fff;font-size:13.5px;font-weight:600;padding:11px 18px;border-radius:999px;z-index:100;opacity:0;transition:opacity .2s;pointer-events:none;max-width:88vw;text-align:center;}
+  .toast.on{opacity:1;}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="brand"><span class="m">TMI</span> City Leads</div>
+  <h1>Own your city.</h1>
+  <p>Sign in to work your leads, your map, and your day.</p>
+  <form id="loginForm" autocomplete="on">
+    <div class="field"><label>Email</label><input id="lEmail" type="email" inputmode="email" autocomplete="username" required/></div>
+    <div class="field"><label>Password</label><input id="lPass" type="password" autocomplete="current-password" required/></div>
+    <div class="err" id="lErr"></div>
+    <button class="btn" id="lBtn" type="submit">Sign in</button>
+  </form>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <span class="m">TMI</span>
+    <h2 id="screenTitle">Today</h2>
+    <span class="who" id="whoami"></span>
+  </div>
+  <div id="view">
+    <section class="screen on" id="s-today"></section>
+    <section class="screen" id="s-leads"></section>
+    <section class="screen" id="s-map">
+      <div class="map-actions">
+        <button class="btn ghost sm" id="locateBtn">Find me</button>
+        <button class="btn sm" id="addHereBtn">Log a lead here</button>
+      </div>
+      <div id="map"></div>
+    </section>
+    <section class="screen" id="s-log"></section>
+    <section class="screen" id="s-me"></section>
+  </div>
+
+  <nav class="tabbar">
+    <button class="tab on" data-tab="today"><svg class="ic" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>Today</button>
+    <button class="tab" data-tab="leads"><svg class="ic" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1.4"/><circle cx="3.5" cy="12" r="1.4"/><circle cx="3.5" cy="18" r="1.4"/></svg>Leads</button>
+    <button class="tab add" data-tab="log"><span class="badge"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>Log</button>
+    <button class="tab" data-tab="map"><svg class="ic" viewBox="0 0 24 24"><path d="M9 3L3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/></svg>Map</button>
+    <button class="tab" data-tab="me"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Me</button>
+  </nav>
+</div>
+
+<!-- LEAD DETAIL SHEET -->
+<div class="sheet" id="sheet">
+  <div class="sheet-top">
+    <button class="x" id="sheetClose" aria-label="Close">&times;</button>
+    <h3 id="sheetTitle">Lead</h3>
+  </div>
+  <div class="sheet-body" id="sheetBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '';
+const TOKEN_KEY = 'tmi_rep_token';
+let TOKEN = localStorage.getItem(TOKEN_KEY) || '';
+let ME = null, LEADS = [], FILTER = 'all', SEARCH = '';
+let map = null, markers = null, meMarker = null, lastPos = null;
+
+const $ = (s, r=document) => r.querySelector(s);
+const el = (h) => { const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild; };
+const esc = (s) => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const STATUS = ['new','attempted','contacted','booked','callback','not_interested','won','lost'];
+const STATUS_LABEL = {new:'New',attempted:'Attempted',contacted:'Contacted',booked:'Booked',callback:'Callback',not_interested:'Not interested',won:'Won',lost:'Lost'};
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._x); t._x=setTimeout(()=>t.classList.remove('on'),2400); }
+
+async function api(path, opts={}){
+  const h = Object.assign({'Content-Type':'application/json'}, opts.headers||{});
+  if(TOKEN) h.Authorization = 'Bearer '+TOKEN;
+  const res = await fetch(API+path, Object.assign({}, opts, {headers:h}));
+  if(res.status===401){ logout(); throw new Error('Session expired, sign in again'); }
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || ('Error '+res.status));
+  return data;
+}
+
+/* ---- auth ---- */
+$('#loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const btn=$('#lBtn'), err=$('#lErr'); err.textContent='';
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  try{
+    const r = await fetch(API+'/api/rep-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('#lEmail').value.trim(),password:$('#lPass').value})});
+    const d = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(d.error||'Sign in failed');
+    TOKEN=d.token; ME=d.rep; localStorage.setItem(TOKEN_KEY,TOKEN);
+    boot();
+  }catch(ex){ err.textContent=ex.message; }
+  btn.disabled=false; btn.textContent='Sign in';
+});
+function logout(){ TOKEN=''; localStorage.removeItem(TOKEN_KEY); $('#app').style.display='none'; $('#login').style.display='flex'; }
+
+async function boot(){
+  try{
+    if(!ME) ME = await api('/api/rep-me');
+    $('#login').style.display='none'; $('#app').style.display='flex';
+    $('#whoami').textContent = (ME.name||'').split(' ')[0] + (ME.city?(' · '+ME.city):'');
+    await loadLeads();
+    switchTab('today');
+  }catch(ex){ logout(); }
+}
+
+async function loadLeads(){
+  try{ LEADS = await api('/api/rep-leads'); }catch(ex){ LEADS=[]; toast(ex.message); }
+}
+
+/* ---- tabs ---- */
+const TITLES = {today:'Today',leads:'My Leads',map:'Map',log:'Log a Lead',me:'Me'};
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $('#s-'+tab).classList.add('on');
+  $('#screenTitle').textContent = TITLES[tab];
+  $('#view').scrollTop=0;
+  if(tab==='today') renderToday();
+  if(tab==='leads') renderLeads();
+  if(tab==='log') renderLog();
+  if(tab==='me') renderMe();
+  if(tab==='map') setTimeout(initMap,50);
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+
+/* ---- Today ---- */
+function isToday(iso){ if(!iso) return false; const d=new Date(iso), n=new Date(); return d.toDateString()===n.toDateString(); }
+function dueToday(l){ if(!l.next_action_at) return false; return new Date(l.next_action_at) <= new Date() && !['won','lost','not_interested'].includes(l.status); }
+function renderToday(){
+  const loggedToday = LEADS.filter(l=>isToday(l.created_at)).length;
+  const booked = LEADS.filter(l=>l.status==='booked'||l.status==='won').length;
+  const due = LEADS.filter(dueToday);
+  const s=$('#s-today');
+  s.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat"><div class="n">${loggedToday}</div><div class="l">Logged today</div></div>
+      <div class="stat"><div class="n">${booked}</div><div class="l">Audits booked</div></div>
+      <div class="stat"><div class="n">${due.length}</div><div class="l">Follow-ups due</div></div>
+    </div>
+    <button class="btn" id="tLog">Log a walk-in</button>
+    <div style="height:10px"></div>
+    <button class="btn ghost" id="tMap">Open the map</button>
+    <div class="h-eyebrow">Follow-ups due</div>
+    <div id="tDue"></div>`;
+  $('#tLog').onclick=()=>switchTab('log');
+  $('#tMap').onclick=()=>switchTab('map');
+  const box=$('#tDue');
+  if(!due.length){ box.innerHTML='<div class="empty">Nothing due. Go knock some doors.</div>'; }
+  else due.sort((a,b)=>new Date(a.next_action_at)-new Date(b.next_action_at)).forEach(l=>box.appendChild(leadRow(l)));
+}
+
+/* ---- Leads ---- */
+function leadRow(l){
+  const node = el(`<div class="lead"><div class="body"><div class="name">${esc(l.business_name||l.contact_name||'Untitled')}</div><div class="sub">${esc([l.industry,l.contact_name&&l.business_name?l.contact_name:'',l.phone].filter(Boolean).join(' · ')||'Tap to open')}</div></div><span class="chip ${l.status}">${STATUS_LABEL[l.status]||l.status}</span></div>`);
+  node.addEventListener('click',()=>openLead(l.id));
+  return node;
+}
+function renderLeads(){
+  const s=$('#s-leads');
+  s.innerHTML = `
+    <input class="search" id="leadSearch" type="search" placeholder="Search leads" value="${esc(SEARCH)}"/>
+    <div class="filters" id="leadFilters"></div>
+    <div id="leadList"></div>`;
+  const fils=['all','new','attempted','contacted','callback','booked','won','not_interested','lost'];
+  const fbox=$('#leadFilters');
+  fils.forEach(f=>{ const b=el(`<button class="${f===FILTER?'on':''}">${f==='all'?'All':(STATUS_LABEL[f]||f)}</button>`); b.onclick=()=>{FILTER=f; renderLeads();}; fbox.appendChild(b); });
+  $('#leadSearch').addEventListener('input',(e)=>{ SEARCH=e.target.value; drawLeadList(); });
+  drawLeadList();
+}
+function drawLeadList(){
+  const box=$('#leadList'); if(!box) return; box.innerHTML='';
+  let rows = LEADS.slice();
+  if(FILTER!=='all') rows=rows.filter(l=>l.status===FILTER);
+  const q=SEARCH.trim().toLowerCase();
+  if(q) rows=rows.filter(l=>[l.business_name,l.contact_name,l.phone,l.address,l.industry,l.notes].filter(Boolean).join(' ').toLowerCase().includes(q));
+  if(!rows.length){ box.innerHTML='<div class="empty">No leads here yet.</div>'; return; }
+  rows.forEach(l=>box.appendChild(leadRow(l)));
+}
+
+/* ---- Log ---- */
+function renderLog(prefill){
+  prefill = prefill||{};
+  const s=$('#s-log');
+  s.innerHTML = `
+    <div class="card">
+      <div class="field"><label>Business name</label><input id="f_business" value="${esc(prefill.business_name||'')}" placeholder="ABC Roofing"/></div>
+      <div class="field"><label>Owner / contact</label><input id="f_contact" placeholder="First name"/></div>
+      <div class="row" style="gap:10px">
+        <div class="field" style="flex:1"><label>Phone</label><input id="f_phone" type="tel" inputmode="tel"/></div>
+        <div class="field" style="flex:1"><label>Industry</label><input id="f_industry" placeholder="HVAC"/></div>
+      </div>
+      <div class="field"><label>Address</label><input id="f_address" placeholder="Street, City"/></div>
+      <div class="field"><label>Status</label>
+        <select id="f_status">${STATUS.map(x=>`<option value="${x}">${STATUS_LABEL[x]}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="f_notes" rows="3" placeholder="What happened at the door"></textarea></div>
+      <div class="recbar"><button class="btn ghost sm" id="logRec">Record a voice note</button><span id="logRecState" style="font-size:12px;color:var(--muted)"></span></div>
+      <label style="display:flex;align-items:center;gap:9px;text-transform:none;font-size:13.5px;color:var(--ink);font-weight:600;margin:6px 0 14px"><input type="checkbox" id="f_geo" checked style="width:auto"/> Pin my current location</label>
+      <button class="btn" id="saveLead">Save lead</button>
+    </div>`;
+  wireRecorder($('#logRec'), $('#logRecState'), null, (txt)=>{ const n=$('#f_notes'); n.value=(n.value?n.value+'\n':'')+txt; });
+  $('#saveLead').onclick=saveNewLead;
+}
+async function saveNewLead(){
+  const btn=$('#saveLead');
+  const body={
+    business_name:$('#f_business').value.trim(), contact_name:$('#f_contact').value.trim(),
+    phone:$('#f_phone').value.trim(), industry:$('#f_industry').value.trim(),
+    address:$('#f_address').value.trim(), status:$('#f_status').value, notes:$('#f_notes').value.trim(), source:'walk-in',
+  };
+  if(!body.business_name && !body.contact_name){ toast('Add a business or contact name'); return; }
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  try{
+    if($('#f_geo').checked){ const p=await getPos().catch(()=>null); if(p){ body.lat=p.coords.latitude; body.lng=p.coords.longitude; } }
+    const lead=await api('/api/rep-leads',{method:'POST',body:JSON.stringify(body)});
+    LEADS.unshift(lead); toast('Lead saved'); switchTab('leads');
+  }catch(ex){ toast(ex.message); }
+  btn.disabled=false; btn.textContent='Save lead';
+}
+
+/* ---- Lead detail sheet ---- */
+function openLead(id){
+  const l=LEADS.find(x=>x.id===id); if(!l) return;
+  $('#sheetTitle').textContent = l.business_name||l.contact_name||'Lead';
+  const b=$('#sheetBody');
+  const tel=(l.phone||'').replace(/[^0-9+]/g,'');
+  b.innerHTML = `
+    <div class="quickact">
+      <a href="${tel?('tel:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Call</a>
+      <a href="${tel?('sms:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Text</a>
+    </div>
+    <div class="statuses" id="dStatus">${STATUS.map(x=>`<button data-s="${x}" class="${l.status===x?'on '+x:''}" ${l.status===x?('style="background:var(--'+statusVar(x)+')"'):''}>${STATUS_LABEL[x]}</button>`).join('')}</div>
+    <div class="field" style="margin-top:14px"><label>Contact</label><input id="d_contact" value="${esc(l.contact_name||'')}"/></div>
+    <div class="row" style="gap:10px"><div class="field" style="flex:1"><label>Phone</label><input id="d_phone" type="tel" value="${esc(l.phone||'')}"/></div><div class="field" style="flex:1"><label>Industry</label><input id="d_industry" value="${esc(l.industry||'')}"/></div></div>
+    <div class="field"><label>Address</label><input id="d_address" value="${esc(l.address||'')}"/></div>
+    <div class="field"><label>Next follow-up</label><input id="d_next" type="date" value="${l.next_action_at?String(l.next_action_at).slice(0,10):''}"/></div>
+    <div class="field"><label>Notes</label><textarea id="d_notes" rows="5">${esc(l.notes||'')}</textarea></div>
+    <div class="recbar"><button class="btn ghost sm" id="dRec">Record a voice note</button><span id="dRecState" style="font-size:12px;color:var(--muted)"></span></div>
+    <button class="btn" id="dSave">Save changes</button>
+    <div style="height:10px"></div>
+    <button class="btn ghost" id="dDelete" style="color:var(--red)">Delete lead</button>
+    <div style="height:20px"></div>`;
+  b.querySelectorAll('#dStatus button').forEach(btn=>btn.onclick=async()=>{
+    const st=btn.dataset.s;
+    try{ const up=await api('/api/rep-leads',{method:'PATCH',body:JSON.stringify({id:l.id,status:st})}); mergeLead(up); openLead(l.id); toast('Marked '+STATUS_LABEL[st]); }catch(ex){ toast(ex.message); }
+  });
+  wireRecorder($('#dRec'), $('#dRecState'), l.id, (txt)=>{ const n=$('#d_notes'); n.value=(n.value?n.value+'\n':'')+txt; });
+  $('#dSave').onclick=async()=>{
+    const btn=$('#dSave'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+    try{
+      const up=await api('/api/rep-leads',{method:'PATCH',body:JSON.stringify({id:l.id,contact_name:$('#d_contact').value.trim(),phone:$('#d_phone').value.trim(),industry:$('#d_industry').value.trim(),address:$('#d_address').value.trim(),notes:$('#d_notes').value.trim(),next_action_at:$('#d_next').value||null})});
+      mergeLead(up); toast('Saved'); closeSheet();
+    }catch(ex){ toast(ex.message); }
+    btn.disabled=false; btn.textContent='Save changes';
+  };
+  $('#dDelete').onclick=async()=>{ if(!confirm('Delete this lead?')) return; try{ await api('/api/rep-leads',{method:'DELETE',body:JSON.stringify({id:l.id})}); LEADS=LEADS.filter(x=>x.id!==l.id); toast('Deleted'); closeSheet(); refreshCurrent(); }catch(ex){ toast(ex.message); } };
+  $('#sheet').classList.add('on');
+}
+function statusVar(s){ return ({new:'muted',attempted:'amber',contacted:'blue',booked:'green',callback:'purple',not_interested:'muted',won:'green',lost:'red'})[s]||'muted'; }
+function closeSheet(){ $('#sheet').classList.remove('on'); refreshCurrent(); }
+$('#sheetClose').onclick=closeSheet;
+function mergeLead(up){ const i=LEADS.findIndex(x=>x.id===up.id); if(i>=0) LEADS[i]=up; else LEADS.unshift(up); }
+function refreshCurrent(){ const on=document.querySelector('.tab.on'); if(on) switchTab(on.dataset.tab); }
+
+/* ---- Recorder + Deepgram transcription ---- */
+function wireRecorder(btn, state, leadId, onText){
+  let rec=null, chunks=[], stream=null, t0=0;
+  btn.onclick=async()=>{
+    if(rec && rec.state==='recording'){ rec.stop(); return; }
+    if(!navigator.mediaDevices || !window.MediaRecorder){ toast('Recording not supported on this browser'); return; }
+    try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }catch(ex){ toast('Microphone blocked'); return; }
+    chunks=[]; rec=new MediaRecorder(stream); t0=Date.now();
+    rec.ondataavailable=(e)=>{ if(e.data.size) chunks.push(e.data); };
+    rec.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      btn.classList.remove('rec'); btn.textContent='Record a voice note';
+      const blob=new Blob(chunks,{type:(chunks[0]&&chunks[0].type)||'audio/webm'});
+      const dur=Math.round((Date.now()-t0)/1000);
+      state.innerHTML='<span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span> Transcribing...';
+      try{
+        const dataUrl=await blobToDataUrl(blob);
+        const r=await api('/api/rep-transcribe',{method:'POST',body:JSON.stringify({audio:dataUrl,lead_id:leadId,duration:dur})});
+        state.textContent='';
+        if(r.transcript && r.transcript.trim()){ onText(r.transcript.trim()); toast('Voice note added'); }
+        else toast('Nothing caught, try again');
+      }catch(ex){ state.textContent=''; toast(ex.message); }
+    };
+    rec.start();
+    btn.classList.add('rec'); btn.innerHTML='Stop &amp; save'; state.innerHTML='<span class="recbar" style="margin:0"><span class="dot"></span> Recording</span>';
+  };
+}
+function blobToDataUrl(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(blob); }); }
+
+/* ---- Map (Leaflet) ---- */
+function getPos(){ return new Promise((res,rej)=>{ if(!navigator.geolocation) return rej(new Error('No GPS')); navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true,timeout:8000,maximumAge:30000}); }); }
+function initMap(){
+  if(typeof L==='undefined'){ setTimeout(initMap,300); return; }
+  if(!map){
+    map=L.map('map',{zoomControl:true,attributionControl:false}).setView([39.5,-98.35],4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+    markers=L.layerGroup().addTo(map);
+    getPos().then(p=>{ lastPos=p; map.setView([p.coords.latitude,p.coords.longitude],14); drawMe(p); }).catch(()=>{});
+  }
+  drawPins();
+  setTimeout(()=>map.invalidateSize(),120);
+}
+function statusColor(s){ return ({new:'#7c7d89',attempted:'#c98a12',contacted:'#2f6bd6',booked:'#3f8f2a',callback:'#7a5bd0',not_interested:'#9aa',won:'#186b1e',lost:'#d1483a'})[s]||'#7c7d89'; }
+function drawPins(){
+  if(!markers) return; markers.clearLayers(); const pts=[];
+  LEADS.filter(l=>l.lat!=null&&l.lng!=null).forEach(l=>{
+    const mk=L.circleMarker([l.lat,l.lng],{radius:9,color:'#fff',weight:2,fillColor:statusColor(l.status),fillOpacity:1});
+    mk.on('click',()=>openLead(l.id));
+    mk.bindTooltip((l.business_name||l.contact_name||'Lead'),{direction:'top'});
+    markers.addLayer(mk); pts.push([l.lat,l.lng]);
+  });
+  if(pts.length && !lastPos){ try{ map.fitBounds(pts,{padding:[40,40],maxZoom:15}); }catch(e){} }
+}
+function drawMe(p){ if(meMarker) map.removeLayer(meMarker); meMarker=L.circleMarker([p.coords.latitude,p.coords.longitude],{radius:7,color:'#fff',weight:3,fillColor:'#2f6bd6',fillOpacity:1}).addTo(map); }
+$('#locateBtn').onclick=async()=>{ try{ const p=await getPos(); lastPos=p; map.setView([p.coords.latitude,p.coords.longitude],15); drawMe(p); }catch(ex){ toast('Location blocked'); } };
+$('#addHereBtn').onclick=()=>switchTab('log');
+
+/* ---- Me ---- */
+function renderMe(){
+  const s=$('#s-me');
+  const total=LEADS.length, booked=LEADS.filter(l=>l.status==='booked'||l.status==='won').length, today=LEADS.filter(l=>isToday(l.created_at)).length;
+  s.innerHTML=`
+    <div class="card">
+      <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em">${esc(ME.name||'')}</div>
+      <div style="color:var(--muted);font-size:14px;margin-top:2px">${esc(ME.email||'')}${ME.city?(' · '+esc(ME.city)):''}</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat"><div class="n">${total}</div><div class="l">Total leads</div></div>
+      <div class="stat"><div class="n">${booked}</div><div class="l">Booked / won</div></div>
+      <div class="stat"><div class="n">${today}</div><div class="l">Logged today</div></div>
+    </div>
+    <button class="btn ghost" id="meRefresh">Refresh</button>
+    <div style="height:10px"></div>
+    <button class="btn ghost" id="meOut" style="color:var(--red)">Sign out</button>`;
+  $('#meRefresh').onclick=async()=>{ await loadLeads(); toast('Up to date'); renderMe(); };
+  $('#meOut').onclick=logout;
+}
+
+/* ---- start ---- */
+if(TOKEN) boot(); else { $('#login').style.display='flex'; }
+</script>
+</body>
+</html>
