@@ -376,6 +376,7 @@ const TMIAdmin = (() => {
         ]},
         { label: 'Partners', items: [
           { page:'city-leads', label:'Applications', icon:I.cityPin, href:'/admin-city-leads' },
+          { page:'city-team',  label:'City Team',    icon:I.cityPin, href:'/admin-cityleads-team' },
         ]},
         { label: 'System', items: [
           { page:'system', label:'System', icon:I.command },

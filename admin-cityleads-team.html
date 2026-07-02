@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>City Team — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">City Team</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openCreate()">+ Add rep</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>City Leads Team</h1>
+        <span class="filter-count" id="rep-count"></span>
+      </div>
+      <p style="font-size:13.5px;color:var(--muted);line-height:1.6;margin:-6px 0 20px;max-width:70ch;">
+        These are the field reps who log in to <b>cityleads.tmitechai.com</b> on their phone to work their walk-ins, map, and leads. Add a rep here to give them access. Each rep only sees their own leads.
+      </p>
+
+      <!-- create form -->
+      <div class="card" id="create-card" style="display:none;margin-bottom:20px;">
+        <div class="panel-sec-label" style="margin-bottom:12px;">New city-lead rep</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:640px;">
+          <div><label class="form-label">Name</label><input class="form-input" id="c-name" placeholder="Jane Doe"/></div>
+          <div><label class="form-label">City / metro</label><input class="form-input" id="c-city" placeholder="Lafayette, LA"/></div>
+          <div><label class="form-label">Email (their login)</label><input class="form-input" id="c-email" type="email" placeholder="jane@tmitechai.com"/></div>
+          <div><label class="form-label">Phone</label><input class="form-input" id="c-phone" type="tel" placeholder="(337) 555-0100"/></div>
+          <div><label class="form-label">Temp password</label><input class="form-input" id="c-pass" placeholder="8+ characters"/></div>
+          <div style="display:flex;align-items:flex-end;"><button class="btn btn-ghost btn-sm" onclick="genPass()" type="button">Generate password</button></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn btn-primary btn-sm" onclick="createRep()">Create rep</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeCreate()">Cancel</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>City</th><th>Email</th><th>Leads</th><th>Booked</th><th>Status</th><th></th></tr></thead>
+            <tbody id="rep-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- rep panel: their leads + actions -->
+<div class="panel-overlay" id="rep-panel">
+  <div class="panel-bg" onclick="TMIAdmin.closePanel('rep-panel')"></div>
+  <div class="panel">
+    <div class="panel-hd">
+      <h2 class="panel-title" id="rp-name">Rep</h2>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-sm" onclick="resetPass()">Reset password</button>
+        <button class="btn btn-ghost btn-sm" id="rp-toggle" onclick="toggleStatus()">Disable</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="detail-grid" id="rp-details"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label" style="margin-bottom:10px;">Their leads</div>
+      <div id="rp-leads"></div>
+      <div class="panel-sep"></div>
+      <button class="btn btn-ghost btn-sm" style="color:var(--danger,#d1483a)" onclick="deleteRep()">Remove rep</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('city-team');
+
+let reps = [], current = null;
+const esc = (s) => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const SL = {new:'New',attempted:'Attempted',contacted:'Contacted',booked:'Booked',callback:'Callback',not_interested:'Not interested',won:'Won',lost:'Lost'};
+
+async function load(){
+  reps = await TMIAdmin.api('/api/reps-admin').catch(()=>[]) || [];
+  document.getElementById('rep-count').textContent = reps.length + (reps.length===1?' rep':' reps');
+  const tb = document.getElementById('rep-tbody');
+  if(!reps.length){ tb.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
+  tb.innerHTML = reps.map(r=>`
+    <tr style="cursor:pointer" onclick="openRep('${r.id}')">
+      <td><b>${esc(r.name||'—')}</b></td>
+      <td>${esc(r.city||'—')}</td>
+      <td>${esc(r.email)}</td>
+      <td>${r.lead_count||0}</td>
+      <td>${r.booked_count||0}</td>
+      <td>${r.status==='disabled'
+        ? '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#e6e6ea;color:#55576a;">Disabled</span>'
+        : '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#e9f7d0;color:#3f6d12;">Active</span>'}</td>
+      <td style="text-align:right;color:var(--muted)">&rsaquo;</td>
+    </tr>`).join('');
+}
+
+function openCreate(){ document.getElementById('create-card').style.display='block'; }
+function closeCreate(){ document.getElementById('create-card').style.display='none'; ['c-name','c-city','c-email','c-phone','c-pass'].forEach(i=>document.getElementById(i).value=''); }
+function genPass(){ const w=['Field','Route','Door','City','North','Bold','Prime','Solid']; const p=w[Math.floor(Date.now()%w.length)]+'-'+Math.floor(1000+Date.now()%9000); document.getElementById('c-pass').value=p; }
+
+async function createRep(){
+  const body = {
+    name: document.getElementById('c-name').value.trim(),
+    city: document.getElementById('c-city').value.trim(),
+    email: document.getElementById('c-email').value.trim(),
+    phone: document.getElementById('c-phone').value.trim(),
+    password: document.getElementById('c-pass').value,
+  };
+  if(!body.email || !body.password){ TMIAdmin.toast('Email and password required'); return; }
+  try{
+    await TMIAdmin.api('/api/reps-admin','POST',body);
+    TMIAdmin.toast('Rep created. Share their email + temp password.');
+    closeCreate(); load();
+  }catch(ex){ TMIAdmin.toast(ex.message||'Could not create rep'); }
+}
+
+async function openRep(id){
+  current = reps.find(r=>r.id===id); if(!current) return;
+  document.getElementById('rp-name').textContent = current.name || current.email;
+  document.getElementById('rp-details').innerHTML = `
+    <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">${esc(current.email)}</span></div>
+    <div class="detail-item"><span class="detail-label">City</span><span class="detail-value">${esc(current.city||'—')}</span></div>
+    <div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value">${esc(current.phone||'—')}</span></div>
+    <div class="detail-item"><span class="detail-label">Leads</span><span class="detail-value">${current.lead_count||0} (${current.booked_count||0} booked)</span></div>`;
+  document.getElementById('rp-toggle').textContent = current.status==='disabled' ? 'Enable' : 'Disable';
+  document.getElementById('rp-leads').innerHTML = '<div style="color:var(--muted);font-size:13px;">Loading…</div>';
+  TMIAdmin.openPanel('rep-panel');
+  const leads = await TMIAdmin.api('/api/reps-admin?leads='+encodeURIComponent(id)).catch(()=>[]) || [];
+  const box = document.getElementById('rp-leads');
+  if(!leads.length){ box.innerHTML = '<div style="color:var(--muted);font-size:13px;">No leads logged yet.</div>'; return; }
+  box.innerHTML = leads.slice(0,50).map(l=>`
+    <div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);">
+      <div style="min-width:0;"><div style="font-weight:600;font-size:14px;">${esc(l.business_name||l.contact_name||'Untitled')}</div><div style="font-size:12px;color:var(--muted);">${esc([l.industry,l.phone].filter(Boolean).join(' · '))}</div></div>
+      <span style="flex:none;align-self:center;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--bg-alt,#f0f0f2);color:var(--ink-2,#55576a);">${esc(SL[l.status]||l.status)}</span>
+    </div>`).join('');
+}
+
+async function resetPass(){
+  if(!current) return;
+  const p = prompt('New temporary password for '+(current.name||current.email)+' (8+ chars):');
+  if(!p) return;
+  try{ await TMIAdmin.api('/api/reps-admin','PATCH',{id:current.id,password:p}); TMIAdmin.toast('Password reset. Share it with them.'); }
+  catch(ex){ TMIAdmin.toast(ex.message); }
+}
+async function toggleStatus(){
+  if(!current) return;
+  const next = current.status==='disabled' ? 'active' : 'disabled';
+  try{ await TMIAdmin.api('/api/reps-admin','PATCH',{id:current.id,status:next}); TMIAdmin.toast(next==='disabled'?'Rep disabled':'Rep enabled'); TMIAdmin.closePanel('rep-panel'); load(); }
+  catch(ex){ TMIAdmin.toast(ex.message); }
+}
+async function deleteRep(){
+  if(!current) return;
+  if(!confirm('Remove '+(current.name||current.email)+'? Their leads stay in the database.')) return;
+  try{ await TMIAdmin.api('/api/reps-admin','DELETE',{id:current.id}); TMIAdmin.toast('Rep removed'); TMIAdmin.closePanel('rep-panel'); load(); }
+  catch(ex){ TMIAdmin.toast(ex.message); }
+}
+
+load();
+</script>
+</body>
+</html>
