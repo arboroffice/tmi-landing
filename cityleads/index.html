@@ -184,7 +184,8 @@
 const API = '';
 const TOKEN_KEY = 'tmi_rep_token';
 let TOKEN = localStorage.getItem(TOKEN_KEY) || '';
-let ME = null, LEADS = [], FILTER = 'all', SEARCH = '';
+let ME = null, LEADS = [], FILTER = 'all', SEARCH = '', SORT = 'recent';
+function haversine(la1,lo1,la2,lo2){ const R=3958.8,toR=x=>x*Math.PI/180; const dLa=toR(la2-la1),dLo=toR(lo2-lo1); const a=Math.sin(dLa/2)**2+Math.cos(toR(la1))*Math.cos(toR(la2))*Math.sin(dLo/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
 let map = null, markers = null, meMarker = null, lastPos = null;
 
 const $ = (s, r=document) => r.querySelector(s);
@@ -278,7 +279,9 @@ function renderToday(){
 
 /* ---- Leads ---- */
 function leadRow(l){
-  const node = el(`<div class="lead"><div class="body"><div class="name">${esc(l.business_name||l.contact_name||'Untitled')}</div><div class="sub">${esc([l.industry,l.contact_name&&l.business_name?l.contact_name:'',l.phone].filter(Boolean).join(' · ')||'Tap to open')}</div></div><span class="chip ${l.status}">${STATUS_LABEL[l.status]||l.status}</span></div>`);
+  const dist=(l._dist!=null&&isFinite(l._dist))?l._dist.toFixed(1)+' mi':'';
+  const sub=[dist,l.industry,(l.contact_name&&l.business_name?l.contact_name:''),l.phone].filter(Boolean).join(' · ')||'Tap to open';
+  const node = el(`<div class="lead"><div class="body"><div class="name">${esc(l.business_name||l.contact_name||'Untitled')}</div><div class="sub">${esc(sub)}</div></div><span class="chip ${l.status}">${STATUS_LABEL[l.status]||l.status}</span></div>`);
   node.addEventListener('click',()=>openLead(l.id));
   return node;
 }
@@ -286,11 +289,14 @@ function renderLeads(){
   const s=$('#s-leads');
   s.innerHTML = `
     <input class="search" id="leadSearch" type="search" placeholder="Search leads" value="${esc(SEARCH)}"/>
+    <div class="filters" style="padding-bottom:4px"><button id="srtR" class="${SORT==='recent'?'on':''}">Recent</button><button id="srtN" class="${SORT==='near'?'on':''}">Nearest</button></div>
     <div class="filters" id="leadFilters"></div>
     <div id="leadList"></div>`;
   const fils=['all','new','attempted','contacted','callback','booked','won','not_interested','lost'];
   const fbox=$('#leadFilters');
   fils.forEach(f=>{ const b=el(`<button class="${f===FILTER?'on':''}">${f==='all'?'All':(STATUS_LABEL[f]||f)}</button>`); b.onclick=()=>{FILTER=f; renderLeads();}; fbox.appendChild(b); });
+  $('#srtR').onclick=()=>{ SORT='recent'; renderLeads(); };
+  $('#srtN').onclick=async()=>{ if(!lastPos){ try{ lastPos=await getPos(); }catch(e){ toast('Turn on location to sort by nearest'); return; } } SORT='near'; renderLeads(); };
   $('#leadSearch').addEventListener('input',(e)=>{ SEARCH=e.target.value; drawLeadList(); });
   drawLeadList();
 }
@@ -300,6 +306,10 @@ function drawLeadList(){
   if(FILTER!=='all') rows=rows.filter(l=>l.status===FILTER);
   const q=SEARCH.trim().toLowerCase();
   if(q) rows=rows.filter(l=>[l.business_name,l.contact_name,l.phone,l.address,l.industry,l.notes].filter(Boolean).join(' ').toLowerCase().includes(q));
+  if(SORT==='near' && lastPos){
+    rows.forEach(l=>{ l._dist=(l.lat!=null&&l.lng!=null)?haversine(lastPos.coords.latitude,lastPos.coords.longitude,l.lat,l.lng):Infinity; });
+    rows.sort((a,b)=>(a._dist)-(b._dist));
+  } else { rows.forEach(l=>{ delete l._dist; }); }
   if(!rows.length){ box.innerHTML='<div class="empty">No leads here yet.</div>'; return; }
   rows.forEach(l=>box.appendChild(leadRow(l)));
 }

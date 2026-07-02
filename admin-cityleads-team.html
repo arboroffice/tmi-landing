@@ -101,6 +101,7 @@ const SL = {new:'New',attempted:'Attempted',contacted:'Contacted',booked:'Booked
 
 async function load(){
   reps = await TMIAdmin.api('/api/reps-admin').catch(()=>[]) || [];
+  reps.sort((a,b)=>(b.today_count||0)-(a.today_count||0)||(b.booked_count||0)-(a.booked_count||0)||(b.lead_count||0)-(a.lead_count||0));
   document.getElementById('rep-count').textContent = reps.length + (reps.length===1?' rep':' reps');
   const tb = document.getElementById('rep-tbody');
   const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.booked_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
