@@ -26,6 +26,8 @@
         These are the field reps who log in to <b>cityleads.tmitechai.com</b> on their phone to work their walk-ins, map, and leads. Add a rep here to give them access. Each rep only sees their own leads.
       </p>
 
+      <div id="team-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
+
       <!-- create form -->
       <div class="card" id="create-card" style="display:none;margin-bottom:20px;">
         <div class="panel-sec-label" style="margin-bottom:12px;">New city-lead rep</div>
@@ -46,7 +48,7 @@
       <div class="card">
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Name</th><th>City</th><th>Email</th><th>Leads</th><th>Booked</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Name</th><th>City</th><th>Email</th><th>Leads</th><th>Booked</th><th>Today</th><th>Status</th><th></th></tr></thead>
             <tbody id="rep-tbody"></tbody>
           </table>
         </div>
@@ -68,6 +70,16 @@
     </div>
     <div class="panel-body">
       <div class="detail-grid" id="rp-details"></div>
+      <div class="panel-sep"></div>
+      <div class="panel-sec-label" style="margin-bottom:10px;">Assign a lead to this rep</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <input class="form-input" id="al-business" placeholder="Business name"/>
+        <input class="form-input" id="al-contact" placeholder="Contact"/>
+        <input class="form-input" id="al-phone" type="tel" placeholder="Phone"/>
+        <input class="form-input" id="al-industry" placeholder="Industry"/>
+      </div>
+      <input class="form-input" id="al-address" placeholder="Address (optional)" style="margin-bottom:8px;"/>
+      <button class="btn btn-primary btn-sm" onclick="assignLead()">Add lead to their queue</button>
       <div class="panel-sep"></div>
       <div class="panel-sec-label" style="margin-bottom:10px;">Their leads</div>
       <div id="rp-leads"></div>
@@ -91,7 +103,10 @@ async function load(){
   reps = await TMIAdmin.api('/api/reps-admin').catch(()=>[]) || [];
   document.getElementById('rep-count').textContent = reps.length + (reps.length===1?' rep':' reps');
   const tb = document.getElementById('rep-tbody');
-  if(!reps.length){ tb.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
+  const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.booked_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
+  const stat=(n,l)=>`<div class="card" style="text-align:center;padding:16px 12px;margin:0;"><div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;line-height:1;">${n}</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;">${l}</div></div>`;
+  document.getElementById('team-stats').innerHTML = stat(reps.length,'Reps')+stat(tl,'Total leads')+stat(tb2,'Booked / won')+stat(td,'Logged today');
+  if(!reps.length){ tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
   tb.innerHTML = reps.map(r=>`
     <tr style="cursor:pointer" onclick="openRep('${r.id}')">
       <td><b>${esc(r.name||'—')}</b></td>
@@ -99,6 +114,7 @@ async function load(){
       <td>${esc(r.email)}</td>
       <td>${r.lead_count||0}</td>
       <td>${r.booked_count||0}</td>
+      <td>${r.today_count||0}</td>
       <td>${r.status==='disabled'
         ? '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#e6e6ea;color:#55576a;">Disabled</span>'
         : '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#e9f7d0;color:#3f6d12;">Active</span>'}</td>
@@ -145,6 +161,23 @@ async function openRep(id){
       <div style="min-width:0;"><div style="font-weight:600;font-size:14px;">${esc(l.business_name||l.contact_name||'Untitled')}</div><div style="font-size:12px;color:var(--muted);">${esc([l.industry,l.phone].filter(Boolean).join(' · '))}</div></div>
       <span style="flex:none;align-self:center;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--bg-alt,#f0f0f2);color:var(--ink-2,#55576a);">${esc(SL[l.status]||l.status)}</span>
     </div>`).join('');
+}
+
+async function assignLead(){
+  if(!current) return;
+  const body={ action:'add_lead', rep_id:current.id,
+    business_name:document.getElementById('al-business').value.trim(),
+    contact_name:document.getElementById('al-contact').value.trim(),
+    phone:document.getElementById('al-phone').value.trim(),
+    industry:document.getElementById('al-industry').value.trim(),
+    address:document.getElementById('al-address').value.trim() };
+  if(!body.business_name && !body.contact_name){ TMIAdmin.toast('Add a business or contact name'); return; }
+  try{
+    await TMIAdmin.api('/api/reps-admin','POST',body);
+    ['al-business','al-contact','al-phone','al-industry','al-address'].forEach(i=>document.getElementById(i).value='');
+    TMIAdmin.toast('Lead added to their queue');
+    openRep(current.id); load();
+  }catch(ex){ TMIAdmin.toast(ex.message); }
 }
 
 async function resetPass(){

@@ -9,6 +9,7 @@ const { cors, requireAuth } = require('./_auth');
 const { hashPassword } = require('./_rep-auth');
 
 const clean = (r) => ({ id: r.id, name: r.name, email: r.email, city: r.city, phone: r.phone, status: r.status || 'active', created_at: r.created_at });
+const isToday = (iso) => { if (!iso) return false; const d = new Date(iso), n = new Date(); return d.toDateString() === n.toDateString(); };
 
 module.exports = async (req, res) => {
   cors(res);
@@ -23,16 +24,37 @@ module.exports = async (req, res) => {
       }
       const reps = await db.list('reps', { order: 'created_at', ascending: false, limit: 200 });
       const all = await db.list('rep_leads', { limit: 5000 }).catch(() => []);
-      const counts = {}, booked = {};
+      const counts = {}, booked = {}, today = {};
       (all || []).forEach((l) => {
         counts[l.rep_id] = (counts[l.rep_id] || 0) + 1;
         if (l.status === 'booked' || l.status === 'won') booked[l.rep_id] = (booked[l.rep_id] || 0) + 1;
+        if (isToday(l.created_at)) today[l.rep_id] = (today[l.rep_id] || 0) + 1;
       });
-      return res.json((reps || []).map((r) => Object.assign(clean(r), { lead_count: counts[r.id] || 0, booked_count: booked[r.id] || 0 })));
+      return res.json((reps || []).map((r) => Object.assign(clean(r), {
+        lead_count: counts[r.id] || 0, booked_count: booked[r.id] || 0, today_count: today[r.id] || 0,
+      })));
     }
 
     if (req.method === 'POST') {
-      const { name, email, password, city, phone } = req.body || {};
+      const body = req.body || {};
+      // Assign / seed a lead to a rep's field queue.
+      if (body.action === 'add_lead') {
+        const { rep_id } = body;
+        if (!rep_id) return res.status(400).json({ error: 'rep_id required' });
+        if (!body.business_name && !body.contact_name) return res.status(400).json({ error: 'A business or contact name is required' });
+        const rep = await db.getById('reps', rep_id);
+        if (!rep) return res.status(404).json({ error: 'Rep not found' });
+        const now = new Date().toISOString();
+        const lead = await db.insert('rep_leads', {
+          rep_id, business_name: body.business_name || null, contact_name: body.contact_name || null,
+          phone: body.phone || null, email: body.email || null, address: body.address || null,
+          industry: body.industry || null, lat: null, lng: null,
+          status: 'new', notes: body.notes || null, next_action_at: null,
+          source: 'assigned', created_at: now, updated_at: now, visited_at: null,
+        });
+        return res.status(201).json(lead);
+      }
+      const { name, email, password, city, phone } = body;
       if (!email || !email.includes('@') || !password || String(password).length < 8) {
         return res.status(400).json({ error: 'Email and an 8+ character password are required' });
       }
