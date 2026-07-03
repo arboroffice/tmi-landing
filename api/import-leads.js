@@ -7,6 +7,7 @@ const path = require('path');
 // Idempotent (upsert by email). Powers the "Import list" button on the Campaign tab.
 const LISTS = {
   'lafayette-oil-gas-manufacturing': 'agents/gtm/data/lafayette-oil-gas-manufacturing.csv',
+  'louisiana-named-decision-makers': 'agents/gtm/data/louisiana-named-decision-makers.csv',
 };
 
 module.exports = async function handler(req, res) {
