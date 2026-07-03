@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <script>window.__gmapsReady=false;function __gmapsInit(){window.__gmapsReady=true;}</script>
-<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvjUKge3a6hEmh9BRZ5Ez1JLyWkR_Fyww&libraries=geometry&callback=__gmapsInit"></script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvjUKge3a6hEmh9BRZ5Ez1JLyWkR_Fyww&libraries=geometry,places&callback=__gmapsInit"></script>
 <style>
   :root{
     --bg:#f4f5ef;--card:#ffffff;--ink:#0a0b14;--ink-2:#454654;--muted:#7c7d89;
@@ -184,14 +184,17 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
 <script>
   firebase.initializeApp({
     apiKey: "AIzaSyD3Kzn1uGfM9Wbe2ufazxtNURPTN4k-kAg",
     authDomain: "tmitech-e264c.firebaseapp.com",
     projectId: "tmitech-e264c",
-    appId: "1:284870734681:web:a203336968a7127e149248"
+    appId: "1:284870734681:web:a203336968a7127e149248",
+    measurementId: "G-1PT4VHBYLK"
   });
   window.fbAuth = firebase.auth();
+  try { firebase.analytics(); } catch(e) {}
 </script>
 
 <script>
@@ -408,8 +411,10 @@ function openLead(id){
     <div class="quickact">
       <a href="${tel?('tel:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Call</a>
       <a href="${tel?('sms:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Text</a>
+      <a href="#" id="dEnrich">Enrich</a>
     </div>
     <a class="btn" href="${bookUrl}" target="_blank" rel="noopener" style="text-decoration:none;margin-top:2px">Book the audit &rarr;</a>
+    <div id="dTemplates" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px"></div>
     ${(isWarm(l)||l.context)?`<div style="margin-top:10px;background:#E4FF97;color:#0a0b14;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:700;">★ ${esc(l.priority==='hot'?'Hot lead':'Warm lead')}${l.context?(' · '+esc(l.context)):''}${l.email?('<div style="font-weight:500;margin-top:3px;">'+esc(l.email)+'</div>'):''}</div>`:''}
     <div class="statuses" id="dStatus">${STATUS.map(x=>`<button data-s="${x}" class="${l.status===x?'on '+x:''}" ${l.status===x?('style="background:var(--'+statusVar(x)+')"'):''}>${STATUS_LABEL[x]}</button>`).join('')}</div>
     <div class="field" style="margin-top:14px"><label>Contact</label><input id="d_contact" value="${esc(l.contact_name||'')}"/></div>
@@ -435,6 +440,20 @@ function openLead(id){
     loadInteractions(l.id);
   });
   loadInteractions(l.id);
+  // Quick-text templates + one-tap enrich
+  const rep=((ME&&ME.name)||'').split(' ')[0]||'the TMI team';
+  const nm=((l.contact_name||'').split(' ')[0])||'there';
+  const co=l.business_name||'your company';
+  const ind=l.industry||'operations';
+  const tmpls=[
+    ['Intro', 'Hi '+nm+', this is '+rep+' with TMI. We help '+ind+' run tighter with less chaos and full visibility. Open to a quick free audit of '+co+'?'],
+    ['Follow up', 'Following up '+nm+'. Still glad to run a free Business Intelligence Audit for '+co+'. 30 minutes, no pitch. Does this week work?'],
+    ['Send link', 'Thanks '+nm+'. Grab a time here and we will walk your numbers: '+bookUrl],
+  ];
+  const tbox=$('#dTemplates');
+  if(tbox){ if(!tel){ tbox.innerHTML='<span style="font-size:12px;color:var(--muted)">Add a phone to text</span>'; }
+    else tmpls.forEach(([lab,body])=>{ const bt=el('<button class="btn ghost sm" style="flex:none">'+lab+'</button>'); bt.onclick=()=>{ location.href='sms:'+tel+'?&body='+encodeURIComponent(body); }; tbox.appendChild(bt); }); }
+  const enr=$('#dEnrich'); if(enr) enr.onclick=(e)=>{ e.preventDefault(); enrichLead(l); };
   $('#dSave').onclick=async()=>{
     const btn=$('#dSave'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
     try{
@@ -497,6 +516,28 @@ async function loadInteractions(leadId){
       const body=x.summary||x.transcript||'';
       return '<div style="border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;background:var(--card)"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">'+oc+esc(when)+'</div><div style="font-size:13.5px;color:var(--ink);line-height:1.5">'+esc(body)+'</div>'+(x.next_step?('<div style="font-size:12.5px;color:var(--ink-2);margin-top:5px">Next: '+esc(x.next_step)+'</div>'):'')+'</div>';
     }).join('');
+}
+
+/* ---- On-the-spot enrichment (Google Places) ---- */
+function enrichLead(l){
+  if(typeof google==='undefined'||!google.maps||!google.maps.places){ toast('Enrichment still loading, try again'); return; }
+  toast('Looking up '+(l.business_name||'business')+'…');
+  const svc=new google.maps.places.PlacesService(document.createElement('div'));
+  const query=[l.business_name,l.address||l.industry,'Louisiana'].filter(Boolean).join(' ');
+  svc.textSearch({query},(results,status)=>{
+    if(status!=='OK'||!results||!results[0]){ toast('No public match found'); return; }
+    svc.getDetails({placeId:results[0].place_id,fields:['name','formatted_phone_number','international_phone_number','website','formatted_address','geometry']},(d,st)=>{
+      if(st!=='OK'||!d){ toast('No details found'); return; }
+      const patch={}; const ph=d.formatted_phone_number||d.international_phone_number;
+      if(ph && !l.phone) patch.phone=ph;
+      if(d.formatted_address && !l.address) patch.address=d.formatted_address;
+      if(d.geometry&&d.geometry.location){ patch.lat=d.geometry.location.lat(); patch.lng=d.geometry.location.lng(); }
+      if(d.website){ patch.notes=(l.notes?l.notes+'\n':'')+'Website: '+d.website; }
+      if(!Object.keys(patch).length){ toast('Nothing new to add'); return; }
+      patch.id=l.id;
+      api('/api/rep-leads',{method:'PATCH',body:JSON.stringify(patch)}).then(up=>{ mergeLead(up); openLead(l.id); toast('Enriched from Google'); }).catch(ex=>toast(ex.message));
+    });
+  });
 }
 
 /* ---- Map (Google Maps) ---- */
