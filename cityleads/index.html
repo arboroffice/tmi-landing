@@ -368,7 +368,7 @@ function renderLog(prefill){
   const s=$('#s-log');
   s.innerHTML = `
     <div class="card">
-      <div class="recbar" style="margin-top:0"><button class="btn ghost sm" id="speakLead">🎤 Speak a new lead</button><span id="speakState" style="font-size:12px;color:var(--muted)"></span></div>
+      <div class="recbar" style="margin-top:0;flex-wrap:wrap"><button class="btn ghost sm" id="speakLead">🎤 Speak a new lead</button><label class="btn ghost sm" style="cursor:pointer">📇 Scan card<input type="file" accept="image/*" capture="environment" id="scanInput" style="display:none"/></label><span id="speakState" style="font-size:12px;color:var(--muted)"></span></div>
       <div class="field"><label>Business name</label><input id="f_business" value="${esc(prefill.business_name||'')}" placeholder="ABC Roofing"/></div>
       <div class="field"><label>Owner / contact</label><input id="f_contact" placeholder="First name"/></div>
       <div class="row" style="gap:10px">
@@ -386,7 +386,23 @@ function renderLog(prefill){
     </div>`;
   wireRecorder($('#logRec'), $('#logRecState'), null, (r)=>{ const n=$('#f_notes'); const t=r.summary?('Recap: '+r.summary+(r.next_step?('\nNext: '+r.next_step):'')):(r.transcript||''); if(t) n.value=(n.value?n.value+'\n\n':'')+t; toast('Interaction captured'); });
   wireLeadDictation($('#speakLead'), $('#speakState'));
+  const si=$('#scanInput'); if(si) si.onchange=()=>scanCard(si);
   $('#saveLead').onclick=saveNewLead;
+}
+async function scanCard(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const state=$('#speakState'); state.innerHTML='<span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span> Reading the card…';
+  try{
+    const dataUrl=await downscaleImage(f,1400,0.85);
+    const r=await api('/api/rep-scan-card',{method:'POST',body:JSON.stringify({image:dataUrl})});
+    state.textContent=''; const L=r.fields||{};
+    const set=(id,v)=>{ const e=$(id); if(e&&v) e.value=v; };
+    set('#f_business',L.business_name); set('#f_contact',L.contact_name); set('#f_phone',L.phone); set('#f_industry',L.industry);
+    const extra=[L.title,L.email,L.website].filter(Boolean).join(' · ');
+    if(extra){ const n=$('#f_notes'); n.value=(n.value?n.value+'\n':'')+extra; }
+    toast(L.business_name?('Scanned: '+L.business_name):'Filled what I could read');
+  }catch(ex){ state.textContent=''; toast(ex.message||'Scan failed'); }
+  input.value='';
 }
 // Speak a lead: record -> transcribe -> AI extracts fields -> prefill the form.
 function wireLeadDictation(btn, state){
