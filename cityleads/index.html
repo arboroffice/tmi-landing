@@ -502,20 +502,32 @@ $('#addHereBtn').onclick=()=>switchTab('log');
 /* ---- Me ---- */
 function renderMe(){
   const s=$('#s-me');
-  const total=LEADS.length, booked=LEADS.filter(l=>l.status==='booked'||l.status==='won').length, today=LEADS.filter(l=>isToday(l.created_at)).length;
+  const total=LEADS.length;
+  const booked=LEADS.filter(l=>l.status==='booked'||l.status==='won').length;
+  const won=LEADS.filter(l=>l.status==='won').length;
+  const today=LEADS.filter(l=>isToday(l.created_at)).length;
+  const weekAgo=Date.now()-7*864e5;
+  const week=LEADS.filter(l=>l.created_at&&new Date(l.created_at).getTime()>=weekAgo).length;
+  const warmLeft=LEADS.filter(l=>isWarm(l)&&l.status==='new').length;
+  const conv=total?Math.round((booked/total)*100):0;
   s.innerHTML=`
     <div class="card">
       <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em">${esc(ME.name||'')}</div>
       <div style="color:var(--muted);font-size:14px;margin-top:2px">${esc(ME.email||'')}${ME.city?(' · '+esc(ME.city)):''}</div>
     </div>
+    ${warmLeft?`<div class="card" id="meWarm" style="background:#E4FF97;color:#0a0b14;font-weight:800;cursor:pointer;text-align:center;">★ ${warmLeft} warm lead${warmLeft===1?'':'s'} waiting — tap to work them</div>`:''}
     <div class="stat-grid">
+      <div class="stat"><div class="n">${today}</div><div class="l">Logged today</div></div>
+      <div class="stat"><div class="n">${week}</div><div class="l">This week</div></div>
       <div class="stat"><div class="n">${total}</div><div class="l">Total leads</div></div>
       <div class="stat"><div class="n">${booked}</div><div class="l">Booked / won</div></div>
-      <div class="stat"><div class="n">${today}</div><div class="l">Logged today</div></div>
+      <div class="stat"><div class="n">${won}</div><div class="l">Won</div></div>
+      <div class="stat"><div class="n">${conv}%</div><div class="l">Book rate</div></div>
     </div>
     <button class="btn ghost" id="meRefresh">Refresh</button>
     <div style="height:10px"></div>
     <button class="btn ghost" id="meOut" style="color:var(--red)">Sign out</button>`;
+  const w=$('#meWarm'); if(w) w.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
   $('#meRefresh').onclick=async()=>{ await loadLeads(); toast('Up to date'); renderMe(); };
   $('#meOut').onclick=logout;
 }
