@@ -20,14 +20,18 @@ module.exports = async (req, res) => {
     const cutoff = endToday.getTime();
 
     const leads = await db.list('rep_leads', { limit: 5000 }).catch(() => []);
-    const due = {};
+    const due = {}, warm = {};
     (leads || []).forEach((l) => {
-      if (!l.rep_id || !l.next_action_at || TERMINAL.has(l.status)) return;
-      const t = new Date(l.next_action_at).getTime();
-      if (Number.isFinite(t) && t <= cutoff) (due[l.rep_id] = due[l.rep_id] || []).push(l);
+      if (!l.rep_id || TERMINAL.has(l.status)) return;
+      if (l.next_action_at) {
+        const t = new Date(l.next_action_at).getTime();
+        if (Number.isFinite(t) && t <= cutoff) (due[l.rep_id] = due[l.rep_id] || []).push(l);
+      }
+      const isWarm = l.priority === 'warm' || l.priority === 'hot' || l.source === 'assigned';
+      if (isWarm && l.status === 'new') (warm[l.rep_id] = warm[l.rep_id] || []).push(l);
     });
 
-    const repIds = Object.keys(due);
+    const repIds = Array.from(new Set([...Object.keys(due), ...Object.keys(warm)]));
     if (!repIds.length) return res.json({ ok: true, sent: 0, reason: 'nothing due' });
 
     const canSms = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
@@ -38,10 +42,16 @@ module.exports = async (req, res) => {
       const rep = await db.getById('reps', rid).catch(() => null);
       if (!rep || rep.status === 'disabled') continue;
       const to = formatPhone(rep.phone);
-      const list = due[rid];
-      const names = list.slice(0, 3).map((l) => l.business_name || l.contact_name || 'a lead').join(', ');
+      const dueList = due[rid] || [], warmList = warm[rid] || [];
+      if (!dueList.length && !warmList.length) continue;
       const first = (rep.name || '').split(' ')[0];
-      const body = `Morning${first ? ' ' + first : ''}. You've got ${list.length} follow-up${list.length > 1 ? 's' : ''} due today: ${names}${list.length > 3 ? ', and more' : ''}. Work them here: ${PORTAL}`;
+      const parts = [];
+      if (dueList.length) {
+        const names = dueList.slice(0, 3).map((l) => l.business_name || l.contact_name || 'a lead').join(', ');
+        parts.push(`${dueList.length} follow-up${dueList.length > 1 ? 's' : ''} due (${names}${dueList.length > 3 ? ', +more' : ''})`);
+      }
+      if (warmList.length) parts.push(`${warmList.length} new warm lead${warmList.length > 1 ? 's' : ''} to work`);
+      const body = `Morning${first ? ' ' + first : ''}. You've got ${parts.join(' and ')}. Jump in: ${PORTAL}`;
       if (sms && to) {
         try { await sms.messages.create({ from: FROM_NUMBER, to, body }); sent++; }
         catch (e) { console.error('rep-reminder sms', rid, e.message); }

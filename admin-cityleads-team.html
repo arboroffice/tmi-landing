@@ -29,6 +29,8 @@
 
       <div id="team-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
 
+      <div id="team-feed" style="margin-bottom:22px;"></div>
+
       <!-- create form -->
       <div class="card" id="create-card" style="display:none;margin-bottom:20px;">
         <div class="panel-sec-label" style="margin-bottom:12px;">New city-lead rep</div>
@@ -116,6 +118,9 @@
       <div class="panel-sec-label" style="margin-bottom:10px;">Their leads</div>
       <div id="rp-leads"></div>
       <div class="panel-sep"></div>
+      <div class="panel-sec-label" style="margin-bottom:10px;">Recent visit recaps</div>
+      <div id="rp-recaps"></div>
+      <div class="panel-sep"></div>
       <button class="btn btn-ghost btn-sm" style="color:var(--danger,#d1483a)" onclick="deleteRep()">Remove rep</button>
     </div>
   </div>
@@ -131,6 +136,20 @@ let reps = [], current = null;
 const TARGET = 20; // daily walk-in / log target from the playbook
 const esc = (s) => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const SL = {new:'New',attempted:'Attempted',contacted:'Contacted',booked:'Booked',callback:'Callback',not_interested:'Not interested',won:'Won',lost:'Lost'};
+const OL = {booked:'Booked',interested:'Interested',follow_up:'Follow up',not_interested:'Not interested',no_decision:'No decision'};
+function reltime(iso){ if(!iso) return ''; const s=Math.floor((Date.now()-new Date(iso).getTime())/1000); if(s<60)return'just now'; if(s<3600)return Math.floor(s/60)+'m ago'; if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+
+async function loadFeed(){
+  const box=document.getElementById('team-feed'); if(!box) return;
+  let feed=[]; try{ feed=await TMIAdmin.api('/api/reps-admin?feed=1'); }catch(e){ box.innerHTML=''; return; }
+  if(!feed || !feed.length){ box.innerHTML=''; return; }
+  box.innerHTML='<div class="panel-sec-label" style="margin-bottom:10px;">Team activity</div>'+
+    feed.slice(0,12).map(x=>`<div class="card" style="padding:12px 14px;margin:0 0 8px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:3px;"><b style="color:var(--ink)">${esc(x.rep)}</b>${x.outcome?(' · '+esc(OL[x.outcome]||x.outcome)):''} · ${reltime(x.created_at)}</div>
+      <div style="font-size:13.5px;color:var(--ink);line-height:1.5;">${esc(x.summary||'')}</div>
+      ${x.next_step?`<div style="font-size:12.5px;color:var(--ink-2);margin-top:4px;">Next: ${esc(x.next_step)}</div>`:''}
+    </div>`).join('');
+}
 
 async function load(){
   reps = await TMIAdmin.api('/api/reps-admin').catch(()=>[]) || [];
@@ -142,10 +161,11 @@ async function load(){
   const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.booked_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
   const stat=(n,l)=>`<div class="card" style="text-align:center;padding:16px 12px;margin:0;"><div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;line-height:1;">${n}</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;">${l}</div></div>`;
   document.getElementById('team-stats').innerHTML = stat(reps.length,'Reps')+stat(tl,'Total leads')+stat(tb2,'Booked / won')+stat(td,'Logged today');
+  loadFeed();
   if(!reps.length){ tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
   tb.innerHTML = reps.map(r=>`
     <tr style="cursor:pointer" onclick="openRep('${r.id}')">
-      <td><b>${esc(r.name||'—')}</b></td>
+      <td><b>${esc(r.name||'—')}</b><div style="font-size:11px;color:var(--muted)">${r.last_active?('Active '+reltime(r.last_active)):'No activity yet'}</div></td>
       <td>${esc(r.city||'—')}</td>
       <td>${esc(r.email)}</td>
       <td>${r.lead_count||0}</td>
@@ -210,6 +230,7 @@ async function openRep(id){
   document.getElementById('rp-toggle').textContent = current.status==='disabled' ? 'Enable' : 'Disable';
   document.getElementById('rp-leads').innerHTML = '<div style="color:var(--muted);font-size:13px;">Loading…</div>';
   TMIAdmin.openPanel('rep-panel');
+  loadRecaps(id);
   const leads = await TMIAdmin.api('/api/reps-admin?leads='+encodeURIComponent(id)).catch(()=>[]) || [];
   const box = document.getElementById('rp-leads');
   if(!leads.length){ box.innerHTML = '<div style="color:var(--muted);font-size:13px;">No leads logged yet.</div>'; return; }
@@ -235,6 +256,18 @@ async function assignLead(){
     TMIAdmin.toast('Lead added to their queue');
     openRep(current.id); load();
   }catch(ex){ TMIAdmin.toast(ex.message); }
+}
+
+async function loadRecaps(id){
+  const rb=document.getElementById('rp-recaps'); if(!rb) return;
+  rb.innerHTML='<div style="color:var(--muted);font-size:13px;">Loading…</div>';
+  const recaps=await TMIAdmin.api('/api/reps-admin?activity='+encodeURIComponent(id)).catch(()=>[]) || [];
+  if(!recaps.length){ rb.innerHTML='<div style="color:var(--muted);font-size:13px;">No recorded visits yet.</div>'; return; }
+  rb.innerHTML=recaps.slice(0,10).map(x=>`<div style="padding:9px 0;border-bottom:1px solid var(--line);">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">${x.outcome?esc(OL[x.outcome]||x.outcome)+' · ':''}${reltime(x.created_at)}</div>
+    <div style="font-size:13px;color:var(--ink);line-height:1.5;">${esc(x.summary||x.transcript||'')}</div>
+    ${x.next_step?`<div style="font-size:12px;color:var(--ink-2);margin-top:3px;">Next: ${esc(x.next_step)}</div>`:''}
+  </div>`).join('');
 }
 
 async function assignPool(){

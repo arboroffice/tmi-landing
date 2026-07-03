@@ -22,16 +22,33 @@ module.exports = async (req, res) => {
         const leads = await db.list('rep_leads', { where: [['rep_id', '==', req.query.leads]], order: 'updated_at', ascending: false, limit: 1000 });
         return res.json(leads || []);
       }
+      // Team activity feed: recent recorded interactions across all reps, with names.
+      if (req.query.feed) {
+        const [recaps, reps] = await Promise.all([
+          db.list('rep_interactions', { order: 'created_at', ascending: false, limit: 40 }).catch(() => []),
+          db.list('reps', { limit: 200 }).catch(() => []),
+        ]);
+        const nameOf = {}; (reps || []).forEach((r) => { nameOf[r.id] = r.name || r.email || 'Rep'; });
+        return res.json((recaps || []).map((x) => ({ id: x.id, rep: nameOf[x.rep_id] || 'Rep', summary: x.summary, outcome: x.outcome, next_step: x.next_step, created_at: x.created_at })));
+      }
+      // One rep's recorded interactions (recaps) for the rep panel.
+      if (req.query.activity) {
+        const recaps = await db.list('rep_interactions', { where: [['rep_id', '==', req.query.activity]], order: 'created_at', ascending: false, limit: 20 }).catch(() => []);
+        return res.json(recaps || []);
+      }
       const reps = await db.list('reps', { order: 'created_at', ascending: false, limit: 200 });
       const all = await db.list('rep_leads', { limit: 5000 }).catch(() => []);
-      const counts = {}, booked = {}, today = {};
+      const counts = {}, booked = {}, today = {}, last = {};
       (all || []).forEach((l) => {
         counts[l.rep_id] = (counts[l.rep_id] || 0) + 1;
         if (l.status === 'booked' || l.status === 'won') booked[l.rep_id] = (booked[l.rep_id] || 0) + 1;
         if (isToday(l.created_at)) today[l.rep_id] = (today[l.rep_id] || 0) + 1;
+        const t = l.visited_at || l.updated_at || l.created_at;
+        if (t && (!last[l.rep_id] || t > last[l.rep_id])) last[l.rep_id] = t;
       });
       return res.json((reps || []).map((r) => Object.assign(clean(r), {
         lead_count: counts[r.id] || 0, booked_count: booked[r.id] || 0, today_count: today[r.id] || 0,
+        last_active: last[r.id] || null,
       })));
     }
 
