@@ -14,7 +14,7 @@ const FIELDS = ['business_name', 'contact_name', 'phone', 'email', 'address', 'i
 module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
-  const r = requireRep(req, res); if (!r) return;
+  const r = await requireRep(req, res); if (!r) return;
   const repId = r.sub;
 
   try {

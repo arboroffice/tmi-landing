@@ -180,10 +180,21 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey: "AIzaSyD3Kzn1uGfM9Wbe2ufazxtNURPTN4k-kAg",
+    authDomain: "tmitech-e264c.firebaseapp.com",
+    projectId: "tmitech-e264c",
+    appId: "1:284870734681:web:a203336968a7127e149248"
+  });
+  window.fbAuth = firebase.auth();
+</script>
+
 <script>
 const API = '';
-const TOKEN_KEY = 'tmi_rep_token';
-let TOKEN = localStorage.getItem(TOKEN_KEY) || '';
+let TOKEN = '';
 let ME = null, LEADS = [], FILTER = 'all', SEARCH = '', SORT = 'recent';
 function haversine(la1,lo1,la2,lo2){ const R=3958.8,toR=x=>x*Math.PI/180; const dLa=toR(la2-la1),dLo=toR(lo2-lo1); const a=Math.sin(dLa/2)**2+Math.cos(toR(la1))*Math.cos(toR(la2))*Math.sin(dLo/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
 let map = null, markers = null, meMarker = null, lastPos = null;
@@ -197,6 +208,8 @@ function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); 
 
 async function api(path, opts={}){
   const h = Object.assign({'Content-Type':'application/json'}, opts.headers||{});
+  // Always send a fresh Firebase ID token (auto-refreshes before expiry).
+  try { if(window.fbAuth && window.fbAuth.currentUser) TOKEN = await window.fbAuth.currentUser.getIdToken(); } catch(e){}
   if(TOKEN) h.Authorization = 'Bearer '+TOKEN;
   const res = await fetch(API+path, Object.assign({}, opts, {headers:h}));
   if(res.status===401){ logout(); throw new Error('Session expired, sign in again'); }
@@ -206,20 +219,38 @@ async function api(path, opts={}){
 }
 
 /* ---- auth ---- */
+function authError(ex){
+  const c = (ex && ex.code) || '';
+  if(c==='auth/invalid-email') return 'That email looks invalid.';
+  if(c==='auth/user-disabled') return 'This account is disabled. Contact the office.';
+  if(c==='auth/user-not-found'||c==='auth/wrong-password'||c==='auth/invalid-credential') return 'Wrong email or password.';
+  if(c==='auth/too-many-requests') return 'Too many tries. Wait a minute and try again.';
+  if(c==='auth/network-request-failed') return 'Network problem. Check your connection.';
+  return (ex && ex.message) || 'Sign in failed';
+}
 $('#loginForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const btn=$('#lBtn'), err=$('#lErr'); err.textContent='';
   btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  const email=$('#lEmail').value.trim(), pass=$('#lPass').value;
   try{
-    const r = await fetch(API+'/api/rep-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('#lEmail').value.trim(),password:$('#lPass').value})});
-    const d = await r.json().catch(()=>({}));
-    if(!r.ok) throw new Error(d.error||'Sign in failed');
-    TOKEN=d.token; ME=d.rep; localStorage.setItem(TOKEN_KEY,TOKEN);
-    boot();
-  }catch(ex){ err.textContent=ex.message; }
-  btn.disabled=false; btn.textContent='Sign in';
+    await window.fbAuth.signInWithEmailAndPassword(email, pass);
+    // Success -> onAuthStateChanged fires next and boots the app.
+  }catch(ex){
+    // Transition fallback: rep not in Firebase Auth yet -> try the legacy login,
+    // whose token the backend still accepts. Removed once all reps are on Firebase.
+    try{
+      const r = await fetch('/api/rep-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+      const d = await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(d.error||'Sign in failed');
+      TOKEN=d.token; ME=d.rep; await boot();
+    }catch(ex2){
+      err.textContent=authError(ex);
+    }
+    btn.disabled=false; btn.textContent='Sign in';
+  }
 });
-function logout(){ TOKEN=''; localStorage.removeItem(TOKEN_KEY); $('#app').style.display='none'; $('#login').style.display='flex'; }
+async function logout(){ TOKEN=''; ME=null; try{ await window.fbAuth.signOut(); }catch(e){} $('#app').style.display='none'; $('#login').style.display='flex'; }
 
 async function boot(){
   try{
@@ -480,7 +511,17 @@ function renderMe(){
 }
 
 /* ---- start ---- */
-if(TOKEN) boot(); else { $('#login').style.display='flex'; }
+window.fbAuth.onAuthStateChanged(async (user)=>{
+  const btn=$('#lBtn');
+  if(user){
+    try{ TOKEN = await user.getIdToken(); ME=null; await boot(); }
+    catch(ex){ $('#lErr').textContent = authError(ex); }
+    if(btn){ btn.disabled=false; btn.textContent='Sign in'; }
+  } else {
+    TOKEN=''; ME=null; $('#app').style.display='none'; $('#login').style.display='flex';
+    if(btn){ btn.disabled=false; btn.textContent='Sign in'; }
+  }
+});
 </script>
 </body>
 </html>
