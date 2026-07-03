@@ -32,6 +32,10 @@ export const CAMPAIGN = {
     rest: { size: null, plays: ['email', 'content'] },
   },
 
+  // Cold send limits. dailyCap = new first-touches added to Instantly per day.
+  // Set your Instantly campaign's own daily send limit to match your inbox count.
+  sending: { channel: 'instantly', dailyCap: 50 },
+
   // The always-on email sequence (positive, intelligent-company framing).
   sequence: [
     { day: 0, angle: 'the shift', link: false },
