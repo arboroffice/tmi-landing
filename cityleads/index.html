@@ -14,8 +14,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+<script>window.__gmapsReady=false;function __gmapsInit(){window.__gmapsReady=true;}</script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvjUKge3a6hEmh9BRZ5Ez1JLyWkR_Fyww&libraries=geometry&callback=__gmapsInit"></script>
 <style>
   :root{
     --bg:#f4f5ef;--card:#ffffff;--ink:#0a0b14;--ink-2:#454654;--muted:#7c7d89;
@@ -152,9 +152,11 @@
     <section class="screen" id="s-map">
       <div class="map-actions">
         <button class="btn ghost sm" id="locateBtn">Find me</button>
-        <button class="btn sm" id="addHereBtn">Log a lead here</button>
+        <button class="btn sm" id="routeBtn">Optimize route</button>
+        <button class="btn ghost sm" id="addHereBtn">Log here</button>
       </div>
       <div id="map"></div>
+      <div id="routePanel"></div>
     </section>
     <section class="screen" id="s-log"></section>
     <section class="screen" id="s-me"></section>
@@ -197,7 +199,7 @@ const API = '';
 let TOKEN = '';
 let ME = null, LEADS = [], FILTER = 'all', SEARCH = '', SORT = 'recent';
 function haversine(la1,lo1,la2,lo2){ const R=3958.8,toR=x=>x*Math.PI/180; const dLa=toR(la2-la1),dLo=toR(lo2-lo1); const a=Math.sin(dLa/2)**2+Math.cos(toR(la1))*Math.cos(toR(la2))*Math.sin(dLo/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
-let map = null, markers = null, meMarker = null, lastPos = null;
+let map = null, markers = [], meMarker = null, lastPos = null, dirRenderer = null, geocoder = null, gInfo = null;
 
 const $ = (s, r=document) => r.querySelector(s);
 const el = (h) => { const d=document.createElement('div'); d.innerHTML=h.trim(); return d.firstChild; };
@@ -497,32 +499,80 @@ async function loadInteractions(leadId){
     }).join('');
 }
 
-/* ---- Map (Leaflet) ---- */
+/* ---- Map (Google Maps) ---- */
 function getPos(){ return new Promise((res,rej)=>{ if(!navigator.geolocation) return rej(new Error('No GPS')); navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true,timeout:8000,maximumAge:30000}); }); }
+function statusColor(s){ return ({new:'#7c7d89',attempted:'#c98a12',contacted:'#2f6bd6',booked:'#3f8f2a',callback:'#7a5bd0',not_interested:'#9aa',won:'#186b1e',lost:'#d1483a'})[s]||'#7c7d89'; }
+function dot(color,size){ return {path:google.maps.SymbolPath.CIRCLE,scale:size||7,fillColor:color,fillOpacity:1,strokeColor:'#fff',strokeWeight:2}; }
 function initMap(){
-  if(typeof L==='undefined'){ setTimeout(initMap,300); return; }
+  if(!window.__gmapsReady || typeof google==='undefined' || !google.maps){ setTimeout(initMap,300); return; }
   if(!map){
-    map=L.map('map',{zoomControl:true,attributionControl:false}).setView([39.5,-98.35],4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-    markers=L.layerGroup().addTo(map);
-    getPos().then(p=>{ lastPos=p; map.setView([p.coords.latitude,p.coords.longitude],14); drawMe(p); }).catch(()=>{});
+    map=new google.maps.Map(document.getElementById('map'),{center:{lat:30.22,lng:-92.02},zoom:11,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',clickableIcons:false});
+    dirRenderer=new google.maps.DirectionsRenderer({map,suppressMarkers:true,polylineOptions:{strokeColor:'#0a0b14',strokeWeight:5,strokeOpacity:.85}});
+    geocoder=new google.maps.Geocoder();
+    gInfo=new google.maps.InfoWindow();
+    getPos().then(p=>{ lastPos=p; map.setCenter({lat:p.coords.latitude,lng:p.coords.longitude}); map.setZoom(13); drawMe(p); }).catch(()=>{});
+    geocodeMissing();
   }
   drawPins();
-  setTimeout(()=>map.invalidateSize(),120);
 }
-function statusColor(s){ return ({new:'#7c7d89',attempted:'#c98a12',contacted:'#2f6bd6',booked:'#3f8f2a',callback:'#7a5bd0',not_interested:'#9aa',won:'#186b1e',lost:'#d1483a'})[s]||'#7c7d89'; }
 function drawPins(){
-  if(!markers) return; markers.clearLayers(); const pts=[];
+  if(!map) return;
+  markers.forEach(m=>m.setMap(null)); markers=[];
+  const bounds=new google.maps.LatLngBounds(); let n=0;
   LEADS.filter(l=>l.lat!=null&&l.lng!=null).forEach(l=>{
-    const mk=L.circleMarker([l.lat,l.lng],{radius:9,color:'#fff',weight:2,fillColor:statusColor(l.status),fillOpacity:1});
-    mk.on('click',()=>openLead(l.id));
-    mk.bindTooltip((l.business_name||l.contact_name||'Lead'),{direction:'top'});
-    markers.addLayer(mk); pts.push([l.lat,l.lng]);
+    const pos={lat:Number(l.lat),lng:Number(l.lng)};
+    const mk=new google.maps.Marker({position:pos,map,icon:dot(statusColor(l.status), isWarm(l)&&l.status==='new'?9:7),title:l.business_name||l.contact_name||'Lead'});
+    mk.addListener('click',()=>{ gInfo.setContent('<div style="font-weight:700;font-size:13px">'+esc(l.business_name||l.contact_name||'Lead')+'</div><div style="font-size:12px;color:#555">'+esc([l.industry,l.address].filter(Boolean).join(' · '))+'</div><a href="#" id="iwOpen" style="font-size:12px;color:#1d4ed8;font-weight:600">Open →</a>'); gInfo.open(map,mk); setTimeout(()=>{ const a=document.getElementById('iwOpen'); if(a) a.onclick=(e)=>{e.preventDefault();openLead(l.id);}; },50); });
+    markers.push(mk); bounds.extend(pos); n++;
   });
-  if(pts.length && !lastPos){ try{ map.fitBounds(pts,{padding:[40,40],maxZoom:15}); }catch(e){} }
+  if(n && !lastPos){ try{ map.fitBounds(bounds); }catch(e){} }
 }
-function drawMe(p){ if(meMarker) map.removeLayer(meMarker); meMarker=L.circleMarker([p.coords.latitude,p.coords.longitude],{radius:7,color:'#fff',weight:3,fillColor:'#2f6bd6',fillOpacity:1}).addTo(map); }
-$('#locateBtn').onclick=async()=>{ try{ const p=await getPos(); lastPos=p; map.setView([p.coords.latitude,p.coords.longitude],15); drawMe(p); }catch(ex){ toast('Location blocked'); } };
+function drawMe(p){ const pos={lat:p.coords.latitude,lng:p.coords.longitude}; if(meMarker) meMarker.setMap(null); meMarker=new google.maps.Marker({position:pos,map,icon:dot('#2f6bd6',6),zIndex:999}); }
+
+// Geocode assigned leads that have an address but no coordinates, and persist.
+async function geocodeMissing(){
+  if(!geocoder) return;
+  const todo=LEADS.filter(l=>(l.lat==null||l.lng==null)&&l.address).slice(0,12);
+  for(const l of todo){
+    await new Promise(r=>{
+      geocoder.geocode({address:l.address+', Louisiana'},(res,status)=>{
+        if(status==='OK'&&res[0]){ const loc=res[0].geometry.location; l.lat=loc.lat(); l.lng=loc.lng();
+          api('/api/rep-leads',{method:'PATCH',body:JSON.stringify({id:l.id,lat:l.lat,lng:l.lng})}).catch(()=>{}); }
+        setTimeout(r,220);
+      });
+    });
+  }
+  if(todo.length) drawPins();
+}
+
+// Optimize today's driving route across actionable stops (round trip from you).
+async function optimizeRoute(){
+  const panel=$('#routePanel'); const btn=$('#routeBtn');
+  if(!map){ toast('Open the map first'); return; }
+  let origin=lastPos?{lat:lastPos.coords.latitude,lng:lastPos.coords.longitude}:null;
+  if(!origin){ try{ const p=await getPos(); lastPos=p; origin={lat:p.coords.latitude,lng:p.coords.longitude}; drawMe(p); }catch(e){ toast('Turn on location to build a route'); return; } }
+  const stops=LEADS.filter(l=>l.lat!=null&&l.lng!=null && ['new','attempted','callback','contacted'].includes(l.status));
+  if(!stops.length){ toast('No open stops with a location yet'); return; }
+  if(stops.length>23) stops.length=23;
+  btn.disabled=true; btn.textContent='Optimizing…';
+  const ds=new google.maps.DirectionsService();
+  ds.route({origin,destination:origin,travelMode:'DRIVING',optimizeWaypoints:true,
+    waypoints:stops.map(l=>({location:{lat:Number(l.lat),lng:Number(l.lng)},stopover:true}))},(result,status)=>{
+    btn.disabled=false; btn.textContent='Optimize route';
+    if(status!=='OK'||!result){ toast('Route failed: '+status+(status==='REQUEST_DENIED'?' (enable Directions API)':'')); return; }
+    dirRenderer.setDirections(result);
+    const order=result.routes[0].waypoint_order;
+    const legs=result.routes[0].legs;
+    let meters=0,secs=0; legs.forEach(lg=>{ meters+=lg.distance.value; secs+=lg.duration.value; });
+    const miles=(meters/1609.34).toFixed(1); const mins=Math.round(secs/60);
+    const ordered=order.map((idx,i)=>{ const l=stops[idx]; return '<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)"><div style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">'+(i+1)+'</div><div style="min-width:0"><div style="font-weight:700;font-size:14px" onclick="openLead(\''+l.id+'\')">'+esc(l.business_name||l.contact_name||'Lead')+'</div><div style="font-size:12px;color:var(--muted)">'+esc(l.address||l.industry||'')+'</div></div></div>'; }).join('');
+    const navUrl='https://www.google.com/maps/dir/?api=1&travelmode=driving&origin='+origin.lat+','+origin.lng+'&destination='+origin.lat+','+origin.lng+'&waypoints='+order.map(idx=>stops[idx].lat+','+stops[idx].lng).join('%7C');
+    panel.innerHTML='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-weight:800">'+order.length+' stops · '+miles+' mi · '+mins+' min</div><a class="btn sm" href="'+navUrl+'" target="_blank" rel="noopener" style="text-decoration:none">Navigate →</a></div>'+ordered+'</div>';
+  });
+}
+
+$('#locateBtn').onclick=async()=>{ try{ const p=await getPos(); lastPos=p; map.setCenter({lat:p.coords.latitude,lng:p.coords.longitude}); map.setZoom(14); drawMe(p); }catch(ex){ toast('Location blocked'); } };
+$('#routeBtn').onclick=optimizeRoute;
 $('#addHereBtn').onclick=()=>switchTab('log');
 
 /* ---- Me ---- */
