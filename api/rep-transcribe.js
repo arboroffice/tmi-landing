@@ -1,11 +1,43 @@
-// Transcribe a rep's voice note with Deepgram, save the transcript (text, not the
-// raw audio), and return it so the portal can drop it into the lead's notes.
-//   POST { audio: dataURL, lead_id?, duration? } -> { id, transcript }
+// Capture a rep's field interaction: transcribe the audio (Deepgram), summarize
+// it (Claude) into an outcome + next step, and store it as an interaction record.
+//   POST { audio: dataURL, lead_id?, duration? } -> { id, transcript, summary, outcome, next_step, sentiment }
 const db = require('./_db');
 const { cors } = require('./_auth');
 const { requireRep } = require('./_rep-auth');
 
-const MAX = 4 * 1024 * 1024; // ~4MB data URL cap (Vercel body limit ~4.5MB)
+const MAX = 4 * 1024 * 1024; // ~4MB data URL cap (Vercel body limit ~4.5MB); opus fits ~15 min
+
+// Summarize a field-visit transcript into a structured recap. Never throws.
+async function summarize(transcript) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || !transcript || transcript.trim().length < 20) return null;
+  const prompt = `You are a sales assistant. A field rep just recorded a visit or call with a prospect (an industrial/trades business owner). From the transcript, return STRICT JSON only, no prose, with keys:
+"summary" (2-3 sentence recap),
+"outcome" (one of: "booked","interested","follow_up","not_interested","no_decision"),
+"next_step" (one short imperative sentence, or ""),
+"sentiment" (one of: "positive","neutral","negative").
+Transcript:
+"""${transcript.slice(0, 6000)}"""`;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 500, messages: [{ role: 'user', content: prompt }] }),
+    });
+    if (!r.ok) { console.error('summarize', r.status); return null; }
+    const data = await r.json();
+    let txt = (data && data.content && data.content[0] && data.content[0].text) || '';
+    const jm = txt.match(/\{[\s\S]*\}/);
+    if (!jm) return null;
+    const o = JSON.parse(jm[0]);
+    return {
+      summary: String(o.summary || '').slice(0, 800),
+      outcome: String(o.outcome || '').slice(0, 40),
+      next_step: String(o.next_step || '').slice(0, 300),
+      sentiment: String(o.sentiment || '').slice(0, 20),
+    };
+  } catch (e) { console.error('summarize err', e.message); return null; }
+}
 
 module.exports = async function handler(req, res) {
   cors(res);
@@ -18,7 +50,7 @@ module.exports = async function handler(req, res) {
   if (!audio || typeof audio !== 'string' || !audio.startsWith('data:')) {
     return res.status(400).json({ error: 'A base64 audio data URL is required' });
   }
-  if (audio.length > MAX) return res.status(413).json({ error: 'Recording too long. Keep voice notes under about 2 minutes.' });
+  if (audio.length > MAX) return res.status(413).json({ error: 'Recording too long for one upload. Keep it under about 15 minutes.' });
 
   const key = process.env.DEEPGRAM_API_KEY;
   if (!key) return res.status(503).json({ error: 'Transcription is not configured (DEEPGRAM_API_KEY missing)' });
@@ -50,17 +82,26 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: e.message });
   }
 
-  // Store the transcript only (small, searchable). Return it even if the save fails.
+  // Summarize into an outcome + next step (best-effort; never blocks the transcript).
+  const recap = await summarize(transcript);
+
+  // Store the interaction (transcript + AI recap; not the raw audio). Return it
+  // even if the save fails so the rep never loses their note.
+  const payload = {
+    rep_id: rep.sub, lead_id: b.lead_id || null,
+    transcript, duration: Number(b.duration) || null,
+    summary: recap ? recap.summary : null,
+    outcome: recap ? recap.outcome : null,
+    next_step: recap ? recap.next_step : null,
+    sentiment: recap ? recap.sentiment : null,
+    created_at: new Date().toISOString(),
+  };
   try {
-    const note = await db.insert('rep_voice_notes', {
-      rep_id: rep.sub, lead_id: b.lead_id || null,
-      transcript, duration: Number(b.duration) || null,
-      created_at: new Date().toISOString(),
-    });
-    return res.json({ id: note.id, transcript, created_at: note.created_at });
+    const rec = await db.insert('rep_interactions', payload);
+    return res.json({ id: rec.id, transcript, summary: payload.summary, outcome: payload.outcome, next_step: payload.next_step, sentiment: payload.sentiment, created_at: rec.created_at });
   } catch (e) {
-    return res.json({ transcript, saved: false, error: e.message });
+    return res.json({ transcript, summary: payload.summary, outcome: payload.outcome, next_step: payload.next_step, sentiment: payload.sentiment, saved: false, error: e.message });
   }
 };
 
-module.exports.config = { maxDuration: 30 };
+module.exports.config = { maxDuration: 60 };

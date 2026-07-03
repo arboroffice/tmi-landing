@@ -371,11 +371,11 @@ function renderLog(prefill){
         <select id="f_status">${STATUS.map(x=>`<option value="${x}">${STATUS_LABEL[x]}</option>`).join('')}</select>
       </div>
       <div class="field"><label>Notes</label><textarea id="f_notes" rows="3" placeholder="What happened at the door"></textarea></div>
-      <div class="recbar"><button class="btn ghost sm" id="logRec">Record a voice note</button><span id="logRecState" style="font-size:12px;color:var(--muted)"></span></div>
+      <div class="recbar"><button class="btn ghost sm" id="logRec">Record interaction</button><span id="logRecState" style="font-size:12px;color:var(--muted)"></span></div>
       <label style="display:flex;align-items:center;gap:9px;text-transform:none;font-size:13.5px;color:var(--ink);font-weight:600;margin:6px 0 14px"><input type="checkbox" id="f_geo" checked style="width:auto"/> Pin my current location</label>
       <button class="btn" id="saveLead">Save lead</button>
     </div>`;
-  wireRecorder($('#logRec'), $('#logRecState'), null, (txt)=>{ const n=$('#f_notes'); n.value=(n.value?n.value+'\n':'')+txt; });
+  wireRecorder($('#logRec'), $('#logRecState'), null, (r)=>{ const n=$('#f_notes'); const t=r.summary?('Recap: '+r.summary+(r.next_step?('\nNext: '+r.next_step):'')):(r.transcript||''); if(t) n.value=(n.value?n.value+'\n\n':'')+t; toast('Interaction captured'); });
   $('#saveLead').onclick=saveNewLead;
 }
 async function saveNewLead(){
@@ -415,7 +415,8 @@ function openLead(id){
     <div class="field"><label>Address</label><input id="d_address" value="${esc(l.address||'')}"/></div>
     <div class="field"><label>Next follow-up</label><input id="d_next" type="date" value="${l.next_action_at?String(l.next_action_at).slice(0,10):''}"/></div>
     <div class="field"><label>Notes</label><textarea id="d_notes" rows="5">${esc(l.notes||'')}</textarea></div>
-    <div class="recbar"><button class="btn ghost sm" id="dRec">Record a voice note</button><span id="dRecState" style="font-size:12px;color:var(--muted)"></span></div>
+    <div class="recbar"><button class="btn ghost sm" id="dRec">Record interaction</button><span id="dRecState" style="font-size:12px;color:var(--muted)"></span></div>
+    <div id="dTimeline"></div>
     <button class="btn" id="dSave">Save changes</button>
     <div style="height:10px"></div>
     <button class="btn ghost" id="dDelete" style="color:var(--red)">Delete lead</button>
@@ -424,7 +425,14 @@ function openLead(id){
     const st=btn.dataset.s;
     try{ const up=await api('/api/rep-leads',{method:'PATCH',body:JSON.stringify({id:l.id,status:st})}); mergeLead(up); openLead(l.id); toast('Marked '+STATUS_LABEL[st]); }catch(ex){ toast(ex.message); }
   });
-  wireRecorder($('#dRec'), $('#dRecState'), l.id, (txt)=>{ const n=$('#d_notes'); n.value=(n.value?n.value+'\n':'')+txt; });
+  wireRecorder($('#dRec'), $('#dRecState'), l.id, (r)=>{
+    const n=$('#d_notes');
+    const t=r.summary?('Recap: '+r.summary+(r.next_step?('\nNext: '+r.next_step):'')):(r.transcript||'');
+    if(t) n.value=(n.value?n.value+'\n\n':'')+t;
+    toast(r.outcome?('Logged · '+outcomeLabel(r.outcome)):'Interaction saved');
+    loadInteractions(l.id);
+  });
+  loadInteractions(l.id);
   $('#dSave').onclick=async()=>{
     const btn=$('#dSave'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
     try{
@@ -442,9 +450,10 @@ $('#sheetClose').onclick=closeSheet;
 function mergeLead(up){ const i=LEADS.findIndex(x=>x.id===up.id); if(i>=0) LEADS[i]=up; else LEADS.unshift(up); }
 function refreshCurrent(){ const on=document.querySelector('.tab.on'); if(on) switchTab(on.dataset.tab); }
 
-/* ---- Recorder + Deepgram transcription ---- */
-function wireRecorder(btn, state, leadId, onText){
-  let rec=null, chunks=[], stream=null, t0=0;
+/* ---- Recorder: transcribe (Deepgram) + AI recap ---- */
+function wireRecorder(btn, state, leadId, onResult){
+  let rec=null, chunks=[], stream=null, t0=0, tick=null;
+  const label = btn.textContent || 'Record interaction';
   btn.onclick=async()=>{
     if(rec && rec.state==='recording'){ rec.stop(); return; }
     if(!navigator.mediaDevices || !window.MediaRecorder){ toast('Recording not supported on this browser'); return; }
@@ -453,23 +462,40 @@ function wireRecorder(btn, state, leadId, onText){
     rec.ondataavailable=(e)=>{ if(e.data.size) chunks.push(e.data); };
     rec.onstop=async()=>{
       stream.getTracks().forEach(t=>t.stop());
-      btn.classList.remove('rec'); btn.textContent='Record a voice note';
+      clearInterval(tick);
+      btn.classList.remove('rec'); btn.textContent=label;
       const blob=new Blob(chunks,{type:(chunks[0]&&chunks[0].type)||'audio/webm'});
       const dur=Math.round((Date.now()-t0)/1000);
-      state.innerHTML='<span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span> Transcribing...';
+      state.innerHTML='<span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span> Transcribing &amp; summarizing...';
       try{
         const dataUrl=await blobToDataUrl(blob);
         const r=await api('/api/rep-transcribe',{method:'POST',body:JSON.stringify({audio:dataUrl,lead_id:leadId,duration:dur})});
         state.textContent='';
-        if(r.transcript && r.transcript.trim()){ onText(r.transcript.trim()); toast('Voice note added'); }
+        if((r.transcript && r.transcript.trim()) || r.summary){ onResult(r); }
         else toast('Nothing caught, try again');
       }catch(ex){ state.textContent=''; toast(ex.message); }
     };
     rec.start();
-    btn.classList.add('rec'); btn.innerHTML='Stop &amp; save'; state.innerHTML='<span class="recbar" style="margin:0"><span class="dot"></span> Recording</span>';
+    btn.classList.add('rec'); btn.innerHTML='Stop &amp; save';
+    const render=()=>{ const s=Math.round((Date.now()-t0)/1000); const mm=String(Math.floor(s/60)).padStart(1,'0'), ss=String(s%60).padStart(2,'0'); state.innerHTML='<span class="recbar" style="margin:0"><span class="dot"></span> Recording '+mm+':'+ss+'</span>'; };
+    render(); tick=setInterval(render,1000);
   };
 }
+function outcomeLabel(o){ return ({booked:'Booked',interested:'Interested',follow_up:'Follow up',not_interested:'Not interested',no_decision:'No decision'})[o]||o||''; }
 function blobToDataUrl(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(blob); }); }
+async function loadInteractions(leadId){
+  const box=document.getElementById('dTimeline'); if(!box) return;
+  let rows=[];
+  try{ rows=await api('/api/rep-interactions?lead_id='+encodeURIComponent(leadId)); }catch(e){ return; }
+  if(!rows || !rows.length){ box.innerHTML=''; return; }
+  box.innerHTML='<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;">Interaction history</div>'+
+    rows.slice(0,20).map(x=>{
+      const when=x.created_at?new Date(x.created_at).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
+      const oc=x.outcome?('<span style="font-weight:700">'+esc(outcomeLabel(x.outcome))+'</span> · '):'';
+      const body=x.summary||x.transcript||'';
+      return '<div style="border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;background:var(--card)"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">'+oc+esc(when)+'</div><div style="font-size:13.5px;color:var(--ink);line-height:1.5">'+esc(body)+'</div>'+(x.next_step?('<div style="font-size:12.5px;color:var(--ink-2);margin-top:5px">Next: '+esc(x.next_step)+'</div>'):'')+'</div>';
+    }).join('');
+}
 
 /* ---- Map (Leaflet) ---- */
 function getPos(){ return new Promise((res,rej)=>{ if(!navigator.geolocation) return rej(new Error('No GPS')); navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true,timeout:8000,maximumAge:30000}); }); }
