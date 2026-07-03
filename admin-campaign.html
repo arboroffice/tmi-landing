@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Campaign — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .cs-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  .cs-stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm,10px);padding:18px 20px;}
+  .cs-stat .n{font-size:28px;font-weight:700;color:var(--ink);line-height:1;}
+  .cs-stat .l{font-size:12px;color:var(--ink-2);margin-top:6px;}
+  .cs-stat.hot .n{color:#0a7d2e;}
+  .grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;align-items:start;margin-bottom:22px;}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm,10px);padding:22px 24px;}
+  .panel h3{margin:0 0 4px;font-size:15px;font-weight:600;color:var(--ink);}
+  .panel .sub{font-size:12.5px;color:var(--ink-2);margin:0 0 16px;max-width:60ch;line-height:1.5;}
+  .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .kv:last-child{border-bottom:0;}
+  .kv .k{color:var(--ink-2);} .kv .v{color:var(--ink);font-weight:600;text-align:right;}
+  .seq{list-style:none;margin:0;padding:0;}
+  .seq li{display:flex;gap:12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .seq li:last-child{border-bottom:0;}
+  .seq .day{font-weight:700;color:var(--ink);min-width:52px;font-size:12px;}
+  .seq .ang{color:var(--ink-2);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .chip{font-size:11px;font-weight:600;background:var(--bg);border:1px solid var(--line);color:var(--ink-2);padding:3px 9px;border-radius:999px;}
+  .run-box{background:var(--bg);border:1px dashed var(--line);border-radius:var(--r-sm,10px);padding:18px 20px;margin-top:14px;}
+  .run-box .big{font-size:13px;color:var(--ink);font-weight:600;margin-bottom:4px;}
+  .muted{color:var(--ink-2);}
+  .out{white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink-2);margin-top:12px;}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr;}}
+  @media(max-width:768px){.cs-stats{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:480px){.cs-stats{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Campaign</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadStatus()">Refresh</button>
+        <button class="btn btn-ghost btn-sm" onclick="importList()">Import Lafayette list</button>
+        <button class="btn btn-primary btn-sm" onclick="runSend()">Run today's send</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head"><h1 id="camp-name">Campaign</h1></div>
+      <p class="muted" style="margin:-6px 0 22px;max-width:74ch;">The daily cold-outbound engine. Every lead is verified for deliverability and matched to an industry-specific angle before it enters the Instantly sequence. New first-touches are capped per day to keep sending healthy. Import a list, then run the send each morning.</p>
+
+      <div class="cs-stats" id="cs-stats">
+        <div class="cs-stat"><div class="n">…</div><div class="l">loading</div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <h3>Today's send</h3>
+          <p class="sub">Adds up to the daily cap of verified, in-fit leads into the sequence with industry-specific merge fields. Safe to run once a day; already-contacted leads are never re-added.</p>
+          <div class="run-box">
+            <div class="big">1. Import the prospect list</div>
+            <div class="muted" style="font-size:12.5px;margin-bottom:12px;">Loads the researched Lafayette oil &amp; gas / manufacturing list into leads as fresh, uncontacted prospects. Idempotent.</div>
+            <button class="btn btn-ghost btn-sm" onclick="importList()">Import Lafayette list</button>
+          </div>
+          <div class="run-box">
+            <div class="big">2. Run the daily send</div>
+            <div class="muted" style="font-size:12.5px;margin-bottom:12px;">Verifies and queues up to <span id="cap-inline">50</span> new leads into Instantly right now.</div>
+            <button class="btn btn-primary btn-sm" onclick="runSend()">Run today's send</button>
+          </div>
+          <div class="out" id="run-out"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Configuration</h3>
+          <p class="sub">Shared by every agent in the campaign.</p>
+          <div class="kv"><span class="k">Market</span><span class="v" id="cfg-market">—</span></div>
+          <div class="kv"><span class="k">Channel</span><span class="v" id="cfg-channel">—</span></div>
+          <div class="kv"><span class="k">Daily cap</span><span class="v" id="cfg-cap">—</span></div>
+          <div class="kv"><span class="k">Offer</span><span class="v" id="cfg-offer">—</span></div>
+          <div style="margin-top:14px;">
+            <div class="k muted" style="font-size:12px;">Target industries</div>
+            <div class="chips" id="cfg-industries"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Email sequence</h3>
+        <p class="sub">Positive, intelligent-company framing. The <code>{{industry_angle}}</code> merge field makes every step read specific to the recipient's trade.</p>
+        <ul class="seq" id="cfg-sequence"><li><span class="muted">Loading…</span></li></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('campaign');
+
+const stat = (n,l,hot)=>`<div class="cs-stat${hot?' hot':''}"><div class="n">${n ?? 0}</div><div class="l">${l}</div></div>`;
+
+async function loadStatus(){
+  const box = document.getElementById('cs-stats');
+  let d;
+  try { d = await TMIAdmin.api('/api/campaign-status'); }
+  catch(e){ box.innerHTML = stat('—','could not load'); return; }
+  if (!d || !d.ok) { box.innerHTML = stat('—','no data yet'); return; }
+
+  const c = d.counts || {}, cfg = d.campaign || {};
+  document.getElementById('camp-name').textContent = cfg.name || 'Campaign';
+  box.innerHTML =
+    stat(c.new, 'Ready to send') +
+    stat(c.queuedToday, 'Queued today', true) +
+    stat(c.in_campaign, 'In sequence') +
+    stat(c.replied, 'Replied', true);
+
+  document.getElementById('cfg-market').textContent = cfg.market || '—';
+  document.getElementById('cfg-channel').textContent = cfg.channel || '—';
+  document.getElementById('cfg-cap').textContent = (cfg.dailyCap || 50) + ' / day';
+  document.getElementById('cap-inline').textContent = cfg.dailyCap || 50;
+  document.getElementById('cfg-offer').textContent = (cfg.offer && cfg.offer.name) || '—';
+  document.getElementById('cfg-industries').innerHTML =
+    (cfg.industries || []).map(i => `<span class="chip">${i}</span>`).join('') || '<span class="muted">—</span>';
+  document.getElementById('cfg-sequence').innerHTML =
+    (cfg.sequence || []).map(s => `<li><span class="day">Day ${s.day}</span><span class="ang">${s.angle}${s.link ? ' &middot; links the audit' : ''}</span></li>`).join('')
+    || '<li><span class="muted">No sequence configured.</span></li>';
+}
+
+async function importList(){
+  if(!confirm('Import the researched Lafayette oil & gas / manufacturing list into leads? (idempotent — safe to re-run)')) return;
+  const out = document.getElementById('run-out');
+  out.textContent = 'Importing…';
+  try {
+    const r = await TMIAdmin.api('/api/import-leads', 'POST', { list: 'lafayette-oil-gas-manufacturing' });
+    out.textContent = r && r.ok
+      ? `Imported: ${r.added} added, ${r.existing} already present, ${r.skipped} skipped (of ${r.total}).`
+      : ('Import: ' + JSON.stringify(r));
+    loadStatus();
+  } catch(e){ out.textContent = 'Import failed: ' + e.message; }
+}
+
+async function runSend(){
+  if(!confirm("Verify and queue today's cold batch into Instantly now?")) return;
+  const out = document.getElementById('run-out');
+  out.textContent = 'Running send…';
+  try {
+    const r = await TMIAdmin.api('/api/campaign-send', 'POST', {});
+    out.textContent = r && r.ok
+      ? `Sent: queued ${r.queued}, scanned ${r.scanned}, ${r.invalid||0} invalid, ${r.role||0} role, ${r.suppressed||0} suppressed, ${r.errors||0} errors.`
+      : ('Send: ' + JSON.stringify(r));
+    loadStatus();
+  } catch(e){ out.textContent = 'Send failed: ' + e.message; }
+}
+
+loadStatus();
+</script>
+</body>
+</html>

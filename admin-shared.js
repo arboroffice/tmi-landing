@@ -338,6 +338,7 @@ const TMIAdmin = (() => {
         { label: 'Sales', items: [
           { page:'cockpit',      label:'Sales Cockpit', icon:I.command },
           { page:'outbound',     label:'Outbound',     icon:I.command,  href:'/admin-outbound' },
+          { page:'campaign',     label:'Campaign',     icon:I.command,  href:'/admin-campaign' },
           { page:'pipeline',     label:'Pipeline',     icon:I.pipeline, href:'/admin-sales#pipeline' },
           { page:'audits',       label:'Audits',       icon:I.audits,   href:'/admin-sales#audits' },
           { page:'bookings',     label:'Bookings',     icon:I.bookings, href:'/admin-sales#bookings' },
