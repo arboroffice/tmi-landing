@@ -85,6 +85,24 @@
     <div class="panel-body">
       <div class="detail-grid" id="rp-details"></div>
       <div class="panel-sep"></div>
+      <div class="panel-sec-label" style="margin-bottom:10px;">Push warm leads from the pool</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 90px;gap:8px;margin-bottom:8px;">
+        <select class="form-input" id="ap-industry">
+          <option value="">Any industry</option>
+          <option value="oilgas">Oil &amp; gas</option>
+          <option value="manufacturing">Manufacturing</option>
+          <option value="construction">Construction</option>
+          <option value="hvac">HVAC</option>
+          <option value="roofing">Roofing</option>
+          <option value="electrical">Electrical</option>
+          <option value="plumbing">Plumbing</option>
+          <option value="industrial">Industrial</option>
+        </select>
+        <input class="form-input" id="ap-city" placeholder="City (optional)"/>
+        <input class="form-input" id="ap-limit" type="number" min="1" max="100" value="25"/>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="assignPool()">Push warm leads →</button>
+      <div class="panel-sep"></div>
       <div class="panel-sec-label" style="margin-bottom:10px;">Assign a lead to this rep</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
         <input class="form-input" id="al-business" placeholder="Business name"/>
@@ -215,6 +233,19 @@ async function assignLead(){
     await TMIAdmin.api('/api/reps-admin','POST',body);
     ['al-business','al-contact','al-phone','al-industry','al-address'].forEach(i=>document.getElementById(i).value='');
     TMIAdmin.toast('Lead added to their queue');
+    openRep(current.id); load();
+  }catch(ex){ TMIAdmin.toast(ex.message); }
+}
+
+async function assignPool(){
+  if(!current) return;
+  const body={ action:'assign_pool', rep_id:current.id,
+    industry:document.getElementById('ap-industry').value,
+    city:document.getElementById('ap-city').value.trim(),
+    limit:parseInt(document.getElementById('ap-limit').value,10)||25 };
+  try{
+    const r = await TMIAdmin.api('/api/reps-admin','POST',body);
+    TMIAdmin.toast(r.created ? ('Pushed '+r.created+' warm lead'+(r.created===1?'':'s')) : (r.note||'No matching leads'));
     openRep(current.id); load();
   }catch(ex){ TMIAdmin.toast(ex.message); }
 }

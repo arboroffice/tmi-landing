@@ -56,14 +56,52 @@ module.exports = async (req, res) => {
         for (const it of items) {
           const rid = targets[i % targets.length]; i++;
           await db.insert('rep_leads', {
-            rep_id: rid, business_name: it.business_name || null, contact_name: it.contact_name || null,
-            phone: it.phone || null, email: null, address: it.address || null, industry: it.industry || null,
+            rep_id: rid, business_name: it.business_name || null,
+            contact_name: it.contact_name || it.owner_name || null,
+            phone: it.phone || null, email: it.email || null,
+            address: it.address || null, industry: it.industry || null,
             lat: null, lng: null, status: 'new', notes: it.notes || null, next_action_at: null,
+            priority: it.priority || null, context: it.context || null,
+            company_domain: it.domain || null, lead_id: it.lead_id || null,
             source: 'assigned', created_at: now, updated_at: now, visited_at: null,
           });
           created++;
         }
         return res.status(201).json({ ok: true, created, reps: targets.length });
+      }
+
+      // Push warm, enriched leads from the GTM pool (leads collection) to a rep.
+      //   { action:'assign_pool', rep_id, industry?, city?, limit? }
+      if (body.action === 'assign_pool') {
+        if (!body.rep_id) return res.status(400).json({ error: 'Pick a rep' });
+        if (!(await db.getById('reps', body.rep_id))) return res.status(404).json({ error: 'Rep not found' });
+        const limit = Math.min(parseInt(body.limit, 10) || 25, 100);
+        const where = body.industry ? [['industry_bucket', '==', String(body.industry)]] : [];
+        let pool = await db.list('leads', { where, order: 'created_at', ascending: true, limit: Math.max(limit * 4, 100) }).catch(() => []);
+        const city = String(body.city || '').toLowerCase().trim();
+        pool = (pool || []).filter((l) => l && !l.assigned_rep_id && (l.company_name || l.owner_name));
+        if (city) pool = pool.filter((l) => String(l.location || '').toLowerCase().includes(city));
+        pool = pool.slice(0, limit);
+        if (!pool.length) return res.status(200).json({ ok: true, created: 0, note: 'No unassigned leads matched that filter. Import more on the Campaign tab.' });
+        const now = new Date().toISOString();
+        let created = 0;
+        for (const l of pool) {
+          const ctx = [l.revenue_est || l.revenue, l.industry].filter(Boolean).join(' · ');
+          await db.insert('rep_leads', {
+            rep_id: body.rep_id,
+            business_name: l.company_name || null, contact_name: l.owner_name || null,
+            phone: l.phone || null, email: l.email || null,
+            address: l.location || null, industry: l.industry || l.industry_bucket || null,
+            lat: null, lng: null, status: 'new', notes: null, next_action_at: null,
+            priority: 'warm', context: ctx || null,
+            company_domain: (l.website || '').replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '') || null,
+            lead_id: l.id || null, source: 'assigned',
+            created_at: now, updated_at: now, visited_at: null,
+          });
+          await db.update('leads', l.id, { assigned_rep_id: body.rep_id, assigned_at: now }).catch(() => {});
+          created++;
+        }
+        return res.status(201).json({ ok: true, created });
       }
       // Assign / seed a single lead to a rep's field queue.
       if (body.action === 'add_lead') {
