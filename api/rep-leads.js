@@ -49,6 +49,7 @@ module.exports = async (req, res) => {
       FIELDS.forEach((k) => { if (b[k] !== undefined) up[k] = b[k]; });
       if (b.lat !== undefined) up.lat = num(b.lat);
       if (b.lng !== undefined) up.lng = num(b.lng);
+      if (b.deal_value !== undefined) up.deal_value = num(b.deal_value);
       if (b.status !== undefined && STATUSES.includes(b.status)) {
         up.status = b.status;
         if (b.status !== 'new' && !lead.visited_at) up.visited_at = up.updated_at;

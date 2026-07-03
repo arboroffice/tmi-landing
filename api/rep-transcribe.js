@@ -39,6 +39,36 @@ Transcript:
   } catch (e) { console.error('summarize err', e.message); return null; }
 }
 
+// Extract structured lead fields from a spoken "new lead" note. Never throws.
+async function extractLead(transcript) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || !transcript || transcript.trim().length < 6) return null;
+  const prompt = `A field sales rep spoke a quick note to create a new lead. From the note, return STRICT JSON only, no prose, with keys: "business_name","contact_name","phone","industry","status" (one of: new,attempted,contacted,booked,callback,not_interested,won,lost — default "new"),"notes". Use "" for anything not mentioned.
+Note:
+"""${transcript.slice(0, 2000)}"""`;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 400, messages: [{ role: 'user', content: prompt }] }),
+    });
+    if (!r.ok) { console.error('extractLead', r.status); return null; }
+    const data = await r.json();
+    const txt = (data && data.content && data.content[0] && data.content[0].text) || '';
+    const jm = txt.match(/\{[\s\S]*\}/); if (!jm) return null;
+    const o = JSON.parse(jm[0]);
+    const STAT = ['new', 'attempted', 'contacted', 'booked', 'callback', 'not_interested', 'won', 'lost'];
+    return {
+      business_name: String(o.business_name || '').slice(0, 120),
+      contact_name: String(o.contact_name || '').slice(0, 80),
+      phone: String(o.phone || '').slice(0, 40),
+      industry: String(o.industry || '').slice(0, 60),
+      status: STAT.includes(o.status) ? o.status : 'new',
+      notes: String(o.notes || '').slice(0, 600),
+    };
+  } catch (e) { console.error('extractLead err', e.message); return null; }
+}
+
 module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -80,6 +110,12 @@ module.exports = async function handler(req, res) {
   } catch (e) {
     console.error('transcribe fetch:', e.message);
     return res.status(500).json({ error: e.message });
+  }
+
+  // Voice-to-lead: extract structured fields instead of an interaction recap.
+  if (b.intent === 'new_lead') {
+    const lead = await extractLead(transcript);
+    return res.json({ transcript, lead });
   }
 
   // Summarize into an outcome + next step (best-effort; never blocks the transcript).

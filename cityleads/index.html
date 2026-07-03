@@ -294,6 +294,7 @@ function renderToday(){
   const loggedToday = LEADS.filter(l=>isToday(l.created_at)).length;
   const booked = LEADS.filter(l=>l.status==='booked'||l.status==='won').length;
   const due = LEADS.filter(dueToday);
+  const rot = LEADS.filter(l=>isWarm(l)&&l.status==='new'&&l.created_at&&(Date.now()-new Date(l.created_at).getTime())>5*864e5);
   const s=$('#s-today');
   s.innerHTML = `
     <div class="stat-grid">
@@ -304,10 +305,12 @@ function renderToday(){
     <button class="btn" id="tLog">Log a walk-in</button>
     <div style="height:10px"></div>
     <button class="btn ghost" id="tMap">Open the map</button>
+    ${rot.length?`<div class="card" id="tRot" style="background:#fbeceb;color:#7a241c;font-weight:700;cursor:pointer;margin-top:14px;">⚠ ${rot.length} warm lead${rot.length===1?'':'s'} going cold — untouched 5+ days. Tap to work them.</div>`:''}
     <div class="h-eyebrow">Follow-ups due</div>
     <div id="tDue"></div>`;
   $('#tLog').onclick=()=>switchTab('log');
   $('#tMap').onclick=()=>switchTab('map');
+  const rb=$('#tRot'); if(rb) rb.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
   const box=$('#tDue');
   if(!due.length){ box.innerHTML='<div class="empty">Nothing due. Go knock some doors.</div>'; }
   else due.sort((a,b)=>new Date(a.next_action_at)-new Date(b.next_action_at)).forEach(l=>box.appendChild(leadRow(l)));
@@ -365,6 +368,7 @@ function renderLog(prefill){
   const s=$('#s-log');
   s.innerHTML = `
     <div class="card">
+      <div class="recbar" style="margin-top:0"><button class="btn ghost sm" id="speakLead">🎤 Speak a new lead</button><span id="speakState" style="font-size:12px;color:var(--muted)"></span></div>
       <div class="field"><label>Business name</label><input id="f_business" value="${esc(prefill.business_name||'')}" placeholder="ABC Roofing"/></div>
       <div class="field"><label>Owner / contact</label><input id="f_contact" placeholder="First name"/></div>
       <div class="row" style="gap:10px">
@@ -381,7 +385,36 @@ function renderLog(prefill){
       <button class="btn" id="saveLead">Save lead</button>
     </div>`;
   wireRecorder($('#logRec'), $('#logRecState'), null, (r)=>{ const n=$('#f_notes'); const t=r.summary?('Recap: '+r.summary+(r.next_step?('\nNext: '+r.next_step):'')):(r.transcript||''); if(t) n.value=(n.value?n.value+'\n\n':'')+t; toast('Interaction captured'); });
+  wireLeadDictation($('#speakLead'), $('#speakState'));
   $('#saveLead').onclick=saveNewLead;
+}
+// Speak a lead: record -> transcribe -> AI extracts fields -> prefill the form.
+function wireLeadDictation(btn, state){
+  let rec=null, chunks=[], stream=null;
+  btn.onclick=async()=>{
+    if(rec && rec.state==='recording'){ rec.stop(); return; }
+    if(!navigator.mediaDevices || !window.MediaRecorder){ toast('Recording not supported'); return; }
+    try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }catch(ex){ toast('Microphone blocked'); return; }
+    chunks=[]; rec=new MediaRecorder(stream);
+    rec.ondataavailable=(e)=>{ if(e.data.size) chunks.push(e.data); };
+    rec.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop()); btn.classList.remove('rec'); btn.textContent='🎤 Speak a new lead';
+      state.innerHTML='<span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span> Reading it back…';
+      try{
+        const dataUrl=await blobToDataUrl(new Blob(chunks,{type:(chunks[0]&&chunks[0].type)||'audio/webm'}));
+        const r=await api('/api/rep-transcribe',{method:'POST',body:JSON.stringify({audio:dataUrl,intent:'new_lead'})});
+        state.textContent='';
+        const L=r.lead||{};
+        const set=(id,v)=>{ const e=$(id); if(e && v) e.value=v; };
+        set('#f_business',L.business_name); set('#f_contact',L.contact_name); set('#f_phone',L.phone); set('#f_industry',L.industry);
+        if(L.status){ const sel=$('#f_status'); if(sel) sel.value=L.status; }
+        if(L.notes){ const n=$('#f_notes'); n.value=(n.value?n.value+'\n':'')+L.notes; }
+        toast(L.business_name?('Got it: '+L.business_name):'Filled what I caught');
+      }catch(ex){ state.textContent=''; toast(ex.message); }
+    };
+    rec.start(); btn.classList.add('rec'); btn.innerHTML='Stop';
+    state.innerHTML='<span class="recbar" style="margin:0"><span class="dot"></span> Listening</span>';
+  };
 }
 async function saveNewLead(){
   const btn=$('#saveLead');
@@ -391,6 +424,8 @@ async function saveNewLead(){
     address:$('#f_address').value.trim(), status:$('#f_status').value, notes:$('#f_notes').value.trim(), source:'walk-in',
   };
   if(!body.business_name && !body.contact_name){ toast('Add a business or contact name'); return; }
+  const dupe=body.business_name && LEADS.find(l=>(l.business_name||'').toLowerCase().trim()===body.business_name.toLowerCase().trim());
+  if(dupe && !confirm('"'+body.business_name+'" is already in your list ('+(STATUS_LABEL[dupe.status]||dupe.status)+'). Add it again?')) return;
   btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
   try{
     if($('#f_geo').checked){ const p=await getPos().catch(()=>null); if(p){ body.lat=p.coords.latitude; body.lng=p.coords.longitude; } }
@@ -420,7 +455,7 @@ function openLead(id){
     <div class="field" style="margin-top:14px"><label>Contact</label><input id="d_contact" value="${esc(l.contact_name||'')}"/></div>
     <div class="row" style="gap:10px"><div class="field" style="flex:1"><label>Phone</label><input id="d_phone" type="tel" value="${esc(l.phone||'')}"/></div><div class="field" style="flex:1"><label>Industry</label><input id="d_industry" value="${esc(l.industry||'')}"/></div></div>
     <div class="field"><label>Address</label><input id="d_address" value="${esc(l.address||'')}"/></div>
-    <div class="field"><label>Next follow-up</label><input id="d_next" type="date" value="${l.next_action_at?String(l.next_action_at).slice(0,10):''}"/></div>
+    <div class="row" style="gap:10px"><div class="field" style="flex:1"><label>Next follow-up</label><input id="d_next" type="date" value="${l.next_action_at?String(l.next_action_at).slice(0,10):''}"/></div><div class="field" style="flex:1"><label>Deal value ($)</label><input id="d_deal" type="number" min="0" inputmode="numeric" value="${l.deal_value!=null?esc(l.deal_value):''}" placeholder="e.g. 12000"/></div></div>
     <div class="field"><label>Notes</label><textarea id="d_notes" rows="5">${esc(l.notes||'')}</textarea></div>
     <div class="recbar"><button class="btn ghost sm" id="dRec">Record interaction</button><span id="dRecState" style="font-size:12px;color:var(--muted)"></span></div>
     <div id="dTimeline"></div>
@@ -457,7 +492,7 @@ function openLead(id){
   $('#dSave').onclick=async()=>{
     const btn=$('#dSave'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
     try{
-      const up=await api('/api/rep-leads',{method:'PATCH',body:JSON.stringify({id:l.id,contact_name:$('#d_contact').value.trim(),phone:$('#d_phone').value.trim(),industry:$('#d_industry').value.trim(),address:$('#d_address').value.trim(),notes:$('#d_notes').value.trim(),next_action_at:$('#d_next').value||null})});
+      const up=await api('/api/rep-leads',{method:'PATCH',body:JSON.stringify({id:l.id,contact_name:$('#d_contact').value.trim(),phone:$('#d_phone').value.trim(),industry:$('#d_industry').value.trim(),address:$('#d_address').value.trim(),notes:$('#d_notes').value.trim(),next_action_at:$('#d_next').value||null,deal_value:$('#d_deal').value!==''?Number($('#d_deal').value):null})});
       mergeLead(up); toast('Saved'); closeSheet();
     }catch(ex){ toast(ex.message); }
     btn.disabled=false; btn.textContent='Save changes';
@@ -617,36 +652,68 @@ $('#routeBtn').onclick=optimizeRoute;
 $('#addHereBtn').onclick=()=>switchTab('log');
 
 /* ---- Me ---- */
+function dayKey(d){ d=new Date(d); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function calcStreak(){
+  const days=new Set(LEADS.filter(l=>l.created_at).map(l=>dayKey(l.created_at)));
+  const d=new Date(); d.setHours(0,0,0,0);
+  if(!days.has(dayKey(d))){ d.setDate(d.getDate()-1); if(!days.has(dayKey(d))) return 0; }
+  let streak=0; while(days.has(dayKey(d))){ streak++; d.setDate(d.getDate()-1); }
+  return streak;
+}
 function renderMe(){
   const s=$('#s-me');
   const total=LEADS.length;
   const booked=LEADS.filter(l=>l.status==='booked'||l.status==='won').length;
-  const won=LEADS.filter(l=>l.status==='won').length;
+  const wonLeads=LEADS.filter(l=>l.status==='won');
   const today=LEADS.filter(l=>isToday(l.created_at)).length;
   const weekAgo=Date.now()-7*864e5;
   const week=LEADS.filter(l=>l.created_at&&new Date(l.created_at).getTime()>=weekAgo).length;
   const warmLeft=LEADS.filter(l=>isWarm(l)&&l.status==='new').length;
   const conv=total?Math.round((booked/total)*100):0;
+  const dealTotal=wonLeads.reduce((a,l)=>a+(Number(l.deal_value)||0),0);
+  const commission=Math.round(dealTotal*0.20);
+  const money=n=>'$'+Math.round(n||0).toLocaleString();
+  const GOAL=20; const goalPct=Math.min(100,Math.round((today/GOAL)*100));
+  const streak=calcStreak();
   s.innerHTML=`
     <div class="card">
       <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em">${esc(ME.name||'')}</div>
       <div style="color:var(--muted);font-size:14px;margin-top:2px">${esc(ME.email||'')}${ME.city?(' · '+esc(ME.city)):''}</div>
     </div>
+    <div class="card" style="background:var(--ink);color:#fff">
+      <div style="font-size:11px;opacity:.65;text-transform:uppercase;letter-spacing:.07em">Commission earned</div>
+      <div style="font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:2px">${money(commission)}</div>
+      <div style="font-size:12px;opacity:.65;margin-top:2px">20% of ${money(dealTotal)} won · ${wonLeads.length} deal${wonLeads.length===1?'':'s'}</div>
+    </div>
     ${warmLeft?`<div class="card" id="meWarm" style="background:#E4FF97;color:#0a0b14;font-weight:800;cursor:pointer;text-align:center;">★ ${warmLeft} warm lead${warmLeft===1?'':'s'} waiting — tap to work them</div>`:''}
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700"><span>Today's goal</span><span>${today}/${GOAL} doors</span></div>
+      <div style="height:9px;border-radius:999px;background:var(--line);margin-top:8px;overflow:hidden"><div style="height:100%;width:${goalPct}%;background:#3f8f2a"></div></div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:9px">🔥 ${streak}-day streak</div>
+    </div>
     <div class="stat-grid">
       <div class="stat"><div class="n">${today}</div><div class="l">Logged today</div></div>
       <div class="stat"><div class="n">${week}</div><div class="l">This week</div></div>
       <div class="stat"><div class="n">${total}</div><div class="l">Total leads</div></div>
       <div class="stat"><div class="n">${booked}</div><div class="l">Booked / won</div></div>
-      <div class="stat"><div class="n">${won}</div><div class="l">Won</div></div>
+      <div class="stat"><div class="n">${wonLeads.length}</div><div class="l">Won</div></div>
       <div class="stat"><div class="n">${conv}%</div><div class="l">Book rate</div></div>
     </div>
+    <div class="card" id="meBoard"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">This week's leaderboard</div><div style="font-size:13px;color:var(--muted);margin-top:8px">Loading…</div></div>
     <button class="btn ghost" id="meRefresh">Refresh</button>
     <div style="height:10px"></div>
     <button class="btn ghost" id="meOut" style="color:var(--red)">Sign out</button>`;
   const w=$('#meWarm'); if(w) w.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
   $('#meRefresh').onclick=async()=>{ await loadLeads(); toast('Up to date'); renderMe(); };
   $('#meOut').onclick=logout;
+  loadLeaderboard();
+}
+async function loadLeaderboard(){
+  const box=$('#meBoard'); if(!box) return;
+  let rows=[]; try{ rows=await api('/api/rep-leaderboard'); }catch(e){ box.innerHTML=''; return; }
+  if(!rows || !rows.length){ box.innerHTML=''; return; }
+  box.innerHTML='<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">This week\'s leaderboard</div>'+
+    rows.slice(0,8).map(r=>'<div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;'+(r.isMe?'background:#E4FF97;':'')+'"><div style="width:20px;font-weight:800;color:var(--ink-2)">'+r.rank+'</div><div style="flex:1;font-size:14px;font-weight:'+(r.isMe?'800':'600')+'">'+esc((r.name||'').split(' ')[0])+(r.isMe?' (you)':'')+'</div><div style="font-size:12px;color:var(--ink-2)">'+r.won+'W · '+r.booked+'B · '+r.visits+'V</div></div>').join('');
 }
 
 /* ---- start ---- */
