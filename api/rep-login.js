@@ -33,10 +33,26 @@ module.exports = async function handler(req, res) {
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   const em = String(email).toLowerCase().trim();
   try {
-    const rep = await db.findOne('reps', 'email', em);
-    if (!rep || rep.status === 'disabled' || !verifyPassword(password, rep.password)) {
+    // Match on the normalized email (trim + lowercase), not just the exact
+    // stored string. This self-heals a stored email with a stray space or odd
+    // case, and duplicate rep rows created during setup: we authenticate against
+    // whichever active record actually matches the password.
+    const candidates = [];
+    const exact = await db.findOne('reps', 'email', em);
+    if (exact) candidates.push(exact);
+    const all = await db.list('reps', { limit: 500 }).catch(() => []);
+    for (const r of all) {
+      if (r && r.email && String(r.email).toLowerCase().trim() === em && !candidates.some((c) => c.id === r.id)) {
+        candidates.push(r);
+      }
+    }
+    const active = candidates.filter((r) => r.status !== 'disabled');
+    const rep = active.find((r) => verifyPassword(password, r.password));
+    if (!rep) {
+      // Diagnostic (no secrets): how many rows matched the email, and did any password verify.
+      console.log(`rep-login fail email=${JSON.stringify(em)} total=${(all || []).length} candidates=${candidates.length} active=${active.length} pwMatched=false`);
       return res.status(401).json({ error: 'Wrong email or password' });
     }
-    return res.json({ token: signRep(rep), rep: { id: rep.id, name: rep.name, email: em, city: rep.city, phone: rep.phone } });
-  } catch (e) { return res.status(500).json({ error: e.message }); }
+    return res.json({ token: signRep(rep), rep: { id: rep.id, name: rep.name, email: rep.email || em, city: rep.city, phone: rep.phone } });
+  } catch (e) { console.error('rep-login error:', e.message); return res.status(500).json({ error: e.message }); }
 };
