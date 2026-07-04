@@ -9,7 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="TMI City Leads"/>
 <meta name="robots" content="noindex"/>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
-<link rel="apple-touch-icon" href="/favicon.svg"/>
+<link rel="apple-touch-icon" href="/logo.png"/>
+<link rel="manifest" href="/cityleads/manifest.webmanifest"/>
 <title>TMI City Leads</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -770,6 +771,9 @@ window.fbAuth.onAuthStateChanged(async (user)=>{
     if(btn){ btn.disabled=false; btn.textContent='Sign in'; }
   }
 });
+
+/* ---- installable PWA (offline app shell) ---- */
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('/cityleads/sw.js').catch(()=>{}); }); }
 </script>
 </body>
 </html>
