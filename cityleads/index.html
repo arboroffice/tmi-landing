@@ -463,6 +463,7 @@ function openLead(id){
     <div class="quickact">
       <a href="${tel?('tel:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Call</a>
       <a href="${tel?('sms:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Text</a>
+      <a href="#" id="dCheckin">📍 Check in</a>
       <a href="#" id="dEnrich">Enrich</a>
     </div>
     <a class="btn" href="${bookUrl}" target="_blank" rel="noopener" style="text-decoration:none;margin-top:2px">Book the audit &rarr;</a>
@@ -473,6 +474,7 @@ function openLead(id){
     <div class="row" style="gap:10px"><div class="field" style="flex:1"><label>Phone</label><input id="d_phone" type="tel" value="${esc(l.phone||'')}"/></div><div class="field" style="flex:1"><label>Industry</label><input id="d_industry" value="${esc(l.industry||'')}"/></div></div>
     <div class="field"><label>Address</label><input id="d_address" value="${esc(l.address||'')}"/></div>
     <div class="row" style="gap:10px"><div class="field" style="flex:1"><label>Next follow-up</label><input id="d_next" type="date" value="${l.next_action_at?String(l.next_action_at).slice(0,10):''}"/></div><div class="field" style="flex:1"><label>Deal value ($)</label><input id="d_deal" type="number" min="0" inputmode="numeric" value="${l.deal_value!=null?esc(l.deal_value):''}" placeholder="e.g. 12000"/></div></div>
+    ${l.next_action_at?`<a id="dCal" href="#" style="font-size:12.5px;color:#1d4ed8;font-weight:600;display:inline-block;margin:-4px 0 8px">📅 Add follow-up to Google Calendar</a>`:''}
     <div class="field"><label>Notes</label><textarea id="d_notes" rows="5">${esc(l.notes||'')}</textarea></div>
     <div class="recbar"><button class="btn ghost sm" id="dRec">Record interaction</button><span id="dRecState" style="font-size:12px;color:var(--muted)"></span></div>
     <div id="dTimeline"></div>
@@ -508,6 +510,8 @@ function openLead(id){
   if(tbox){ if(!tel){ tbox.innerHTML='<span style="font-size:12px;color:var(--muted)">Add a phone to text</span>'; }
     else tmpls.forEach(([lab,body])=>{ const bt=el('<button class="btn ghost sm" style="flex:none">'+lab+'</button>'); bt.onclick=()=>{ location.href='sms:'+tel+'?&body='+encodeURIComponent(body); }; tbox.appendChild(bt); }); }
   const enr=$('#dEnrich'); if(enr) enr.onclick=(e)=>{ e.preventDefault(); enrichLead(l); };
+  const ci=$('#dCheckin'); if(ci) ci.onclick=(e)=>{ e.preventDefault(); checkIn(l); };
+  const cal=$('#dCal'); if(cal) cal.onclick=(e)=>{ e.preventDefault(); addToCalendar(l); };
   const pin=$('#dPhotoInput'); if(pin) pin.onchange=()=>addPhoto(l.id,pin);
   loadPhotos(l.id);
   $('#dSave').onclick=async()=>{
@@ -594,6 +598,29 @@ async function loadInteractions(leadId){
       const body=x.summary||x.transcript||'';
       return '<div style="border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;background:var(--card)"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">'+oc+esc(when)+'</div><div style="font-size:13.5px;color:var(--ink);line-height:1.5">'+esc(body)+'</div>'+(x.next_step?('<div style="font-size:12.5px;color:var(--ink-2);margin-top:5px">Next: '+esc(x.next_step)+'</div>'):'')+'</div>';
     }).join('');
+}
+
+/* ---- Arrival check-in + add-to-calendar ---- */
+async function checkIn(l){
+  toast('Checking in…');
+  try{
+    const p=await getPos();
+    const patch={id:l.id,lat:p.coords.latitude,lng:p.coords.longitude};
+    if(l.status==='new') patch.status='attempted';
+    const up=await api('/api/rep-leads',{method:'PATCH',body:JSON.stringify(patch)});
+    mergeLead(up); openLead(l.id); toast('Checked in here');
+  }catch(ex){ toast('Turn on location to check in'); }
+}
+function addToCalendar(l){
+  if(!l.next_action_at){ toast('Set a follow-up date first'); return; }
+  const d=String(l.next_action_at).slice(0,10).replace(/-/g,'');
+  const nx=new Date(l.next_action_at); nx.setDate(nx.getDate()+1); const d2=nx.toISOString().slice(0,10).replace(/-/g,'');
+  const title='Follow up: '+(l.business_name||l.contact_name||'lead');
+  const details=[l.contact_name&&('Contact: '+l.contact_name),l.phone&&('Phone: '+l.phone),l.notes].filter(Boolean).join('\n');
+  const u='https://calendar.google.com/calendar/render?action=TEMPLATE'+
+    '&text='+encodeURIComponent(title)+'&dates='+d+'/'+d2+
+    '&details='+encodeURIComponent(details||'')+'&location='+encodeURIComponent(l.address||'');
+  window.open(u,'_blank','noopener');
 }
 
 /* ---- On-the-spot enrichment (Google Places) ---- */
