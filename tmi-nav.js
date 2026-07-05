@@ -28,6 +28,15 @@
     ".nav-links .tmi-dd{display:inline-flex;align-items:center;}"+
     ".nav-links .tmi-dd-btn{font-family:var(--sans,inherit);font-size:12.5px;font-weight:600;letter-spacing:0.08em;color:var(--ink-2,#505060);padding:0;border-radius:0;transition:color .15s;}"+
     ".nav-links .tmi-dd-btn:hover{background:none;color:var(--ink,#1a1a1a);}"+
+    /* in the desktop side rail the dropdown becomes an inline accordion */
+    "@media(min-width:1024px){"+
+      ".nav .nav-links .tmi-dd{display:block;}"+
+      ".nav .nav-links .tmi-dd-btn{width:100%;display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;letter-spacing:-0.01em;text-transform:none;padding:10px 12px;border-radius:8px;}"+
+      ".nav .nav-links .tmi-dd-btn:hover{background:var(--bg-alt,#f5f5f7);color:var(--ink,#1a1a1a);}"+
+      ".nav .nav-links .tmi-dd-btn:after{content:'+';font-size:15px;opacity:.5;}"+
+      ".nav .nav-links .tmi-dd.open .tmi-dd-btn:after{content:'\\2212';}"+
+      ".nav .nav-links .tmi-dd-panel{position:static;transform:none;width:auto;max-width:none;border:none;box-shadow:none;border-radius:0;padding:2px 0 8px 12px;}"+
+    "}"+
     ".tmi-dd-panel{position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);width:300px;max-width:88vw;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.16);padding:16px 18px;display:none;z-index:200;}"+
     ".tmi-dd.open .tmi-dd-panel{display:block;}"+
     ".tmi-dd-panel .tmi-ind-box{display:block;}"+

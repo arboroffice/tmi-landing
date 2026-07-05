@@ -210,9 +210,38 @@ footer{background:var(--bg-alt);padding:56px 0 32px;border-top:1px solid var(--l
 </style>
 <script src="/rb2b.js"></script>
 <script src="/footer-signup.js" defer></script>
+<style>
+/* Desktop side rail replaces the top bar (site-wide nav pattern). */
+@media(min-width:1024px){
+  .hd{display:none;}
+  body{padding-left:248px;}
+  .rail{position:fixed;left:0;top:0;bottom:0;z-index:300;width:248px;background:#fff;border-right:1px solid rgba(0,0,0,0.08);display:flex;flex-direction:column;padding:26px 16px 22px;}
+  .rail-brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:20px;letter-spacing:-0.02em;color:#0a0b14;text-decoration:none;padding:0 10px 20px;border-bottom:1px solid rgba(0,0,0,0.08);}
+  .rail-brand img{height:24px;width:auto;}
+  .rail-links{display:flex;flex-direction:column;gap:2px;margin-top:14px;flex:1;overflow-y:auto;}
+  .rail-links a{font-size:14px;font-weight:600;letter-spacing:-0.01em;color:#505060;padding:10px 12px;border-radius:8px;text-decoration:none;transition:color .15s,background .15s;}
+  .rail-links a:hover{color:#0a0b14;background:#f5f5f7;}
+  .rail-cta{display:flex;align-items:center;justify-content:center;background:#0a0b14;color:#fff;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:15px 20px;border-radius:8px;text-decoration:none;margin-top:16px;transition:opacity .15s;}
+  .rail-cta:hover{opacity:0.92;}
+}
+@media(max-width:1023.98px){.rail{display:none;}}
+</style>
 </head>
 <body>
 
+<aside class="rail" aria-label="Site navigation">
+  <a class="rail-brand" href="/"><img src="/logo.svg" alt="TMI"/> TMI</a>
+  <nav class="rail-links">
+    <a href="/solutions">Solutions</a>
+    <a href="/departments">Digital Workforce</a>
+    <a href="/physical">Industries</a>
+    <a href="/portfolio">The Work</a>
+    <a href="/about">About</a>
+    <a href="/founders-of-the-future">Founders of the Future</a>
+    <a href="/news">Journal</a>
+  </nav>
+  <a class="rail-cta" href="/complete-audit">Apply</a>
+</aside>
 <header class="hd">
   <div class="hd-inner">
     <a href="/physical" class="hd-brand"><img src="logo.svg" alt="TMI"/> TMI Trades</a>
