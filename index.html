@@ -55,6 +55,22 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 </script>
 <style>
   /* Page-specific pieces layered on /tmi.css */
+
+  /* Chartreuse text is unreadable on white. On light sections the accent renders
+     as a highlighter behind ink instead; dark sections keep lime text. */
+  .hero .lime,.sec:not(.dark) .lime{
+    color:var(--ink);background:var(--chart);
+    -webkit-box-decoration-break:clone;box-decoration-break:clone;
+    padding:0.02em 0.14em;margin-left:-0.04em;
+  }
+
+  /* The third build card sits orphaned in the 2-col grid; give it the full row
+     as a horizontal card on desktop. */
+  @media(min-width:921px){
+    .builds .build:nth-child(3){grid-column:1/-1;display:grid;grid-template-columns:1.5fr 1fr;}
+    .builds .build:nth-child(3) .b-vis{aspect-ratio:auto;height:100%;border-bottom:none;border-right:1px solid rgba(255,255,255,0.1);}
+    .builds .build:nth-child(3) .b-copy{align-self:center;}
+  }
   .hero{padding:84px 0 64px;text-align:left;}
   .hero .display{max-width:16ch;margin-bottom:26px;}
   .hero .sub{max-width:60ch;margin-bottom:34px;}

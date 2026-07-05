@@ -24,6 +24,10 @@
     ".tmi-dd{position:relative;display:inline-block;}"+
     ".tmi-dd-btn{background:none;border:none;font:inherit;color:inherit;cursor:pointer;padding:6px 12px;border-radius:6px;text-transform:uppercase;letter-spacing:.02em;}"+
     ".tmi-dd-btn:hover{background:rgba(0,0,0,.05);}"+
+    /* inside the main header the trigger must match .nav-links a exactly */
+    ".nav-links .tmi-dd{display:inline-flex;align-items:center;}"+
+    ".nav-links .tmi-dd-btn{font-family:var(--sans,inherit);font-size:12.5px;font-weight:600;letter-spacing:0.08em;color:var(--ink-2,#505060);padding:0;border-radius:0;transition:color .15s;}"+
+    ".nav-links .tmi-dd-btn:hover{background:none;color:var(--ink,#1a1a1a);}"+
     ".tmi-dd-panel{position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);width:300px;max-width:88vw;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.16);padding:16px 18px;display:none;z-index:200;}"+
     ".tmi-dd.open .tmi-dd-panel{display:block;}"+
     ".tmi-dd-panel .tmi-ind-box{display:block;}"+
