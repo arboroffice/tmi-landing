@@ -79,6 +79,7 @@
   .sec-head p{font-family:var(--sans);font-size:16px;color:var(--ink-2);max-width:56ch;margin-top:16px;line-height:1.6;}
   /* featured build */
   .feat{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding:64px 0;border-top:1px solid var(--line);}
+  .feat>*{min-width:0;} /* let grid children shrink so wide mock tables do not overflow on mobile */
   .feat.rev .feat-copy{order:2;}
   .kicker{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-2);margin-bottom:16px;}
   .feat h3{font-size:clamp(26px,3vw,38px);letter-spacing:-0.02em;margin-bottom:18px;}
@@ -238,6 +239,13 @@
     .feat.rev .feat-copy{order:0;}
     .steps{grid-template-columns:1fr;}
     .wrap{padding:0 20px;}
+  }
+  /* dense dashboard mocks: keep their tight stat grids inside the phone width */
+  @media(max-width:520px){
+    .mock{padding:16px;}
+    .wt-stats,.hp-vitals,.ib-stats,.ib-aging{grid-template-columns:1fr 1fr;}
+    .wt-stat,.hp-vital,.ib-stat,.ib-age{min-width:0;}
+    .wt-stat .v{font-size:20px;}
   }
 </style>
 <style>
