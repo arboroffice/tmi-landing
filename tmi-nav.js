@@ -28,6 +28,25 @@
     ".nav-links .tmi-dd{display:inline-flex;align-items:center;}"+
     ".nav-links .tmi-dd-btn{font-family:var(--sans,inherit);font-size:12.5px;font-weight:600;letter-spacing:0.08em;color:var(--ink-2,#505060);padding:0;border-radius:0;transition:color .15s;}"+
     ".nav-links .tmi-dd-btn:hover{background:none;color:var(--ink,#1a1a1a);}"+
+    /* article header: match the injected trigger to .ah-nav a in the top-bar range */
+    ".ah-nav .tmi-dd-btn{font-family:var(--sans,inherit);font-size:13px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-2,#505060);padding:6px 12px;border-radius:6px;}"+
+    ".ah-nav .tmi-dd-btn:hover{color:var(--ink,#1a1a1a);background:var(--bg-alt,#f5f5f7);}"+
+    /* article pages: on desktop the reading top bar becomes the site side rail */
+    "@media(min-width:1024px){"+
+      "body:has(.article-header){padding-left:248px;}"+
+      ".article-header{left:0;top:0;bottom:0;right:auto;width:248px;height:auto;border-bottom:none;border-right:1px solid rgba(0,0,0,0.08);background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;}"+
+      ".article-header-inner{max-width:none;height:100%;flex-direction:column;align-items:stretch;gap:0;padding:26px 16px 22px;}"+
+      ".ah-brand{flex:none;padding:0 10px 20px;border-bottom:1px solid rgba(0,0,0,0.08);}"+
+      ".ah-nav{flex-direction:column;align-items:stretch;gap:2px;margin-top:14px;flex:1;overflow-y:auto;}"+
+      ".ah-nav a{font-size:14px;font-weight:600;letter-spacing:-0.01em;color:var(--ink-2,#505060);padding:10px 12px;border-radius:8px;}"+
+      ".ah-nav a:hover{color:var(--ink,#1a1a1a);background:var(--bg-alt,#f5f5f7);}"+
+      ".ah-cta{margin-top:16px;text-align:center;}"+
+      ".article-header .tmi-dd{display:block;}"+
+      ".article-header .tmi-dd-btn{width:100%;display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;letter-spacing:-0.01em;text-transform:none;padding:10px 12px;border-radius:8px;}"+
+      ".article-header .tmi-dd-btn:after{content:'+';font-size:15px;opacity:.5;}"+
+      ".article-header .tmi-dd.open .tmi-dd-btn:after{content:'\\2212';}"+
+      ".article-header .tmi-dd-panel{position:static;transform:none;width:auto;max-width:none;border:none;box-shadow:none;border-radius:0;padding:2px 0 8px 12px;}"+
+    "}"+
     /* in the desktop side rail the dropdown becomes an inline accordion */
     "@media(min-width:1024px){"+
       ".nav .nav-links .tmi-dd{display:block;}"+
