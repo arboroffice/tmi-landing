@@ -47,6 +47,18 @@
       ".article-header .tmi-dd.open .tmi-dd-btn:after{content:'\\2212';}"+
       ".article-header .tmi-dd-panel{position:static;transform:none;width:auto;max-width:none;border:none;box-shadow:none;border-radius:0;padding:2px 0 8px 12px;}"+
     "}"+
+    /* collapsible desktop rail: a floating toggle hides/shows the side nav */
+    "@media(min-width:1024px){"+
+      "#railTgl{position:fixed;top:18px;left:calc(var(--railw,248px) - 52px);z-index:600;width:38px;height:38px;border-radius:9px;background:#fff;border:1px solid rgba(0,0,0,0.12);cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;box-shadow:0 4px 16px rgba(0,0,0,0.07);transition:left .28s ease;}"+
+      "#railTgl span{width:16px;height:2px;background:#0a0b14;border-radius:2px;display:block;}"+
+      "#railTgl:hover{border-color:rgba(0,0,0,0.3);}"+
+      "html.rail-collapsed #railTgl{left:14px;box-shadow:0 6px 22px rgba(0,0,0,0.14);}"+
+      "header.nav,.article-header,aside.rail,.side-nav{transition:transform .28s ease;}"+
+      "body{transition:padding-left .28s ease;}"+
+      "html.rail-collapsed header.nav,html.rail-collapsed .article-header,html.rail-collapsed aside.rail,html.rail-collapsed .side-nav{transform:translateX(-100%);}"+
+      "html.rail-collapsed body{padding-left:0 !important;}"+
+    "}"+
+    "@media(max-width:1023.98px){#railTgl{display:none;}}"+
     /* in the desktop side rail the dropdown becomes an inline accordion */
     "@media(min-width:1024px){"+
       ".nav .nav-links .tmi-dd{display:block;}"+
@@ -192,6 +204,29 @@
     });
   }
 
-  function init(){ ensureExtras(); enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); }
+  // Collapsible desktop rail: floating toggle hides/shows whichever side-nav
+  // surface the page uses; the choice persists across pages via localStorage.
+  function railToggle(){
+    if(document.getElementById('railTgl')) return;
+    var surface=document.querySelector('header.nav, .article-header, aside.rail, .side-nav');
+    if(!surface) return;
+    var btn=mk('button','', '<span></span><span></span><span></span>');
+    btn.id='railTgl'; btn.type='button'; btn.setAttribute('aria-label','Toggle navigation');
+    document.body.appendChild(btn);
+    function width(){
+      try{ var w=surface.getBoundingClientRect().width; if(w>0) document.documentElement.style.setProperty('--railw', Math.round(w)+'px'); }catch(e){}
+    }
+    width(); window.addEventListener('resize', width);
+    var KEY='tmi_rail_hidden';
+    function set(c){
+      document.documentElement.classList.toggle('rail-collapsed', c);
+      btn.title = c ? 'Show menu' : 'Hide menu';
+      try{ localStorage.setItem(KEY, c ? '1' : '0'); }catch(e){}
+    }
+    btn.addEventListener('click', function(){ set(!document.documentElement.classList.contains('rail-collapsed')); });
+    try{ if(localStorage.getItem(KEY)==='1') set(true); else set(false); }catch(e){ set(false); }
+  }
+
+  function init(){ ensureExtras(); enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); railToggle(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
