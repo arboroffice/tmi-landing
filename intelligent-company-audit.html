@@ -27,7 +27,7 @@ button { font-family: inherit; }
 .pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 100px; padding: 6px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; border: 1.5px solid; cursor: pointer; transition: all 0.14s; font-family: 'Inter', sans-serif; }
 .check-box { width: 20px; height: 20px; border-radius: 5px; border: 2px solid #E0E0E0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: all 0.15s; }
 .check-box.done { background: #0A0A0A; border-color: #0A0A0A; }
-.nav-item { background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: #AAAAAA; padding: 18px 14px; border-bottom: 2px solid transparent; transition: all 0.14s; white-space: nowrap; flex-shrink: 0; }
+#navBar .nav-scroll{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;}#navBar .nav-scroll::-webkit-scrollbar{display:none;}@media(max-width:760px){#navBar{position:sticky;}#navBar:after{content:"";position:absolute;top:0;right:0;bottom:0;width:44px;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.96));}}.nav-item { background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: #AAAAAA; padding: 18px 14px; border-bottom: 2px solid transparent; transition: all 0.14s; white-space: nowrap; flex-shrink: 0; }
 .nav-item:hover { color: #0A0A0A; }
 .nav-item.on { color: #0A0A0A; font-weight: 700; border-bottom-color: #0A0A0A; }
 .card { background: #FFFFFF; border: 1.5px solid #EBEBEB; border-radius: 16px; transition: all 0.18s; }
@@ -47,7 +47,7 @@ button { font-family: inherit; }
 .fld input,.fld textarea,.fld select{width:100%;font-family:'Inter',sans-serif;font-size:14px;color:#0A0A0A;background:#fff;border:1.5px solid #E0E0DC;border-radius:10px;padding:12px 14px;outline:none;}
 .fld input:focus,.fld textarea:focus,.fld select:focus{border-color:#0A0A0A;}
 .fld textarea{min-height:84px;resize:vertical;}
-.fld .opt{display:flex;align-items:center;gap:9px;font-size:14px;color:#4A4A4A;margin:7px 0;cursor:pointer;}
+.fld .opt{display:flex;align-items:center;gap:10px;font-size:14px;color:#4A4A4A;margin:6px 0;cursor:pointer;border:1.5px solid #EBEBEB;border-radius:10px;padding:11px 14px;min-height:44px;transition:border-color .12s,background .12s;}.fld .opt:hover{border-color:#C8F135;}.fld .opt:has(input:checked){border-color:#0A0A0A;background:#FDFFF5;font-weight:600;color:#0A0A0A;}.fld .opt input{accent-color:#0A0A0A;width:16px;height:16px;flex-shrink:0;}
 .fld .opt input{width:auto;}
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -408,12 +408,14 @@ function btnGhost(label,fn){ return '<button onclick="'+fn+'" style="background:
 
 /* ─── NAV ──────────────────────────────────────────────────────── */
 function renderNav(){
-  var h='<div style="max-width:1120px;margin:0 auto;padding:0 16px;display:flex;align-items:center;overflow-x:auto;">'
+  var h='<div class="nav-scroll" style="max-width:1120px;margin:0 auto;padding:0 16px;display:flex;align-items:center;overflow-x:auto;">'
    + '<div class="d" style="font-weight:700;font-size:13px;letter-spacing:0.14em;text-transform:uppercase;padding:17px 20px 17px 0;margin-right:8px;border-right:2.5px solid #0A0A0A;flex-shrink:0;color:#0A0A0A;">TMI</div>'
    + '<div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;background:#C8F135;color:#0A0A0A;padding:3px 9px;border-radius:4px;margin-right:16px;flex-shrink:0;">FREE</div>';
   NAV.forEach(function(n){ h+='<button onclick="go(\''+n.id+'\')" class="nav-item'+(state.sec===n.id?' on':'')+'">'+n.label+'</button>'; });
   h+='</div>';
   document.getElementById("navBar").innerHTML=h;
+  // Keep the active section visible in the strip on phones.
+  try{ var on=document.querySelector("#navBar .nav-item.on"); if(on) on.scrollIntoView({inline:"center",block:"nearest"}); }catch(e){}
 }
 
 /* ─── RENDER ───────────────────────────────────────────────────── */
