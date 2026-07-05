@@ -51,6 +51,12 @@ jobs:
           else
             git commit -m "Field Notes: $TITLE"
             git push
+            # Tell Bing/Copilot and other IndexNow engines about the new article immediately.
+            SLUG=$(git diff --name-only HEAD~1 HEAD | grep -oE '^article-[a-z0-9-]+\.html$' | head -1 | sed 's/\.html$//')
+            if [ -n "$SLUG" ]; then
+              curl -s "https://api.indexnow.org/indexnow?url=https://www.tmitechai.com/${SLUG}&key=1ff7376d2a8649b0a6516385e204d6f0" || true
+              curl -s "https://api.indexnow.org/indexnow?url=https://www.tmitechai.com/news&key=1ff7376d2a8649b0a6516385e204d6f0" || true
+            fi
           fi
 
       - name: Send email to subscribers
