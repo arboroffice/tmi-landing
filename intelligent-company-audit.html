@@ -37,6 +37,12 @@ button { font-family: inherit; }
 .agent-row.on { background: #FAFAF8; border-bottom-color: #C8F135; }
 .score-track { height: 8px; background: #F0F0F0; border-radius: 100px; overflow: hidden; }
 .score-fill { height: 100%; border-radius: 100px; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+.diag-opt { display:block; width:100%; text-align:left; border:1.5px solid #E6E6E1; border-radius:12px; background:#fff; padding:18px 20px; margin-bottom:12px; font-size:16px; font-weight:600; color:#1A1A1A; cursor:pointer; transition:border-color .12s, background .12s, transform .06s; min-height:56px; font-family:inherit; }
+.diag-opt:hover { border-color:#0A0A0A; background:#FDFFF5; }
+.diag-opt:active { transform:scale(0.99); }
+.diag-progress { height:6px; background:#EEEEEA; border-radius:100px; overflow:hidden; }
+.diag-progress>div { height:100%; background:#0A0A0A; border-radius:100px; transition:width .3s ease; }
+@media(max-width:560px){ .diag-opt{ font-size:15px; padding:16px 16px; } }
 .leak-item { border-bottom: 1.5px solid #F0F0F0; cursor: pointer; }
 .leak-item:hover { background: #FAFAF8; }
 .leak-item.on { background: #FAFAF8; }
@@ -275,7 +281,7 @@ const FALLBACK_INTAKE = OWNER_INTAKE;
 
 /* ─── STATE ─────────────────────────────────────────────────────── */
 var lead = { name:"", email:"", company:"", phone:"" };
-var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null, research:null, researching:false, researched:false, prefilled:{}, hypothesis:{}, removedFacts:{}, userFacts:[], diagnosis:null, diagnosing:false, diagnosed:false, issueReact:{}, autoScored:false };
+var state = { sec:"intro", openWk:null, openDay:null, aFilter:"All", selAgent:null, openLeak:null, checks:{}, qi:0, scores:{ Visibility:2, Traceability:2, Accountability:2, Predictability:1, Control:1 }, answers:{}, intake:null, intakeLoaded:false, submitted:false, result:null, research:null, researching:false, researched:false, prefilled:{}, hypothesis:{}, removedFacts:{}, userFacts:[], diagnosis:null, diagnosing:false, diagnosed:false, issueReact:{}, autoScored:false };
 function isMob(){ return window.innerWidth < 640; }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function sum(o){ return Object.values(o).reduce(function(a,b){return a+b;},0); }
@@ -471,27 +477,62 @@ function renderIntro(mob){
 
 function scoreMeta(){ var t=sum(state.scores); var label=t<=8?"Fragmented":t<=14?"Developing":t<=19?"Coordinated":"Intelligent"; var color=t<=8?"#FF4040":t<=14?"#FF6B35":t<=19?"#F5A623":"#C8F135"; return {t:t,label:label,color:color}; }
 
+var DIAG_Q = [
+  { want:"Visibility", q:"Right now, without calling or texting anyone, how much of your operation can you actually see?",
+    opts:[["All of it, live, in one place",5],["Most of it, if I go check a few spots",4],["Only what I think to ask about",2],["Not much until something blows up",1]] },
+  { want:"Traceability", q:"When a job goes sideways, how fast do you find out?",
+    opts:[["The same minute it happens",5],["Same day",4],["A day or two later",2],["I hear it from the customer",1]] },
+  { want:"Accountability", q:"When something slips through the cracks, how clear is it who owned it?",
+    opts:[["Every task has one clear owner",5],["Usually clear, sometimes fuzzy",4],["We sort it out after the fact",2],["It turns into a blame game",1]] },
+  { want:"Predictability", q:"How far ahead can you see what is coming: cash, capacity, and problems?",
+    opts:[["Weeks out, with real numbers",5],["A few days, roughly",4],["Just the week in front of me",2],["We deal with it as it hits",1]] },
+  { want:"Control", q:"If you disappeared for two weeks, what would happen to the business?",
+    opts:[["It runs fine without me",5],["It runs, with a few check-ins",4],["It limps and things slip",2],["It basically stops",1]] }
+];
+function wantByLabel(l){ for(var i=0;i<FIVE_WANTS.length;i++){ if(FIVE_WANTS[i].label===l) return FIVE_WANTS[i]; } return FIVE_WANTS[0]; }
+function answerDiag(sc){ var q=DIAG_Q[state.qi]; if(!q) return; state.scores[q.want]=sc; state.qi++; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+function diagBack(){ if(state.qi>0){ state.qi--; render(); window.scrollTo({top:0,behavior:"smooth"}); } }
+function retakeDiag(){ state.qi=0; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+
 function renderDiag(mob){
+  var pad=mob?36:72;
+  // One plain diagnostic question at a time. Answers compute the score.
+  if(state.qi < DIAG_Q.length){
+    var q=DIAG_Q[state.qi], w=wantByLabel(q.want);
+    var pct=Math.round((state.qi/DIAG_Q.length)*100);
+    var h='<div style="max-width:640px;margin:0 auto;padding-top:'+pad+'px;">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><span style="font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#9A9A9A;">Question '+(state.qi+1)+' of '+DIAG_Q.length+'</span>'+(state.qi>0?'<button onclick="diagBack()" style="background:none;border:none;font-size:13px;color:#9A9A9A;cursor:pointer;">&larr; Back</button>':'')+'</div>';
+    h+='<div class="diag-progress" style="margin-bottom:34px;"><div style="width:'+pct+'%;"></div></div>';
+    h+='<div style="display:inline-block;background:#0A0A0A;color:'+w.color+';font-size:10px;font-weight:700;letter-spacing:0.14em;padding:3px 9px;border-radius:4px;margin-bottom:16px;">'+w.label.toUpperCase()+'</div>';
+    h+='<h2 class="d" style="font-size:clamp(24px,3.4vw,36px);font-weight:700;letter-spacing:-0.02em;line-height:1.2;color:#0A0A0A;margin-bottom:28px;">'+q.q+'</h2>';
+    q.opts.forEach(function(o){ h+='<button class="diag-opt" onclick="answerDiag('+o[1]+')">'+o[0]+'</button>'; });
+    h+='<p style="font-size:13px;color:#B0B0B0;margin-top:16px;text-align:center;">No wrong answers. This is your starting line, not a test.</p>';
+    h+='</div>';
+    return h;
+  }
+  // Reveal: score computed from the answers.
   var sm=scoreMeta();
-  var h='<div><div style="padding-top:'+(mob?36:72)+'px;padding-bottom:'+(mob?28:48)+'px;">'+sectionRule("Your Score");
-  h+='<h2 class="d" style="font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#0A0A0A;margin-bottom:16px;">Where are you right now?</h2>';
-  h+='<p style="font-size:17px;color:#5A5A5A;max-width:560px;line-height:1.75;">'+(state.autoScored?'We pre-scored these from our research. Adjust anything that does not match. ':'Rate your business on each of the 5 wants. Be honest. ')+'This is the gap this audit closes. Your score today is your starting line, not your limit.</p>';
-  if(state.autoScored){ h+='<div style="display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:#EEF8C8;border:1px solid #D8ECCC;border-radius:100px;padding:5px 14px;"><span style="width:7px;height:7px;border-radius:50%;background:#7AA830;"></span><span style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4A6010;">AI estimated &middot; adjust if needed</span></div>'; }
+  var co=(state.answers.company||lead.company||"your company");
+  var h='<div><div style="padding-top:'+pad+'px;padding-bottom:'+(mob?24:40)+'px;">'+sectionRule("Your Score");
+  h+='<h2 class="d" style="font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-0.03em;line-height:1.08;color:#0A0A0A;margin-bottom:14px;">Here is where '+esc(co)+' stands.</h2>';
+  h+='<p style="font-size:17px;color:#5A5A5A;max-width:560px;line-height:1.7;">We scored this straight from your answers. It is the gap this audit closes, your starting line, not your limit.</p></div>';
+  h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"340px 1fr")+';gap:'+(mob?"20px":"40px")+';align-items:start;">';
+  h+='<div style="background:#0A0A0A;border-radius:20px;padding:32px 28px;">';
+  h+='<div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#4A4A4A;margin-bottom:16px;">Your operational score</div>';
+  h+='<div class="d" style="font-size:80px;font-weight:700;line-height:1;color:'+sm.color+';">'+sm.t+'<span style="font-size:26px;color:#4A4A4A;font-weight:600;"> / 25</span></div>';
+  h+='<div style="font-size:15px;color:#8A8A8A;margin:6px 0 22px;">'+sm.label+'</div>';
+  h+='<div style="height:6px;background:#1A1A1A;border-radius:100px;overflow:hidden;margin-bottom:24px;"><div style="height:100%;width:'+((sm.t/25)*100)+'%;background:'+sm.color+';border-radius:100px;transition:width 0.6s ease;"></div></div>';
+  FIVE_WANTS.forEach(function(w){ var v=state.scores[w.label]; h+='<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;color:#9A9A9A;">'+w.label+'</span><span style="font-size:12px;font-weight:700;color:'+w.color+';">'+v+'/5</span></div><div style="height:5px;background:#1A1A1A;border-radius:100px;overflow:hidden;"><div style="height:100%;width:'+((v/5)*100)+'%;background:'+w.color+';border-radius:100px;"></div></div></div>'; });
+  h+='<button onclick="retakeDiag()" style="background:none;border:none;color:#6A6A6A;font-size:12px;cursor:pointer;margin-top:10px;text-decoration:underline;">Retake the diagnostic</button>';
   h+='</div>';
-  h+='<div style="display:grid;grid-template-columns:'+(mob?"1fr":"1fr 320px")+';gap:32px;align-items:start;"><div>';
-  FIVE_WANTS.forEach(function(w){ var sc=state.scores[w.label];
-    h+='<div style="border-top:1.5px solid #F0F0F0;padding:28px 0;"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:16px;"><div><div style="display:inline-block;background:#0A0A0A;color:'+w.color+';font-size:10px;font-weight:700;letter-spacing:0.14em;padding:3px 8px;border-radius:4px;margin-bottom:10px;">'+w.n+'</div><div class="d" style="font-size:20px;font-weight:700;color:#0A0A0A;margin-bottom:4px;">'+w.label+'</div><div style="font-size:13px;color:#8A8A8A;font-style:italic;">'+w.q+'</div></div><div class="d" style="font-size:32px;font-weight:700;color:'+(sc>=4?w.color:sc>=3?"#F5A623":"#FF6060")+';min-width:48px;text-align:right;">'+sc+'<span style="font-size:16px;color:#CCCCCC;">/5</span></div></div><div style="display:flex;gap:8px;margin-bottom:12px;">';
-    [1,2,3,4,5].forEach(function(v){ var on=sc===v, part=sc>v; h+='<button onclick="setScore(\''+w.label+'\','+v+')" style="flex:1;height:40px;border:1.5px solid;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;background:'+(on?"#0A0A0A":part?w.color+"30":"white")+';border-color:'+(on?"#0A0A0A":part?w.color:"#E8E8E4")+';color:'+(on?"white":"#0A0A0A")+';">'+v+'</button>'; });
-    h+='</div><div style="display:flex;justify-content:space-between;"><span style="font-size:11px;color:#CCCCCC;">No visibility at all</span><span style="font-size:11px;color:#CCCCCC;">Completely solved</span></div></div>';
-  });
-  h+='</div><div style="position:'+(mob?"static":"sticky")+';top:72px;">';
-  h+='<div style="background:#0A0A0A;border-radius:20px;padding:32px 28px;margin-bottom:16px;"><div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#4A4A4A;margin-bottom:20px;">Your operational score</div><div class="d" style="font-size:72px;font-weight:700;line-height:1;color:'+sm.color+';margin-bottom:4px;">'+sm.t+'</div><div style="font-size:14px;color:#6A6A6A;margin-bottom:24px;">out of 25 &middot; '+sm.label+'</div><div style="height:6px;background:#1A1A1A;border-radius:100px;overflow:hidden;margin-bottom:24px;"><div style="height:100%;width:'+((sm.t/25)*100)+'%;background:'+sm.color+';border-radius:100px;transition:width 0.5s ease;"></div></div>';
-  FIVE_WANTS.forEach(function(w){ h+='<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;font-weight:500;color:#6A6A6A;">'+w.label+'</span><span style="font-size:12px;font-weight:700;color:'+w.color+';">'+state.scores[w.label]+'/5</span></div><div class="score-track"><div class="score-fill" style="width:'+((state.scores[w.label]/5)*100)+'%;background:'+w.color+';"></div></div></div>'; });
+  var weak=FIVE_WANTS.slice().sort(function(a,b){ return (state.scores[a.label]||0)-(state.scores[b.label]||0); }).slice(0,2);
+  h+='<div>';
+  h+='<div style="background:#F8F8F5;border:1.5px solid #EBEBEB;border-left:4px solid '+sm.color+';border-radius:0 14px 14px 0;padding:20px 22px;margin-bottom:16px;"><div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#BBBBBB;margin-bottom:10px;">What this means</div><p style="font-size:15px;color:#3A3A3A;line-height:1.7;margin:0;">Your two weakest links are <b>'+weak[0].label+'</b> and <b>'+weak[1].label+'</b>. '+(sm.t>=20?'Even strong operations have a next layer, and that is where the AI Org Chart takes over.':'That is where the money leaks and the chaos starts, and it is exactly where the 30-day build begins.')+'</p></div>';
+  h+='<div style="background:#fff;border:1.5px solid #EBEBEB;border-radius:14px;padding:18px 20px;">';
+  [{range:"5-8",label:"Fragmented",desc:"Runs on memory. Start at Day 1."},{range:"9-14",label:"Developing",desc:"Some systems, expensive gaps."},{range:"15-19",label:"Coordinated",desc:"Solid foundation to sharpen."},{range:"20-25",label:"Intelligent",desc:"Strong. The AI Org Chart is next."}].forEach(function(sX,i){ var on=(sm.label===sX.label); h+='<div style="padding:9px 0;border-bottom:'+(i<3?"1px solid #F2F2F2":"none")+';display:flex;gap:12px;align-items:flex-start;'+(on?"":"opacity:.5;")+'"><div class="d" style="font-size:12px;font-weight:700;color:'+(on?"#0A0A0A":"#CCCCCC")+';min-width:44px;">'+sX.range+'</div><div><div style="font-size:13px;font-weight:600;color:#0A0A0A;">'+sX.label+(on?' &larr; you':'')+'</div><div style="font-size:12px;color:#8A8A8A;">'+sX.desc+'</div></div></div>'; });
+  h+='</div></div>';
   h+='</div>';
-  h+='<div style="background:#F8F8F5;border:1.5px solid #EBEBEB;border-radius:16px;padding:20px;"><div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#BBBBBB;margin-bottom:12px;">What your score means</div>';
-  [{range:"5–8",label:"Fragmented",desc:"Your business runs on memory. Start at Day 1."},{range:"9–14",label:"Developing",desc:"Some systems exist. The gaps are expensive. Start at Week 2."},{range:"15–19",label:"Coordinated",desc:"Solid foundation. Focus on Week 3 and 4."},{range:"20–25",label:"Intelligent",desc:"Strong operations. The AI Org Chart is your next layer."}].forEach(function(s,i){ h+='<div style="padding:10px 0;border-bottom:'+(i<3?"1px solid #F0F0F0":"none")+';display:flex;gap:12px;align-items:flex-start;"><div class="d" style="font-size:12px;font-weight:700;color:#CCCCCC;min-width:36px;">'+s.range+'</div><div><div style="font-size:13px;font-weight:600;color:#0A0A0A;margin-bottom:2px;">'+s.label+'</div><div style="font-size:12px;color:#8A8A8A;">'+s.desc+'</div></div></div>'; });
-  h+='</div></div></div>';
-  h+='<div style="margin-top:40px;display:flex;gap:12px;">'+btnGhost("&larr; Back","go('intro')")+btnBlack("Map your operation &rarr;","go('intake')")+'</div></div>';
+  h+='<div style="margin-top:36px;display:flex;gap:12px;flex-wrap:wrap;">'+btnBlack("See your money leaks &rarr;","go('leaks')")+btnGhost("Add a few real numbers &rarr;","go('intake')")+'</div></div>';
   return h;
 }
 
