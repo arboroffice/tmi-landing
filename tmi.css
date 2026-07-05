@@ -139,9 +139,15 @@ p{margin:0;}
 /* Chartreuse text is unreadable on white; on light sections the accent renders
    as a highlighter behind ink. Dark sections keep lime text. */
 .hero .lime,.sec:not(.dark) .lime{
-  color:var(--ink);background:var(--chart);
+  color:var(--ink);
+  /* Paint the highlight as a sized gradient, not the full inline box: tight
+     headline line-heights make a full-box background bleed over the line above. */
+  background-image:linear-gradient(var(--chart),var(--chart));
+  background-repeat:no-repeat;
+  background-size:100% 0.84em;
+  background-position:0 72%;
   -webkit-box-decoration-break:clone;box-decoration-break:clone;
-  padding:0.02em 0.14em;margin-left:-0.04em;
+  padding:0 0.14em;margin-left:-0.04em;
 }
 
 /* ---- desktop side rail ---------------------------------------------------- */
