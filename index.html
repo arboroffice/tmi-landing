@@ -194,6 +194,16 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     .log{grid-template-columns:1fr;gap:6px;}
   }
   @media(max-width:520px){.eps{grid-template-columns:1fr;}.live-grid{grid-template-columns:1fr 1fr;}}
+  /* ---- Weekly masterclass band ---- */
+  .mc-band{display:grid;grid-template-columns:1.4fr 0.9fr;gap:40px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:20px;padding:44px 46px;}
+  .mc-k{display:inline-flex;align-items:center;gap:9px;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink);}
+  .mc-k i{width:9px;height:9px;border-radius:50%;background:var(--chart-dark);box-shadow:0 0 0 4px rgba(205,238,114,0.3);animation:lpulse 1.8s ease-in-out infinite;}
+  .mc-when{background:var(--ink);color:#fff;border-radius:16px;padding:30px 28px;text-align:center;}
+  .mc-when-k{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--chart);margin-bottom:14px;}
+  .mc-when-day{font-family:var(--serif);font-weight:800;font-size:30px;letter-spacing:-0.02em;line-height:1.05;}
+  .mc-when-time{font-family:var(--serif);font-weight:800;font-size:30px;letter-spacing:-0.02em;line-height:1.05;color:var(--chart);}
+  .mc-when-local{font-family:var(--sans);font-size:12px;color:rgba(255,255,255,0.5);margin-top:12px;}
+  @media(max-width:760px){.mc-band{grid-template-columns:1fr;gap:28px;padding:32px 26px;}}
 </style>
 </head>
 <body>
@@ -304,6 +314,29 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
       <div class="live-cell"><div class="live-n" data-count="96">0</div><div class="live-l">invoices processed</div></div>
       <div class="live-cell"><div class="live-n" data-count="37">0</div><div class="live-l">workflows running</div></div>
       <div class="live-cell"><div class="live-n" data-count="14">0</div><div class="live-l">businesses on TMI systems</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WEEKLY MASTERCLASS -->
+<section class="sec alt" id="masterclass">
+  <div class="wrap">
+    <div class="mc-band reveal">
+      <div class="mc-copy">
+        <p class="mc-k"><i></i> Free live masterclass · every week</p>
+        <h2 class="h-sec" style="margin:12px 0 12px;max-width:20ch;">Build a company that runs without you.</h2>
+        <p class="sub" style="max-width:52ch;">A 40-minute working session on the system that removes the owner as the bottleneck. Live every Tuesday, or watch on demand right now.</p>
+        <div class="hero-cta" style="margin-top:24px;">
+          <a href="/webinar" class="btn btn-lime" onclick="lead()">Save my spot</a>
+          <a href="/watch?mode=ondemand" class="btn" style="background:transparent;color:var(--ink);border-color:var(--line-2);">▶ Watch on demand</a>
+        </div>
+      </div>
+      <div class="mc-when">
+        <div class="mc-when-k">Next live session</div>
+        <div class="mc-when-day" id="mcDay">Tuesday</div>
+        <div class="mc-when-time" id="mcTime">3:00 PM CST</div>
+        <div class="mc-when-local" id="mcLocal"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -602,6 +635,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
       </div>
       <div class="foot-col">
         <h5>More</h5>
+        <a href="/webinar">Free Masterclass</a>
         <a href="/founders-of-the-future">Founders of the Future</a>
         <a href="/news" style="color:var(--chart);">Field Notes (Journal)</a>
         <a href="/faq">FAQ</a>
@@ -639,6 +673,36 @@ function countUp(el){
 }
 var cObs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){countUp(e.target);cObs.unobserve(e.target);}})},{threshold:0.5});
 document.querySelectorAll('.live-n[data-count]').forEach(function(el){cObs.observe(el);});
+
+// Next weekly masterclass — Tuesday 3:00 PM America/Chicago, DST-safe.
+(function(){
+  var TZ='America/Chicago';
+  function zonedToUtc(y,mo,d,h,mi){
+    var asUTC=Date.UTC(y,mo-1,d,h,mi,0);
+    var dtf=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    var p={};dtf.formatToParts(new Date(asUTC)).forEach(function(x){p[x.type]=x.value;});
+    var hr=+p.hour;if(hr===24)hr=0;
+    var asTZ=Date.UTC(+p.year,p.month-1,+p.day,hr,+p.minute,+p.second);
+    return new Date(asUTC-(asTZ-asUTC));
+  }
+  function parts(date){
+    var dtf=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour12:false,weekday:'short',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    var p={};dtf.formatToParts(date).forEach(function(x){p[x.type]=x.value;});
+    var wd={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[p.weekday];
+    var hr=+p.hour;if(hr===24)hr=0;
+    return {y:+p.year,mo:+p.month,d:+p.day,wd:wd,h:hr,mi:+p.minute};
+  }
+  var c=parts(new Date());
+  var add=(2-c.wd+7)%7;
+  if(add===0&&(c.h>15||(c.h===15&&c.mi>=0)))add=7;
+  var base=Date.UTC(c.y,c.mo-1,c.d)+add*86400000,b=new Date(base);
+  var s=zonedToUtc(b.getUTCFullYear(),b.getUTCMonth()+1,b.getUTCDate(),15,0);
+  var day=document.getElementById('mcDay');
+  if(day){
+    day.textContent=(add<=1?(add===0?'Today':'Tomorrow'):new Intl.DateTimeFormat('en-US',{timeZone:TZ,weekday:'long',month:'long',day:'numeric'}).format(s));
+    document.getElementById('mcLocal').textContent='Your time: '+new Intl.DateTimeFormat(undefined,{weekday:'short',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(s);
+  }
+})();
 </script>
 <script src="/tmi-book.js" defer></script>
 <script src="/tmi-nav.js" defer></script>
