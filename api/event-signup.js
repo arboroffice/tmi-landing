@@ -31,6 +31,7 @@ module.exports = async function handler(req, res) {
   const last = name.includes(' ') ? name.split(/\s+/).slice(1).join(' ') : null;
   const summary =
     `Event: ${eventName} (${slug})\n` +
+    (b.session ? `Session: ${b.session}${b.session_time ? ` (${b.session_time})` : ''}\n` : '') +
     `Company: ${b.company || '—'}  ·  Phone: ${b.phone || '—'}\n` +
     `Industry: ${b.industry || '—'}  ·  Location: ${b.location || '—'}\n` +
     `Wants to walk away with: ${b.goal || '—'}\n` +
