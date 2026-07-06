@@ -159,6 +159,41 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     .method-strip{grid-template-columns:1fr 1fr;}
   }
   @media(max-width:480px){.method-strip{grid-template-columns:1fr;}}
+
+  /* ---- Watch the Show (episode grid) ---- */
+  .show-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:34px;}
+  .eps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .ep{display:block;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);background:#101220;transition:transform .18s ease,border-color .18s ease;}
+  .ep:hover{transform:translateY(-4px);border-color:rgba(228,255,151,0.5);}
+  .ep-thumb{position:relative;aspect-ratio:16/9;background-size:cover;background-position:center;}
+  .ep-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,20,0.05),rgba(10,11,20,0.72));}
+  .ep-play{position:absolute;left:16px;bottom:14px;z-index:2;display:flex;align-items:center;gap:9px;color:#fff;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.04em;}
+  .ep-play .disc{width:34px;height:34px;border-radius:50%;background:rgba(228,255,151,0.95);color:#0a0b14;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .ep-tag{position:absolute;top:12px;left:12px;z-index:2;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;background:rgba(0,0,0,0.55);color:var(--chart);padding:4px 9px;border-radius:5px;backdrop-filter:blur(4px);}
+  .ep-body{padding:16px 18px 18px;}
+  .ep-body h4{font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-0.01em;color:#fff;line-height:1.2;margin:0 0 6px;}
+  .ep-body p{font-family:var(--sans);font-size:13px;color:rgba(255,255,255,0.55);line-height:1.5;margin:0;}
+  .ep-meta{font-family:var(--sans);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:12px;}
+  /* ---- What's Running Right Now ---- */
+  .live-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.1);border-radius:16px;overflow:hidden;margin-top:34px;}
+  .live-cell{background:var(--bg-deep);padding:30px 22px;text-align:center;}
+  .live-n{font-family:var(--sans);font-size:clamp(30px,3.4vw,44px);font-weight:800;letter-spacing:-0.03em;color:var(--chart);line-height:1;}
+  .live-l{font-family:var(--sans);font-size:12px;color:rgba(255,255,255,0.55);line-height:1.4;margin-top:9px;}
+  .live-dot{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart);}
+  .live-dot i{width:8px;height:8px;border-radius:50%;background:var(--chart);box-shadow:0 0 10px var(--chart);animation:lpulse 1.8s ease-in-out infinite;}
+  @keyframes lpulse{0%,100%{opacity:1}50%{opacity:.35}}
+  /* ---- Build Logs ---- */
+  .logs{border-top:1px solid var(--line);margin-top:30px;}
+  .log{display:grid;grid-template-columns:130px 1fr;gap:24px;padding:20px 0;border-bottom:1px solid var(--line);align-items:baseline;}
+  .log-date{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--muted);}
+  .log-body{font-family:var(--serif);font-size:18px;color:var(--ink);line-height:1.5;}
+  .log-body .tag{display:inline-block;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-2);background:var(--bg-alt);border:1px solid var(--line);border-radius:5px;padding:2px 8px;margin-right:10px;vertical-align:middle;}
+  @media(max-width:860px){
+    .eps{grid-template-columns:1fr 1fr;}
+    .live-grid{grid-template-columns:1fr 1fr 1fr;}
+    .log{grid-template-columns:1fr;gap:6px;}
+  }
+  @media(max-width:520px){.eps{grid-template-columns:1fr;}.live-grid{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
@@ -201,6 +236,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     <p class="sub reveal">The companies that win the next decade will not be the ones with the most people. They will be the ones with the best systems, data, and intelligence behind every move. We redesign how established businesses operate, so they save time, increase profit, and create freedom for the owner. We are here to scale your business and make it future-proof.</p>
     <div class="hero-cta reveal">
       <a href="/audit" class="btn" onclick="lead()">Book Your Business Intelligence Audit</a>
+      <a href="#watch" class="btn" style="background:transparent;color:var(--ink);border-color:var(--line-2);">▶ Watch a Transformation</a>
     </div>
     <div class="checks reveal"><span>Built in 30 days</span><span>You own it forever</span><span>No monthly software license</span></div>
   </div>
@@ -215,6 +251,61 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   </div>
   <div class="cc-floor"></div>
   <div class="cc-cap">The command center. Your whole operation on one screen, finally quiet.</div>
+</section>
+
+<!-- WATCH THE SHOW -->
+<section class="sec dark" id="watch">
+  <div class="wrap">
+    <div class="show-head">
+      <div>
+        <p class="kicker reveal" style="color:rgba(255,255,255,0.5);">Watch the show</p>
+        <h2 class="h-sec reveal" style="margin-top:14px;max-width:22ch;">See a real business get rebuilt.</h2>
+      </div>
+      <p class="sub reveal" style="color:rgba(255,255,255,0.6);max-width:40ch;">Short films from inside the work. Watch what changes before you ever talk to us.</p>
+    </div>
+    <div class="eps reveal">
+      <a class="ep" href="#watch">
+        <div class="ep-thumb" style="background-image:url('/dashboard-construction.webp')"><span class="ep-tag">Diagnosis</span><span class="ep-play"><span class="disc">▶</span> Watch</span></div>
+        <div class="ep-body"><h4>Why this company needed 17 apps</h4><p>One operation, seventeen logins, and nothing talking to each other.</p><div class="ep-meta">Episode 01 · 6 min</div></div>
+      </a>
+      <a class="ep" href="#watch">
+        <div class="ep-thumb" style="background-image:url('/dashboard-home-service-1.webp')"><span class="ep-tag">The owner</span><span class="ep-play"><span class="disc">▶</span> Watch</span></div>
+        <div class="ep-body"><h4>Meet the owner bottleneck</h4><p>What happens to a business when nothing moves until one person says so.</p><div class="ep-meta">Episode 02 · 8 min</div></div>
+      </a>
+      <a class="ep" href="#watch">
+        <div class="ep-thumb" style="background-image:url('/dashboard-manufacturing.webp')"><span class="ep-tag">The build</span><span class="ep-play"><span class="disc">▶</span> Watch</span></div>
+        <div class="ep-body"><h4>Building an AI department in 30 days</h4><p>Start to finish: audit, design, build, launch, on one operation.</p><div class="ep-meta">Episode 03 · 11 min</div></div>
+      </a>
+      <a class="ep" href="#watch">
+        <div class="ep-thumb" style="background-image:url('/dashboard-utilities.webp')"><span class="ep-tag">The money</span><span class="ep-play"><span class="disc">▶</span> Watch</span></div>
+        <div class="ep-body"><h4>The $250K workflow problem</h4><p>Where a quarter million dollars a year was quietly leaking, and how we closed it.</p><div class="ep-meta">Episode 04 · 7 min</div></div>
+      </a>
+      <a class="ep" href="#watch">
+        <div class="ep-thumb" style="background-image:url('/dashboard-heavy-machinery.webp')"><span class="ep-tag">Before &amp; after</span><span class="ep-play"><span class="disc">▶</span> Watch</span></div>
+        <div class="ep-body"><h4>Before &amp; after: an intelligent company</h4><p>The same business, six weeks apart. Chaos on one side, control on the other.</p><div class="ep-meta">Episode 05 · 9 min</div></div>
+      </a>
+      <a class="ep" href="/news">
+        <div class="ep-thumb" style="background:linear-gradient(135deg,#1a1c2e,#0d0f1a);"><span class="ep-tag">Field notes</span><span class="ep-play"><span class="disc">→</span> Read</span></div>
+        <div class="ep-body"><h4>The written record</h4><p>Every teardown, pattern, and playbook we publish, in Field Notes.</p><div class="ep-meta">Ongoing · The Journal</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT'S RUNNING RIGHT NOW -->
+<section class="sec dark" style="border-top:1px solid rgba(255,255,255,0.08);">
+  <div class="wrap">
+    <p class="live-dot reveal"><i></i> What's running right now</p>
+    <h2 class="h-sec reveal" style="margin:14px 0 4px;max-width:24ch;">TMI is an operating company, not an agency.</h2>
+    <p class="sub reveal" style="color:rgba(255,255,255,0.6);max-width:56ch;">Real systems, in production, doing the work while you read this.</p>
+    <div class="live-grid reveal">
+      <div class="live-cell"><div class="live-n" data-count="1284">0</div><div class="live-l">tasks automated today</div></div>
+      <div class="live-cell"><div class="live-n" data-count="412">0</div><div class="live-l">estimates generated</div></div>
+      <div class="live-cell"><div class="live-n" data-count="96">0</div><div class="live-l">invoices processed</div></div>
+      <div class="live-cell"><div class="live-n" data-count="37">0</div><div class="live-l">workflows running</div></div>
+      <div class="live-cell"><div class="live-n" data-count="14">0</div><div class="live-l">businesses on TMI systems</div></div>
+    </div>
+  </div>
 </section>
 
 <!-- WHAT YOU GET -->
@@ -427,6 +518,27 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   </div>
 </section>
 
+<!-- BUILD LOGS -->
+<section class="sec">
+  <div class="wrap">
+    <div class="show-head">
+      <div>
+        <p class="kicker reveal">Build logs</p>
+        <h2 class="h-sec reveal" style="margin-top:14px;max-width:22ch;">What we shipped this week.</h2>
+      </div>
+      <p class="sub reveal" style="max-width:40ch;">We build in the open. A running record of the systems going live inside the companies we work with.</p>
+    </div>
+    <div class="logs reveal">
+      <div class="log"><span class="log-date">This week</span><div class="log-body"><span class="tag">Automation</span>Put invoice approvals on autopilot for a field-service operation, so a job closes the day it finishes instead of the week it gets remembered.</div></div>
+      <div class="log"><span class="log-date">This week</span><div class="log-body"><span class="tag">Command layer</span>Wired dispatch, job costing, and accounting into one live screen for a 40-person contractor. One source of truth, no more end-of-month scramble.</div></div>
+      <div class="log"><span class="log-date">Last week</span><div class="log-body"><span class="tag">Workflow</span>Removed three manual hand-offs between the estimate and the invoice. The work now routes itself and nothing waits on the owner.</div></div>
+      <div class="log"><span class="log-date">Last week</span><div class="log-body"><span class="tag">Digital workforce</span>Stood up an intake agent that answers, qualifies, and schedules after hours, so no lead sits until morning.</div></div>
+      <div class="log"><span class="log-date">Earlier</span><div class="log-body"><span class="tag">Visibility</span>Connected five disconnected systems into a single reporting layer. Reports that used to take a half-day now generate themselves.</div></div>
+    </div>
+    <a href="/news" class="btn reveal" style="margin-top:30px;">Read the full record</a>
+  </div>
+</section>
+
 <!-- FOUNDERS OF THE FUTURE -->
 <section class="sec alt">
   <div class="wrap">
@@ -511,6 +623,22 @@ function closeDrawer(){ document.getElementById('drawer').classList.remove('open
 document.querySelectorAll('#drawer a').forEach(function(a){ a.addEventListener('click', closeDrawer); });
 var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}})},{threshold:0.08});
 document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
+
+// Count-up for the live metrics
+function countUp(el){
+  var target=parseInt(el.getAttribute('data-count'),10)||0;
+  var dur=1400, start=null;
+  function step(ts){
+    if(!start) start=ts;
+    var p=Math.min((ts-start)/dur,1);
+    var eased=1-Math.pow(1-p,3);
+    el.textContent=Math.round(target*eased).toLocaleString();
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+var cObs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){countUp(e.target);cObs.unobserve(e.target);}})},{threshold:0.5});
+document.querySelectorAll('.live-n[data-count]').forEach(function(el){cObs.observe(el);});
 </script>
 <script src="/tmi-book.js" defer></script>
 <script src="/tmi-nav.js" defer></script>
