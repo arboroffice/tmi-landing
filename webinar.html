@@ -45,6 +45,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
   "description": "A free 40-minute masterclass on the system that removes the owner as the bottleneck and turns an operations-heavy business into an intelligent company that runs without you.",
   "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
   "eventStatus": "https://schema.org/EventScheduled",
+  "eventSchedule": { "@type": "Schedule", "repeatFrequency": "P1W", "byDay": "https://schema.org/Tuesday", "startTime": "15:00", "scheduleTimezone": "America/Chicago", "duration": "PT40M" },
   "location": { "@type": "VirtualLocation", "url": "https://www.tmitechai.com/webinar" },
   "organizer": { "@type": "Organization", "name": "TMI Technology", "url": "https://www.tmitechai.com" },
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock", "url": "https://www.tmitechai.com/webinar" },
@@ -172,7 +173,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
       <div>
         <span class="wb-eyebrow">Free 40-minute masterclass</span>
         <h1 class="wb-h1">Build a company that runs <span class="lime">without you.</span></h1>
-        <p class="wb-deck">A live-simulated masterclass on the system that removes the owner as the bottleneck, so a $5M+ operations-heavy business runs on systems, not on you answering every question. No slides full of buzzwords. The actual framework.</p>
+        <p class="wb-deck">A live masterclass, every week, on the system that removes the owner as the bottleneck, so a $5M+ operations-heavy business runs on systems, not on you answering every question. No slides full of buzzwords. The actual framework.</p>
         <ul class="wb-learn">
           <li>The three systems every operations-heavy company needs to run without the owner in the middle of everything.</li>
           <li>How to spot which one is quietly leaking the most time and money in your business right now.</li>
@@ -183,8 +184,8 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
       <div>
         <div class="reg" id="reg">
           <p class="reg-k">Reserve your seat</p>
-          <p class="reg-t">Pick a start time</p>
-          <p class="reg-s">On-demand. Choose a session below, including one starting in minutes.</p>
+          <p class="reg-t">Save your spot</p>
+          <p class="reg-s">Live every week. Join the next session, or watch on demand right now.</p>
           <form id="regForm" autocomplete="on">
             <div class="slots" id="slots"><!-- injected by JS --></div>
             <div class="reg-field"><input type="text" id="rgName" name="name" placeholder="Your name" autocomplete="name" required/></div>
@@ -301,101 +302,123 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
 function lead(label){ try{ if(typeof fbq==='function') fbq('track','Lead',{content_name: label||'Webinar Registration'}); }catch(e){} }
 function scrollReg(e){ if(e) e.preventDefault(); var r=document.getElementById('reg'); if(r) r.scrollIntoView({behavior:'smooth',block:'center'}); var n=document.getElementById('rgName'); if(n) setTimeout(function(){n.focus();},400); }
 
-// ---- Evergreen "live-simulated" session times (no hardcoded dates) ----
-// Generates rolling start times off the visitor's own clock so the page
-// always feels live and never ages out.
+// ---- Weekly session: Tuesday 3:00 PM America/Chicago (CST/CDT), DST-safe ----
+var TZ='America/Chicago', SESSION_WEEKDAY=2, SESSION_HOUR=15, SESSION_MIN=0;
+function zonedToUtc(y,mo,d,h,mi){
+  var asUTC=Date.UTC(y,mo-1,d,h,mi,0);
+  var dtf=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var p={};dtf.formatToParts(new Date(asUTC)).forEach(function(x){p[x.type]=x.value;});
+  var hr=+p.hour;if(hr===24)hr=0;
+  var asTZ=Date.UTC(+p.year,p.month-1,+p.day,hr,+p.minute,+p.second);
+  return new Date(asUTC-(asTZ-asUTC));
+}
+function chicagoParts(date){
+  var dtf=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour12:false,weekday:'short',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  var p={};dtf.formatToParts(date).forEach(function(x){p[x.type]=x.value;});
+  var wd={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[p.weekday];
+  var hr=+p.hour;if(hr===24)hr=0;
+  return {y:+p.year,mo:+p.month,d:+p.day,wd:wd,h:hr,mi:+p.minute};
+}
+function nextSession(from){
+  var now=from||new Date();var c=chicagoParts(now);
+  var add=(SESSION_WEEKDAY-c.wd+7)%7;
+  if(add===0&&(c.h>SESSION_HOUR||(c.h===SESSION_HOUR&&c.mi>=SESSION_MIN)))add=7;
+  var base=Date.UTC(c.y,c.mo-1,c.d)+add*86400000;var b=new Date(base);
+  return zonedToUtc(b.getUTCFullYear(),b.getUTCMonth()+1,b.getUTCDate(),SESSION_HOUR,SESSION_MIN);
+}
+function relDay(date){
+  var a=chicagoParts(new Date()), b=chicagoParts(date);
+  var da=Date.UTC(a.y,a.mo-1,a.d), db=Date.UTC(b.y,b.mo-1,b.d);
+  var diff=Math.round((db-da)/86400000);
+  if(diff===0) return 'Today';
+  if(diff===1) return 'Tomorrow';
+  return new Intl.DateTimeFormat('en-US',{timeZone:TZ,weekday:'long',month:'long',day:'numeric'}).format(date);
+}
+function cstTime(date){ return new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'}).format(date)+' CST'; }
+function localTime(date){ return new Intl.DateTimeFormat(undefined,{weekday:'short',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(date); }
+
+var SESSION=nextSession();
+var SESSION_ISO=SESSION.toISOString();
+
 (function(){
-  var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  function fmt(d){
-    var h=d.getHours(), m=d.getMinutes(), ap=h>=12?'PM':'AM';
-    var h12=h%12; if(h12===0) h12=12;
-    return h12+':'+(m<10?'0':'')+m+' '+ap;
-  }
-  function dayWord(d, now){
-    var a=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    var b=new Date(d.getFullYear(),d.getMonth(),d.getDate());
-    var diff=Math.round((b-a)/86400000);
-    if(diff<=0) return 'Today';
-    if(diff===1) return 'Tomorrow';
-    return DAYS[d.getDay()];
-  }
-  function roundUp(d, step){ // step in minutes
-    var ms=step*60000; return new Date(Math.ceil(d.getTime()/ms)*ms);
-  }
-  var now=new Date();
-  var slots=[];
-
-  // 1) "Starts in a few minutes" — next 15-min boundary, min 8 min out
-  var soon=roundUp(new Date(now.getTime()+8*60000),15);
-  var mins=Math.max(1,Math.round((soon-now)/60000));
-  slots.push({ label:'Today · starts in '+mins+' minutes', sub:fmt(soon), tag:'Starting soon', iso:soon.toISOString() });
-
-  // 2) Later today (or tomorrow) — a few hours out, on the hour
-  var later=roundUp(new Date(now.getTime()+3*3600000),60);
-  slots.push({ label:dayWord(later,now)+' · '+fmt(later), sub:'A few hours from now', tag:'', iso:later.toISOString() });
-
-  // 3) This evening at 7:00 PM, or tomorrow evening if past
-  var eve=new Date(now); eve.setHours(19,0,0,0);
-  if(eve.getTime() < now.getTime()+90*60000){ eve.setDate(eve.getDate()+1); }
-  slots.push({ label:dayWord(eve,now)+' · '+fmt(eve), sub:'Evening session', tag:'', iso:eve.toISOString() });
-
-  // 4) Tomorrow at 12:00 PM
-  var tmr=new Date(now); tmr.setDate(tmr.getDate()+1); tmr.setHours(12,0,0,0);
-  slots.push({ label:dayWord(tmr,now)+' · '+fmt(tmr), sub:'Midday session', tag:'', iso:tmr.toISOString() });
-
-  var html=slots.map(function(s,i){
-    return '<label class="slot">'
-      + '<input type="radio" name="session" value="'+s.label.replace(/"/g,'&quot;')+'" data-iso="'+s.iso+'"'+(i===0?' checked':'')+'/>'
-      + '<span class="radio"></span>'
-      + '<span class="st"><b>'+s.label+'</b><span>'+s.sub+'</span></span>'
-      + (s.tag?'<span class="tag">'+s.tag+'</span>':'')
-      + '</label>';
-  }).join('');
+  var html=
+    '<label class="slot">'
+      +'<input type="radio" name="session" value="live" data-iso="'+SESSION_ISO+'" checked/>'
+      +'<span class="radio"></span>'
+      +'<span class="st"><b>'+relDay(SESSION)+' · '+cstTime(SESSION)+'</b><span>Live session · your time: '+localTime(SESSION)+'</span></span>'
+      +'<span class="tag">Live</span>'
+    +'</label>'
+    +'<label class="slot">'
+      +'<input type="radio" name="session" value="ondemand" data-iso=""/>'
+      +'<span class="radio"></span>'
+      +'<span class="st"><b>Watch on demand</b><span>Start the replay right now</span></span>'
+    +'</label>';
   document.getElementById('slots').innerHTML=html;
 })();
 
-// ---- Registration ----
-// Replace WEBINAR_ROOM_URL with your EverWebinar / Demio / EasyWebinar room
-// link once the platform is chosen; until then the confirmation points at the
-// audit so no registrant hits a dead end.
-var WEBINAR_ROOM_URL='/audit';
-
+// ---- Registration (self-hosted webinar system) ----
 document.getElementById('regForm').addEventListener('submit', function(e){
   e.preventDefault();
   var name=document.getElementById('rgName').value.trim();
   var email=document.getElementById('rgEmail').value.trim();
   var company=document.getElementById('rgCompany').value.trim();
   var sel=document.querySelector('input[name="session"]:checked');
-  var session=sel?sel.value:'';
-  var iso=sel?sel.getAttribute('data-iso'):'';
+  var choice=sel?sel.value:'live';
   var err=document.getElementById('rgErr');
   err.textContent='';
   if(!name){ err.textContent='Please add your name.'; return; }
   if(!email || email.indexOf('@')<0){ err.textContent='Please add a valid email.'; return; }
 
   var btn=document.getElementById('rgBtn');
-  btn.disabled=true; btn.textContent='Reserving your seat...';
+  btn.disabled=true; btn.textContent='Saving your spot...';
+  try{ localStorage.setItem('tmi_webinar_name', name); }catch(e0){}
 
   lead('Webinar Registration');
-  try{
-    fetch('/api/event-signup',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ name:name, email:email, company:company,
-        event:'webinar', event_name:'The Intelligent Company Masterclass',
-        session:session, session_time:iso,
-        goal:'Registered for masterclass session: '+session })});
-  }catch(e2){}
 
+  if(choice==='ondemand'){
+    // Straight to the replay — still capture the lead in the background.
+    try{
+      fetch('/api/webinar-register',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ name:name, email:email, company:company, session_time:'' })});
+    }catch(e2){}
+    window.location.href='/watch?mode=ondemand&n='+encodeURIComponent(name);
+    return;
+  }
+
+  fetch('/api/webinar-register',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ name:name, email:email, company:company, session_time:SESSION_ISO })})
+    .then(function(r){ return r.json().catch(function(){return {};}); })
+    .then(function(d){ showDone(name, email, (d&&d.token)||'', (d&&d.session_time)||SESSION_ISO); })
+    .catch(function(){ showDone(name, email, '', SESSION_ISO); });
+});
+
+function calLinks(iso){
+  var start=new Date(iso), end=new Date(start.getTime()+40*60000);
+  function stamp(d){ return d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,''); }
+  var join='https://www.tmitechai.com/watch?s='+encodeURIComponent(iso);
+  var g='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('The Intelligent Company Masterclass')+'&dates='+stamp(start)+'/'+stamp(end)+'&details='+encodeURIComponent('Join here: '+join)+'&location='+encodeURIComponent(join);
+  var ics='/api/webinar-ics?s='+encodeURIComponent(iso);
+  return { g:g, ics:ics, join:join };
+}
+
+function showDone(name, email, token, iso){
   var reg=document.getElementById('reg');
-  var first=name.split(/\s+/)[0];
+  var first=name.split(/\s+/)[0].replace(/</g,'');
+  var c=calLinks(iso);
+  var join=token?('/watch?s='+encodeURIComponent(iso)+'&t='+token):c.join;
   reg.innerHTML=
     '<div class="reg-done">'
     +'<div class="disc">&#10003;</div>'
-    +'<h3>You’re registered, '+first.replace(/</g,'')+'.</h3>'
-    +'<p>Your seat for <b style="color:#fff">'+session.replace(/</g,'')+'</b> is saved. We just sent a confirmation with your calendar invite and join link to <b style="color:#fff">'+email.replace(/</g,'')+'</b>. See you in the room.</p>'
-    +'<a class="join" href="'+WEBINAR_ROOM_URL+'">Add the session to your day &rarr;</a>'
+    +'<h3>You’re registered, '+first+'.</h3>'
+    +'<p>Your spot for <b style="color:#fff">'+relDay(SESSION).replace(/</g,'')+' at '+cstTime(SESSION)+'</b> is saved. We just emailed <b style="color:#fff">'+email.replace(/</g,'')+'</b> your join link and reminders. Add it to your calendar so you don’t miss it:</p>'
+    +'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:0 0 20px;">'
+      +'<a class="join" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.2);" href="'+c.g+'" target="_blank" rel="noopener">Google Calendar</a>'
+      +'<a class="join" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.2);" href="'+c.ics+'">Apple / Outlook</a>'
+    +'</div>'
+    +'<a class="join" href="'+join+'">Go to the room &rarr;</a>'
     +'</div>';
   reg.scrollIntoView({behavior:'smooth',block:'center'});
-});
+}
 </script>
 </body>
 </html>
