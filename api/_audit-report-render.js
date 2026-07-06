@@ -67,19 +67,24 @@ function mdToHtml(md) {
   return html;
 }
 
-// Pull the 0-100 Intelligence Score and any category scores (X/10) out of the md.
+// Pull the 0-100 AI Score and any per-function scores (X/100) out of the md.
 function parseAuditMeta(md) {
   const text = String(md || '');
   let score = null;
-  const near = text.match(/Intelligence Score[\s\S]{0,240}?\b(\d{1,3})\s*\/\s*100/i)
+  const near = text.match(/AI Score[\s\S]{0,240}?\b(\d{1,3})\s*\/\s*100/i)
+    || text.match(/Intelligence Score[\s\S]{0,240}?\b(\d{1,3})\s*\/\s*100/i)
     || text.match(/\b(\d{1,3})\s*\/\s*100/);
   if (near) { const n = parseInt(near[1], 10); if (n >= 0 && n <= 100) score = n; }
 
+  // Per-function scores, written as "Sales — 42 / 100 — why".
   const categories = [];
-  const catRe = /(Lead flow|Operations|Visibility|Automation|Reporting)\b[^\d]{0,20}(\d{1,2})\s*\/\s*10/gi;
+  const catRe = /(Sales|Marketing|Operations|Finance|Customer Service|Leadership|HR|Visibility|Automation|Reporting|Lead flow)\b[^\d]{0,12}(\d{1,3})\s*\/\s*100/gi;
   let c;
   while ((c = catRe.exec(text)) && categories.length < 8) {
-    categories.push({ label: c[1], score: parseInt(c[2], 10) });
+    const label = c[1], val = parseInt(c[2], 10);
+    if (val >= 0 && val <= 100 && !categories.some(x => x.label.toLowerCase() === label.toLowerCase())) {
+      categories.push({ label, score: val });
+    }
   }
   return { score, categories };
 }
@@ -101,8 +106,8 @@ function categoryBars(categories) {
   if (!categories || !categories.length) return '';
   return `<div class="cats">${categories.map(c => `
     <div class="cat">
-      <div class="cat-top"><span>${esc(c.label)}</span><span>${c.score}/10</span></div>
-      <div class="cat-track"><div class="cat-fill" style="width:${Math.max(0, Math.min(10, c.score)) * 10}%"></div></div>
+      <div class="cat-top"><span>${esc(c.label)}</span><span>${c.score}/100</span></div>
+      <div class="cat-track"><div class="cat-fill" style="width:${Math.max(0, Math.min(100, c.score))}%"></div></div>
     </div>`).join('')}</div>`;
 }
 
@@ -114,7 +119,7 @@ function renderReportPage({ company, md, date }) {
   return `<!doctype html><html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="robots" content="noindex"/>
-<title>Complete Audit${company ? ' — ' + esc(company) : ''} | TMI</title>
+<title>Business Intelligence Audit${company ? ' — ' + esc(company) : ''} | TMI</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
@@ -162,11 +167,11 @@ function renderReportPage({ company, md, date }) {
 <div class="wrap">
   <div class="toolbar"><button class="print" onclick="window.print()">Print / Save as PDF</button></div>
   <div class="hero">
-    <div class="eyebrow">The Complete Audit</div>
+    <div class="eyebrow">Business Intelligence Audit</div>
     <h1 class="title">${company ? esc(company) : 'Your operation'}</h1>
     <div class="sub">${dateStr ? 'Prepared ' + dateStr + ' · ' : ''}TMI Technology</div>
     ${meta.score != null ? `<div class="scorecard">
-      <div style="text-align:center;">${scoreRing(meta.score)}<div class="sc-label" style="margin-top:6px;">Intelligence Score</div></div>
+      <div style="text-align:center;">${scoreRing(meta.score)}<div class="sc-label" style="margin-top:6px;">AI Score</div></div>
       ${categoryBars(meta.categories)}
     </div>` : ''}
   </div>

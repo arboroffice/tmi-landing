@@ -81,6 +81,9 @@ module.exports = async function handler(req, res) {
               _ops_signals: (research.opsSignals || []).join('; '),
               _role_signals: (research.signals || []).join(', '),
               _reviews: research.maps ? `${research.maps.rating || '?'} stars, ${research.maps.reviewCount || 0} Google reviews${research.maps.category ? ', ' + research.maps.category : ''}` : '',
+              _review_themes: Array.isArray(research.reviewThemes) ? research.reviewThemes.join('; ') : '',
+              _competitors: Array.isArray(research.competitors) ? research.competitors.map(c => c.name || c).join(', ') : '',
+              _competitor_ads: Array.isArray(research.competitorAds) ? research.competitorAds.slice(0, 8).map(a => `${a.page || 'competitor'}: ${(a.text || a.headline || '').slice(0, 140)}`).join(' | ') : '',
               _firmographics: research.firmographics ? `industry=${research.firmographics.industry || '?'}, employees=${research.firmographics.employeeCount || '?'}, revenue=${research.firmographics.revenue || '?'}, founded=${research.firmographics.foundedYear || '?'}` : '',
               _service_area: (research.facts && research.facts.service_area_text) || '',
             })
@@ -94,6 +97,7 @@ module.exports = async function handler(req, res) {
           company: company || answers.company,
           industry: industry || answers.industry,
           answers: enriched,
+          research: research || null,
         });
         const { parseAuditMeta } = require('./_audit-report-render');
         const meta = parseAuditMeta(md);
