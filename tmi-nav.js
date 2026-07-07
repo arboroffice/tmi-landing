@@ -201,7 +201,6 @@
       var c=document.querySelector(sel); if(!c) return;
       ensureLink(c,'/departments','Digital Workforce','a[href="/solutions"],a[href="solutions.html"],a[href="/about"],a[href="about.html"]','after');
       ensureLink(c,'/portfolio','The Work','a[href="/about"],a[href="about.html"],a[href="/news"],a[href="news.html"]','before');
-      ensureLink(c,'/webinar','Masterclass','a[href="/news"],a[href="news.html"],a[href="/about"],a[href="about.html"]','before');
       ensureLink(c,'/makemoneywithai','Make Money With AI','a[href="/news"],a[href="news.html"],a[href="/about"],a[href="about.html"]','before');
     });
   }
