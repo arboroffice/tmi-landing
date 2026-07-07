@@ -39,8 +39,8 @@ function buildStepEmail(reg, step) {
       subject = `Your next step after the masterclass`;
       body = `<p>Hey ${first},</p><p>Thanks for spending 40 minutes with us. You've seen the framework — the three systems that let a company run without the owner in the middle of everything.</p><p>The fastest way to find out exactly where yours is leaking is the free Business Intelligence Audit. We map your operation and hand you a 30-day plan. No pitch.</p><p>${btn(auditUrl, 'Book your free audit →', true)}</p><p>— The TMI team</p>`;
     } else {
-      subject = `You missed it — here's the replay`;
-      body = `<p>Hey ${first},</p><p>Looks like ${when} didn't work out. No problem — you can watch the full masterclass on demand right now:</p><p>${btn(replayUrl, 'Watch the replay →', true)}</p><p>It's the same 40 minutes on the system that removes the owner as the bottleneck. Worth the time.</p><p>— The TMI team</p>`;
+      subject = `You missed it — grab the next session`;
+      body = `<p>Hey ${first},</p><p>Looks like ${when} didn't work out. No problem — we run it live every week. Grab your spot for the next one:</p><p>${btn(W.SITE + '/webinar', 'Save my spot →', true)}</p><p>It's 40 minutes on the system that removes the owner as the bottleneck. Worth the time.</p><p>— The TMI team</p>`;
     }
   } else {
     return null;

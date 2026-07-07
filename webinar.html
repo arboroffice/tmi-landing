@@ -185,7 +185,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
         <div class="reg" id="reg">
           <p class="reg-k">Reserve your seat</p>
           <p class="reg-t">Save your spot</p>
-          <p class="reg-s">Live every week. Join the next session, or watch on demand right now.</p>
+          <p class="reg-s">Live every week. Save your spot for the next session.</p>
           <form id="regForm" autocomplete="on">
             <div class="slots" id="slots"><!-- injected by JS --></div>
             <div class="reg-field"><input type="text" id="rgName" name="name" placeholder="Your name" autocomplete="name" required/></div>
@@ -347,11 +347,6 @@ var SESSION_ISO=SESSION.toISOString();
       +'<span class="radio"></span>'
       +'<span class="st"><b>'+relDay(SESSION)+' · '+cstTime(SESSION)+'</b><span>Live session · your time: '+localTime(SESSION)+'</span></span>'
       +'<span class="tag">Live</span>'
-    +'</label>'
-    +'<label class="slot">'
-      +'<input type="radio" name="session" value="ondemand" data-iso=""/>'
-      +'<span class="radio"></span>'
-      +'<span class="st"><b>Watch on demand</b><span>Start the replay right now</span></span>'
     +'</label>';
   document.getElementById('slots').innerHTML=html;
 })();
@@ -362,8 +357,6 @@ document.getElementById('regForm').addEventListener('submit', function(e){
   var name=document.getElementById('rgName').value.trim();
   var email=document.getElementById('rgEmail').value.trim();
   var company=document.getElementById('rgCompany').value.trim();
-  var sel=document.querySelector('input[name="session"]:checked');
-  var choice=sel?sel.value:'live';
   var err=document.getElementById('rgErr');
   err.textContent='';
   if(!name){ err.textContent='Please add your name.'; return; }
@@ -374,16 +367,6 @@ document.getElementById('regForm').addEventListener('submit', function(e){
   try{ localStorage.setItem('tmi_webinar_name', name); }catch(e0){}
 
   lead('Webinar Registration');
-
-  if(choice==='ondemand'){
-    // Straight to the replay — still capture the lead in the background.
-    try{
-      fetch('/api/webinar-register',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ name:name, email:email, company:company, session_time:'' })});
-    }catch(e2){}
-    window.location.href='/watch?mode=ondemand&n='+encodeURIComponent(name);
-    return;
-  }
 
   fetch('/api/webinar-register',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({ name:name, email:email, company:company, session_time:SESSION_ISO })})
