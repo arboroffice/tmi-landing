@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<title>TMI Sales Playbook — City Leads</title>
+<style>
+  :root{
+    --bg:#ffffff;--panel:#f4f5ef;--panel-2:#eceee4;
+    --ink:#0a0b14;--ink-2:#454654;--muted:#71727f;
+    --line:rgba(10,11,20,0.10);--line-2:rgba(10,11,20,0.16);
+    --chart:#E4FF97;--chart-d:#c8ec6f;--leaf:#6f8f2a;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    --measure:68ch;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.62;font-size:16.5px;-webkit-font-smoothing:antialiased;}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+
+  .shell{max-width:1180px;margin:0 auto;padding:0 28px;display:grid;grid-template-columns:238px 1fr;gap:52px;align-items:start;}
+  @media(max-width:900px){.shell{grid-template-columns:1fr;gap:0;padding:0 20px;}}
+
+  .rail{position:sticky;top:0;align-self:start;padding:34px 0;max-height:100vh;overflow-y:auto;}
+  @media(max-width:900px){.rail{position:static;max-height:none;padding:24px 0 8px;border-bottom:1px solid var(--line);}}
+  .rail .brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-0.02em;font-size:19px;margin-bottom:6px;}
+  .rail .mark{width:26px;height:26px;border-radius:6px;background:var(--ink);color:var(--chart);display:grid;place-items:center;font-size:13px;font-weight:800;}
+  .rail .sub{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;color:var(--muted);text-transform:uppercase;margin-bottom:22px;}
+  .toc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px;}
+  .toc a{display:flex;gap:10px;align-items:baseline;text-decoration:none;color:var(--ink-2);font-size:13.5px;padding:6px 10px;border-radius:7px;border-left:2px solid transparent;transition:background .12s,color .12s;}
+  .toc a:hover{background:var(--panel);color:var(--ink);}
+  .toc a .n{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:16px;}
+  .toc .grp{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:14px 10px 4px;}
+  @media(max-width:900px){.toc{flex-direction:row;flex-wrap:wrap;gap:6px;}.toc a{border:1px solid var(--line);border-left:1px solid var(--line);}.toc .grp{width:100%;padding:8px 2px 2px;}}
+
+  main{padding:34px 0 120px;min-width:0;}
+  .measure{max-width:var(--measure);}
+
+  .mast{padding:14px 0 30px;border-bottom:2px solid var(--ink);margin-bottom:44px;}
+  .kick{font-family:var(--mono);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-2);display:inline-flex;align-items:center;gap:9px;}
+  .kick::before{content:"";width:22px;height:2px;background:var(--chart-d);display:inline-block;}
+  h1{font-size:clamp(34px,5.4vw,58px);line-height:1.02;letter-spacing:-0.035em;font-weight:850;margin:18px 0 0;text-wrap:balance;}
+  .lede{font-size:clamp(17px,2vw,20px);color:var(--ink-2);max-width:60ch;margin-top:20px;line-height:1.55;}
+  .lede b{color:var(--ink);font-weight:700;}
+  mark{background:linear-gradient(transparent 58%,var(--chart) 58%);color:inherit;padding:0 1px;}
+
+  .note{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:26px 0;font-size:14.5px;color:var(--ink-2);}
+  .note b{color:var(--ink);}
+  .note.accent{border-left:3px solid var(--chart-d);}
+
+  .mod{padding-top:56px;margin-top:8px;}
+  .mod-h{display:flex;gap:16px;align-items:baseline;border-top:1px solid var(--line);padding-top:26px;margin-bottom:8px;}
+  .mod-h .num{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--ink);background:var(--chart);border-radius:6px;padding:3px 9px;flex:none;letter-spacing:0.02em;}
+  .mod-h h2{font-size:clamp(24px,3vw,33px);line-height:1.08;letter-spacing:-0.028em;font-weight:800;margin:0;text-wrap:balance;}
+  .mod > p,.mod > ul,.mod > ol{max-width:var(--measure);}
+  h3{font-size:18px;letter-spacing:-0.01em;margin:34px 0 6px;font-weight:750;}
+  p{margin:14px 0;}
+
+  ul,ol{padding-left:20px;margin:14px 0;}
+  li{margin:7px 0;}
+  ul.tight li{margin:4px 0;}
+  .lead-in{font-weight:700;color:var(--ink);}
+
+  .ladder{display:flex;flex-direction:column;gap:12px;margin:22px 0;}
+  .rung{border:1px solid var(--line);border-radius:12px;padding:18px 20px;background:#fff;}
+  .rung .tag{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);}
+  .rung p{margin:8px 0 0;}
+
+  .script{font-family:var(--mono);font-size:13.5px;line-height:1.7;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--chart-d);border-radius:10px;padding:18px 20px;margin:16px 0;color:var(--ink);white-space:normal;overflow-x:auto;}
+  .script .lbl{display:block;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .script .you{color:var(--ink);}
+  .script .beat{color:var(--leaf);}
+
+  .steps{counter-reset:s;list-style:none;padding:0;margin:18px 0;display:flex;flex-direction:column;gap:10px;max-width:var(--measure);}
+  .steps li{counter-increment:s;position:relative;padding:14px 16px 14px 52px;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:15px;}
+  .steps li::before{content:counter(s);position:absolute;left:14px;top:13px;width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--chart);font-family:var(--mono);font-size:13px;font-weight:700;display:grid;place-items:center;}
+  .steps li b{color:var(--ink);}
+
+  .obj{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:14px 0;background:#fff;}
+  .obj .say{background:var(--panel-2);padding:13px 18px;font-weight:700;font-size:15px;display:flex;gap:10px;align-items:baseline;}
+  .obj .say .q{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;flex:none;}
+  .obj .resp{padding:14px 18px;font-size:14.5px;color:var(--ink-2);}
+  .obj .resp b{color:var(--ink);}
+
+  .dd{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0;}
+  @media(max-width:620px){.dd{grid-template-columns:1fr;}}
+  .dd-col{border:1px solid var(--line);border-radius:12px;padding:18px 20px;}
+  .dd-col h4{margin:0 0 10px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--mono);}
+  .dd-col.do h4{color:#3f6d12;}
+  .dd-col.dont h4{color:#9a3412;}
+  .dd-col ul{margin:0;padding-left:18px;}
+  .dd-col li{font-size:14.5px;color:var(--ink-2);}
+
+  /* personality cards */
+  .ptypes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0;}
+  @media(max-width:620px){.ptypes{grid-template-columns:1fr;}}
+  .ptype{border:1px solid var(--line);border-radius:12px;padding:18px 20px;background:#fff;}
+  .ptype h4{margin:0;font-size:17px;font-weight:800;letter-spacing:-0.01em;}
+  .ptype .want{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--leaf);margin:2px 0 10px;}
+  .ptype .row{font-size:13.5px;color:var(--ink-2);margin:5px 0;}
+  .ptype .row b{color:var(--ink);}
+
+  /* trust formula */
+  .formula{font-family:var(--mono);font-size:clamp(14px,2.2vw,17px);background:var(--ink);color:#fff;border-radius:14px;padding:22px 20px;text-align:center;margin:20px 0;letter-spacing:0.01em;line-height:1.5;}
+  .formula b{color:var(--chart);font-weight:700;}
+  .formula .cap{display:block;font-family:var(--sans);font-size:12px;color:rgba(255,255,255,0.6);margin-top:10px;letter-spacing:0;text-transform:none;}
+
+  .tblwrap{overflow-x:auto;margin:18px 0;border:1px solid var(--line);border-radius:12px;}
+  table{border-collapse:collapse;width:100%;font-size:14px;}
+  th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--panel);}
+  tr:last-child td{border-bottom:none;}
+  td.num,th.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;}
+  td b{color:var(--ink);}
+
+  .check{list-style:none;padding:0;margin:20px 0;display:flex;flex-direction:column;gap:2px;max-width:var(--measure);}
+  .check li{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border:1px solid var(--line);border-radius:9px;font-size:14.5px;}
+  .check .box{width:19px;height:19px;border:2px solid var(--line-2);border-radius:5px;flex:none;margin-top:2px;}
+
+  .card{background:var(--ink);color:#fff;border-radius:16px;padding:30px 30px 26px;margin-top:20px;}
+  .card h3{color:var(--chart);margin:0 0 4px;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--mono);}
+  .card .big{font-size:20px;font-weight:750;letter-spacing:-0.02em;line-height:1.3;margin:0 0 20px;color:#fff;max-width:52ch;}
+  .card .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  @media(max-width:620px){.card .grid{grid-template-columns:1fr;}}
+  .card .grid h4{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--chart);margin:0 0 8px;}
+  .card .grid p,.card .grid li{color:rgba(255,255,255,0.82);font-size:13.5px;line-height:1.55;}
+  .card .grid ul{margin:0;padding-left:16px;}
+  .card .mono{font-family:var(--mono);font-size:12.5px;color:#fff;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:8px;padding:12px 14px;line-height:1.6;}
+
+  .foot{margin-top:70px;padding-top:22px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+
+  @media print{
+    .rail{display:none;}.shell{grid-template-columns:1fr;}
+    .card,.formula{background:#fff;color:var(--ink);border:1px solid var(--line);}
+    .card h3,.card .grid h4,.formula b{color:var(--ink);} .card .big,.card .grid p,.card .grid li,.formula .cap{color:var(--ink);}
+    .mod{page-break-inside:avoid;}
+  }
+</style>
+
+</head>
+<body>
+<div class="shell">
+  <nav class="rail">
+    <div class="brand"><span class="mark">TMI</span> TMI</div>
+    <div class="sub">Sales Playbook · City Leads</div>
+    <ol class="toc">
+      <li class="grp">Foundations</li>
+      <li><a href="#m1"><span class="n">01</span> What TMI Is</a></li>
+      <li><a href="#m2"><span class="n">02</span> What We Do &amp; How We Help</a></li>
+      <li><a href="#m3"><span class="n">03</span> The Offer &amp; The Money</a></li>
+      <li><a href="#m4"><span class="n">04</span> Who We're For</a></li>
+      <li><a href="#m5"><span class="n">05</span> Your Job</a></li>
+      <li class="grp">The Three Channels</li>
+      <li><a href="#m6"><span class="n">06</span> Walk-Ins</a></li>
+      <li><a href="#m7"><span class="n">07</span> Social Media</a></li>
+      <li><a href="#m8"><span class="n">08</span> Outbound</a></li>
+      <li class="grp">The Human Side</li>
+      <li><a href="#m9"><span class="n">09</span> Psychology of Trust</a></li>
+      <li><a href="#m10"><span class="n">10</span> Read the Person</a></li>
+      <li><a href="#m11"><span class="n">11</span> Become the Go-To</a></li>
+      <li class="grp">The Conversation</li>
+      <li><a href="#m12"><span class="n">12</span> What to Ask</a></li>
+      <li><a href="#m13"><span class="n">13</span> Objections</a></li>
+      <li><a href="#m14"><span class="n">14</span> Booking &amp; Show-Up</a></li>
+      <li><a href="#m15"><span class="n">15</span> Pre-Audit &amp; Handoff</a></li>
+      <li class="grp">Run Your Week</li>
+      <li><a href="#m16"><span class="n">16</span> Cadence</a></li>
+      <li><a href="#m17"><span class="n">17</span> The Numbers</a></li>
+      <li><a href="#m18"><span class="n">18</span> Voice &amp; Rules</a></li>
+      <li><a href="#m19"><span class="n">19</span> First 4 Weeks</a></li>
+      <li><a href="#ref"><span class="n">★</span> Quick Reference</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="mast">
+      <span class="kick">TMI Technology · Field Sales Manual</span>
+      <h1>The City Leads Playbook.</h1>
+      <p class="lede">You work three channels: <b>walk-ins</b> as your bread and butter, <b>social media</b> to warm the market, and <b>outbound</b> to fill the gaps. Two things win in all of them: you can <b>explain what TMI does and how it helps in plain English</b>, and you make yourself the local person an owner trusts on this. Do that and you don't chase deals. Owners come to you.</p>
+      <div class="note measure"><b>Your one job.</b> Find owners in your city who are buried in their own business, make them interested in what TMI does, and book them onto the free Business Intelligence Audit, a call with Mia to go deeper and run the intelligent audit. You do not close. You do not quote price. You do not explain every detail. You spark interest and book the call. Foundations first, then the three channels, then the human side (this is what makes you great), then the conversation and how to run your week. Read it once end to end. Then live in Modules 2, 6, 9, and 11.</div>
+    </header>
+
+    <!-- 01 -->
+    <section class="mod" id="m1">
+      <div class="mod-h"><span class="num">01</span><h2>What TMI is, in your sleep</h2></div>
+      <p>You cannot sell what you cannot say in one breath. TMI <mark>builds intelligent companies</mark>. We take an operation that runs on people, memory, and a dozen disconnected apps, and we install the systems, the digital workforce, and the command center the business runs on instead. The owner stops being the bottleneck. The company starts running without them.</p>
+      <div class="ladder">
+        <div class="rung"><span class="tag">The one-liner (10 seconds)</span><p>"We help established [industry] owners get out of the day-to-day by building the systems their business runs on, so it grows without depending on them."</p></div>
+        <div class="rung"><span class="tag">The 30-second version</span><p>"Most owners doing a few million a year become the system. Every decision, every fire, every answer runs through them, and growth just makes it heavier. We redesign how the operation runs, install the backend that holds it together, and put the whole business on one screen. Built in about 30 days, and you own it. It always starts with a free audit of where your time and money are leaking."</p></div>
+        <div class="rung"><span class="tag">The belief (why now)</span><p>"The companies that win the next decade won't be the ones with the most people. They'll be the ones with the best systems, data, and intelligence behind every move. Every company eventually becomes an intelligent company. The only question is who in your market builds it first."</p></div>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section class="mod" id="m2">
+      <div class="mod-h"><span class="num">02</span><h2>What we do &amp; how we help</h2></div>
+      <p>Master this one first. An owner decides in the first two minutes whether you actually understand their world. You need to explain what we do <mark>in their language</mark>, with real examples, not buzzwords.</p>
+      <h3>The plain-English version</h3>
+      <div class="note accent measure">"You know how basically everything in your business runs through you and a couple key people? And the real information lives in your head, in text messages, on a whiteboard, and in five apps that don't talk to each other? We fix that. We build <b>one system your whole company runs on</b>, we put <b>digital workers</b> on the repetitive jobs like answering calls, scheduling, and chasing invoices, and we give you <b>one screen</b> to see the whole operation live. So the business runs on systems instead of running on you."</div>
+      <h3>How we help, function by function</h3>
+      <p>Pick the two or three that match what they complained about. Never list all of them.</p>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Their pain today</th><th>What we build</th><th>What changes for them</th></tr></thead>
+          <tbody>
+            <tr><td>Missed calls, leads slip, slow to follow up</td><td>A sales / front-desk office that answers, texts back, qualifies, books</td><td><b>They stop losing jobs to whoever answered first.</b></td></tr>
+            <tr><td>Scheduling and dispatch is chaos, done by phone and text</td><td>A dispatch office that schedules, routes, updates the customer</td><td>The board fills itself. Fewer angry callbacks.</td></tr>
+            <tr><td>Invoices go out late, money sits in AR</td><td>A back office that invoices on time and chases collections</td><td>Cash comes in faster without the owner nagging.</td></tr>
+            <tr><td>Owner can't see the numbers, runs on gut</td><td>A command center and reporting on one screen</td><td>They see capacity, cash, and what's stuck, live.</td></tr>
+            <tr><td>Everything lives in a couple people's heads</td><td>Organizational memory, captured and searchable</td><td>Losing a key person no longer blows up the business.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>How we help the owner, personally</h3>
+      <p>This is what makes them lean in. Sell the life, not the software.</p>
+      <ul class="tight">
+        <li>Get their <b>time back</b>, their evenings and weekends.</li>
+        <li>Finally <b>take a real vacation</b> without it falling apart.</li>
+        <li>Stop being the bottleneck so the team can <b>actually decide</b>.</li>
+        <li>Grow the company <b>without drowning</b> in the growth.</li>
+        <li>Build a company that's <b>worth more and could be sold</b>, because it runs without them.</li>
+      </ul>
+      <div class="note measure"><b>Analogies that land:</b> "We build the nervous system of your company." · "It's like hiring a whole back office and an ops manager, except it's a system you own, not more payroll." · "The version of your company that runs itself while you're on the boat."</div>
+    </section>
+
+    <!-- 03 -->
+    <section class="mod" id="m3">
+      <div class="mod-h"><span class="num">03</span><h2>The offer, and how we make money</h2></div>
+      <p>You lead with one thing only: <mark>the free Business Intelligence Audit</mark>. It's the front door to everything. You're not selling a build on the street. You're giving away a genuinely valuable, genuinely free diagnosis.</p>
+      <h3>What the free audit actually is</h3>
+      <p>It's a 20-minute call with Mia, our founder, who has built and scaled these companies herself. We research the company, map how it runs today, score every part of the business, and hand the owner a 30-day plan showing exactly where time and money are leaking and what it's costing them. Free, no pitch attached. Your strongest line: <b>"Worst case, you get a roadmap."</b></p>
+      <h3>What happens after (so you sound credible)</h3>
+      <ul class="tight">
+        <li><span class="lead-in">The install.</span> We build their operating system, digital workforce, and command center in about 30 days. They own it.</li>
+        <li><span class="lead-in">The growth partner model.</span> For the right owner, we embed as their growth team and tie our pay to the value we create. Less vendor, more partner.</li>
+      </ul>
+      <div class="note measure"><b>The price rule. Memorize this.</b> You never quote a price. Price depends entirely on what the audit uncovers, and the audit does the selling. If they push: <b>"That's exactly what the audit answers. It's free, and it tells us both whether there's even a fit before anyone talks dollars."</b></div>
+    </section>
+
+    <!-- 04 -->
+    <section class="mod" id="m4">
+      <div class="mod-h"><span class="num">04</span><h2>Who we're for, and who we're not</h2></div>
+      <p>You'll waste your week talking to the wrong people. We fit <b>operations-heavy companies, roughly $2M and up</b>, where the owner is still the glue. Industrial, trades, home service, and oil and gas mainly, but we work with all kinds of companies. You spot a good lead by <b>what's breaking</b>, not by industry.</p>
+      <div class="dd">
+        <div class="dd-col do">
+          <h4>Green flags (go after)</h4>
+          <ul class="tight">
+            <li>$2M+ and growing, but chaos grew with it</li>
+            <li>Owner answers every question, works 60+ hours</li>
+            <li>Crews, trucks, jobs, multiple sites</li>
+            <li>Runs on spreadsheets, texts, whiteboards, one overworked office manager</li>
+            <li>Recently hired a dispatcher or "data entry" person to keep up</li>
+            <li>Says "I can't take a vacation" or "it all runs through me"</li>
+          </ul>
+        </div>
+        <div class="dd-col dont">
+          <h4>Red flags (skip)</h4>
+          <ul class="tight">
+            <li>Under ~$1M, or a solo operator</li>
+            <li>Pure e-commerce or software, no operations</li>
+            <li>Already systematized, running hands-off</li>
+            <li>Owner retiring next quarter, coasting</li>
+            <li>Tire-kicker who wants free consulting</li>
+            <li>Not a decision maker, no path to one</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section class="mod" id="m5">
+      <div class="mod-h"><span class="num">05</span><h2>Your job, and where you own the funnel</h2></div>
+      <p>Simple: <mark>book qualified owners onto the free audit, a call with Mia.</mark> That's the whole scoreboard, no matter which channel got you there. You are not the closer. You spark interest and book the call. Mia takes it from there.</p>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Stage</th><th>Who owns it</th><th>"Done" looks like</th></tr></thead>
+          <tbody>
+            <tr><td><b>Find them</b></td><td>You (walk-ins, social, outbound)</td><td>Qualified owners in your city, with a name and cell</td></tr>
+            <tr><td><b>Earn the conversation</b></td><td>You</td><td>A real two-way conversation and a little trust</td></tr>
+            <tr><td><b>Qualify</b></td><td>You</td><td>Right size, actual owner, a real pain in their words</td></tr>
+            <tr><td><b>Book the audit</b></td><td>You</td><td>A confirmed slot with the decision maker</td></tr>
+            <tr><td><b>Prep &amp; show</b></td><td>You + reminders</td><td>They show up prepared. No-shows rebooked</td></tr>
+            <tr><td><b>The call</b></td><td>Mia (founder)</td><td>You hand off a warm owner with clean notes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>A "qualified booked audit" = the real decision maker, a company that fits, and a pain you heard in their own words. Three that fit beats ten that don't.</p>
+    </section>
+
+    <!-- 06 -->
+    <section class="mod" id="m6">
+      <div class="mod-h"><span class="num">06</span><h2>Walk-ins: your bread and butter</h2></div>
+      <p>Walking into a business is our highest-trust channel. You're a real local person, in the flesh, offering something free. Owners in the trades respect that. Your goal on a walk-in is rarely to close, it's to <b>get 60 seconds with the owner and book the audit</b>, or get their name and cell to follow up.</p>
+      <h3>Before you walk in</h3>
+      <ul class="tight">
+        <li><span class="lead-in">Know the business.</span> Name, what they do, and the owner's name if you can find it.</li>
+        <li><span class="lead-in">Look the part.</span> Clean, local, approachable. A peer, not a suit.</li>
+        <li><span class="lead-in">Carry the leave-behind.</span> The TMI one-pager with the QR that books the audit. Never empty-handed.</li>
+        <li><span class="lead-in">Work a route.</span> Cluster visits so you hit 15 to 25 in a run.</li>
+      </ul>
+      <h3>The five moves, every time</h3>
+      <ol class="steps">
+        <li><b>Warm open with whoever's at the front.</b> Smile, relaxed, brief. The front desk decides if you reach the owner, so treat them like gold.</li>
+        <li><b>Ask for the owner by name.</b> "Is [Owner] around by chance?" Casual, like you belong there.</li>
+        <li><b>If the owner's there:</b> 30-second in-person pitch, read the room, ask for the audit.</li>
+        <li><b>If not there:</b> get their name and best cell, leave the one-pager, get the gatekeeper on your side. Don't just drop a flyer.</li>
+        <li><b>Same-day follow-up text.</b> Every walk-in gets a text that afternoon, met them or not.</li>
+      </ol>
+      <h3>Walk-in scripts</h3>
+      <div class="script"><span class="lbl">To the gatekeeper</span><span class="you">"Hey, how's it going? I'm [Rep], I'm local, I work with TMI. We help [industry] owners around here get out of the day-to-day with better systems. Is [Owner] around for two minutes, or is there a better time to catch them?"</span></div>
+      <div class="script"><span class="lbl">Owner is there (30-sec pitch + ask)</span><span class="you">"[Owner], I'll be quick, I know you're busy. I'm [Rep], local, with TMI. We help established [industry] owners build the systems the business runs on so it stops running through you. We're doing a few free operational audits for [City] companies this month, we map where your time and money are leaking and hand you a 30-day plan. No pitch, no cost. Worst case you get a roadmap. Can I grab 20 minutes on your calendar next week?"</span></div>
+      <div class="script"><span class="lbl">Owner not there</span><span class="you">"No worries. What's the best way to reach [Owner], a cell that gets to them directly? I'll leave this too. It's a free operational audit we're running for a few [City] companies. Can you make sure it gets in front of them? Really appreciate it, [gatekeeper's name]."</span></div>
+      <div class="script"><span class="lbl">Same-day text (missed them)</span><span class="you">Hi [Owner], [Rep] with TMI. Swung by [Company] today and missed you. We're doing free operational audits for a few [City] companies, mapping where time and money leak. Worth 20 min? Happy to work around your schedule.</span></div>
+      <div class="dd">
+        <div class="dd-col do">
+          <h4>On a walk-in, do</h4>
+          <ul class="tight"><li>Respect their time, read the room, keep it under a minute</li><li>Win the gatekeeper first</li><li>Always leave the one-pager and get a name + cell</li><li>Log every visit the same day</li></ul>
+        </div>
+        <div class="dd-col dont">
+          <h4>On a walk-in, don't</h4>
+          <ul class="tight"><li>Pitch the whole thing at the counter</li><li>Talk over a busy shop, offer to come back</li><li>Leave a flyer and walk without a conversation</li><li>Get pushy, or take a "not today" personally</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section class="mod" id="m7">
+      <div class="mod-h"><span class="num">07</span><h2>Social media: warm the market</h2></div>
+      <p>Social isn't for hard selling, it's for <b>credibility and warm outreach</b>. When an owner looks you up or gets your DM, your profile should make you look like a real, helpful local who knows this world. Social turns cold into warm, and warm into a booked audit.</p>
+      <h3>What to post and share</h3>
+      <ul class="tight">
+        <li>TMI's Field Notes and short clips about getting out of the day-to-day.</li>
+        <li>Plain-language posts: "What an intelligent company actually looks like," "3 things costing [industry] owners money every week."</li>
+        <li>Local flavor: businesses you've visited (with permission), your day in the field, wins.</li>
+        <li>The free-audit offer, framed as value, not a pitch.</li>
+      </ul>
+      <h3>DM outreach (the real lever)</h3>
+      <div class="script"><span class="lbl">Opening DM (warm)</span><span class="you">Hey [Name], love what you've built at [Company]. I work with [industry] owners around [City] on getting the business to run without them being the bottleneck. Not pitching you, genuinely think you'd get value from a free operational audit we're running. Open to me sending details?</span></div>
+      <div class="script"><span class="lbl">After they reply</span><span class="you">Awesome. Quick version: we map where your time and money are leaking and hand you a 30-day plan. Free, no pitch, about 20 min. Want me to grab a time or send the link?</span></div>
+      <div class="note measure"><b>Rule:</b> value first, always. If your whole feed is "book a call," people tune out. A handful of real conversations a day beats a hundred blasts.</div>
+    </section>
+
+    <!-- 08 -->
+    <section class="mod" id="m8">
+      <div class="mod-h"><span class="num">08</span><h2>Outbound: fill the gaps</h2></div>
+      <p>Between routes, work the phone, text, and email to reach owners you couldn't catch in person. Same offer, same goal.</p>
+      <div class="script"><span class="lbl">Cold call — permission opener</span><span class="you">"Hi, is this [Owner]? ... Hey [Name], you don't know me, and I'll be honest, this is a cold call. </span><span class="beat">(smile, pause)</span><span class="you"> Can I have 30 seconds, then you can tell me to get lost?"</span></div>
+      <div class="script"><span class="lbl">Hook + ask</span><span class="you">"We help established [industry] owners in [City] get out of the day-to-day by building the systems the business runs on. Most owners we talk to are the bottleneck for everything. Does that hit close to home? ... Here's all I want: a free Business Intelligence Audit. We map where time and money are leaking and hand you a 30-day plan. Free, no pitch. Worth 20 minutes next week?"</span></div>
+      <div class="script"><span class="lbl">SMS first touch</span><span class="you">Hey [Name], this is [Rep] with TMI. We build the systems that get [industry] owners out of the day-to-day. Doing a few free operational audits for [City] companies this month. Want details? No pitch.</span></div>
+      <div class="script"><span class="lbl">Breakup text (+5 days)</span><span class="you">All good [Name], I'll get out of your hair. If getting the business to run without you ever moves up the list, text me here anytime.</span></div>
+      <div class="script"><span class="lbl">Voicemail (under 20 sec)</span><span class="you">"Hey [Name], [Rep] with TMI. We help [City] [industry] owners build the systems that get them out of the day-to-day. I've got a free operational audit with your name on it. Text me back at this number and I'll send details."</span></div>
+    </section>
+
+    <!-- 09 -->
+    <section class="mod" id="m9">
+      <div class="mod-h"><span class="num">09</span><h2>The psychology of trust</h2></div>
+      <p>In person, you're not selling a product in the first meeting. You're earning trust fast enough that they'll give you 20 minutes. Two proven frameworks make you good at this on purpose, not by accident.</p>
+
+      <h3>The Trust Equation (Maister)</h3>
+      <p>Decades of research on why people trust advisors boils down to one formula. Learn it, then aim every interaction at it.</p>
+      <div class="formula"><b>TRUST</b> = ( Credibility + Reliability + Intimacy ) &divide; <b>Self-Orientation</b><span class="cap">The two that move the needle most are Intimacy and low Self-Orientation, not your credentials.</span></div>
+      <ul>
+        <li><span class="lead-in">Credibility</span> — you know their world. Speak their language, reference real operations (this is Module 2). It's the price of entry, not the winner.</li>
+        <li><span class="lead-in">Reliability</span> — you do what you say. Show up when you said, send what you promised, follow up on time. Small promises kept build this fast.</li>
+        <li><span class="lead-in">Intimacy</span> — they feel safe telling you the real problem. You get there by asking, listening, and being a normal human, not a pitch machine.</li>
+        <li><span class="lead-in">Self-Orientation</span> — the divider, and the most important. The rep who clearly wants to <b>help</b> more than they want the <b>sale</b> wins. Lower it out loud: "If this isn't a fit, I'll tell you." That one line beats any close.</li>
+      </ul>
+
+      <h3>Cialdini's principles, on a walk-in</h3>
+      <p>The seven research-backed levers of influence. Use them honestly. Never fake them.</p>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Principle</th><th>How you use it</th></tr></thead>
+          <tbody>
+            <tr><td><b>Reciprocity</b></td><td>Give first. The free audit, a genuine tip, an intro. People feel the pull to give back.</td></tr>
+            <tr><td><b>Commitment</b></td><td>Get a small yes (20-minute audit) that leads to bigger yeses. Start tiny.</td></tr>
+            <tr><td><b>Social proof</b></td><td>"Other [industry] owners around here are doing this." Only ever say what's true.</td></tr>
+            <tr><td><b>Authority</b></td><td>Signal you know operations: look the part, speak with competence, use the brand.</td></tr>
+            <tr><td><b>Liking</b></td><td>Similarity, genuine compliments, cooperation. Find real common ground.</td></tr>
+            <tr><td><b>Scarcity</b></td><td>"We're only doing a few audits in [City] this month." True capacity, not fake urgency.</td></tr>
+            <tr><td><b>Unity</b></td><td>Shared identity: "we work with owners like you, local, in the trenches." Be on their side.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>What your body is saying</h3>
+      <p>Most of how an owner reads your trustworthiness in the first seconds is nonverbal, tone and posture more than words. So:</p>
+      <ul class="tight">
+        <li>Open posture, firm handshake, easy eye contact, lean slightly in. Confident and calm, never rushed.</li>
+        <li><span class="lead-in">Mirror and pace, subtly.</span> Match their energy and speed. Fast talker, pick it up. Slow and thoughtful, slow down. It makes people feel understood.</li>
+        <li>Keep it natural. Forced or obvious mirroring backfires, and you never mirror anger or frustration, that just escalates it.</li>
+        <li>Read the room. If they're slammed and tense, the trust move is to respect it and offer to come back.</li>
+      </ul>
+    </section>
+
+    <!-- 10 -->
+    <section class="mod" id="m10">
+      <div class="mod-h"><span class="num">10</span><h2>Read the person: sell to their style</h2></div>
+      <p>People buy in different languages. The classic model (Merrill-Reid social styles, the same four as DISC) sorts owners into four types by two things: how fast and direct they are, and how people-focused they are. You can peg most owners in 30 seconds and adjust on the fly. Many trades owners are <b>Drivers</b>, so default to brief and direct until you learn otherwise.</p>
+      <div class="ptypes">
+        <div class="ptype">
+          <h4>Driver</h4>
+          <div class="want">Wants to know: WHAT · fast &amp; in charge</div>
+          <div class="row"><b>Spot it:</b> blunt, impatient, "get to the point," runs the room.</div>
+          <div class="row"><b>Sell it:</b> be brief, lead with the result, give 2 options, respect their time, let them decide.</div>
+          <div class="row"><b>Avoid:</b> small talk, long stories, over-explaining.</div>
+        </div>
+        <div class="ptype">
+          <h4>Analytical</h4>
+          <div class="want">Wants to know: HOW · careful &amp; precise</div>
+          <div class="row"><b>Spot it:</b> asks detailed questions, cautious, wants proof, not emotional.</div>
+          <div class="row"><b>Sell it:</b> give specifics and process, don't rush, offer to send info, let them think.</div>
+          <div class="row"><b>Avoid:</b> hype, pressure, vague claims.</div>
+        </div>
+        <div class="ptype">
+          <h4>Amiable</h4>
+          <div class="want">Wants to know: WHY · warm &amp; relationship-first</div>
+          <div class="row"><b>Spot it:</b> friendly, easygoing, avoids conflict, cares who you are.</div>
+          <div class="row"><b>Sell it:</b> build trust first, be gentle, reassure, guide. They buy from people they like.</div>
+          <div class="row"><b>Avoid:</b> aggressive closing, rushing, pushiness.</div>
+        </div>
+        <div class="ptype">
+          <h4>Expressive</h4>
+          <div class="want">Wants to know: WHO · high energy &amp; big-picture</div>
+          <div class="row"><b>Spot it:</b> talkative, enthusiastic, tells stories, loves the vision.</div>
+          <div class="row"><b>Sell it:</b> match their energy, paint the picture, get excited with them, keep it moving.</div>
+          <div class="row"><b>Avoid:</b> dry data dumps, killing the vibe with fine print.</div>
+        </div>
+      </div>
+      <div class="note measure"><b>The move:</b> most people are a blend. Don't type them and forget it. Read their energy in the first 30 seconds, start in that style, and keep adjusting to how they respond. Same pitch, different delivery.</div>
+    </section>
+
+    <!-- 11 -->
+    <section class="mod" id="m11">
+      <div class="mod-h"><span class="num">11</span><h2>Become the go-to</h2></div>
+      <p>Here's the whole game. You are not a one-shot salesperson. You are becoming <mark>the person in your city an owner thinks of first</mark> when they think "I need to get my business to run without me." Most owners you meet aren't ready today. The rep who stays useful and top-of-mind wins them in three, six, twelve months, and gets their referrals too.</p>
+
+      <h3>How you become the go-to</h3>
+      <ul>
+        <li><span class="lead-in">Give value with no ask.</span> Send a useful article, a tip, an intro, even when they don't book. Reciprocity plus low self-orientation, on repeat.</li>
+        <li><span class="lead-in">Follow through, every time.</span> Do the small things you said you'd do. Reliability is how a stranger becomes a trusted name.</li>
+        <li><span class="lead-in">Teach, don't sell.</span> Be the person who explains intelligent systems in plain English. Post it, say it, show it. The expert gets the call.</li>
+        <li><span class="lead-in">Stay in their world.</span> Show up at their spots, know their industry, talk like an insider. You're one of them, not a vendor passing through.</li>
+        <li><span class="lead-in">Bring insight.</span> Tell an owner something true about their own business they hadn't seen. That's what a trusted advisor does, and it's unforgettable.</li>
+        <li><span class="lead-in">Work the "not now" list.</span> A helpful check-in every month or two. When they're finally ready, or a buddy asks "who do I talk to about this," you're the answer.</li>
+        <li><span class="lead-in">Earn referrals.</span> Owners talk to owners. Be so clear and helpful that they send you people. Once you've earned it, ask: "Who else do you know that's buried in their business?"</li>
+      </ul>
+      <div class="note accent measure"><b>Own the identity out loud:</b> "I'm the person in [City] who helps [industry] owners build intelligent companies." Say it, live it, and it becomes true. Every rep who becomes the go-to person is how <b>TMI becomes the go-to name.</b></div>
+    </section>
+
+    <!-- 12 -->
+    <section class="mod" id="m12">
+      <div class="mod-h"><span class="num">12</span><h2>What to ask</h2></div>
+      <p>Once you have a live conversation, in any channel, your job is not to talk. It's to get them saying the pain out loud, in their words. Ask, then listen. These map straight to what the audit diagnoses.</p>
+      <ul>
+        <li>"Walk me through what still runs through you personally every day."</li>
+        <li>"If you took two weeks off with no phone, what breaks first?"</li>
+        <li>"Where do jobs or leads fall through the cracks most often?"</li>
+        <li>"How do you know today if you're at, over, or under capacity?"</li>
+        <li>"What number do you wish you could see every morning but can't?"</li>
+        <li>"Who are the one or two people you couldn't run without, and why?"</li>
+        <li>"What have you already tried to fix this, and what happened?"</li>
+      </ul>
+      <p><b>The pivot to booking:</b> "Everything you just described is exactly what the audit maps. Let's get it on the calendar and show you what it's actually costing you."</p>
+    </section>
+
+    <!-- 13 -->
+    <section class="mod" id="m13">
+      <div class="mod-h"><span class="num">13</span><h2>Objections, answered</h2></div>
+      <p>Objections aren't rejection, they're the conversation. Acknowledge, reframe, redirect to the free audit. Never argue.</p>
+      <div class="obj"><div class="say"><span class="q">They say</span>"We already have software for that."</div><div class="resp">"Perfect, most owners we work with do. The problem is rarely one more tool, it's that they don't talk and you're holding it together. <b>The audit shows exactly where that's costing you.</b> It's free."</div></div>
+      <div class="obj"><div class="say"><span class="q">They say</span>"Is this an AI thing?"</div><div class="resp">"There's smart tech under the hood, but we don't sell you AI. We build the systems and digital workforce your business runs on and hand you the outcome. <b>The audit shows what that looks like for your operation.</b>"</div></div>
+      <div class="obj"><div class="say"><span class="q">They say</span>"I don't have time for this."</div><div class="resp">"That's exactly the reason to do it. If you had time you wouldn't need us. It's 20 minutes, and it's the one thing that could give you time back. <b>What's next week look like?</b>"</div></div>
+      <div class="obj"><div class="say"><span class="q">They say</span>"What's it cost?"</div><div class="resp">"The audit's free. What a build costs depends on what it uncovers, which is why we start there. It tells us both whether there's even a fit before anyone talks dollars. <b>Fair?</b>"</div></div>
+      <div class="obj"><div class="say"><span class="q">They say</span>"Just leave some info."</div><div class="resp">"Happy to, and I will. Honestly though the flyer's generic and your operation isn't. The audit's the version built around your actual business, same 20 minutes it'd take to read a PDF. <b>Let's just book it.</b>"</div></div>
+      <div class="obj"><div class="say"><span class="q">They say</span>"We tried automation, it didn't work."</div><div class="resp">"Hear that a lot, usually because someone bolted a tool onto a broken process. We map how you actually run first, then build around it. <b>The audit's where we find what went sideways last time.</b>"</div></div>
+      <div class="obj"><div class="say"><span class="q">They say</span>"We're slammed right now."</div><div class="resp">"Then you're exactly who this is for. Busy and buried is the problem we fix. We'll book it out a couple weeks, on your terms. <b>Mornings or afternoons better?</b>"</div></div>
+      <div class="obj"><div class="say"><span class="q">They say</span>"I need to talk to my partner."</div><div class="resp">"Makes total sense. The audit's the perfect thing to bring them, the whole picture on one page. Let's book it and look together. <b>Should they be on it too?</b>"</div></div>
+      <div class="obj"><div class="say"><span class="q">They say</span>"Call me in a few months."</div><div class="resp">"Can do. Quick question, what changes in a few months? The audit's free and gives you the plan now, so when you're ready you're not starting from zero. <b>Want me to grab a slot?</b>"</div></div>
+      <div class="obj"><div class="say"><span class="q">They say</span>"Not interested."</div><div class="resp">"Fair enough, I won't be that guy. Can I ask, is it the timing, or is getting the business to run without you just not a priority right now? <b>(Listen. Their answer tells you whether to book or bow out.)</b>"</div></div>
+    </section>
+
+    <!-- 14 -->
+    <section class="mod" id="m14">
+      <div class="mod-h"><span class="num">14</span><h2>Booking the audit &amp; making it stick</h2></div>
+      <p>When they lean in, don't oversell. Assume the booking and lock the calendar.</p>
+      <ul class="tight">
+        <li><span class="lead-in">Assume it.</span> "Great, let's get you on the calendar." Not "would you maybe want to."</li>
+        <li><span class="lead-in">Two options.</span> "Tuesday morning or Thursday afternoon?" Two yeses, not a yes/no.</li>
+        <li><span class="lead-in">Confirm decision makers.</span> "Anyone else who'd want to be on it?"</li>
+        <li><span class="lead-in">Set the frame.</span> "About 20 minutes. Come as you are, no prep. We do the digging."</li>
+        <li><span class="lead-in">Lock the cell.</span> Confirm the best number for reminders. This kills no-shows.</li>
+        <li><span class="lead-in">Text the confirmation on the spot,</span> while you're still with them.</li>
+      </ul>
+      <div class="note measure"><b>No-show defense.</b> The system sends automatic reminder texts and emails at 24 hours and 2 hours before. On top of that, send a personal text the morning of: "Looking forward to it at [time], [Name]. Anything you want to make sure we cover?" People show up for people.</div>
+    </section>
+
+    <!-- 15 -->
+    <section class="mod" id="m15">
+      <div class="mod-h"><span class="num">15</span><h2>Pre-audit: prep the owner, prep the team</h2></div>
+      <p>A booked audit isn't done, it's loaded. The gap between booking and the call is where you set it up to convert. Two jobs: get the owner ready, and hand the team a clean brief.</p>
+      <h3>Prep the owner</h3>
+      <ul class="tight">
+        <li><span class="lead-in">Set expectations.</span> "20 minutes, no prep, we do the digging. Just be honest about where it hurts."</li>
+        <li><span class="lead-in">Confirm who's on it.</span> Owner and any partner or right-hand who helps decide.</li>
+        <li><span class="lead-in">Note what you already know</span> so we don't ask what we can look up: name, website, rough size, what they run on, the pain in their words.</li>
+        <li><span class="lead-in">Tee up the value.</span> "You'll walk out with a real picture of where the money's leaking, whether we ever work together or not."</li>
+      </ul>
+      <h3>The handoff brief (fill this out every time)</h3>
+      <div class="script"><span class="lbl">Handoff notes template</span><span class="you">COMPANY: <br>OWNER + best cell: <br>INDUSTRY / what they do: <br>ROUGH SIZE (revenue, crews, trucks, sites): <br>HOW I REACHED THEM: walk-in / social / outbound<br>PERSONALITY READ: driver / analytical / amiable / expressive<br>THE PAIN, IN THEIR WORDS: "________"<br>WHAT RUNS THROUGH THE OWNER: <br>WHAT THEY'VE TRIED: <br>DECISION MAKERS: <br>GREEN / RED FLAGS: <br>BOOKED FOR: [date/time] · reminders confirmed? Y/N</span></div>
+      <div class="note measure"><b>Why it matters:</b> the closer walks in already knowing the owner's real pain, their style, and how to frame the fix. A warm, well-briefed handoff is the difference between an audit that converts and a cold restart.</div>
+    </section>
+
+    <!-- 16 -->
+    <section class="mod" id="m16">
+      <div class="mod-h"><span class="num">16</span><h2>The follow-up cadence</h2></div>
+      <p>Most booked audits are won in the follow-up, not the first touch. Work a lead for two weeks before you let it go cold, and mix the channels.</p>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th class="num">Day</th><th>Channel</th><th>Move</th></tr></thead>
+          <tbody>
+            <tr><td class="num">0</td><td>In person</td><td>Walk-in or first conversation. Leave the one-pager.</td></tr>
+            <tr><td class="num">0</td><td>SMS</td><td>Same-day text that afternoon, met them or not.</td></tr>
+            <tr><td class="num">2</td><td>Call / DM</td><td>Second touch, different channel and time of day.</td></tr>
+            <tr><td class="num">4</td><td>SMS</td><td>The nudge: offer to send an example audit.</td></tr>
+            <tr><td class="num">7</td><td>Walk-back / call</td><td>Swing by again or call. Reference something specific.</td></tr>
+            <tr><td class="num">9</td><td>SMS</td><td>The breakup text. This one gets the most replies.</td></tr>
+            <tr><td class="num">14+</td><td>Go-to list</td><td>Move to your long-term nurture. Helpful check-in every 30 to 60 days.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Rule of thumb: <b>five to eight touches</b> before a lead is dead. Most reps quit at two. That gap is your paycheck.</p>
+    </section>
+
+    <!-- 17 -->
+    <section class="mod" id="m17">
+      <div class="mod-h"><span class="num">17</span><h2>The numbers: what good looks like</h2></div>
+      <p>This job rewards activity and honesty. Track your own numbers daily. Healthy starting targets, not ceilings, and they'll sharpen as we learn your market.</p>
+      <div class="tblwrap">
+        <table>
+          <thead><tr><th>Daily activity</th><th class="num">Target</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>Quality walk-ins</td><td class="num">15–25</td><td>Your primary channel. Real conversations at the door.</td></tr>
+            <tr><td>Owner conversations</td><td class="num">6–10</td><td>The only activity that books anything.</td></tr>
+            <tr><td>Social DMs / touches</td><td class="num">15–25</td><td>Warms the market between routes.</td></tr>
+            <tr><td>Outbound dials + texts</td><td class="num">30–50</td><td>Fills the gaps and follows up.</td></tr>
+            <tr><td>Audits booked</td><td class="num">2–3</td><td>Your one true scoreboard.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Watch your conversion at each step and fix the weakest one. Not booking? More doors. Booking but nobody shows? Tighten qualifying and reminders. Showing but not fitting? You're booking the wrong owners.</p>
+    </section>
+
+    <!-- 18 -->
+    <section class="mod" id="m18">
+      <div class="mod-h"><span class="num">18</span><h2>Voice &amp; rules</h2></div>
+      <p>How we say things is part of the product. You represent a company that sells order, so sound ordered: calm, direct, confident, never pushy or hypey.</p>
+      <div class="dd">
+        <div class="dd-col do">
+          <h4>Say this</h4>
+          <ul class="tight">
+            <li>"Intelligent company," "the systems your business runs on"</li>
+            <li>"Digital workforce," "a department you hire"</li>
+            <li>"Free Business Intelligence Audit," "roadmap," "worst case you get a plan"</li>
+            <li>"Get out of the day-to-day," "runs without you"</li>
+            <li>Real numbers and specific scenarios from their world</li>
+          </ul>
+        </div>
+        <div class="dd-col dont">
+          <h4>Never say</h4>
+          <ul class="tight">
+            <li>"AI agents," "bots," "chatbots"</li>
+            <li>"Leverage AI," "cutting-edge," "revolutionary," hype words</li>
+            <li>Any price or dollar figure. The audit does that.</li>
+            <li>Promises we can't keep, or fake urgency</li>
+            <li>Talking over them. Ask, then listen.</li>
+          </ul>
+        </div>
+      </div>
+      <p>Three habits that separate great reps: <b>they log every visit and call</b> so the next touch is smarter, <b>they tell the truth</b> even when it costs a booking (low self-orientation), and <b>they never chase a bad fit</b> just to hit a number.</p>
+    </section>
+
+    <!-- 19 -->
+    <section class="mod" id="m19">
+      <div class="mod-h"><span class="num">19</span><h2>Your first four weeks</h2></div>
+      <p>You're not expected to be great on day one. You're expected to ramp on this schedule.</p>
+      <ul class="tight">
+        <li><span class="lead-in">Week 1 — Learn.</span> Master Modules 1, 2, and 6. Learn to explain us cold. Shadow walk-in routes. First 10 walk-ins by Friday.</li>
+        <li><span class="lead-in">Week 2 — Reps.</span> Full activity across all three channels. Book your first audit. Role-play objections and the four personality types daily.</li>
+        <li><span class="lead-in">Week 3 — Refine.</span> Review your numbers, find your weakest step, fix it. Practice reading the person and lowering self-orientation.</li>
+        <li><span class="lead-in">Week 4 — Own it.</span> Consistent booked audits, clean handoffs, a worked pipeline, and a growing "go-to" list. Certified.</li>
+      </ul>
+      <h3>Certification checklist</h3>
+      <ul class="check">
+        <li><span class="box"></span> I can explain what we do and how we help in plain English, with examples.</li>
+        <li><span class="box"></span> I can give the one-liner, 30-second pitch, and the belief without notes.</li>
+        <li><span class="box"></span> I can run a walk-in: win the gatekeeper, pitch the owner, book or get a cell.</li>
+        <li><span class="box"></span> I can start warm conversations on social without spamming.</li>
+        <li><span class="box"></span> I aim every interaction at the Trust Equation and lower my self-orientation out loud.</li>
+        <li><span class="box"></span> I can read the four personality types in 30 seconds and adjust my delivery.</li>
+        <li><span class="box"></span> I have a word-for-word answer to all ten objections.</li>
+        <li><span class="box"></span> I book with two-option assumptive closes and confirm decision makers.</li>
+        <li><span class="box"></span> I prep the owner and fill out a clean handoff brief every time.</li>
+        <li><span class="box"></span> I give value with no ask and keep a real "go-to" list warm.</li>
+        <li><span class="box"></span> I never quote price and never say "AI agents."</li>
+        <li><span class="box"></span> I've booked and handed off my first qualified audit.</li>
+      </ul>
+    </section>
+
+    <!-- QUICK REF -->
+    <section class="mod" id="ref">
+      <div class="mod-h"><span class="num">★</span><h2>Quick reference card</h2></div>
+      <p>Print this. Keep it on you.</p>
+      <div class="card">
+        <h3>The pitch (any channel)</h3>
+        <p class="big">"We help established owners get out of the day-to-day by building the systems their business runs on. It starts with a free audit of where time and money are leaking. Worst case, you get a roadmap."</p>
+        <div class="grid">
+          <div>
+            <h4>Walk-in flow</h4>
+            <ul>
+              <li>Win the gatekeeper</li>
+              <li>Ask for the owner by name</li>
+              <li>30-sec pitch → ask for 20 min</li>
+              <li>Not there? Name + cell, leave one-pager</li>
+              <li>Text same day, always</li>
+            </ul>
+            <h4 style="margin-top:16px;">Read the person (30 sec)</h4>
+            <div class="mono">DRIVER → brief, results, options<br>ANALYTICAL → proof, don't rush<br>AMIABLE → trust, gentle, reassure<br>EXPRESSIVE → energy, vision, stories</div>
+          </div>
+          <div>
+            <h4>Trust = (C + R + I) / Self-orientation</h4>
+            <div class="mono">Help &gt; sell. "If it's not a fit, I'll tell you." Do what you said. Ask, then listen.</div>
+            <h4 style="margin-top:16px;">The booking line</h4>
+            <div class="mono">"Tuesday morning or Thursday afternoon? ... Texting the confirmation now. Best cell for reminders?"</div>
+            <h4 style="margin-top:16px;">Daily scoreboard</h4>
+            <div class="mono">15–25 walk-ins · 6–10 convos<br>15–25 DMs · 30–50 dials/texts<br>2–3 audits booked</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="foot">
+      <span>TMI Technology · Sales Playbook v3 · Walk-ins · Social · Outbound · The Human Side</span>
+      <span>Be the go-to. Book qualified audits.</span>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
