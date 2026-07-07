@@ -161,6 +161,7 @@
     </section>
     <section class="screen" id="s-log"></section>
     <section class="screen" id="s-me"></section>
+    <section class="screen" id="s-plan"></section>
   </div>
 
   <nav class="tabbar">
@@ -273,7 +274,7 @@ async function loadLeads(){
 }
 
 /* ---- tabs ---- */
-const TITLES = {today:'Today',leads:'My Leads',map:'Map',log:'Log a Lead',me:'Me'};
+const TITLES = {today:'Today',leads:'My Leads',map:'Map',log:'Log a Lead',me:'Me',plan:'Day Plan'};
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
@@ -284,6 +285,7 @@ function switchTab(tab){
   if(tab==='leads') renderLeads();
   if(tab==='log') renderLog();
   if(tab==='me') renderMe();
+  if(tab==='plan') renderPlan();
   if(tab==='map') setTimeout(initMap,50);
 }
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
@@ -306,15 +308,47 @@ function renderToday(){
     <button class="btn" id="tLog">Log a walk-in</button>
     <div style="height:10px"></div>
     <button class="btn ghost" id="tMap">Open the map</button>
+    <div style="height:10px"></div>
+    <button class="btn ghost" id="tPlan">📋 Today's game plan</button>
     ${rot.length?`<div class="card" id="tRot" style="background:#fbeceb;color:#7a241c;font-weight:700;cursor:pointer;margin-top:14px;">⚠ ${rot.length} warm lead${rot.length===1?'':'s'} going cold — untouched 5+ days. Tap to work them.</div>`:''}
     <div class="h-eyebrow">Follow-ups due</div>
     <div id="tDue"></div>`;
   $('#tLog').onclick=()=>switchTab('log');
   $('#tMap').onclick=()=>switchTab('map');
+  $('#tPlan').onclick=()=>switchTab('plan');
   const rb=$('#tRot'); if(rb) rb.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
   const box=$('#tDue');
   if(!due.length){ box.innerHTML='<div class="empty">Nothing due. Go knock some doors.</div>'; }
   else due.sort((a,b)=>new Date(a.next_action_at)-new Date(b.next_action_at)).forEach(l=>box.appendChild(leadRow(l)));
+}
+
+/* ---- Day Plan (oil & gas + industrial, Acadiana) ---- */
+function renderPlan(){
+  const todays = LEADS.filter(l=>isToday(l.created_at));
+  const doors = todays.length;
+  const convos = todays.filter(l=>['contacted','booked','callback','won'].includes(l.status)).length;
+  const audits = todays.filter(l=>['booked','won'].includes(l.status)).length;
+  const bar=(v,t)=>{ const p=Math.min(100,Math.round(v/t*100)); return `<div style="height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:9px"><div style="height:100%;width:${p}%;background:${v>=t?'var(--green)':'var(--ink)'};border-radius:4px;transition:width .4s"></div></div>`; };
+  const goal=(v,t,label)=>`<div class="card" style="flex:1;min-width:0;padding:14px 13px;margin:0"><div style="font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1">${v}<span style="font-size:13px;color:var(--muted);font-weight:600"> / ${t}</span></div><div style="font-size:11.5px;color:var(--muted);margin-top:3px">${label}</div>${bar(v,t)}</div>`;
+  const sec=(title,body)=>`<details class="card" style="padding:0;margin:10px 0 0"><summary style="padding:14px 16px;font-weight:700;font-size:14.5px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">${title}<span style="color:var(--muted);font-weight:400">＋</span></summary><div style="padding:0 16px 16px;font-size:13.5px;line-height:1.65;color:var(--ink-2)">${body}</div></details>`;
+  const s=$('#s-plan');
+  s.innerHTML = `
+    <style>#s-plan summary::-webkit-details-marker{display:none}#s-plan details[open] summary>span:last-child{transform:rotate(45deg)}</style>
+    <button class="btn ghost sm" id="pBack" style="width:auto;align-self:flex-start">← Today</button>
+    <div class="h-eyebrow">Today's scoreboard</div>
+    <div style="display:flex;gap:9px">${goal(doors,15,'Doors walked')}${goal(convos,6,'Conversations')}${goal(audits,2,'Audits booked')}</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:9px">Counts what you log today. One booked audit is a good day.</div>
+
+    <div class="h-eyebrow" style="margin-top:22px">The play — oil &amp; gas + industrial, Acadiana</div>
+    ${sec('Before you leave (15 min)', "Pick <b>one cluster</b>, not the whole map. Pull <b>12–15 targets</b> from My Leads and write the <b>owner's name</b> next to each. Owner-operated shops are the whole game. Load the route so you are never more than 5 minutes between stops.")}
+    ${sec('Where to walk', "<b>Broussard</b> — Hwy 90 oilfield-service yards, stacked back to back.<br><b>Port of Iberia / New Iberia</b> — fabrication, welding, marine, oilfield.<br><b>Lafayette</b> — industrial by the airport, Pinhook, Ambassador Caffery.<br><b>Scott · Duson · Youngsville</b> — service yards, trucking, machine shops.")}
+    ${sec('The day, hour by hour', "<b>6:30–8:00</b> — catch owners at the yard before crews roll out. Best window to get the founder face to face.<br><b>8:00–11:30</b> — walk-ins: wireline, frac, coiled tubing, vac trucks, water hauling, rental tools, welding, fab, machine shops.<br><b>11:30–1:00</b> — front offices &amp; supply houses. Get the owner's name and when he's around.<br><b>1:00–4:00</b> — second pass, catch the owners who were out this morning. Book the audits.<br><b>4:00</b> — log everything here while it's fresh.")}
+    ${sec('Get past the gate to the owner', "When someone stops you: <br><i>“I'm not here to sell anything. We ran a free breakdown on [Company] — where the operation's leaking time and money — and I want to hand it to [owner] personally. Is he in the yard?”</i><br><br>“Not here to sell” + “hand it to him personally” beats any pitch. If he's out, get his <b>cell and best time</b>, leave the one-pager.")}
+    ${sec('The 20-second pitch', "Once you've got the founder: <br><i>“You built this running everything through you. We build the systems that run oilfield and industrial companies so the operation moves without you chasing every job, ticket, and invoice. We already did a free intelligence report on [Company]. Give me 15 minutes and I'll show you where it's leaking. No pitch, no cost.”</i><br><br>Talk shop, not tech. Say tickets, dispatch, invoicing, the yard, the crews. Never “AI platform.”")}
+    ${sec("What you're there to get", "Not a sale. <b>Book the 15-minute audit review</b>, or get the owner's cell and a yes to a call. That's the win. One booked audit per day of walking is a good day.")}
+    <div style="height:24px"></div>
+  `;
+  $('#pBack').onclick=()=>switchTab('today');
 }
 
 /* ---- Leads ---- */
