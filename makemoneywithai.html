@@ -279,8 +279,8 @@ document.getElementById('joinForm').addEventListener('submit', function(e){
   var btn=document.getElementById('jBtn'); btn.disabled=true; btn.textContent='Saving your spot...';
   lead('Make Money With AI');
   try{
-    fetch('/api/event-signup',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ name:name, email:email, event:'makemoneywithai', event_name:'Make Money With AI (early access)', goal:'Wants AI to find and build a business around their unfair advantage' })});
+    fetch('/api/mma-submit',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ name:name, email:email, goal:'Wants AI to find and build a business around their unfair advantage' })});
   }catch(e2){}
   var box=document.getElementById('join');
   var first=name.split(/\s+/)[0].replace(/</g,'');
