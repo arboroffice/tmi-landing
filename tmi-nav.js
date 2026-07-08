@@ -203,6 +203,7 @@
       ensureLink(c,'/portfolio','The Work','a[href="/about"],a[href="about.html"],a[href="/news"],a[href="news.html"]','before');
       ensureLink(c,'/startabusiness','Start a Business','a[href="/news"],a[href="news.html"],a[href="/about"],a[href="about.html"]','before');
       ensureLink(c,'/makemoneywithai','Make Money With AI','a[href="/news"],a[href="news.html"],a[href="/about"],a[href="about.html"]','before');
+      ensureLink(c,'/distro','Distro','a[href="/news"],a[href="news.html"],a[href="/about"],a[href="about.html"]','before');
     });
   }
 
