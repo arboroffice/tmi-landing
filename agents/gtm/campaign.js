@@ -19,10 +19,10 @@ export const CAMPAIGN = {
   market: { name: 'Acadiana', geo: ['Lafayette, LA', 'Acadiana', 'Louisiana', 'United States'], expandNext: ['Lake Charles, LA', 'Baton Rouge, LA', 'Houston, TX'] },
 
   icp: {
-    revenueMin: 5_000_000,
-    employeeRanges: ['21,50', '51,100', '101,200', '201,500'],
+    revenueMin: 2_000_000,
+    employeeRanges: ['11,20', '21,50', '51,100', '101,200', '201,500'],
     titles: ['Owner', 'Founder', 'President', 'CEO', 'COO', 'General Manager', 'VP Operations'],
-    industries: ['hvac', 'roofing', 'construction', 'plumbing', 'electrical', 'oil and gas', 'manufacturing', 'logistics', 'trucking', 'equipment rental', 'field service'],
+    industries: ['hvac', 'roofing', 'construction', 'plumbing', 'electrical', 'home service', 'oil and gas', 'manufacturing', 'industrial', 'logistics', 'trucking', 'equipment rental', 'field service'],
   },
 
   // How hard each tier gets hit (the saturation stack).
