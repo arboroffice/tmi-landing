@@ -47,6 +47,25 @@
   .faq summary::-webkit-details-marker{display:none;}
   .faq p{font-size:16px;color:var(--ink-2);line-height:1.65;margin-top:12px;max-width:70ch;}
   @media(max-width:920px){.steps{grid-template-columns:1fr;}.step{border-left:none;border-top:1px solid var(--line);padding:24px 0;}.step:first-child{border-top:none;padding-top:0;}.pay-grid{grid-template-columns:1fr;}.who{grid-template-columns:1fr;}.who-col+.who-col{border-left:none;border-top:1px solid var(--line);}}
+  /* application form */
+  .apply-card{max-width:640px;margin:36px auto 0;background:#fff;border:1px solid var(--line-2);border-radius:20px;padding:38px 38px;box-shadow:0 30px 80px rgba(0,0,0,0.08);}
+  .apply-form{display:flex;flex-direction:column;gap:16px;}
+  .apply-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .apply-field{display:flex;flex-direction:column;gap:7px;}
+  .apply-field.full{grid-column:1 / -1;}
+  .apply-field label{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--ink-2);}
+  .apply-field input,.apply-field select,.apply-field textarea{width:100%;font-family:var(--sans);font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:11px;padding:13px 15px;transition:border-color .15s;}
+  .apply-field input:focus,.apply-field select:focus,.apply-field textarea:focus{outline:none;border-color:var(--ink);}
+  .apply-field textarea{resize:vertical;min-height:96px;line-height:1.5;}
+  .apply-field input::placeholder,.apply-field textarea::placeholder{color:var(--muted);}
+  .apply-btn{width:100%;justify-content:center;margin-top:6px;cursor:pointer;font-size:14px;}
+  .apply-note{font-family:var(--sans);font-size:12px;color:var(--muted);text-align:center;margin-top:14px;}
+  .apply-err{font-family:var(--sans);font-size:13px;color:#c0392b;min-height:1px;}
+  .apply-success{text-align:center;padding:8px 0;}
+  .apply-success .disc{width:56px;height:56px;border-radius:50%;background:var(--chart);color:#0a0b14;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;}
+  .apply-success h3{font-family:var(--serif);font-weight:800;font-size:clamp(24px,3vw,32px);letter-spacing:-0.02em;margin:0 0 10px;color:var(--ink);}
+  .apply-success p{font-family:var(--sans);font-size:15px;color:var(--ink-2);margin:0 auto;max-width:44ch;line-height:1.6;}
+  @media(max-width:560px){.apply-card{padding:26px 22px;}.apply-row{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -60,13 +79,13 @@
       <a href="/about">About</a>
       <a href="/news">Journal</a>
     </nav>
-    <a href="/contact" class="btn nav-cta" onclick="lead()">Apply to the program</a>
+    <a href="#apply" class="btn nav-cta" onclick="lead()">Apply to the program</a>
     <button class="nav-burger" aria-label="Menu" onclick="openDrawer()"><span></span><span></span><span></span></button>
   </div>
 </header>
 <div class="drawer" id="drawer">
   <div class="drawer-top"><a href="/" class="nav-brand"><img src="logo.svg" alt="TMI"/> TMI</a><button class="x" aria-label="Close" onclick="closeDrawer()">&times;</button></div>
-  <a href="/solutions">Solutions</a><a href="/physical">Industries</a><a href="/about">About</a><a href="/news">Journal</a><a href="/contact" onclick="lead()" style="color:#E4FF97;">Apply to the program</a>
+  <a href="/solutions">Solutions</a><a href="/physical">Industries</a><a href="/about">About</a><a href="/news">Journal</a><a href="#apply" onclick="lead()" style="color:#E4FF97;">Apply to the program</a>
 </div>
 
 <!-- HERO -->
@@ -77,7 +96,7 @@
     <p class="sub reveal" style="font-weight:700;margin-bottom:16px;">Own your work. Keep the upside. Answer to no one. You know the trade, you just never wanted to run the phones, the quotes, and the paperwork. So don't.</p>
     <p class="sub reveal">This is a partnership for people who are ready to own a business instead of clocking in for someone else. Already have a trade? You go out and do the job while we build and run the entire company around you: the lead generation, the booking, the estimates, the invoicing, the collections, the marketing, and the systems. No trade yet? We help you learn one. You get a real business and a mentor who has built one before, without gambling your savings on figuring it out alone.</p>
     <div class="hero-cta reveal">
-      <a href="/contact" class="btn btn-lime" onclick="lead()">Apply to the program</a>
+      <a href="#apply" class="btn btn-lime" onclick="lead()">Apply to the program</a>
       <a href="#how" class="btn" style="background:transparent;color:var(--ink);border-color:var(--line-2);">See how it works</a>
     </div>
   </div>
@@ -220,12 +239,48 @@
   </div>
 </section>
 
+<!-- APPLICATION -->
+<section class="sec alt" id="apply">
+  <div class="wrap" style="text-align:center;">
+    <p class="kicker reveal">Apply to the program</p>
+    <h2 class="h-sec reveal" style="margin:14px auto 16px;max-width:20ch;">Tell us about you. We will take it from there.</h2>
+    <p class="sub reveal" style="margin:0 auto;max-width:52ch;">A few questions so we understand your trade, your market, and your goals. No cost to apply, and we read every one.</p>
+    <div class="apply-card reveal">
+      <form class="apply-form" id="applyForm" autocomplete="on">
+        <div class="apply-row">
+          <div class="apply-field"><label for="aName">Full name</label><input type="text" id="aName" name="name" placeholder="Jordan Ellis" autocomplete="name" required/></div>
+          <div class="apply-field"><label for="aEmail">Email</label><input type="email" id="aEmail" name="email" placeholder="you@email.com" autocomplete="email" required/></div>
+        </div>
+        <div class="apply-row">
+          <div class="apply-field"><label for="aPhone">Phone</label><input type="tel" id="aPhone" name="phone" placeholder="(555) 123-4567" autocomplete="tel"/></div>
+          <div class="apply-field"><label for="aStatus">Do you have a trade?</label>
+            <select id="aStatus" name="trade_status">
+              <option value="" disabled selected>Select one</option>
+              <option value="have">Yes, I already have a trade</option>
+              <option value="learning">I'm learning one now</option>
+              <option value="none">Not yet, I want to learn</option>
+            </select>
+          </div>
+        </div>
+        <div class="apply-row">
+          <div class="apply-field"><label for="aTrade">Trade (or one you're interested in)</label><input type="text" id="aTrade" name="trade" placeholder="HVAC, plumbing, electrical..."/></div>
+          <div class="apply-field"><label for="aLocation">City / market</label><input type="text" id="aLocation" name="location" placeholder="City, State"/></div>
+        </div>
+        <div class="apply-field full"><label for="aMessage">Tell us a bit about yourself and why</label><textarea id="aMessage" name="message" placeholder="Where you are now, what you're good at, and what you want to build."></textarea></div>
+        <button type="submit" class="btn btn-lime apply-btn" id="aBtn">Submit application &rarr;</button>
+        <div class="apply-err" id="aErr"></div>
+        <div class="apply-note">No cost to apply. We reply within a couple of business days.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
 <!-- CLOSE -->
 <section class="sec dark" style="text-align:center;">
   <div class="wrap on-dark">
     <h2 class="h-sec reveal" style="margin:0 auto 18px;max-width:22ch;">You bring the skill. We bring the business.</h2>
     <p class="sub reveal" style="margin:0 auto 30px;max-width:56ch;color:rgba(255,255,255,0.7);">If you are good at the work and ready to own it, let's build the company around you. Apply and we will show you exactly how the partnership works.</p>
-    <a href="/contact" class="btn btn-lime reveal" onclick="lead()">Apply to the program</a>
+    <a href="#apply" class="btn btn-lime reveal" onclick="lead()">Apply to the program</a>
   </div>
 </section>
 
@@ -245,6 +300,33 @@ function closeDrawer(){ document.getElementById('drawer').classList.remove('open
 document.querySelectorAll('#drawer a').forEach(function(a){ a.addEventListener('click', closeDrawer); });
 var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}})},{threshold:0.08});
 document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
+
+document.getElementById('applyForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var name=document.getElementById('aName').value.trim();
+  var email=document.getElementById('aEmail').value.trim();
+  var err=document.getElementById('aErr'); err.textContent='';
+  if(!name){ err.textContent='Please add your name.'; return; }
+  if(!email || email.indexOf('@')<0){ err.textContent='Please add a valid email.'; return; }
+  var payload={
+    name:name, email:email,
+    phone:document.getElementById('aPhone').value.trim(),
+    trade_status:document.getElementById('aStatus').value,
+    trade:document.getElementById('aTrade').value.trim(),
+    location:document.getElementById('aLocation').value.trim(),
+    message:document.getElementById('aMessage').value.trim()
+  };
+  var btn=document.getElementById('aBtn'); btn.disabled=true; btn.textContent='Sending...';
+  lead();
+  fetch('/api/startabusiness-submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(function(r){ if(!r.ok) throw new Error('bad'); return r.json(); })
+    .then(function(){
+      var first=name.split(/\s+/)[0].replace(/</g,'');
+      document.querySelector('.apply-card').innerHTML='<div class="apply-success"><div class="disc">&#10003;</div><h3>Application received, '+first+'.</h3><p>We read every application. If it looks like a fit, we’ll reach out within a couple of business days to talk through the partnership.</p></div>';
+      document.getElementById('apply').scrollIntoView({behavior:'smooth',block:'center'});
+    })
+    .catch(function(){ err.textContent='Something went wrong. Please try again or email mia@tmitechai.com.'; btn.disabled=false; btn.textContent='Submit application →'; });
+});
 </script>
 <script src="/tmi-nav.js" defer></script>
 </body>
