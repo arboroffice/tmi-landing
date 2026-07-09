@@ -102,13 +102,13 @@ button { font-family: inherit; }
     <!-- STEP 1: company -->
     <div id="gateStep1">
       <h1>Let's start with your company.</h1>
-      <p>Tell us who you are and we will do the homework before we ask you anything. Takes about fifteen seconds.</p>
-      <label for="g-company">Company name</label>
+      <p>Drop your website and we will scan it to pull your company details before we ask you anything. Takes about fifteen seconds.</p>
+      <label for="g-website">Company website</label>
+      <input id="g-website" type="text" placeholder="yourcompany.com" autocomplete="url" onkeydown="if(event.key==='Enter')gateFind()"/>
+      <label for="g-company">Company name <span style="text-transform:none;letter-spacing:0;color:#B0B0B0;font-weight:500;">(optional)</span></label>
       <input id="g-company" type="text" placeholder="Smith Industries" autocomplete="organization" onkeydown="if(event.key==='Enter')gateFind()"/>
-      <label for="g-website">Website <span style="text-transform:none;letter-spacing:0;color:#B0B0B0;font-weight:500;">(optional, helps us find you)</span></label>
-      <input id="g-website" type="text" placeholder="smithindustries.com" autocomplete="url" onkeydown="if(event.key==='Enter')gateFind()"/>
       <button onclick="gateFind()">Find my company &rarr;</button>
-      <div class="err" id="g-err1">Enter your company name to begin.</div>
+      <div class="err" id="g-err1">Enter your website so we can pull your company details.</div>
       <div class="note">Free. No card. Your results are yours to keep.</div>
     </div>
 
@@ -328,7 +328,7 @@ function sum(o){ return Object.values(o).reduce(function(a,b){return a+b;},0); }
 function gateFind(){
   var co=(document.getElementById("g-company").value||"").trim();
   var web=(document.getElementById("g-website").value||"").trim();
-  if(!co && !web){ document.getElementById("g-err1").style.display="block"; return; }
+  if(!web || web.indexOf(".")<0){ document.getElementById("g-err1").style.display="block"; return; }
   document.getElementById("g-err1").style.display="none";
   lead.company=co;
   state.answers.company=co;
