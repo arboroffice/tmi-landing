@@ -59,17 +59,25 @@ button { font-family: inherit; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #DDDDDD; border-radius: 2px; }
 /* GATE */
-.gate{position:fixed;inset:0;z-index:500;background:#0A0A0A;display:flex;align-items:center;justify-content:center;padding:24px;}
-.gate-card{max-width:440px;width:100%;}
-.gate .tag2{display:inline-flex;align-items:center;gap:8px;background:#1A1A1A;border:1.5px solid #2A2A2A;border-radius:100px;padding:6px 14px 6px 8px;margin-bottom:24px;}
-.gate h1{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#fff;margin-bottom:14px;}
-.gate p{font-size:15px;color:#8A8A8A;line-height:1.7;margin-bottom:28px;}
-.gate label{display:block;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6A6A6A;margin:0 0 7px;}
-.gate input{width:100%;background:#141414;border:1.5px solid #2A2A2A;color:#fff;font-family:'Inter',sans-serif;font-size:15px;padding:13px 15px;border-radius:10px;outline:none;margin-bottom:14px;}
-.gate input:focus{border-color:#C8F135;}
+.gate{position:fixed;inset:0;z-index:500;background:#fff;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto;}
+.gate-card{max-width:460px;width:100%;}
+.gate .tag2{display:inline-flex;align-items:center;gap:8px;background:#F4FAE3;border:1.5px solid #E2F0C6;border-radius:100px;padding:6px 14px 6px 8px;margin-bottom:24px;}
+.gate h1{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#0A0A0A;margin-bottom:14px;}
+.gate p{font-size:15px;color:#6A6A6A;line-height:1.7;margin-bottom:28px;}
+.gate label{display:block;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8A8A8A;margin:0 0 7px;}
+.gate input{width:100%;background:#fff;border:1.5px solid #E0E0DC;color:#0A0A0A;font-family:'Inter',sans-serif;font-size:15px;padding:13px 15px;border-radius:10px;outline:none;margin-bottom:14px;}
+.gate input:focus{border-color:#0A0A0A;}
 .gate button{width:100%;background:#C8F135;color:#0A0A0A;border:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.04em;text-transform:uppercase;padding:15px;border-radius:10px;cursor:pointer;margin-top:6px;}
-.gate .err{color:#FF6B6B;font-size:13px;margin-top:10px;display:none;}
-.gate .note{font-size:12px;color:#5A5A5A;text-align:center;margin-top:16px;}
+.gate button:disabled{opacity:.55;cursor:default;}
+.gate .gate-back{width:auto;background:none;border:none;color:#8A8A8A;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;text-transform:none;letter-spacing:0;padding:12px 0 0;cursor:pointer;margin:0;}
+.gate .gate-back:hover{color:#0A0A0A;}
+.gate .err{color:#D14343;font-size:13px;margin-top:10px;display:none;}
+.gate .note{font-size:12px;color:#9A9A9A;text-align:center;margin-top:16px;}
+.gate .searching{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(160deg,#F8FCE8,#fff);border:1.5px solid #D8ECCC;border-radius:14px;padding:18px 20px;margin-bottom:8px;}
+.gate .found-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.gate .found-chips span{font-size:12px;color:#4A6010;background:#F4FAE3;border:1px solid #E2F0C6;border-radius:100px;padding:6px 12px;}
+.gate .spin{width:16px;height:16px;border:2px solid #D8ECCC;border-top-color:#8FBF3C;border-radius:50%;animation:gspin .8s linear infinite;flex-shrink:0;margin-top:1px;}
+@keyframes gspin{to{transform:rotate(360deg);}}
 @media (max-width: 639px) {
   .nav-item { font-size: 11px; padding: 16px 11px; }
   .step-card { padding: 14px 14px; }
@@ -89,20 +97,47 @@ button { font-family: inherit; }
 <!-- EMAIL GATE -->
 <div class="gate" id="gate">
   <div class="gate-card">
-    <div class="tag2"><span class="pulse" style="width:8px;height:8px;border-radius:50%;background:#C8F135;display:block;"></span><span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#C8F135;">Free &middot; The Intelligent Company Audit</span></div>
-    <h1>See your operation, scored live.</h1>
-    <p>An immersive audit: your operational score, the money leaking through your business, the digital employees you could build, and a 30-day path. Enter your details to begin.</p>
-    <label for="g-name">Your name</label>
-    <input id="g-name" type="text" placeholder="Jane Smith" autocomplete="name"/>
-    <label for="g-email">Email *</label>
-    <input id="g-email" type="email" placeholder="you@company.com" autocomplete="email"/>
-    <label for="g-company">Company</label>
-    <input id="g-company" type="text" placeholder="Smith Industries" autocomplete="organization"/>
-    <label for="g-phone">Mobile (for your results + call reminders)</label>
-    <input id="g-phone" type="tel" placeholder="(555) 123-4567" autocomplete="tel"/>
-    <button onclick="gateSubmit()">Start the audit &rarr;</button>
-    <div class="err" id="g-err">Please enter a valid email.</div>
-    <div class="note">Free. No card. Your results are yours to keep.</div>
+    <div class="tag2"><span class="pulse" style="width:8px;height:8px;border-radius:50%;background:#8FBF3C;display:block;"></span><span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#4A6010;">Free &middot; The Intelligent Company Audit</span></div>
+
+    <!-- STEP 1: company -->
+    <div id="gateStep1">
+      <h1>Let's start with your company.</h1>
+      <p>Tell us who you are and we will do the homework before we ask you anything. Takes about fifteen seconds.</p>
+      <label for="g-company">Company name</label>
+      <input id="g-company" type="text" placeholder="Smith Industries" autocomplete="organization" onkeydown="if(event.key==='Enter')gateFind()"/>
+      <label for="g-website">Website <span style="text-transform:none;letter-spacing:0;color:#B0B0B0;font-weight:500;">(optional, helps us find you)</span></label>
+      <input id="g-website" type="text" placeholder="smithindustries.com" autocomplete="url" onkeydown="if(event.key==='Enter')gateFind()"/>
+      <button onclick="gateFind()">Find my company &rarr;</button>
+      <div class="err" id="g-err1">Enter your company name to begin.</div>
+      <div class="note">Free. No card. Your results are yours to keep.</div>
+    </div>
+
+    <!-- STEP 2: search + confirm -->
+    <div id="gateStep2" style="display:none;">
+      <div id="gateSearching">
+        <div class="searching"><div class="spin"></div><div style="font-size:14px;color:#3A6A28;line-height:1.5;"><b id="searchCo">Searching&hellip;</b> Reading your site and what is public so you do not have to type it all.</div></div>
+      </div>
+      <div id="gateConfirm" style="display:none;">
+        <h1>Does this look right?</h1>
+        <p id="confirmSub">Here is what we found. Confirm or fix it, then we will begin.</p>
+        <div class="found-chips" id="foundChips"></div>
+        <label for="c-company">Company</label>
+        <input id="c-company" type="text" autocomplete="organization"/>
+        <label for="c-website">Website</label>
+        <input id="c-website" type="text" autocomplete="url" placeholder="yourcompany.com"/>
+        <label for="c-industry">Industry</label>
+        <input id="c-industry" type="text" placeholder="e.g. HVAC, construction, logistics"/>
+        <label for="c-name">Your name</label>
+        <input id="c-name" type="text" placeholder="Jane Smith" autocomplete="name"/>
+        <label for="c-email">Email *</label>
+        <input id="c-email" type="email" placeholder="you@company.com" autocomplete="email" onkeydown="if(event.key==='Enter')gateSubmit()"/>
+        <label for="c-phone">Mobile <span style="text-transform:none;letter-spacing:0;color:#B0B0B0;font-weight:500;">(for your results + reminders)</span></label>
+        <input id="c-phone" type="tel" placeholder="(555) 123-4567" autocomplete="tel"/>
+        <button onclick="gateSubmit()">Yes, start my audit &rarr;</button>
+        <div class="err" id="g-err2">Please enter a valid email.</div>
+        <button class="gate-back" onclick="gateBack()">&larr; Back</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -287,24 +322,105 @@ function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,
 function sum(o){ return Object.values(o).reduce(function(a,b){return a+b;},0); }
 
 /* ─── GATE ──────────────────────────────────────────────────────── */
+/* Step 1: company first. We take the company (and optional website), go do the
+   research, then show a confirm screen so the owner checks what we found before
+   the audit begins. */
+function gateFind(){
+  var co=(document.getElementById("g-company").value||"").trim();
+  var web=(document.getElementById("g-website").value||"").trim();
+  if(!co && !web){ document.getElementById("g-err1").style.display="block"; return; }
+  document.getElementById("g-err1").style.display="none";
+  lead.company=co;
+  state.answers.company=co;
+  if(web) state.answers.website=web;
+  // Prefill the confirm fields we already know.
+  document.getElementById("c-company").value=co;
+  document.getElementById("c-website").value=web;
+  // Move to step 2 in the searching state.
+  document.getElementById("gateStep1").style.display="none";
+  document.getElementById("gateStep2").style.display="block";
+  document.getElementById("gateSearching").style.display="block";
+  document.getElementById("gateConfirm").style.display="none";
+  var sc=document.getElementById("searchCo"); if(sc) sc.textContent="Searching "+(co||web)+"…";
+  // Go do the homework now (company/website only; email comes on confirm).
+  state.researching=true;
+  fetch("/api/audit-research",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ company:co, email:"", website:web })})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      state.researching=false; state.researched=true;
+      if(d && d.ok!==false){ state.research=d; applyResearchPrefill(d); }
+      gateShowConfirm(d);
+    })
+    .catch(function(){ state.researching=false; state.researched=true; gateShowConfirm(null); });
+}
+
+// Apply research prefill/hypotheses into the audit answers (shared with runResearch).
+function applyResearchPrefill(d){
+  if(!d) return;
+  var pf=d.prefill||{};
+  Object.keys(pf).forEach(function(k){
+    var cur=state.answers[k];
+    if(cur==null || String(cur).trim()===""){ state.answers[k]=pf[k]; state.prefilled[k]=true; }
+  });
+  var hy=d.hypotheses||{};
+  Object.keys(hy).forEach(function(k){
+    var v=hy[k]; if(!v || String(v).trim()==="") return;
+    var cur=state.answers[k];
+    if(cur==null || String(cur).trim()===""){ state.answers[k]=String(v); state.prefilled[k]=true; state.hypothesis[k]=true; }
+  });
+}
+
+function gateShowConfirm(d){
+  document.getElementById("gateSearching").style.display="none";
+  document.getElementById("gateConfirm").style.display="block";
+  var pf=(d&&d.prefill)||{};
+  var web=document.getElementById("c-website");
+  if((!web.value || web.value.trim()==="") && pf.website) web.value=pf.website;
+  var ind=document.getElementById("c-industry");
+  if((!ind.value || ind.value.trim()==="") && pf.industry) ind.value=pf.industry;
+  var coName=document.getElementById("c-company");
+  if((!coName.value || coName.value.trim()==="") && pf.company) coName.value=pf.company;
+  var chips=document.getElementById("foundChips");
+  var found=(d&&d.found)||[];
+  if(found.length){
+    chips.innerHTML=found.map(function(x){ return "<span>"+esc(x)+"</span>"; }).join("");
+    document.getElementById("confirmSub").innerHTML="Here is what we found on <b>"+esc(lead.company||coName.value||"your company")+"</b>. Confirm or fix it, then we will begin.";
+  } else {
+    chips.innerHTML="";
+    document.getElementById("confirmSub").textContent="Add your details and we will begin. We will finish the research while you work.";
+  }
+  var em=document.getElementById("c-email"); if(em) try{ em.focus(); }catch(_){}
+}
+
+function gateBack(){
+  document.getElementById("gateStep2").style.display="none";
+  document.getElementById("gateStep1").style.display="block";
+  document.getElementById("g-err2").style.display="none";
+}
+
+/* Step 2: confirm details and start. */
 function gateSubmit(){
-  var em=(document.getElementById("g-email").value||"").trim();
-  if(!em || em.indexOf("@")<0){ document.getElementById("g-err").style.display="block"; return; }
-  lead.name=(document.getElementById("g-name").value||"").trim();
+  var em=(document.getElementById("c-email").value||"").trim();
+  if(!em || em.indexOf("@")<0){ document.getElementById("g-err2").style.display="block"; return; }
+  document.getElementById("g-err2").style.display="none";
+  lead.name=(document.getElementById("c-name").value||"").trim();
   lead.email=em;
-  lead.company=(document.getElementById("g-company").value||"").trim();
-  var ph=document.getElementById("g-phone"); lead.phone=ph?(ph.value||"").trim():"";
+  lead.company=(document.getElementById("c-company").value||"").trim();
+  var ph=document.getElementById("c-phone"); lead.phone=ph?(ph.value||"").trim():"";
+  state.answers.company=lead.company;
+  var web=(document.getElementById("c-website").value||"").trim(); if(web) state.answers.website=web;
+  var ind=(document.getElementById("c-industry").value||"").trim(); if(ind) state.answers.industry=ind;
   // Capture the lead to admin immediately and start the abandon-chaser (email +
   // text nudges to finish). It no-ops the moment they complete or book.
   try{ fetch("/api/audit-start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ name:lead.name, email:lead.email, company:lead.company, phone:lead.phone })}); }catch(e){}
   try{ if(typeof fbq==="function") fbq("track","Lead",{content_name:"Intelligent Company Audit"}); }catch(e){}
   try{ localStorage.setItem("ica_lead", JSON.stringify(lead)); }catch(e){}
-  state.answers.company = lead.company;
   document.getElementById("gate").style.display="none";
   document.getElementById("appRoot").style.display="block";
   state.sec="dossier";
   render();
-  runResearch();
+  // Research usually already ran at step 1; only kick it off if it did not.
+  if(!state.research){ state.researched=false; runResearch(); }
 }
 
 /* ─── AI RESEARCH (do the homework before we ask) ───────────────── */
@@ -359,7 +475,7 @@ function researchStatus(full){
     var q=new URLSearchParams(location.search); var e=q.get("e");
     if(e){
       var set=function(id,v){ var el=document.getElementById(id); if(el&&v!=null&&v!=="") el.value=v; };
-      set("g-name",q.get("n")); set("g-email",e); set("g-company",q.get("c")); set("g-phone",q.get("p"));
+      set("c-name",q.get("n")); set("c-email",e); set("c-company",q.get("c")); set("c-phone",q.get("p"));
       gateSubmit();
       return;
     }
