@@ -91,6 +91,22 @@ button { font-family: inherit; }
   .gate h1{font-size:28px;}
 }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+/* ── Mobile performance ──────────────────────────────────────────────────
+   backdrop-filter on the sticky nav repaints the blurred region on every
+   scroll frame, which is the main source of scroll jank on phones. Swap it for
+   a solid bar under 900px. Also calm the tap-flash and heavy transitions. */
+@media (max-width: 900px) {
+  #navBar { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: #ffffff !important; }
+  * { -webkit-tap-highlight-color: transparent; }
+  .card, .pill, .check-box, .nav-item, .agent-row, .diag-opt, .leak-item, .fld .opt { transition-duration: .1s; }
+  /* Infinite marquee eats CPU on phones; hold it still. */
+  .mq { animation: none; }
+  html { scroll-behavior: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq, .pulse, .fu, .fw { animation: none !important; }
+  * { scroll-behavior: auto !important; }
+}
 </style>
 <link rel="canonical" href="https://www.tmitechai.com/audit"/>
 </head>
@@ -520,7 +536,10 @@ function selectAgent(id){ state.selAgent = state.selAgent===id?null:id; render()
 function setAns(id,v){ state.answers[id]=v; saveProgress(); }
 function toggleMulti(id,v){ var a=Array.isArray(state.answers[id])?state.answers[id].slice():[]; var i=a.indexOf(v); if(i<0)a.push(v); else a.splice(i,1); state.answers[id]=a; saveProgress(); }
 // Persist audit progress so a partial audit survives a refresh or a return trip.
-function saveProgress(){
+// Debounced: serializing the whole state to localStorage on every keystroke made
+// typing laggy on phones, so we coalesce writes and flush on leave.
+var _saveTimer=null;
+function _writeProgress(){
   try{ localStorage.setItem("ica_progress", JSON.stringify({
     v:1, sec:state.sec, answers:state.answers, checks:state.checks, scores:state.scores,
     prefilled:state.prefilled, hypothesis:state.hypothesis,
@@ -528,6 +547,12 @@ function saveProgress(){
     research:state.research, researched:state.researched, autoScored:state.autoScored, ts:Date.now()
   })); }catch(e){}
 }
+function saveProgress(){ if(_saveTimer) clearTimeout(_saveTimer); _saveTimer=setTimeout(function(){ _saveTimer=null; _writeProgress(); }, 500); }
+// Never lose the last edits when the tab is hidden or closed.
+try{
+  window.addEventListener("pagehide", _writeProgress);
+  document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="hidden") _writeProgress(); });
+}catch(e){}
 
 function loadIntake(){
   // We deliberately ask only the owner-only questions now; research + the dossier
