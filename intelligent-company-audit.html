@@ -50,9 +50,10 @@ button { font-family: inherit; }
 .step-card.done-card { border-color: #C8F135; background: #FDFFF5; }
 .tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 5px; padding: 3px 9px; }
 .wk-gutter { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 2px; }
-.fld input,.fld textarea,.fld select{width:100%;font-family:'Inter',sans-serif;font-size:14px;color:#0A0A0A;background:#fff;border:1.5px solid #E0E0DC;border-radius:10px;padding:12px 14px;outline:none;}
-.fld input:focus,.fld textarea:focus,.fld select:focus{border-color:#0A0A0A;}
-.fld textarea{min-height:84px;resize:vertical;}
+.fld input,.fld textarea,.fld select{width:100%;font-family:'Inter',sans-serif;font-size:15px;color:#0A0A0A;background:#FAFAF8;border:1.5px solid #E6E6E1;border-radius:12px;padding:14px 16px;outline:none;transition:border-color .14s,box-shadow .14s,background .14s;}
+.fld input::placeholder,.fld textarea::placeholder{color:#A8A8A2;}
+.fld input:focus,.fld textarea:focus,.fld select:focus{border-color:#0A0A0A;background:#fff;box-shadow:0 0 0 4px rgba(200,241,53,0.30);}
+.fld textarea{min-height:96px;resize:vertical;line-height:1.55;}
 .fld .opt{display:flex;align-items:center;gap:10px;font-size:14px;color:#4A4A4A;margin:6px 0;cursor:pointer;border:1.5px solid #EBEBEB;border-radius:10px;padding:11px 14px;min-height:44px;transition:border-color .12s,background .12s;}.fld .opt:hover{border-color:#C8F135;}.fld .opt:has(input:checked){border-color:#0A0A0A;background:#FDFFF5;font-weight:600;color:#0A0A0A;}.fld .opt input{accent-color:#0A0A0A;width:16px;height:16px;flex-shrink:0;}
 .fld .opt input{width:auto;}
 ::-webkit-scrollbar { width: 4px; }
@@ -65,8 +66,9 @@ button { font-family: inherit; }
 .gate h1{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:700;letter-spacing:-0.03em;line-height:1.05;color:#0A0A0A;margin-bottom:14px;}
 .gate p{font-size:15px;color:#6A6A6A;line-height:1.7;margin-bottom:28px;}
 .gate label{display:block;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8A8A8A;margin:0 0 7px;}
-.gate input{width:100%;background:#fff;border:1.5px solid #E0E0DC;color:#0A0A0A;font-family:'Inter',sans-serif;font-size:15px;padding:13px 15px;border-radius:10px;outline:none;margin-bottom:14px;}
-.gate input:focus{border-color:#0A0A0A;}
+.gate input{width:100%;background:#FAFAF8;border:1.5px solid #E6E6E1;color:#0A0A0A;font-family:'Inter',sans-serif;font-size:15px;padding:14px 16px;border-radius:12px;outline:none;margin-bottom:14px;transition:border-color .14s,box-shadow .14s,background .14s;}
+.gate input:focus{border-color:#0A0A0A;background:#fff;box-shadow:0 0 0 4px rgba(200,241,53,0.30);}
+.gate input::placeholder{color:#A8A8A2;}
 .gate button{width:100%;background:#C8F135;color:#0A0A0A;border:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.04em;text-transform:uppercase;padding:15px;border-radius:10px;cursor:pointer;margin-top:6px;}
 .gate button:disabled{opacity:.55;cursor:default;}
 .gate .gate-back{width:auto;background:none;border:none;color:#8A8A8A;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;text-transform:none;letter-spacing:0;padding:12px 0 0;cursor:pointer;margin:0;}
@@ -485,11 +487,29 @@ function researchStatus(full){
       return;
     }
   }catch(_){}
-  try{ var s=localStorage.getItem("ica_lead"); if(s){ lead=JSON.parse(s); state.answers.company=lead.company||""; document.getElementById("gate").style.display="none"; document.getElementById("appRoot").style.display="block"; state.sec="dossier"; render(); runResearch(); } }catch(e){}
+  try{ var s=localStorage.getItem("ica_lead"); if(s){
+    lead=JSON.parse(s); state.answers.company=lead.company||"";
+    // Restore saved progress so they land where they left off.
+    try{ var pg=localStorage.getItem("ica_progress"); if(pg){ var P=JSON.parse(pg);
+      if(P.answers) state.answers=Object.assign({}, P.answers, {company:state.answers.company||P.answers.company||""});
+      if(P.checks) state.checks=P.checks;
+      if(P.scores) state.scores=P.scores;
+      if(P.prefilled) state.prefilled=P.prefilled;
+      if(P.hypothesis) state.hypothesis=P.hypothesis;
+      if(P.diagnosis){ state.diagnosis=P.diagnosis; state.diagnosed=!!P.diagnosed; }
+      if(P.research){ state.research=P.research; state.researched=true; }
+      if(P.autoScored) state.autoScored=P.autoScored;
+      if(P.sec) state.sec=P.sec;
+    } }catch(_){}
+    document.getElementById("gate").style.display="none"; document.getElementById("appRoot").style.display="block";
+    if(!state.sec || state.sec==="intro") state.sec="dossier";
+    render();
+    if(!state.researched) runResearch();
+  } }catch(e){}
 })();
 
 /* ─── ACTIONS ───────────────────────────────────────────────────── */
-function go(id){ state.sec=id; state.selAgent=null; render(); window.scrollTo({top:0,behavior:"smooth"}); if(id==="intake" && !state.intakeLoaded) loadIntake(); if(id==="issues" && !state.diagnosed && !state.diagnosing) runDiagnose(); }
+function go(id){ state.sec=id; state.selAgent=null; saveProgress(); render(); window.scrollTo({top:0,behavior:"smooth"}); if(id==="intake" && !state.intakeLoaded) loadIntake(); if(id==="issues" && !state.diagnosed && !state.diagnosing) runDiagnose(); }
 function setScore(label,v){ state.scores[label]=v; render(); }
 function toggleCheck(k){ state.checks[k]=!state.checks[k]; render(); }
 function toggleWk(i){ state.openWk = state.openWk===i?null:i; state.openDay=null; render(); }
@@ -497,8 +517,17 @@ function toggleDay(k){ state.openDay = state.openDay===k?null:k; render(); }
 function toggleLeak(i){ state.openLeak = state.openLeak===i?null:i; render(); }
 function setFilter(c){ state.aFilter=c; state.selAgent=null; render(); }
 function selectAgent(id){ state.selAgent = state.selAgent===id?null:id; render(); }
-function setAns(id,v){ state.answers[id]=v; }
-function toggleMulti(id,v){ var a=Array.isArray(state.answers[id])?state.answers[id].slice():[]; var i=a.indexOf(v); if(i<0)a.push(v); else a.splice(i,1); state.answers[id]=a; }
+function setAns(id,v){ state.answers[id]=v; saveProgress(); }
+function toggleMulti(id,v){ var a=Array.isArray(state.answers[id])?state.answers[id].slice():[]; var i=a.indexOf(v); if(i<0)a.push(v); else a.splice(i,1); state.answers[id]=a; saveProgress(); }
+// Persist audit progress so a partial audit survives a refresh or a return trip.
+function saveProgress(){
+  try{ localStorage.setItem("ica_progress", JSON.stringify({
+    v:1, sec:state.sec, answers:state.answers, checks:state.checks, scores:state.scores,
+    prefilled:state.prefilled, hypothesis:state.hypothesis,
+    diagnosis:state.diagnosis, diagnosed:state.diagnosed,
+    research:state.research, researched:state.researched, autoScored:state.autoScored, ts:Date.now()
+  })); }catch(e){}
+}
 
 function loadIntake(){
   // We deliberately ask only the owner-only questions now; research + the dossier
