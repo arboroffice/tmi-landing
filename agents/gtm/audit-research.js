@@ -104,6 +104,7 @@ export async function researchForAudit({ company, website, email } = {}) {
     facts.since_year ? `In business since: ${facts.since_year}` : '',
     facts.team_claim ? `Team-size claim on site: ${facts.team_claim}` : '',
     facts.phones ? `Phone numbers listed: ${facts.phones.join(', ')}` : '',
+    facts.emails ? `Contact emails listed on site: ${facts.emails.join(', ')}` : '',
     firmo ? `Apollo firmographics: industry=${firmo.industry || '?'}, employees=${firmo.employeeCount || '?'}, revenue=${firmo.revenue || '?'}, founded=${firmo.foundedYear || '?'}, HQ=${firmo.location || '?'}` : '',
     linkedin ? `LinkedIn: ${[linkedin.industry, linkedin.employeeCount ? linkedin.employeeCount + ' employees' : '', linkedin.founded ? 'founded ' + linkedin.founded : '', Array.isArray(linkedin.specialties) ? 'specialties: ' + linkedin.specialties.slice(0, 8).join(', ') : ''].filter(Boolean).join('; ')}` : '',
     maps ? `Google Maps: ${[maps.category, maps.rating ? maps.rating + ' stars' : '', maps.reviewCount ? maps.reviewCount + ' reviews' : '', maps.address, maps.hours ? 'hours listed' : ''].filter(Boolean).join('; ')}` : '',
@@ -146,6 +147,12 @@ Return ONLY this JSON object:
     "work_flow": "our read on how a job likely flows from sold to delivered to paid, one confirmable sentence, or empty",
     "biggest_bottleneck": "our single best read on the most likely operational bottleneck, named specifically and tied to the evidence, or empty",
     "founder_role": "our read on what the owner is likely still doing personally given the size/stack, or empty"
+  },
+  "contact": {
+    "name": "the owner or primary contact's real name if a person is clearly named on the site (About, Team, or Contact page), else empty. Never guess.",
+    "title": "their role if shown (Owner, President, GM, Operations Manager), else empty",
+    "email": "the best single contact email from the site, preferring a named person over info@ or sales@, else empty",
+    "phone": "the primary contact phone number from the site, else empty"
   },
   "confidence": "high | medium | low"
 }`;
@@ -211,9 +218,28 @@ Return ONLY this JSON object:
   if (facts.certifications && facts.certifications.length) found.push(`Advertises ${facts.certifications.slice(0, 4).join(', ')}`);
   if (Array.isArray(parsed.found)) for (const f of parsed.found) if (found.indexOf(f) < 0) found.push(f);
 
+  // Contact: the model's read, backed by deterministic extraction from the site.
+  const roleRe = /^(info|contact|sales|support|admin|hello|office|service|help|team|billing|careers|jobs|noreply|no-reply)@/i;
+  const pickEmail = (list) => {
+    if (!Array.isArray(list) || !list.length) return '';
+    const named = list.find((e) => !roleRe.test(e));
+    return named || list[0];
+  };
+  const mc = parsed.contact || {};
+  const contact = {
+    name: (mc.name && String(mc.name).trim()) || '',
+    title: (mc.title && String(mc.title).trim()) || '',
+    email: (mc.email && String(mc.email).trim()) || pickEmail(facts.emails) || '',
+    phone: (mc.phone && String(mc.phone).trim()) || (Array.isArray(facts.phones) ? facts.phones[0] : '') || '',
+  };
+  for (const k of Object.keys(contact)) {
+    if (!contact[k] || String(contact[k]).toLowerCase() === 'unknown') delete contact[k];
+  }
+
   return {
     website: site || null,
     origin,
+    contact: Object.keys(contact).length ? contact : null,
     pagesCrawled: (crawl && crawl.pagesCrawled) || [],
     techStack: tech,
     signals: roleSignals,

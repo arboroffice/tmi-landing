@@ -380,6 +380,11 @@ function gateShowConfirm(d){
   if((!ind.value || ind.value.trim()==="") && pf.industry) ind.value=pf.industry;
   var coName=document.getElementById("c-company");
   if((!coName.value || coName.value.trim()==="") && pf.company) coName.value=pf.company;
+  // Pre-fill the contact fields from what we scraped (owner name, email, phone).
+  var ct=(d&&d.contact)||{};
+  var cn=document.getElementById("c-name"); if(cn && (!cn.value||cn.value.trim()==="") && ct.name) cn.value=ct.name;
+  var ce=document.getElementById("c-email"); if(ce && (!ce.value||ce.value.trim()==="") && ct.email) ce.value=ct.email;
+  var cp=document.getElementById("c-phone"); if(cp && (!cp.value||cp.value.trim()==="") && ct.phone) cp.value=ct.phone;
   var chips=document.getElementById("foundChips");
   var found=(d&&d.found)||[];
   if(found.length){

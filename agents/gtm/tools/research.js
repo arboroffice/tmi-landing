@@ -225,6 +225,15 @@ export function extractFacts(text, html) {
   const facts = {};
   const phones = [...new Set((text.match(/(\(\d{3}\)\s?|\d{3}[.\-\s])\d{3}[.\-\s]\d{4}/g) || []).map(s => s.trim()))].slice(0, 6);
   if (phones.length) facts.phones = phones;
+  // Contact emails listed on the site (mailto links + inline). Skip asset/tracking
+  // false positives so we only surface addresses a human could actually reply to.
+  const emails = [...new Set(
+    ((text + ' ' + (html || '')).match(/[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/g) || [])
+      .map((s) => s.toLowerCase().trim())
+      .filter((e) => !/\.(png|jpe?g|gif|svg|webp|css|js|woff2?|ico)$/i.test(e))
+      .filter((e) => !/(example\.com|sentry|wixpress|@2x|\.w3\.org|schema\.org)/.test(e))
+  )].slice(0, 6);
+  if (emails.length) facts.emails = emails;
   // Service areas: "serving X, Y, Z" or "areas we serve"
   const serveBlock = (text.match(/(serving|areas? (we )?serve|service areas?|proudly serving)[^.]{0,220}/i) || [])[0];
   if (serveBlock) facts.service_area_text = serveBlock.trim().slice(0, 220);
