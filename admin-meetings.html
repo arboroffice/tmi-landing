@@ -294,6 +294,10 @@ async function newAccount(){
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recog = null, recording = false, startTs = 0, timerInt = null, accumSec = 0;
 let mediaRec = null, mediaStream = null, audioChunks = [], audioMime = '';
+let wakeLock = null;
+async function acquireWake(){ try{ if('wakeLock' in navigator){ wakeLock = await navigator.wakeLock.request('screen'); } }catch(_){} }
+function releaseWake(){ try{ if(wakeLock){ wakeLock.release(); } }catch(_){} wakeLock = null; }
+document.addEventListener('visibilitychange', ()=>{ if(recording && document.visibilityState==='visible') acquireWake(); });
 const tbox = document.getElementById('transcript-box');
 
 if(!SR){ document.getElementById('unsupported').style.display='block'; }
@@ -335,6 +339,7 @@ function toggleRecord(){
   timerInt = setInterval(setTimer, 500);
   try{ recog.start(); }catch(_){}
   startAudioCapture();
+  acquireWake();
 }
 
 // Capture the actual audio so the recording is saved to Firebase Storage
@@ -357,6 +362,7 @@ function stopAudioCapture(){
 }
 function stopRecord(){
   recording = false;
+  releaseWake();
   if(recog){ try{ recog.stop(); }catch(_){} }
   stopAudioCapture();
   accumSec += Math.floor((Date.now()-startTs)/1000);
