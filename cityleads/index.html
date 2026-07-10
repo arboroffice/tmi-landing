@@ -118,6 +118,16 @@
   .recbar .dot{width:10px;height:10px;border-radius:50%;background:var(--red);animation:pulse 1s infinite;}
   @keyframes pulse{50%{opacity:0.3;}}
   @media(prefers-reduced-motion:reduce){.recbar .dot{animation:none;}}
+  /* Global floating recorder bar: always visible while recording, so the rep
+     can keep using the app and stop from anywhere. */
+  #recBar{position:fixed;left:12px;right:12px;bottom:calc(84px + var(--safe-b));z-index:120;display:none;align-items:center;gap:12px;background:var(--dark);color:#fff;border-radius:14px;padding:12px 15px;box-shadow:0 14px 44px rgba(0,0,0,.4);}
+  #recBar.on{display:flex;}
+  #recBar .dot{width:11px;height:11px;border-radius:50%;background:var(--red);animation:pulse 1s infinite;flex:none;}
+  @media(prefers-reduced-motion:reduce){#recBar .dot{animation:none;}}
+  #recBar .lbl{font-size:14px;font-weight:600;flex:1;display:flex;align-items:center;gap:9px;}
+  #recBar .lbl b{font-variant-numeric:tabular-nums;}
+  #recBar button{background:var(--red);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;flex:none;}
+  #recBar.busy button{opacity:.55;pointer-events:none;}
 
   .toast{position:fixed;left:50%;bottom:calc(90px + var(--safe-b));transform:translateX(-50%);background:var(--dark);color:#fff;font-size:13.5px;font-weight:600;padding:11px 18px;border-radius:999px;z-index:100;opacity:0;transition:opacity .2s;pointer-events:none;max-width:88vw;text-align:center;}
   .toast.on{opacity:1;}
@@ -184,6 +194,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="recBar"><span class="dot"></span><span class="lbl">Recording <b id="recBarTime">0:00</b></span><button id="recBarStop" type="button">Stop</button></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -656,7 +667,7 @@ function wireLeadDictation(btn, state){
         toast(L.business_name?('Got it: '+L.business_name):'Filled what I caught');
       }catch(ex){ state.textContent=''; toast(ex.message); }
     };
-    rec.start(); btn.classList.add('rec'); btn.innerHTML='Stop';
+    rec.start(1000); btn.classList.add('rec'); btn.innerHTML='Stop';
     state.innerHTML='<span class="recbar" style="margin:0"><span class="dot"></span> Listening</span>';
   };
 }
@@ -773,36 +784,70 @@ $('#sheetClose').onclick=closeSheet;
 function mergeLead(up){ const i=LEADS.findIndex(x=>x.id===up.id); if(i>=0) LEADS[i]=up; else LEADS.unshift(up); }
 function refreshCurrent(){ const on=document.querySelector('.tab.on'); if(on) switchTab(on.dataset.tab); }
 
-/* ---- Recorder: transcribe (Deepgram) + AI recap ---- */
-function wireRecorder(btn, state, leadId, onResult){
-  let rec=null, chunks=[], stream=null, t0=0, tick=null;
-  const label = btn.textContent || 'Record interaction';
-  btn.onclick=async()=>{
-    if(rec && rec.state==='recording'){ rec.stop(); return; }
-    if(!navigator.mediaDevices || !window.MediaRecorder){ toast('Recording not supported on this browser'); return; }
-    try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }catch(ex){ toast('Microphone blocked'); return; }
-    chunks=[]; rec=new MediaRecorder(stream); t0=Date.now();
-    rec.ondataavailable=(e)=>{ if(e.data.size) chunks.push(e.data); };
-    rec.onstop=async()=>{
-      stream.getTracks().forEach(t=>t.stop());
-      clearInterval(tick);
-      btn.classList.remove('rec'); btn.textContent=label;
-      const blob=new Blob(chunks,{type:(chunks[0]&&chunks[0].type)||'audio/webm'});
+/* ---- Recorder: one global recording at a time ----
+   Records with a 1s timeslice (so nothing is lost if interrupted), holds a
+   screen Wake Lock so the phone will not sleep and kill the mic, and shows a
+   floating Stop bar that survives tab switches so the rep can keep using the
+   app and stop from anywhere. Deepgram transcribes + Claude recaps on stop. */
+const Rec = {
+  active:false, busy:false, rec:null, stream:null, chunks:[], t0:0, tick:null, wake:null, onResult:null, leadId:null, mime:'audio/webm',
+  supported(){ return !!(navigator.mediaDevices && window.MediaRecorder); },
+  async start(leadId, onResult){
+    if(this.active || this.busy){ toast('Already recording'); return; }
+    if(!this.supported()){ toast('Recording not supported on this browser'); return; }
+    let stream;
+    try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }
+    catch(ex){ toast('Microphone blocked'); return; }
+    this.stream=stream; this.chunks=[]; this.leadId=leadId||null; this.onResult=onResult||null; this.t0=Date.now();
+    let mime=''; try{ mime=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(t=>MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t))||''; }catch(_){}
+    try{ this.rec = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream); }
+    catch(_){ this.rec = new MediaRecorder(stream); }
+    this.mime = (this.rec && this.rec.mimeType) || mime || 'audio/webm';
+    this.rec.ondataavailable=(e)=>{ if(e.data && e.data.size) this.chunks.push(e.data); };
+    this.rec.onstop=()=>this._finish();
+    try{ this.rec.start(1000); }catch(_){ try{ this.rec.start(); }catch(e2){ toast('Could not start recording'); this._cleanup(); return; } }
+    this.active=true; this._wake(); this._bar('rec');
+    this.tick=setInterval(()=>this._tick(),500); this._tick(); this._reflect();
+  },
+  stop(){
+    if(!this.active) return;
+    this.active=false; this.busy=true;
+    clearInterval(this.tick); this._release(); this._bar('busy'); this._reflect();
+    try{ if(this.rec && this.rec.state!=='inactive') this.rec.stop(); else this._finish(); }
+    catch(_){ this._finish(); }
+  },
+  async _finish(){
+    try{ if(this.stream) this.stream.getTracks().forEach(t=>t.stop()); }catch(_){}
+    const chunks=this.chunks, mime=this.mime, t0=this.t0, onResult=this.onResult, leadId=this.leadId;
+    try{
+      const blob=new Blob(chunks,{type:(chunks[0]&&chunks[0].type)||mime});
       const dur=Math.round((Date.now()-t0)/1000);
-      state.innerHTML='<span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span> Transcribing &amp; summarizing...';
-      try{
-        const dataUrl=await blobToDataUrl(blob);
-        const r=await api('/api/rep-transcribe',{method:'POST',body:JSON.stringify({audio:dataUrl,lead_id:leadId,duration:dur})});
-        state.textContent='';
-        if((r.transcript && r.transcript.trim()) || r.summary){ onResult(r); }
-        else toast('Nothing caught, try again');
-      }catch(ex){ state.textContent=''; toast(ex.message); }
-    };
-    rec.start();
-    btn.classList.add('rec'); btn.innerHTML='Stop &amp; save';
-    const render=()=>{ const s=Math.round((Date.now()-t0)/1000); const mm=String(Math.floor(s/60)).padStart(1,'0'), ss=String(s%60).padStart(2,'0'); state.innerHTML='<span class="recbar" style="margin:0"><span class="dot"></span> Recording '+mm+':'+ss+'</span>'; };
-    render(); tick=setInterval(render,1000);
-  };
+      const dataUrl=await blobToDataUrl(blob);
+      const r=await api('/api/rep-transcribe',{method:'POST',body:JSON.stringify({audio:dataUrl,lead_id:leadId,duration:dur})});
+      if((r.transcript && r.transcript.trim()) || r.summary){ try{ if(onResult) onResult(r); }catch(_){ toast('Interaction saved'); } }
+      else toast('Nothing caught, try again');
+    }catch(ex){ toast((ex && ex.message) || 'Upload failed'); }
+    this._cleanup();
+  },
+  _cleanup(){ this.busy=false; this.active=false; this.rec=null; this.stream=null; this.chunks=[]; this.onResult=null; this.leadId=null; this._bar('off'); this._reflect(); },
+  _tick(){ const s=Math.max(0,Math.round((Date.now()-this.t0)/1000)); const mm=Math.floor(s/60), ss=String(s%60).padStart(2,'0'); const el=$('#recBarTime'); if(el) el.textContent=mm+':'+ss; },
+  _bar(mode){ const b=$('#recBar'); if(!b) return; const lbl=b.querySelector('.lbl'); if(mode==='off'){ b.classList.remove('on','busy'); return; } b.classList.add('on'); if(mode==='rec'){ b.classList.remove('busy'); if(lbl) lbl.innerHTML='Recording <b id="recBarTime">0:00</b>'; } else if(mode==='busy'){ b.classList.add('busy'); if(lbl) lbl.innerHTML='<span class="spin"></span> Transcribing…'; } },
+  _reflect(){ document.querySelectorAll('[data-rec-btn]').forEach(btn=>{ btn.classList.toggle('rec', this.active); btn.textContent = this.active ? 'Stop recording' : (btn.getAttribute('data-rec-label')||'Record interaction'); }); },
+  async _wake(){ try{ if('wakeLock' in navigator){ this.wake=await navigator.wakeLock.request('screen'); } }catch(_){} },
+  _release(){ try{ if(this.wake){ this.wake.release(); } }catch(_){} this.wake=null; },
+};
+// Re-acquire the wake lock when the rep comes back to the tab (locks drop on hide).
+document.addEventListener('visibilitychange',()=>{ if(Rec.active && document.visibilityState==='visible') Rec._wake(); });
+(function(){ const s=$('#recBarStop'); if(s) s.onclick=()=>Rec.stop(); })();
+
+// Same signature as before: wire a per-view button to the global recorder.
+function wireRecorder(btn, state, leadId, onResult){
+  if(!btn) return;
+  btn.setAttribute('data-rec-btn','1');
+  btn.setAttribute('data-rec-label', (btn.textContent||'Record interaction').trim());
+  btn.classList.toggle('rec', Rec.active);
+  if(Rec.active) btn.textContent='Stop recording';
+  btn.onclick=()=>{ if(Rec.active || Rec.busy) Rec.stop(); else Rec.start(leadId, onResult); };
 }
 function outcomeLabel(o){ return ({booked:'Booked',interested:'Interested',follow_up:'Follow up',not_interested:'Not interested',no_decision:'No decision'})[o]||o||''; }
 function blobToDataUrl(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(blob); }); }
