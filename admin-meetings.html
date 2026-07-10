@@ -329,7 +329,7 @@ function toggleRecord(){
     renderTranscript(interim);
   };
   recog.onerror = (e)=>{ if(e.error==='not-allowed') TMIAdmin.toast('Microphone blocked','error'); };
-  recog.onend = ()=>{ if(recording){ try{ recog.start(); }catch(_){} } }; // auto-restart on silence
+  recog.onend = ()=>{ if(recording && recog){ try{ recog.start(); }catch(_){} } }; // auto-restart on silence
   recording = true; startTs = Date.now();
   tbox.contentEditable = 'false';
   document.getElementById('btn-rec').innerHTML = '■ Stop';
@@ -363,7 +363,15 @@ function stopAudioCapture(){
 function stopRecord(){
   recording = false;
   releaseWake();
-  if(recog){ try{ recog.stop(); }catch(_){} }
+  // Detach the auto-restart handler BEFORE stopping, then abort so the engine
+  // cannot relaunch itself. Plain stop() races the onend->restart loop and the
+  // mic keeps going ("won't stop"); abort() kills it immediately.
+  if(recog){
+    try{ recog.onend = null; recog.onresult = null; recog.onerror = null; }catch(_){}
+    try{ recog.stop(); }catch(_){}
+    try{ recog.abort(); }catch(_){}
+    recog = null;
+  }
   stopAudioCapture();
   accumSec += Math.floor((Date.now()-startTs)/1000);
   clearInterval(timerInt);
