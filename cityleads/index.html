@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <script>window.__gmapsReady=false;function __gmapsInit(){window.__gmapsReady=true;}</script>
-<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvjUKge3a6hEmh9BRZ5Ez1JLyWkR_Fyww&libraries=geometry,places&callback=__gmapsInit"></script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvjUKge3a6hEmh9BRZ5Ez1JLyWkR_Fyww&libraries=geometry,places,visualization&callback=__gmapsInit"></script>
 <style>
   :root{
     --bg:#f4f5ef;--card:#ffffff;--ink:#0a0b14;--ink-2:#454654;--muted:#7c7d89;
@@ -154,6 +154,7 @@
       <div class="map-actions">
         <button class="btn ghost sm" id="locateBtn">Find me</button>
         <button class="btn sm" id="routeBtn">Optimize route</button>
+        <button class="btn ghost sm" id="heatBtn">Heatmap</button>
         <button class="btn ghost sm" id="addHereBtn">Log here</button>
       </div>
       <div id="map"></div>
@@ -203,6 +204,9 @@
 const API = '';
 let TOKEN = '';
 let ME = null, LEADS = [], FILTER = 'all', SEARCH = '', SORT = 'recent';
+let LEADVIEW = 'list';        // 'list' | 'board' (Kanban)
+let LB_RANGE = 'week';        // leaderboard window: week | month | all
+let heatLayer = null, heatOn = false;
 function haversine(la1,lo1,la2,lo2){ const R=3958.8,toR=x=>x*Math.PI/180; const dLa=toR(la2-la1),dLo=toR(lo2-lo1); const a=Math.sin(dLa/2)**2+Math.cos(toR(la1))*Math.cos(toR(la2))*Math.sin(dLo/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
 let map = null, markers = [], meMarker = null, lastPos = null, dirRenderer = null, geocoder = null, gInfo = null;
 
@@ -223,6 +227,102 @@ async function api(path, opts={}){
   const data = await res.json().catch(()=>({}));
   if(!res.ok) throw new Error(data.error || ('Error '+res.status));
   return data;
+}
+
+/* ---- Offline write queue ----
+   Reps work basements, rural yards, dead zones. Writes that fail on the network
+   are stashed in localStorage and replayed automatically when the connection
+   returns. Reads still need signal; writes never get lost. */
+const OQ_KEY = 'cl_offline_queue';
+function oqLoad(){ try{ return JSON.parse(localStorage.getItem(OQ_KEY)||'[]'); }catch(e){ return []; } }
+function oqSave(q){ try{ localStorage.setItem(OQ_KEY, JSON.stringify(q)); }catch(e){} paintPending(); }
+function oqAdd(path, method, body){ const q=oqLoad(); q.push({path,method,body,ts:Date.now()}); oqSave(q); }
+function oqCount(){ return oqLoad().length; }
+function isOffline(ex){ return !navigator.onLine || (ex && /Failed to fetch|NetworkError|network request failed/i.test(ex.message||'')); }
+function paintPending(){
+  const n=oqCount(); document.querySelectorAll('[data-pending]').forEach(el=>{ el.textContent = n?('• '+n+' unsynced'):''; });
+}
+async function flushQueue(){
+  if(!navigator.onLine) return;
+  let q=oqLoad(); if(!q.length) return;
+  const keep=[]; let done=0;
+  for(const item of q){
+    try{ await api(item.path,{method:item.method,body:JSON.stringify(item.body)}); done++; }
+    catch(ex){ if(isOffline(ex)) keep.push(item); /* server rejects (4xx/5xx) are dropped, not retried forever */ }
+  }
+  oqSave(keep);
+  if(done){ await loadLeads(); toast(done+' offline change'+(done===1?'':'s')+' synced'); refreshCurrent(); }
+}
+window.addEventListener('online', flushQueue);
+
+// Write helper for rep-leads: online -> real result; offline -> queue + optimistic.
+// Returns { lead, queued }.
+async function writeLead(method, body, optimistic){
+  if(navigator.onLine){
+    try{ const lead=await api('/api/rep-leads',{method,body:JSON.stringify(body)}); return {lead, queued:false}; }
+    catch(ex){ if(!isOffline(ex)) throw ex; }
+  }
+  oqAdd('/api/rep-leads', method, body);
+  return { lead: optimistic || null, queued:true };
+}
+
+/* ---- Follow-up cadence: auto-schedule the next touch when a status changes,
+   so warm leads never rot. Only fills an empty slot; never overrides a date the
+   rep set by hand. ---- */
+const CADENCE = { attempted:2, contacted:3, callback:1, booked:7 };
+function cadenceDate(status){
+  const days = CADENCE[status]; if(days==null) return undefined;
+  const d=new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10);
+}
+
+/* ---- Log a manual call/text/note interaction against a lead ---- */
+async function logInteraction(leadId, channel, opts){
+  opts=opts||{};
+  const body=Object.assign({lead_id:leadId, channel}, opts);
+  if(navigator.onLine){
+    try{
+      const r=await api('/api/rep-interactions',{method:'POST',body:JSON.stringify(body)});
+      if(r && r.lead) mergeLead(r.lead);
+      return r;
+    }catch(ex){ if(!isOffline(ex)) throw ex; }
+  }
+  oqAdd('/api/rep-interactions','POST',body);
+  return {queued:true};
+}
+
+/* ---- Web push opt-in ---- */
+function urlB64ToUint8(base64){
+  const pad='='.repeat((4-base64.length%4)%4);
+  const b64=(base64+pad).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(b64); const out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++) out[i]=raw.charCodeAt(i);
+  return out;
+}
+async function pushState(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)||typeof Notification==='undefined') return 'unsupported';
+  if(Notification.permission==='denied') return 'blocked';
+  try{ const reg=await navigator.serviceWorker.ready; const s=await reg.pushManager.getSubscription(); return s?'on':'off'; }
+  catch(e){ return 'off'; }
+}
+async function enablePush(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){ toast('Notifications not supported here'); return; }
+  let cfg; try{ cfg=await api('/api/rep-push'); }catch(e){ toast('Could not reach the server'); return; }
+  if(!cfg.enabled||!cfg.publicKey){ toast('Notifications are not set up yet'); return; }
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted'){ toast('Notifications blocked'); return; }
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:urlB64ToUint8(cfg.publicKey)});
+    await api('/api/rep-push',{method:'POST',body:JSON.stringify({subscription:sub.toJSON()})});
+    toast('Notifications on'); renderMe();
+  }catch(ex){ toast(ex.message||'Could not enable notifications'); }
+}
+async function disablePush(){
+  try{ const reg=await navigator.serviceWorker.ready; const s=await reg.pushManager.getSubscription();
+    if(s){ await api('/api/rep-push',{method:'DELETE',body:JSON.stringify({endpoint:s.endpoint})}).catch(()=>{}); await s.unsubscribe(); }
+    toast('Notifications off'); renderMe();
+  }catch(ex){ toast('Could not turn off'); }
 }
 
 /* ---- auth ---- */
@@ -265,6 +365,7 @@ async function boot(){
     $('#login').style.display='none'; $('#app').style.display='flex';
     $('#whoami').textContent = (ME.name||'').split(' ')[0] + (ME.city?(' · '+ME.city):'');
     await loadLeads();
+    flushQueue();
     switchTab('today');
   }catch(ex){ logout(); }
 }
@@ -305,21 +406,45 @@ function renderToday(){
       <div class="stat"><div class="n">${booked}</div><div class="l">Audits booked</div></div>
       <div class="stat"><div class="n">${due.length}</div><div class="l">Follow-ups due</div></div>
     </div>
+    <div data-pending style="text-align:center;font-size:12px;font-weight:700;color:var(--amber);margin:-4px 0 10px"></div>
     <button class="btn" id="tLog">Log a walk-in</button>
     <div style="height:10px"></div>
     <button class="btn ghost" id="tMap">Open the map</button>
     <div style="height:10px"></div>
     <button class="btn ghost" id="tPlan">📋 Today's game plan</button>
+    <div style="height:10px"></div>
+    <button class="btn ghost" id="tDebrief">✨ End-of-day debrief</button>
+    <div id="tDebriefOut"></div>
     ${rot.length?`<div class="card" id="tRot" style="background:#fbeceb;color:#7a241c;font-weight:700;cursor:pointer;margin-top:14px;">⚠ ${rot.length} warm lead${rot.length===1?'':'s'} going cold — untouched 5+ days. Tap to work them.</div>`:''}
     <div class="h-eyebrow">Follow-ups due</div>
     <div id="tDue"></div>`;
   $('#tLog').onclick=()=>switchTab('log');
   $('#tMap').onclick=()=>switchTab('map');
   $('#tPlan').onclick=()=>switchTab('plan');
+  $('#tDebrief').onclick=runDebrief;
+  paintPending();
   const rb=$('#tRot'); if(rb) rb.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
   const box=$('#tDue');
   if(!due.length){ box.innerHTML='<div class="empty">Nothing due. Go knock some doors.</div>'; }
   else due.sort((a,b)=>new Date(a.next_action_at)-new Date(b.next_action_at)).forEach(l=>box.appendChild(leadRow(l)));
+}
+async function runDebrief(){
+  const out=$('#tDebriefOut'), btn=$('#tDebrief'); if(!out||!btn) return;
+  btn.disabled=true; btn.innerHTML='<span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span> Thinking…';
+  try{
+    const d=await api('/api/rep-debrief');
+    out.innerHTML='<div class="card" style="margin-top:12px"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Today\'s debrief</div>'+
+      '<div style="font-size:14.5px;line-height:1.6;color:var(--ink)">'+esc(d.summary||'')+'</div>'+
+      '<div style="display:flex;gap:8px;margin:12px 0">'+
+        '<div class="stat" style="flex:1;padding:10px 8px"><div class="n" style="font-size:22px">'+(d.doors||0)+'</div><div class="l">Doors</div></div>'+
+        '<div class="stat" style="flex:1;padding:10px 8px"><div class="n" style="font-size:22px">'+(d.conversations||0)+'</div><div class="l">Convos</div></div>'+
+        '<div class="stat" style="flex:1;padding:10px 8px"><div class="n" style="font-size:22px">'+(d.booked||0)+'</div><div class="l">Booked</div></div>'+
+      '</div>'+
+      '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:6px 0 8px">Tomorrow</div>'+
+      (Array.isArray(d.tomorrow)?d.tomorrow:[]).map(t=>'<div style="display:flex;gap:9px;font-size:14px;margin-bottom:7px;line-height:1.5"><span>→</span><span>'+esc(t)+'</span></div>').join('')+
+    '</div>';
+  }catch(ex){ toast(ex.message||'Could not build debrief'); }
+  btn.disabled=false; btn.textContent='✨ End-of-day debrief';
 }
 
 /* ---- Day Plan (oil & gas + industrial, Acadiana) ---- */
@@ -369,18 +494,81 @@ function leadRow(l){
 }
 function renderLeads(){
   const s=$('#s-leads');
+  const boardMode = LEADVIEW==='board';
   s.innerHTML = `
     <input class="search" id="leadSearch" type="search" placeholder="Search leads" value="${esc(SEARCH)}"/>
-    <div class="filters" style="padding-bottom:4px"><button id="srtR" class="${SORT==='recent'?'on':''}">Recent</button><button id="srtN" class="${SORT==='near'?'on':''}">Nearest</button></div>
-    <div class="filters" id="leadFilters"></div>
+    <div class="filters" style="padding-bottom:4px">
+      <button id="vwList" class="${!boardMode?'on':''}">List</button>
+      <button id="vwBoard" class="${boardMode?'on':''}">Board</button>
+      <span style="flex:1;min-width:8px"></span>
+      <button id="srtR" class="${SORT==='recent'?'on':''}" ${boardMode?'style="display:none"':''}>Recent</button>
+      <button id="srtN" class="${SORT==='near'?'on':''}" ${boardMode?'style="display:none"':''}>Nearest</button>
+    </div>
+    <div class="filters" id="leadFilters" ${boardMode?'style="display:none"':''}></div>
     <div id="leadList"></div>`;
   const fils=['all','warm','new','attempted','contacted','callback','booked','won','not_interested','lost'];
   const fbox=$('#leadFilters');
   fils.forEach(f=>{ const label=f==='all'?'All':(f==='warm'?'★ Warm':(STATUS_LABEL[f]||f)); const b=el(`<button class="${f===FILTER?'on':''}">${label}</button>`); b.onclick=()=>{FILTER=f; renderLeads();}; fbox.appendChild(b); });
+  $('#vwList').onclick=()=>{ LEADVIEW='list'; renderLeads(); };
+  $('#vwBoard').onclick=()=>{ LEADVIEW='board'; renderLeads(); };
   $('#srtR').onclick=()=>{ SORT='recent'; renderLeads(); };
   $('#srtN').onclick=async()=>{ if(!lastPos){ try{ lastPos=await getPos(); }catch(e){ toast('Turn on location to sort by nearest'); return; } } SORT='near'; renderLeads(); };
-  $('#leadSearch').addEventListener('input',(e)=>{ SEARCH=e.target.value; drawLeadList(); });
-  drawLeadList();
+  $('#leadSearch').addEventListener('input',(e)=>{ SEARCH=e.target.value; boardMode?drawBoard():drawLeadList(); });
+  boardMode ? drawBoard() : drawLeadList();
+}
+// Kanban pipeline. Columns are the live stages; tap a card to open it, or use the
+// chevrons to advance/retreat a lead one stage without opening the sheet.
+const PIPELINE = ['new','attempted','contacted','callback','booked','won'];
+function drawBoard(){
+  const box=$('#leadList'); if(!box) return;
+  const q=SEARCH.trim().toLowerCase();
+  let rows=LEADS.slice();
+  if(q) rows=rows.filter(l=>[l.business_name,l.contact_name,l.phone,l.address,l.industry,l.notes,l.context].filter(Boolean).join(' ').toLowerCase().includes(q));
+  const byCol={}; PIPELINE.forEach(s=>byCol[s]=[]);
+  rows.forEach(l=>{ if(byCol[l.status]) byCol[l.status].push(l); });
+  box.innerHTML = `<div style="display:flex;gap:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 2px 8px;">${
+    PIPELINE.map(st=>`
+      <div style="flex:none;width:76vw;max-width:320px;">
+        <div style="display:flex;align-items:center;gap:8px;margin:2px 2px 8px;">
+          <span style="width:9px;height:9px;border-radius:50%;background:${statusColorSafe(st)}"></span>
+          <span style="font-weight:800;font-size:13px">${STATUS_LABEL[st]}</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:700">${byCol[st].length}</span>
+        </div>
+        <div id="col-${st}"></div>
+      </div>`).join('')
+  }</div>`;
+  PIPELINE.forEach(st=>{
+    const col=$('#col-'+st);
+    if(!byCol[st].length){ col.innerHTML='<div style="border:1px dashed var(--line-2);border-radius:12px;padding:16px;text-align:center;color:var(--muted);font-size:12.5px">Empty</div>'; return; }
+    byCol[st].forEach(l=>{
+      const idx=PIPELINE.indexOf(st);
+      const owner=(l.contact_name&&l.business_name)?l.contact_name:'';
+      const sub=[l.industry,owner].filter(Boolean).join(' · ');
+      const card=el(`<div class="card" style="padding:11px 12px;margin-bottom:9px;">
+        <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(l.business_name||l.contact_name||'Untitled')}</div>
+        ${sub?`<div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px">${esc(sub)}</div>`:''}
+        <div style="display:flex;justify-content:space-between;margin-top:9px;gap:6px">
+          <button class="bmove" data-dir="-1" ${idx<=0?'disabled':''} style="opacity:${idx<=0?0.3:1};font-size:16px;font-weight:800;padding:2px 10px;border:1px solid var(--line-2);border-radius:8px">‹</button>
+          <button class="bopen" style="flex:1;font-size:12px;font-weight:700;color:var(--ink-2);border:1px solid var(--line-2);border-radius:8px">Open</button>
+          <button class="bmove" data-dir="1" ${idx>=PIPELINE.length-1?'disabled':''} style="opacity:${idx>=PIPELINE.length-1?0.3:1};font-size:16px;font-weight:800;padding:2px 10px;border:1px solid var(--line-2);border-radius:8px">›</button>
+        </div>
+      </div>`);
+      card.querySelector('.bopen').onclick=()=>openLead(l.id);
+      card.querySelectorAll('.bmove').forEach(mb=>mb.onclick=()=>{ if(mb.disabled) return; const ni=idx+Number(mb.dataset.dir); if(ni<0||ni>=PIPELINE.length) return; moveLeadStatus(l, PIPELINE[ni]); });
+      col.appendChild(card);
+    });
+  });
+}
+function statusColorSafe(s){ return ({new:'#7c7d89',attempted:'#c98a12',contacted:'#2f6bd6',booked:'#3f8f2a',callback:'#7a5bd0',not_interested:'#9aa',won:'#186b1e',lost:'#d1483a'})[s]||'#7c7d89'; }
+async function moveLeadStatus(l, st){
+  const patch={id:l.id,status:st};
+  const cd=cadenceDate(st); if(cd!==undefined && !l.next_action_at) patch.next_action_at=cd;
+  try{
+    const opt=Object.assign({},l,patch,{updated_at:new Date().toISOString()});
+    const {lead,queued}=await writeLead('PATCH',patch,opt);
+    mergeLead(lead||opt); drawBoard();
+    toast(queued?('Moved to '+STATUS_LABEL[st]+' — offline'):('Moved to '+STATUS_LABEL[st]));
+  }catch(ex){ toast(ex.message); }
 }
 function drawLeadList(){
   const box=$('#leadList'); if(!box) return; box.innerHTML='';
@@ -485,8 +673,10 @@ async function saveNewLead(){
   btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
   try{
     if($('#f_geo').checked){ const p=await getPos().catch(()=>null); if(p){ body.lat=p.coords.latitude; body.lng=p.coords.longitude; } }
-    const lead=await api('/api/rep-leads',{method:'POST',body:JSON.stringify(body)});
-    LEADS.unshift(lead); toast('Lead saved'); switchTab('leads');
+    const now=new Date().toISOString();
+    const optimistic=Object.assign({id:'tmp_'+Date.now(), created_at:now, updated_at:now}, body);
+    const {lead, queued}=await writeLead('POST', body, optimistic);
+    LEADS.unshift(lead); toast(queued?'Saved offline — will sync':'Lead saved'); switchTab('leads');
   }catch(ex){ toast(ex.message); }
   btn.disabled=false; btn.textContent='Save lead';
 }
@@ -500,8 +690,8 @@ function openLead(id){
   const bookUrl='https://cal.com/mia-elianaa-a4n2hk/30min?'+new URLSearchParams({name:(l.contact_name||l.business_name||''),email:(l.email||''),notes:[l.business_name,l.phone].filter(Boolean).join(' · ')}).toString();
   b.innerHTML = `
     <div class="quickact">
-      <a href="${tel?('tel:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Call</a>
-      <a href="${tel?('sms:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Text</a>
+      <a id="dCall" href="${tel?('tel:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Call</a>
+      <a id="dText" href="${tel?('sms:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Text</a>
       <a href="#" id="dCheckin">📍 Check in</a>
       <a href="#" id="dEnrich">Enrich</a>
     </div>
@@ -525,7 +715,16 @@ function openLead(id){
     <div style="height:20px"></div>`;
   b.querySelectorAll('#dStatus button').forEach(btn=>btn.onclick=async()=>{
     const st=btn.dataset.s;
-    try{ const up=await api('/api/rep-leads',{method:'PATCH',body:JSON.stringify({id:l.id,status:st})}); mergeLead(up); openLead(l.id); toast('Marked '+STATUS_LABEL[st]); }catch(ex){ toast(ex.message); }
+    const patch={id:l.id,status:st};
+    // Auto-schedule the next touch when moving into a follow-up status and none is set.
+    const cd=cadenceDate(st);
+    if(cd!==undefined && !l.next_action_at) patch.next_action_at=cd;
+    try{
+      const opt=Object.assign({},l,patch,{updated_at:new Date().toISOString()});
+      const {lead,queued}=await writeLead('PATCH',patch,opt);
+      mergeLead(lead||opt); openLead(l.id);
+      toast(queued?('Marked '+STATUS_LABEL[st]+' — offline'):('Marked '+STATUS_LABEL[st]+(patch.next_action_at?' · follow-up set':'')));
+    }catch(ex){ toast(ex.message); }
   });
   wireRecorder($('#dRec'), $('#dRecState'), l.id, (r)=>{
     const n=$('#d_notes');
@@ -547,8 +746,12 @@ function openLead(id){
   ];
   const tbox=$('#dTemplates');
   if(tbox){ if(!tel){ tbox.innerHTML='<span style="font-size:12px;color:var(--muted)">Add a phone to text</span>'; }
-    else tmpls.forEach(([lab,body])=>{ const bt=el('<button class="btn ghost sm" style="flex:none">'+lab+'</button>'); bt.onclick=()=>{ location.href='sms:'+tel+'?&body='+encodeURIComponent(body); }; tbox.appendChild(bt); }); }
+    else tmpls.forEach(([lab,body])=>{ const bt=el('<button class="btn ghost sm" style="flex:none">'+lab+'</button>'); bt.onclick=()=>{ logInteraction(l.id,'text',{summary:'Texted ('+lab+') '+(l.contact_name||l.business_name||'lead')}).catch(()=>{}); location.href='sms:'+tel+'?&body='+encodeURIComponent(body); }; tbox.appendChild(bt); }); }
   const enr=$('#dEnrich'); if(enr) enr.onclick=(e)=>{ e.preventDefault(); enrichLead(l); };
+  // Tap-to-call / tap-to-text auto-log an interaction so the timeline is honest
+  // about every attempt. The href still dials/opens Messages.
+  const cbtn=$('#dCall'); if(cbtn && tel) cbtn.addEventListener('click',()=>{ logInteraction(l.id,'call',{summary:'Called '+(l.contact_name||l.business_name||'lead')}).then(()=>{ if($('#sheet').classList.contains('on')) loadInteractions(l.id); }).catch(()=>{}); toast('Logged the call'); });
+  const xbtn=$('#dText'); if(xbtn && tel) xbtn.addEventListener('click',()=>{ logInteraction(l.id,'text',{summary:'Texted '+(l.contact_name||l.business_name||'lead')}).then(()=>{ if($('#sheet').classList.contains('on')) loadInteractions(l.id); }).catch(()=>{}); });
   const ci=$('#dCheckin'); if(ci) ci.onclick=(e)=>{ e.preventDefault(); checkIn(l); };
   const cal=$('#dCal'); if(cal) cal.onclick=(e)=>{ e.preventDefault(); addToCalendar(l); };
   const pin=$('#dPhotoInput'); if(pin) pin.onchange=()=>addPhoto(l.id,pin);
@@ -759,6 +962,26 @@ async function optimizeRoute(){
 $('#locateBtn').onclick=async()=>{ try{ const p=await getPos(); lastPos=p; map.setCenter({lat:p.coords.latitude,lng:p.coords.longitude}); map.setZoom(14); drawMe(p); }catch(ex){ toast('Location blocked'); } };
 $('#routeBtn').onclick=optimizeRoute;
 $('#addHereBtn').onclick=()=>switchTab('log');
+$('#heatBtn').onclick=toggleHeatmap;
+
+// Territory density heatmap: where you've already worked, so you stop re-walking
+// the same streets. Worked leads count more heavily than untouched ones.
+function toggleHeatmap(){
+  if(!map){ toast('Open the map first'); return; }
+  if(!google.maps.visualization){ toast('Heatmap still loading, try again'); return; }
+  heatOn=!heatOn;
+  const btn=$('#heatBtn');
+  const setActive=(on)=>{ if(!btn) return; if(on){ btn.style.background='var(--dark)'; btn.style.color='#fff'; } else { btn.style.background=''; btn.style.color=''; } };
+  if(!heatOn){ if(heatLayer) heatLayer.setMap(null); setActive(false); if(btn) btn.textContent='Heatmap'; drawPins(); return; }
+  const worked=['attempted','contacted','callback','booked','won','not_interested','lost'];
+  const pts=LEADS.filter(l=>l.lat!=null&&l.lng!=null).map(l=>({location:new google.maps.LatLng(Number(l.lat),Number(l.lng)), weight: worked.includes(l.status)?3:1}));
+  if(!pts.length){ heatOn=false; toast('No mapped leads yet'); return; }
+  if(heatLayer) heatLayer.setMap(null);
+  heatLayer=new google.maps.visualization.HeatmapLayer({data:pts, radius:34, opacity:0.7, dissipating:true});
+  heatLayer.setMap(map);
+  setActive(true); if(btn) btn.textContent='Heatmap on';
+  toast('Showing where you\'ve worked');
+}
 
 /* ---- Me ---- */
 function dayKey(d){ d=new Date(d); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
@@ -784,6 +1007,27 @@ function renderMe(){
   const money=n=>'$'+Math.round(n||0).toLocaleString();
   const GOAL=20; const goalPct=Math.min(100,Math.round((today/GOAL)*100));
   const streak=calcStreak();
+  // Earnings goal (monthly commission) — target kept per-device.
+  const mStart=new Date(); mStart.setDate(1); mStart.setHours(0,0,0,0);
+  const inMonth=(iso)=>iso&&new Date(iso).getTime()>=mStart.getTime();
+  const monthDealTotal=wonLeads.filter(l=>inMonth(l.updated_at||l.visited_at||l.created_at)).reduce((a,l)=>a+(Number(l.deal_value)||0),0);
+  const monthCommission=Math.round(monthDealTotal*0.20);
+  let earnGoal=parseInt(localStorage.getItem('cl_earn_goal')||'',10); if(!Number.isFinite(earnGoal)||earnGoal<=0) earnGoal=2000;
+  const earnPct=Math.min(100,Math.round(monthCommission/earnGoal*100));
+  const dayNow=new Date().getDate(); const daysInMo=new Date(mStart.getFullYear(),mStart.getMonth()+1,0).getDate();
+  const projected=Math.round(monthCommission/Math.max(dayNow,1)*daysInMo);
+  // Badges
+  const dayCounts={}; LEADS.forEach(l=>{ if(l.created_at){ const k=dayKey(l.created_at); dayCounts[k]=(dayCounts[k]||0)+1; } });
+  const bestDay=Object.values(dayCounts).reduce((m,v)=>Math.max(m,v),0);
+  const BADGES=[
+    {e:'🚪',label:'Door knocker',earned:total>=25,hint:'25 leads'},
+    {e:'🔥',label:'On a roll',earned:streak>=3,hint:'3-day streak'},
+    {e:'⚡',label:'Big day',earned:bestDay>=15,hint:'15 in a day'},
+    {e:'📅',label:'Booker',earned:booked>=1,hint:'Book an audit'},
+    {e:'🏆',label:'First win',earned:wonLeads.length>=1,hint:'Close a deal'},
+    {e:'💵',label:'$10k club',earned:dealTotal>=10000,hint:'$10k won'},
+  ];
+  const badgeHtml=BADGES.map(b=>`<div style="flex:none;width:88px;text-align:center;opacity:${b.earned?1:0.35}"><div style="font-size:26px;line-height:1;${b.earned?'':'filter:grayscale(1)'}">${b.e}</div><div style="font-size:11px;font-weight:700;margin-top:4px">${b.label}</div><div style="font-size:10px;color:var(--muted)">${b.earned?'Earned':b.hint}</div></div>`).join('');
   s.innerHTML=`
     <div class="card">
       <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em">${esc(ME.name||'')}</div>
@@ -793,6 +1037,11 @@ function renderMe(){
       <div style="font-size:11px;opacity:.65;text-transform:uppercase;letter-spacing:.07em">Commission earned</div>
       <div style="font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:2px">${money(commission)}</div>
       <div style="font-size:12px;opacity:.65;margin-top:2px">20% of ${money(dealTotal)} won · ${wonLeads.length} deal${wonLeads.length===1?'':'s'}</div>
+    </div>
+    <div class="card" id="meEarn">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700"><span>This month's goal</span><button id="meEarnEdit" style="font-size:12px;color:var(--blue);font-weight:700">${money(monthCommission)} / ${money(earnGoal)}</button></div>
+      <div style="height:9px;border-radius:999px;background:var(--line);margin-top:8px;overflow:hidden"><div style="height:100%;width:${earnPct}%;background:var(--dark)"></div></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:9px">On pace for about ${money(projected)} this month. Tap the number to set your target.</div>
     </div>
     ${warmLeft?`<div class="card" id="meWarm" style="background:#E4FF97;color:#0a0b14;font-weight:800;cursor:pointer;text-align:center;">★ ${warmLeft} warm lead${warmLeft===1?'':'s'} waiting — tap to work them</div>`:''}
     <div class="card">
@@ -808,21 +1057,42 @@ function renderMe(){
       <div class="stat"><div class="n">${wonLeads.length}</div><div class="l">Won</div></div>
       <div class="stat"><div class="n">${conv}%</div><div class="l">Book rate</div></div>
     </div>
-    <div class="card" id="meBoard"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">This week's leaderboard</div><div style="font-size:13px;color:var(--muted);margin-top:8px">Loading…</div></div>
+    <div class="card">
+      <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Badges</div>
+      <div style="display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px">${badgeHtml}</div>
+    </div>
+    <div class="card" id="mePush">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div><div style="font-weight:700;font-size:14px">Notifications</div><div style="font-size:12px;color:var(--muted)" id="mePushState">Follow-up nudges and warm-lead alerts.</div></div>
+        <button class="btn ghost sm" id="mePushBtn" style="flex:none">Enable</button>
+      </div>
+    </div>
+    <div class="card" id="meBoard"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Leaderboard</div><div style="font-size:13px;color:var(--muted);margin-top:8px">Loading…</div></div>
     <button class="btn ghost" id="meRefresh">Refresh</button>
     <div style="height:10px"></div>
     <button class="btn ghost" id="meOut" style="color:var(--red)">Sign out</button>`;
   const w=$('#meWarm'); if(w) w.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
+  const ee=$('#meEarnEdit'); if(ee) ee.onclick=()=>{ const v=prompt('Set your monthly commission goal ($):', String(earnGoal)); if(v==null) return; const n=parseInt(String(v).replace(/[^0-9]/g,''),10); if(Number.isFinite(n)&&n>0){ localStorage.setItem('cl_earn_goal',String(n)); renderMe(); } };
+  const pb=$('#mePushBtn'); if(pb){ pushState().then(st=>{
+    if(st==='unsupported'){ pb.style.display='none'; $('#mePushState').textContent='Not supported on this device.'; }
+    else if(st==='blocked'){ pb.textContent='Blocked'; pb.disabled=true; $('#mePushState').textContent='Turn notifications on in your phone settings.'; }
+    else if(st==='on'){ pb.textContent='Turn off'; pb.onclick=disablePush; $('#mePushState').textContent='On — you\'ll get daily nudges.'; }
+    else { pb.textContent='Enable'; pb.onclick=enablePush; }
+  }); }
   $('#meRefresh').onclick=async()=>{ await loadLeads(); toast('Up to date'); renderMe(); };
   $('#meOut').onclick=logout;
   loadLeaderboard();
 }
 async function loadLeaderboard(){
   const box=$('#meBoard'); if(!box) return;
-  let rows=[]; try{ rows=await api('/api/rep-leaderboard'); }catch(e){ box.innerHTML=''; return; }
-  if(!rows || !rows.length){ box.innerHTML=''; return; }
-  box.innerHTML='<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">This week\'s leaderboard</div>'+
-    rows.slice(0,8).map(r=>'<div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;'+(r.isMe?'background:#E4FF97;':'')+'"><div style="width:20px;font-weight:800;color:var(--ink-2)">'+r.rank+'</div><div style="flex:1;font-size:14px;font-weight:'+(r.isMe?'800':'600')+'">'+esc((r.name||'').split(' ')[0])+(r.isMe?' (you)':'')+'</div><div style="font-size:12px;color:var(--ink-2)">'+r.won+'W · '+r.booked+'B · '+r.visits+'V</div></div>').join('');
+  let data; try{ data=await api('/api/rep-leaderboard?range='+LB_RANGE); }catch(e){ box.innerHTML=''; return; }
+  const rows=(data&&data.rows)||[];
+  const label = LB_RANGE==='week'?'This week':(LB_RANGE==='month'?'This month':'All time');
+  const tabs=['week','month','all'].map(r=>'<button data-r="'+r+'" style="font-size:11px;font-weight:700;padding:5px 11px;border-radius:999px;border:1px solid var(--line-2);background:'+(r===LB_RANGE?'var(--dark)':'#fff')+';color:'+(r===LB_RANGE?'#fff':'var(--ink-2)')+'">'+(r==='week'?'Week':r==='month'?'Month':'All')+'</button>').join('');
+  const medal=n=>n===1?'🥇':n===2?'🥈':n===3?'🥉':'';
+  box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">'+label+' leaderboard</div><div style="display:flex;gap:6px">'+tabs+'</div></div>'+
+    (rows.length? rows.slice(0,8).map(r=>'<div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;'+(r.isMe?'background:#E4FF97;':'')+'"><div style="width:22px;font-weight:800;color:var(--ink-2)">'+(medal(r.rank)||r.rank)+'</div><div style="flex:1;font-size:14px;font-weight:'+(r.isMe?'800':'600')+'">'+esc((r.name||'').split(' ')[0])+(r.isMe?' (you)':'')+'</div><div style="font-size:12px;color:var(--ink-2)">'+r.won+'W · '+r.booked+'B · '+r.visits+'V</div></div>').join('') : '<div style="font-size:13px;color:var(--muted)">No standings yet.</div>');
+  box.querySelectorAll('button[data-r]').forEach(b=>b.onclick=()=>{ LB_RANGE=b.dataset.r; loadLeaderboard(); });
 }
 
 /* ---- start ---- */

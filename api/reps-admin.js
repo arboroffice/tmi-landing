@@ -10,6 +10,7 @@ const { hashPassword } = require('./_rep-auth');
 
 const clean = (r) => ({ id: r.id, name: r.name, email: r.email, city: r.city, phone: r.phone, status: r.status || 'active', created_at: r.created_at });
 const isToday = (iso) => { if (!iso) return false; const d = new Date(iso), n = new Date(); return d.toDateString() === n.toDateString(); };
+const STATUSES = ['new', 'attempted', 'contacted', 'booked', 'callback', 'not_interested', 'won', 'lost'];
 
 module.exports = async (req, res) => {
   cors(res);
@@ -35,6 +36,47 @@ module.exports = async (req, res) => {
       if (req.query.activity) {
         const recaps = await db.list('rep_interactions', { where: [['rep_id', '==', req.query.activity]], order: 'created_at', ascending: false, limit: 20 }).catch(() => []);
         return res.json(recaps || []);
+      }
+      // Team conversion funnel: counts by status + headline funnel stages.
+      if (req.query.funnel) {
+        const all = await db.list('rep_leads', { limit: 5000 }).catch(() => []);
+        const byStatus = {}; STATUSES.forEach((s) => { byStatus[s] = 0; });
+        let revenue = 0;
+        (all || []).forEach((l) => {
+          if (byStatus[l.status] === undefined) byStatus[l.status] = 0;
+          byStatus[l.status]++;
+          if (l.status === 'won') revenue += Number(l.deal_value) || 0;
+        });
+        const total = (all || []).length;
+        const worked = total - (byStatus['new'] || 0);
+        const contacted = (byStatus['contacted'] || 0) + (byStatus['booked'] || 0) + (byStatus['callback'] || 0) + (byStatus['won'] || 0);
+        const booked = (byStatus['booked'] || 0) + (byStatus['won'] || 0);
+        const won = byStatus['won'] || 0;
+        const stages = [
+          { key: 'total', label: 'Leads', value: total },
+          { key: 'worked', label: 'Worked', value: worked },
+          { key: 'contacted', label: 'Conversations', value: contacted },
+          { key: 'booked', label: 'Audits booked', value: booked },
+          { key: 'won', label: 'Won', value: won },
+        ];
+        return res.json({ byStatus, stages, revenue, total });
+      }
+      // Team map: every located lead with its rep, for the oversight map.
+      if (req.query.map) {
+        const [reps, all] = await Promise.all([
+          db.list('reps', { limit: 200 }).catch(() => []),
+          db.list('rep_leads', { limit: 5000 }).catch(() => []),
+        ]);
+        const nameOf = {}; (reps || []).forEach((r) => { nameOf[r.id] = r.name || r.email || 'Rep'; });
+        const pins = (all || [])
+          .filter((l) => l.lat != null && l.lng != null)
+          .slice(0, 2000)
+          .map((l) => ({
+            id: l.id, rep_id: l.rep_id, rep: nameOf[l.rep_id] || 'Rep',
+            business_name: l.business_name || l.contact_name || 'Lead',
+            status: l.status, lat: l.lat, lng: l.lng,
+          }));
+        return res.json({ pins, reps: (reps || []).filter((r) => r.status !== 'disabled').map((r) => ({ id: r.id, name: r.name || r.email })) });
       }
       const reps = await db.list('reps', { order: 'created_at', ascending: false, limit: 200 });
       const all = await db.list('rep_leads', { limit: 5000 }).catch(() => []);
@@ -136,6 +178,16 @@ module.exports = async (req, res) => {
           source: 'assigned', created_at: now, updated_at: now, visited_at: null,
         });
         return res.status(201).json(lead);
+      }
+      // Move an existing lead from one rep's queue to another.
+      if (body.action === 'reassign_lead') {
+        if (!body.lead_id || !body.to_rep_id) return res.status(400).json({ error: 'lead_id and to_rep_id required' });
+        const lead = await db.getById('rep_leads', body.lead_id);
+        if (!lead) return res.status(404).json({ error: 'Lead not found' });
+        const target = await db.getById('reps', body.to_rep_id);
+        if (!target) return res.status(404).json({ error: 'Target rep not found' });
+        const out = await db.update('rep_leads', body.lead_id, { rep_id: body.to_rep_id, updated_at: new Date().toISOString() });
+        return res.json(out);
       }
       const { name, email, password, city, phone } = body;
       if (!email || !email.includes('@') || !password || String(password).length < 8) {

@@ -3,6 +3,7 @@
 // closed) and texts the rep a short nudge with a link to their portal.
 const db = require('./_db');
 const twilio = require('twilio');
+const push = require('./_push');
 
 const FROM_NUMBER = '+18557171044';
 const PORTAL = 'cityleads.tmitechai.com';
@@ -37,7 +38,7 @@ module.exports = async (req, res) => {
     const canSms = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
     const sms = canSms ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) : null;
 
-    let sent = 0;
+    let sent = 0, pushed = 0;
     for (const rid of repIds) {
       const rep = await db.getById('reps', rid).catch(() => null);
       if (!rep || rep.status === 'disabled') continue;
@@ -56,7 +57,16 @@ module.exports = async (req, res) => {
         try { await sms.messages.create({ from: FROM_NUMBER, to, body }); sent++; }
         catch (e) { console.error('rep-reminder sms', rid, e.message); }
       }
+      // Best-effort web push to any devices the rep has enabled notifications on.
+      try {
+        pushed += await push.sendToRep(rep, {
+          title: `${parts.join(' and ')}`.replace(/^./, (c) => c.toUpperCase()),
+          body: `Tap to work your day, ${first || 'there'}.`,
+          url: 'https://' + PORTAL,
+          tag: 'daily-reminder',
+        });
+      } catch (e) { console.error('rep-reminder push', rid, e.message); }
     }
-    return res.json({ ok: true, reps_with_due: repIds.length, sent, sms_configured: canSms });
+    return res.json({ ok: true, reps_with_due: repIds.length, sent, pushed, sms_configured: canSms, push_configured: push.configured() });
   } catch (e) { return res.status(500).json({ error: e.message }); }
 };

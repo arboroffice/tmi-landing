@@ -6,6 +6,7 @@
 <title>City Team — TMI Admin</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="stylesheet" href="admin.css"/>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDvjUKge3a6hEmh9BRZ5Ez1JLyWkR_Fyww&libraries=geometry"></script>
 </head>
 <body>
 <div class="layout">
@@ -28,6 +29,16 @@
       </p>
 
       <div id="team-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
+
+      <div id="team-funnel" style="margin-bottom:20px;"></div>
+
+      <div class="card" id="team-map-card" style="margin-bottom:20px;padding:0;overflow:hidden;display:none;">
+        <div style="padding:14px 16px;font-weight:700;font-size:14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span>Team map</span>
+          <span id="team-map-legend" style="font-size:12px;color:var(--muted);font-weight:500;display:flex;gap:12px;flex-wrap:wrap;"></span>
+        </div>
+        <div id="team-map" style="height:440px;width:100%;background:#e7e8e2;"></div>
+      </div>
 
       <div id="team-feed" style="margin-bottom:22px;"></div>
 
@@ -115,6 +126,13 @@
       <input class="form-input" id="al-address" placeholder="Address (optional)" style="margin-bottom:8px;"/>
       <button class="btn btn-primary btn-sm" onclick="assignLead()">Add lead to their queue</button>
       <div class="panel-sep"></div>
+      <div class="panel-sec-label" style="margin-bottom:10px;">Reassign a lead to another rep</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <select class="form-input" id="rx-lead"><option value="">Pick a lead…</option></select>
+        <select class="form-input" id="rx-rep"><option value="">Move to rep…</option></select>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="reassignLead()">Move lead →</button>
+      <div class="panel-sep"></div>
       <div class="panel-sec-label" style="margin-bottom:10px;">Their leads</div>
       <div id="rp-leads"></div>
       <div class="panel-sep"></div>
@@ -132,7 +150,7 @@
 TMIAdmin.requireAuth();
 TMIAdmin.initSidebar('city-team');
 
-let reps = [], current = null;
+let reps = [], current = null, rpLeads = [];
 const TARGET = 20; // daily walk-in / log target from the playbook
 const esc = (s) => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const SL = {new:'New',attempted:'Attempted',contacted:'Contacted',booked:'Booked',callback:'Callback',not_interested:'Not interested',won:'Won',lost:'Lost'};
@@ -151,6 +169,54 @@ async function loadFeed(){
     </div>`).join('');
 }
 
+async function loadFunnel(){
+  const box=document.getElementById('team-funnel'); if(!box) return;
+  let d; try{ d=await TMIAdmin.api('/api/reps-admin?funnel=1'); }catch(e){ box.innerHTML=''; return; }
+  const stages=(d&&d.stages)||[]; if(!stages.length || !d.total){ box.innerHTML=''; return; }
+  const top=stages[0].value||1;
+  const money=n=>'$'+Math.round(n||0).toLocaleString();
+  const rows=stages.map((s,i)=>{
+    const pct=Math.round((s.value/top)*100);
+    const conv=i>0 && stages[i-1].value ? Math.round((s.value/stages[i-1].value)*100) : null;
+    return `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px;">
+        <span>${s.label}</span>
+        <span style="color:var(--muted);">${s.value}${conv!=null?` · ${conv}% of prev`:''}</span>
+      </div>
+      <div style="height:12px;border-radius:6px;background:var(--bg-alt,#f0f0f2);overflow:hidden;"><div style="height:100%;width:${pct}%;background:${i===stages.length-1?'#186b1e':'var(--ink,#0a0b14)'};border-radius:6px;transition:width .4s;"></div></div>
+    </div>`;
+  }).join('');
+  box.innerHTML=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div class="panel-sec-label">Team conversion funnel</div><div style="font-size:13px;font-weight:700;">${money(d.revenue)} <span style="color:var(--muted);font-weight:500;">won revenue</span></div></div>${rows}</div>`;
+}
+
+let teamMap=null, teamMarkers=[];
+const REP_COLORS=['#2f6bd6','#d1483a','#3f8f2a','#7a5bd0','#c98a12','#0891b2','#be185d','#4d7c0f','#b45309','#6d28d9'];
+function whenMaps(cb,tries){ tries=tries||0; if(window.google&&google.maps){ cb(); } else if(tries<40){ setTimeout(()=>whenMaps(cb,tries+1),150); } }
+async function loadTeamMap(){
+  let d; try{ d=await TMIAdmin.api('/api/reps-admin?map=1'); }catch(e){ return; }
+  const pins=(d&&d.pins)||[]; const repList=(d&&d.reps)||[];
+  const card=document.getElementById('team-map-card');
+  if(!pins.length){ if(card) card.style.display='none'; return; }
+  if(card) card.style.display='block';
+  const colorOf={}; repList.forEach((r,i)=>{ colorOf[r.id]=REP_COLORS[i%REP_COLORS.length]; });
+  const legend=document.getElementById('team-map-legend');
+  if(legend) legend.innerHTML=repList.map(r=>`<span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:50%;background:${colorOf[r.id]||'#7c7d89'};display:inline-block;"></span>${esc((r.name||'').split(' ')[0])}</span>`).join('');
+  whenMaps(()=>{
+    const elm=document.getElementById('team-map'); if(!elm) return;
+    if(!teamMap) teamMap=new google.maps.Map(elm,{center:{lat:30.22,lng:-92.02},zoom:10,disableDefaultUI:true,zoomControl:true,clickableIcons:false});
+    teamMarkers.forEach(m=>m.setMap(null)); teamMarkers=[];
+    const bounds=new google.maps.LatLngBounds(); const info=new google.maps.InfoWindow();
+    pins.forEach(p=>{
+      const pos={lat:Number(p.lat),lng:Number(p.lng)};
+      const mk=new google.maps.Marker({position:pos,map:teamMap,title:p.business_name,
+        icon:{path:google.maps.SymbolPath.CIRCLE,scale:6,fillColor:colorOf[p.rep_id]||'#7c7d89',fillOpacity:0.95,strokeColor:'#fff',strokeWeight:1.5}});
+      mk.addListener('click',()=>{ info.setContent(`<div style="font-weight:700;font-size:13px">${esc(p.business_name)}</div><div style="font-size:12px;color:#555">${esc(p.rep)} · ${esc(SL[p.status]||p.status)}</div>`); info.open(teamMap,mk); });
+      teamMarkers.push(mk); bounds.extend(pos);
+    });
+    try{ teamMap.fitBounds(bounds); }catch(e){}
+  });
+}
+
 async function load(){
   reps = await TMIAdmin.api('/api/reps-admin').catch(()=>[]) || [];
   reps.sort((a,b)=>(b.today_count||0)-(a.today_count||0)||(b.booked_count||0)-(a.booked_count||0)||(b.lead_count||0)-(a.lead_count||0));
@@ -161,7 +227,7 @@ async function load(){
   const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.booked_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
   const stat=(n,l)=>`<div class="card" style="text-align:center;padding:16px 12px;margin:0;"><div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;line-height:1;">${n}</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;">${l}</div></div>`;
   document.getElementById('team-stats').innerHTML = stat(reps.length,'Reps')+stat(tl,'Total leads')+stat(tb2,'Booked / won')+stat(td,'Logged today');
-  loadFeed();
+  loadFeed(); loadFunnel(); loadTeamMap();
   if(!reps.length){ tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
   tb.innerHTML = reps.map(r=>`
     <tr style="cursor:pointer" onclick="openRep('${r.id}')">
@@ -232,6 +298,12 @@ async function openRep(id){
   TMIAdmin.openPanel('rep-panel');
   loadRecaps(id);
   const leads = await TMIAdmin.api('/api/reps-admin?leads='+encodeURIComponent(id)).catch(()=>[]) || [];
+  rpLeads = leads;
+  // Reassign controls: pick one of their leads, and any other rep to move it to.
+  const lsel=document.getElementById('rx-lead');
+  if(lsel) lsel.innerHTML='<option value="">Pick a lead…</option>'+leads.slice(0,200).map(l=>`<option value="${l.id}">${esc(l.business_name||l.contact_name||'Untitled')}</option>`).join('');
+  const rsel=document.getElementById('rx-rep');
+  if(rsel) rsel.innerHTML='<option value="">Move to rep…</option>'+reps.filter(r=>r.id!==id).map(r=>`<option value="${r.id}">${esc(r.name||r.email)}</option>`).join('');
   const box = document.getElementById('rp-leads');
   if(!leads.length){ box.innerHTML = '<div style="color:var(--muted);font-size:13px;">No leads logged yet.</div>'; return; }
   box.innerHTML = leads.slice(0,50).map(l=>`
@@ -254,6 +326,19 @@ async function assignLead(){
     await TMIAdmin.api('/api/reps-admin','POST',body);
     ['al-business','al-contact','al-phone','al-industry','al-address'].forEach(i=>document.getElementById(i).value='');
     TMIAdmin.toast('Lead added to their queue');
+    openRep(current.id); load();
+  }catch(ex){ TMIAdmin.toast(ex.message); }
+}
+
+async function reassignLead(){
+  if(!current) return;
+  const leadId=document.getElementById('rx-lead').value;
+  const toRep=document.getElementById('rx-rep').value;
+  if(!leadId){ TMIAdmin.toast('Pick a lead to move'); return; }
+  if(!toRep){ TMIAdmin.toast('Pick the rep to move it to'); return; }
+  try{
+    await TMIAdmin.api('/api/reps-admin','POST',{action:'reassign_lead', lead_id:leadId, to_rep_id:toRep});
+    TMIAdmin.toast('Lead moved');
     openRep(current.id); load();
   }catch(ex){ TMIAdmin.toast(ex.message); }
 }
