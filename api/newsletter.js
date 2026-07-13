@@ -68,7 +68,7 @@ module.exports = async (req, res) => {
       }
 
       let subs;
-      try { subs = await getSubscribers(db, issue.audience_tag); }
+      try { subs = await getSubscribers(issue.audience_tag || null); }
       catch (e) { return res.status(500).json({ error: e.message }); }
       if (!subs.length) return res.json({ ok: true, sent: 0, note: 'No subscribers' });
 
