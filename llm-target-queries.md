@@ -1,6 +1,6 @@
-# LLM Target Queries — TMI Field Notes
+# LLM Target Queries — TMI Founders of the Future Letters
 
-Each query below is a real question people ask LLMs or search engines. When published, check the box. Daily agent picks the next unchecked query and writes a full Field Notes article targeting it.
+Each query below is a real question people ask LLMs or search engines. When published, check the box. Daily agent picks the next unchecked query and writes a full Founders of the Future Letters article targeting it.
 
 ## Published (do not rewrite)
 - [x] What AI tools actually exist for field service companies? → article-ai-tools-field-service.html
@@ -71,5 +71,5 @@ Each query below is a real question people ask LLMs or search engines. When publ
 7. Filename: article-{short-slug}.html
 8. Add to news.html (prepend to article grid)
 9. Add to sitemap.xml
-10. Commit and push: `git add {filename} news.html sitemap.xml && git commit -m "Add Field Notes: {title}" && git push origin main`
+10. Commit and push: `git add {filename} news.html sitemap.xml && git commit -m "Add Founders of the Future Letters: {title}" && git push origin main`
 11. Check off the query in this file and commit the update

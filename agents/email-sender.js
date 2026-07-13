@@ -35,7 +35,7 @@ function buildEmailHtml({ title, deck, category, readTime, articleUrl, photoUrl,
       <tr><td style="padding:28px 0 20px;text-align:center;">
         <a href="https://tmi-technology.com/news.html" style="text-decoration:none;display:inline-flex;align-items:center;gap:10px;">
           <span style="font-size:20px;font-weight:700;color:#E4FF97;letter-spacing:0.04em;">TMI</span>
-          <span style="font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Field Notes</span>
+          <span style="font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Founders of the Future Letters</span>
         </a>
       </td></tr>
 
@@ -137,13 +137,13 @@ async function main() {
   }
 
   // Create campaign record
-  const subject = `Field Notes: ${title}`;
+  const subject = `Founders of the Future Letters: ${title}`;
   let campaign = null;
   try {
     campaign = await db.insertCampaign({
       subject,
       body: `${deck}\n\nRead the full article: ${articleUrl}`,
-      from_name: 'TMI Field Notes',
+      from_name: 'TMI Founders of the Future Letters',
       from_email: 'fieldnotes@tmi-technology.com',
       audience_type: 'all',
       status: 'sending',
@@ -168,7 +168,7 @@ async function main() {
 
       try {
         await resend.emails.send({
-          from: 'TMI Field Notes <fieldnotes@tmi-technology.com>',
+          from: 'TMI Founders of the Future Letters <fieldnotes@tmi-technology.com>',
           to: contact.email,
           subject,
           html: emailHtml,

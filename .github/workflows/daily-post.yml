@@ -1,4 +1,4 @@
-name: Field Notes (2x Weekly)
+name: Founders of the Future Letters (2x Weekly)
 
 on:
   schedule:
@@ -44,12 +44,12 @@ jobs:
         run: |
           git config user.name "TMI Bot"
           git config user.email "bot@tmi-technology.com"
-          TITLE=$(cat .last-title 2>/dev/null || echo "Weekly Field Notes")
+          TITLE=$(cat .last-title 2>/dev/null || echo "Weekly Founders of the Future Letters")
           git add -A
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Field Notes: $TITLE"
+            git commit -m "Founders of the Future Letters: $TITLE"
             git push
             # Tell Bing/Copilot and other IndexNow engines about the new article immediately.
             SLUG=$(git diff --name-only HEAD~1 HEAD | grep -oE '^article-[a-z0-9-]+\.html$' | head -1 | sed 's/\.html$//')

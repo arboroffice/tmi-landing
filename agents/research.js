@@ -77,7 +77,7 @@ async function analyzeTopics(feedItems) {
     max_tokens: 2000,
     messages: [{
       role: 'user',
-      content: `You are a research editor for TMI Field Notes, a blog for operators and owners in the trades (construction, HVAC, plumbing, electrical, oil & gas, manufacturing, landscaping, fleet).
+      content: `You are a research editor for TMI Founders of the Future Letters, a blog for operators and owners in the trades (construction, HVAC, plumbing, electrical, oil & gas, manufacturing, landscaping, fleet).
 
 TODAY'S INDUSTRY NEWS:
 ${feedSection}

@@ -73,8 +73,8 @@ module.exports = async function handler(req, res) {
 <p style="margin:0 0 6px;font-size:11px;color:#888;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;">TMI Technology</p>
 <h2 style="margin:0 0 20px;font-size:28px;font-weight:800;letter-spacing:-0.02em;line-height:1.1;">We got your application.</h2>
 <p style="font-size:15px;color:#444;margin:0 0 20px;line-height:1.65;">I'll review what you shared and reach out within 3 business days. If ${city} is available and you're a fit, we'll get on a call to walk through the program.</p>
-<p style="font-size:15px;color:#444;margin:0 0 32px;line-height:1.65;">In the meantime, take a look at some of the Field Notes to get a feel for how we think about the work:</p>
-<a href="https://tmi-technology.com/news" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">Read Field Notes &rarr;</a>
+<p style="font-size:15px;color:#444;margin:0 0 32px;line-height:1.65;">In the meantime, take a look at some of the Founders of the Future Letters to get a feel for how we think about the work:</p>
+<a href="https://tmi-technology.com/news" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">Read Founders of the Future Letters &rarr;</a>
 <p style="margin:36px 0 0;font-size:14px;line-height:1.7;">Mia<br><span style="color:#888;font-size:13px;">TMI &mdash; AI Infrastructure for Field Operations</span></p>
 </td></tr><tr><td style="padding:6px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><div style="border-top:1px solid #eceee4;margin-top:8px;padding-top:16px;font-size:12px;line-height:1.6;color:#9a9ba5;">TMI Technology &middot; chaos control for growing companies<br><a href="https://www.tmitechai.com" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`,
   }).catch(e => console.error('city-lead confirmation email:', e.message));

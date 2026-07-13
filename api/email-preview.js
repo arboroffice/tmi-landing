@@ -13,7 +13,7 @@ const SITE = 'https://www.tmitechai.com';
 const btn = (href, label, dark) =>
   `<a href="${href}" style="display:inline-block;background:${dark ? '#0a0b14' : '#E4FF97'};color:${dark ? '#E4FF97' : '#0a0b14'};font-weight:800;padding:14px 28px;border-radius:10px;text-decoration:none;">${label}</a>`;
 
-// The Field Notes sample (mirrors newsletter-test).
+// The Founders of the Future Letters sample (mirrors newsletter-test).
 const NL_SAMPLE = {
   title: 'The first thing AI should do in your business',
   subject: 'The first thing AI should do in your business',
@@ -109,7 +109,7 @@ function samples(to) {
   const web = buildStepEmail(reg, 'reminder_24h');
   if (web) list.push({ key: 'webinar-reminder', subject: web.subject, html: web.html });
 
-  // 6) Field Notes newsletter
+  // 6) Founders of the Future Letters newsletter
   list.push({
     key: 'field-notes-newsletter',
     subject: NL_SAMPLE.subject,

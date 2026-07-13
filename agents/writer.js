@@ -92,7 +92,7 @@ async function pickTopic() {
     max_tokens: 800,
     messages: [{
       role: 'user',
-      content: `Pick one strong article topic for TMI Field Notes. Use the topic ideas in this CLAUDE.md file. Do not repeat any existing articles.
+      content: `Pick one strong article topic for TMI Founders of the Future Letters. Use the topic ideas in this CLAUDE.md file. Do not repeat any existing articles.
 
 EXISTING ARTICLES:
 ${existing}
@@ -144,7 +144,7 @@ async function writeArticleHtml(topic, { filename, imageUrl, dateStr }) {
   const response = await client.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 8000,
-    system: `You are the editor of TMI Field Notes. Write one complete article as a full HTML file.
+    system: `You are the editor of TMI Founders of the Future Letters. Write one complete article as a full HTML file.
 
 TMI VOICE RULES - follow these exactly:
 - Written for operators, owners, field managers. Not tech people, not software buyers.
@@ -167,7 +167,7 @@ AEO / ANSWER-ENGINE OPTIMIZATION - this article must rank in search and be quota
 OUTPUT: Return ONLY the complete HTML file. No preamble, no explanation, no markdown fences.`,
     messages: [{
       role: 'user',
-      content: `Write this Field Notes article:
+      content: `Write this Founders of the Future Letters article:
 
 TOPIC: ${topic.angle}
 WHY IT MATTERS: ${topic.why_it_matters}
