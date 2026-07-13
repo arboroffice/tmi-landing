@@ -300,15 +300,8 @@ const FIVE_WANTS = [
 ];
 
 const NAV = [
-  { id:"intro", label:"Overview" },
   { id:"dossier", label:"What We Found" },
-  { id:"issues", label:"Your Issues" },
-  { id:"diag", label:"Your Score" },
-  { id:"intake", label:"Your Operation" },
-  { id:"five", label:"The Framework" },
-  { id:"play", label:"30-Day Playbook" },
-  { id:"leaks", label:"Money Leaks" },
-  { id:"agents", label:"AI Org Chart" }
+  { id:"issues", label:"Your Diagnosis" }
 ];
 
 // The intake is now just the few things our research cannot know. Everything
@@ -518,7 +511,7 @@ function researchStatus(full){
       if(P.sec) state.sec=P.sec;
     } }catch(_){}
     document.getElementById("gate").style.display="none"; document.getElementById("appRoot").style.display="block";
-    if(!state.sec || state.sec==="intro") state.sec="dossier";
+    if(state.sec!=="dossier" && state.sec!=="issues") state.sec="dossier";
     render();
     if(!state.researched) runResearch();
   } }catch(e){}
@@ -606,7 +599,10 @@ function render(){
   var mob=isMob();
   var pad = mob? "0 16px 80px" : "0 32px 120px";
   document.getElementById("main").style.padding = pad;
-  var fn = {intro:renderIntro, dossier:renderDossier, issues:renderIssues, diag:renderDiag, intake:renderIntake, five:renderFive, play:renderPlay, leaks:renderLeaks, agents:renderAgents}[state.sec] || renderIntro;
+  // Lean flow: only the dossier ("we did the homework") and the diagnosis are
+  // walk-through screens; booking is the submitted state. Anything else falls
+  // back to the dossier so a stale saved section can't strand someone.
+  var fn = {dossier:renderDossier, issues:renderIssues}[state.sec] || renderDossier;
   document.getElementById("main").innerHTML = fn(mob);
 }
 
@@ -777,7 +773,7 @@ function renderDossier(mob){
   h+='<div style="font-size:12px;color:#8A8A8A;margin-bottom:10px;">We searched: '+(searched.length?esc(searched.join(', ')):'your company name')+'. Wrong company or site? Fix it and we will look again.</div>';
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;"><input type="text" value="'+esc(state.answers.company||lead.company||'')+'" oninput="setAns(\'company\',this.value)" placeholder="Company name" style="flex:1;min-width:150px;"><input type="text" value="'+esc(state.answers.website||'')+'" oninput="setAns(\'website\',this.value)" placeholder="Website" style="flex:1;min-width:150px;"><button onclick="reRunResearch()" style="background:#fff;border:1.5px solid #DDDDD8;border-radius:10px;padding:11px 18px;font-size:13px;color:#0A0A0A;cursor:pointer;font-weight:600;">Re-run research</button></div></div>';
 
-  h+='<div style="margin-top:32px;display:flex;gap:12px;">'+btnGhost("&larr; Overview","go('intro')")+btnBlack("Looks right, see my issues &rarr;","go('issues')")+'</div></div>';
+  h+='<div style="margin-top:32px;display:flex;gap:12px;">'+btnBlack("Looks right &mdash; run my diagnosis &rarr;","go('issues')")+'</div></div>';
   return h;
 }
 
@@ -808,7 +804,7 @@ function renderIssues(mob){
   if(!state.diagnosed){ h+='<div style="background:#F8F8F5;border:1.5px solid #EBEBEB;border-radius:16px;padding:28px;color:#6A6A6A;font-size:15px;display:flex;flex-direction:column;gap:16px;align-items:flex-start;">Run the diagnosis on what we found.'+btnBlack("Diagnose my operation &rarr;","runDiagnose()")+'</div></div>'; return h; }
 
   var dg=state.diagnosis||{}; var issues=dg.issues||[];
-  if(!issues.length){ h+='<div style="background:#F8F8F5;border:1.5px solid #EBEBEB;border-radius:16px;padding:28px;color:#6A6A6A;font-size:15px;">We could not generate a diagnosis automatically. Map your operation and we will build it by hand.'+'<div style="margin-top:16px;">'+btnBlack("Map your operation &rarr;","go('intake')")+'</div></div></div>'; return h; }
+  if(!issues.length){ h+='<div style="background:#F8F8F5;border:1.5px solid #EBEBEB;border-radius:16px;padding:28px;color:#6A6A6A;font-size:15px;">We could not generate a diagnosis automatically. Book a call and we will build it with you by hand.'+'<div style="margin-top:16px;">'+btnBlack("Book my strategy call &rarr;","submitAudit()")+'</div></div></div>'; return h; }
 
   issues.forEach(function(it,idx){
     var lc=LENS_COLOR[it.lens]||"#00B4D8"; var sc=SEV_COLOR[it.severity]||"#F5A623"; var react=state.issueReact[it.id];
@@ -830,7 +826,7 @@ function renderIssues(mob){
 
   if(dg.summary){ h+='<div style="background:#F6FCF2;border:1.5px solid #D8ECCC;border-radius:16px;padding:'+(mob?"22px":"26px 28px")+';margin-top:20px;"><div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#5A8A30;margin-bottom:10px;">The through-line</div><div style="font-size:16px;color:#2A4A18;line-height:1.7;">'+esc(dg.summary)+'</div></div>'; }
 
-  h+='<div style="margin-top:32px;display:flex;gap:12px;">'+btnGhost("&larr; What we found","go('dossier')")+btnBlack("Build my full audit &rarr;","go('intake')")+'</div></div>';
+  h+='<div style="margin-top:32px;display:flex;gap:12px;">'+btnGhost("&larr; What we found","go('dossier')")+btnBlack("Book my strategy call &rarr;","submitAudit()")+'</div></div>';
   return h;
 }
 
@@ -1074,7 +1070,7 @@ render = function(){
   }
   _render();
 };
-function backToAudit(){ state.submitted=false; go("agents"); }
+function backToAudit(){ state.submitted=false; go("issues"); }
 
 var _t; window.addEventListener("resize", function(){ clearTimeout(_t); _t=setTimeout(function(){ if(document.getElementById("appRoot").style.display!=="none") render(); }, 150); });
 </script>
