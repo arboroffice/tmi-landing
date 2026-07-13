@@ -256,6 +256,24 @@
     try{ if(localStorage.getItem(KEY)==='1') set(true); else set(false); }catch(e){ set(false); }
   }
 
-  function init(){ ensureExtras(); ensureFooterTapMe(); enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); railToggle(); }
+  // In the side nav and footer, label the journal as "Founders of the Future
+  // Letters" with only "Letters" in chartreuse, so it reads as clearly separate
+  // from the "Founders of the Future" program link sitting near it.
+  function styleFotfLetters(){
+    var CH='color:var(--chart,#E4FF97);';
+    var sel='.nav-links a[href="/news"], #drawer a[href="/news"], .ah-nav a[href="/news"], #side-nav a[href="/news"], footer a[href="/news"]';
+    [].forEach.call(document.querySelectorAll(sel), function(a){
+      if(a.querySelector('[data-ltrs]')) return;              // already styled
+      var t=(a.textContent||'').trim();
+      a.style.color='';                                        // drop any full-chartreuse so only "Letters" pops
+      if(/^journal$/i.test(t)){
+        a.innerHTML='Founders of the Future <span data-ltrs style="'+CH+'">Letters</span>';
+      } else if(a.innerHTML.indexOf('Founders of the Future Letters')>=0){
+        a.innerHTML=a.innerHTML.replace('Founders of the Future Letters','Founders of the Future <span data-ltrs style="'+CH+'">Letters</span>');
+      }
+    });
+  }
+
+  function init(){ ensureExtras(); ensureFooterTapMe(); styleFotfLetters(); enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); railToggle(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
