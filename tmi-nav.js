@@ -269,7 +269,8 @@
       if(/^journal$/i.test(t)){
         a.innerHTML='Founders of the Future <span data-ltrs style="'+CH+'">Letters</span>';
       } else if(a.innerHTML.indexOf('Founders of the Future Letters')>=0){
-        a.innerHTML=a.innerHTML.replace('Founders of the Future Letters','Founders of the Future <span data-ltrs style="'+CH+'">Letters</span>');
+        var html=a.innerHTML.replace(/\s*\(Journal\)\s*/i,'');   // "(Journal)" is redundant now that Letters is the brand
+        a.innerHTML=html.replace('Founders of the Future Letters','Founders of the Future <span data-ltrs style="'+CH+'">Letters</span>');
       }
     });
   }
