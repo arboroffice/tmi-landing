@@ -108,8 +108,12 @@ module.exports = async function handler(req, res) {
             const callMs = new Date(startTime).getTime(), nowMs = Date.now();
             const d24 = Math.floor((callMs - 86400000 - nowMs) / 1000);
             const d2 = Math.floor((callMs - 7200000 - nowMs) / 1000);
+            const d1h = Math.floor((callMs - 3600000 - nowMs) / 1000);
+            const d10 = Math.floor((callMs - 600000 - nowMs) / 1000);
             if (d24 > 60) await qs.publishJSON({ url: nurl, delay: d24, body: { stage: 'precall_24h', applicationId: appLead.id } });
             if (d2 > 60) await qs.publishJSON({ url: nurl, delay: d2, body: { stage: 'precall_2h', applicationId: appLead.id } });
+            if (d1h > 60) await qs.publishJSON({ url: nurl, delay: d1h, body: { stage: 'precall_1h', applicationId: appLead.id } });
+            if (d10 > 30) await qs.publishJSON({ url: nurl, delay: d10, body: { stage: 'precall_10m', applicationId: appLead.id } });
           }
         } catch (e) { console.error('schedule precall (app):', e.message); }
 
@@ -235,6 +239,8 @@ module.exports = async function handler(req, res) {
 
     const delay24h = Math.floor((callMs - 86400000 - nowMs) / 1000);
     const delay2h  = Math.floor((callMs - 7200000  - nowMs) / 1000);
+    const delay1h  = Math.floor((callMs - 3600000  - nowMs) / 1000);
+    const delay10m = Math.floor((callMs - 600000   - nowMs) / 1000);
 
     // 24h before: email nudge to submit audit
     if (delay24h > 60) {
@@ -252,6 +258,24 @@ module.exports = async function handler(req, res) {
         delay: delay2h,
         body: { leadId: lead.id, step: 'pre_call_2h' },
       }).catch(e => console.error('QStash pre_call_2h error:', e));
+    }
+
+    // 1h before: email + SMS so it doesn't get missed
+    if (delay1h > 60) {
+      qstash.publishJSON({
+        url: followupUrl,
+        delay: delay1h,
+        body: { leadId: lead.id, step: 'pre_call_1h' },
+      }).catch(e => console.error('QStash pre_call_1h error:', e));
+    }
+
+    // 10m before: final email + SMS reminder to hop on
+    if (delay10m > 30) {
+      qstash.publishJSON({
+        url: followupUrl,
+        delay: delay10m,
+        body: { leadId: lead.id, step: 'pre_call_10m' },
+      }).catch(e => console.error('QStash pre_call_10m error:', e));
     }
   }
 

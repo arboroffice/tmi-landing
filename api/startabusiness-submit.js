@@ -92,5 +92,17 @@ module.exports = async function handler(req, res) {
     } catch (e) { console.error('startabusiness email:', e.message); }
   }
 
+  // Confirmation to the applicant so they know it went through (best-effort)
+  try {
+    if (process.env.RESEND_API_KEY) {
+      const { Resend } = require('resend');
+      await new Resend(process.env.RESEND_API_KEY).emails.send({
+        from: 'TMI <support@tmitechai.com>', to: email,
+        subject: 'Got your Start a Business request',
+        html: `<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;padding:10px;color:#1a1a1a;font-size:16px;line-height:1.7;"><p style="margin:0 0 16px;">Hey ${first},</p><p style="margin:0 0 16px;">Got it - you want to build a business with TMI. We're reviewing what you sent and will reach out with next steps.</p><p style="margin:0 0 16px;">Reply here anytime with more on your idea or where you're trying to take it.</p><p style="margin:0;">- The TMI team</p></div>`,
+      });
+    }
+  } catch (e) { console.error('startabusiness confirm:', e.message); }
+
   return res.status(200).json({ ok: true, id: sub && sub.id ? sub.id : null });
 };

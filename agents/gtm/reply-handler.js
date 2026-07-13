@@ -173,5 +173,19 @@ export async function handleReply({ fromEmail, subject, body, inReplyToMessageId
     }).catch(e => console.error('Digest error:', e.message));
   }
 
+  // Fast team SMS for the hottest replies so a human can jump in immediately
+  // (the email digest above can sit unread). Only the money intents.
+  if (classification.intent === 'interested' || classification.intent === 'meeting_request') {
+    try {
+      if (process.env.TWILIO_ACCOUNT_SID) {
+        const twilio = (await import('twilio')).default;
+        twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN).messages.create({
+          from: '+18557171044', to: '+13373809059',
+          body: `${autoSent ? 'AUTO-REPLIED' : 'HOT'} cold reply (${classification.intent}): ${lead?.company_name || fromEmail} - ${classification.summary}`.slice(0, 320),
+        }).catch(() => {});
+      }
+    } catch (e) { console.error('hot reply sms:', e.message); }
+  }
+
   return { intent: classification.intent, leadId: lead?.id, autoSent };
 }

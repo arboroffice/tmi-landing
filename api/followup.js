@@ -52,7 +52,7 @@ async function handler(req, res) {
 
   const lead = await db.getById('leads', leadId);
 
-  const preCallSteps = ['pre_call_24h', 'pre_call_2h'];
+  const preCallSteps = ['pre_call_24h', 'pre_call_2h', 'pre_call_1h', 'pre_call_10m'];
 
   // Statuses where the lead has converted, gone dead, or opted out. Once a lead
   // reaches any of them, all cold and Intelligence Audit nurture follow-up stops.
@@ -389,6 +389,51 @@ ${sig}`;
       from: FROM_NUMBER,
       to: formatPhone(lead.phone),
     });
+  }
+
+  if (step === 'pre_call_1h') {
+    // 1 hour before — email + SMS so the call doesn't get missed.
+    await resend.emails.send({
+      from: 'TMI <support@tmitechai.com>',
+      to: lead.email,
+      subject: "Your TMI call is in about an hour",
+      html: emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">Quick heads up - we're on in about an hour. Your call link is in the calendar invite and your confirmation email.</p>
+${auditDone ? '' : `<p style="margin:0 0 16px;">If you get five minutes first, <a href="${auditLink}" style="color:#5a9e00;font-weight:600;">finish your Intelligence Audit</a> so we walk in with your real numbers.</p>`}
+<p style="margin:0 0 16px;">Talk soon.</p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>
+`, unsubUrl),
+    });
+    if (lead.phone) {
+      await sms.messages.create({
+        body: `Hey ${firstName} - we're on in about an hour. Your call link is in the calendar invite + confirmation email. Reply here if you need it resent. - Mia`,
+        from: FROM_NUMBER,
+        to: formatPhone(lead.phone),
+      });
+    }
+  }
+
+  if (step === 'pre_call_10m') {
+    // 10 minutes before — final email + SMS to hop on.
+    await resend.emails.send({
+      from: 'TMI <support@tmitechai.com>',
+      to: lead.email,
+      subject: "We're starting in about 10 minutes",
+      html: emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">We're on in about 10 minutes. Grab the call link from your calendar invite or your confirmation email and hop on when you're ready.</p>
+<p style="margin:0 0 16px;">If you can't find the link or something came up, just reply to this email and I'll sort it out.</p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>
+`, unsubUrl),
+    });
+    if (lead.phone) {
+      await sms.messages.create({
+        body: `${firstName} - we're starting in about 10 min. Your call link is in the calendar invite + confirmation email. Reply here if you need it. - Mia`,
+        from: FROM_NUMBER,
+        to: formatPhone(lead.phone),
+      });
+    }
   }
 
   res.status(200).json({ ok: true, step });

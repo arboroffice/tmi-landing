@@ -99,7 +99,7 @@ module.exports = async function handler(req, res) {
       return ack();
     }
 
-    if (stage === 'precall_24h' || stage === 'precall_2h') {
+    if (stage === 'precall_24h' || stage === 'precall_2h' || stage === 'precall_1h' || stage === 'precall_10m') {
       const app = b.applicationId ? await db.getById('applications', b.applicationId).catch(() => null) : await appByEmail(b.email);
       if (stopped(app)) return res.json({ ok: true, skipped: 'opted out' });
       const name = (app && app.name || 'there').split(/\s+/)[0];
@@ -109,6 +109,16 @@ module.exports = async function handler(req, res) {
         await email(to, 'Your TMI strategy call is tomorrow',
           `<p style="margin:0 0 16px;">Hey ${name},</p>
 <p style="margin:0 0 16px;">Quick reminder: your 30-minute strategy call with the founder is tomorrow. Have your audit handy and come with the one thing you most want off your plate. See you then.</p>`, unsub);
+      } else if (stage === 'precall_1h') {
+        await email(to, 'Your TMI call is in about an hour',
+          `<p style="margin:0 0 16px;">Hey ${name},</p>
+<p style="margin:0 0 16px;">Heads up - we're on in about an hour. Your call link is in the calendar invite and confirmation email. Talk soon.</p>`, unsub);
+        await sms(app && app.phone, `${name} - your TMI strategy call is in about an hour. Link's in your calendar invite + confirmation email. Reply if you need it resent.`);
+      } else if (stage === 'precall_10m') {
+        await email(to, "We're starting in about 10 minutes",
+          `<p style="margin:0 0 16px;">Hey ${name},</p>
+<p style="margin:0 0 16px;">We're on in about 10 minutes. Grab the call link from your calendar invite or confirmation email and hop on when you're ready. Reply here if you need it and I'll sort it out.</p>`, unsub);
+        await sms(app && app.phone, `${name} - we're starting in about 10 min. Call link is in your calendar invite + confirmation email. Reply if you need it.`);
       } else {
         await sms(app && app.phone, `${name} - your TMI strategy call is in about 2 hours. Talk soon.`);
       }

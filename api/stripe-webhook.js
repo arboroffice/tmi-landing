@@ -23,6 +23,18 @@ function alertTeam(text) {
   } catch (e) { /* best effort */ }
 }
 
+// Branded transactional email (best-effort, fire-and-forget - never blocks the webhook).
+function sendEmail(to, subject, innerHtml) {
+  try {
+    if (!process.env.RESEND_API_KEY || !to) return;
+    const { Resend } = require('resend');
+    new Resend(process.env.RESEND_API_KEY).emails.send({
+      from: 'TMI <support@tmitechai.com>', to, subject,
+      html: `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f5ef;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5ef;"><tr><td align="center" style="padding:28px 14px;"><table role="presentation" width="560" cellpadding="0" cellspacing="0" style="width:560px;max-width:100%;background:#fff;border:1px solid #e7e8e1;border-radius:16px;overflow:hidden;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><tr><td style="background:#0a0b14;padding:18px 30px;"><span style="font-size:19px;font-weight:800;letter-spacing:-0.02em;color:#fff;">TMI</span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#E4FF97;margin-left:5px;"></span></td></tr><tr><td style="padding:34px 30px;color:#1a1a1a;font-size:16px;line-height:1.7;">${innerHtml}</td></tr><tr><td style="padding:0 30px 28px;"><div style="border-top:1px solid #eceee4;padding-top:16px;font-size:12px;color:#9a9ba5;">TMI Technology &middot; chaos control for growing companies &middot; <a href="https://www.tmitechai.com" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`,
+    }).catch(e => console.error('stripe email:', e.message));
+  } catch (e) { /* best effort */ }
+}
+
 async function findApp({ applicationId, email }) {
   if (applicationId) {
     const byId = await dbx.getById('applications', applicationId).catch(() => null);
@@ -43,6 +55,19 @@ async function markPaid(session) {
       status: 'paid', paid_at: new Date().toISOString(), stripe_session: session.id,
     });
     alertTeam(`PAID Complete Audit: ${app.name || company || email} | ${email || 'no email'}`);
+    // Immediate payment confirmation + next step to the customer (in case they
+    // closed the tab before the intake page loaded).
+    if (email) {
+      const cfn = (app.name || 'there').split(/\s+/)[0];
+      const intake = `https://www.tmitechai.com/complete-audit-intake?session_id=${encodeURIComponent(session.id)}`;
+      sendEmail(email, 'Payment received - your Complete Audit is underway', `
+<p style="margin:0 0 16px;">Hey ${cfn},</p>
+<p style="margin:0 0 16px;">Your Complete Audit payment came through - thank you. You're in.</p>
+<p style="margin:0 0 16px;">The one thing we need from you now is a short intake so we build the audit around your actual operation. It takes about 10 to 15 minutes, and the more detail you give, the sharper it comes back.</p>
+<p style="margin:0 0 24px;"><a href="${intake}" style="color:#5a9e00;font-weight:600;">Start your intake &rarr;</a></p>
+<p style="margin:0 0 16px;">Once it's in, we build your written diagnosis and the plan, then you book a call to walk through it. Reply here anytime.</p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>`);
+    }
     // Nudge to complete the intake if they paid and bailed (stops once intake exists).
     try {
       if (process.env.QSTASH_TOKEN && email) {
@@ -76,6 +101,17 @@ async function markBuildDeposit(session) {
     deposit_paid: (session.amount_total || 0) / 100, stripe_session: session.id,
   });
   alertTeam(`BUILD ACCEPTED (${path.toUpperCase()}): ${prop.company || prop.client_email || proposalId} - deposit $${((session.amount_total || 0) / 100).toLocaleString()}`);
+  // Onboarding / welcome email to the client who just committed to the build.
+  const clientEmail = prop.client_email || ((session.customer_details && session.customer_details.email) || null);
+  if (clientEmail) {
+    const cfn = (prop.client_name || prop.company || 'there').split(/\s+/)[0];
+    sendEmail(clientEmail, 'You\'re in - let\'s build', `
+<p style="margin:0 0 16px;">Hey ${cfn},</p>
+<p style="margin:0 0 16px;">Your deposit came through and the build is a go. This is the fun part.</p>
+<p style="margin:0 0 16px;">Here's what happens next: we lock your kickoff, map your operation in detail, and start installing. You'll have a single point of contact the whole way, and we build in about 30 days.</p>
+<p style="margin:0 0 16px;">We'll reach out within one business day to schedule kickoff. If you want to get us anything ahead of time - logins, current tools, the one thing you most want fixed first - just reply here.</p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>`);
+  }
 }
 
 async function markRefunded(event) {
@@ -118,6 +154,15 @@ module.exports = async function handler(req, res) {
       if (s.payment_status === 'paid') {
         if (s.metadata && s.metadata.product === 'build_deposit') await markBuildDeposit(s);
         else await markPaid(s);
+      }
+    } else if (event.type === 'checkout.session.expired') {
+      // Someone opened the $1k checkout and didn't finish - flag it so the team
+      // can follow up while it's warm.
+      const s = event.data.object || {};
+      if (!(s.metadata && s.metadata.product === 'build_deposit')) {
+        const em = (s.customer_details && s.customer_details.email) || s.customer_email || null;
+        const co = (s.metadata && s.metadata.company) || '';
+        if (em || co) alertTeam(`Abandoned Complete Audit checkout: ${co || em || s.id}${em ? ' | ' + em : ''} - follow up`);
       }
     } else if (event.type === 'charge.refunded' || event.type === 'refund.created' || event.type === 'charge.dispute.created') {
       await markRefunded(event);

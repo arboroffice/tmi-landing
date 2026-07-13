@@ -67,5 +67,17 @@ module.exports = async function handler(req, res) {
     } catch (e) { console.error('mma email:', e.message); }
   }
 
+  // 4) Confirmation to the applicant so they know it went through (best-effort)
+  try {
+    if (process.env.RESEND_API_KEY) {
+      const { Resend } = require('resend');
+      await new Resend(process.env.RESEND_API_KEY).emails.send({
+        from: 'TMI <support@tmitechai.com>', to: email,
+        subject: "You're on the early-access list",
+        html: `<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;padding:10px;color:#1a1a1a;font-size:16px;line-height:1.7;"><p style="margin:0 0 16px;">Hey ${first},</p><p style="margin:0 0 16px;">You're on the list for <strong>Make Money With AI</strong>. We'll email you the moment early access opens.</p><p style="margin:0 0 16px;">In the meantime, reply and tell us what you're trying to build - it helps us tailor it to you.</p><p style="margin:0;">- The TMI team</p></div>`,
+      });
+    }
+  } catch (e) { console.error('mma confirm:', e.message); }
+
   return res.status(200).json({ ok: true, id: sub && sub.id ? sub.id : null });
 };
