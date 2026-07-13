@@ -104,15 +104,24 @@
   }
   function buildGroup(label,items,base){
     var g=mk('div','tmi-ind-grp');
-    var b=mk('button','tmi-ind-l2',label+caret()); b.type='button';
+    // Header reuses .tmi-ind-l2 styling (a flex row, styled per nav surface): the
+    // label is a real link to the business page, and a caret button expands the
+    // industry list without navigating away.
+    var head=mk('div','tmi-ind-l2');
+    var a=mk('a',null,label); a.href='/'+base;
+    a.style.cssText='color:inherit;text-decoration:none;flex:1;';
+    var b=mk('button',null,caret()); b.type='button';
+    b.setAttribute('aria-label','Browse '+label+' industries');
+    b.style.cssText='background:none;border:none;color:inherit;font:inherit;cursor:pointer;padding:0 2px;';
     var l=buildList(items,base);
-    b.addEventListener('click',function(){var open=l.style.display==='block';l.style.display=open?'none':'block';b.classList.toggle('open',!open);});
-    g.appendChild(b); g.appendChild(l); return g;
+    b.addEventListener('click',function(e){e.stopPropagation();var open=l.style.display==='block';l.style.display=open?'none':'block';head.classList.toggle('open',!open);});
+    head.appendChild(a); head.appendChild(b);
+    g.appendChild(head); g.appendChild(l); return g;
   }
   function buildBox(){
     var box=mk('div','tmi-ind-box');
-    box.appendChild(buildGroup('Physical',PHYS,'physical'));
-    box.appendChild(buildGroup('Online',ONL,'online'));
+    box.appendChild(buildGroup('Physical Business',PHYS,'physical'));
+    box.appendChild(buildGroup('Online Business',ONL,'online'));
     return box;
   }
 
