@@ -22,8 +22,8 @@ function confirmEmail(to, firstName, dateStr) {
 <p style="margin:0 0 16px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">You're confirmed for your discovery call${dateStr && dateStr !== 'TBD' ? ` on <strong>${dateStr} CT</strong>` : ''}. It's 30 minutes with me, walking through your operation and the first systems we would build.</p>
 <p style="margin:0 0 8px;">To get the most out of it, come with:</p>
-<p style="margin:0 0 16px;color:#444;">1. The one thing you most want off your plate.<br>2. A rough sense of your numbers (revenue, team size, close rate).<br>3. Your audit results, if you have run it.</p>
-<p style="margin:0 0 16px;">If anything comes up before then, just reply to this email.</p>
+<p style="margin:0 0 16px;color:#444;">1. The one thing you most want off your plate.<br>2. A rough sense of your numbers (revenue, team size, where jobs or leads slip).<br>3. The tools you are paying for right now.</p>
+<p style="margin:0 0 16px;">Question before then, or want to talk sooner? Just reply here or text us at <a href="tel:+13374509795" style="color:#5a9e00;">(337) 450-9795</a>.</p>
 <p style="margin:24px 0 0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>
 </td></tr><tr><td style="padding:6px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><div style="border-top:1px solid #eceee4;margin-top:8px;padding-top:16px;font-size:12px;line-height:1.6;color:#9a9ba5;">TMI Technology &middot; chaos control for growing companies<br><a href="https://www.tmitechai.com" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`,
   }).catch(e => console.error('confirm email:', e.message));
@@ -124,7 +124,7 @@ module.exports = async function handler(req, res) {
           await confirmEmail(email, fn, dateStr);
           if (appLead.phone && process.env.TWILIO_ACCOUNT_SID) {
             twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN).messages.create({
-              body: `You're confirmed for your TMI discovery call${dateStr && dateStr !== 'TBD' ? ` on ${dateStr} CT` : ''}, ${fn}. Come with the one thing you most want off your plate. Reply here if anything comes up. - Mia`,
+              body: `You're confirmed for your TMI discovery call${dateStr && dateStr !== 'TBD' ? ` on ${dateStr} CT` : ''}, ${fn}. Come with the one thing you most want off your plate. Questions before then? Text us at (337) 450-9795. - Mia`,
               from: FROM_NUMBER, to: formatPhone(appLead.phone),
             }).catch(() => {});
           }
@@ -178,21 +178,10 @@ module.exports = async function handler(req, res) {
     ? new Date(startTime).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
     : 'TBD';
 
-  // Has this lead completed the Intelligence Audit? If not (e.g. they used "skip
-  // the audit and book a call"), the call is far more effective with their actual
-  // numbers, so the confirmation text doubles as the first push to run it. The
-  // pre-call sequence (api/followup) keeps nudging at 24h and 2h; this covers the
-  // gap for same-day / next-day bookings where those reminders can't fire.
-  let auditDone = false;
-  try {
-    const a = await db.findOne('audit_submissions', 'email', (lead.email || '').toLowerCase());
-    auditDone = !!a;
-  } catch { /* best effort — default to the plain confirmation */ }
-
+  // Company note (used to ground the team's pre-call brief). The intelligent
+  // audit now happens live on the call, so there is no self-serve audit to push.
   let companyNote = '';
   try { companyNote = (JSON.parse(lead.notes || '{}').company) || ''; } catch { companyNote = ''; }
-  const resumeParams = new URLSearchParams({ n: lead.name || '', e: lead.email || '', p: lead.phone || '', c: companyNote });
-  const auditLink = `${SITE}/audit?resume=1&${resumeParams.toString()}`;
 
   // Auto-generate the pre-call intelligence brief for the team (robust via QStash).
   try {
@@ -212,9 +201,7 @@ module.exports = async function handler(req, res) {
   // Confirmation SMS to lead
   if (lead.phone) {
     sms.messages.create({
-      body: auditDone
-        ? `You're confirmed, ${firstName}. See you then. If anything comes up before the call, reply here.`
-        : `You're confirmed, ${firstName}. One quick favor before the call: run your 5-min Intelligence Audit so we walk in with your real numbers and go deep from minute one - ${auditLink}`,
+      body: `You're confirmed, ${firstName}. Come with the one thing you most want off your plate and a rough sense of your numbers. Questions before then? Text us at (337) 450-9795.`,
       from: FROM_NUMBER,
       to: formatPhone(lead.phone),
     }).catch(e => console.error('Confirmation SMS error:', e));

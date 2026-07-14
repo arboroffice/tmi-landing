@@ -22,11 +22,11 @@ ${body}
 function buildInitialEmail(firstName, unsubUrl) {
   return emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">Got it.</p>
-<p style="margin:0 0 16px;">We're going through your operation now. What we're building is a picture of where things are leaking - time, money, accountability gaps. Most owners are surprised by what comes back.</p>
-<p style="margin:0 0 16px;">We'll be in touch.</p>
-<p style="margin:0 0 24px;">If you'd rather just talk now: <a href="${SITE}/booking" style="color:#5a9e00;">${SITE}/booking</a></p>
-<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - AI Infrastructure for Field Operations</span></p>
+<p style="margin:0 0 16px;">Got your details. If you already grabbed a time, you're set - a separate confirmation with the call link is on its way. If you did not finish picking a time, do it here: <a href="${SITE}/book" style="color:#5a9e00;">${SITE}/book</a></p>
+<p style="margin:0 0 8px;">The call is 30 minutes. We map where your operation is leaking time and money and show you what we would build first. Come ready with:</p>
+<p style="margin:0 0 16px;color:#444;">1. The one thing you most want off your plate.<br>2. A rough sense of your numbers - revenue, team size, and where jobs or leads slip.<br>3. The tools you are paying for right now.</p>
+<p style="margin:0 0 24px;">Question before then, or want to talk sooner? Text us at <a href="tel:+13374509795" style="color:#5a9e00;">(337) 450-9795</a>.</p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>
 `, unsubUrl);
 }
 
@@ -115,14 +115,14 @@ module.exports = async function handler(req, res) {
   resend.emails.send({
     from: 'TMI <support@tmitechai.com>',
     to: email,
-    subject: "You applied. Here's what happens next.",
+    subject: "You're set - here's how to prep for the call",
     html: buildInitialEmail(firstName, unsubUrl),
   }).catch(e => console.error('Resend error:', e));
 
   // SMS to lead
   if (phone) {
     sms.messages.create({
-      body: `Hey ${firstName} - got your application. Going through your operation now, we'll be in touch. Talk sooner: ${SITE}/booking`,
+      body: `Hey ${firstName} - got your details. On the call we'll map where your operation is leaking time and money. Come with the one thing you most want off your plate. Questions before then? Text us at (337) 450-9795.`,
       from: FROM_NUMBER,
       to: formatPhone(phone),
     }).catch(e => console.error('Lead SMS error:', e));
@@ -142,24 +142,10 @@ module.exports = async function handler(req, res) {
     to: ALERT_NUMBER,
   }).catch(e => console.error('Alert SMS 2 error:', e));
 
-  // Schedule follow-up chain
-  const qstash = new QStashClient({ token: process.env.QSTASH_TOKEN });
-  const followupUrl = `${SITE}/api/followup`;
-
-  const schedule = [
-    { delay: 86400,   step: 'day1_sms' },
-    { delay: 259200,  step: 'day3_email' },
-    { delay: 604800,  step: 'day7_email_sms' },
-    { delay: 1209600, step: 'day14_email' },
-  ];
-
-  for (const { delay, step } of schedule) {
-    qstash.publishJSON({
-      url: followupUrl,
-      delay,
-      body: { applicationId: app.id, step },
-    }).catch(e => console.error(`QStash ${step} error:`, e));
-  }
+  // No drip is scheduled here. People book a call immediately after this form, so
+  // the booking confirmation and pre-call reminders (api/booking-confirmed ->
+  // api/funnel-nurture) own the rest of the conversation. The email/SMS above
+  // already nudge anyone who did not finish picking a time back to /book.
 
   res.status(200).json({ ok: true });
 };

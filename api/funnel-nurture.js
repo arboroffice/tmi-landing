@@ -106,9 +106,9 @@ module.exports = async function handler(req, res) {
       const to = app && app.email;
       const unsub = app ? `${SITE}/api/unsubscribe?id=${app.id}` : null;
       if (stage === 'precall_24h') {
-        await email(to, 'Your TMI strategy call is tomorrow',
+        await email(to, 'Your TMI call is tomorrow',
           `<p style="margin:0 0 16px;">Hey ${name},</p>
-<p style="margin:0 0 16px;">Quick reminder: your 30-minute strategy call with the founder is tomorrow. Have your audit handy and come with the one thing you most want off your plate. See you then.</p>`, unsub);
+<p style="margin:0 0 16px;">Quick reminder: your 30-minute call with the founder is tomorrow. Come with the one thing you most want off your plate, a rough sense of your numbers, and the tools you are paying for right now. Question before then? Text us at (337) 450-9795. See you then.</p>`, unsub);
       } else if (stage === 'precall_1h') {
         await email(to, 'Your TMI call is in about an hour',
           `<p style="margin:0 0 16px;">Hey ${name},</p>

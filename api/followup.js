@@ -337,70 +337,48 @@ ${sig}`;
     });
   }
 
-  // --- BOOKED SEQUENCE ---
-  // Goal: every call goes in with the audit already done. If the booked lead
-  // has not completed the audit (no audit_submissions row -> `audit` is null),
-  // the pre-call touches push them to finish it first. If they have, we just
-  // send a clean reminder.
-  const auditDone = !!audit;
-  let preCallCompany = '';
-  try { preCallCompany = (JSON.parse(lead.notes || '{}').company) || ''; } catch { preCallCompany = ''; }
-  const resumeParams = new URLSearchParams({ n: lead.name || '', e: lead.email || '', p: lead.phone || '', c: preCallCompany });
-  const auditLink = `${SITE}/audit?resume=1&${resumeParams.toString()}`;
+  // --- BOOKED SEQUENCE (pre-call reminders) ---
+  // The intelligent audit now happens live on the call, so these just confirm,
+  // prep the prospect, and make sure they hop on. No self-serve audit link.
+  const TEXT_LINE = "Question before then? Text us at (337) 450-9795.";
 
-  if (step === 'pre_call_24h') {
-    // From Mia — day before the call
+  if (step === "pre_call_24h") {
     await resend.emails.send({
-      from: 'TMI <support@tmitechai.com>',
+      from: "TMI <support@tmitechai.com>",
       to: lead.email,
-      subject: auditDone ? "We're talking tomorrow" : "Before our call tomorrow",
-      html: auditDone ? emailWrap(`
-<p style="margin:0 0 20px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">Just a heads up - we're on tomorrow. Looking forward to it.</p>
-<p style="margin:0 0 16px;">I've got your audit in front of me, so we can skip the basics and go straight to what matters for your operation.</p>
-<p style="margin:0 0 16px;">See you then.</p>
-<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - intelligent infrastructure for field operations</span></p>
-`, unsubUrl) : emailWrap(`
+      subject: "We're talking tomorrow",
+      html: emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">We're on tomorrow. Looking forward to it.</p>
-<p style="margin:0 0 16px;">One thing that'll make the call much more useful: finish your Intelligence Audit before we get on. It takes about 5 minutes, and it means we walk in with your actual numbers and go deep from the first minute instead of spending the call on basics.</p>
-<p style="margin:0 0 24px;"><a href="${auditLink}" style="color:#5a9e00;font-weight:600;">Finish my audit before the call &rarr;</a></p>
-<p style="margin:0 0 16px;">See you then.</p>
-<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI - intelligent infrastructure for field operations</span></p>
+<p style="margin:0 0 8px;">It's 30 minutes: we map where your operation is leaking time and money and show you what we would build first. Come ready with:</p>
+<p style="margin:0 0 16px;color:#444;">1. The one thing you most want off your plate.<br>2. A rough sense of your numbers - revenue, team size, where jobs or leads slip.<br>3. The tools you are paying for right now.</p>
+<p style="margin:0 0 16px;">${TEXT_LINE}</p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>
 `, unsubUrl),
     });
-
-    // If the audit isn't done, also send an SMS so it doesn't get missed.
-    if (!auditDone && lead.phone) {
+    if (lead.phone) {
       await sms.messages.create({
-        body: `Hey ${firstName} - we're on tomorrow. Quick favor: finish your 5-min audit before the call so we go deep from the start: ${auditLink}`,
-        from: FROM_NUMBER,
-        to: formatPhone(lead.phone),
+        body: `Hey ${firstName} - we're on tomorrow. Come with the one thing you most want off your plate and a rough sense of your numbers. ${TEXT_LINE}`,
+        from: FROM_NUMBER, to: formatPhone(lead.phone),
       });
     }
   }
 
-  if (step === 'pre_call_2h' && lead.phone) {
-    // SMS only — 2 hours before
+  if (step === "pre_call_2h" && lead.phone) {
     await sms.messages.create({
-      body: auditDone
-        ? `Hey ${firstName} - we're on in 2 hours. See you then.`
-        : `Hey ${firstName} - we're on in 2 hours. If you get 5 min, finish your audit first so we can go deep: ${auditLink}`,
-      from: FROM_NUMBER,
-      to: formatPhone(lead.phone),
+      body: `Hey ${firstName} - we're on in about 2 hours. See you then. ${TEXT_LINE}`,
+      from: FROM_NUMBER, to: formatPhone(lead.phone),
     });
   }
 
-  if (step === 'pre_call_1h') {
-    // 1 hour before — email + SMS so the call doesn't get missed.
+  if (step === "pre_call_1h") {
     await resend.emails.send({
-      from: 'TMI <support@tmitechai.com>',
+      from: "TMI <support@tmitechai.com>",
       to: lead.email,
       subject: "Your TMI call is in about an hour",
       html: emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">Quick heads up - we're on in about an hour. Your call link is in the calendar invite and your confirmation email.</p>
-${auditDone ? '' : `<p style="margin:0 0 16px;">If you get five minutes first, <a href="${auditLink}" style="color:#5a9e00;font-weight:600;">finish your Intelligence Audit</a> so we walk in with your real numbers.</p>`}
 <p style="margin:0 0 16px;">Talk soon.</p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>
 `, unsubUrl),
@@ -408,16 +386,14 @@ ${auditDone ? '' : `<p style="margin:0 0 16px;">If you get five minutes first, <
     if (lead.phone) {
       await sms.messages.create({
         body: `Hey ${firstName} - we're on in about an hour. Your call link is in the calendar invite + confirmation email. Reply here if you need it resent. - Mia`,
-        from: FROM_NUMBER,
-        to: formatPhone(lead.phone),
+        from: FROM_NUMBER, to: formatPhone(lead.phone),
       });
     }
   }
 
-  if (step === 'pre_call_10m') {
-    // 10 minutes before — final email + SMS to hop on.
+  if (step === "pre_call_10m") {
     await resend.emails.send({
-      from: 'TMI <support@tmitechai.com>',
+      from: "TMI <support@tmitechai.com>",
       to: lead.email,
       subject: "We're starting in about 10 minutes",
       html: emailWrap(`
@@ -430,13 +406,12 @@ ${auditDone ? '' : `<p style="margin:0 0 16px;">If you get five minutes first, <
     if (lead.phone) {
       await sms.messages.create({
         body: `${firstName} - we're starting in about 10 min. Your call link is in the calendar invite + confirmation email. Reply here if you need it. - Mia`,
-        from: FROM_NUMBER,
-        to: formatPhone(lead.phone),
+        from: FROM_NUMBER, to: formatPhone(lead.phone),
       });
     }
   }
 
-  res.status(200).json({ ok: true, step });
+    res.status(200).json({ ok: true, step });
 }
 
 handler.config = { api: { bodyParser: false } };
