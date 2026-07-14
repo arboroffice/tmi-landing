@@ -45,9 +45,11 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
   .sub{font-size:16px;line-height:1.6;color:rgba(255,255,255,0.5);max-width:440px;margin-bottom:36px;}
   form{width:100%;display:flex;flex-direction:column;gap:12px;text-align:left;}
   .field label{display:block;font-size:12px;font-weight:600;letter-spacing:0.02em;color:rgba(255,255,255,0.55);margin-bottom:6px;}
-  .field input{width:100%;padding:14px 16px;font:inherit;font-size:16px;color:#fff;background:var(--bg-card);border:1px solid rgba(255,255,255,0.1);border-radius:11px;transition:border-color .15s;}
+  .field input,.field select{width:100%;padding:14px 16px;font:inherit;font-size:16px;color:#fff;background:var(--bg-card);border:1px solid rgba(255,255,255,0.1);border-radius:11px;transition:border-color .15s;}
   .field input::placeholder{color:rgba(255,255,255,0.28);}
-  .field input:focus{outline:none;border-color:var(--chart);}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--chart);}
+  .field select{appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23888' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;}
+  .field select option{color:#111;}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   @media(max-width:460px){.row{grid-template-columns:1fr;}}
   button.cta{margin-top:8px;width:100%;padding:16px;font:inherit;font-size:16px;font-weight:800;letter-spacing:-0.01em;color:#0a0b14;background:var(--chart);border:none;border-radius:11px;cursor:pointer;transition:background .15s;}
@@ -79,6 +81,21 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
         <div class="row">
           <div class="field"><label for="company">Company</label><input id="company" name="company" required placeholder="Company name"/></div>
           <div class="field"><label for="website">Website</label><input id="website" name="website" placeholder="company.com"/></div>
+        </div>
+        <div class="field"><label for="heard">How did you find us?</label>
+          <select id="heard" name="heard">
+            <option value="">Select one</option>
+            <option>Google search</option>
+            <option>Referral or word of mouth</option>
+            <option>Instagram</option>
+            <option>Facebook</option>
+            <option>LinkedIn</option>
+            <option>YouTube</option>
+            <option>TikTok</option>
+            <option>Podcast</option>
+            <option>Event or in person</option>
+            <option>Other</option>
+          </select>
         </div>
         <button class="cta" type="submit" id="submit-btn">Book my call &rarr;</button>
         <div class="err" id="err"></div>
@@ -138,6 +155,7 @@ document.getElementById('lead-form').addEventListener('submit', async function (
   var phone = document.getElementById('phone').value.trim();
   var company = document.getElementById('company').value.trim();
   var website = document.getElementById('website').value.trim();
+  var heard = document.getElementById('heard').value;
   if (!name || !email || !phone) { err.textContent = 'Name, email, and phone are required.'; return; }
   btn.disabled = true; btn.textContent = 'One sec...';
   try {
@@ -145,7 +163,7 @@ document.getElementById('lead-form').addEventListener('submit', async function (
     // Capture the lead (best-effort). Never block the booking on it.
     fetch('/api/lead', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, email: email, phone: phone, company: company, website: website, source: 'book-call' }),
+      body: JSON.stringify({ name: name, email: email, phone: phone, company: company, website: website, heard_from: heard, source: 'book-call' }),
     }).catch(function () {});
   } catch (e) {}
   // Store for the thank-you page.

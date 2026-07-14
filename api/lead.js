@@ -74,10 +74,14 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { name, email, phone, company, website, audience, niche, message, source } = req.body || {};
+  const { name, email, phone, company, website, heard_from, audience, niche, message, source } = req.body || {};
   if (!name || !email) return res.status(400).json({ error: 'Missing required fields' });
-  // Fold the website into the message so it lands in the CRM record.
-  const noteParts = [message, website ? `Website: ${website}` : null].filter(Boolean);
+  // Fold website + attribution into the message so they land in the CRM record.
+  const noteParts = [
+    message,
+    website ? `Website: ${website}` : null,
+    heard_from ? `How they found us: ${heard_from}` : null,
+  ].filter(Boolean);
   const noteBody = noteParts.length ? noteParts.join('\n') : null;
 
   const firstName = name.split(' ')[0];
@@ -91,6 +95,7 @@ module.exports = async function handler(req, res) {
       phone: phone || null,
       company: company || null,
       website: website || null,
+      heard_from: heard_from || null,
       audience: audience || null,
       niche: niche || null,
       message: noteBody,
@@ -126,7 +131,7 @@ module.exports = async function handler(req, res) {
   // Internal alerts
   const domain = email.split('@')[1] || '';
   sms.messages.create({
-    body: `New lead: ${name}\n${email}\n${phone || 'no phone'}\nCo: ${company || domain}${website ? '\n' + website : ''}${audience ? '\nAudience: ' + audience : ''}${niche ? ' / ' + niche : ''}`,
+    body: `New lead: ${name}\n${email}\n${phone || 'no phone'}\nCo: ${company || domain}${website ? '\n' + website : ''}${heard_from ? '\nFound us: ' + heard_from : ''}${audience ? '\nAudience: ' + audience : ''}${niche ? ' / ' + niche : ''}`,
     from: FROM_NUMBER,
     to: ALERT_NUMBER,
   }).catch(e => console.error('Alert SMS 1 error:', e));
