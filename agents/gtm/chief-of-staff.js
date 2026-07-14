@@ -18,6 +18,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import * as db from './tools/db.js';
 import { sendDigest } from './tools/email.js';
+import { proposeAgentSpec, saveDraftSpec } from './agent-runtime.js';
 import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic();
@@ -51,14 +52,19 @@ VOICE: Direct. Real. Short blunt sentences. Never use em dashes. Never use emoji
 
 You can delegate an action to a digital agent by setting its "agent" field to one of these keys: ${AGENT_KEYS.join(', ')}. Only use those exact keys, or null for a human action. Actions handled by a person get an owner of "Mia" or "Tyler".
 
+When you notice a recurring, repeatable job that keeps showing up and should be handled by a standing digital employee (not a one-off task), propose building a new agent for it. Only propose one when the need is genuinely recurring. Keep it to at most two.
+
 You return ONLY valid JSON, no markdown fences, matching exactly:
 {
  "focus": "the single most important thing to move today, one sentence",
  "actions": [
    {"title":"the action","detail":"one line of what and why","owner":"Mia|Tyler|Agent","agent":"<agent key or null>","priority":"now|today|this_week"}
+ ],
+ "proposed_agents": [
+   {"name":"the agent","purpose":"the recurring job it would own, one line","cadence":"daily|weekly"}
  ]
 }
-Give 3 to 6 actions, ranked, the most important first. Prefer actions that directly grow revenue or protect existing revenue. Use only what the strategy and brief support.`;
+Give 3 to 6 actions, ranked, the most important first. Prefer actions that directly grow revenue or protect existing revenue. proposed_agents is optional and usually empty. Use only what the strategy and brief support.`;
 
 function fallbackPlan(g) {
   const actions = [];
@@ -128,14 +134,27 @@ export async function runChiefOfStaff() {
     }), null);
   }
 
+  // Build new agents when the plan calls for one. Each becomes a DRAFT spec a
+  // human reviews and activates in the Agent Builder. Never auto-activated.
+  let proposedAgents = 0;
+  for (const pa of (plan.proposed_agents || []).slice(0, 2)) {
+    await safe(async () => {
+      const spec = await proposeAgentSpec(pa.purpose || pa.name || '');
+      if (pa.name) spec.name = pa.name;
+      if (pa.cadence) spec.cadence = pa.cadence;
+      await saveDraftSpec(spec, 'chief-of-staff');
+      proposedAgents++;
+    }, null);
+  }
+
   // Email the plan (no-ops without a digest email).
   const lines = [`TMI Chief of Staff — ${date}`, '', `Focus: ${plan.focus || ''}`, '', 'ACTIONS'];
   (plan.actions || []).forEach((a, i) => lines.push(`${i + 1}. [${a.owner || 'Mia'}${a.agent ? '/' + a.agent : ''}] ${a.title}${a.detail ? ' — ' + a.detail : ''}`));
   await safe(() => sendDigest({ subject: 'TMI Chief of Staff — today\'s plan', body: lines.join('\n') }), null);
 
   await safe(() => db.logRun({ kind: 'chief-of-staff', used_llm: usedLlm, elapsed_s: Math.round((Date.now() - started) / 1000) }), null);
-  console.log(`Chief of Staff: done (${usedLlm ? 'llm' : 'plain'}, ${(plan.actions || []).length} actions)`);
-  return Object.assign({ id: planId }, plan, { date, generated_at });
+  console.log(`Chief of Staff: done (${usedLlm ? 'llm' : 'plain'}, ${(plan.actions || []).length} actions, ${proposedAgents} agents proposed)`);
+  return Object.assign({ id: planId }, plan, { date, generated_at, proposed_agents_saved: proposedAgents });
 }
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);

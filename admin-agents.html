@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Agent Builder — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .ab-propose{display:flex;gap:10px;align-items:flex-start;margin:6px 0 4px;}
+  .ab-propose textarea{flex:1;min-height:64px;resize:vertical;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font:inherit;color:var(--ink);background:#fff;}
+  .ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;}
+  @media(max-width:1000px){.ab-grid{grid-template-columns:1fr;}}
+  .spec{padding:16px 20px;border-bottom:1px solid var(--line);}
+  .spec:last-child{border-bottom:none;}
+  .spec-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+  .spec-name{font-weight:600;color:var(--ink);font-size:15px;}
+  .spec-purpose{color:var(--muted);font-size:13px;line-height:1.5;margin-top:3px;}
+  .spec-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;}
+  .pill{font-size:11px;font-weight:600;border-radius:999px;padding:3px 10px;border:1px solid var(--line);color:var(--ink);background:#fff;}
+  .st-draft{background:#eef1f5;color:#475569;border-color:transparent;}
+  .st-active{background:#eef7cf;color:#4f6b0e;border-color:transparent;}
+  .st-paused{background:#fef3d7;color:#9a6700;border-color:transparent;}
+  .spec-prompt{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.55;white-space:pre-wrap;max-height:0;overflow:hidden;transition:max-height .2s;}
+  .spec-prompt.open{max-height:400px;overflow:auto;}
+  .spec-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+  .run{padding:12px 20px;border-bottom:1px solid var(--line);font-size:13px;}
+  .run:last-child{border-bottom:none;}
+  .run-h{display:flex;justify-content:space-between;color:var(--ink);font-weight:500;}
+  .run-when{color:var(--muted);font-size:12px;}
+  .run-body{color:var(--muted);font-size:12.5px;line-height:1.5;margin-top:5px;white-space:pre-wrap;max-height:120px;overflow:auto;}
+  .ab-empty{padding:18px 20px;font-size:13px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Agent Builder</span></div>
+      <div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="loadAll()">Refresh</button></div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Agent Builder</h1>
+        <div class="sec-head-right"><span style="font-size:12px;color:var(--muted)">Built agents are read-only and never contact customers.</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-title">Build a new agent</span><span class="card-sub">describe the recurring job it should own</span></div>
+        <div class="card-body">
+          <div class="ab-propose">
+            <textarea id="need" placeholder="e.g. Every Monday, review clients with no activity in 30 days and flag the ones most likely to churn with why."></textarea>
+            <button class="btn btn-primary btn-sm" id="propose-btn" onclick="propose()">Propose agent</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ab-grid">
+        <div id="specs-col"></div>
+        <div id="runs-col"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('agents');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function card(title, sub, inner){return `<div class="card"><div class="card-head"><span class="card-title">${esc(title)}</span>${sub?`<span class="card-sub">${esc(sub)}</span>`:''}</div><div class="card-body">${inner}</div></div>`;}
+
+function renderSpecs(specs){
+  const live = (specs||[]).filter(s=>s.status!=='archived');
+  const col = document.getElementById('specs-col');
+  if(!live.length){ col.innerHTML = card('Agents', null, `<div class="ab-empty">No agents yet. Describe a job above, or the Chief of Staff will propose one.</div>`); return; }
+  const rows = live.map(s=>{
+    const st = s.status||'draft';
+    const reads = (s.reads||[]).map(r=>r.collection).join(', ') || 'none';
+    const last = s.last_run_at ? new Date(s.last_run_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'never';
+    let btns = `<button class="btn btn-ghost btn-sm" onclick="togglePrompt(this)">Instructions</button>
+      <button class="btn btn-ghost btn-sm" onclick="run('${esc(s.id)}',this)">Run now</button>`;
+    if(st!=='active') btns += `<button class="btn btn-primary btn-sm" onclick="setStatus('${esc(s.id)}','activate')">Activate</button>`;
+    else btns += `<button class="btn btn-ghost btn-sm" onclick="setStatus('${esc(s.id)}','pause')">Pause</button>`;
+    btns += `<button class="btn btn-ghost btn-sm" onclick="setStatus('${esc(s.id)}','remove')">Delete</button>`;
+    return `<div class="spec">
+      <div class="spec-top"><div><div class="spec-name">${esc(s.name)}</div><div class="spec-purpose">${esc(s.purpose||'')}</div></div><span class="pill st-${esc(st)}">${esc(st)}</span></div>
+      <div class="spec-meta">
+        <span class="pill">${esc(s.output||'brief')}</span>
+        <span class="pill">${esc(s.cadence||'manual')}</span>
+        <span class="pill">reads: ${esc(reads)}</span>
+        <span class="pill">last run: ${esc(last)}</span>
+      </div>
+      <div class="spec-prompt">${esc(s.system_prompt||'')}</div>
+      <div class="spec-btns">${btns}</div>
+    </div>`;
+  }).join('');
+  col.innerHTML = card('Agents', live.length+' total', rows);
+}
+function renderRuns(runs){
+  const col = document.getElementById('runs-col');
+  if(!(runs||[]).length){ col.innerHTML = card('Recent runs', null, `<div class="ab-empty">No runs yet.</div>`); return; }
+  const rows = runs.map(r=>{
+    const when = r.generated_at ? new Date(r.generated_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
+    const body = r.output_type==='actions' ? `${(r.actions||[]).length} action(s) queued` : (r.output||'');
+    return `<div class="run"><div class="run-h"><span>${esc(r.name||'agent')}</span><span class="run-when">${esc(when)}</span></div><div class="run-body">${esc(body).slice(0,600)}</div></div>`;
+  }).join('');
+  col.innerHTML = card('Recent runs', null, rows);
+}
+
+function togglePrompt(el){ const p = el.closest('.spec').querySelector('.spec-prompt'); p.classList.toggle('open'); }
+
+async function propose(){
+  const need = document.getElementById('need').value.trim();
+  if(!need){ TMIAdmin.toast && TMIAdmin.toast('Describe the job first.'); return; }
+  const b=document.getElementById('propose-btn'); b.disabled=true; b.textContent='Building…';
+  const r = await TMIAdmin.api('/api/agents','POST',{propose:need});
+  b.disabled=false; b.textContent='Propose agent';
+  if(r && r.spec){ document.getElementById('need').value=''; TMIAdmin.toast && TMIAdmin.toast('Agent drafted. Review and activate it.'); loadAll(); }
+}
+async function run(id, el){ if(el){el.disabled=true;el.textContent='Running…';} await TMIAdmin.api('/api/agents','POST',{run:id}); TMIAdmin.toast && TMIAdmin.toast('Agent running. Refresh in ~30s.'); if(el){setTimeout(()=>{el.disabled=false;el.textContent='Run now';loadAll();},30000);} }
+async function setStatus(id, action){ await TMIAdmin.api('/api/agents','POST',{[action]:id}); loadAll(); }
+
+async function loadAll(){ const d = await TMIAdmin.api('/api/agents'); if(d){ renderSpecs(d.specs); renderRuns(d.runs); } }
+loadAll();
+</script>
+</body>
+</html>
