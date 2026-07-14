@@ -331,6 +331,7 @@ const TMIAdmin = (() => {
       // More sheet
       const groups = [
         { label: 'Overview', items: [
+          { page:'command',   label:'Command',   icon:I.command },
           { page:'revenue',   label:'Revenue',   icon:I.revenue,   href:'/admin-reports#revenue' },
           { page:'analytics', label:'Analytics', icon:I.analytics, href:'/admin-reports#analytics' },
           { page:'brief',     label:'Command Brief', icon:I.command },
