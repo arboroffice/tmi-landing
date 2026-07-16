@@ -77,7 +77,7 @@ export async function runTest({ email, company, domain, industry } = {}) {
     `Spent some time looking at ${COMPANY}.`,
     `Built a quick operational intelligence review and mapped a few places where time and money may be getting lost. You can see it here:`,
     auditUrl,
-    `No forms, no pitch. Just thought you'd find it interesting.`,
+    `Just thought you'd find it interesting.`,
     `Mia`,
     `TMI Tech AI`,
   ].join('\n');

@@ -92,7 +92,7 @@ Give me:
 4. One concrete real-world scenario I could film or describe
 5. The TMI angle - how does AI infrastructure or robotics change this specifically
 
-Keep it tight. Just usable facts. No fluff.`;
+Keep it tight. Just usable facts.`;
 
     try {
       const r = await fetch('https://api.anthropic.com/v1/messages', {
@@ -177,7 +177,7 @@ CTA: ...
 
 [repeat for 2 and 3]
 
-TMI ads are direct, operator-focused, specific. No hype words.`;
+TMI ads are direct, operator-focused, specific.`;
 
     try {
       const r = await fetch('https://api.anthropic.com/v1/messages', {

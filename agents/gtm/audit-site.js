@@ -247,7 +247,7 @@ ${demo}
 <section class="sec cta"><div class="wrap">
   <div class="eyebrow">This is the preview</div>
   <h2>Want the complete picture for ${esc(d.companyName)}?</h2>
-  <p>The Complete Audit goes deep on your real operation, then you sit down with the founder and a strategist to map exactly what to fix and how. It is free, and there is no pitch.</p>
+  <p>The Complete Audit goes deep on your real operation, then you sit down with the founder and a strategist to map exactly what to fix and how. It is free.</p>
   <a href="/complete-audit?company=${encodeURIComponent(d.companyName)}" class="btn">Get your free Complete Audit &rarr;</a>
   <p class="note">Prepared by TMI &middot; A preliminary review from public information.</p>
 </div></section>

@@ -51,7 +51,7 @@ Return JSON only:
 
 async function writeInboundFollowup({ lead, scoring, routeTag }) {
   const routeContext = {
-    audit: 'Move them to the free Complete Audit at /complete-audit - a detailed operational audit plus a 30-minute strategy call with the founder and a strategist, where they map the three paths (DIY, done with you, done for you). It is free with no pitch, and it is the one entry point for everyone.',
+    audit: 'Move them to the free Complete Audit at /complete-audit - a detailed operational audit plus a 30-minute strategy call with the founder and a strategist, where they map the three paths (DIY, done with you, done for you). It is free, and it is the one entry point for everyone.',
   };
   // Single funnel: every inbound route leads to the Complete Audit.
   const routeNote = routeContext[routeTag] || routeContext.audit;

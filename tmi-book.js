@@ -58,7 +58,7 @@
           '<div class="bc-sub">A 30-minute call to walk through your operation and the systems that would fix it. The free audit on the site is the fastest start, but you can grab a call here.</div>' +
           '<div class="bc-dates" id="tbwDates"></div>' +
           '<button class="btn btn-lime bc-btn" type="button" id="tbwBtn" data-cal-link="' + CAL_LINK + '" data-cal-config=\'{"layout":"month_view"}\'>Schedule my call</button>' +
-          '<div class="bc-foot">Free &middot; No pitch &middot; 30 min</div>' +
+          '<div class="bc-foot">Free &middot; 30 min &middot; Real plan</div>' +
         '</div>' +
       '</div>';
     document.body.appendChild(w);

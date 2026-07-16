@@ -53,7 +53,7 @@ function invoiceAmount(inv) {
 
 // Tone notes per bucket — feeds both the template and the LLM prompt.
 const TONE = {
-  '1-30': 'Friendly first reminder. Assume it simply slipped through. Polite, brief, no pressure.',
+  '1-30': 'Friendly first reminder. Assume it simply slipped through. Polite, brief, easy.',
   '31-60': 'Firm but professional. The invoice is now meaningfully past due and needs attention.',
   '61-90': 'Direct. Ask for payment or a clear timeline. Note this account needs to be brought current.',
   '90+': 'Escalation. State the account is seriously past due and that it will move to our collections process if not resolved. Firm, professional, never aggressive.',

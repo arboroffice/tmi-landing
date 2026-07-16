@@ -27,7 +27,7 @@ function buildStepEmail(reg, step) {
   let subject = '', body = '';
   if (step === 'reminder_24h') {
     subject = `Tomorrow: ${W.EVENT_NAME}`;
-    body = `<p>Hey ${first},</p><p>Quick reminder — <b>${W.EVENT_NAME}</b> is tomorrow, <b>${when}</b>.</p><p>Come ready to find out which of the three systems is leaking the most time and money in your operation. Forty minutes, no fluff.</p><p>${btn(joinUrl, 'Your join link →', true)}</p><p>— The TMI team</p>`;
+    body = `<p>Hey ${first},</p><p>Quick reminder — <b>${W.EVENT_NAME}</b> is tomorrow, <b>${when}</b>.</p><p>Come ready to find out which of the three systems is leaking the most time and money in your operation. Forty minutes, live.</p><p>${btn(joinUrl, 'Your join link →', true)}</p><p>— The TMI team</p>`;
   } else if (step === 'reminder_1h') {
     subject = `Starting in 1 hour: ${W.EVENT_NAME}`;
     body = `<p>Hey ${first},</p><p>We go live in about an hour (<b>${when}</b>). Grab a coffee and a notepad.</p><p>${btn(joinUrl, 'Join the room →', true)}</p><p>— The TMI team</p>`;
@@ -37,7 +37,7 @@ function buildStepEmail(reg, step) {
   } else if (step === 'followup_2h') {
     if (reg.attended) {
       subject = `Your next step after the class`;
-      body = `<p>Hey ${first},</p><p>Thanks for spending 40 minutes with us. You've seen the framework — the three systems that let a company run without the owner in the middle of everything.</p><p>The fastest way to find out exactly where yours is leaking is the free Business Intelligence Audit. We map your operation and hand you a 30-day plan. No pitch.</p><p>${btn(auditUrl, 'Book your free audit →', true)}</p><p>— The TMI team</p>`;
+      body = `<p>Hey ${first},</p><p>Thanks for spending 40 minutes with us. You've seen the framework — the three systems that let a company run without the owner in the middle of everything.</p><p>The fastest way to find out exactly where yours is leaking is the free Business Intelligence Audit. We map your operation and hand you a 30-day plan.</p><p>${btn(auditUrl, 'Book your free audit →', true)}</p><p>— The TMI team</p>`;
     } else {
       subject = `You missed it — grab the next session`;
       body = `<p>Hey ${first},</p><p>Looks like ${when} didn't work out. No problem — we run it live every week. Grab your spot for the next one:</p><p>${btn(W.SITE + '/webinar', 'Save my spot →', true)}</p><p>It's 40 minutes on the system that removes the owner as the bottleneck. Worth the time.</p><p>— The TMI team</p>`;

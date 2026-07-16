@@ -33,7 +33,7 @@ function resumeEmail(firstName, resumeLink, unsubUrl) {
 <p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName}, you started your TMI Intelligence Audit but didn't quite finish. It takes about 3 more minutes, and at the end you get your founder dependency score, your biggest operational bottleneck, and the first move to fix it.</p>
 <p style="margin:0 0 24px;font-size:15px;color:#444;line-height:1.65;">Pick up right where you left off. Your answers are pre-filled.</p>
 <a href="${resumeLink}" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">Finish my audit &rarr;</a>
-<p style="margin:28px 0 0;font-size:14px;color:#555;line-height:1.65;">It's free, and there's no pitch at the end. Just a clear read on your operation.</p>
+<p style="margin:28px 0 0;font-size:14px;color:#555;line-height:1.65;">It's free. Just a clear read on your operation.</p>
 <p style="margin:24px 0 0;font-size:14px;">Mia<br><span style="color:#888;font-size:13px;">TMI &mdash; Intelligent Infrastructure for Field Operations</span></p>`, unsubUrl);
 }
 

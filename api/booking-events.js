@@ -63,7 +63,7 @@ module.exports = async function handler(req, res) {
       await email(eml, 'The plan from our call',
         `<p style="margin:0 0 16px;">Hey ${first},</p>
 <p style="margin:0 0 16px;">Good talking through your operation. The short version: here is what we would build first, in the order that pays back fastest, and the 30-day path to get there.</p>
-<p style="margin:0 0 16px;">When you are ready to move, just reply to this email or grab a time and we will scope it and kick it off. No pressure, no rush.</p>${cta(CAL_LINK, 'Lock in the next step')}${unsub ? `<p style="margin:24px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsub}" style="color:#bbb;">Unsubscribe</a></p>` : ''}`);
+<p style="margin:0 0 16px;">When you are ready to move, just reply to this email or grab a time and we will scope it and kick it off.</p>${cta(CAL_LINK, 'Lock in the next step')}${unsub ? `<p style="margin:24px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsub}" style="color:#bbb;">Unsubscribe</a></p>` : ''}`);
       await sms(phone, `${first} - good talking today. Sending over the plan from our call. Ready to move on it? Just reply, or grab a time: ${CAL_LINK} - Mia`);
       if (app) { try { await db.update('applications', app.id, { post_call_sent_at: new Date().toISOString(), status: app.status === 'booked' ? 'call_done' : app.status }); } catch (e) {} }
       return ack('post-call sent');

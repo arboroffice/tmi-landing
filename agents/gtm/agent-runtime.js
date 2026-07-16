@@ -113,7 +113,7 @@ async function gather(spec) {
   return out;
 }
 
-const GUARDRAILS = `\n\nVOICE: direct, real numbers only, no hype, no em dashes, no emojis. Never invent figures or names; use only the data given.`;
+const GUARDRAILS = `\n\nVOICE: direct, real numbers only, no hype, no em dashes, no emojis. Never write throwaway reassurance lines like "no pitch", "no fluff", "no pressure", "no catch", or "no obligation"; state the value plainly instead. Never invent figures or names; use only the data given.`;
 
 export async function runCustomAgent(spec) {
   const started = Date.now();

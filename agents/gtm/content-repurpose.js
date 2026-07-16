@@ -57,7 +57,7 @@ async function generateSocialContent(article) {
     max_tokens: 2000,
     system: `You create social media content for TMI Technology.
 TMI builds AI operating systems for trade businesses and field service companies.
-Voice: direct, operator-centric, no fluff. Written for trade business owners and field service operators.
+Voice: direct, operator-centric, tight. Written for trade business owners and field service operators.
 No em dashes. No generic AI hype. No "leverage". Talk about operations, crews, dispatch, invoices.`,
     messages: [{
       role: 'user',

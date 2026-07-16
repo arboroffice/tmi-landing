@@ -379,6 +379,7 @@ git push origin main
 2. **Never use em dashes** — use regular dashes or restructure the sentence
 3. **No bullet point listicles** — write in prose
 4. **No generic AI hype** — "leverage AI" is banned. Write about systems and operations
+   - **Never use throwaway reassurance lines** — "no pitch", "no fluff", "no pressure", "no catch", "no obligation", "no hype", or anything like them. State the value plainly instead.
 5. **Always deploy after changes** — push to main triggers live deploy
 6. **Article filenames** — `article-{short-slug}.html`, all lowercase, hyphens only
 7. **Read before writing** — use the Write tool only after reading the file (if it already exists)

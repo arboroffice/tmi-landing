@@ -137,7 +137,7 @@ module.exports = async function handler(req, res) {
   }).catch(e => console.error('Alert SMS 1 error:', e));
 
   sms.messages.create({
-    body: `PITCH: Free ops audit (no pitch, no pressure) -> $25K+ system build -> we install and walk away. Optional: stay on as their fractional AI dept.\n\nSell on: revenue leaks, crew accountability, dispatch gaps, job costing off until too late.\n\nBook: ${SITE}/booking`,
+    body: `PITCH: Free ops audit -> $25K+ system build -> we install and walk away. Optional: stay on as their fractional AI dept.\n\nSell on: revenue leaks, crew accountability, dispatch gaps, job costing off until too late.\n\nBook: ${SITE}/booking`,
     from: FROM_NUMBER,
     to: ALERT_NUMBER,
   }).catch(e => console.error('Alert SMS 2 error:', e));

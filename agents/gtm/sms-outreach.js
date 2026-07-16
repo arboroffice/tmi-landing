@@ -38,7 +38,7 @@ async function sendSms(to, body) {
 export async function smsTouch(lead) {
   const first = (lead.owner_name || 'there').split(/\s+/)[0];
   const link = lead.audit_url || `${SITE}/audit`;
-  const body = `Hi ${first}, it's Mia at TMI. Put together a quick operational intelligence review for ${lead.company_name || 'your company'}: ${link}. No pitch. Reply STOP to opt out.`;
+  const body = `Hi ${first}, it's Mia at TMI. Put together a quick operational intelligence review for ${lead.company_name || 'your company'}: ${link}. Reply STOP to opt out.`;
   const r = await sendSms(lead.phone, body);
   if (r.ok) {
     await db.updateLead(lead.id, { sms_sent_at: new Date().toISOString(), sms_status: 'sent' }).catch(() => {});

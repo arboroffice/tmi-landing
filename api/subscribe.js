@@ -51,7 +51,7 @@ module.exports = async function handler(req, res) {
           from: 'Founders of the Future <support@tmitechai.com>',
           to: emailNorm,
           subject: "You're in",
-          html: `<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;padding:10px;color:#1a1a1a;font-size:16px;line-height:1.7;"><p style="margin:0 0 16px;">Hey ${first_name},</p><p style="margin:0 0 16px;">You're on the list. Twice a week we send the <strong>Founders of the Future Letters</strong> - short, blunt lessons on running an intelligent company: operations, the trades, AI, finance, and leadership. No fluff, no pitch.</p><p style="margin:0 0 16px;">The next one lands soon. If it's ever not for you, every email has a one-click unsubscribe.</p><p style="margin:0;">- TMI</p></div>`,
+          html: `<div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;padding:10px;color:#1a1a1a;font-size:16px;line-height:1.7;"><p style="margin:0 0 16px;">Hey ${first_name},</p><p style="margin:0 0 16px;">You're on the list. Twice a week we send the <strong>Founders of the Future Letters</strong> - short, blunt lessons on running an intelligent company: operations, the trades, AI, finance, and leadership.</p><p style="margin:0 0 16px;">The next one lands soon. If it's ever not for you, every email has a one-click unsubscribe.</p><p style="margin:0;">- TMI</p></div>`,
         });
       }
     } catch (e) { console.error('subscribe welcome:', e.message); }

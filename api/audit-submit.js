@@ -94,7 +94,7 @@ function buildResultsEmail(firstName, contact, results, unsubUrl) {
 
 <a href="${SITE}/booking" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">Book My Free Strategy Call →</a>
 
-<p style="margin:28px 0 0;font-size:14px;color:#555;line-height:1.65;">We'll walk through exactly what to install in your operation, what it will do, and what the path looks like. No pitch. No pressure. Just a plan.</p>
+<p style="margin:28px 0 0;font-size:14px;color:#555;line-height:1.65;">We'll walk through exactly what to install in your operation, what it will do, and what the path looks like. Just a plan.</p>
 
 <p style="margin:24px 0 0;font-size:14px;">Mia<br><span style="color:#888;font-size:13px;">TMI — AI Infrastructure for Field Operations</span></p>
 `, unsubUrl);
