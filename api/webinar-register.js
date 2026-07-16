@@ -35,6 +35,7 @@ module.exports = async function handler(req, res) {
   }
   const first = name.split(/\s+/)[0];
   const last = name.includes(' ') ? name.split(/\s+/).slice(1).join(' ') : null;
+  const phone = (b.phone || '').trim();
 
   // Trust a client-sent session, but re-derive if missing/past.
   let session = b.session_time ? new Date(b.session_time) : null;
@@ -58,6 +59,7 @@ module.exports = async function handler(req, res) {
     for (const t of ['webinar', 'webinar-masterclass']) if (!tags.includes(t)) tags.push(t);
     contact = await db.upsertByField('contacts', 'email', email, {
       first_name: first, last_name: last, email,
+      phone: phone || (existing && existing.phone) || null,
       company: b.company || (existing && existing.company) || null,
       tags, notes: `Registered: ${W.EVENT_NAME}\nSession: ${when}`,
     });
@@ -67,7 +69,7 @@ module.exports = async function handler(req, res) {
   let reg = null;
   try {
     reg = await db.insert('webinar_registrations', {
-      name, email, company: b.company || null,
+      name, email, company: b.company || null, phone: phone || null,
       session_time: sessionIso, when, token,
       status: 'registered', attended: false,
       contact_id: contact && contact.id ? contact.id : null,
@@ -106,6 +108,12 @@ module.exports = async function handler(req, res) {
     } catch (e) { console.error('webinar email:', e.message); }
   }
 
+  // 3b) Confirmation SMS (best-effort; only if they gave a number)
+  if (phone && reg && reg.id) {
+    try { const { sendStepSms } = require('./_webinar-sms'); await sendStepSms(db, reg, 'sms_confirm'); }
+    catch (e) { console.error('webinar sms confirm:', e.message); }
+  }
+
   // 4) Schedule the reminder / follow-up chain via QStash (best-effort)
   if (process.env.QSTASH_TOKEN && reg && reg.id) {
     try {
@@ -123,6 +131,17 @@ module.exports = async function handler(req, res) {
         { step: 'nurture_3d', delay: diff + 3 * 24 * 3600 },
         { step: 'lastcall_6d', delay: diff + 6 * 24 * 3600 },
       ];
+      // Parallel SMS track (only fires if a phone was given; gated in sendStepSms).
+      if (phone) {
+        jobs.push(
+          { step: 'sms_24h', delay: diff - 86400 },
+          { step: 'sms_dayof', delay: diff - 6 * 3600 },
+          { step: 'sms_1h', delay: diff - 3600 },
+          { step: 'sms_live', delay: diff },
+          { step: 'sms_after', delay: diff + 2 * 3600 + W.DURATION_SEC },
+          { step: 'sms_nudge', delay: diff + 2 * 24 * 3600 },
+        );
+      }
       for (const j of jobs) {
         if (j.delay < 60) continue; // too soon to be worth scheduling
         qstash.publishJSON({ url, delay: j.delay, body: { regId: reg.id, step: j.step } })

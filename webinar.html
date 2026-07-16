@@ -190,10 +190,12 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
             <div class="slots" id="slots"><!-- injected by JS --></div>
             <div class="reg-field"><input type="text" id="rgName" name="name" placeholder="Your name" autocomplete="name" required/></div>
             <div class="reg-field"><input type="email" id="rgEmail" name="email" placeholder="you@company.com" autocomplete="email" required/></div>
+            <div class="reg-field"><input type="tel" id="rgPhone" name="phone" placeholder="Mobile (for reminders)" autocomplete="tel"/></div>
             <div class="reg-field"><input type="text" id="rgCompany" name="company" placeholder="Company (optional)" autocomplete="organization"/></div>
             <button type="submit" class="reg-btn" id="rgBtn">Reserve my seat &rarr;</button>
             <div class="reg-err" id="rgErr"></div>
             <div class="reg-foot">Free · 40 min · Live Q&amp;A</div>
+            <div class="reg-foot" style="text-transform:none;letter-spacing:0;margin-top:8px;line-height:1.5;">Add your mobile and we'll text your reminders and join link. Msg rates may apply. Reply STOP to opt out.</div>
           </form>
         </div>
       </div>
@@ -356,6 +358,7 @@ document.getElementById('regForm').addEventListener('submit', function(e){
   e.preventDefault();
   var name=document.getElementById('rgName').value.trim();
   var email=document.getElementById('rgEmail').value.trim();
+  var phone=document.getElementById('rgPhone').value.trim();
   var company=document.getElementById('rgCompany').value.trim();
   var err=document.getElementById('rgErr');
   err.textContent='';
@@ -369,7 +372,7 @@ document.getElementById('regForm').addEventListener('submit', function(e){
   lead('Webinar Registration');
 
   fetch('/api/webinar-register',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ name:name, email:email, company:company, session_time:SESSION_ISO })})
+    body:JSON.stringify({ name:name, email:email, phone:phone, company:company, session_time:SESSION_ISO })})
     .then(function(r){ return r.json().catch(function(){return {};}); })
     .then(function(d){ showDone(name, email, (d&&d.token)||'', (d&&d.session_time)||SESSION_ISO); })
     .catch(function(){ showDone(name, email, '', SESSION_ISO); });

@@ -13,6 +13,7 @@
 const db = require('./_db');
 const W = require('./_webinar');
 const { sendStep } = require('./_webinar-mail');
+const { sendStepSms } = require('./_webinar-sms');
 
 module.exports = async function handler(req, res) {
   const now = Date.now();
@@ -51,6 +52,20 @@ module.exports = async function handler(req, res) {
 
     for (const step of steps) {
       try { if (await sendStep(db, reg, step)) sent++; } catch (e) { console.error('webinar-cron:', e.message); }
+    }
+
+    // Parallel SMS track (own disjoint windows; gated to phone/attended in sendStepSms).
+    if (reg.phone) {
+      let smsStep = null;
+      if (now >= T - 24 * H && now < T - 7 * H) smsStep = 'sms_24h';
+      else if (now >= T - 6 * H && now < T - 2 * H) smsStep = 'sms_dayof';
+      else if (now >= T - H && now < T) smsStep = 'sms_1h';
+      else if (now >= T && now < T + 20 * 60 * 1000) smsStep = 'sms_live';
+      else if (now >= T + D + 2 * H && now < T + D + 26 * H) smsStep = 'sms_after';
+      else if (now >= T + 2 * 24 * H && now < T + 3 * 24 * H) smsStep = 'sms_nudge';
+      if (smsStep) {
+        try { if (await sendStepSms(db, reg, smsStep)) sent++; } catch (e) { console.error('webinar-cron sms:', e.message); }
+      }
     }
   }
 

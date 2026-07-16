@@ -98,4 +98,4 @@ async function sendStep(db, reg, step) {
   return true;
 }
 
-module.exports = { buildStepEmail, sendStep, emailWrap };
+module.exports = { buildStepEmail, sendStep, emailWrap, hasBooked };

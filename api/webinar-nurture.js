@@ -4,6 +4,7 @@
 
 const db = require('./_db');
 const { sendStep } = require('./_webinar-mail');
+const { sendStepSms } = require('./_webinar-sms');
 
 function getRawBody(req) {
   return new Promise((resolve, reject) => {
@@ -39,7 +40,10 @@ async function handler(req, res) {
   const reg = await db.getById('webinar_registrations', regId).catch(() => null);
   if (!reg || !reg.email) return res.status(200).json({ ok: true, skipped: 'no-reg' });
 
-  const sent = await sendStep(db, reg, step);
+  // SMS steps are prefixed 'sms_'; everything else is an email step.
+  const sent = step.startsWith('sms_')
+    ? await sendStepSms(db, reg, step)
+    : await sendStep(db, reg, step);
   return res.status(200).json({ ok: true, step, sent });
 }
 
