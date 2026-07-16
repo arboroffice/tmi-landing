@@ -79,6 +79,8 @@ module.exports = async (req, res) => {
     // Recent registrations for the table.
     const registrations = regs.slice(0, 250).map((r) => ({
       name: r.name || '', email: r.email || '', company: r.company || '',
+      website: r.website || '', revenue: r.revenue || '', goal: r.goal || '',
+      phone: r.phone || '',
       session_time: r.session_time || '', when: r.when || '',
       attended: !!r.attended, booked: booked.has(lc(r.email)),
       created_at: r.created_at || '',

@@ -120,9 +120,9 @@ function render(){
   </tr>`).join('') || `<tr><td colspan="5" class="muted-empty">No sessions yet.</td></tr>`;
 
   const regRows = (d.registrations||[]).map(r=>`<tr>
-    <td><b>${esc(r.name||'-')}</b><div style="font-size:11.5px;color:var(--muted)">${esc(r.email||'')}</div></td>
-    <td>${esc(r.company||'')}</td>
-    <td>${esc(r.when||fmtDate(r.session_time))}</td>
+    <td><b>${esc(r.name||'-')}</b><div style="font-size:11.5px;color:var(--muted)">${esc(r.email||'')}${r.phone?' · '+esc(r.phone):''}</div></td>
+    <td>${esc(r.company||'')}${r.website?`<div style="font-size:11.5px;color:var(--muted)">${esc(r.website)}</div>`:''}${r.goal?`<div style="font-size:11px;color:var(--muted);font-style:italic">“${esc(r.goal)}”</div>`:''}</td>
+    <td>${r.revenue?esc(r.revenue):'<span style="color:var(--muted)">—</span>'}</td>
     <td>${r.attended?'<span class="tag2 yes">Attended</span>':'<span class="tag2 no">No-show</span>'} ${r.booked?'<span class="tag2 book">Booked</span>':''}</td>
     <td>${fmtDate(r.created_at)}</td>
   </tr>`).join('') || `<tr><td colspan="5" class="muted-empty">No registrations yet.</td></tr>`;
@@ -138,7 +138,7 @@ function render(){
       <button class="wb-tab" data-t="questions" onclick="tab('questions')">Questions</button>
     </div>
     <div id="pane-regs">
-      <table class="wbt"><thead><tr><th>Person</th><th>Company</th><th>Session</th><th>Status</th><th>Registered</th></tr></thead><tbody>${regRows}</tbody></table>
+      <table class="wbt"><thead><tr><th>Person</th><th>Company</th><th>Revenue</th><th>Status</th><th>Registered</th></tr></thead><tbody>${regRows}</tbody></table>
     </div>
     <div id="pane-sessions" style="display:none;">
       <table class="wbt"><thead><tr><th>Session</th><th>Registered</th><th>Attended</th><th>Show rate</th><th>Booked after</th></tr></thead><tbody>${sessRows}</tbody></table>

@@ -189,13 +189,12 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
           <form id="regForm" autocomplete="on">
             <div class="slots" id="slots"><!-- injected by JS --></div>
             <div class="reg-field"><input type="text" id="rgName" name="name" placeholder="Your name" autocomplete="name" required/></div>
+            <div class="reg-field"><input type="tel" id="rgPhone" name="phone" placeholder="Mobile number" autocomplete="tel" required/></div>
             <div class="reg-field"><input type="email" id="rgEmail" name="email" placeholder="you@company.com" autocomplete="email" required/></div>
-            <div class="reg-field"><input type="tel" id="rgPhone" name="phone" placeholder="Mobile (for reminders)" autocomplete="tel"/></div>
-            <div class="reg-field"><input type="text" id="rgCompany" name="company" placeholder="Company (optional)" autocomplete="organization"/></div>
             <button type="submit" class="reg-btn" id="rgBtn">Reserve my seat &rarr;</button>
             <div class="reg-err" id="rgErr"></div>
             <div class="reg-foot">Free · 40 min · Live Q&amp;A</div>
-            <div class="reg-foot" style="text-transform:none;letter-spacing:0;margin-top:8px;line-height:1.5;">Add your mobile and we'll text your reminders and join link. Msg rates may apply. Reply STOP to opt out.</div>
+            <div class="reg-foot" style="text-transform:none;letter-spacing:0;margin-top:8px;line-height:1.5;">We'll text and email your reminders and join link. Msg rates may apply. Reply STOP to opt out.</div>
           </form>
         </div>
       </div>
@@ -353,16 +352,20 @@ var SESSION_ISO=SESSION.toISOString();
   document.getElementById('slots').innerHTML=html;
 })();
 
-// ---- Registration (self-hosted webinar system) ----
+// ---- Registration: step 1 captures the essentials and reserves the seat,
+//      step 2 enriches with company details. They are registered after step 1,
+//      so even if they skip step 2 nothing is lost. ----
+var REG = { name:'', email:'', token:'', iso:SESSION_ISO };
+
 document.getElementById('regForm').addEventListener('submit', function(e){
   e.preventDefault();
   var name=document.getElementById('rgName').value.trim();
-  var email=document.getElementById('rgEmail').value.trim();
   var phone=document.getElementById('rgPhone').value.trim();
-  var company=document.getElementById('rgCompany').value.trim();
+  var email=document.getElementById('rgEmail').value.trim();
   var err=document.getElementById('rgErr');
   err.textContent='';
   if(!name){ err.textContent='Please add your name.'; return; }
+  if(!phone){ err.textContent='Please add your mobile number.'; return; }
   if(!email || email.indexOf('@')<0){ err.textContent='Please add a valid email.'; return; }
 
   var btn=document.getElementById('rgBtn');
@@ -372,11 +375,57 @@ document.getElementById('regForm').addEventListener('submit', function(e){
   lead('Webinar Registration');
 
   fetch('/api/webinar-register',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ name:name, email:email, phone:phone, company:company, session_time:SESSION_ISO })})
+    body:JSON.stringify({ name:name, email:email, phone:phone, session_time:SESSION_ISO })})
     .then(function(r){ return r.json().catch(function(){return {};}); })
-    .then(function(d){ showDone(name, email, (d&&d.token)||'', (d&&d.session_time)||SESSION_ISO); })
-    .catch(function(){ showDone(name, email, '', SESSION_ISO); });
+    .then(function(d){
+      REG={ name:name, email:email, token:(d&&d.token)||'', iso:(d&&d.session_time)||SESSION_ISO };
+      showEnrich();
+    })
+    .catch(function(){ REG={ name:name, email:email, token:'', iso:SESSION_ISO }; showEnrich(); });
 });
+
+// ---- Step 2: a few more details (optional but encouraged) ----
+function showEnrich(){
+  var reg=document.getElementById('reg');
+  var first=REG.name.split(/\s+/)[0].replace(/</g,'');
+  reg.innerHTML=
+    '<p class="reg-k">You’re in, '+first+'</p>'
+    +'<p class="reg-t">One more step</p>'
+    +'<p class="reg-s">Tell us about your business so we can tailor the session and the free plan to you. Takes 20 seconds.</p>'
+    +'<form id="enrichForm" autocomplete="on">'
+      +'<div class="reg-field"><input type="text" id="enCompany" placeholder="Company name" autocomplete="organization"/></div>'
+      +'<div class="reg-field"><input type="text" id="enWebsite" placeholder="Website (company.com)" autocomplete="url"/></div>'
+      +'<div class="reg-field"><select id="enRevenue" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);border-radius:10px;padding:13px 15px;font-family:var(--sans);font-size:15px;color:#fff;">'
+        +'<option value="" style="color:#111">Annual revenue</option>'
+        +'<option style="color:#111">Just getting started</option>'
+        +'<option style="color:#111">Under $250k</option>'
+        +'<option style="color:#111">$250k - $1M</option>'
+        +'<option style="color:#111">$1M - $5M</option>'
+        +'<option style="color:#111">$5M - $20M</option>'
+        +'<option style="color:#111">$20M+</option>'
+      +'</select></div>'
+      +'<div class="reg-field"><input type="text" id="enGoal" placeholder="What do you most want off your plate?"/></div>'
+      +'<button type="submit" class="reg-btn" id="enBtn">Finish &amp; get my link &rarr;</button>'
+      +'<div class="reg-foot" style="text-transform:none;letter-spacing:0;margin-top:12px;"><a href="#" id="enSkip" style="color:rgba(255,255,255,0.55);">Skip for now, I’m registered &rarr;</a></div>'
+    +'</form>';
+  document.getElementById('enrichForm').addEventListener('submit', submitEnrich);
+  document.getElementById('enSkip').addEventListener('click', function(ev){ ev.preventDefault(); showDone(REG.name, REG.email, REG.token, REG.iso); });
+  reg.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function submitEnrich(e){
+  e.preventDefault();
+  var body={
+    token: REG.token, email: REG.email,
+    company: document.getElementById('enCompany').value.trim(),
+    website: document.getElementById('enWebsite').value.trim(),
+    revenue: document.getElementById('enRevenue').value,
+    goal: document.getElementById('enGoal').value.trim()
+  };
+  var btn=document.getElementById('enBtn'); btn.disabled=true; btn.textContent='Saving...';
+  fetch('/api/webinar-enrich',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).catch(function(){});
+  showDone(REG.name, REG.email, REG.token, REG.iso);
+}
 
 function calLinks(iso){
   var start=new Date(iso), end=new Date(start.getTime()+40*60000);
