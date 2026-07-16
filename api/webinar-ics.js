@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
 
   const uid = `webinar-${W.icsStamp(session)}@tmitechai.com`;
   const joinUrl = `${W.SITE}/watch?s=${encodeURIComponent(session.toISOString())}`;
-  const desc = `Join the masterclass: ${joinUrl}\\n\\n40 minutes on the system that removes the owner as the bottleneck.`;
+  const desc = `Join the class: ${joinUrl}\\n\\n40 minutes on the system that removes the owner as the bottleneck.`;
 
   const ics = [
     'BEGIN:VCALENDAR',
@@ -40,6 +40,6 @@ module.exports = async function handler(req, res) {
   ].join('\r\n');
 
   res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
-  res.setHeader('Content-Disposition', 'attachment; filename="tmi-masterclass.ics"');
+  res.setHeader('Content-Disposition', 'attachment; filename="tmi-intelligent-company.ics"');
   return res.status(200).send(ics);
 };

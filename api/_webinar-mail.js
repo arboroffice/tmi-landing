@@ -36,7 +36,7 @@ function buildStepEmail(reg, step) {
     body = `<p>Hey ${first},</p><p>We're starting right now. Jump in.</p><p>${btn(joinUrl, 'Join live →', false)}</p><p>— The TMI team</p>`;
   } else if (step === 'followup_2h') {
     if (reg.attended) {
-      subject = `Your next step after the masterclass`;
+      subject = `Your next step after the class`;
       body = `<p>Hey ${first},</p><p>Thanks for spending 40 minutes with us. You've seen the framework — the three systems that let a company run without the owner in the middle of everything.</p><p>The fastest way to find out exactly where yours is leaking is the free Business Intelligence Audit. We map your operation and hand you a 30-day plan. No pitch.</p><p>${btn(auditUrl, 'Book your free audit →', true)}</p><p>— The TMI team</p>`;
     } else {
       subject = `You missed it — grab the next session`;

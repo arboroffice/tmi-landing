@@ -1,7 +1,6 @@
-// Shared helpers for the self-hosted weekly evergreen webinar.
+// Shared helpers for the weekly live class.
 // One appointment, every week: Tuesday 3:00 PM America/Chicago (CST/CDT).
-// The "live" feel comes from synced playback of an evergreen recording, so the
-// same masterclass runs forever without re-recording and without dated copy.
+// The team shows up live every week, so the copy is live-weekly, not evergreen.
 
 const TZ = 'America/Chicago';
 const SESSION_WEEKDAY = 2; // Sun=0 ... Tue=2
@@ -9,7 +8,7 @@ const SESSION_HOUR = 15; // 3:00 PM local
 const SESSION_MIN = 0;
 const DURATION_SEC = 40 * 60; // 40-minute masterclass
 const SITE = 'https://www.tmitechai.com';
-const EVENT_NAME = 'The Intelligent Company Masterclass';
+const EVENT_NAME = 'How to Build an Intelligent Company';
 
 // Absolute instant (Date) for a wall-clock time in a named timezone, DST-safe.
 function zonedToUtc(y, mo, d, h, mi, tz) {

@@ -246,8 +246,9 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
       <a href="/about">About</a>
       <a href="/founders-of-the-future">Founders of the Future</a>
       <a href="/news">Journal</a>
+      <a href="/book">Book a call</a>
     </nav>
-    <a href="/book" class="btn nav-cta" onclick="lead()">Book a Call</a>
+    <a href="/webinar" class="btn nav-cta" onclick="lead('Webinar CTA')">Join the free class</a>
     <button class="nav-burger" aria-label="Menu" onclick="openDrawer()"><span></span><span></span><span></span></button>
   </div>
 </header>
@@ -262,7 +263,8 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   <a href="/about">About</a>
   <a href="/founders-of-the-future">Founders of the Future</a>
   <a href="/news">Journal</a>
-  <a href="/book" onclick="lead()" style="color:#E4FF97;">Book a Call</a>
+  <a href="/webinar" onclick="lead('Webinar CTA')" style="color:#E4FF97;">Join the free class</a>
+  <a href="/book" onclick="lead()">Book a call</a>
 </div>
 
 <!-- SCOPED STYLES for restructured landing -->
@@ -310,10 +312,10 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     <p class="sub reveal" style="font-weight:700;margin-bottom:16px;font-size:22px;">We solve problems by introducing technology.</p>
     <p class="sub reveal">We are your AI department and growth partner - the growth operators who install intelligence into your company, rebuild the operating system it runs on, add digital employees to run it, and operate alongside you to grow it. Whatever is breaking or capping your growth, we fix it by introducing the right technology. For any business: field operations, local companies getting online, and online creators turning an audience into real income. Built in 30 days, yours to own forever.</p>
     <div class="hero-cta reveal">
-      <a href="/book" class="btn" onclick="lead()">Book Your Free Discovery Call</a>
-      <a href="/news" class="btn" style="background:transparent;color:var(--ink);border-color:var(--line-2);">Read the Founders of the Future Letters</a>
+      <a href="/webinar" class="btn" onclick="lead('Webinar CTA')">Join the free class: How to Build an Intelligent Company</a>
+      <a href="/book" class="btn" style="background:transparent;color:var(--ink);border-color:var(--line-2);" onclick="lead()">Or book a discovery call</a>
     </div>
-    <div class="checks reveal"><span>Built in 30 days</span><span>You own it forever</span><span>No monthly software license</span></div>
+    <div class="checks reveal"><span>Free live class every Tuesday</span><span>40 minutes</span><span>No pitch</span></div>
     <p class="hero-cred reveal">Run by <b>specialists in business growth, technology, and AI.</b> Operators who have built, scaled, and systemized real companies.</p>
   </div>
 </section>
@@ -514,8 +516,9 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     <h2 class="display reveal" style="font-size:clamp(32px,4.6vw,60px);margin:16px auto 20px;max-width:26ch;">Every company will become an intelligent company. <span class="lime" style="color:var(--chart);">The only question is who builds it first.</span></h2>
     <p class="sub reveal" style="margin:0 auto;max-width:62ch;">The businesses that win the next ten years will not be the ones with the most people. They will be the ones with the best systems behind every move.</p>
     <p class="sub reveal" style="margin:18px auto 0;max-width:56ch;font-weight:700;color:#fff;">We install that system. You own it.</p>
-    <a href="/book" class="btn btn-lime reveal" style="margin-top:30px;" onclick="lead()">Book your free call</a>
-    <div class="checks reveal" style="justify-content:center;margin-top:26px;"><span>Built in 30 days</span><span>You own it forever</span><span>No monthly software license</span></div>
+    <a href="/webinar" class="btn btn-lime reveal" style="margin-top:30px;" onclick="lead('Webinar CTA')">Start with the free class &rarr;</a>
+    <p class="reveal" style="margin:18px auto 0;"><a href="/book" onclick="lead()" style="color:rgba(255,255,255,0.7);font-family:var(--sans);font-size:14px;text-decoration:underline;">Or book a discovery call &rarr;</a></p>
+    <div class="checks reveal" style="justify-content:center;margin-top:26px;"><span>Free live class every Tuesday</span><span>40 minutes</span><span>No pitch</span></div>
   </div>
 </section>
 
@@ -551,6 +554,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
         <a href="/distro">Distro</a>
         <a href="https://tapme.tmitechai.com" target="_blank" rel="noopener">TapMe &#8599;</a>
         <a href="/founders-of-the-future">Founders of the Future</a>
+        <a href="/webinar" onclick="lead('Webinar CTA')" style="color:var(--chart);">Free Class: Build an Intelligent Company</a>
         <a href="/book" onclick="lead()">Book a Call</a>
       </div>
     </div>
@@ -562,7 +566,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 </footer>
 
 <script>
-function lead(){ try{ if(typeof fbq==='function') fbq('track','Lead',{content_name:'Business Intelligence Audit'}); }catch(e){} }
+function lead(label){ try{ if(typeof fbq==='function') fbq('track','Lead',{content_name:label||'Business Intelligence Audit'}); }catch(e){} }
 function openDrawer(){ document.getElementById('drawer').classList.add('open'); }
 function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); }
 document.querySelectorAll('#drawer a').forEach(function(a){ a.addEventListener('click', closeDrawer); });
