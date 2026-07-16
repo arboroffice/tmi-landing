@@ -19,7 +19,7 @@ function buildStepEmail(reg, step) {
   const when = reg.when || W.fmtChicago(session);
   const joinUrl = `${W.SITE}/watch?s=${encodeURIComponent(reg.session_time)}&t=${reg.token}`;
   const replayUrl = `${W.SITE}/watch?mode=ondemand`;
-  const auditUrl = `${W.SITE}/audit`;
+  const bookUrl = `${W.SITE}/book`;
   const unsub = `${W.SITE}/api/unsubscribe?email=${encodeURIComponent(reg.email)}`;
   const btn = (href, label, dark) =>
     `<a href="${href}" style="display:inline-block;background:${dark ? '#0a0b14' : '#E4FF97'};color:${dark ? '#E4FF97' : '#0a0b14'};font-weight:800;padding:14px 28px;border-radius:10px;text-decoration:none;">${label}</a>`;
@@ -27,20 +27,20 @@ function buildStepEmail(reg, step) {
   let subject = '', body = '';
   if (step === 'reminder_24h') {
     subject = `Tomorrow: ${W.EVENT_NAME}`;
-    body = `<p>Hey ${first},</p><p>Quick reminder — <b>${W.EVENT_NAME}</b> is tomorrow, <b>${when}</b>.</p><p>Come ready to find out which of the three systems is leaking the most time and money in your operation. Forty minutes, live.</p><p>${btn(joinUrl, 'Your join link →', true)}</p><p>— The TMI team</p>`;
+    body = `<p>Hey ${first},</p><p>Quick reminder, <b>${W.EVENT_NAME}</b> is tomorrow, <b>${when}</b>.</p><p>Come ready to find out which of the three systems is leaking the most time and money in your operation. Forty minutes, live.</p><p>${btn(joinUrl, 'Your join link →', true)}</p><p>- The TMI team</p>`;
   } else if (step === 'reminder_1h') {
     subject = `Starting in 1 hour: ${W.EVENT_NAME}`;
-    body = `<p>Hey ${first},</p><p>We go live in about an hour (<b>${when}</b>). Grab a coffee and a notepad.</p><p>${btn(joinUrl, 'Join the room →', true)}</p><p>— The TMI team</p>`;
+    body = `<p>Hey ${first},</p><p>We go live in about an hour (<b>${when}</b>). Grab a coffee and a notepad.</p><p>${btn(joinUrl, 'Join the room →', true)}</p><p>- The TMI team</p>`;
   } else if (step === 'live_now') {
-    subject = `We're live now — ${W.EVENT_NAME}`;
-    body = `<p>Hey ${first},</p><p>We're starting right now. Jump in.</p><p>${btn(joinUrl, 'Join live →', false)}</p><p>— The TMI team</p>`;
+    subject = `We're live now: ${W.EVENT_NAME}`;
+    body = `<p>Hey ${first},</p><p>We're starting right now. Jump in.</p><p>${btn(joinUrl, 'Join live →', false)}</p><p>- The TMI team</p>`;
   } else if (step === 'followup_2h') {
     if (reg.attended) {
       subject = `Your next step after the class`;
-      body = `<p>Hey ${first},</p><p>Thanks for spending 40 minutes with us. You've seen the framework — the three systems that let a company run without the owner in the middle of everything.</p><p>The fastest way to find out exactly where yours is leaking is the free Business Intelligence Audit. We map your operation and hand you a 30-day plan.</p><p>${btn(auditUrl, 'Book your free audit →', true)}</p><p>— The TMI team</p>`;
+      body = `<p>Hey ${first},</p><p>Thanks for spending 40 minutes with us. You've seen the framework, the three systems that let a company run without the owner in the middle of everything.</p><p>The fastest way to find out exactly where yours is leaking is a free discovery call. We look at your operation the way we would if we owned it and hand you a 30-day plan.</p><p>${btn(bookUrl, 'Book your free call →', true)}</p><p>Or text a question first: (337) 450-9795.</p><p>- The TMI team</p>`;
     } else {
-      subject = `You missed it — grab the next session`;
-      body = `<p>Hey ${first},</p><p>Looks like ${when} didn't work out. No problem — we run it live every week. Grab your spot for the next one:</p><p>${btn(W.SITE + '/webinar', 'Save my spot →', true)}</p><p>It's 40 minutes on the system that removes the owner as the bottleneck. Worth the time.</p><p>— The TMI team</p>`;
+      subject = `You missed it, grab the next session`;
+      body = `<p>Hey ${first},</p><p>Looks like ${when} didn't work out. No problem, we run it live every Tuesday. Grab your seat for the next one:</p><p>${btn(W.SITE + '/webinar', 'Save my seat →', true)}</p><p>It's 40 minutes on the system that removes the owner as the bottleneck. Worth the time.</p><p>- The TMI team</p>`;
     }
   } else {
     return null;
