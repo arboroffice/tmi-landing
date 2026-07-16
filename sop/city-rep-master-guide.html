@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TMI City Rep Master Guide</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%230a0b14%27/%3E%3Crect x=%279%27 y=%279%27 width=%2714%27 height=%2714%27 rx=%272%27 fill=%27%23E4FF97%27/%3E%3C/svg%3E"/>
+<style>
+  :root{
+    --bg:#fbfbf8; --panel:#ffffff; --ink:#16171d; --ink-2:#3f414c; --muted:#7b7e8b;
+    --line:rgba(20,20,30,0.10); --line-2:rgba(20,20,30,0.16);
+    --feature:#0a0b14; --feat-ink:#ffffff; --feat-mut:rgba(255,255,255,0.62);
+    --chart:#E4FF97; --acc:#4f6b0e; --acc-bg:#eef7cf;
+    --warn:#8a5a12; --warn-bg:#fbf1dd;
+    --good-bg:#f1f7e1; --bad-bg:#fbeef0; --bad-ink:#a83246;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1017; --panel:#171922; --ink:#f3f3ee; --ink-2:#c4c6d0; --muted:#8b8e9c;
+      --line:rgba(255,255,255,0.10); --line-2:rgba(255,255,255,0.18);
+      --feature:#070810; --feat-mut:rgba(255,255,255,0.62);
+      --chart:#E4FF97; --acc:#c8ec6f; --acc-bg:rgba(228,255,151,0.10);
+      --warn:#e0a94a; --warn-bg:rgba(224,169,74,0.10);
+      --good-bg:rgba(200,236,111,0.09); --bad-bg:rgba(220,90,110,0.13); --bad-ink:#e88b9c;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1017; --panel:#171922; --ink:#f3f3ee; --ink-2:#c4c6d0; --muted:#8b8e9c;
+    --line:rgba(255,255,255,0.10); --line-2:rgba(255,255,255,0.18);
+    --feature:#070810; --feat-mut:rgba(255,255,255,0.62);
+    --chart:#E4FF97; --acc:#c8ec6f; --acc-bg:rgba(228,255,151,0.10);
+    --warn:#e0a94a; --warn-bg:rgba(224,169,74,0.10);
+    --good-bg:rgba(200,236,111,0.09); --bad-bg:rgba(220,90,110,0.13); --bad-ink:#e88b9c;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  a{color:var(--acc);text-decoration:none;}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:4px;}
+  h1,h2,h3,h4{letter-spacing:-0.022em;line-height:1.08;margin:0;font-weight:800;text-wrap:balance;}
+  .mono{font-family:var(--mono);}
+  .top{position:sticky;top:0;z-index:20;background:var(--feature);color:var(--feat-ink);border-bottom:1px solid rgba(255,255,255,0.08);}
+  .top-in{max-width:1200px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:14px;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:16px;}
+  .brand .dot{width:9px;height:9px;border-radius:2px;background:var(--chart);}
+  .brand .sub{font-weight:500;color:rgba(255,255,255,0.5);font-size:13px;}
+  .top .tag{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart);}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:250px 1fr;gap:44px;}
+  .toc{position:sticky;top:70px;align-self:start;max-height:calc(100vh - 92px);overflow:auto;padding:28px 0;font-size:13.5px;}
+  .toc ol{list-style:none;margin:0;padding:0;}
+  .toc a{display:flex;gap:10px;color:var(--ink-2);padding:6px 10px;border-radius:7px;}
+  .toc a:hover{background:var(--panel);color:var(--ink);}
+  .toc a b{font-family:var(--mono);color:var(--muted);font-weight:600;font-size:12px;min-width:20px;}
+  .toc .lbl{display:block;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin:0 10px 10px;}
+  main{padding:28px 0 90px;min-width:0;}
+  .hero{position:relative;background:var(--feature);color:var(--feat-ink);border:1px solid var(--line-2);border-radius:18px;padding:46px 40px;margin-bottom:8px;overflow:hidden;}
+  .hero::after{content:"";position:absolute;top:-40%;right:-10%;width:60%;height:150%;background:radial-gradient(ellipse at center,rgba(228,255,151,0.14),transparent 62%);pointer-events:none;}
+  .hero>*{position:relative;}
+  .hero .k{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--chart);margin-bottom:16px;}
+  .hero h1{font-size:clamp(32px,4.8vw,52px);color:var(--feat-ink);}
+  .hero h1 em{font-style:italic;color:var(--chart);}
+  .hero p{color:var(--feat-mut);font-size:17px;max-width:62ch;margin:16px 0 0;}
+  section{scroll-margin-top:76px;padding:38px 0 6px;border-bottom:1px solid var(--line);}
+  section:last-child{border-bottom:none;}
+  .eyebrow{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--acc);}
+  h2{font-size:clamp(25px,3vw,34px);margin:10px 0 6px;}
+  h3{font-size:19px;margin:28px 0 8px;}
+  p{margin:12px 0;color:var(--ink-2);max-width:70ch;}
+  strong{color:var(--ink);}
+  .lead{font-size:18px;color:var(--ink);}
+  ul,ol.rich{margin:12px 0;padding-left:22px;color:var(--ink-2);max-width:70ch;}
+  li{margin:7px 0;}
+  .grid{display:grid;gap:16px;margin:18px 0;}
+  .g2{grid-template-columns:1fr 1fr;} .g3{grid-template-columns:repeat(3,1fr);} .g4{grid-template-columns:repeat(2,1fr);}
+  @media(max-width:820px){.g3{grid-template-columns:1fr 1fr;}}
+  @media(max-width:640px){.g2,.g3,.g4{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;}
+  .card h4{font-size:16px;margin-bottom:6px;}
+  .card p{margin:6px 0 0;font-size:14.5px;}
+  .card .lead-in{font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--acc);margin-bottom:8px;}
+  .pill{display:inline-block;font-size:12px;font-weight:700;color:var(--acc);background:var(--acc-bg);border-radius:999px;padding:4px 12px;margin:0 6px 6px 0;}
+  .num{display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--acc);background:var(--acc-bg);border-radius:6px;padding:3px 8px;margin-bottom:10px;}
+  .callout{background:var(--acc-bg);border-left:3px solid var(--acc);border-radius:8px;padding:16px 20px;margin:18px 0;font-size:15px;color:var(--ink-2);max-width:72ch;}
+  .callout b{color:var(--ink);}
+  .warn{background:var(--warn-bg);border-left-color:var(--warn);}
+  .tablewrap{overflow-x:auto;margin:18px 0;}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px;}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+  td b{color:var(--ink);}
+  .tnum{font-variant-numeric:tabular-nums;}
+  .qa{border:1px solid var(--line);border-radius:12px;padding:2px 20px;margin:12px 0;background:var(--panel);}
+  .qa summary{cursor:pointer;font-weight:700;color:var(--ink);padding:14px 0;list-style:none;position:relative;padding-right:28px;}
+  .qa summary::-webkit-details-marker{display:none;}
+  .qa summary::after{content:"+";position:absolute;right:2px;top:11px;color:var(--muted);font-size:20px;font-family:var(--mono);}
+  .qa[open] summary::after{content:"–";}
+  .qa p{margin:0 0 16px;font-size:14.5px;}
+  .say{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:18px 0;}
+  .say>div{padding:18px 20px;}
+  .say .good{background:var(--good-bg);} .say .bad{background:var(--bad-bg);}
+  .say h4{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;}
+  .say .good h4{color:var(--acc);} .say .bad h4{color:var(--bad-ink);}
+  .say ul{margin:0;padding-left:18px;font-size:14px;}
+  @media(max-width:640px){.say{grid-template-columns:1fr;}}
+  .ref{background:var(--feature);color:var(--feat-ink);border:1px solid var(--line-2);border-radius:16px;padding:30px;}
+  .ref h3{color:var(--feat-ink);margin-top:22px;}
+  .ref h3:first-child{margin-top:0;}
+  .ref .row{display:flex;flex-wrap:wrap;gap:10px 26px;margin:12px 0;font-size:14px;color:var(--feat-mut);}
+  .ref b{color:var(--chart);font-family:var(--mono);}
+  .ref a{color:#fff;border-bottom:1px solid var(--chart);}
+  dl{margin:16px 0;max-width:72ch;}
+  dt{font-weight:800;color:var(--ink);margin-top:16px;}
+  dd{margin:2px 0 0;color:var(--ink-2);font-size:14.5px;}
+  .step{display:flex;gap:16px;margin:14px 0;}
+  .step .n{flex:none;width:38px;height:38px;border-radius:10px;background:var(--feature);color:var(--chart);font-family:var(--mono);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .step .b{flex:1;} .step .b h4{font-size:16px;} .step .b p{margin:4px 0 0;font-size:14.5px;}
+  .foot{max-width:1200px;margin:0 auto;padding:30px 24px 60px;color:var(--muted);font-size:13px;font-family:var(--mono);}
+  @media(max-width:900px){
+    .wrap{grid-template-columns:1fr;gap:0;}
+    .toc{position:static;max-height:none;border-bottom:1px solid var(--line);padding:16px 0;}
+    .toc ol{columns:2;column-gap:16px;}
+  }
+
+  .script{background:var(--feature);color:var(--feat-ink);border:1px solid var(--line-2);border-radius:12px;padding:16px 20px;margin:16px 0;max-width:76ch;}
+  .script .who{display:block;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--chart);margin-bottom:8px;}
+  .script p{margin:0;color:var(--feat-mut);font-size:15px;line-height:1.62;}
+  .card h3{font-size:17px;margin:0 0 6px;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-in">
+    <span class="brand"><span class="dot"></span> TMI Tech AI <span class="sub">City Rep Master Guide</span></span>
+    <span class="tag">All industries &amp; services &middot; Deep edition</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <span class="lbl">Master guide</span>
+    <ol>
+      <li><a href="#start"><b>00</b><span>Start here</span></a></li>
+      <li><a href="#what"><b>01</b><span>What TMI is</span></a></li>
+      <li><a href="#whynow"><b>02</b><span>Why now</span></a></li>
+      <li><a href="#worlds"><b>03</b><span>The two worlds</span></a></li>
+      <li><a href="#physical-deep"><b>04</b><span>Physical economy, deep</span></a></li>
+      <li><a href="#service-deep"><b>05</b><span>Online &amp; service, deep</span></a></li>
+      <li><a href="#leaks"><b>06</b><span>The universal leaks</span></a></li>
+      <li><a href="#systems-deep"><b>07</b><span>The product, in depth</span></a></li>
+      <li><a href="#menu"><b>08</b><span>The full service menu</span></a></li>
+      <li><a href="#deal"><b>09</b><span>The money, in depth</span></a></li>
+      <li><a href="#opportunities"><b>10</b><span>The wider opportunities</span></a></li>
+      <li><a href="#rep-ops"><b>11</b><span>Your operation</span></a></li>
+      <li><a href="#prospecting"><b>12</b><span>Filling the pipeline</span></a></li>
+      <li><a href="#first-convo"><b>13</b><span>The first conversation</span></a></li>
+      <li><a href="#qualify"><b>14</b><span>How to qualify anyone</span></a></li>
+      <li><a href="#language"><b>15</b><span>How to talk about TMI</span></a></li>
+      <li><a href="#objections-deep"><b>16</b><span>Objection handling</span></a></li>
+      <li><a href="#call"><b>17</b><span>The discovery call</span></a></li>
+      <li><a href="#cases"><b>18</b><span>Proof &amp; case studies</span></a></li>
+      <li><a href="#ref"><b>19</b><span>Quick reference</span></a></li>
+      <li><a href="#glossary"><b>20</b><span>Glossary</span></a></li>
+      <li><a href="#checks"><b>21</b><span>Prove you know it</span></a></li>
+      <li><a href="#first30"><b>22</b><span>Your first 30 days</span></a></li>
+      <li><a href="#faq"><b>23</b><span>FAQ</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <div class="hero" id="start">
+      <div class="k">City Rep Onboarding / The Master Guide</div>
+      <h1>Everything you need to sell <em>TMI</em> in your city.</h1>
+      <p>TMI builds intelligent companies. This is the whole picture, in depth: who we serve, every industry and what leaks in each, exactly what we build, what it costs, and precisely how you turn a business owner into a booked call. Study it once. Keep it open. It works for any door you walk through.</p>
+    </div>
+
+    <section id="start-2">
+      <div class="eyebrow">Start here</div>
+      <h2>How to use this guide</h2>
+      <p class="lead">This is the deep version. You will not memorize all of it, and you do not need to. Read it front to back once so you know what is in it, then live in six sections: <strong>the industry deep-dives</strong> (04&ndash;05) for the room you are about to walk into, <strong>the universal leaks</strong> (06), <strong>the product</strong> (07), <strong>the pricing</strong> (09), <strong>your prospecting playbook</strong> (11&ndash;13), and <strong>objection handling</strong> (16). Those carry every conversation. The rest is the context that makes them land.</p>
+      <div class="callout"><b>The one sentence to memorize:</b> "TMI is your AI department and growth partner. We install intelligent systems and digital employees that run the busy work, so your business stops depending on you and your people catching everything by hand." Say that with confidence and you can talk to any owner in any industry.</div>
+      <div class="callout warn"><b>Your whole job in one line:</b> find the businesses running on people instead of systems, make them feel the leak, and book the free call. You do not close. The system and the founder close. You open the door.</div>
+    </section>
+
+
+<section id="what">
+  <div class="eyebrow">01 / Foundation</div>
+  <h2>What TMI actually is</h2>
+  <p class="lead">TMI is an AI department and growth partner. We go into a business, delete the dead software and the busywork, connect what is left, and build the intelligent backend and digital workforce that run the operation. The client owns everything we build. It is a 30-day transformation, not a subscription.</p>
+  <p>Hold that sentence in your head, because everything else in this guide is a detail hanging off it. You are not selling a tool. You are not selling a service you perform by hand. You are selling the thing a business becomes when it stops running on people catching everything by memory and starts running on systems that catch everything on their own.</p>
+  <h3>The method: delete, connect, build</h3>
+  <div class="grid g3">
+    <div class="card"><span class="num">01</span><h4>Delete</h4><p>Cut the software nobody uses and the busywork that should not exist. Smaller bills and less friction from day one, before we build a single new thing.</p></div>
+    <div class="card"><span class="num">02</span><h4>Connect</h4><p>Wire the systems and data that already exist into one operational layer, so nothing lives in a silo and the whole operation is visible in real time.</p></div>
+    <div class="card"><span class="num">03</span><h4>Build</h4><p>Build the custom systems and digital employees for the specific jobs the business repeats: scheduling, dispatch, follow-up, billing, reporting, and more.</p></div>
+  </div>
+  <h3>What we install, every time</h3>
+  <div class="grid g3">
+    <div class="card"><h4>Intelligence</h4><p>The business can finally see itself. One source of truth, live visibility, on one screen.</p></div>
+    <div class="card"><h4>An operating system</h4><p>The one backend the whole company runs on, in place of a dozen tools that do not talk.</p></div>
+    <div class="card"><h4>A digital workforce</h4><p>Digital employees that own whole jobs end to end. No payroll, no training, never drop the ball.</p></div>
+  </div>
+  <h3>What we are not</h3>
+  <ul>
+    <li><strong>Not SaaS.</strong> We do not sell a tool the client configures and manages. We build the system around how they already work.</li>
+    <li><strong>Not an agency.</strong> We stay in after launch. A partnership, not a project that ends.</li>
+    <li><strong>Not consulting.</strong> We do not hand over a strategy deck. We build and install the working system.</li>
+    <li><strong>Not a chatbot.</strong> A digital employee owns an outcome. It answers, books, follows up, and collects on its own. A chatbot just talks.</li>
+  </ul>
+  <div class="callout"><b>Documented outcomes you can quote (ranges, not promises):</b> 5 to 15% of revenue recovered from billing automation, dispatch time cut 3 to 6 hours a day, invoice cycles compressed from 9 days to same-day, 10 to 15% productivity lift in the first phase, and 30 to 70% profit uplift over a 5-year horizon for operations that fully digitize. The audit puts the real number on the specific business.</div>
+</section>
+
+<section id="whynow">
+<div class="eyebrow">02 / The opportunity</div>
+<h2>Why now, and why you</h2>
+<p>Almost every business you will walk into runs on people, not systems. The owner is the system. The best dispatcher is the system. The one person who knows how billing actually works is the system. That looks fine until someone quits, goes on vacation, or gets sick, and then the whole thing wobbles. TMI exists to fix that. We install intelligence, an operating system, and a digital workforce so the business runs on something that does not walk out the door.</p>
+<p>Here is the shift. Roughly 80% of the workforce is deskless, and almost no software was ever built for them. The field, the shop, the job site, the front desk. Those people run the economy and they have been handed nothing but clipboards and group texts. At the same time, everyone is being sold AI tools. Fewer than 20% of the businesses buying those off-the-shelf tools see real ROI within twelve months, because they bought a tool before they fixed the operation. A tool bolted onto a broken process just makes the broken process faster.</p>
+<div class="grid g3">
+<div class="card">
+<h3>Systems, not tools</h3>
+<p>We do not sell another app to ignore. We delete what is wasting time, connect what is disconnected, and build the system the business should have had from the start. In about 30 days, and the client owns it. No monthly license.</p>
+</div>
+<div class="card">
+<h3>An open market</h3>
+<p>Almost every established local business is a fit and almost none of them are served. Plumbers, builders, clinics, shops, agencies. They all have the same leaks. You are not fighting for scraps. You are the first person to ever offer them the real thing.</p>
+</div>
+<div class="card">
+<h3>A growth partner</h3>
+<p>TMI is not a build shop that disappears. We are growth operators. We are also a media company that tells these stories in public, hosts events, and runs Founders of the Future, a community for people building intelligent companies.</p>
+</div>
+</div>
+<p>The timing is the whole point. The businesses that install real systems now pull ahead of the ones that wait, and the gap does not close later. Five years out, a fully digitized operation can run 30 to 70% more profitable than the version that stayed on people and paper. That is the story you get to tell in your market before anyone else does.</p>
+<div class="callout"><b>You are the door.</b> The build is real, the method is proven, and the pricing is honest. None of it matters until someone in your city hears about it. That someone is you. You are not selling software. You are the first person to walk into a local owner's office and show them the company they could actually own.</div>
+</section>
+
+
+<section id="worlds">
+  <div class="eyebrow">03 / The map</div>
+  <h2>The two worlds we serve</h2>
+  <p>Every prospect you meet lives in one of two worlds. Same company under the hood, different surface. Learn to spot which one you are standing in, because it tells you which leak to name first and which flagship system to lead with.</p>
+  <div class="grid g2">
+    <div class="card">
+      <div class="lead-in">World one</div>
+      <h4>The physical economy</h4>
+      <p>Businesses that dispatch crews, run job sites, manage equipment, and move in the real world. They live and die on the schedule, the truck, and the work order.</p>
+      <p style="margin-top:10px;"><b>The tells:</b> a dispatcher on the phone all day, job status in texts and heads, equipment nobody can find, invoices that go out late.</p>
+    </div>
+    <div class="card">
+      <div class="lead-in">World two</div>
+      <h4>The online &amp; service economy</h4>
+      <p>Businesses that run on a calendar, a pipeline, a front desk, or an audience. They live and die on the booking, the follow-up, and the customer coming back.</p>
+      <p style="margin-top:10px;"><b>The tells:</b> missed calls, leads that go cold, a full inbox, a founder who is the bottleneck, an audience that is not monetized.</p>
+    </div>
+  </div>
+  <div class="callout"><b>The unifying truth:</b> owners do not sort themselves by industry. They sort themselves by what is breaking. A plumber and a med spa have the same problem: the business runs on people catching things by hand, and it gets more chaotic every time they grow. That is what you sell against, everywhere. The next two sections take you industry by industry so you can walk into any one of them and sound like you have done it before.</div>
+</section>
+
+<section id="physical-deep"><div class="eyebrow">04 / Physical economy</div><h2>Industry deep-dives: the physical economy</h2><p>These are your field notes for the ten trades you will sell most. Read the industry your prospect is in before the call, memorize the leak and the one talk track, and use the objection block when they push back. Do not pitch the software list. Make them feel the leak, then move them to the free discovery call at tmitechai.com/book, where the intelligent audit is done live and gives them the real number.</p>
+
+<h3>1. HVAC, plumbing & electrical (field service)</h3>
+<p><b>The reality:</b> These shops live and die by the day's board. A dispatcher juggles calls, truck locations, and skill matching in their head or on a whiteboard, techs drive to jobs with half the info, and the office chases paperwork for a week before anyone gets billed. When the good dispatcher takes a day off, the whole operation limps.</p>
+<p><b>Where money leaks:</b> Billing that lags means 5 to 15% of revenue never makes it onto an invoice. Second trips because the tech showed up without the right part run 60 to 80% avoidable at $150 to $400 each. Technician utilization sitting at 55 to 68% means you are paying for trucks and labor that bill less than two thirds of the day.</p>
+<p><b>What we build first:</b> Autonomous dispatch and routing to match the right tech and truck to each call and cut dispatch work 3 to 6 hours a day. Invoice and billing automation to take the cycle from about 9 days to same day. A revenue leakage detector to catch the jobs that got worked but never billed. Van stock and parts inventory so the truck carries what the job needs and the second trip disappears.</p>
+<p><b>What they run today:</b> ServiceTitan, FieldEdge, Successware, Service Fusion, Jobber, HouseCall Pro, or Payzerware. We do not rip those out on day one. The system sits on top, pulls the data into one source of truth, and automates the dispatch and billing those tools only track. When the owner sees they own the operating layer with no monthly license, the SaaS bill becomes the easy cut.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"Quick question. If I pulled every job your techs closed last month and matched it against what actually got invoiced, how confident are you that number is zero gap? Most shops your size are leaving 5 to 15% of revenue on the table because billing runs a week behind. That is the first thing our audit measures."</p></div>
+<details class="qa"><summary>"I already pay for ServiceTitan, I do not need another system."</summary><p>You are right that you do not need another subscription, and we are not one. ServiceTitan tracks your jobs. It does not dispatch autonomously, catch the jobs that never got billed, or cut your invoice cycle to same day. We build that layer, you own it outright, no monthly license, and it sits on top of what you already have. The free call shows you exactly what ServiceTitan is not catching. Book it at tmitechai.com/book and we run the numbers on your operation live.</p></details>
+
+<h3>2. Construction</h3>
+<p><b>The reality:</b> A GC runs on approvals, change orders, and the gap between what got built and what got paid for. Field crews capture almost nothing in real time, the estimate and the actual job cost drift apart over weeks, and change orders get done verbally and remembered later, if at all. The owner finds out a job lost money after it is finished.</p>
+<p><b>Where money leaks:</b> 85% of construction projects run over budget, and most of that is invisible until closeout. Change orders that never got captured are work you did for free. Real cost drifting off the estimate with no live visibility means you cannot fix a bleeding job while it is still open.</p>
+<p><b>What we build first:</b> Real-time estimating and job costing so the estimate and the actual track together and you see the overrun forming. Change order capture so every scope change gets logged, priced, and billed the moment it happens on site. Field data capture and job-site photo documentation so the crew's day becomes data instead of a text at 6pm. The Command Center to put every active job's budget health on one screen.</p>
+<p><b>What they run today:</b> Procore, Buildertrend, or CoConstruct. Those are systems of record for documents and schedules. They do not connect your field capture to live job costing or force a change order into the billing the day it happens. We build that connective layer and the custom systems on top, and the client owns it.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"85% of construction jobs run over budget, and you almost never see it until the job closes. What if you could watch a job's margin bleed in real time and fix it while it is still open instead of finding out at closeout? Which of your last three jobs came in exactly where you bid it?"</p></div>
+<details class="qa"><summary>"My project managers already know their numbers, this is overkill."</summary><p>Your best PM knows their numbers because they carry them in their head, which means when they are on vacation or they leave, the number leaves with them. And even a great PM finds the overrun at the end, not while it is forming. We are not replacing their judgment. We put every job's live budget on one screen so the overrun shows up in week two, not at closeout. Spend 30 minutes on a free call at tmitechai.com/book and we will pull one of your recent jobs apart to show you where it slipped.</p></details>
+
+<h3>3. Roofing</h3>
+<p><b>The reality:</b> Roofing is a speed game. The company that gets a real, credible price to the homeowner first usually wins the job. Most roofers still book a measurement, wait for an estimator, and get a quote out days later while a faster competitor already closed it. Sales and production run on separate paper.</p>
+<p><b>Where money leaks:</b> Every slow quote is a lost deal to whoever answered faster. Bad measurements drive material over-order and callbacks. Estimator time spent on manual takeoffs is time not spent selling.</p>
+<p><b>What we build first:</b> Satellite instant estimating that turns an address text into a real price in under 90 seconds, so the homeowner has a credible number before the competitor even calls back. Real-time estimating and job costing to keep the sold price and the production cost aligned. Job-site photo documentation for insurance and warranty. The revenue leakage detector so supplements and change orders actually get billed.</p>
+<p><b>What they run today:</b> AccuLynx, JobNimbus, Roofr, or EagleView. EagleView gives you a measurement report, the others manage the pipeline. None of them turn an address into a delivered price in 90 seconds or connect that speed to your job costing. We build the instant estimate system and the operating layer under it, and you own it.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"When a homeowner texts you an address, how fast can you get them a real price? If the answer is not under 90 seconds, the roofer who can is closing your leads. We build the system that turns an address into a delivered number before your competitor picks up the phone."</p></div>
+<details class="qa"><summary>"I already use EagleView for measurements, that is good enough."</summary><p>EagleView gives you an accurate report, and it still takes your estimator time to turn that into a quote the homeowner can say yes to. Good enough on measurement is not the same as first with a price. Our system delivers a real price from an address text in under 90 seconds and ties it straight to your job costing, so speed does not cost you accuracy. Book the free call at tmitechai.com/book and we will run one of your real addresses through it live.</p></details>
+
+<h3>4. Oil & gas / industrial</h3>
+<p><b>The reality:</b> Uptime is everything and every hour of downtime is enormous money. These operations run on scheduled maintenance, compliance reporting, and reactive scrambles when something fails. Data sits in silos across SCADA, spreadsheets, and people's memory, and nobody can query the whole operation in plain language to find where the cost is hiding.</p>
+<p><b>Where money leaks:</b> Reactive maintenance instead of predictive costs 30 to 50% more and drives 30 to 50% more unplanned downtime. Compliance and regulatory reporting done by hand eats skilled hours and risks fines. Analytics gaps mean up to about 16% of overall cost is recoverable that nobody is capturing today.</p>
+<p><b>What we build first:</b> Predictive maintenance that flags the failure before it happens and cuts maintenance cost 30 to 50%. An operational LLM layer so a supervisor can ask the business a plain-language question and get an answer instead of waiting on an analyst. Compliance and regulatory reporting automation. The Command Center for whole-operation visibility on one screen.</p>
+<p><b>What they run today:</b> Often SAP PM, IBM Maximo, or asset tools bolted together with spreadsheets and SCADA exports. We connect those into one operational layer rather than replacing the plant historian, then build the predictive and query systems that pull up to about 16% cost reduction out of the analytics. The client owns the layer.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"You already know one hour of unplanned downtime dwarfs anything I am going to quote you. The AI analytics layer on top of your existing data is pulling up to about 16% of total cost out of operations like yours, mostly by predicting failures before they hit. What does an hour of downtime actually cost you?"</p></div>
+<details class="qa"><summary>"We run Maximo and SAP already, we are not tearing out our systems."</summary><p>Good, do not tear them out. Maximo and SAP are your systems of record and they stay. The problem is your data is siloed across them and the plant historian, and no one can predict a failure or query the whole operation in plain language. We connect what you have into one layer and build the predictive maintenance and query systems on top of it. Nothing gets ripped out. The free audit at tmitechai.com/book shows you which failures you could be catching early right now.</p></details>
+
+<h3>5. Manufacturing</h3>
+<p><b>The reality:</b> A plant runs on the line staying up and the maintenance team staying ahead of it. Most shops run maintenance reactively, fix things when they break, and lose production hours they never planned for. Machine data exists but lives in a CMMS that logs work orders after the fact instead of predicting the next failure.</p>
+<p><b>Where money leaks:</b> Unplanned downtime running 30 to 50% higher than it needs to because maintenance is reactive. Maintenance cost itself 30 to 50% above a predictive baseline. Parts and spares either over-stocked as dead cash or missing when the line is down.</p>
+<p><b>What we build first:</b> Preventive and predictive maintenance to cut unplanned downtime 30 to 50% and deliver a 10 to 15% productivity lift in phase one. Parts and inventory management so spares are there when the line stops and not sitting as dead cash. Work order management that feeds the prediction instead of just recording history. The Command Center for line status and asset health on one screen.</p>
+<p><b>What they run today:</b> UpKeep, SAP PM, IBM Maximo, or Fiix. Those are CMMS tools that log and schedule. They record what broke, they do not predict what breaks next. We sit on top, pull the machine and work-order data into one source of truth, and build the predictive layer, which the plant owns outright.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"Your CMMS tells you what broke last month. It does not tell you what breaks next Tuesday. Shops that move from reactive to predictive cut unplanned downtime 30 to 50% and get a 10 to 15% productivity lift in the first phase. How many production hours did you lose last month that you never scheduled?"</p></div>
+<details class="qa"><summary>"We have a preventive maintenance schedule already."</summary><p>A preventive schedule services things on a calendar whether they need it or not, and it still lets the surprise failures through, which are the ones that stop the line. Predictive is different. It reads the machine and flags the specific asset about to fail before it does. That is the 30 to 50% downtime cut. Your calendar cannot do that. The free call at tmitechai.com/book pulls your maintenance history and shows you which failures a predictive layer would have caught.</p></details>
+
+<h3>6. Fleet & logistics</h3>
+<p><b>The reality:</b> A fleet operation is trucks, drivers, routes, and the constant question of where everything is and what it is costing. Telematics generates a firehose of data that mostly gets ignored, routing is done by habit, and maintenance on the vehicles is reactive, so a truck breaks down mid-route and blows up the day.</p>
+<p><b>Where money leaks:</b> Idle trucks and inefficient routing burn fuel and hours nobody is tracking. Reactive vehicle maintenance drives breakdowns that cost far more than the service that would have prevented them, on the same 30 to 50% predictive-versus-reactive gap. Assets that go missing or sit unused are pure carrying cost.</p>
+<p><b>What we build first:</b> Fleet and asset tracking that turns telematics data into one live picture instead of noise. Autonomous routing to cut the miles and hours out of every day. Predictive maintenance on the vehicles so a truck comes in before it fails on the road, not after. Field data capture so the driver's day becomes usable data.</p>
+<p><b>What they run today:</b> Samsara, Fleetio, or Motive. Those collect the telematics and log the vehicles. They generate the data, they do not act on it or predict the breakdown. We connect them into one operational layer and build the routing and predictive systems that turn the data into fewer miles and fewer breakdowns, owned by the operator.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"You are already paying Samsara to collect a mountain of data on every truck. Question is what acts on it. Right now a truck breaks down mid-route and torches the whole day, when the data to predict that failure was already sitting in your dashboard. We build the layer that reads it and reroutes before the breakdown."</p></div>
+<details class="qa"><summary>"Samsara already gives me all the tracking and reports I need."</summary><p>Samsara gives you the data, and that is exactly the point. It reports what happened. It does not reroute your fleet to cut miles or pull a truck in before it fails on the road. You are paying for the firehose and drinking from a cup. We build the system that turns that data into fewer miles and fewer breakdowns, and you own it. Book the free call at tmitechai.com/book and we will look at one week of your telematics and show you what it is missing.</p></details>
+
+<h3>7. Mining & heavy equipment</h3>
+<p><b>The reality:</b> This is capital-heavy work where a single piece of equipment going down can idle an entire crew and stall the site. Machines run hard in brutal conditions, maintenance is scheduled or reactive, and when a haul truck or excavator fails unexpectedly the cost is not the repair, it is the whole operation waiting on it.</p>
+<p><b>Where money leaks:</b> Unplanned equipment downtime running 30 to 50% above a predictive baseline, with a stalled site multiplying the cost far past the machine itself. Reactive maintenance at 30 to 50% higher cost than predictive. Expensive assets sitting lost or idle across a large site as pure carrying cost.</p>
+<p><b>What we build first:</b> Predictive maintenance on the heavy fleet to catch a failure before it strands a crew and cut downtime 30 to 50%. Fleet and asset tracking to locate and account for every high-value machine across the site. Preventive maintenance scheduling tied to actual machine hours and load, not the calendar. Safety and incident reporting for a high-risk environment. The Command Center for site-wide equipment health on one screen.</p>
+<p><b>What they run today:</b> A mix of OEM telematics, spreadsheets, and enterprise asset tools like IBM Maximo or SAP PM. We connect those into one operational layer instead of replacing the OEM systems, then build the predictive and tracking layer the site owns, so downtime and lost-asset cost come out of the operation.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"When a haul truck goes down unexpectedly, you are not paying for a repair, you are paying for a whole crew standing around waiting on it. Predictive maintenance on your heavy fleet catches that failure before it strands the site and cuts downtime 30 to 50%. What did your last unplanned equipment failure actually cost you in idle crew?"</p></div>
+<details class="qa"><summary>"Our equipment is too specialized and our conditions are too harsh for software to predict anything."</summary><p>The harsh conditions are the argument for predictive, not against it. Machines running hard in brutal conditions fail more, and every one of those failures leaves a signature in the hours, load, and sensor data your equipment already produces. We read that to flag the specific machine before it strands your crew. It is not generic software, it is a system built on your fleet's actual data. The free audit at tmitechai.com/book shows you what your equipment data is already telling you that nobody is reading.</p></details>
+
+<h3>8. Home service (residential)</h3>
+<p><b>The reality:</b> Residential service is high volume, tight margins, and a customer who judges you on how fast you answer and how well you show up. The owner is buried in scheduling, the office is chasing payment, and every emergency call that sits unanswered is a customer calling the next company on the list.</p>
+<p><b>Where money leaks:</b> Emergency dispatch response sitting at 15 to 20 minutes when the job could be under 2 minutes, and every slow response is a booked job lost to a faster competitor. Billing lag pulling the same 5 to 15% of revenue off the table. Techs sitting at 55 to 68% utilization because the schedule has holes and drive time nobody optimized.</p>
+<p><b>What we build first:</b> Autonomous dispatch to take emergency response from 15 to 20 minutes down to under 2 minutes and answer the customer before they call the next name. Invoice and billing automation to collect same day instead of chasing for a week. Crew and labor management to close the gaps that keep utilization low. A digital employee to handle intake and scheduling so the owner is not the bottleneck.</p>
+<p><b>What they run today:</b> HouseCall Pro, Jobber, or Service Fusion. Those book jobs and take payments. They do not answer an emergency call in under 2 minutes or fill the schedule holes automatically. We build the dispatch and intake layer on top, the owner stops being the switchboard, and they own the system with no monthly license.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"When an emergency call comes in and nobody picks up in the first two minutes, that customer is already dialing the next company. Right now your response is what, 15, 20 minutes? We build the dispatch system that answers and books it in under two. How many after-hours calls went to voicemail last week?"</p></div>
+<details class="qa"><summary>"We are a small shop, this sounds like enterprise stuff we cannot afford."</summary><p>It is the opposite. A small shop feels every missed emergency call and every late invoice harder than a big one does, because you do not have the volume to absorb it. A digital employee starts at $5,000 and takes the intake and scheduling off your plate so you stop being the bottleneck, and you own it outright with no monthly bill. The audit is free and it gives you the real number for your shop, not a guess. Book it at tmitechai.com/book.</p></details>
+
+<h3>9. Restoration</h3>
+<p><b>The reality:</b> Restoration is emergency-driven and documentation-driven. The call comes in at 2am after a flood or fire, speed of response wins the job, and then the entire margin depends on documenting every hour, every piece of equipment, and every line item well enough to get paid in full by insurance. Miss the documentation and the carrier claws it back.</p>
+<p><b>Where money leaks:</b> Slow emergency response losing the job to whoever answered first, on that same 15-to-20-minute versus under-2-minute gap. Under-documented work that the insurance carrier denies or discounts, which is revenue you already earned walking out the door. Equipment like air movers and dehumidifiers left on a site, lost, or unbilled.</p>
+<p><b>What we build first:</b> Autonomous dispatch to answer the emergency call and get a crew moving in under 2 minutes. Job-site photo documentation and field data capture so every hour and every asset is logged to survive an insurance audit. Fleet and asset tracking for the equipment that gets scattered across job sites. The revenue leakage detector so every billable line actually gets billed and collected.</p>
+<p><b>What they run today:</b> Often a mix of general field-service tools and insurance-estimating platforms held together manually. We connect the intake, documentation, and billing into one operational layer and build the dispatch and capture systems the operator owns, so the response is faster and the carrier pays the full claim.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"Two things decide a restoration job's margin. How fast you answer the 2am call, and whether your documentation is airtight enough that the carrier pays the whole claim. If your response is 15 minutes and your documentation is a tech's phone photos, you are losing jobs on the front and money on the back. We fix both."</p></div>
+<details class="qa"><summary>"My crews already photograph everything for the insurance claims."</summary><p>Photos in a tech's phone are not the same as documentation that survives a carrier audit, and the gap between the two is exactly where claims get discounted. When every hour, every air mover, and every line item is captured in a structured record automatically, the carrier pays the full claim instead of clawing it back. That is revenue you already earned. The free call at tmitechai.com/book pulls a recent claim apart and shows you what documentation gaps cost you.</p></details>
+
+<h3>10. Pest control & landscaping</h3>
+<p><b>The reality:</b> These are dense-route, recurring-service businesses. The whole model is fitting as many stops into a day as the routing allows and keeping recurring customers on schedule. Routes get built by habit and hand, techs backtrack across town, and recurring visits slip through the cracks, which is a subscription customer quietly churning.</p>
+<p><b>Where money leaks:</b> Inefficient routing burning drive time that could have been another paying stop, dragging tech utilization down from a possible 76 to 85% to the usual 55 to 68%. Missed recurring visits that turn into cancelled contracts and lost lifetime value. Billing on recurring service that lags or leaks the same 5 to 15% of revenue.</p>
+<p><b>What we build first:</b> Autonomous routing to pack the day with stops and stop the cross-town backtracking, pushing utilization toward 76 to 85%. Crew and labor management to keep every recurring visit on schedule so contracts do not churn. Invoice and billing automation for clean recurring collection. Field data capture so each stop is logged without paperwork back at the office.</p>
+<p><b>What they run today:</b> Usually Jobber, Service Fusion, or HouseCall Pro for scheduling and invoicing. Those hold the customer list and the calendar. They do not sequence the route to fit more stops in a day or guarantee the recurring visit never slips. We build the routing and scheduling layer on top, and the operator owns it outright.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"Your whole business is stops per day and keeping recurring customers on the schedule. If your techs are backtracking across town, you are running maybe 55 to 68% utilization when the route could get you to 76 to 85%. That gap is another route's worth of revenue with the trucks you already own. How many stops does a tech average now?"</p></div>
+<details class="qa"><summary>"My routes are fine, my guys know the area better than any software."</summary><p>Knowing the area is exactly why the habit route feels fine, and it is also why nobody notices the backtracking that costs you two or three stops a day. That is not a knock on your techs, it is math no person solves in their head across a full board. Closing that gap moves utilization from the high 50s toward the mid 80s, which is another route's worth of revenue on the trucks you already run. Book the free call at tmitechai.com/book and we will run a day of your actual stops through it and show you the difference.</p></details>
+</section>
+
+<section id="service-deep"><div class="eyebrow">05 / Online &amp; service economy</div><h2>Industry deep-dives: online &amp; service</h2><p>Every business in this section runs on the same physics. A lead reaches out, and the clock starts. The business that answers in 5 minutes wins many times more often than the one that answers in an hour, missed calls turn into a competitor's customer, and no-shows are dead revenue you already paid to book. Your job is to find the leak, name the number, and get the owner on a free call at tmitechai.com/book where we run the intelligent audit live.</p>
+
+<h3>1. Healthcare &amp; dental practices</h3>
+<p><b>The reality:</b> A practice lives and dies by the schedule. The front desk is drowning, answering the phone, checking people in, chasing insurance, and calling to confirm tomorrow. When two lines ring at once, one goes to voicemail, and a new patient with a toothache does not leave a voicemail. They call the next office.</p>
+<p><b>Where money leaks:</b> Missed calls during lunch and after hours that never get returned. No-shows and last-minute cancellations that leave a $300 chair empty. Recall patients who lapsed 18 months ago and were never called back.</p>
+<p><b>What we build first:</b> An AI front desk that answers every call and text, so nothing hits voicemail, and texts back any missed call within seconds to book it. A scheduler with a no-show engine that confirms, reminds, and fills the empty slot from a waitlist. A patient reactivation engine that works the recall list and pulls lapsed patients back in.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"How many calls did your front desk miss last Tuesday between noon and one? You do not know, and that is the problem. Every one of those was a patient, and most of them booked somewhere else."</p></div>
+<details class="qa"><summary>"My front desk staff handle the phones fine."</summary><p>They handle the calls they catch. The ones they miss during check-in, at lunch, and after five o'clock are invisible to you, so it feels fine. The system answers all of them and books them, and your staff stops apologizing for being on the other line. Let us pull your actual missed-call number live on a free call, then you decide. Book it at tmitechai.com/book.</p></details>
+
+<h3>2. Med spa &amp; aesthetics</h3>
+<p><b>The reality:</b> A med spa sells high-ticket, discretionary treatments to people who booked on impulse and cool off fast. The margin is in rebooking and packages, not the first visit. Most inquiries come in by DM and text at night, and if nobody answers until the morning, the excitement is gone.</p>
+<p><b>Where money leaks:</b> After-hours DMs and texts that sit unanswered until the buying mood passes. Clients who came once for Botox and were never booked for the three-month touch-up. Consult no-shows on treatments worth four figures.</p>
+<p><b>What we build first:</b> A lead response and intake employee that answers Instagram and text in seconds, qualifies, quotes, and books the consult before the interest fades. A scheduler that pre-books the next cycle at checkout and a no-show engine that protects the consult slots. A reactivation engine that runs treatment intervals, so the client hears from you exactly when the filler or the package is due to refresh.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"A woman DMs you at 9pm ready to book a $1,200 package. You see it at 8am. Half the time she is already booked with the spa across town that texted her back in two minutes. We close that gap."</p></div>
+<details class="qa"><summary>"My aesthetic touch is personal, a bot will feel cold."</summary><p>The bot does not do the aesthetics. It answers the 9pm text, quotes the package, and gets her on your calendar so you can do the personal part in the room. Right now the personal touch never happens because you never got the message in time. Come see it on a free call and judge the tone yourself at tmitechai.com/book.</p></details>
+
+<h3>3. Wellness &amp; recovery (chiro, PT, IV, etc.)</h3>
+<p><b>The reality:</b> These businesses make money on the plan, not the visit. A chiropractic adjustment, a PT protocol, an IV membership, they only pay off if the client comes back the full course. The owner is usually also the practitioner, hands-on with a patient and unable to answer the phone, which is exactly when new leads call.</p>
+<p><b>Where money leaks:</b> Calls missed while the owner is in a session, with no one to catch them. Patients who drop off after three visits of a twelve-visit plan and quietly stop rebooking. Membership and package holders who lapse without a single follow-up.</p>
+<p><b>What we build first:</b> An AI receptionist that covers the phone while the practitioner is hands-on, booking new patients without interrupting care. A scheduler plus no-show engine that keeps a treatment plan on track visit by visit and flags the ones falling off. A retention and reactivation engine that follows up on lapsed plans and dormant memberships.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"You are the best adjustment in town and you also answer the phone, which means when you are adjusting, nobody is answering. Every new patient calls during business hours, when you are busy. See the problem?"</p></div>
+<details class="qa"><summary>"I am a small shop, I cannot afford another salary."</summary><p>You are not hiring a salary. A digital employee starts at $5,000, you own it, and there is no monthly license. Compare that to one front desk hire at $40,000 a year who still goes to lunch and cannot answer two lines. The system covers the phone every hour you are with a patient. Let us do the math on a free call at tmitechai.com/book.</p></details>
+
+<h3>4. Home service (viewed as a service business)</h3>
+<p><b>The reality:</b> Plumbers, HVAC, electricians, roofers. The person who answers the phone books the job. Homeowners with a burst pipe call three companies and hire the first human who picks up. The techs are in trucks and attics all day, so calls go to voicemail, and voicemail is a dead lead.</p>
+<p><b>Where money leaks:</b> Missed calls while every tech is on a job, each one a booked ticket lost to the next contractor. No-shows and unconfirmed appointments that waste a truck roll. Estimates and reviews that never get followed up, so a five-star reputation stays thin online.</p>
+<p><b>What we build first:</b> An AI front desk that answers every call and instantly texts back missed ones to book the job before the homeowner dials the next number. A dispatch-aware scheduler with confirmations that cut no-shows and wasted rolls. A reviews and reputation engine that asks every happy customer at the right moment, so the storefront online matches the work.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"When all your trucks are out, who answers the phone? Nobody. That homeowner with water on the floor is not leaving a voicemail, he is calling the next plumber. That is a booked job you lost while you were working."</p></div>
+<details class="qa"><summary>"An answering service already picks up my calls."</summary><p>An answering service takes a message. It does not qualify the job, check your dispatch calendar, and book the slot, and it does not text back the caller who hangs up before a human answers. This does all of that in seconds and drops the job straight onto the schedule. Bring your call logs to a free call and we will show you what the service is missing at tmitechai.com/book.</p></details>
+
+<h3>5. Ecommerce &amp; DTC</h3>
+<p><b>The reality:</b> A DTC brand pays hard for every click, then loses most of the money after the sale. Carts get abandoned, support tickets pile up, and the second and third purchase, where the actual profit lives, never gets engineered. The founder is buried in the inbox and the ad account at the same time.</p>
+<p><b>Where money leaks:</b> Support questions that go unanswered for hours, so the sale stalls at checkout. First-time buyers who never come back because nothing brought them back. Post-purchase, refunds, and billing handled by hand, eating margin one ticket at a time.</p>
+<p><b>What we build first:</b> A lead-response and support employee that answers pre-sale questions and tickets instantly across email, chat, and DM, so buying never stalls on a slow reply. A CRM and retention engine that segments buyers and runs win-back and replenishment automatically. Billing and back-office automation for refunds and subscription issues, plus a Command Center that puts revenue, tickets, and retention on one screen.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"You spend $40 to get the click and then lose the customer after one order. Your whole profit is in order two and three, and right now nothing in your business is built to make that happen. It is all luck."</p></div>
+<details class="qa"><summary>"I already run Klaviyo and a Shopify stack."</summary><p>Good, keep what works. We DELETE the dead tools you pay for and do not use, CONNECT the ones you keep so they share one source of truth, and BUILD the retention and support employees the stack cannot. You end up owning the system instead of renting a dozen apps that do not talk to each other. Let us audit your stack live at tmitechai.com/book.</p></details>
+
+<h3>6. Agencies</h3>
+<p><b>The reality:</b> An agency sells other people's time and drowns in its own operations. The founder is the bottleneck on sales, delivery, and client updates all at once. New prospects wait days for a proposal, and existing clients churn quietly because nobody follows up until the invoice bounces.</p>
+<p><b>Where money leaks:</b> Inbound leads that cool off while the founder finishes client work before replying. Slow proposals and intake that let prospects drift to a faster competitor. Client reporting and admin done by hand that burns the team's billable hours.</p>
+<p><b>What we build first:</b> A lead-response and intake employee that qualifies inbound, books the discovery call, and starts the proposal while the founder is heads-down. A client CRM and retention engine that keeps every account touched, updated, and renewed on schedule. Back-office automation for reporting and billing, plus a Command Center so the founder sees pipeline and delivery on one screen instead of in ten tabs.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"You are the bottleneck. Sales waits on you, delivery waits on you, and clients wait on you, so leads go cold and accounts churn while you are stuck doing the work only you can do. That is not a growth problem, it is a wiring problem."</p></div>
+<details class="qa"><summary>"We sell custom work, our process cannot be automated."</summary><p>The strategy stays yours. What gets automated is the repeatable part around it, the intake, the follow-up, the reporting, the renewals, all the admin that steals the hours you should spend on the custom work. We build it in about 30 days and you own it. See exactly what we would wire up first on a free call at tmitechai.com/book.</p></details>
+
+<h3>7. Professional services (law, accounting, consulting firms)</h3>
+<p><b>The reality:</b> A law or accounting firm sells trust and billable hours, and both leak at the front door. A prospect with a legal problem or a tax mess calls several firms and retains the first one that responds like a professional. Meanwhile partners bill by the hour, so every minute on admin is money burned.</p>
+<p><b>Where money leaks:</b> New-matter calls that hit voicemail and go to the firm that called back first. Consultations that no-show, wasting a partner's most expensive hour. Intake, scheduling, and AR chased by hand, plus receivables that age out past 90 days.</p>
+<p><b>What we build first:</b> An AI front desk and intake employee that answers every new-matter inquiry, screens it, and books the consult so no qualified lead slips. A scheduler with a no-show engine that guards partner time. Billing and AR automation that sends, follows up, and compresses invoice cycles to same-day, plus documented 5 to 15 percent of revenue recovered from billing alone.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"When a new client calls about a case and gets your voicemail, they do not wait. They call the next firm on the list and retain them. Your intake is your front door, and right now it is unlocked and unattended after 5pm."</p></div>
+<details class="qa"><summary>"Client confidentiality means I cannot hand this to software."</summary><p>You are not handing over the case. The system handles intake, scheduling, and billing follow-up, the front-door work, on infrastructure you own with one source of truth, not a chatbot bolted to the public internet. The privileged work stays with your attorneys. Let us walk the exact data path on a free call so your standard is met before anything is built. tmitechai.com/book.</p></details>
+
+<h3>8. Coaches &amp; consultants</h3>
+<p><b>The reality:</b> A coach sells access to themselves, which means the founder is the entire delivery engine and the entire sales team. Leads come from content and referrals, respond at all hours, and expect a personal reply. When the coach is on a client call, sales stops cold.</p>
+<p><b>Where money leaks:</b> Application and discovery-call leads that go cold before the coach can reply between sessions. Discovery-call no-shows that gut a calendar built around a handful of high-ticket slots. An audience of followers and past clients that is never converted into paid engagements.</p>
+<p><b>What we build first:</b> A lead-response employee that answers applications and DMs instantly, qualifies fit, and books the discovery call while the coach is coaching. A scheduler with a no-show engine that protects those few high-value slots with confirmations and reminders. A reactivation engine that works past clients and warm leads, plus Personal Brand Studio to keep the founder's content pulling new applications in.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"You are the product and the salesperson, which means every hour you coach is an hour nobody is closing your leads. They apply, they wait, they cool off, they ghost. Your calendar is not empty because demand is low. It is empty because you cannot be in two places at once."</p></div>
+<details class="qa"><summary>"My brand is personal, automated replies will kill it."</summary><p>Your brand is the coaching and the content, and both stay 100 percent you. The system just makes sure the person who applies at midnight gets a real, fast reply and lands on your calendar instead of forgetting you by morning. It protects the personal relationship by making sure it actually starts. See the tone and the flow on a free call at tmitechai.com/book.</p></details>
+
+<h3>9. Creators with an audience to monetize</h3>
+<p><b>The reality:</b> A creator has the hardest thing in business already, attention, and almost none of it is turned into money. The audience shows up for free content, the DMs pile up, and brand deals and product sales get handled between edits, badly. An audience that is not monetized is money left on the table, every single day.</p>
+<p><b>Where money leaks:</b> Thousands of DMs and comments with buying intent that never get a reply. Brand-deal and collaboration inquiries lost in a flooded inbox. Followers who would happily buy a product or offer that the creator has never built the machine to sell them.</p>
+<p><b>What we build first:</b> A lead-response employee that triages DMs and inbound at scale, answering fans and routing real brand deals and buyers to a booking or checkout. A CRM that turns anonymous followers into an owned audience you can sell to on purpose, not by luck. Personal Brand Studio to keep the content engine running done-for-you, plus AI Visibility so when someone asks ChatGPT or Google about your niche, you are the answer that comes back.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"You have the one thing money cannot easily buy, attention, and you are sitting on it. Your DMs are full of people ready to give you money and your inbox is full of brand deals you never saw. The audience is not the goal, it is the inventory, and right now none of it is for sale."</p></div>
+<details class="qa"><summary>"I do not want to look like a sellout to my followers."</summary><p>Ignoring the DM from a fan who wanted to buy is not authenticity, it is just a missed sale that helped nobody. We build the machine that answers everyone fast and offers the right thing at the right moment, so the audience gets served and you get paid. That is more respect for them, not less. Come map it out on a free call at tmitechai.com/book.</p></details>
+
+<h3>10. Local businesses trying to get online</h3>
+<p><b>The reality:</b> A local business has a real storefront and a nearly invisible digital one. The website is stale, the Google profile is thin, and when a neighbor asks ChatGPT or Google for the best option in town, a competitor's name comes back instead. The owner knows they should be online but has no time and no system to get there.</p>
+<p><b>Where money leaks:</b> Searchers and AI answers that send local business to competitors because the shop is not the answer engines' answer. Thin reviews that make a great local operation look unproven next to a louder rival. Web and phone inquiries that arrive and die because nothing catches and books them.</p>
+<p><b>What we build first:</b> AI Visibility that does answer-engine optimization and SEO so the business becomes the name ChatGPT, Google, and Perplexity give when someone searches the category locally. A reviews and reputation engine that steadily turns happy customers into a five-star storefront. An AI front desk and lead-response employee so every new call, text, and web inquiry gets answered and booked instead of lost.</p>
+<div class="script"><span class="who">Talk track - your opener</span><p>"Pull out your phone and ask ChatGPT for the best in your category in this town. If your name does not come up, that is where your customers are going right now. Being the best on the block does not matter if the machine everybody asks has never heard of you."</p></div>
+<details class="qa"><summary>"I am not a tech person, this sounds like too much."</summary><p>That is exactly who this is for. You do not build anything or manage anything, we DELETE the dead tools, CONNECT what is left, and BUILD the system, done in about 30 days, and then you own it with no monthly license. You keep running your shop. Let us show you where you stand online on a free call at tmitechai.com/book.</p></details>
+</section>
+
+
+<section id="leaks">
+  <div class="eyebrow">06 / The pain you sell against</div>
+  <h2>The universal leaks</h2>
+  <p>These cut across every industry in both worlds. You are not selling AI. You are selling the end of these specific, expensive leaks. Learn them cold, because your entire job in a first conversation is spotting which two or three a prospect is bleeding from and making them feel it.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>The leak</th><th>What it looks like</th><th>Why it costs real money</th></tr></thead>
+    <tbody>
+    <tr><td><b>It all runs through the owner</b></td><td>Nothing moves right when the owner steps away.</td><td>The business cannot scale past one person's attention, and that person can never truly take time off.</td></tr>
+    <tr><td><b>No visibility</b></td><td>They find out a job went sideways when the customer calls, not before.</td><td>You cannot manage what you cannot see. Problems get expensive before anyone notices.</td></tr>
+    <tr><td><b>Missed calls &amp; slow follow-up</b></td><td>The phone rings out, a lead sits for hours, and the customer books with whoever answered first.</td><td>Speed to first contact is one of the top predictors of who wins the job. Every missed one is revenue handed to a competitor.</td></tr>
+    <tr><td><b>Unbilled &amp; late-billed work</b></td><td>Work gets done in the field and never makes it onto an invoice, or the invoice goes out a week late.</td><td>Pure earned revenue that vanishes. Most operations leak 5 to 15% here without knowing it.</td></tr>
+    <tr><td><b>Manual busywork</b></td><td>Scheduling, dispatch, intake, and reporting all run on people re-typing things between tools.</td><td>Hours of expensive labor a week on work a system should do, plus the errors that cost trust.</td></tr>
+    <tr><td><b>Things slip between people</b></td><td>The truth lives in texts, sticky notes, and a few key people's heads.</td><td>Work falls through the cracks between people and apps. Nobody owns it, so it does not happen.</td></tr>
+    <tr><td><b>Nobody comes back</b></td><td>Past customers and lapsed leads are never worked again.</td><td>The cheapest revenue any business has is the customer it already earned. Almost nobody reactivates them.</td></tr>
+    <tr><td><b>Growth adds chaos, not profit</b></td><td>Every new hire, truck, or location makes it heavier, not easier.</td><td>They are scaling the chaos instead of the profit. More volume just means more things to catch by hand.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn"><b>Rep move:</b> your only real goal in a first conversation is to find which two or three of these are bleeding the most. You do not diagnose it fully. That is what the call is for. You make them feel it enough to book. The next section shows you the exact system we build for each one.</div>
+</section>
+
+<section id="systems-deep">
+<div class="eyebrow">07 / The product, in depth</div>
+<h2>What we build, system by system</h2>
+
+<p>Every business runs on the same handful of jobs getting done over and over. Someone answers the phone. Someone books the work. Someone sends the estimate. Someone chases the invoice. When a person does those jobs, the job stops the second that person is busy, out sick, or gone. We build each of those jobs as a digital employee that does the same work without stopping, and we hand it to the client to own. Here is what each one actually does, what it replaces, and where it lands hardest.</p>
+
+<div class="grid g2">
+
+<div class="card">
+<div class="lead-in">Fixes: missed calls, lost leads, after-hours dead air</div>
+<h4>AI Front Desk / Receptionist</h4>
+<p>It answers every inbound call and message, day or night. It knows your services, your service area, and your pricing rules. It books the appointment straight onto the calendar, captures the caller's details, and routes anything urgent to a human. Before: 30 to 40 percent of calls go to voicemail after hours or when the office is slammed, and a missed call is usually a lost customer who dials the next name on the list. After: every call gets answered and the calendar fills itself. In the owner's terms, if you do 1,000 calls a month and were missing 200 of them, and even one in five of those was a real job worth $400, that is $16,000 a month walking out the door on the ring. Lands hardest in home services, HVAC, plumbing, electrical, and any shop where the phone is the front door.</p>
+</div>
+
+<div class="card">
+<div class="lead-in">Fixes: hours lost to scheduling, double-books, windshield time</div>
+<h4>Dispatch &amp; Scheduling Agent</h4>
+<p>It takes the day's jobs and assigns them by tech skill, location, priority, and drive time, then keeps the board updated as things move. When a job cancels it fills the hole. When a tech runs long it reshuffles the rest. Before: a dispatcher spends 3 to 6 hours a day on the phone and the whiteboard, and the routing is only as good as one tired person's memory. After: the board builds itself and dispatch time drops to minutes of oversight. In the owner's terms, that is 3 to 6 hours a day back, tighter routes, more jobs per truck per day, and less overtime. Lands hardest in field service with multiple crews, trades, and any operation running trucks across a city.</p>
+</div>
+
+<div class="card">
+<div class="lead-in">Fixes: slow quote follow-up, leads going cold, inconsistent pricing</div>
+<h4>Lead Response &amp; Estimating</h4>
+<p>It responds to a new lead in seconds, asks the qualifying questions, and builds a first estimate off your pricebook while the customer is still interested. It follows up on its own until the customer answers or says no. Before: the average shop takes hours or days to quote, and speed to lead is the single biggest factor in who wins the job. After: the lead gets a real answer immediately and a consistent price every time. In the owner's terms, going from a 4 hour response to a 4 minute response can lift booked jobs meaningfully, and even a few extra closed estimates a week pays for the system. Lands hardest in contracting, remodeling, roofing, and anywhere the quote is the sale.</p>
+</div>
+
+<div class="card">
+<div class="lead-in">Fixes: dead database, one-time customers, no repeat revenue</div>
+<h4>Reactivation Engine</h4>
+<p>It works the customer list you already have. It finds the people who bought once and never came back, the quotes that were never closed, and the maintenance due for a follow-up, then reaches out with the right message at the right time. Before: that list sits in the CRM doing nothing while you spend money on new leads. After: old customers turn back into jobs at almost no cost. In the owner's terms, a shop with 3,000 past customers that reactivates even 2 percent at $500 a job just found $30,000 out of a database it already paid for. Lands hardest in HVAC, plumbing, dental and med spa, auto, and any business with a big customer list and repeat work.</p>
+</div>
+
+<div class="card">
+<div class="lead-in">Fixes: unbilled work, slow invoicing, revenue leaking out unseen</div>
+<h4>Billing &amp; AR + Revenue Leakage Detector</h4>
+<p>It invoices the second a job is marked done, sends the reminders, and chases the past-due balances without anyone having to feel awkward about it. The leakage detector watches for work that got done but never billed, parts that never made it onto an invoice, and discounts nobody approved. Before: invoicing lags 9 days behind the work, cash sits in the field, and 5 to 15 percent of revenue quietly never gets collected. After: same-day invoicing and the leaks get flagged and closed. In the owner's terms, recovering 8 percent on a $2M business is $160,000 a year you were already earning and not keeping. Lands hardest in construction, field service, and any business with lots of jobs and messy paperwork.</p>
+</div>
+
+<div class="card">
+<div class="lead-in">Fixes: reactive breakdowns, surprise downtime, blown maintenance</div>
+<h4>Work Orders &amp; Predictive Maintenance</h4>
+<p>It tracks every asset, logs every work order, and watches usage and service history to tell you what is about to break before it does. It schedules the service instead of waiting for the failure. Before: maintenance is reactive, a truck or a machine goes down mid-job, and you pay for the emergency plus the lost day. After: service happens on a schedule you set and downtime becomes rare. In the owner's terms, predictive maintenance runs 30 to 50 percent cheaper than reactive, and one avoided breakdown on a critical asset can save a week. Lands hardest in manufacturing, heavy equipment, fleets, oil and gas, and facilities.</p>
+</div>
+
+<div class="card">
+<div class="lead-in">Fixes: thin review count, bad reviews unanswered, weak reputation</div>
+<h4>Reviews &amp; Reputation</h4>
+<p>It asks every happy customer for a review at the right moment, routes the unhappy ones to you privately before they post, and responds to what comes in. Before: reviews are an afterthought, the count is thin, and one bad one sits there unanswered for a month. After: a steady stream of new reviews and a rating that actually reflects the work. In the owner's terms, moving from 3.9 to 4.7 stars and a fresh review every few days is more inbound calls at zero ad cost, because rating is what people pick you on. Lands hardest in any local business where customers check reviews before they call, which is nearly all of them.</p>
+</div>
+
+<div class="card">
+<div class="lead-in">Fixes: no single view, decisions made blind, chaos at scale</div>
+<h4>The Command Center</h4>
+<p>It puts the whole operation on one screen. Jobs, crews, cash, pipeline, AR, and every digital employee reporting live in one place. Before: the owner keeps the business in their head and pulls numbers from five systems a week late. After: one screen, current, that tells you where you are making money and where you are bleeding. In the owner's terms, this is the difference between finding out about a problem this morning versus at month-end when it is already expensive. Lands hardest in operations doing $1M and up where the owner is the bottleneck and every added crew adds chaos.</p>
+</div>
+
+<div class="card">
+<div class="lead-in">Fixes: buried answers, gut-feel decisions, data nobody can reach</div>
+<h4>The Operational LLM Layer</h4>
+<p>It lets you ask the business a question in plain language and get the answer straight from your own data. "Which customers have not booked in a year." "What was margin on the Johnson job." "Which crew runs the most callbacks." Before: getting those answers means a report request, a spreadsheet, and a two-day wait. After: you type the question and read the answer. In the owner's terms, the numbers you needed to make a call are now available in the ten seconds you have to make it. Lands hardest anywhere the owner or managers make decisions all day and the data to back them is locked in systems nobody has time to query.</p>
+</div>
+
+</div>
+
+<div class="callout"><b>The digital workforce, and how you buy it:</b> Most operations have room for about ten of these: receptionist, sales rep, estimator, dispatcher, office manager, HR coordinator, marketing coordinator, accounts receivable, customer success, and executive assistant. You do not buy all ten on day one. You start with the one job that is costing you the most right now, whether that is missed calls, slow dispatch, or leaked revenue. That first digital employee pays for itself fast, and the money it recovers funds the next one. The audit is where we figure out which one goes first for this specific business.</div>
+
+</section>
+
+
+<section id="menu">
+  <div class="eyebrow">08 / The whole menu</div>
+  <h2>The full service menu</h2>
+  <p>The core is the build: the intelligent operating system and the digital workforce you just read about in depth. Around it, TMI has a full menu. You do not pitch these cold. You keep them in your back pocket so that when an owner names a need, you know we cover it, and it all still starts with the same free call.</p>
+  <div class="grid g2">
+    <div class="card"><h4>Digital Workforce</h4><p>Hire individual digital employees by the month: dispatcher, collector, estimator, front desk, reactivation, and more. Built and managed for the client.</p></div>
+    <div class="card"><h4>Back Office</h4><p>Invoicing, accounts receivable, collections, bookkeeping, and admin run by a team backed by AI, so the money side stops leaking.</p></div>
+    <div class="card"><h4>AI Visibility</h4><p>Answer-engine optimization plus SEO, so the business is the answer ChatGPT, Google, and Perplexity give when someone searches their category.</p></div>
+    <div class="card"><h4>Personal Brand Studio</h4><p>A done-for-you founder brand: a real team films the owner's life, edits, plans, and runs the content. For owners and creators who want to build an audience.</p></div>
+    <div class="card"><h4>Programs</h4><p>Coaching, consulting, company masterminds, and trainings for founders, leaders, and teams. Programs start around $10k.</p></div>
+    <div class="card"><h4>Founders of the Future</h4><p>The community for people building intelligent companies: dinners, build labs, and company tours. This is how you bring owners into the room.</p></div>
+  </div>
+  <div class="callout"><b>How to use the menu:</b> never lead with it. Lead with the leak and the free call. But when an owner says "I also need help getting found online" or "I want to build my personal brand," you say "we do that too, and it is one of the things the call maps." The menu proves depth. The call is still the door.</div>
+</section>
+
+<section id="deal">
+<div class="eyebrow">09 / The money, in depth</div>
+<h2>Pricing, value &amp; how deals work</h2>
+
+<p>The whole thing runs on one path. Book a free discovery call, we run an intelligent audit live on that call, and then the owner picks one of three ways to build. No pressure, no obligation to buy anything to get real value out of the call itself. Your job as a rep is to get people onto that call, because the call is where the value gets scoped and the number gets set.</p>
+
+<h3>The path: call to live audit to three ways to build</h3>
+<p>The free discovery call is at tmitechai.com/book. On that call we do the intelligent audit live, meaning we look at their actual operation and map where the money is leaking and which digital employee fixes it first. From there, three paths.</p>
+
+<div class="grid g3">
+<div class="card">
+<div class="lead-in">DIY</div>
+<h4>They build, we guide</h4>
+<p>For the owner who has a capable person in-house and wants to build it themselves with a blueprint and guidance from us. We hand them the plan and the direction, they do the assembly. Lowest cost, most owner effort, best for hands-on operators who like to build.</p>
+</div>
+<div class="card">
+<div class="lead-in">Done-with-you</div>
+<h4>We build alongside your team</h4>
+<p>For the owner who has a team and wants them trained up as it gets built. We build alongside their people and train them so the knowledge stays in the building. The most common path for a growing company that wants ownership and internal capability.</p>
+</div>
+<div class="card">
+<div class="lead-in">Done-for-you</div>
+<h4>We build and install all of it</h4>
+<p>For the owner who just wants it running. We build and install the whole thing, deployed and working, and hand it over live. Highest touch, fastest to running, best for the operator whose time is the scarce resource.</p>
+</div>
+</div>
+
+<h3>The price table</h3>
+<p>These are starting points, not quotes. The final number gets scoped on the call against what the audit finds. Never give a final price from memory.</p>
+
+<div class="tablewrap">
+<table>
+<tr><th>What you buy</th><th>Starts at</th><th>Who it is for</th></tr>
+<tr><td>Digital employee (one system, one job)</td><td>from $5,000</td><td>Fix the single biggest leak first</td></tr>
+<tr><td>Intelligent operating system (full department build)</td><td>from $25,000</td><td>Multiple systems working as one operation</td></tr>
+<tr><td>AI Department Retainer</td><td>$3,000 to $15,000+ / mo</td><td>Ongoing build, run, and optimization as your AI department</td></tr>
+<tr><td>Programs (coaching, consulting, masterminds)</td><td>from $10,000</td><td>Owners who want to be trained to lead the build</td></tr>
+</table>
+</div>
+
+<p><b>One thing to be clear on:</b> the build is a one-time thing you own, not a monthly license. The retainer is a separate choice for the client who wants us to keep building and running it as their AI department. You can own a system without a retainer.</p>
+
+<h3>How to frame value and do the math out loud</h3>
+<p>Never sell on price. Sell on the leak. The move is simple: find the number they are already losing, put it next to the cost, and let the gap do the talking. Do the arithmetic out loud so the owner does it with you.</p>
+
+<div class="callout"><b>Worked example, say it like this:</b> "You told me you do about $2M a year and invoicing runs a week or two behind. Billing automation typically recovers 5 to 15 percent of revenue that leaks out in unbilled work and stuff that never gets collected. Let's be conservative and call it 7 percent. On $2M that is $140,000 a year you are earning right now and not keeping. The system that plugs that leak starts around $25,000 and you own it. So we are talking about spending twenty-five to stop losing a hundred and forty, every year, going forward. That math does not really need me to close it. The audit tells us the exact number for your business." Same move works on dispatch: "You've got a dispatcher spending 5 hours a day on the board. That is 25 hours a week. Cut that to a half hour of oversight and you just got most of a full salary back doing higher-value work, plus more jobs per truck." Always anchor to their real numbers, and always land on the audit giving the exact figure.</p>
+
+<h3>What the audit reveals</h3>
+<p>The audit is not a sales pitch dressed up. It maps their operation and shows, in their numbers, where the money is going: the missed calls, the slow quotes, the invoices lagging, the revenue leaking, the hours burned on work a system should do. It ranks the leaks by size so the owner sees exactly which digital employee to hire first and what that one is worth. Even if they buy nothing, they walk away knowing where they bleed. That is why the call is easy to say yes to.</p>
+
+<h3>When price comes up early</h3>
+<p>People will ask "what does this cost" in the first two minutes. Do not dodge it and do not guess a final number. Say it straight: "It depends on what you need, and I would be making it up if I threw a number at you before we look at your operation. The build starts at $5,000 for a single system and $25,000 for a full department. Where you land depends on what the audit finds is worth fixing first. That call is free and you get the map either way." Give the honest range, tie the real number to the audit, move to the booking.</p>
+
+<h3>Why "you own it, no monthly license" matters</h3>
+<p>Software companies rent you access forever and the day you stop paying, it all goes dark and you have nothing. What we build, the client owns. It is theirs, it keeps running, and there is no switch we flip if they walk away. For an owner who has been burned by stacking monthly subscriptions that never end, that is the whole difference. You are buying an asset that lives in your business, not another bill that shows up every month for as long as you exist.</p>
+
+</section>
+
+
+<section id="opportunities">
+  <div class="eyebrow">10 / The ecosystem</div>
+  <h2>The wider opportunities</h2>
+  <p>TMI is more than the build. There are other doors into the ecosystem. You should know they exist, because a prospect who is not ready for a full build might be perfect for one of these, and it keeps you useful to everyone you meet, not just the ones ready to buy today.</p>
+  <div class="grid g2">
+    <div class="card"><h4>Start a Business</h4><p>For people who want to build a business on intelligent systems from day one. A door for the ambitious owner-to-be, not just the established operator.</p></div>
+    <div class="card"><h4>Make Money With AI</h4><p>For individuals who want to earn with AI. A lighter entry point that still runs through the TMI world.</p></div>
+    <div class="card"><h4>Distro</h4><p>The anti-accelerator for people who have already built an app or product and want distribution. For the builder in your network.</p></div>
+    <div class="card"><h4>TapMe</h4><p>The tap-to-share tool for turning a real-world moment into a connection. Simple, and a natural thing to hand someone you meet.</p></div>
+  </div>
+  <div class="callout"><b>Rep instinct:</b> your bread and butter is the local business that needs an AI department. But keep these in mind. Every person you meet fits somewhere in the TMI world, and pointing them to the right door builds the reputation that fills your pipeline.</div>
+</section>
+
+<section id="rep-ops">
+<div class="eyebrow">11 / Your operation</div>
+<h2>Your role &amp; how to run your week</h2>
+
+<p>You have one job. Book discovery calls that turn into clients. Everything in this section exists to keep you pointed at that one number, because that is the only thing that puts money in your pocket and the only thing we grade you on.</p>
+
+<div class="callout">
+<p><b>The one rule:</b> You open the door. The system closes. You are not the pitch, the demo, the proposal, or the price. You find an owner, make them feel a leak they already suspected, and get them booked at tmitechai.com/book. The founder and a strategist run the audit live on that call and scope the build. Your win is a booked call that shows up and becomes a client.</p>
+</div>
+
+<h3>What you own, and what you do not</h3>
+<div class="grid g2">
+<div class="card">
+<p><b>You own</b></p>
+<ul>
+<li>Finding owners and operators worth talking to</li>
+<li>Making first contact across every channel</li>
+<li>Surfacing a real leak in a two minute conversation</li>
+<li>Getting the call booked and confirmed</li>
+<li>Reminding the prospect so they actually show</li>
+<li>Clean handoff notes to the founder before the call</li>
+</ul>
+</div>
+<div class="card">
+<p><b>You do not own</b></p>
+<ul>
+<li>Running the audit or the discovery call</li>
+<li>Explaining how the build works under the hood</li>
+<li>Quoting any price. The call scopes it, every time</li>
+<li>Handling deep technical questions. Park them for the call</li>
+<li>Negotiating, closing, or writing contracts</li>
+<li>Delivery. Once they are a client, the build team takes over</li>
+</ul>
+</div>
+</div>
+
+<p>When a prospect pushes you toward price or product detail, that is your cue to book, not to answer. "That is exactly what the founder walks you through on the call. Let me get you on his calendar." You are the door. Stay the door.</p>
+
+<h3>A realistic day</h3>
+<p>Do not try to work sixteen hours in a blur. A rep who blocks time and protects the prospecting window will beat a rep who "stays busy" every week of the year. Here is a day that works.</p>
+
+<div class="step">
+<div class="n">1</div>
+<div class="b">8:00 to 8:30 - Setup. Review your pipeline. Pull the list of who you are contacting today. Check for any calls booked and confirm them by text. Read your handoff notes for any call happening today.</div>
+</div>
+<div class="step">
+<div class="n">2</div>
+<div class="b">8:30 to 11:00 - Live prospecting block one. Walk-ins and cold calls while owners are on site and reachable. This is your money window. Phone off social. No email in this block.</div>
+</div>
+<div class="step">
+<div class="n">3</div>
+<div class="b">11:00 to 12:00 - Follow-up block. Work your cadence. Anyone you touched on prior days who has not answered gets their next scheduled touch. This is where most booked calls actually come from.</div>
+</div>
+<div class="step">
+<div class="n">4</div>
+<div class="b">12:00 to 1:00 - Lunch, and this is also when a lot of owners finally pick up. Keep the phone close. A call over a sandwich is still a call.</div>
+</div>
+<div class="step">
+<div class="n">5</div>
+<div class="b">1:00 to 3:30 - Live prospecting block two. More walk-ins, more calls, referral asks with anyone friendly. Mix channels so you do not burn out on one.</div>
+</div>
+<div class="step">
+<div class="n">6</div>
+<div class="b">3:30 to 4:30 - Written outreach. LinkedIn, DMs, cold email, Facebook group replies. Slower channels that do not need the owner live.</div>
+</div>
+<div class="step">
+<div class="n">7</div>
+<div class="b">4:30 to 5:00 - Close the day. Log every touch. Update pipeline stages. Prep handoff notes for tomorrow's booked calls. Set tomorrow's list so you walk in ready.</div>
+</div>
+
+<h3>Weekly cadence</h3>
+<div class="grid g2">
+<div class="card">
+<p><b>Monday</b> - Plan the week. Build your target list by neighborhood and vertical. Heavy prospecting. Confirm every call already on the calendar.</p>
+</div>
+<div class="card">
+<p><b>Tuesday and Wednesday</b> - Peak field days. Most walk-ins and most booked calls land here. Owners are on the job and reachable.</p>
+</div>
+<div class="card">
+<p><b>Thursday</b> - Prospecting plus a networking event, chamber meeting, or BNI if you have one. Push referral asks hard.</p>
+</div>
+<div class="card">
+<p><b>Friday</b> - Follow-up heavy. Owners wrap the week and answer more. Confirm next week's calls. Clean your pipeline before you leave.</p>
+</div>
+</div>
+
+<h3>How many touches it takes</h3>
+<p>Set your expectations to the real math so you do not quit on a good week that just looks slow. Most owners do not answer the first time, or the second. The booked call usually lands on touch three through six. If you stop at one, you leave nearly every deal on the table.</p>
+
+<div class="tablewrap">
+<table>
+<tr><th>Activity</th><th>Rough ratio</th><th>What it means</th></tr>
+<tr><td>Contacts to conversations</td><td>4 to 1</td><td>One in four you reach will actually talk</td></tr>
+<tr><td>Conversations to booked</td><td>3 to 1</td><td>Feel one real leak, they book</td></tr>
+<tr><td>Booked to showed</td><td>4 to 3</td><td>Confirm and remind or you lose the fourth</td></tr>
+<tr><td>Showed to client</td><td>varies</td><td>The founder closes on the call, not you</td></tr>
+</table>
+</div>
+
+<p>Read it backward. To get a healthy week of showed calls, you need a stack of conversations, which needs a much larger stack of contacts. That is why the prospecting blocks are non-negotiable.</p>
+
+<h3>Pipeline stages</h3>
+<p>Every prospect sits in exactly one stage. Move them forward, or move them out. A pipeline full of "maybe someday" is a pipeline of zero.</p>
+
+<div class="tablewrap">
+<table>
+<tr><th>Stage</th><th>Means</th><th>Your next action</th></tr>
+<tr><td>Identified</td><td>A real business with an owner you can name</td><td>Make first contact</td></tr>
+<tr><td>Contacted</td><td>You reached out, no reply yet</td><td>Run the follow-up cadence</td></tr>
+<tr><td>Conversation</td><td>You actually talked, a leak surfaced</td><td>Ask for the booking</td></tr>
+<tr><td>Booked</td><td>Call is on the calendar</td><td>Confirm and remind so they show</td></tr>
+<tr><td>Showed</td><td>They attended the audit</td><td>Founder runs it, you log the outcome</td></tr>
+<tr><td>Client</td><td>They signed</td><td>Ask for a referral, protect the relationship</td></tr>
+</table>
+</div>
+
+<div class="callout warn">
+<p><b>Track it or it did not happen.</b> Log every prospect, every stage, and every touch with a date. A deal you forgot to follow up on is a deal you gave to nobody. Whatever tool you use, a spreadsheet or a CRM, update it at the end of every single day.</p>
+</div>
+
+<h3>Territory strategy</h3>
+<p>Do not spray a whole city thin. Own it block by block and vertical by vertical.</p>
+
+<div class="grid g3">
+<div class="card">
+<p><b>Density</b></p>
+<p>Work one commercial corridor or industrial park at a time. Ten walk-ins in ten adjacent buildings beats ten across town. Windshield time is dead time.</p>
+</div>
+<div class="card">
+<p><b>Verticals to own</b></p>
+<p>Pick two or three trades and go deep. HVAC, plumbing, electrical, construction, landscaping. When you speak their exact leaks, you sound like an insider, and referrals stay inside the trade.</p>
+</div>
+<div class="card">
+<p><b>Referral flywheel</b></p>
+<p>Every client and every friendly no is a door to three more. Owners know owners. Ask every time. A warm intro converts far higher than any cold touch you will ever make.</p>
+</div>
+</div>
+
+<h3>The metrics you watch</h3>
+<p>Vanity numbers lie. Watch the ones that predict booked calls, and watch the one that pays you.</p>
+<div class="grid g2">
+<div class="card">
+<p><b>Leading (you control these daily)</b></p>
+<ul>
+<li>Contacts made per day</li>
+<li>Live conversations per day</li>
+<li>Follow-up touches completed</li>
+<li>Referral asks made</li>
+</ul>
+</div>
+<div class="card">
+<p><b>Lagging (the scoreboard)</b></p>
+<ul>
+<li>Calls booked this week</li>
+<li>Show rate on booked calls</li>
+<li>Booked calls that became clients</li>
+<li>Your conversation to booked ratio, trending</li>
+</ul>
+</div>
+</div>
+<p>If booked calls dip, look up the chain. Fewer bookings almost always trace to fewer conversations, which traces to fewer contacts. Fix the top of the funnel first.</p>
+</section>
+
+<section id="prospecting">
+<div class="eyebrow">12 / Filling the pipeline</div>
+<h2>Prospecting: channels &amp; scripts</h2>
+
+<p>Pipeline is oxygen. No pipeline, no booked calls, no paycheck. You have seven channels. You do not need all seven every day, but you need to be strong in three or four. Lead with a leak on every one of them. Never lead with "we do AI."</p>
+
+<h3>The channels and how to work each one</h3>
+
+<div class="grid g2">
+<div class="card">
+<p><b>In-person walk-ins</b></p>
+<p>Your highest-trust channel. Walk into the office, ask for the owner by name if you have it. Be brief, be human, name a leak, ask for two minutes. If the owner is out, get the name and the best time, and come back. Dress like you belong on a jobsite, not in a boardroom.</p>
+</div>
+<div class="card">
+<p><b>Referrals</b></p>
+<p>The channel that converts best and costs least. Every client, every friendly no, and every person in your network can hand you a warm door. The trick is simple. You have to actually ask, by name, every time. See the script below.</p>
+</div>
+<div class="card">
+<p><b>LinkedIn</b></p>
+<p>Find owners and operators by title and city. Do not pitch in the connection request. Connect, then open with a leak in a short message. Comment on their posts first so your name is not cold when you land in their inbox.</p>
+</div>
+<div class="card">
+<p><b>Local Facebook groups</b></p>
+<p>Contractor groups, chamber groups, "[City] small business" groups. Do not spam. Answer questions, be useful, and DM the owners who post about being slammed, missing calls, or drowning in paperwork. They just told you their leak in public.</p>
+</div>
+<div class="card">
+<p><b>Chambers, BNI, networking</b></p>
+<p>Show up regularly, not once. Owners buy from people they see twice. Your goal at an event is not to pitch, it is to get two coffees on the calendar. Collect cards, follow up in 48 hours, book the real conversation later.</p>
+</div>
+<div class="card">
+<p><b>Cold call</b></p>
+<p>Fast and scalable. Expect most to not answer. Open with a leak, get to the point in ten seconds, and drive to the call. Call during work hours but not at 7am or right at close. See the branch script below.</p>
+</div>
+<div class="card">
+<p><b>Cold email and DM</b></p>
+<p>Volume channel for owners you cannot reach live. Short, one leak, one question, one link. No paragraphs, no brochure. The whole job of the email is to start a reply, not to sell.</p>
+</div>
+</div>
+
+<div class="callout">
+<p><b>Every channel, same spine:</b> lead with a leak the owner already feels, keep it short, and drive to one thing, the free call at tmitechai.com/book. You are not explaining the product. You are giving them a reason to spend 30 minutes with the founder.</p>
+</div>
+
+<h3>The scripts</h3>
+
+<div class="script">
+<span class="who">Walk-in - opener</span>
+<p>"Hey, are you the owner? I am [Name] with TMI, I work with [trade] shops here in town. I will keep this to two minutes. Most owners I talk to are losing five to fifteen percent of revenue to work that gets done and never billed clean, or calls that come in after hours and go nowhere. Is that something you have ever felt here, or are you tight on that? ... The founder does a free 30 minute call where he looks at exactly where that is happening in your shop. No pitch, no cost. Can I get you on his calendar this week?"</p>
+</div>
+
+<div class="script">
+<span class="who">Cold call - script with branches</span>
+<p>"Hi, is this [Owner]? [Name] with TMI, I will be quick. We help [trade] owners stop leaking money on missed calls and work that gets billed late or not at all. Quick question, when a call comes in and nobody grabs it, does that lead just disappear, or do you have something catching it?"</p>
+<p><b>If "we handle it fine":</b> "Good, most owners think that until they see the number. That is the whole point of the free call. The founder shows you where it is actually leaking, on your own numbers. Worst case you get a clear picture for free. Fifteen minutes Thursday or does Friday work better?"</p>
+<p><b>If "we are slammed / no time":</b> "That is exactly why. Busy and profitable are not the same thing, and the reason usually hides in that busy. The call is 30 minutes and the founder runs it, not me. I will send the link and you pick the slot. Cell number to text you the confirmation?"</p>
+<p><b>If "not interested":</b> "Fair enough. Can I ask, if you were losing a real chunk of revenue every month and did not know it, would you want to see it or not? ... That is all the call is. No cost. Want me to send the link so you have it?"</p>
+</div>
+
+<div class="script">
+<span class="who">Cold DM - LinkedIn or Facebook</span>
+<p>"Hey [Name], saw you run [Company]. Not selling you anything here. Quick one. Most [trade] owners I talk to are quietly losing revenue to work that never gets billed clean and follow-ups that slip between people. We fix that with systems the owner actually owns. The founder does a free 30 minute look at where it is happening. Worth me sending the link?"</p>
+</div>
+
+<div class="script">
+<span class="who">Cold email - subject and body</span>
+<p><b>Subject:</b> the 5 to 15 percent leak at [Company]</p>
+<p>"[Name], most [trade] owners in [City] are losing five to fifteen percent of revenue to work that gets done and billed late or never, plus calls that come in and go nowhere. TMI builds the systems that catch all of it, and you own them, no monthly license. The founder does a free 30 minute call where he shows you exactly where it is leaking in your operation. No pitch. Want the link to grab a time? You can also text questions to (337) 450-9795."</p>
+</div>
+
+<div class="script">
+<span class="who">Referral ask - to a client or contact</span>
+<p>"Quick favor. You know how [we caught the billing you were missing / you saw where the calls were leaking]? Who else comes to mind, another owner you actually respect, who is dealing with the same thing? If you can think of one or two, I would love a quick intro. Even just a text saying 'talk to this person' goes a long way. Who comes to mind first?"</p>
+</div>
+
+<h3>The follow-up cadence</h3>
+<p>This is where the money is. Most reps quit after one touch and blame the market. Run this sequence on every prospect who does not book on first contact. Mix channels so you are not just calling the same number into voicemail.</p>
+
+<div class="step">
+<div class="n">0</div>
+<div class="b">Day 0 - First contact. Walk-in, call, or DM. Lead with a leak, ask for the booking. If no book, get the best contact and permission to follow up.</div>
+</div>
+<div class="step">
+<div class="n">2</div>
+<div class="b">Day 2 - Second touch, different channel. If you called, now email or DM. "Following up. That five to fifteen percent leak is worth 30 free minutes with the founder. Want the link?"</div>
+</div>
+<div class="step">
+<div class="n">5</div>
+<div class="b">Day 5 - Value touch. Send one specific thing that lands. A one-line example of a leak a shop like theirs had, or a short client result. No ask heavy, just "thought of you, this is exactly the kind of thing the call surfaces."</div>
+</div>
+<div class="step">
+<div class="n">10</div>
+<div class="b">Day 10 - Direct ask again. Call or walk back in. "Still want to get you that free look. Does this week work, or should I check back next month?" Give them an easy yes or a clean out.</div>
+</div>
+<div class="step">
+<div class="n">17</div>
+<div class="b">Day 17 - The break-up. "I do not want to keep bugging you. I will close your file for now. If the missed-revenue thing ever gets loud enough, the link is tmitechai.com/book and questions go to (337) 450-9795. Door is open." This one books more calls than you would expect.</div>
+</div>
+<div class="step">
+<div class="n">30+</div>
+<div class="b">Day 30 and beyond - Long-term nurture. Anyone who did not book but stayed friendly goes on a monthly check-in. Owners' situations change. The no today is often a yes next quarter.</div>
+</div>
+
+<div class="callout warn">
+<p><b>Log every touch with a date.</b> The cadence only works if you know who is on day 2 and who is on day 10. If it is not written down, it will not happen, and you will re-pitch some people and forget others entirely.</p>
+</div>
+</section>
+
+<section id="first-convo">
+<div class="eyebrow">13 / The first conversation</div>
+<h2>The first conversation &amp; discovery</h2>
+
+<p>The goal of the first conversation is one thing. Book the call. You are not here to explain TMI, demo anything, or win a debate about AI. You are here to make an owner feel a leak they already suspected, then hand them 30 free minutes with the founder to see it clearly. If you try to close, you will lose. Open the door and step back.</p>
+
+<div class="callout">
+<p><b>The framework:</b> Open with a leak. Ask two or three discovery questions. Mirror the pain back in their own words. Book the call. That is the entire play. Four moves. Do not add a fifth.</p>
+</div>
+
+<h3>Discovery questions that surface leaks</h3>
+<p>You are listening for pain, not delivering a script. Ask a couple, shut up, and let them talk. The moment they describe a leak, you have your booking hook. Group them by what they expose.</p>
+
+<div class="grid g2">
+<div class="card">
+<p><b>About the owner's time</b></p>
+<ul>
+<li>If you took a week fully off, would the business run without you calling in?</li>
+<li>What is the stuff only you can do right now?</li>
+<li>How much of your day is putting out fires versus actually growing the thing?</li>
+</ul>
+</div>
+<div class="card">
+<p><b>About money and billing</b></p>
+<ul>
+<li>How confident are you that every job that gets done actually gets billed?</li>
+<li>How long between finishing work and the invoice going out?</li>
+<li>Do you know, today, which jobs made money and which lost it?</li>
+</ul>
+</div>
+<div class="card">
+<p><b>About lead flow</b></p>
+<ul>
+<li>When a call comes in and nobody grabs it, what happens to that lead?</li>
+<li>How fast does a new lead actually get a call back?</li>
+<li>When was the last time you reached back out to a past customer?</li>
+</ul>
+</div>
+<div class="card">
+<p><b>About the team</b></p>
+<ul>
+<li>When something slips, is it usually a person or a process that dropped it?</li>
+<li>How much lives in one person's head or one person's phone?</li>
+<li>When you grew, did profit grow with it, or just the chaos?</li>
+</ul>
+</div>
+</div>
+
+<h3>How to transition to the booking</h3>
+<p>The second an owner admits a leak, mirror it back and go straight to the calendar. Do not explain how TMI fixes it. That is the founder's job on the call. Here is exactly what I would say:</p>
+
+<div class="script">
+<span class="who">Transition - leak to booking</span>
+<p>"So if I heard you right, calls after hours basically vanish and you are not sure everything is getting billed. That is the exact stuff the founder digs into on a free 30 minute call. He looks at your operation and shows you where the money is actually leaking, on your numbers, not a generic pitch. Worst case, you walk away with a clear picture for free. What is better for you, Thursday afternoon or Friday morning?"</p>
+</div>
+
+<p>Notice the moves. Mirror their words. Name the free call. Lower the risk. Offer two times, not an open "when are you free." Two choices book far more calls than an open question.</p>
+
+<h3>How to handle "just send me info"</h3>
+<p>"Send me info" is almost always a polite no. A PDF never closes and never books. Redirect to the call, because the call is the thing that actually helps them.</p>
+
+<div class="script">
+<span class="who">Objection - "just send me info"</span>
+<p>"I could, but honestly a brochure would waste your time. Nothing I send will be specific to your shop. The 30 minute call is the opposite, the founder looks at your actual operation and shows you exactly where you are leaking. That is worth far more than a PDF, and it is free. Let me grab you a slot this week, and if it is not useful you have lost 30 minutes. Thursday or Friday?"</p>
+</div>
+
+<p>If they still insist, get the booking link into their hands and set a follow-up. "I will text you the link right now from (337) 450-9795, and I will check back Friday. Fair?" You keep control of the next step instead of handing it to a document.</p>
+
+<h3>A full conversation, open to booked</h3>
+
+<div class="script">
+<span class="who">Walk-in - full example</span>
+<p><b>Rep:</b> "Hey, are you the owner? I am [Name] with TMI, I work with plumbing and HVAC shops around here. Two minutes, then I am gone. Can I ask you something straight?"</p>
+<p><b>Owner:</b> "Sure, go ahead."</p>
+<p><b>Rep:</b> "When a call comes in after hours or your guys are all on jobs, what happens to that lead?"</p>
+<p><b>Owner:</b> "Honestly? Voicemail. We call back when we can. Some of them we probably lose."</p>
+<p><b>Rep:</b> "Yeah, that is the pattern. And the billing side, are you confident every job that gets finished actually gets invoiced clean and on time?"</p>
+<p><b>Owner:</b> "Mostly. The paperwork gets behind though. My office manager is buried."</p>
+<p><b>Rep:</b> "So leads slipping to voicemail, and invoicing running behind because one person is buried. That right there is usually five to fifteen percent of revenue an owner never sees. Here is the thing. The founder at TMI does a free 30 minute call where he looks at your actual operation and shows you exactly where that is leaking. No pitch, no cost, and you would own whatever gets built. Worst case you get a clear picture for free. What works better, Thursday afternoon or Friday morning?"</p>
+<p><b>Owner:</b> "Thursday could work, later in the day."</p>
+<p><b>Rep:</b> "Done. Best cell to text you the confirmation and the link? ... Perfect. You will get it from (337) 450-9795, and that same number is where you text any questions before the call. I will lock Thursday at 4. Talk soon."</p>
+</div>
+
+<div class="callout warn">
+<p><b>Once it is booked, protect it.</b> Text the confirmation immediately, remind them the day before, and write your handoff notes for the founder, the leaks they admitted and in their own words. A booked call that no-shows is worth nothing. The reminder is part of the job, not an extra.</p>
+</div>
+</section>
+
+
+<section id="qualify">
+  <div class="eyebrow">14 / The filter</div>
+  <h2>How to qualify anyone, in any industry</h2>
+  <p>You do not need to know their business. You need four answers. This works whether you are standing in a machine shop or a med spa, on a cold DM or across a table.</p>
+  <ol class="rich">
+    <li><strong>Are they established?</strong> Real revenue, a team, actual volume. Not a brand-new solo operator with nothing to systematize yet. Best fit is roughly $1M and up, and it scales from there.</li>
+    <li><strong>Is the owner the bottleneck?</strong> Ask "what happens when you take a week off?" If they laugh or wince, you found it.</li>
+    <li><strong>What is breaking?</strong> Get them to name a leak from section 06. Missed calls, unbilled work, no visibility, nobody comes back. One is enough.</li>
+    <li><strong>Does growth make it worse?</strong> "Does every new hire or location make it easier or heavier?" If heavier, that is your whole pitch in their own words.</li>
+  </ol>
+  <div class="callout"><b>Green light:</b> established, owner-dependent, a nameable leak, and growth adds chaos. Book them. <b>Not now:</b> too new, no volume, or genuinely already systematized. Be honest, stay friendly, and ask who they know who is drowning. That referral is worth more than a bad-fit call.</div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Signal</th><th>Green light</th><th>Not right now</th></tr></thead>
+    <tbody>
+      <tr><td><b>Revenue</b></td><td>Roughly $1M and up, steady volume</td><td>Pre-revenue or a brand-new solo hustle</td></tr>
+      <tr><td><b>Owner load</b></td><td>"Nothing runs right when I step away"</td><td>Already delegated and systematized</td></tr>
+      <tr><td><b>A named leak</b></td><td>They can point to missed work or lost money</td><td>Cannot name a single thing that hurts</td></tr>
+      <tr><td><b>Growth</b></td><td>Every add makes it heavier</td><td>Scaling cleanly, no pain from growth</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+
+<section id="language">
+  <div class="eyebrow">15 / Voice</div>
+  <h2>How to talk about TMI</h2>
+  <p>TMI has a voice. Direct, real, no hype. You represent it. Match it. If a sentence sounds like a software brochure, cut it.</p>
+  <div class="say">
+    <div class="good"><h4>Say this</h4><ul>
+      <li>"We build intelligent companies."</li>
+      <li>"Your AI department and growth partner."</li>
+      <li>"A digital employee that runs your front desk."</li>
+      <li>"The system catches the job you are missing."</li>
+      <li>"You own it. Built in 30 days. No monthly license."</li>
+      <li>"We map where your business leaks time and money."</li>
+    </ul></div>
+    <div class="bad"><h4>Never say</h4><ul>
+      <li>"Leverage AI to optimize your synergy."</li>
+      <li>"It's an AI chatbot / tool / platform."</li>
+      <li>"AI will solve all your problems."</li>
+      <li>Buzzwords, hype, or a wall of jargon.</li>
+      <li>Hard compliance or guarantee promises.</li>
+      <li>A final price before the call scopes it.</li>
+    </ul></div>
+  </div>
+  <div class="callout"><b>Rule of thumb:</b> talk about the <b>problem</b> and the <b>system that fixes it</b>, never the technology for its own sake. Owners do not buy AI. They buy a full schedule, a phone that never gets missed, money that stops leaking, and their own time back.</div>
+</section>
+
+<section id="objections-deep">
+<div class="eyebrow">16 / Handling pushback</div>
+<h2>Objection handling, deep</h2>
+
+<div class="callout"><b>The formula, every time:</b> acknowledge, reframe, book. First, acknowledge the objection so they feel heard and you are not arguing. Second, reframe it back to the leak or the value, because most objections are really about cost versus a cost they cannot see yet. Third, move to the free call, because the call is where the real answer lives. You are never closing the deal on the phone. You are closing the booking.</div>
+
+<details class="qa"><summary>"It's too expensive."</summary><p>Fair, and I would not spend it either if it were just a cost. But look at it against what the leak is costing you. If you are losing even 7 percent of revenue to slow billing and missed calls, on a $2M business that is $140,000 a year, every year. The build is a one-time number that starts at $5,000 for one system. Expensive is bleeding six figures a year and calling it normal. Let's do the free call and put the real numbers side by side, then you decide.</p></details>
+
+<details class="qa"><summary>"I don't have the budget right now."</summary><p>Understood, and that is exactly why we start with the one system fixing the biggest leak instead of the whole thing. That first digital employee is built to pay for itself fast and fund the next one, so it comes out of money you are currently losing, not money you have to find. The audit is free and shows you the number. If the math does not work, you spend nothing.</p></details>
+
+<details class="qa"><summary>"I already have software. We use ServiceTitan / Jobber / whatever."</summary><p>Good, keep it. We are not here to rip out your CRM. That software stores your data and runs your workflows, but it still needs a human to answer the phone, chase the invoice, and follow up on the lead. We build the digital employees that actually do those jobs and we plug them into what you already have. Your software is the filing cabinet. We build the workers. The call shows you where the gaps between them are costing you.</p></details>
+
+<details class="qa"><summary>"Is this just a chatbot?"</summary><p>No. A chatbot answers questions on a website. What we build does the work: it books the job on the calendar, routes the crew, sends the invoice, chases the past-due balance, and reactivates old customers. It is a digital employee that completes real tasks in your operation, not a pop-up that deflects support tickets. On the call I will show you exactly what one does end to end.</p></details>
+
+<details class="qa"><summary>"Is this going to replace my staff?"</summary><p>It replaces the work nobody wants to do, not the people. Your team stops spending 5 hours a day on the scheduling board and chasing invoices, and spends it on customers and the jobs that need a human. Most owners do not cut people, they stop needing to hire the next three as they grow, and the people they have get more done. It takes the grunt work off their plate so they do the work you actually hired them for.</p></details>
+
+<details class="qa"><summary>"My team won't use it."</summary><p>That is the most common reason software fails, and it is exactly why we build it differently. It runs the work in the background instead of asking your crew to log into another app and change how they do their job. The receptionist answers whether or not anyone touches it. On the done-with-you path we train your people so it is theirs, not something imposed on them. Low adoption effort is the point.</p></details>
+
+<details class="qa"><summary>"I don't have time for this."</summary><p>I hear that, and it is the reason you need it. Being too busy to fix the thing making you busy is the trap. That is what the done-for-you path is for: we build and install the whole thing, you do not lift a wrench. The only time you spend up front is one free call, and the whole point of what we install is to give you your time back. Thirty minutes now to stop losing hours every week.</p></details>
+
+<details class="qa"><summary>"My business is too niche. You don't understand my industry."</summary><p>Could be, and that is a fair worry. But the jobs underneath every business are the same. You answer calls, book work, quote, dispatch, invoice, and follow up, whether you pour concrete or run a med spa. We build the systems around your specific workflow, not a template, and the audit is where you tell me what makes yours different so we build for it. If it genuinely does not fit, I will tell you on the call and we both save time.</p></details>
+
+<details class="qa"><summary>"How is this different from every other AI company right now?"</summary><p>Most of them sell you a tool and a login and leave you to figure it out, and you are renting it forever. We build an actual operating system and a digital workforce, install it, and hand you ownership. No monthly license on the build. Built in about 30 days. And it is not one gadget, it is the whole operation connected on one screen. The audit is free, so you can compare us against anyone with real numbers in hand.</p></details>
+
+<details class="qa"><summary>"Do I have to replace everything I'm running?"</summary><p>No. We start with one system, the one fixing your biggest leak, and it works alongside everything you already have. You do not tear anything out and you do not rebuild your whole operation on day one. Prove it on one job that costs you the most, then expand as it pays for itself. Nobody flips a switch on your whole business at once.</p></details>
+
+<details class="qa"><summary>"What's the catch? Why is the call free?"</summary><p>No catch. The call is free because the audit is genuinely useful on its own, and honestly it is our best sales tool. When we show an owner exactly where they are losing money and what it is worth to fix, a lot of them want us to build it. Some take the map and go do it themselves, and that is fine too. We would rather earn it by showing you the real numbers than talk you into anything. Worst case, you leave knowing where you bleed.</p></details>
+
+<details class="qa"><summary>"Now's not a good time. Circle back next quarter."</summary><p>That works, and I will. One thing though: the leak does not wait for next quarter. If you are losing $10,000 a month to missed calls and slow billing, waiting three months is $30,000 gone that you do not get back. The call is free and it is 30 minutes. Doing the audit now does not commit you to building now, it just tells you what the delay is actually costing so you can decide with real numbers.</p></details>
+
+<details class="qa"><summary>"I need to talk to my partner / spouse / the other owner first."</summary><p>Absolutely, this is a decision you make together. The best thing you can bring them is not my pitch, it is the audit, because it lays out in your own numbers where the money is going and what it is worth to fix. Let's get both of you on the call, or do it now and I will send you the map to walk them through. Either way you are deciding on facts, not my say-so.</p></details>
+
+<details class="qa"><summary>"I tried AI before and it didn't work."</summary><p>I believe you, and most of what got sold as AI the last couple years was a chatbot with a coat of paint. That is not this. We build systems that do complete jobs and we install them into your operation instead of handing you a login and wishing you luck. On the call I will show you a specific one working end to end, so you are judging what we actually build, not what burned you last time.</p></details>
+
+<details class="qa"><summary>"Just send me some info."</summary><p>I can, but honestly a PDF will not tell you what you actually want to know, which is what this is worth for your business specifically. That number only comes from looking at your operation, and that is the free audit. It is 30 minutes, you get the map, and there is no obligation. That is a far better use of your time than reading a brochure. What does your Thursday look like?</p></details>
+
+<details class="qa"><summary>"Is my data safe? I'm not comfortable handing over my business info."</summary><p>Good instinct, you should ask that of anyone. You own what we build, including the data in it, and it lives in your business, not rented back to you. We are not selling your information or holding it hostage behind a subscription. On the call we walk through exactly how it is set up and what stays in your control, which is all of it. Ownership is the whole model here.</p></details>
+
+<details class="qa"><summary>"How do I know it'll actually work for me?"</summary><p>You do not have to take my word for it, and you should not. That is what the audit is for. We look at your real operation and show you the specific leak, the specific system that fixes it, and the number it is worth, before you spend a dollar. Then we start with one system on the job costing you the most, so you see it work on something real before you go further. The free call is where you find out, with your own numbers, whether this is for you.</p></details>
+
+</section>
+
+
+<section id="call">
+  <div class="eyebrow">17 / The booked call</div>
+  <h2>The discovery call, and what to have them ready with</h2>
+  <p>You do not run the call. The founder and a strategist do, and they run the intelligent audit live on it. But you set it up to succeed. When a prospect books at <a href="https://www.tmitechai.com/book">tmitechai.com/book</a>, they get a confirmation and reminders that tell them how to prep. Reinforce it so they show up warm and show up at all.</p>
+  <h3>What they should come ready to talk about</h3>
+  <ul>
+    <li>The one thing they most want off their plate.</li>
+    <li>A rough sense of their numbers: revenue, team size, and where jobs, leads, or money slip.</li>
+    <li>The tools and software they are paying for right now.</li>
+    <li>Where the business leans too hard on the owner to run.</li>
+  </ul>
+  <div class="callout"><b>Your line to the prospect:</b> "You'll get a confirmation and a couple reminders. Come with the one thing you most want off your plate and a rough sense of your numbers. Anything before then, just text (337) 450-9795, a real person answers."</div>
+  <div class="callout warn"><b>The no-show killer:</b> a booked call is not a held call. The night before, send one text: "Looking forward to tomorrow at [time]. Bring the one thing you most want off your plate. Text me here if anything comes up." That single reminder is the difference between a full calendar and a half-empty one.</div>
+</section>
+
+<section id="cases">
+<div class="eyebrow">18 / Proof</div>
+<h2>How it plays out: example builds</h2>
+<p>These are the shapes of the work. Real patterns, no real names. Read them so you can tell an owner what the audit tends to find in a business like theirs, and so you never oversell a specific number you have not measured yet.</p>
+<div class="grid g2">
+<div class="card">
+<div class="lead-in">Field service, plumbing - $6M</div>
+<h4>The trucks were making money the office was losing</h4>
+<p><b>Breaking:</b> Dispatch ran out of one person's head and a whiteboard. Invoices went out nine days after the work was done, and techs made a second trip on jobs that should have been one, because parts and history never made it to the truck.</p>
+<p><b>Built:</b> A connected operating system for dispatch, job history, and billing, plus a digital employee that builds and sends the invoice the moment a job closes.</p>
+<p><b>Changed:</b> This is the kind of build where the audit targets same-day invoicing instead of a nine-day cycle, dispatch time cut by 3 to 6 hours a day, and second trips down 60 to 80%. The audit finds the real number for the specific shop.</p>
+</div>
+<div class="card">
+<div class="lead-in">Construction, general contractor - $22M</div>
+<h4>Every job ran over and nobody saw it until the end</h4>
+<p><b>Breaking:</b> Budgets lived in spreadsheets that were updated after the money was already spent. Change orders got done on a handshake and billed late or not at all. The company only learned a job lost money when the job was over.</p>
+<p><b>Built:</b> An operating system that tracks budget against actual in real time, with a digital employee that flags overruns early and keeps change orders from slipping through the cracks.</p>
+<p><b>Changed:</b> With 85% of construction projects running over budget as the baseline, this is the kind of build where the audit targets billing recovery of 5 to 15% of revenue that was quietly leaking, plus overruns caught while there is still time to act.</p>
+</div>
+<div class="card">
+<div class="lead-in">Healthcare, three-location med spa</div>
+<h4>Front desk was the bottleneck and no-shows ate the calendar</h4>
+<p><b>Breaking:</b> Booking, reminders, and follow-up all ran through a busy front desk. Leads sat unanswered for hours, no-shows were never chased, and the three locations each did it differently.</p>
+<p><b>Built:</b> One operating system across all three locations with a digital employee that answers leads instantly, confirms appointments, and runs rebooking and follow-up on its own.</p>
+<p><b>Changed:</b> This is the kind of build where the audit targets the revenue recovered from leads that used to go cold and calendar slots that used to sit empty, with the front desk freed to handle the patient in front of them.</p>
+</div>
+<div class="card">
+<div class="lead-in">Ecommerce, apparel brand - $4M</div>
+<h4>Growth stalled because the founder was still doing customer service</h4>
+<p><b>Breaking:</b> Support tickets, returns, and order questions all funneled to the owner and one assistant. Response times crept up, reviews slipped, and the team spent its day reacting instead of building.</p>
+<p><b>Built:</b> A connected operating system for support, orders, and returns with a digital employee that resolves the routine questions end to end and routes only the real exceptions to a human.</p>
+<p><b>Changed:</b> This is the kind of build where the audit targets the hours pulled back from repetitive tickets and the revenue recovered from faster response and cleaner returns, so the team can spend its time on the work that actually grows the brand.</p>
+</div>
+<div class="card">
+<div class="lead-in">Owner bottleneck, HVAC - $9M</div>
+<h4>The business could not run for a week without him</h4>
+<p><b>Breaking:</b> The owner approved every quote, answered every escalation, and held the schedule together by memory. When he took a week off, revenue dropped and mistakes stacked up, because he was the operating system.</p>
+<p><b>Built:</b> We took the owner's process out of his head and installed it as a real system, with a digital workforce that runs quoting, scheduling, and follow-up to the same standard he did.</p>
+<p><b>Changed:</b> This is the kind of build where the audit targets the hours the owner gets back and the revenue that no longer depends on him being in the building, so the company is worth more and does not stall when he steps away.</p>
+</div>
+</div>
+<div class="callout"><b>Read these as patterns, not promises.</b> Every business leaks in one of these ways, but the exact number is different every time. You do not quote 12% or same-day to a prospect. You say, this is the kind of thing we find, and the free discovery call runs the intelligent audit live to find the real number for their business.</div>
+</section>
+
+
+<section id="ref">
+  <div class="eyebrow">19 / Keep this open</div>
+  <h2>Quick reference</h2>
+  <div class="ref">
+    <h3>Links &amp; numbers</h3>
+    <div class="row"><span>Book a call: <a href="https://www.tmitechai.com/book">tmitechai.com/book</a></span><span>Text line: <b>(337) 450-9795</b></span><span>Site: <a href="https://www.tmitechai.com">tmitechai.com</a></span></div>
+    <div class="row"><span>Digital employee: <b>from $5,000</b></span><span>Intelligent OS: <b>from $25,000</b></span><span>Retainer: <b>$3,000&ndash;$15,000+/mo</b></span><span>Programs: <b>from $10,000</b></span></div>
+    <div class="row"><span>Build time: <b>~30 days</b></span><span>They own it: <b>yes</b></span><span>Monthly license: <b>none</b></span></div>
+    <h3>The method</h3>
+    <div class="row"><span><b>1.</b> Delete</span><span><b>2.</b> Connect</span><span><b>3.</b> Build</span></div>
+    <h3>What we install</h3>
+    <div class="row"><span>Intelligence</span><span>An operating system</span><span>A digital workforce</span></div>
+    <h3>The qualify filter</h3>
+    <div class="row"><span>Established?</span><span>Owner the bottleneck?</span><span>What's breaking?</span><span>Growth adds chaos?</span></div>
+    <h3>The one-liner</h3>
+    <div class="row"><span style="color:var(--feat-ink);">"TMI is your AI department and growth partner. We build intelligent companies."</span></div>
+  </div>
+</section>
+
+
+<section id="glossary">
+  <div class="eyebrow">20 / Language</div>
+  <h2>Glossary</h2>
+  <dl>
+    <dt>Intelligent company</dt><dd>A business that runs on connected systems and live data instead of the owner's memory and a stack of disconnected tools. What we build.</dd>
+    <dt>Digital employee</dt><dd>A system that owns a specific job end to end without a person driving it. The dispatcher, the front desk, the collector.</dd>
+    <dt>Delete, connect, build</dt><dd>The method: cut the software nobody uses, connect what is left, build the few things that are missing.</dd>
+    <dt>Command center</dt><dd>One live screen showing the whole operation: what is live, what is stuck, and where the money is.</dd>
+    <dt>Speed to lead</dt><dd>How fast a new lead gets a first response. One of the strongest predictors of who wins the job. The system makes it instant.</dd>
+    <dt>Reactivation</dt><dd>Winning back past and lapsed customers automatically. The cheapest revenue a business has.</dd>
+    <dt>Revenue leakage</dt><dd>Earned money that never gets billed or collected. Most operations leak 5 to 15% of it.</dd>
+    <dt>Intelligent operating system</dt><dd>The full backend a business runs on, built by TMI, owned by the client. From $25,000.</dd>
+    <dt>AI Department Retainer</dt><dd>The ongoing monthly partnership where TMI keeps building and running the AI operation.</dd>
+    <dt>Discovery call</dt><dd>The free 30-minute call where the intelligent audit is done live. The one way in. Your scorecard.</dd>
+    <dt>The two worlds</dt><dd>Physical economy (crews, equipment, job sites) and online / service economy (calendar, pipeline, front desk, audience).</dd>
+    <dt>AEO / AI Visibility</dt><dd>Answer-engine optimization: making the business the answer ChatGPT, Google, and Perplexity give for its category.</dd>
+  </dl>
+</section>
+
+<section id="checks">
+<div class="eyebrow">21 / Prove you know it</div>
+<h2>Knowledge checks</h2>
+<p>Answer every one of these out loud before you hit the street. If you stumble on any of them, go back and study that section. An owner will ask these exact questions, and your answer needs to be fast, plain, and correct.</p>
+<details class="qa"><summary>What is TMI, in one line?</summary><p>TMI is an AI department and growth partner. We build intelligent companies by installing intelligence, an operating system, and a digital workforce, and the client owns it.</p></details>
+<details class="qa"><summary>What is the method?</summary><p>Delete, connect, build. We delete what wastes time, connect what is disconnected, and build the system the business should have had. That order matters. We fix the operation before we add anything new.</p></details>
+<details class="qa"><summary>What are we not?</summary><p>We are not SaaS, not an agency, not consulting, and not a chatbot. We do not rent you software or hand you a deck. We build a system you own.</p></details>
+<details class="qa"><summary>What does a build cost, across all tiers?</summary><p>A digital employee starts at $5,000. An intelligent operating system starts at $25,000. Ongoing retainers run $3,000 to $15,000 and up per month. There is no monthly license on what we build. The client owns it.</p></details>
+<details class="qa"><summary>How long does a build take and who owns it?</summary><p>About 30 days, and the client owns it outright. No monthly license fee to keep it running.</p></details>
+<details class="qa"><summary>What is the one way in?</summary><p>The free discovery call at tmitechai.com/book. There is one door. Every prospect goes to that call, and the intelligent audit is done live on the call. You are not closing the deal on the street. You are booking the call.</p></details>
+<details class="qa"><summary>What is a digital employee, and how is it different from a chatbot?</summary><p>A digital employee does real work end to end. It builds and sends invoices, answers and books leads, chases follow-up, runs a process the way a person would. A chatbot answers a question and stops. A digital employee finishes the job.</p></details>
+<details class="qa"><summary>Why now?</summary><p>About 80% of the workforce is deskless and almost no software was built for them. Most businesses run on people instead of systems. The ones that install real systems now pull ahead, and the gap does not close later.</p></details>
+<details class="qa"><summary>Why do most AI tools fail to deliver, and why is TMI different?</summary><p>Fewer than 20% of businesses buying off-the-shelf AI tools see real ROI within twelve months, because they buy a tool before fixing the operation. TMI builds the system first, not another tool to bolt onto a broken process.</p></details>
+<details class="qa"><summary>What are the universal leaks you look for?</summary><p>Billing that goes out late or not at all, dispatch and scheduling run out of one person's head, second trips that should have been one, reactive maintenance instead of predictive, and an owner who is the bottleneck. Almost every business has at least one.</p></details>
+<details class="qa"><summary>How do you qualify a prospect?</summary><p>An established local business with real revenue, real people, and a real operation, run on people and paper instead of systems, with an owner who feels the pain. If they have those leaks and someone who can say yes, they are a fit. The audit finds the rest.</p></details>
+<details class="qa"><summary>Objection: I already bought an AI tool.</summary><p>Good, then you already know a tool alone does not fix the operation. Fewer than 20% of businesses see ROI from those tools because they bought the tool before fixing the system. We build the system your tool was supposed to plug into. The call is free and the audit will show you the gap.</p></details>
+<details class="qa"><summary>Objection: that is expensive.</summary><p>Compared to what you are losing right now, it is not. A build starts at $5,000, you own it, and there is no monthly license. The audit puts a real number on what the leaks cost you today. Most owners find the leak is bigger than the build. Let the free call show you.</p></details>
+<details class="qa"><summary>Objection: I do not have time for this.</summary><p>That is the reason to do it. You do not have time because you are the system. The whole point is to take the work off your plate and put it into something that runs without you. The call is free and it is the only thing I am asking for today.</p></details>
+<details class="qa"><summary>What is your scorecard as a rep?</summary><p>Booked discovery calls at tmitechai.com/book. That is the job. You open the door in your market and get qualified owners onto the free call where the live audit happens. You are measured on booked, qualified calls, not on closing the build yourself.</p></details>
+<details class="qa"><summary>What are the two links you need memorized?</summary><p>The book link, tmitechai.com/book, for the free discovery call, and the same site for everything else. When in doubt, send them to book the call. One door, every time.</p></details>
+</section>
+
+
+<section id="first30">
+  <div class="eyebrow">22 / Ramp</div>
+  <h2>Your first 30 days</h2>
+  <div class="step"><div class="n">W1</div><div class="b"><h4>Learn the leaks &amp; the pitch</h4><p>Study this guide until the universal leaks (06), the three prices (09), the qualify filter (14), and the objections (16) are automatic. You should be able to say the one-liner in your sleep and pass the knowledge checks in section 21.</p></div></div>
+  <div class="step"><div class="n">W2</div><div class="b"><h4>Build your list &amp; start talking</h4><p>Map your city: every established business with a schedule, crews, a front desk, or an audience. Start conversations. Lead with the leak. The goal is the first booked calls, not a perfect pitch. Shadow a discovery call if you can.</p></div></div>
+  <div class="step"><div class="n">W3</div><div class="b"><h4>Fill the calendar</h4><p>Push for booked calls. Send prospects straight to /book. Tighten your own speed-to-lead. Track which industries and which leaks book the most, and lean in.</p></div></div>
+  <div class="step"><div class="n">W4</div><div class="b"><h4>Own your territory</h4><p>You are the face of TMI in your market. Referrals compound, reputation compounds. Keep the pipeline full and hand clean context to the build team on every close.</p></div></div>
+  <div class="callout"><b>Success in month one is simple:</b> a full calendar of booked discovery calls with real businesses, and a rep who sounds like they have done this forever. The system closes. You open the door.</div>
+</section>
+
+
+<section id="faq">
+  <div class="eyebrow">23 / Loose ends</div>
+  <h2>FAQ</h2>
+  <details class="qa"><summary>Do I need to know the tech to sell this?</summary><p>No. You need the leaks (06), what we build (07), the pricing (09), and how to qualify (14). The build team owns the how. You own the problem and the booked call.</p></details>
+  <details class="qa"><summary>What if a prospect asks something I don't know?</summary><p>"Great question for the call, the team goes deep on that." Never make something up, especially on price, compliance, or guarantees. Booking the call is always the right next step.</p></details>
+  <details class="qa"><summary>Which industries should I focus on?</summary><p>Whatever is dense in your city and drowning in the leaks. Trades and home service are always strong. Healthcare and wellness convert well. But any established, owner-dependent business is a fit. Go where the pain is loudest.</p></details>
+  <details class="qa"><summary>How do I get paid / what's my target?</summary><p>Your scorecard is booked discovery calls that turn into clients. Your manager sets your specific targets and comp. This guide is about making you good enough that the calls book themselves.</p></details>
+  <details class="qa"><summary>What makes TMI different from every other 'AI' company?</summary><p>We build and install the actual system and stay in to run it. Not a tool to configure, not a deck of advice, not a chatbot. The client owns it, it is built in 30 days, and there is no monthly license. That is the whole pitch.</p></details>
+  <details class="qa"><summary>Where do I send someone who wants to see it themselves?</summary><p>tmitechai.com for the story, tmitechai.com/book to book the call, and (337) 450-9795 to text a real person. That is the whole toolkit.</p></details>
+</section>
+  </main>
+</div>
+
+<div class="foot">TMI Tech AI / City Rep Master Guide / Deep edition / All industries, services &amp; opportunities / Internal training. We build intelligent companies.</div>
+
+</body>
+</html>

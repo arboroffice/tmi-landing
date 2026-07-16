@@ -1,0 +1,273 @@
+<title>TMI — SMS & Email Touchpoint Map</title>
+<style>
+  :root{
+    --bg:#0a0b14; --bg-2:#111324; --panel:#151834; --line:rgba(255,255,255,0.09); --line-2:rgba(255,255,255,0.15);
+    --ink:#f5f6ef; --ink-2:#c4c6d4; --muted:#8a8ca2;
+    --chart:#E4FF97; --sms:#6db3f2; --email:#b6a4ff; --team:#f0b24a;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1100px 500px at 82% -10%,rgba(228,255,151,0.08),transparent 60%);}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px;}
+  h1,h2,h3{margin:0;letter-spacing:-0.02em;font-weight:800;}
+  a{color:var(--chart);}
+  header.top{padding:46px 0 26px;}
+  .eyebrow{font-size:12px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+  header.top h1{font-size:clamp(28px,4.6vw,46px);margin:12px 0 12px;}
+  header.top p{color:var(--ink-2);font-size:16px;max-width:74ch;margin:0;}
+  .counts{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;}
+  .kpi{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:120px;}
+  .kpi .n{font-size:24px;font-weight:900;letter-spacing:-0.03em;}
+  .kpi .l{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-top:2px;}
+  .kpi .n.sms{color:var(--sms);} .kpi .n.email{color:var(--email);} .kpi .n.team{color:var(--team);} .kpi .n.chart{color:var(--chart);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:24px 0 6px;padding:14px 16px;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;font-size:12.5px;color:var(--ink-2);}
+  .legend b{color:var(--ink);}
+  .tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:0.03em;padding:3px 9px;border-radius:999px;white-space:nowrap;text-transform:uppercase;}
+  .t-sms{background:rgba(109,179,242,0.16);color:var(--sms);border:1px solid rgba(109,179,242,0.4);}
+  .t-email{background:rgba(182,164,255,0.16);color:var(--email);border:1px solid rgba(182,164,255,0.4);}
+  .t-inst{background:rgba(228,255,151,0.14);color:var(--chart);border:1px solid rgba(228,255,151,0.4);}
+  .t-person{background:rgba(228,255,151,0.14);color:var(--chart);border:1px solid rgba(228,255,151,0.35);}
+  .t-team{background:rgba(240,178,74,0.15);color:var(--team);border:1px solid rgba(240,178,74,0.4);}
+
+  section{margin:34px 0;}
+  .sec-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 6px;}
+  .sec-h .num{font-family:var(--mono);font-size:13px;color:var(--chart);font-weight:700;}
+  .sec-h h2{font-size:20px;}
+  .sec-sub{color:var(--muted);font-size:13.5px;margin:0 0 14px;max-width:80ch;}
+
+  .tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--bg-2);}
+  table{border-collapse:collapse;width:100%;min-width:760px;font-size:13.5px;}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  thead th{font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:800;background:rgba(255,255,255,0.02);position:sticky;top:0;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(255,255,255,0.02);}
+  td .trigger{color:var(--ink);font-weight:600;}
+  td .time{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
+  td .content{color:var(--ink-2);}
+  td .content .q{color:var(--ink);}
+  td .file{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap;}
+  .col-ch{width:80px;} .col-to{width:96px;}
+
+  .note{background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;font-size:13.5px;color:var(--ink-2);margin-top:14px;}
+  .note b{color:var(--ink);}
+  .foot{padding:36px 0 60px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);margin-top:36px;}
+  code{font-family:var(--mono);font-size:0.92em;background:rgba(255,255,255,0.06);padding:1px 6px;border-radius:5px;color:var(--ink);}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">TMI · internal reference</div>
+  <h1>Every SMS &amp; email touchpoint</h1>
+  <p>Every automated outbound message the system sends, by journey — what fires it, who gets it, and the exact copy. Sent through <b>Resend</b> (email) and <b>Twilio</b> (SMS), with <b>Instantly</b> for cold outbound. Timed/delayed steps run on <b>QStash</b>; recurring jobs on <b>Vercel cron</b>. Logging-only paths are excluded.</p>
+  <div class="counts">
+    <div class="kpi"><div class="n chart">~55</div><div class="l">Prospect-facing sends</div></div>
+    <div class="kpi"><div class="n email">Email</div><div class="l">Resend · support@tmitechai.com</div></div>
+    <div class="kpi"><div class="n sms">SMS</div><div class="l">Twilio · +1 855 717 1044</div></div>
+    <div class="kpi"><div class="n team">Team</div><div class="l">alerts → +1 337 380 9059</div></div>
+  </div>
+</header>
+
+<div class="legend">
+  <span><b>Channels:</b></span>
+  <span class="tag t-sms">SMS</span>
+  <span class="tag t-email">Email</span>
+  <span class="tag t-inst">Instantly</span>
+  <span style="width:1px;height:16px;background:var(--line-2)"></span>
+  <span><b>Recipient:</b></span>
+  <span class="tag t-person">Prospect</span>
+  <span class="tag t-team">Internal team</span>
+</div>
+
+<div class="note">
+  <b>Sender identities.</b> Email FROM is <code>support@tmitechai.com</code>, labeled per context — <i>TMI</i>, <i>Founders of the Future</i>, <i>Founders of the Future Letters</i>, <i>TMI Studio</i>, <i>TMI Outbound</i>. Nurture emails are signed as <b>Mia</b> or <b>Tyler</b>. SMS FROM is <code>+1 855 717 1044</code>. Internal alerts go to SMS <code>+1 337 380 9059</code> and email <code>support@ / mia@tmitechai.com</code> (founder-only forms also hit <code>mialouviere@gmail.com</code>).
+</div>
+
+<!-- 1 -->
+<section>
+  <div class="sec-h"><span class="num">01</span><h2>Free Intelligence Audit</h2></div>
+  <p class="sec-sub">The 5-minute audit funnel: start → abandon-chase → results → multi-day nurture.</p>
+  <div class="tw"><table>
+    <thead><tr><th class="col-ch">Ch</th><th>Trigger &amp; timing</th><th class="col-to">To</th><th>Content</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Audit started</span><span class="time">on submit</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"{first}, your Business Intelligence Audit is saved"</span></td><td class="file">audit-start</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Audit started</span><span class="time">on submit · if phone</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">"Hey {first}, it's Mia at TMI. Your Business Intelligence Audit is saved…"</td><td class="file">audit-start</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Abandoned, not finished</span><span class="time">+10 min / +1 day / +3 day (QStash)</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">"{first}, your TMI audit is almost done" · "want to just talk it through?" · "Last nudge, {first}"</td><td class="file">audit-nudge</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Abandoned, not finished</span><span class="time">+10 min / +1 day / +3 day · if phone</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">"Hey {first} - looks like you didn't finish your TMI audit…"</td><td class="file">audit-nudge</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Audit completed</span><span class="time">on submit</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"Your TMI Audit — {TIER}"</span> (personalized results)</td><td class="file">audit-submit</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Audit completed</span><span class="time">on submit · if phone</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">"Hey {first} - your TMI Audit is done. You're in the…"</td><td class="file">audit-submit</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Audit completed</span><span class="time">on submit</span></td><td><span class="tag t-team">Team</span></td><td class="content">Subj: <span class="q">"Audit: {name} — {TIER} ({dep}% dep)"</span> — full results</td><td class="file">audit-submit</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Audit completed</span><span class="time">on submit</span></td><td><span class="tag t-team">Team</span></td><td class="content">"Audit: {name} | {company} | {email} | {phone} | {tier}…"</td><td class="file">audit-submit</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">IA nurture</span><span class="time">day 1 (QStash)</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">"Hey {first} - your TMI Intelligence Audit is in your inbox…"</td><td class="file">followup</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">IA nurture</span><span class="time">day 2 (Mia)</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"The three places a business gets stuck"</span></td><td class="file">followup</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">IA nurture</span><span class="time">day 4 (Tyler)</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"What the lag is actually costing"</span></td><td class="file">followup</td></tr>
+      <tr><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td><span class="trigger">IA nurture</span><span class="time">day 7 (Mia) · SMS if phone</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"Straight question about your audit"</span> · SMS "is now just a bad time…"</td><td class="file">followup</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">IA nurture</span><span class="time">day 30 check-in</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"{first}, 30 days since your Intelligence Audit"</span></td><td class="file">followup</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 2 -->
+<section>
+  <div class="sec-h"><span class="num">02</span><h2>Complete Audit ($1,000 paid)</h2></div>
+  <p class="sec-sub">Paid capture → Stripe → intake deliverable, with payment and post-delivery nurture.</p>
+  <div class="tw"><table>
+    <thead><tr><th class="col-ch">Ch</th><th>Trigger &amp; timing</th><th class="col-to">To</th><th>Content</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Capture (pre-payment)</span><span class="time">on submit</span></td><td><span class="tag t-team">Team</span></td><td class="content">"Complete Audit capture: {name} {email} {phone} Co:…"</td><td class="file">audit-capture</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Capture (pre-payment)</span><span class="time">on submit</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"Your Complete Audit is one step away"</span></td><td class="file">audit-capture</td></tr>
+      <tr><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td><span class="trigger">Started, didn't pay</span><span class="time">+1h / +1d / +3d / +7d (QStash)</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">"Finish your Complete Audit" · "What the audit actually shows you" · "…one of three things" · "Last nudge". SMS at +1h, +3d.</td><td class="file">audit-followup</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Payment succeeded</span><span class="time">Stripe webhook</span></td><td><span class="tag t-team">Team</span></td><td class="content">"PAID Complete Audit: {name/company/email}"</td><td class="file">stripe-webhook</td></tr>
+      <tr><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td><span class="trigger">Paid, no intake yet</span><span class="time">+3h (email) / +24h (email+SMS)</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"One quick step to start your audit"</span> · SMS "your Complete Audit is paid and waiting on your intake…"</td><td class="file">funnel-nurture</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Deliverable generated</span><span class="time">~30–60s after intake</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"Your Complete Audit — {company}"</span> (report + booking link)</td><td class="file">audit-intake</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Deliverable generated</span><span class="time">~30–60s after intake</span></td><td><span class="tag t-team">Team</span></td><td class="content">Subj: <span class="q">"New Complete Audit: {company} ({email})"</span></td><td class="file">audit-intake</td></tr>
+      <tr><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td><span class="trigger">Delivered, no booking</span><span class="time">+1d (email) / +3d (email+SMS)</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"Book your strategy call"</span> · SMS "your audit is done. Last step is your free 30-min strategy call…"</td><td class="file">funnel-nurture</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 3 -->
+<section>
+  <div class="sec-h"><span class="num">03</span><h2>Booking &amp; calls (Cal.com)</h2></div>
+  <p class="sec-sub">Confirmations, pre-call reminders, and post-call / no-show follow-ups, fired by Cal.com webhooks.</p>
+  <div class="tw"><table>
+    <thead><tr><th class="col-ch">Ch</th><th>Trigger &amp; timing</th><th class="col-to">To</th><th>Content</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td><span class="trigger">Call booked</span><span class="time">Cal BOOKING_CREATED</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"You're booked for {date} CT"</span> · SMS "You're confirmed… run your 5-min Intelligence Audit first"</td><td class="file">booking-confirmed</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Call booked</span><span class="time">Cal BOOKING_CREATED</span></td><td><span class="tag t-team">Team</span></td><td class="content">"Call booked: {name} | {email} | {date} CT"</td><td class="file">booking-confirmed</td></tr>
+      <tr><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td><span class="trigger">Pre-call reminder</span><span class="time">−24h (email) / −2h (SMS)</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"Your TMI strategy call is tomorrow"</span> · SMS "…in about 2 hours. Talk soon."</td><td class="file">funnel-nurture · followup</td></tr>
+      <tr><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td><span class="trigger">Call ended</span><span class="time">Cal MEETING_ENDED</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"The plan from our call"</span> · SMS "good talking today. Sending over the plan…"</td><td class="file">booking-events</td></tr>
+      <tr><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td><span class="trigger">Cancelled / no-show</span><span class="time">Cal webhook</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"Want to grab a new time?"</span> / <span class="q">"Sorry we missed you"</span> · SMS rebook</td><td class="file">booking-events</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 4 -->
+<section>
+  <div class="sec-h"><span class="num">04</span><h2>Proposals &amp; build</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th class="col-ch">Ch</th><th>Trigger &amp; timing</th><th class="col-to">To</th><th>Content</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Blueprint draft generated</span><span class="time">admin action</span></td><td><span class="tag t-team">Team</span></td><td class="content">Subj: <span class="q">"Build proposal draft: {company}"</span></td><td class="file">blueprint</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Proposal sent</span><span class="time">admin "generate &amp; send"</span></td><td><span class="tag t-person">Client</span></td><td class="content">Subj: <span class="q">"Your build proposal — {company}"</span></td><td class="file">_proposal-gen</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Proposal not accepted</span><span class="time">+2d / +6d (QStash)</span></td><td><span class="tag t-person">Client</span></td><td class="content">Subj: <span class="q">"Your build proposal is ready when you are"</span></td><td class="file">funnel-nurture</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Build deposit paid</span><span class="time">Stripe webhook</span></td><td><span class="tag t-team">Team</span></td><td class="content">"BUILD ACCEPTED ({path}): {company/email} - deposit ${amt}"</td><td class="file">stripe-webhook</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Refund / dispute</span><span class="time">Stripe webhook</span></td><td><span class="tag t-team">Team</span></td><td class="content">"REFUND/dispute on Complete Audit: {name/email}"</td><td class="file">stripe-webhook</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 5 -->
+<section>
+  <div class="sec-h"><span class="num">05</span><h2>Main application funnel</h2></div>
+  <p class="sec-sub">The primary "apply" form and its cold nurture sequence.</p>
+  <div class="tw"><table>
+    <thead><tr><th class="col-ch">Ch</th><th>Trigger &amp; timing</th><th class="col-to">To</th><th>Content</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Application submitted</span><span class="time">on submit</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"You applied. Here's what happens next."</span></td><td class="file">lead</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Application submitted</span><span class="time">on submit · if phone</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">"Hey {first} - got your application. Going through your operation now…"</td><td class="file">lead</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Application submitted</span><span class="time">on submit (×2)</span></td><td><span class="tag t-team">Team</span></td><td class="content">"New application: {name} {email}…" + internal "PITCH:" cheat-sheet SMS</td><td class="file">lead</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Cold nurture</span><span class="time">day 1 · if phone</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">"Hey {first} - did you get a chance to look at what we sent?…"</td><td class="file">followup</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Cold nurture</span><span class="time">day 3 (Tyler)</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"Something I keep seeing"</span></td><td class="file">followup</td></tr>
+      <tr><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td><span class="trigger">Cold nurture</span><span class="time">day 7 (Mia) · SMS if phone</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"Straight question"</span> · SMS "is now just a bad time? Real question…"</td><td class="file">followup</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Cold nurture (break-up)</span><span class="time">day 14</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Subj: <span class="q">"I'm going to stop here"</span></td><td class="file">followup</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 6 -->
+<section>
+  <div class="sec-h"><span class="num">06</span><h2>Contact &amp; application forms</h2></div>
+  <p class="sec-sub">Each form sends the applicant a confirmation and alerts the team. Three founder-only forms (Make Money With AI, Start a Business, Distro) alert the team only — <b>no</b> confirmation to the submitter.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Form</th><th class="col-ch">To prospect</th><th class="col-ch">To team</th><th>Prospect subject</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td class="trigger">Contact / strategy call</td><td><span class="tag t-email">Email</span></td><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td class="content">"Got it, {first} — let's talk" <span style="color:var(--muted)">(+ day1/3/7/14 nurture via followup)</span></td><td class="file">contact-submit</td></tr>
+      <tr><td class="trigger">Partner application</td><td><span class="tag t-email">Email</span></td><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td class="content">"Got your partner application, {first}"</td><td class="file">partner-submit</td></tr>
+      <tr><td class="trigger">City Lead application</td><td><span class="tag t-email">Email</span></td><td><span class="tag t-email">Email</span> <span class="tag t-sms">SMS</span></td><td class="content">"Got your application, {first}"</td><td class="file">city-lead-apply</td></tr>
+      <tr><td class="trigger">Service line (Visibility, Inbound…)</td><td><span class="tag t-email">Email</span></td><td><span class="tag t-email">Email</span></td><td class="content">"We got your {service} request"</td><td class="file">service-apply</td></tr>
+      <tr><td class="trigger">TMI Studio (personal brand)</td><td><span class="tag t-email">Email</span></td><td><span class="tag t-email">Email</span></td><td class="content">"We got your TMI Studio application"</td><td class="file">brand-apply</td></tr>
+      <tr><td class="trigger">TMI Outbound</td><td><span class="tag t-email">Email</span></td><td><span class="tag t-email">Email</span></td><td class="content">"We got your TMI Outbound application"</td><td class="file">outbound-apply</td></tr>
+      <tr><td class="trigger">Founders of the Future</td><td><span class="tag t-email">Email</span></td><td><span class="tag t-email">Email</span></td><td class="content">"Your Founders of the Future application"</td><td class="file">fotf-apply</td></tr>
+      <tr><td class="trigger">FOTF event RSVP</td><td><span class="tag t-email">Email</span></td><td><span class="tag t-email">Email</span></td><td class="content">"You're on the list for {event}"</td><td class="file">event-signup</td></tr>
+      <tr><td class="trigger">Make Money With AI</td><td style="color:var(--muted)">— none —</td><td><span class="tag t-email">Email</span></td><td class="content" style="color:var(--muted)">founder alert only</td><td class="file">mma-submit</td></tr>
+      <tr><td class="trigger">Start a Business</td><td style="color:var(--muted)">— none —</td><td><span class="tag t-email">Email</span></td><td class="content" style="color:var(--muted)">founder alert only</td><td class="file">startabusiness-submit</td></tr>
+      <tr><td class="trigger">Distro app submission</td><td style="color:var(--muted)">— none —</td><td><span class="tag t-email">Email</span></td><td class="content" style="color:var(--muted)">founder alert only</td><td class="file">distro-submit</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 7 -->
+<section>
+  <div class="sec-h"><span class="num">07</span><h2>Identified visitors &amp; cold outbound</h2></div>
+  <p class="sec-sub">RB2B de-anonymizes site traffic; Instantly runs the cold-email machine.</p>
+  <div class="tw"><table>
+    <thead><tr><th class="col-ch">Ch</th><th>Trigger &amp; timing</th><th class="col-to">To</th><th>Content</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-sms">SMS</span> <span class="tag t-email">Email</span></td><td><span class="trigger">Hot visitor identified</span><span class="time">RB2B webhook (score ≥ threshold)</span></td><td><span class="tag t-team">Team</span></td><td class="content">"Hot site visitor ({score}): {name · company}" · email "Hot visitor ({score}): {name}"</td><td class="file">rb2b-webhook</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Identified-visitor campaign</span><span class="time">day 0 (Mia) / day 3 (Tyler) / day 7 (Mia)</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">"A thought for {company}" · "Where the revenue actually goes" · "Worth a conversation?" <span style="color:var(--muted)">(email-only by design — TCPA)</span></td><td class="file">followup</td></tr>
+      <tr><td><span class="tag t-inst">Instantly</span></td><td><span class="trigger">Cold outbound campaign</span><span class="time">Vercel cron · weekdays 14:00</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Verified in-fit leads added to the Instantly cold sequence (~50/day cap)</td><td class="file">campaign-send</td></tr>
+      <tr><td><span class="tag t-inst">Instantly</span></td><td><span class="trigger">Cold prospect replied</span><span class="time">Instantly webhook</span></td><td><span class="tag t-person">Prospect</span></td><td class="content">Auto-reply agent classifies intent &amp; replies (when <code>AUTO_REPLY=true</code>), drives to booking</td><td class="file">instantly-webhook</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 8 -->
+<section>
+  <div class="sec-h"><span class="num">08</span><h2>Newsletter &amp; broadcasts</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th class="col-ch">Ch</th><th>Trigger &amp; timing</th><th class="col-to">To</th><th>Content</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Newsletter broadcast</span><span class="time">admin "send" · batched 100s</span></td><td><span class="tag t-person">Subscribers</span></td><td class="content">Subj: issue subject · FROM <i>Founders of the Future</i> · per-recipient unsubscribe</td><td class="file">newsletter</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Newsletter test</span><span class="time">admin</span></td><td><span class="tag t-team">Test addr</span></td><td class="content">Subj: "[TEST] " + issue subject</td><td class="file">newsletter · newsletter-test</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Generic broadcast campaign</span><span class="time">admin · by audience · batched 10s</span></td><td><span class="tag t-person">Contacts</span></td><td class="content">Subj: dynamic campaign subject · custom FROM · unsubscribe footer</td><td class="file">email-send</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 9 -->
+<section>
+  <div class="sec-h"><span class="num">09</span><h2>Webinar / masterclass</h2></div>
+  <p class="sec-sub">Reminder sequence runs on a 15-min cron with a QStash backup; idempotent per step.</p>
+  <div class="tw"><table>
+    <thead><tr><th class="col-ch">Ch</th><th>Trigger &amp; timing</th><th class="col-to">To</th><th>Content</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Registered</span><span class="time">on signup</span></td><td><span class="tag t-person">Registrant</span></td><td class="content">Subj: <span class="q">"You're registered — {event} ({when})"</span> (+ calendar/ics)</td><td class="file">webinar-register</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Registered</span><span class="time">on signup</span></td><td><span class="tag t-team">Team</span></td><td class="content">Subj: <span class="q">"Webinar registration — {name}"</span></td><td class="file">webinar-register</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Reminder sequence</span><span class="time">−24h / −1h / live / +2h after</span></td><td><span class="tag t-person">Registrant</span></td><td class="content">"Tomorrow: {event}" · "Starting in 1 hour" · "We're live now" · "Your next step" / "You missed it"</td><td class="file">_webinar-mail</td></tr>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Audience question submitted</span><span class="time">live room</span></td><td><span class="tag t-team">Team</span></td><td class="content">Subj: <span class="q">"Webinar question from {name}"</span></td><td class="file">webinar-question</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 10 -->
+<section>
+  <div class="sec-h"><span class="num">10</span><h2>Internal alerts &amp; ops</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th class="col-ch">Ch</th><th>Trigger &amp; timing</th><th class="col-to">To</th><th>Content</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-email">Email</span></td><td><span class="trigger">Weekly visitor digest</span><span class="time">Vercel cron · Mon 13:00</span></td><td><span class="tag t-team">Team</span></td><td class="content">Subj: <span class="q">"Visitor digest: {N} this week, top score {s}"</span></td><td class="file">visitor-digest</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">City-lead rep daily nudge</span><span class="time">Vercel cron · daily 13:00</span></td><td><span class="tag t-team">Reps</span></td><td class="content">"Morning {first}. You've got {N} follow-ups due… Jump in: cityleads.tmitechai.com" (+ web push)</td><td class="file">rep-reminders</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Lead replied by text</span><span class="time">Twilio inbound webhook</span></td><td><span class="tag t-team">Team</span></td><td class="content">"Reply from {from}: {inbound message}" (honors STOP/opt-out)</td><td class="file">sms-inbound</td></tr>
+      <tr><td><span class="tag t-sms">SMS</span></td><td><span class="trigger">Generic one-off</span><span class="time">admin API</span></td><td><span class="tag t-person">Contact</span></td><td class="content">Fully dynamic body (admin-sent to a specific contact)</td><td class="file">sms</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- backbone -->
+<section>
+  <div class="sec-h"><span class="num">11</span><h2>The automation backbone</h2></div>
+  <div class="note" style="margin-top:0">
+    <b>Recurring jobs (Vercel cron):</b> <code>rep-reminders</code> daily 13:00 · <code>visitor-digest</code> Mon 13:00 · <code>campaign-send</code> weekdays 14:00 · <code>webinar-cron</code> every 10 min · <code>visitor-process</code> every 6h.<br><br>
+    <b>Delayed steps (Upstash QStash):</b> all "+N hours/days" nurture — <code>audit-nudge</code>, <code>audit-followup</code>, <code>funnel-nurture</code>, <code>followup</code>, <code>webinar-nurture</code> — are scheduled at the triggering event and fired later by QStash, secret-gated with <code>GTM_RUN_SECRET</code>.<br><br>
+    <b>Webhooks:</b> Cal.com (booking created/ended/cancelled/no-show) · Stripe (paid / deposit / refund) · RB2B (hot visitor) · Instantly (cold reply) · Twilio (inbound SMS) · inbound email.<br><br>
+    <b>Every send is logged</b> to the Account 360 timeline via <code>_comms.js</code> (SMS → <code>sms_log</code>, email → <code>activities</code>). All sends are best-effort and never block the request.
+  </div>
+</section>
+
+<div class="foot">
+  TMI internal reference · generated from a full codebase audit of <code>/api</code>. Prospect nurture stops automatically on conversion or unsubscribe/STOP. Founder-only forms (Make Money With AI, Start a Business, Distro) intentionally send no applicant confirmation.
+</div>
+</div>
