@@ -131,7 +131,7 @@ var WEBINAR_YT_ID = '';           // e.g. 'dQw4w9WgXcQ'  (unlisted is fine)
 var WEBINAR_MP4   = '';           // e.g. 'https://cdn.tmitechai.com/class.mp4'
 var DURATION_SEC  = 40 * 60;      // length of the recording
 var CTA_AT_SEC    = 24 * 60;      // when the "book your audit" offer appears
-var AUDIT_URL     = '/audit';
+var BOOK_URL      = '/book';
 
 // --- timezone helpers (mirror of api/_webinar.js) ---
 var TZ='America/Chicago', SESSION_WEEKDAY=2, SESSION_HOUR=15, SESSION_MIN=0;
@@ -175,8 +175,8 @@ var CHAT=[
   {at:360,who:'Sam', txt:'The single source of truth point just hit hard.'},
   {at:520,who:'Wes', txt:'How long does this take to actually build?'},
   {at:900,who:'Tanya', txt:'Wait, the command layer example is basically our whole ops meeting on one screen.'},
-  {at:1200,host:1,who:'TMI Team', txt:'If you want us to map your operation after this, the free audit link is coming up.'},
-  {at:1440,who:'Marcus', txt:'Booking the audit now.'},
+  {at:1200,host:1,who:'TMI Team', txt:'If you want us to map your operation after this, the free call link is coming up.'},
+  {at:1440,who:'Marcus', txt:'Booking the call now.'},
   {at:1600,who:'Danielle', txt:'This is the first thing that has made me feel like I can step back.'},
   {at:1900,who:'Ray', txt:'Replaying this for my ops manager.'},
   {at:2200,host:1,who:'TMI Team', txt:'Last few minutes — get your questions in.'}
@@ -216,8 +216,31 @@ function currentState(){
 function two(n){return (n<10?'0':'')+n;}
 function hms(s){s=Math.max(0,Math.floor(s));var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60;return (h>0?h+':':'')+two(m)+':'+two(x);}
 
+// This week's live stream, set by the team in the admin (api/webinar-live).
+// The emailed room link never changes; this is what plays inside it.
+var LIVE=null;
+function loadLive(){
+  try{
+    fetch('/api/webinar-live').then(function(r){return r.json();}).then(function(d){
+      LIVE=d||null;
+      // If we're already rendering the live view, swap the feed in now.
+      if(currentState()==='live'){ lastState=''; render(); }
+    }).catch(function(){});
+  }catch(e){}
+}
+
 // videoEmbed builds the player markup for the current offset.
 function videoEmbed(o){
+  // 1) Preferred: this week's admin-set live stream.
+  if(LIVE&&LIVE.yt_id){
+    var p='autoplay=1&rel=0&modestbranding=1&playsinline=1';
+    return '<iframe id="vid" src="https://www.youtube-nocookie.com/embed/'+LIVE.yt_id+'?'+p+'" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+  }
+  if(LIVE&&LIVE.live_url){
+    // A link we can't embed (private stream, another platform): send them out.
+    return '<div class="cover placeholder"><div class="k">We’re live now</div><h2 style="max-width:22ch">The class is streaming live.</h2><p style="margin-top:16px"><a class="cta-btn" style="display:inline-block" href="'+LIVE.live_url+'" target="_blank" rel="noopener" onclick="pingAttend()">Join the live class →</a></p></div>';
+  }
+  // 2) Fallback: a hardcoded recording, if one is ever set.
   if(WEBINAR_MP4){
     var live=(currentState()==='live'&&mode!=='ondemand');
     return '<video id="vid" '+(live?'':'controls ')+'playsinline autoplay '+(sim?'muted':'')+'><source src="'+WEBINAR_MP4+'#t='+Math.max(0,Math.floor(o))+'" type="video/mp4"></video>';
@@ -226,8 +249,8 @@ function videoEmbed(o){
     var params='autoplay=1&rel=0&modestbranding=1&playsinline=1&start='+Math.max(0,Math.floor(o))+(currentState()==='live'&&mode!=='ondemand'?'&controls=0&disablekb=1':'&controls=1');
     return '<iframe id="vid" src="https://www.youtube-nocookie.com/embed/'+WEBINAR_YT_ID+'?'+params+'" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
   }
-  // no video configured -> broadcast placeholder
-  return '<div class="cover placeholder"><div class="k">Broadcast feed</div><h2 style="max-width:26ch">This is where the class plays.</h2><p>Add the recording id to <code style="color:#E4FF97">WEBINAR_YT_ID</code> in watch.html and the live feed appears here.</p></div>';
+  // 3) Nothing set yet.
+  return '<div class="cover placeholder"><div class="k">Broadcast feed</div><h2 style="max-width:26ch">This is where the class plays.</h2><p>The host sets this week’s live link in the admin before we go live.</p></div>';
 }
 
 var attendPinged=false;
@@ -275,7 +298,7 @@ function renderLive(){
     '<div class="stage">'
     +'<div class="video-col">'
       +'<div class="screen">'+videoEmbed(o)+'</div>'
-      +'<div class="cta-card" id="ctaCard"><div class="t">Want us to map <span>your</span> operation and show you exactly where it’s leaking? Start with the free Business Intelligence Audit.</div><a class="cta-btn" href="'+AUDIT_URL+'" onclick="lead()">Book my free audit →</a></div>'
+      +'<div class="cta-card" id="ctaCard"><div class="t">Want us to map <span>your</span> operation and show you exactly where it’s leaking? Start with a free discovery call.</div><a class="cta-btn" href="'+BOOK_URL+'" onclick="lead()">Book my free call →</a></div>'
       +'<div class="under"><div><h1>How to Build an Intelligent Company</h1><div class="sub">The three systems that let a company run without the owner in the middle of everything.</div></div><div class="elapsed" id="elapsed"></div></div>'
     +'</div>'
     +'<aside class="chat">'
@@ -326,8 +349,8 @@ function renderEnded(){
     '<div class="ended">'
     +'<div class="k">That’s a wrap</div>'
     +'<h1>You’ve seen the framework. Now map your operation.</h1>'
-    +'<p>The fastest way to find out exactly where your business is leaking time and money is the free Business Intelligence Audit. We map how you run today and hand you a 30-day plan.</p>'
-    +'<div class="row"><a class="primary" href="'+AUDIT_URL+'" onclick="lead()">Book my free audit →</a><a class="ghost" href="/webinar">Register for the next session</a></div>'
+    +'<p>The fastest way to find out exactly where your business is leaking time and money is a free discovery call. We map how you run today and hand you a 30-day plan.</p>'
+    +'<div class="row"><a class="primary" href="'+BOOK_URL+'" onclick="lead()">Book my free call →</a><a class="ghost" href="/webinar">Register for the next session</a></div>'
     +'<div class="next">Next live session: <b>'+fmtSession(next)+'</b>  ·  <a href="/webinar" style="color:#E4FF97">register a colleague</a></div>'
     +'</div>';
 }
@@ -357,6 +380,7 @@ function loop(){
   }
   render();
 }
+loadLive();
 render();
 setInterval(loop,1000);
 </script>

@@ -6,6 +6,7 @@
 const db = require('./_db');
 const W = require('./_webinar');
 const { cors, requireAuth } = require('./_auth');
+const { ytId } = require('./webinar-live');
 
 const lc = (s) => (s || '').toLowerCase();
 
@@ -13,6 +14,21 @@ module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (!requireAuth(req, res)) return;
+
+  // Set this week's live stream link. Stamped with the upcoming session so the
+  // dashboard can tell whether it is set for the right Tuesday.
+  if (req.method === 'POST') {
+    const url = ((req.body && req.body.live_url) || '').trim();
+    const upcoming = W.nextSession().toISOString();
+    try {
+      await db.upsertByField('webinar_config', 'key', 'live', {
+        key: 'live', live_url: url, session_time: upcoming, updated_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      return res.status(500).json({ error: 'could not save' });
+    }
+    return res.json({ ok: true, live_url: url, yt_id: ytId(url), session_time: upcoming });
+  }
 
   try {
     // All registrations (bounded). Small volume; fine to pull and reduce in JS.
@@ -78,8 +94,21 @@ module.exports = async (req, res) => {
         .map((a) => ({ body: a.body || '', created_at: a.created_at || '' }));
     } catch (_) {}
 
-    // Is the live broadcast wired up yet? (watch.html holds the stream id.)
-    const broadcast = { configured: false, note: 'Set the YouTube Live id in watch.html (WEBINAR_YT_ID) to light up the room.' };
+    // This week's live stream link (set by the team, read by the room).
+    let cfg = null;
+    try { cfg = await db.findOne('webinar_config', 'key', 'live'); } catch (_) {}
+    const liveUrl = (cfg && cfg.live_url) || '';
+    const setFor = (cfg && cfg.session_time) || '';
+    const isForUpcoming = !!liveUrl && setFor === nextIso;
+    const broadcast = {
+      live_url: liveUrl,
+      yt_id: ytId(liveUrl),
+      set_for: setFor,
+      updated_at: (cfg && cfg.updated_at) || '',
+      // green = ready for the next session, amber = stale/missing, so the team
+      // never accidentally runs the class pointing at last week's stream.
+      status: !liveUrl ? 'missing' : (isForUpcoming ? 'ready' : 'stale'),
+    };
 
     return res.json({
       stats: { total, attended: attended.length, showRate, bookedAfter, attendConv },

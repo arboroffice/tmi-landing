@@ -79,8 +79,11 @@ function render(){
   const s = d.stats || {};
   const up = d.upcoming || {};
   const bc = d.broadcast || {};
-  const bcColor = bc.configured ? '#3f6b0e' : '#c88a12';
-  const bcText = bc.configured ? 'Broadcast connected' : 'Broadcast not connected yet';
+  const st = bc.status || 'missing';
+  const bcColor = st==='ready' ? '#3f6b0e' : (st==='stale' ? '#c88a12' : '#b23b4e');
+  const bcText = st==='ready' ? 'Live link ready for this session'
+              : st==='stale' ? 'Live link is from a past session — update it'
+              : 'No live link set for this session';
 
   const stats = `<div class="wb-stats">
     ${stat(s.total||0,'Total registrations')}
@@ -90,6 +93,7 @@ function render(){
     ${stat((s.attendConv||0)+'%','Attendee → call')}
   </div>`;
 
+  const stampedFor = bc.set_for ? (' · set for '+fmtDate(bc.set_for)) : '';
   const top = `<div class="wb-top">
     <div class="wb-next">
       <div class="k">Next live session</div>
@@ -98,8 +102,12 @@ function render(){
     </div>
     <div class="wb-broadcast">
       <div class="row"><span class="dot" style="background:${bcColor}"></span>${bcText}</div>
-      <p>${esc(bc.note||'')}</p>
-      <p>Streaming from Streamlabs to YouTube Live: put the YouTube video id in <code>WEBINAR_YT_ID</code> in <code>watch.html</code>, and the room plays the live feed during the session window.</p>
+      <p>Paste this week's YouTube Live (or Streamlabs multistream) link. The room every registrant clicks stays the same, and it plays this link during the session. Set a fresh one before each Tuesday.${stampedFor}</p>
+      <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+        <input id="live-url" type="url" placeholder="https://youtube.com/live/..." value="${esc(bc.live_url||'')}" style="flex:1;min-width:220px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:14px;"/>
+        <button class="wb-tab" style="border-color:var(--ink,#1a1a1a);background:var(--ink,#1a1a1a);color:#fff;" onclick="saveLive()">Save link</button>
+      </div>
+      <p id="live-msg" style="min-height:14px;"></p>
     </div>
   </div>`;
 
@@ -144,6 +152,22 @@ function tab(t){
     document.getElementById('pane-'+x).style.display = (x===t)?'':'none';
   });
   document.querySelectorAll('.wb-tab').forEach(b=>b.classList.toggle('on', b.dataset.t===t));
+}
+
+async function saveLive(){
+  const el = document.getElementById('live-url');
+  const msg = document.getElementById('live-msg');
+  const url = (el.value||'').trim();
+  msg.style.color = 'var(--muted)'; msg.textContent = 'Saving...';
+  try {
+    await TMIAdmin.api('/api/webinar-admin', 'POST', { live_url: url });
+    DATA = await TMIAdmin.api('/api/webinar-admin');
+    render();
+    const m2 = document.getElementById('live-msg');
+    if (m2){ m2.style.color = '#3f6b0e'; m2.textContent = url ? 'Saved. The room will play this during the class.' : 'Cleared.'; }
+  } catch(e){
+    msg.style.color = '#b23b4e'; msg.textContent = 'Could not save. '+(e.message||'');
+  }
 }
 
 (async function(){
