@@ -36,14 +36,22 @@ module.exports = async function handler(req, res) {
     if (isNaN(T)) continue;
     checked++;
 
-    let step = null;
-    if (now >= T - 24 * H && now < T - H) step = 'reminder_24h';
-    else if (now >= T - H && now < T) step = 'reminder_1h';
-    else if (now >= T && now < T + 20 * 60 * 1000) step = 'live_now';
-    else if (now >= T + D + 2 * H && now < T + D + 26 * H) step = 'followup_2h';
-    if (!step) continue;
+    // A single reg can be due for at most one step per run (windows are
+    // disjoint). Nurture steps are additionally gated inside sendStep to
+    // attendees who have not booked, so listing them here is safe.
+    const steps = [];
+    if (now >= T - 24 * H && now < T - H) steps.push('reminder_24h');
+    else if (now >= T - H && now < T) steps.push('reminder_1h');
+    else if (now >= T && now < T + 20 * 60 * 1000) steps.push('live_now');
+    else if (now >= T + D + 2 * H && now < T + D + 26 * H) steps.push('followup_2h');
+    else if (now >= T + 24 * H && now < T + 2 * 24 * H) steps.push('nurture_1d');
+    else if (now >= T + 3 * 24 * H && now < T + 4 * 24 * H) steps.push('nurture_3d');
+    else if (now >= T + 6 * 24 * H && now < T + 7 * 24 * H) steps.push('lastcall_6d');
+    if (!steps.length) continue;
 
-    try { if (await sendStep(db, reg, step)) sent++; } catch (e) { console.error('webinar-cron:', e.message); }
+    for (const step of steps) {
+      try { if (await sendStep(db, reg, step)) sent++; } catch (e) { console.error('webinar-cron:', e.message); }
+    }
   }
 
   return res.status(200).json({ ok: true, checked, sent });

@@ -118,6 +118,10 @@ module.exports = async function handler(req, res) {
         { step: 'reminder_1h', delay: diff - 3600 },
         { step: 'live_now', delay: diff },
         { step: 'followup_2h', delay: diff + 2 * 3600 + W.DURATION_SEC },
+        // Post-class nurture (attended + not-yet-booked only; gated in sendStep).
+        { step: 'nurture_1d', delay: diff + 24 * 3600 },
+        { step: 'nurture_3d', delay: diff + 3 * 24 * 3600 },
+        { step: 'lastcall_6d', delay: diff + 6 * 24 * 3600 },
       ];
       for (const j of jobs) {
         if (j.delay < 60) continue; // too soon to be worth scheduling

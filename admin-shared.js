@@ -347,6 +347,7 @@ const TMIAdmin = (() => {
           { page:'pipeline',     label:'Pipeline',     icon:I.pipeline, href:'/admin-sales#pipeline' },
           { page:'audits',       label:'Audits',       icon:I.audits,   href:'/admin-sales#audits' },
           { page:'bookings',     label:'Bookings',     icon:I.bookings, href:'/admin-sales#bookings' },
+          { page:'webinar',      label:'Weekly Class', icon:I.meetings, href:'/admin-webinar' },
           { page:'meetings',     label:'Meetings',     icon:I.meetings },
           { page:'applications', label:'Applications', icon:I.apps,     href:'/admin-inbox#apps',      badge:'inbox' },
           { page:'followups',    label:'Follow-ups',   icon:I.followup, href:'/admin-inbox#followups', badge:'inbox' },

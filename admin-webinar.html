@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Weekly Class — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .wb-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+  @media(max-width:900px){.wb-stats{grid-template-columns:repeat(2,1fr);}}
+  .wb-stat{background:var(--bg-alt,#f5f5f7);border:1px solid var(--line);border-radius:var(--r,14px);padding:18px 18px;}
+  .wb-stat .v{font-size:28px;font-weight:800;letter-spacing:-0.03em;line-height:1;}
+  .wb-stat .l{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:6px;}
+  .wb-top{display:grid;grid-template-columns:1.1fr 0.9fr;gap:16px;margin-bottom:22px;}
+  @media(max-width:820px){.wb-top{grid-template-columns:1fr;}}
+  .wb-next{background:#0a0b14;color:#fff;border:none;border-radius:var(--r,14px);padding:22px 24px;}
+  .wb-next .k{font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#E4FF97;margin-bottom:10px;}
+  .wb-next .when{font-size:22px;font-weight:800;letter-spacing:-0.02em;line-height:1.15;}
+  .wb-next .cnt{margin-top:12px;font-size:14px;color:rgba(255,255,255,0.72);}
+  .wb-next .cnt b{color:#fff;}
+  .wb-broadcast{border:1px solid var(--line);border-radius:var(--r,14px);padding:20px 22px;display:flex;flex-direction:column;gap:8px;}
+  .wb-broadcast .dot{display:inline-block;width:9px;height:9px;border-radius:50%;}
+  .wb-broadcast .row{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;}
+  .wb-broadcast p{font-size:12.5px;color:var(--muted);line-height:1.55;margin:0;}
+  .wb-broadcast code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--bg-alt,#f5f5f7);border:1px solid var(--line);border-radius:5px;padding:1px 6px;}
+  .wb-cols{display:grid;grid-template-columns:1.35fr 0.65fr;gap:20px;}
+  @media(max-width:980px){.wb-cols{grid-template-columns:1fr;}}
+  .wb-tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .wb-tab{font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink,#1a1a1a);cursor:pointer;}
+  .wb-tab.on{background:var(--ink,#1a1a1a);color:#fff;border-color:var(--ink,#1a1a1a);}
+  table.wbt{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.wbt th{text-align:left;font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);}
+  table.wbt td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .tag2{display:inline-block;font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 9px;}
+  .tag2.yes{background:#e7f6d8;color:#3f6b0e;}
+  .tag2.no{background:#f1f1f3;color:#8a8a94;}
+  .tag2.book{background:#0a0b14;color:#E4FF97;}
+  .q-item{border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:10px;font-size:13.5px;line-height:1.55;color:var(--ink-2,#505060);}
+  .q-item .qd{font-size:10.5px;color:var(--muted);margin-top:7px;}
+  .muted-empty{color:var(--muted);font-size:13px;padding:20px 0;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Weekly Class</span></div>
+      <div class="topbar-actions">
+        <a class="btn btn-ghost btn-sm" href="/webinar" target="_blank" rel="noopener">View sign-up page</a>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>How to Build an Intelligent Company</h1>
+        <span class="filter-count">Live every Tuesday, 3:00 PM CT</span>
+      </div>
+
+      <div id="wb-body">
+        <div class="muted-empty">Loading class data...</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('webinar');
+
+const esc = (s) => (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function fmtDate(iso){ if(!iso) return ''; try{ return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }catch(e){ return ''; } }
+let DATA = null;
+
+function stat(v,l){ return `<div class="wb-stat"><div class="v">${v}</div><div class="l">${l}</div></div>`; }
+
+function render(){
+  const d = DATA;
+  const s = d.stats || {};
+  const up = d.upcoming || {};
+  const bc = d.broadcast || {};
+  const bcColor = bc.configured ? '#3f6b0e' : '#c88a12';
+  const bcText = bc.configured ? 'Broadcast connected' : 'Broadcast not connected yet';
+
+  const stats = `<div class="wb-stats">
+    ${stat(s.total||0,'Total registrations')}
+    ${stat(s.attended||0,'Attended')}
+    ${stat((s.showRate||0)+'%','Show-up rate')}
+    ${stat(s.bookedAfter||0,'Booked a call after')}
+    ${stat((s.attendConv||0)+'%','Attendee → call')}
+  </div>`;
+
+  const top = `<div class="wb-top">
+    <div class="wb-next">
+      <div class="k">Next live session</div>
+      <div class="when">${esc(up.when||'')}</div>
+      <div class="cnt"><b>${up.registered||0}</b> registered for this session so far</div>
+    </div>
+    <div class="wb-broadcast">
+      <div class="row"><span class="dot" style="background:${bcColor}"></span>${bcText}</div>
+      <p>${esc(bc.note||'')}</p>
+      <p>Streaming from Streamlabs to YouTube Live: put the YouTube video id in <code>WEBINAR_YT_ID</code> in <code>watch.html</code>, and the room plays the live feed during the session window.</p>
+    </div>
+  </div>`;
+
+  const sessRows = (d.sessions||[]).map(x=>`<tr>
+    <td><b>${esc(x.when||'')}</b></td>
+    <td>${x.registered||0}</td>
+    <td>${x.attended||0}</td>
+    <td>${x.registered? Math.round((x.attended/x.registered)*100):0}%</td>
+    <td>${x.booked||0}</td>
+  </tr>`).join('') || `<tr><td colspan="5" class="muted-empty">No sessions yet.</td></tr>`;
+
+  const regRows = (d.registrations||[]).map(r=>`<tr>
+    <td><b>${esc(r.name||'-')}</b><div style="font-size:11.5px;color:var(--muted)">${esc(r.email||'')}</div></td>
+    <td>${esc(r.company||'')}</td>
+    <td>${esc(r.when||fmtDate(r.session_time))}</td>
+    <td>${r.attended?'<span class="tag2 yes">Attended</span>':'<span class="tag2 no">No-show</span>'} ${r.booked?'<span class="tag2 book">Booked</span>':''}</td>
+    <td>${fmtDate(r.created_at)}</td>
+  </tr>`).join('') || `<tr><td colspan="5" class="muted-empty">No registrations yet.</td></tr>`;
+
+  const questions = (d.questions||[]).map(q=>`<div class="q-item">${esc(q.body||'')}<div class="qd">${fmtDate(q.created_at)}</div></div>`).join('') || `<div class="muted-empty">No questions submitted yet.</div>`;
+
+  document.getElementById('wb-body').innerHTML = `
+    ${stats}
+    ${top}
+    <div class="wb-tabs">
+      <button class="wb-tab on" data-t="regs" onclick="tab('regs')">Registrations</button>
+      <button class="wb-tab" data-t="sessions" onclick="tab('sessions')">By session</button>
+      <button class="wb-tab" data-t="questions" onclick="tab('questions')">Questions</button>
+    </div>
+    <div id="pane-regs">
+      <table class="wbt"><thead><tr><th>Person</th><th>Company</th><th>Session</th><th>Status</th><th>Registered</th></tr></thead><tbody>${regRows}</tbody></table>
+    </div>
+    <div id="pane-sessions" style="display:none;">
+      <table class="wbt"><thead><tr><th>Session</th><th>Registered</th><th>Attended</th><th>Show rate</th><th>Booked after</th></tr></thead><tbody>${sessRows}</tbody></table>
+    </div>
+    <div id="pane-questions" style="display:none;">${questions}</div>
+  `;
+}
+
+function tab(t){
+  ['regs','sessions','questions'].forEach(x=>{
+    document.getElementById('pane-'+x).style.display = (x===t)?'':'none';
+  });
+  document.querySelectorAll('.wb-tab').forEach(b=>b.classList.toggle('on', b.dataset.t===t));
+}
+
+(async function(){
+  try {
+    DATA = await TMIAdmin.api('/api/webinar-admin');
+    render();
+  } catch(e){
+    document.getElementById('wb-body').innerHTML = '<div class="muted-empty">Could not load class data. '+esc(e.message||'')+'</div>';
+  }
+})();
+</script>
+</body>
+</html>
