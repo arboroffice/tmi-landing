@@ -244,9 +244,6 @@ const TMIAdmin = (() => {
     ${navItem('bookings', 'Bookings', I.bookings, false, '/admin-sales#bookings')}
     ${navItem('meetings', 'Meetings', I.meetings)}
     ${navItem('applications', 'Applications', I.apps, true, '/admin-inbox#apps')}
-    ${navItem('makemoneywithai', 'Make Money w/ AI', I.leads, false, '/admin-makemoneywithai')}
-    ${navItem('startabusiness', 'Start a Business', I.leads, false, '/admin-startabusiness')}
-    ${navItem('distro', 'Distro', I.leads, false, '/admin-distro')}
     ${navItem('followups', 'Follow-ups', I.followup, true, '/admin-inbox#followups')}
     ${navItem('worklist', 'Today', I.level10)}
     ${navItem('leads', 'Leads', I.leads)}
