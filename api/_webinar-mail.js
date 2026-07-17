@@ -19,7 +19,6 @@ function buildStepEmail(reg, step) {
   const when = reg.when || W.fmtChicago(session);
   const joinUrl = `${W.SITE}/watch?s=${encodeURIComponent(reg.session_time)}&t=${reg.token}`;
   const replayUrl = `${W.SITE}/watch?mode=ondemand`;
-  const bookUrl = `${W.SITE}/book`;
   const unsub = `${W.SITE}/api/unsubscribe?email=${encodeURIComponent(reg.email)}`;
   const btn = (href, label, dark) =>
     `<a href="${href}" style="display:inline-block;background:${dark ? '#0a0b14' : '#E4FF97'};color:${dark ? '#E4FF97' : '#0a0b14'};font-weight:800;padding:14px 28px;border-radius:10px;text-decoration:none;">${label}</a>`;
@@ -37,20 +36,20 @@ function buildStepEmail(reg, step) {
   } else if (step === 'followup_2h') {
     if (reg.attended) {
       subject = `Your next step after the class`;
-      body = `<p>Hey ${first},</p><p>Thanks for spending 40 minutes with us. You've seen the framework, the three systems that let a company run without the owner in the middle of everything.</p><p>The fastest way to find out exactly where yours is leaking is a free discovery call. We look at your operation the way we would if we owned it and hand you a 30-day plan.</p><p>${btn(bookUrl, 'Book your free call →', true)}</p><p>Or text a question first: (337) 450-9795.</p><p>- The TMI team</p>`;
+      body = `<p>Hey ${first},</p><p>Thanks for spending 40 minutes with us. You've seen the framework, the three systems that let a company run without the owner in the middle of everything.</p><p>When you're ready to map exactly where yours is leaking, just <b>reply to this email</b> and we'll set up your Business Intelligence Audit, a private call where we look at your operation the way we would if we owned it.</p><p>Or text a question first: (337) 450-9795.</p><p>- The TMI team</p>`;
     } else {
       subject = `You missed it, grab the next session`;
       body = `<p>Hey ${first},</p><p>Looks like ${when} didn't work out. No problem, we run it live every Tuesday. Grab your seat for the next one:</p><p>${btn(W.SITE + '/webinar', 'Save my seat →', true)}</p><p>It's 40 minutes on the system that removes the owner as the bottleneck. Worth the time.</p><p>- The TMI team</p>`;
     }
   } else if (step === 'nurture_1d') {
     subject = `The one system that was leaking the most`;
-    body = `<p>Hey ${first},</p><p>One idea from the class worth sitting with: in almost every operation we look at, one of the three systems is quietly costing more than the other two combined. Usually it's the one the owner has learned to work around by hand.</p><p>On a free call we find yours in about 20 minutes and put a real number on it.</p><p>${btn(bookUrl, 'Book your free call →', true)}</p><p>Or text a question first: (337) 450-9795.</p><p>- The TMI team</p>`;
+    body = `<p>Hey ${first},</p><p>One idea from the class worth sitting with: in almost every operation we look at, one of the three systems is quietly costing more than the other two combined. Usually it's the one the owner has learned to work around by hand.</p><p>On a call we find yours in about 20 minutes and put a real number on it. <b>Reply to this email</b> and we'll set it up.</p><p>Or text a question first: (337) 450-9795.</p><p>- The TMI team</p>`;
   } else if (step === 'nurture_3d') {
     subject = `From 9-day invoices to same-day`;
-    body = `<p>Hey ${first},</p><p>What this looks like in practice: one operation we built cut its invoice cycle from 9 days to same-day and recovered 5 to 15% of revenue that was slipping through unbilled work. Same crews, same volume, a system that stopped dropping the ball.</p><p>That's the kind of thing the free call maps for your business: where the money is and what we would build first.</p><p>${btn(bookUrl, 'Book your free call →', true)}</p><p>- The TMI team</p>`;
+    body = `<p>Hey ${first},</p><p>What this looks like in practice: one operation we built cut its invoice cycle from 9 days to same-day and recovered 5 to 15% of revenue that was slipping through unbilled work. Same crews, same volume, a system that stopped dropping the ball.</p><p>That's the kind of thing a call maps for your business: where the money is and what we would build first. <b>Reply</b> and we'll set one up.</p><p>- The TMI team</p>`;
   } else if (step === 'lastcall_6d') {
     subject = `Before this week's class`;
-    body = `<p>Hey ${first},</p><p>We run the class again tomorrow, and a fresh group books calls off it every week. If you've been meaning to get your operation looked at, now is a good time, before the next season gets loud.</p><p>${btn(bookUrl, 'Book your free call →', true)}</p><p>If the timing is off, no worries. You're on the list and the class runs every Tuesday.</p><p>- The TMI team</p>`;
+    body = `<p>Hey ${first},</p><p>We run the class again tomorrow, and a fresh group comes through every week. If you've been meaning to get your operation looked at, now is a good time, before the next season gets loud.</p><p><b>Reply to this email</b> and we'll set up your call. And if a colleague should see the framework, the class runs live every Tuesday:</p><p>${btn(W.SITE + '/webinar', 'Save a seat →', true)}</p><p>- The TMI team</p>`;
   } else {
     return null;
   }

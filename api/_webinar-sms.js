@@ -42,10 +42,10 @@ function buildStepSms(reg, step) {
       return `TMI: We're live now. Jump in: ${join}`;
     case 'sms_after':
       return reg.attended
-        ? `TMI: Thanks for being on the class, ${first}. Want us to find where your operation is leaking? Book a free call: ${W.SITE}/book, or text a question right here.`
+        ? `TMI: Thanks for being on the class, ${first}. Want us to map where your operation is leaking? Just reply here and we'll set up your call.`
         : `TMI: Missed you on the class today. We run it live every Tuesday at 3pm CT, grab the next seat: ${W.SITE}/webinar`;
     case 'sms_nudge':
-      return `TMI: ${first}, the free call is the fast way to see your three systems mapped and a number on the biggest leak. 20 min: ${W.SITE}/book`;
+      return `TMI: ${first}, ready to see your three systems mapped and a number on your biggest leak? Reply here and we'll set up your call.`;
     default:
       return null;
   }
