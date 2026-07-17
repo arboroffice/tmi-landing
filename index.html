@@ -236,6 +236,39 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 </head>
 <body>
 
+<!-- WEBINAR PROMO BANNER -->
+<style>
+  .promo-bar{display:block;background:var(--ink);color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);}
+  .promo-in{max-width:1200px;margin:0 auto;padding:9px 32px;display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;font-family:var(--sans);font-size:13px;line-height:1.3;}
+  .pb-dot{width:8px;height:8px;border-radius:50%;background:var(--chart);flex:none;animation:pbpulse 2s infinite;}
+  @keyframes pbpulse{0%,100%{box-shadow:0 0 0 0 rgba(228,255,151,.5);}70%{box-shadow:0 0 0 8px rgba(228,255,151,0);}}
+  .pb-text b{color:var(--chart);font-weight:700;}
+  .pb-sep{opacity:.35;margin:0 3px;}
+  .pb-cd{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.7);font-size:12.5px;}
+  .pb-go{background:var(--chart);color:var(--ink);font-weight:700;font-size:12px;padding:5px 14px;border-radius:999px;letter-spacing:0.02em;transition:background .2s,transform .2s;white-space:nowrap;}
+  .promo-bar:hover .pb-go{background:var(--chart-dark);transform:translateY(-1px);}
+  @media(max-width:680px){.pb-hide{display:none;}.promo-in{padding:8px 16px;gap:9px;}}
+</style>
+<a class="promo-bar" href="/webinar" onclick="lead('Webinar CTA')">
+  <span class="promo-in">
+    <span class="pb-dot"></span>
+    <span class="pb-text"><b>Free live class every Tuesday, 3PM CT</b><span class="pb-hide"><span class="pb-sep">·</span> How to Build an Intelligent Company</span></span>
+    <span class="pb-cd" id="pbCd"></span>
+    <span class="pb-go">Save your seat &rarr;</span>
+  </span>
+</a>
+<script>
+(function(){
+  var TZ='America/Chicago';
+  function parts(d){var f=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour12:false,weekday:'short',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});var p={};f.formatToParts(d).forEach(function(x){p[x.type]=x.value;});var wd={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[p.weekday];var hr=+p.hour;if(hr===24)hr=0;return{y:+p.year,mo:+p.month,d:+p.day,wd:wd,h:hr,mi:+p.minute};}
+  function zonedToUtc(y,mo,d,h,mi){var asUTC=Date.UTC(y,mo-1,d,h,mi,0);var f=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});var p={};f.formatToParts(new Date(asUTC)).forEach(function(x){p[x.type]=x.value;});var hr=+p.hour;if(hr===24)hr=0;var asTZ=Date.UTC(+p.year,p.month-1,+p.day,hr,+p.minute,+p.second);return new Date(asUTC-(asTZ-asUTC));}
+  function next(){var now=new Date();var c=parts(now);var add=(2-c.wd+7)%7;if(add===0&&(c.h>15||(c.h===15&&c.mi>=0)))add=7;var base=Date.UTC(c.y,c.mo-1,c.d)+add*86400000;var b=new Date(base);return zonedToUtc(b.getUTCFullYear(),b.getUTCMonth()+1,b.getUTCDate(),15,0);}
+  var el=document.getElementById('pbCd');if(!el)return;var target=next();
+  function tick(){var s=(target-new Date())/1000;if(s<=0){target=next();s=(target-new Date())/1000;}var dd=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),ss=Math.floor(s%60);el.textContent='Starts in '+(dd>0?dd+'d ':'')+h+'h '+m+'m '+ss+'s';}
+  tick();setInterval(tick,1000);
+})();
+</script>
+
 <!-- NAV -->
 <header class="nav">
   <div class="nav-in">
