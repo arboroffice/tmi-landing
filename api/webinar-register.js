@@ -114,6 +114,18 @@ module.exports = async function handler(req, res) {
     catch (e) { console.error('webinar sms confirm:', e.message); }
   }
 
+  // 3c) Owner alert SMS on every registration (best-effort)
+  if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+    try {
+      const sms = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+      await sms.messages.create({
+        body: `New webinar signup: ${name} | ${email}${b.company ? ' | ' + b.company : ''}${phone ? ' | ' + phone : ''} | ${when}`,
+        from: '+18557171044',
+        to: '+13373809059',
+      });
+    } catch (e) { console.error('webinar owner sms alert:', e.message); }
+  }
+
   // 4) Schedule the reminder / follow-up chain via QStash (best-effort)
   if (process.env.QSTASH_TOKEN && reg && reg.id) {
     try {
