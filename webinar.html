@@ -262,6 +262,7 @@ function scrollReg(e){ if(e) e.preventDefault(); var r=document.getElementById('
 
 // ---- Weekly session: Tuesday 3:00 PM America/Chicago (CST/CDT), DST-safe ----
 var TZ='America/Chicago', SESSION_WEEKDAY=2, SESSION_HOUR=15, SESSION_MIN=0;
+var SKIP_DATES=['2026-07-21']; // weeks with no live class (Chicago YYYY-MM-DD)
 function zonedToUtc(y,mo,d,h,mi){
   var asUTC=Date.UTC(y,mo-1,d,h,mi,0);
   var dtf=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -277,12 +278,15 @@ function chicagoParts(date){
   var hr=+p.hour;if(hr===24)hr=0;
   return {y:+p.year,mo:+p.month,d:+p.day,wd:wd,h:hr,mi:+p.minute};
 }
+function chicagoDateStr(date){var c=chicagoParts(date);return c.y+'-'+String(c.mo).padStart(2,'0')+'-'+String(c.d).padStart(2,'0');}
 function nextSession(from){
   var now=from||new Date();var c=chicagoParts(now);
   var add=(SESSION_WEEKDAY-c.wd+7)%7;
   if(add===0&&(c.h>SESSION_HOUR||(c.h===SESSION_HOUR&&c.mi>=SESSION_MIN)))add=7;
-  var base=Date.UTC(c.y,c.mo-1,c.d)+add*86400000;var b=new Date(base);
-  return zonedToUtc(b.getUTCFullYear(),b.getUTCMonth()+1,b.getUTCDate(),SESSION_HOUR,SESSION_MIN);
+  var b=new Date(Date.UTC(c.y,c.mo-1,c.d)+add*86400000);
+  var s=zonedToUtc(b.getUTCFullYear(),b.getUTCMonth()+1,b.getUTCDate(),SESSION_HOUR,SESSION_MIN),g=0;
+  while(SKIP_DATES.indexOf(chicagoDateStr(s))>=0&&g++<60){b=new Date(Date.UTC(b.getUTCFullYear(),b.getUTCMonth(),b.getUTCDate()+7));s=zonedToUtc(b.getUTCFullYear(),b.getUTCMonth()+1,b.getUTCDate(),SESSION_HOUR,SESSION_MIN);}
+  return s;
 }
 function relDay(date){
   var a=chicagoParts(new Date()), b=chicagoParts(date);

@@ -10,6 +10,11 @@ const DURATION_SEC = 40 * 60; // 40-minute masterclass
 const SITE = 'https://www.tmitechai.com';
 const EVENT_NAME = 'How to Build an Intelligent Company';
 
+// Weeks with no live class. Chicago calendar dates (YYYY-MM-DD) of the Tuesday
+// to skip; nextSession() rolls past these to the following Tuesday. Past dates
+// are harmless (the session only ever moves forward), so they can stay.
+const SKIP_DATES = ['2026-07-21'];
+
 // Absolute instant (Date) for a wall-clock time in a named timezone, DST-safe.
 function zonedToUtc(y, mo, d, h, mi, tz) {
   const asUTC = Date.UTC(y, mo - 1, d, h, mi, 0);
@@ -39,16 +44,34 @@ function chicagoParts(date) {
   return { y: +p.year, mo: +p.month, d: +p.day, wd: wdMap[p.weekday], h: hr, mi: +p.minute };
 }
 
-// Next upcoming Tuesday 3:00 PM Chicago as an absolute Date (from `from`).
+// Chicago calendar date (YYYY-MM-DD) for an instant.
+function chicagoDateStr(date) {
+  const c = chicagoParts(date);
+  return `${c.y}-${String(c.mo).padStart(2, '0')}-${String(c.d).padStart(2, '0')}`;
+}
+
+// Is this session date a skipped (no-class) week?
+function isSkipped(date) {
+  return SKIP_DATES.includes(chicagoDateStr(date));
+}
+
+// Next upcoming Tuesday 3:00 PM Chicago as an absolute Date (from `from`),
+// rolling past any skipped weeks.
 function nextSession(from) {
   const now = from || new Date();
   const c = chicagoParts(now);
   let add = (SESSION_WEEKDAY - c.wd + 7) % 7;
   if (add === 0 && (c.h > SESSION_HOUR || (c.h === SESSION_HOUR && c.mi >= SESSION_MIN))) add = 7;
   // advance the Chicago calendar date by `add` days
-  const base = Date.UTC(c.y, c.mo - 1, c.d) + add * 86400000;
-  const b = new Date(base);
-  return zonedToUtc(b.getUTCFullYear(), b.getUTCMonth() + 1, b.getUTCDate(), SESSION_HOUR, SESSION_MIN, TZ);
+  let base = Date.UTC(c.y, c.mo - 1, c.d) + add * 86400000;
+  let b = new Date(base);
+  let session = zonedToUtc(b.getUTCFullYear(), b.getUTCMonth() + 1, b.getUTCDate(), SESSION_HOUR, SESSION_MIN, TZ);
+  let guard = 0;
+  while (isSkipped(session) && guard++ < 60) {
+    b = new Date(Date.UTC(b.getUTCFullYear(), b.getUTCMonth(), b.getUTCDate() + 7));
+    session = zonedToUtc(b.getUTCFullYear(), b.getUTCMonth() + 1, b.getUTCDate(), SESSION_HOUR, SESSION_MIN, TZ);
+  }
+  return session;
 }
 
 // Given a session instant, is `now` before / during / after the live window?
@@ -72,6 +95,7 @@ function icsStamp(date) {
 }
 
 module.exports = {
-  TZ, SESSION_WEEKDAY, SESSION_HOUR, SESSION_MIN, DURATION_SEC, SITE, EVENT_NAME,
+  TZ, SESSION_WEEKDAY, SESSION_HOUR, SESSION_MIN, DURATION_SEC, SITE, EVENT_NAME, SKIP_DATES,
   zonedToUtc, chicagoParts, nextSession, sessionState, fmtChicago, icsStamp,
+  chicagoDateStr, isSkipped,
 };

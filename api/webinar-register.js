@@ -39,7 +39,7 @@ module.exports = async function handler(req, res) {
 
   // Trust a client-sent session, but re-derive if missing/past.
   let session = b.session_time ? new Date(b.session_time) : null;
-  if (!session || isNaN(session.getTime()) || session.getTime() < Date.now()) session = W.nextSession();
+  if (!session || isNaN(session.getTime()) || session.getTime() < Date.now() || W.isSkipped(session)) session = W.nextSession();
   const sessionIso = session.toISOString();
   const when = W.fmtChicago(session);
   const token = crypto.randomBytes(12).toString('hex');
