@@ -273,7 +273,8 @@ const TMIAdmin = (() => {
     ${navItem('content-calendar', 'Calendar', I.rituals, false, '/admin-content-hub#calendar')}
     ${navItem('brand-plan', 'Brand Plan', I.identity)}
     <div class="sb-group-label">Partners</div>
-    ${navItem('city-leads', 'Applications', I.cityPin, false, '/admin-city-leads')}
+    ${navItem('city-leads', 'City Leads', I.cityPin, false, '/admin-city-leads')}
+    ${navItem('venture', 'Venture Studio', I.command, false, '/admin-venture')}
     <div class="sb-sep"></div>
     ${navItem('system', 'System', I.command)}
     ${navItem('settings', 'Settings', I.settings)}
