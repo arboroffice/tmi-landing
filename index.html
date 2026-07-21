@@ -126,6 +126,14 @@
   .rung.core{background:var(--bg-alt);margin:0 -32px;padding-left:32px;padding-right:32px;border-bottom:1px solid var(--line);}
   .rung.core .tag{display:inline-block;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink);background:var(--chart);padding:3px 9px;border-radius:5px;margin-bottom:12px;}
   .ladder-note{margin-top:22px;font-size:13px;color:var(--ink-3);line-height:1.6;max-width:70ch;}
+  /* stage bands: DIY / DWY / DFY */
+  .stage-band{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;padding:32px 0 10px;border-bottom:2px solid var(--ink);margin-top:6px;}
+  .stage-band .sb-n{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:0.04em;}
+  .stage-band .sb-l{font-family:var(--sans);font-size:clamp(21px,2.1vw,28px);font-weight:700;letter-spacing:-0.02em;line-height:1;}
+  .stage-band .sb-r{font-family:var(--sans);font-size:14px;color:var(--ink-2);font-weight:500;margin-left:auto;text-align:right;}
+  .rung.entry{border-bottom:1px solid var(--line);}
+  .rung.entry .lhs h3{color:var(--ink);}
+  @media(max-width:820px){.stage-band .sb-r{margin-left:0;text-align:left;flex-basis:100%;}}
   @media(max-width:820px){.rung{grid-template-columns:1fr;gap:14px;}.rung .rhs{text-align:left;}.rung .mid ul{grid-template-columns:1fr;}.rung.core{margin:0 -22px;padding-left:22px;padding-right:22px;}}
 
   /* business worlds */
@@ -325,43 +333,90 @@
 <section class="sec" id="path">
   <div class="wrap">
     <p class="eyebrow reveal">The path</p>
-    <h2 class="h-sec reveal" style="margin-top:14px;max-width:20ch;">Start free. <span class="lime">Climb as far as you want.</span></h2>
-    <p class="sub reveal lead-in" style="margin-top:20px;">Four steps, from finding your problems to running an intelligence department. Each step pays for the next, and every dollar you spend earlier is credited to the one after it.</p>
+    <h2 class="h-sec reveal" style="margin-top:14px;max-width:22ch;">Do it yourself. <span class="lime">Grow into done for you.</span></h2>
+    <p class="sub reveal lead-in" style="margin-top:20px;">Three stages, one system. Start on the OS and run it yourself. Bring in our team when you want it built around your business. Hand it over when you want us running the whole thing. Every dollar you spend earlier is credited forward, and the system itself tells you when you have outgrown a step.</p>
 
     <div class="ladder reveal">
-      <div class="rung">
-        <div class="lhs"><div class="s">Step 1 &middot; Free</div><h3>Find your problems</h3></div>
-        <div class="mid"><p>See exactly what is costing you before you spend a dollar.</p>
+      <div class="rung entry">
+        <div class="lhs"><div class="s">Start here &middot; Free</div><h3>Find what is costing you</h3></div>
+        <div class="mid"><p>See where you are losing money and time before you spend a dollar.</p>
           <ul><li>The Intelligent Company book</li><li>The Intelligent Company Scorecard</li><li>Your biggest gaps, named and ranked</li></ul>
         </div>
         <div class="rhs"><div class="p">$0<small>Free</small></div><a href="/intelligence-scorecard" class="btn btn-ghost">Take the scorecard</a></div>
       </div>
 
+      <div class="stage-band reveal">
+        <span class="sb-n">01</span><span class="sb-l">Do it yourself</span>
+        <span class="sb-r">You run it. The OS does the work.</span>
+      </div>
+
       <div class="rung">
-        <div class="lhs"><div class="s">Step 2 &middot; Blueprint</div><h3>Get your plan</h3></div>
-        <div class="mid"><p>Our team maps your operation and hands you the build plan.</p>
-          <ul><li>A full assessment with our team</li><li>Your workflows scored and mapped</li><li>The return on each fix</li><li>Credited in full toward your Build</li></ul>
+        <div class="lhs"><div class="s">Launch</div><h3>See your company on one screen</h3></div>
+        <div class="mid"><p>Onboard yourself and the OS builds your command center in the first session.</p>
+          <ul><li>Guided setup, no consultant</li><li>One command center</li><li>3 core AI workers</li><li>Your first workflows live</li></ul>
         </div>
-        <div class="rhs"><div class="p">from $2,500<small>One time</small></div><a href="/intelligence-assessment" class="btn btn-ghost">Book the blueprint</a></div>
+        <div class="rhs"><div class="p">from $500<small>/ month</small></div><a href="/intelligence-scorecard" class="btn btn-ghost">Start free</a></div>
       </div>
 
       <div class="rung core">
-        <div class="lhs"><span class="tag">Most chosen</span><div class="s">Step 3 &middot; Build</div><h3>Build your intelligent company</h3></div>
-        <div class="mid"><p>We install the whole system and put your digital workforce to work.</p>
-          <ul><li>TMI OS installed around your business</li><li>3 digital employees, 3 workflows live</li><li>Knowledge vault and command center</li><li>30 days, or we work free until live</li></ul>
+        <div class="lhs"><span class="tag">Most popular</span><div class="s">Operate</div><h3>Let the OS run the day</h3></div>
+        <div class="mid"><p>The workers do the doing while you watch the whole operation move.</p>
+          <ul><li>Full command center</li><li>8 to 10 AI workers</li><li>Your tools connected</li><li>Automated workflows</li></ul>
         </div>
-        <div class="rhs"><div class="p">from $15k<small>+ $1.5k / month</small></div><a href="#call" class="btn btn-lime">Book a call</a></div>
+        <div class="rhs"><div class="p">from $1,500<small>/ month</small></div><a href="/intelligence-scorecard" class="btn btn-lime">Start free</a></div>
       </div>
 
       <div class="rung">
-        <div class="lhs"><div class="s">Step 4 &middot; Scale</div><h3>Run an intelligence department</h3></div>
-        <div class="mid"><p>We stay on as the team that keeps making you sharper.</p>
-          <ul><li>New workers, workflows, and systems on tap</li><li>Multi-location and enterprise rollouts</li><li>Full marketplace and builder access</li></ul>
+        <div class="lhs"><div class="s">Command</div><h3>Every department, one system</h3></div>
+        <div class="mid"><p>Run the whole company as one intelligent system, not a stack of apps.</p>
+          <ul><li>Every department covered</li><li>Custom and advanced workers</li><li>Higher volume and seats</li><li>Priority build queue</li></ul>
         </div>
-        <div class="rhs"><div class="p">from $3.5k<small>/ month</small></div><a href="#call" class="btn btn-ghost">Talk to us</a></div>
+        <div class="rhs"><div class="p">from $3,500<small>/ month</small></div><a href="/intelligence-scorecard" class="btn btn-ghost">Start free</a></div>
+      </div>
+
+      <div class="stage-band reveal">
+        <span class="sb-n">02</span><span class="sb-l">Do it with you</span>
+        <span class="sb-r">Our team builds it around your business. You still drive.</span>
+      </div>
+
+      <div class="rung">
+        <div class="lhs"><div class="s">Install</div><h3>Built around your real operation</h3></div>
+        <div class="mid"><p>Our team stands the OS up with you and wires in your actual tools and workflows.</p>
+          <ul><li>Build sprint with our team</li><li>Your real tools connected</li><li>Custom workers and workflows</li><li>Credited toward your monthly</li></ul>
+        </div>
+        <div class="rhs"><div class="p">from $7,500<small>One time + monthly</small></div><a href="#call" class="btn btn-ghost">Book a call</a></div>
+      </div>
+
+      <div class="rung">
+        <div class="lhs"><div class="s">Optimize</div><h3>It keeps getting sharper</h3></div>
+        <div class="mid"><p>We tune and expand the system as you grow, on a monthly build cadence.</p>
+          <ul><li>Monthly strategy and build</li><li>New workers on demand</li><li>Ongoing tuning and support</li><li>You stay in control</li></ul>
+        </div>
+        <div class="rhs"><div class="p">from $5k<small>/ month</small></div><a href="#call" class="btn btn-ghost">Book a call</a></div>
+      </div>
+
+      <div class="stage-band reveal">
+        <span class="sb-n">03</span><span class="sb-l">Done for you</span>
+        <span class="sb-r">We run your intelligent company. You get the outcomes.</span>
+      </div>
+
+      <div class="rung">
+        <div class="lhs"><div class="s">Managed</div><h3>Outcomes, not a machine to run</h3></div>
+        <div class="mid"><p>TMI operates the OS for you. Our team and your workers run the day.</p>
+          <ul><li>We run the workers and workflows</li><li>We own the reporting</li><li>Our people on your account</li><li>You review the results</li></ul>
+        </div>
+        <div class="rhs"><div class="p">from $10k<small>/ month</small></div><a href="#call" class="btn btn-ghost">Book a call</a></div>
+      </div>
+
+      <div class="rung">
+        <div class="lhs"><div class="s">Partner</div><h3>TMI becomes part of how you run</h3></div>
+        <div class="mid"><p>An embedded team on top of the OS, owning strategy and the human calls.</p>
+          <ul><li>Embedded TMI team</li><li>Strategic ownership</li><li>Enterprise and multi-location</li><li>Priced to the relationship</li></ul>
+        </div>
+        <div class="rhs"><div class="p">Custom<small>Let us talk</small></div><a href="#call" class="btn btn-ghost">Talk to us</a></div>
       </div>
     </div>
-    <p class="ladder-note reveal">Prices are starting anchors, not quotes. Your exact number depends on size and scope, and we confirm it on your call. Most companies start with the free scorecard.</p>
+    <p class="ladder-note reveal">Prices are starting anchors, not quotes. Your exact number depends on size and scope, and we confirm it on your call. Everyone starts free, and the system tells you when you have outgrown the step you are on.</p>
   </div>
 </section>
 
