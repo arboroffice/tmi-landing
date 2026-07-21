@@ -25,6 +25,21 @@
   .lead-in{max-width:66ch;}
   .eyebrow{font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);}
 
+  /* freebies marked in the nav with a chartreuse dot (chartreuse text is
+     unreadable on white) */
+  .nav-free{position:relative;}
+  .nav-free::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--chart-dark);margin-right:9px;vertical-align:middle;}
+  .free-inline{margin-top:16px;font-family:var(--sans);font-size:14.5px;color:var(--ink-2);}
+  .free-inline a{color:var(--ink);font-weight:600;border-bottom:2px solid var(--chart);}
+  /* slim mid-page freebie band */
+  .freebar{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .freebar .fb-h{font-family:var(--sans);font-size:clamp(20px,2.2vw,28px);font-weight:700;letter-spacing:-0.02em;margin-top:8px;}
+  @media(max-width:560px){
+    .os-hero .display{font-size:clamp(32px,8.5vw,44px);}
+    .freebar .os-actions{width:100%;}
+    .freebar .os-actions .btn{flex:1;justify-content:center;}
+  }
+
   /* hero */
   .os-hero{padding:64px 0 8px;}
   .os-hero .display{max-width:16ch;margin-top:20px;}
@@ -149,7 +164,8 @@
       <a href="#what">What it is</a>
       <a href="#work">How it works</a>
       <a href="#path">Pricing</a>
-      <a href="/the-intelligent-company-book">Free book</a>
+      <a href="/the-intelligent-company-book" class="nav-free">Free book</a>
+      <a href="/intelligence-scorecard" class="nav-free">Free scorecard</a>
     </nav>
     <a href="#call" class="btn btn-lime nav-cta">Book a call</a>
     <button class="nav-burger" aria-label="Menu" onclick="openDrawer()"><span></span><span></span><span></span></button>
@@ -157,7 +173,7 @@
 </header>
 <div class="drawer" id="drawer">
   <div class="drawer-top"><a href="/" class="nav-brand"><img src="logo.svg" alt="TMI"/> TMI OS</a><button class="x" aria-label="Close" onclick="closeDrawer()">&times;</button></div>
-  <a href="#what">What it is</a><a href="#work">How it works</a><a href="#path">Pricing</a><a href="/the-intelligent-company-book">Free book</a><a href="#call" style="color:#0a0b14;">Book a call</a>
+  <a href="#what">What it is</a><a href="#work">How it works</a><a href="#path">Pricing</a><a href="/the-intelligent-company-book" class="nav-free">Free book</a><a href="/intelligence-scorecard" class="nav-free">Free scorecard</a><a href="#call" style="color:#0a0b14;">Book a call</a>
 </div>
 
 <!-- ============ HERO ============ -->
@@ -170,6 +186,7 @@
       <a href="#call" class="btn btn-lime">Book a call &rarr;</a>
       <a href="/the-intelligent-company-book" class="btn btn-ghost">Get the free book</a>
     </div>
+    <p class="free-inline reveal">Free to start: <a href="/the-intelligent-company-book">the book</a> and <a href="/intelligence-scorecard">the scorecard</a>.</p>
     <div class="os-meta reveal">
       <span>Installed in about 30 days</span>
       <span>Built with you, not handed over</span>
@@ -263,6 +280,20 @@
         <div><h4>Collections</h4><p>Chases open invoices politely and persistently until they get paid.</p></div>
         <div><h4>Marketing</h4><p>Runs campaigns and keeps the pipeline full while you sleep.</p></div>
       </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FREEBIE BAND ============ -->
+<section class="sec-tight alt">
+  <div class="wrap freebar reveal">
+    <div>
+      <p class="eyebrow">Start free</p>
+      <p class="fb-h">Not ready to talk? <span class="lime">Start free.</span></p>
+    </div>
+    <div class="os-actions">
+      <a href="/the-intelligent-company-book" class="btn btn-ghost">Read the book</a>
+      <a href="/intelligence-scorecard" class="btn btn-lime">Take the scorecard &rarr;</a>
     </div>
   </div>
 </section>
