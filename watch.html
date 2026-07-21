@@ -131,7 +131,7 @@ var WEBINAR_YT_ID = '';           // e.g. 'dQw4w9WgXcQ'  (unlisted is fine)
 var WEBINAR_MP4   = '';           // e.g. 'https://cdn.tmitechai.com/class.mp4'
 var DURATION_SEC  = 40 * 60;      // length of the recording
 var CTA_AT_SEC    = 24 * 60;      // when the webinar offer appears
-var BOOK_URL      = '/webinar';
+var BOOK_URL      = '/book';
 
 // --- timezone helpers (mirror of api/_webinar.js) ---
 var TZ='America/Chicago', SESSION_WEEKDAY=2, SESSION_HOUR=15, SESSION_MIN=0;
@@ -302,7 +302,7 @@ function renderLive(){
     '<div class="stage">'
     +'<div class="video-col">'
       +'<div class="screen">'+videoEmbed(o)+'</div>'
-      +'<div class="cta-card" id="ctaCard"><div class="t">Want us to map <span>your</span> operation and show you exactly where it’s leaking? Join the free class.</div><a class="cta-btn" href="'+BOOK_URL+'" onclick="lead()">Join the free class →</a></div>'
+      +'<div class="cta-card" id="ctaCard"><div class="t">Want us to map <span>your</span> operation and show you exactly where it’s leaking? Book a call.</div><a class="cta-btn" href="'+BOOK_URL+'" onclick="lead()">Book a call →</a></div>'
       +'<div class="under"><div><h1>How to Build an Intelligent Company</h1><div class="sub">The three systems that let a company run without the owner in the middle of everything.</div></div><div class="elapsed" id="elapsed"></div></div>'
     +'</div>'
     +'<aside class="chat">'
@@ -354,8 +354,8 @@ function renderEnded(){
     +'<div class="k">That’s a wrap</div>'
     +'<h1>You’ve seen the framework. Now map your operation.</h1>'
     +'<p>The fastest way to find out exactly where your business is leaking time and money is the free class. We map how you run today and hand you a 30-day plan.</p>'
-    +'<div class="row"><a class="primary" href="'+BOOK_URL+'" onclick="lead()">Join the free class →</a><a class="ghost" href="/webinar">Register for the next session</a></div>'
-    +'<div class="next">Next live session: <b>'+fmtSession(next)+'</b>  ·  <a href="/webinar" style="color:#E4FF97">register a colleague</a></div>'
+    +'<div class="row"><a class="primary" href="'+BOOK_URL+'" onclick="lead()">Book a call →</a><a class="ghost" href="/book">Book a call</a></div>'
+    +'<div class="next">Next live session: <b>'+fmtSession(next)+'</b>  ·  <a href="/book" style="color:#E4FF97">register a colleague</a></div>'
     +'</div>';
 }
 
