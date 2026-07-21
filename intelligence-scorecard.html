@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
+<meta name="description" content="Score your company's intelligence in two minutes. Six questions rate how well your business remembers, sees, decides, and acts, then show your biggest gap and the first move to close it."/>
+<meta property="og:title" content="The Intelligent Company Scorecard | TMI"/>
+<meta property="og:description" content="Two minutes, six questions. See what level your operation runs at today and where the money is quietly leaking out."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://www.tmitechai.com/intelligence-scorecard"/>
+<meta property="og:image" content="https://www.tmitechai.com/hero-og.jpg"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<link rel="canonical" href="https://www.tmitechai.com/intelligence-scorecard"/>
+<title>The Intelligent Company Scorecard | TMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="/tmi.css"/>
+<style>
+  .sc-wrap{max-width:760px;margin:0 auto;padding:0 32px;}
+  .sc-stage{min-height:calc(100vh - 64px);display:flex;flex-direction:column;justify-content:center;padding:96px 0 72px;}
+
+  /* progress */
+  .sc-progress{position:fixed;top:64px;left:0;right:0;height:3px;background:var(--line);z-index:50;}
+  .sc-progress-bar{height:100%;width:0;background:var(--chart);transition:width .35s cubic-bezier(.2,.7,.2,1);}
+
+  /* intro */
+  .sc-eyebrow{font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:20px;}
+  .sc-h1{font-size:clamp(38px,6vw,72px);font-weight:700;line-height:1.04;letter-spacing:-0.035em;color:var(--ink);}
+  .sc-h1 .lime{color:var(--chart-dark);}
+  .sc-lede{font-family:var(--sans);font-size:clamp(17px,1.8vw,20px);font-weight:400;color:var(--ink-2);line-height:1.55;max-width:46ch;margin:24px 0 0;}
+  .sc-meta{display:flex;flex-wrap:wrap;gap:10px 26px;margin:30px 0 38px;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);}
+  .sc-meta span{display:inline-flex;align-items:center;gap:9px;}
+  .sc-meta span::before{content:"";width:14px;height:14px;border-radius:50%;background:var(--chart);flex:none;}
+
+  /* questions */
+  .sc-step{display:none;}
+  .sc-step.on{display:block;animation:scin .4s cubic-bezier(.2,.7,.2,1);}
+  @keyframes scin{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  .sc-count{font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:16px;}
+  .sc-dim{color:var(--chart-dark);}
+  .sc-q{font-size:clamp(26px,3.6vw,40px);font-weight:700;line-height:1.12;letter-spacing:-0.03em;color:var(--ink);margin-bottom:32px;max-width:20ch;}
+  .sc-opts{display:flex;flex-direction:column;gap:12px;}
+  .sc-opt{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:var(--bg-alt);border:1px solid var(--line);border-radius:14px;padding:20px 22px;cursor:pointer;font-family:var(--serif);font-size:18px;line-height:1.4;color:var(--ink-2);transition:border-color .15s,background .15s,transform .1s;}
+  .sc-opt:hover{border-color:var(--ink);background:#fff;}
+  .sc-opt:active{transform:scale(0.995);}
+  .sc-opt .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line-2);flex:none;transition:border-color .15s,background .15s;}
+  .sc-opt.sel{border-color:var(--ink);background:#fff;color:var(--ink);}
+  .sc-opt.sel .dot{border-color:var(--ink);background:var(--chart);}
+  .sc-nav{display:flex;align-items:center;justify-content:space-between;margin-top:32px;}
+  .sc-back{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer;background:none;border:none;padding:8px 0;}
+  .sc-back:hover{color:var(--ink);}
+  .sc-back[hidden]{visibility:hidden;}
+
+  /* gate */
+  .sc-gate .sc-h1{font-size:clamp(30px,4.4vw,50px);}
+  .sc-form{display:flex;flex-direction:column;gap:12px;max-width:460px;margin-top:30px;}
+  .sc-form label{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:-4px;}
+  .sc-form input{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:10px;padding:14px 16px;width:100%;transition:border-color .15s;}
+  .sc-form input:focus{outline:none;border-color:var(--ink);}
+  .sc-form .btn{justify-content:center;margin-top:8px;font-size:14px;padding:17px 30px;}
+  .sc-form .err{font-family:var(--sans);font-size:13px;color:#c02626;font-weight:500;display:none;}
+  .sc-form .err.on{display:block;}
+  .sc-fine{font-family:var(--sans);font-size:12px;color:var(--ink-3);line-height:1.5;font-weight:400;margin-top:6px;}
+
+  /* results */
+  .sc-level-tag{font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px;}
+  .sc-level{font-size:clamp(34px,5.4vw,64px);font-weight:700;line-height:1.05;letter-spacing:-0.035em;color:var(--ink);}
+  .sc-level em{font-style:normal;color:var(--chart-dark);}
+  .sc-level-desc{font-family:var(--serif);font-size:20px;line-height:1.6;color:var(--ink-2);max-width:52ch;margin:20px 0 0;}
+  .sc-scorebig{font-family:var(--sans);font-weight:700;font-size:15px;color:var(--ink);letter-spacing:-0.01em;margin:36px 0 14px;}
+  .sc-bars{display:flex;flex-direction:column;gap:14px;margin:0 0 8px;}
+  .sc-bar-row{display:grid;grid-template-columns:120px 1fr 34px;align-items:center;gap:14px;}
+  .sc-bar-label{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink-2);}
+  .sc-bar-track{height:10px;background:var(--bg-alt);border-radius:6px;overflow:hidden;border:1px solid var(--line);}
+  .sc-bar-fill{height:100%;background:var(--chart);border-radius:6px;width:0;transition:width .7s cubic-bezier(.2,.7,.2,1);}
+  .sc-bar-row.gap .sc-bar-fill{background:#f0a23b;}
+  .sc-bar-row.gap .sc-bar-label{color:var(--ink);font-weight:700;}
+  .sc-bar-val{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--ink-3);text-align:right;}
+  .sc-gapcard{background:var(--bg-alt);border:1px solid var(--line);border-radius:16px;padding:28px 30px;margin:30px 0;}
+  .sc-gapcard .k{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;}
+  .sc-gapcard .v{font-family:var(--serif);font-size:19px;line-height:1.55;color:var(--ink);}
+  .sc-gapcard .v b{font-weight:700;}
+  .sc-cta{background:var(--ink);color:#fff;border-radius:20px;padding:48px 44px;margin:8px 0 0;text-align:center;}
+  .sc-cta h3{font-size:clamp(26px,4vw,40px);letter-spacing:-0.03em;line-height:1.1;color:#fff;margin-bottom:14px;}
+  .sc-cta h3 em{font-style:normal;color:var(--chart);}
+  .sc-cta p{font-family:var(--sans);font-size:16px;color:rgba(255,255,255,0.72);line-height:1.6;max-width:48ch;margin:0 auto 28px;}
+  .sc-cta .btn-lime{font-size:14px;padding:18px 36px;}
+  .sc-cta .sub-links{margin-top:22px;font-family:var(--sans);font-size:13px;color:rgba(255,255,255,0.55);}
+  .sc-cta .sub-links a{color:var(--chart);border-bottom:1px solid rgba(228,255,151,0.35);}
+
+  @media(max-width:640px){
+    .sc-wrap{padding:0 20px;}
+    .sc-stage{padding:80px 0 56px;min-height:auto;}
+    .sc-opt{font-size:16px;padding:17px 18px;}
+    .sc-bar-row{grid-template-columns:90px 1fr 30px;gap:10px;}
+    .sc-cta{padding:38px 24px;}
+    .sc-gapcard{padding:24px 22px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-in">
+    <a href="/" class="nav-brand"><img src="logo.svg" alt="TMI"/> TMI</a>
+    <nav class="nav-links">
+      <a href="/physical">Industries</a>
+      <a href="/about">About</a>
+      <a href="/founders-of-the-future">Founders of the Future</a>
+      <a href="/news">Journal</a>
+    </nav>
+    <a href="/book" class="btn nav-cta">Book a call</a>
+    <button class="nav-burger" aria-label="Menu" onclick="openDrawer()"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="drawer" id="drawer">
+  <div class="drawer-top"><a href="/" class="nav-brand"><img src="logo.svg" alt="TMI"/> TMI</a><button class="x" aria-label="Close" onclick="closeDrawer()">&times;</button></div>
+  <a href="/physical">Industries</a><a href="/about">About</a><a href="/founders-of-the-future">Founders of the Future</a><a href="/news">Journal</a><a href="/book" style="color:#E4FF97;">Book a call</a>
+</div>
+
+<div class="sc-progress"><div class="sc-progress-bar" id="scBar"></div></div>
+
+<main>
+  <!-- INTRO -->
+  <section class="sc-stage sc-step on" id="sc-intro">
+    <div class="sc-wrap">
+      <p class="sc-eyebrow">The Intelligent Company Scorecard</p>
+      <h1 class="sc-h1">How intelligent is your <span class="lime">company?</span></h1>
+      <p class="sc-lede">Six questions. Two minutes. You will see what level your operation runs at today, where the money is quietly leaking out, and the first move to change it.</p>
+      <div class="sc-meta">
+        <span>6 questions</span>
+        <span>About 2 minutes</span>
+        <span>Instant result</span>
+      </div>
+      <button class="btn btn-lime" onclick="startQuiz()">Start the scorecard &rarr;</button>
+    </div>
+  </section>
+
+  <!-- QUESTIONS injected here -->
+  <div id="sc-questions"></div>
+
+  <!-- GATE -->
+  <section class="sc-stage sc-step sc-gate" id="sc-gate">
+    <div class="sc-wrap">
+      <p class="sc-eyebrow">Last step</p>
+      <h1 class="sc-h1">Where should we send your <span class="lime">scorecard?</span></h1>
+      <p class="sc-lede">Your result is ready. Tell us where to send it and it opens right here.</p>
+      <form class="sc-form" id="scForm" onsubmit="return submitScore(event)">
+        <label for="sc-name">Your name</label>
+        <input id="sc-name" type="text" autocomplete="name" placeholder="First and last" required/>
+        <label for="sc-email">Work email</label>
+        <input id="sc-email" type="email" autocomplete="email" placeholder="you@company.com" required/>
+        <label for="sc-company">Company</label>
+        <input id="sc-company" type="text" autocomplete="organization" placeholder="Company name"/>
+        <div class="err" id="sc-err"></div>
+        <button type="submit" class="btn btn-lime" id="scSubmit">See my result &rarr;</button>
+        <p class="sc-fine">We will send your scorecard and occasional notes on building intelligent companies. Unsubscribe anytime.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="sc-stage sc-step" id="sc-results">
+    <div class="sc-wrap">
+      <p class="sc-level-tag">Your result</p>
+      <h2 class="sc-level" id="scLevelName">Level 3 <span style="color:var(--ink-3)">·</span> <em>Connected</em></h2>
+      <p class="sc-level-desc" id="scLevelDesc"></p>
+
+      <div class="sc-scorebig" id="scScoreBig">Your scorecard</div>
+      <div class="sc-bars" id="scBars"></div>
+
+      <div class="sc-gapcard">
+        <div class="k">Your biggest gap</div>
+        <div class="v" id="scGap"></div>
+      </div>
+
+      <div class="sc-cta">
+        <h3>Let's close the gap on a <em>discovery call.</em></h3>
+        <p id="scCtaCopy">On a short discovery call we will walk through your biggest gap and the first move to close it, then show you what a fix looks like for a company your size.</p>
+        <a href="/book" class="btn btn-lime" onclick="ctaLead()">Book a discovery call &rarr;</a>
+        <div class="sub-links">Want the full picture first? <a href="/the-intelligent-company-book">Read the free book &rarr;</a></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+function openDrawer(){ document.getElementById('drawer').classList.add('open'); }
+function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); }
+document.querySelectorAll('#drawer a').forEach(function(a){ a.addEventListener('click', closeDrawer); });
+
+// ---- quiz data (from The Intelligent Company, Chapter 14) ----
+var QUESTIONS = [
+  { dim:'Memory', q:'If your best employee quit tomorrow, what happens to what they know?',
+    opts:[
+      { t:'Most of it walks out the door with them.', v:1 },
+      { t:'Some is written down, but it takes real digging to find.', v:2 },
+      { t:'It is documented well enough that the next hire could pick it up.', v:4 },
+      { t:'Any customer or job history can be pulled up in seconds by anyone.', v:5 }
+    ]},
+  { dim:'Awareness', q:'How do you usually find out something is going wrong?',
+    opts:[
+      { t:'From a customer complaint, after the fact.', v:1 },
+      { t:'From a weekly report that is already a few days old.', v:2 },
+      { t:'I can check current numbers when I think to look.', v:4 },
+      { t:'Yesterday’s real numbers are in front of me before the coffee brews.', v:5 }
+    ]},
+  { dim:'Action', q:'How much of your routine work runs without someone triggering it?',
+    opts:[
+      { t:'Every step needs a person: reminders, invoices, follow-ups.', v:1 },
+      { t:'A couple of repetitive tasks run on their own.', v:3 },
+      { t:'Most follow-up and billing fires automatically.', v:4 },
+      { t:'The majority of routine work happens without anyone touching it.', v:5 }
+    ]},
+  { dim:'Learning', q:'When the same mistake happens twice, what changes?',
+    opts:[
+      { t:'It keeps repeating and nobody spots the pattern.', v:1 },
+      { t:'We talk about it, but rarely change the process.', v:2 },
+      { t:'We usually fix the process once it stings enough.', v:4 },
+      { t:'Every recurring problem gets written into a workflow that prevents it.', v:5 }
+    ]},
+  { dim:'Integration', q:'How well do your tools share information with each other?',
+    opts:[
+      { t:'Five or more tools and none of them talk.', v:1 },
+      { t:'A couple are connected, most still sit alone.', v:3 },
+      { t:'Most of the core tools share data.', v:4 },
+      { t:'Enter information once and it shows up everywhere it is needed.', v:5 }
+    ]},
+  { dim:'Decision', q:'How long to answer a real question, like which jobs are actually profitable?',
+    opts:[
+      { t:'Days and several phone calls.', v:1 },
+      { t:'About an hour and one phone call.', v:3 },
+      { t:'A few minutes of digging around.', v:4 },
+      { t:'Minutes, from numbers already sitting on a screen.', v:5 }
+    ]}
+];
+
+var LEVELS = {
+  1:{ name:'On paper', desc:'The business runs on notebooks, memory, and one person’s head. If the building burned down tonight, most of what the company knows would go with it. The upside: there is enormous room to gain, and the first connected system will feel like turning the lights on.' },
+  2:{ name:'Disconnected software', desc:'You bought good tools and never wired them together, so the same customer gets typed into three systems for one job. This is the most expensive place to sit, paying for five subscriptions and getting the coordination of none. Connecting what you already own is the fastest win available.' },
+  3:{ name:'Connected', desc:'Your tools have started sharing information instead of sitting as islands. Enter something once and it shows up elsewhere. The next climb is automation: letting the system take the routine actions so your best people stop doing them by hand.' },
+  4:{ name:'Automated', desc:'Reminders fire, invoices generate, and work happens on a Saturday when nobody is logged in. You are close. The last step is a true command layer that remembers, notices, decides, and reports on the whole business without you in the loop.' },
+  5:{ name:'Intelligent operating system', desc:'Every part of the business feeds one connected brain that remembers, notices, decides, and acts. You could take two weeks off with the phone off and the company would run, report on itself, and flag problems without you. The work now is staying sharp and compounding the lead.' }
+};
+
+var GAP_MOVES = {
+  Memory:'capturing what your team knows into one place, so it stops walking out the door with people',
+  Awareness:'putting today’s real numbers on one screen, so you stop finding out about problems from customers',
+  Action:'automating the routine follow-up and billing that currently eats your best people’s hours',
+  Learning:'turning recurring mistakes into workflows that prevent them, instead of repeating them',
+  Integration:'connecting the tools you already pay for, so information stops getting typed in three times',
+  Decision:'getting the numbers onto one screen, so real questions take minutes instead of days'
+};
+
+var answers = new Array(QUESTIONS.length).fill(null);
+var idx = 0;           // 0..QUESTIONS.length-1 for questions
+var TOTAL_STEPS = QUESTIONS.length + 1; // questions + gate
+
+// build question steps
+(function buildQuestions(){
+  var host = document.getElementById('sc-questions');
+  QUESTIONS.forEach(function(qq, i){
+    var sec = document.createElement('section');
+    sec.className = 'sc-stage sc-step';
+    sec.id = 'sc-q' + i;
+    var opts = qq.opts.map(function(o, oi){
+      return '<button class="sc-opt" type="button" data-v="'+o.v+'" data-label="'+o.t.replace(/"/g,'&quot;')+'" onclick="pick('+i+','+oi+','+o.v+',this)">'
+        + '<span class="dot"></span><span>'+o.t+'</span></button>';
+    }).join('');
+    sec.innerHTML = '<div class="sc-wrap">'
+      + '<div class="sc-count">Question '+(i+1)+' of '+QUESTIONS.length+' &middot; <span class="sc-dim">'+qq.dim+'</span></div>'
+      + '<h2 class="sc-q">'+qq.q+'</h2>'
+      + '<div class="sc-opts">'+opts+'</div>'
+      + '<div class="sc-nav"><button class="sc-back" type="button" onclick="back('+i+')">&larr; Back</button></div>'
+      + '</div>';
+    host.appendChild(sec);
+  });
+})();
+
+function show(id){
+  document.querySelectorAll('.sc-step').forEach(function(s){ s.classList.remove('on'); });
+  var el = document.getElementById(id); el.classList.add('on');
+  window.scrollTo({ top:0, behavior:'instant' });
+}
+function setBar(stepsDone){
+  var pct = Math.round((stepsDone / TOTAL_STEPS) * 100);
+  document.getElementById('scBar').style.width = pct + '%';
+}
+
+function startQuiz(){ idx = 0; show('sc-q0'); setBar(0); syncBack(0); }
+
+function syncBack(i){
+  var b = document.querySelector('#sc-q'+i+' .sc-back');
+  if(b) b.hidden = (i === 0);
+}
+
+function pick(i, oi, v, btn){
+  answers[i] = { dimension: QUESTIONS[i].dim, label: btn.getAttribute('data-label'), value: v };
+  var parent = btn.parentNode;
+  parent.querySelectorAll('.sc-opt').forEach(function(o){ o.classList.remove('sel'); });
+  btn.classList.add('sel');
+  setBar(i + 1);
+  // small delay so the selection is visible, then advance
+  setTimeout(function(){
+    if(i < QUESTIONS.length - 1){ idx = i + 1; show('sc-q' + idx); syncBack(idx); restoreSel(idx); }
+    else { show('sc-gate'); }
+  }, 220);
+}
+function restoreSel(i){
+  if(!answers[i]) return;
+  var parent = document.querySelector('#sc-q'+i+' .sc-opts');
+  parent.querySelectorAll('.sc-opt').forEach(function(o){
+    o.classList.toggle('sel', o.getAttribute('data-label') === answers[i].label);
+  });
+}
+function back(i){
+  if(i === 0){ show('sc-intro'); setBar(0); return; }
+  idx = i - 1; show('sc-q' + idx); syncBack(idx); restoreSel(idx); setBar(idx);
+}
+
+function computeResult(){
+  var sum = answers.reduce(function(a, x){ return a + (x ? x.value : 0); }, 0);
+  var avg = sum / QUESTIONS.length;
+  var level;
+  if(avg < 1.8) level = 1;
+  else if(avg < 2.6) level = 2;
+  else if(avg < 3.5) level = 3;
+  else if(avg < 4.3) level = 4;
+  else level = 5;
+  // biggest gap = lowest-scoring dimension (first one if tie)
+  var gap = answers.slice().sort(function(a,b){ return a.value - b.value; })[0];
+  return { avg: Math.round(avg * 10) / 10, level: level, gap: gap };
+}
+
+function renderResults(r){
+  document.getElementById('scLevelName').innerHTML = 'Level ' + r.level + ' <span style=\'color:var(--ink-3)\'>·</span> <em>' + LEVELS[r.level].name + '</em>';
+  document.getElementById('scLevelDesc').textContent = LEVELS[r.level].desc;
+  document.getElementById('scScoreBig').textContent = 'Your scorecard, ' + r.avg + ' out of 5';
+  // bars
+  var bars = document.getElementById('scBars');
+  bars.innerHTML = answers.map(function(a){
+    var isGap = (a.dimension === r.gap.dimension);
+    return '<div class="sc-bar-row'+(isGap?' gap':'')+'">'
+      + '<div class="sc-bar-label">'+a.dimension+'</div>'
+      + '<div class="sc-bar-track"><div class="sc-bar-fill" data-w="'+(a.value*20)+'"></div></div>'
+      + '<div class="sc-bar-val">'+a.value+'/5</div></div>';
+  }).join('');
+  document.getElementById('scGap').innerHTML = '<b>'+r.gap.dimension+'.</b> The fastest return is in ' + GAP_MOVES[r.gap.dimension] + '.';
+  document.getElementById('scCtaCopy').textContent = 'On a short discovery call we will walk through your ' + r.gap.dimension.toLowerCase() + ' gap and the first move to close it, then show you what a fix looks like for a company your size.';
+  // animate bars after paint
+  setTimeout(function(){
+    document.querySelectorAll('#scBars .sc-bar-fill').forEach(function(f){ f.style.width = f.getAttribute('data-w') + '%'; });
+  }, 80);
+}
+
+function submitScore(e){
+  e.preventDefault();
+  var name = document.getElementById('sc-name').value.trim();
+  var email = document.getElementById('sc-email').value.trim();
+  var company = document.getElementById('sc-company').value.trim();
+  var err = document.getElementById('sc-err');
+  if(!email || email.indexOf('@') < 1){ err.textContent = 'Please enter a valid email.'; err.classList.add('on'); return false; }
+  err.classList.remove('on');
+  var btn = document.getElementById('scSubmit');
+  btn.textContent = 'Scoring...'; btn.style.opacity = '0.7';
+
+  var r = computeResult();
+  var payload = {
+    name: name, email: email, company: company,
+    level: r.level, level_name: LEVELS[r.level].name, score: r.avg,
+    gap: r.gap.dimension, answers: answers
+  };
+  try{ if(typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Intelligence Scorecard' }); }catch(_){}
+  fetch('/api/scorecard-lead', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+    .catch(function(){})
+    .finally(function(){
+      try{ localStorage.setItem('tmi_scorecard', JSON.stringify({ email: email, level: r.level, ts: Date.now() })); }catch(_){}
+      renderResults(r);
+      setBar(TOTAL_STEPS);
+      show('sc-results');
+    });
+  return false;
+}
+
+function ctaLead(){ try{ if(typeof fbq === 'function') fbq('track', 'Schedule', { content_name: 'Scorecard discovery call' }); }catch(_){} }
+</script>
+<script src="/tmi-nav.js" defer></script>
+</body>
+</html>
