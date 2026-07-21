@@ -219,6 +219,21 @@
     ref.parentNode.insertBefore(a, ref.nextSibling);
   }
 
+  // Ensure the free book link sits in the page footer as a CTA, cloning a neutral
+  // footer link so it inherits that footer's styling. Skips if already present.
+  function ensureFooterBook(){
+    var foot=document.querySelector('footer'); if(!foot) return;
+    if(foot.querySelector('a[href="/the-intelligent-company-book"]')) return;
+    var ref=null, sels=['a[href="/founders-of-the-future"]','a[href="/about"]','a[href="/faq"]','a[href="/contact"]','a[href="/news"]'];
+    for(var i=0;i<sels.length && !ref;i++) ref=foot.querySelector(sels[i]);
+    if(!ref) return;
+    var a=ref.cloneNode(true);
+    a.removeAttribute('onclick');
+    a.href='/the-intelligent-company-book'; a.textContent='Free book: The Intelligent Company';
+    a.style.color='var(--chart,#E4FF97)'; a.style.fontWeight='600';
+    ref.parentNode.insertBefore(a, ref);
+  }
+
   // Inject the offering links (Digital Workforce, The Work) into every nav surface.
   function ensureExtras(){
     var sels=['.nav-links','#drawer','.ah-nav','.topnav .nav-right','#side-nav'];
@@ -230,6 +245,10 @@
       ensureLink(c,'/makemoneywithai','Make Money With AI','a[href="/news"],a[href="news.html"],a[href="/about"],a[href="about.html"]','before');
       ensureLink(c,'/distro','Distro','a[href="/news"],a[href="news.html"],a[href="/about"],a[href="about.html"]','before');
       ensureLink(c,'https://tapme.tmitechai.com','TapMe','a[href="/distro"],a[href="/news"],a[href="news.html"],a[href="/about"],a[href="about.html"]','after');
+      // Free book CTA: injected into every nav surface, highlighted in chartreuse.
+      ensureLink(c,'/the-intelligent-company-book','Free book','a[href="/about"],a[href="about.html"],a[href="/news"],a[href="news.html"]','before');
+      var bk=c.querySelector('a[href="/the-intelligent-company-book"]');
+      if(bk){ bk.style.color='var(--chart,#E4FF97)'; bk.style.fontWeight='700'; }
     });
   }
 
@@ -275,6 +294,6 @@
     });
   }
 
-  function init(){ ensureExtras(); ensureFooterTapMe(); styleFotfLetters(); enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); railToggle(); }
+  function init(){ ensureExtras(); ensureFooterTapMe(); ensureFooterBook(); styleFotfLetters(); enhanceSideNav(); enhanceDrawerLike(document.getElementById('drawer')); enhanceDesktop(); enhanceTopnav(); enhanceArticleHeader(); railToggle(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
