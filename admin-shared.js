@@ -240,6 +240,7 @@ const TMIAdmin = (() => {
     ${navItem('signals', 'Intent Signals', I.vision)}
     ${navItem('call-tasks', 'Call Queue', I.command)}
     ${navItem('pipeline', 'Pipeline', I.pipeline, false, '/admin-sales#pipeline')}
+    ${navItem('assessment', 'Assessments', I.audits, false, '/admin-assessment')}
     ${navItem('audits', 'Audits', I.audits, false, '/admin-sales#audits')}
     ${navItem('bookings', 'Bookings', I.bookings, false, '/admin-sales#bookings')}
     ${navItem('meetings', 'Meetings', I.meetings)}
