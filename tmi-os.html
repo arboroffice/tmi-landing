@@ -30,7 +30,7 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+  html{scroll-behavior:smooth;scroll-padding-top:78px;-webkit-text-size-adjust:100%;}
   body{font-family:var(--sans);font-weight:500;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
   a{color:inherit;text-decoration:none;}
   h1,h2,h3,h4{font-weight:700;letter-spacing:-0.03em;line-height:1.03;margin:0;text-wrap:balance;}
@@ -255,6 +255,49 @@
     .aud{display:none;}
   }
   @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto;}}
+
+  /* ---------- motion ---------- */
+  .rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);will-change:opacity,transform;}
+  .rv.in{opacity:1;transform:none;}
+  /* ambient hero glow drift */
+  .hero-glow{animation:drift 14s ease-in-out infinite alternate;}
+  @keyframes drift{from{transform:translate(0,0) scale(1);opacity:.9;}to{transform:translate(-4%,3%) scale(1.08);opacity:1;}}
+  /* hub core breathing ring */
+  .hub-core{animation:breathe 4.5s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{box-shadow:0 0 0 8px rgba(228,255,151,0.14),0 30px 60px -30px rgba(10,11,20,0.6);}50%{box-shadow:0 0 0 16px rgba(228,255,151,0.20),0 30px 60px -30px rgba(10,11,20,0.6);}}
+  /* dashboard sparklines */
+  .spark{display:block;width:100%;height:30px;margin-top:10px;overflow:visible;}
+  .spark .area{fill:rgba(228,255,151,0.14);stroke:none;opacity:0;transition:opacity .6s ease .5s;}
+  .spark .line{fill:none;stroke:var(--chart);stroke-width:2;vector-effect:non-scaling-stroke;stroke-dasharray:240;stroke-dashoffset:240;}
+  .spark .end{fill:var(--chart);opacity:0;}
+  .dash.in .spark .line{animation:draw 1.15s cubic-bezier(.4,.7,.3,1) .15s forwards;}
+  .dash.in .spark .area{opacity:1;}
+  .dash.in .spark .end{animation:pop .3s ease 1.05s forwards;}
+  @keyframes draw{to{stroke-dashoffset:0;}}
+  @keyframes pop{to{opacity:1;}}
+  /* workflow sequential light-up */
+  .fnode{transition:box-shadow .45s ease,border-color .45s ease,transform .2s ease;}
+  .fnode.lit{border-color:var(--chart-dark);box-shadow:0 0 0 1px var(--chart-dark),0 12px 34px -14px rgba(205,238,106,0.55);}
+  .fnode .n{transition:background .3s ease,color .3s ease;}
+  .fnode.lit .n{background:var(--chart);color:var(--ink);}
+  /* dark band top glow */
+  .band.dark{position:relative;overflow:hidden;}
+  .band.dark::before{content:"";position:absolute;left:50%;top:-40%;transform:translateX(-50%);width:720px;height:520px;background:radial-gradient(closest-side,rgba(228,255,151,0.12),rgba(228,255,151,0) 72%);pointer-events:none;}
+  .band.dark .wrap{position:relative;z-index:1;}
+  .chip{transition:border-color .15s,transform .15s,background .15s;}
+  .chip:hover{border-color:var(--line-2);transform:translateY(-1px);}
+  .hub-node{transition:transform .18s ease,box-shadow .18s ease;}
+  .hub-node:hover{transform:translateY(-2px);box-shadow:0 14px 34px -20px rgba(10,11,20,0.5);}
+  .ind{transition:border-color .15s,transform .15s;}
+  .ind:hover{border-color:var(--line-2);transform:translateY(-2px);}
+  .mk-card{transition:border-color .15s,transform .15s;}
+  .mk-card:hover{border-color:rgba(228,255,151,0.4);transform:translateY(-2px);}
+  .aud button{transition:color .15s,background .15s;}
+  @media(prefers-reduced-motion:reduce){
+    .rv{opacity:1;transform:none;transition:none;}
+    .hero-glow,.hub-core{animation:none;}
+    .spark .line{stroke-dashoffset:0;}.spark .area,.spark .end{opacity:1;}
+  }
 </style>
 </head>
 <body data-aud="phys">
@@ -441,10 +484,10 @@
           <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg> Reports</div>
         </div>
         <div class="tiles">
-          <div class="tile"><div class="k">Revenue</div><div class="v num">$2.43M</div><div class="d">+12.5%</div></div>
-          <div class="tile"><div class="k">Cash Flow</div><div class="v num">$842K</div><div class="d">+9.3%</div></div>
-          <div class="tile"><div class="k">New Leads</div><div class="v num">356</div><div class="d">+18.2%</div></div>
-          <div class="tile"><div class="k"><span class="sw" data-p="Jobs in Progress" data-o="Active Projects">Jobs in Progress</span></div><div class="v num">128</div><div class="d">+8.1%</div></div>
+          <div class="tile"><div class="k">Revenue</div><div class="v num">$2.43M</div><div class="d">+12.5%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 24 L20 21 L40 23 L60 14 L80 16 L100 8 L120 6 L120 30 L0 30Z"/><path class="line" d="M0 24 L20 21 L40 23 L60 14 L80 16 L100 8 L120 6"/><circle class="end" cx="120" cy="6" r="2.6"/></svg></div>
+          <div class="tile"><div class="k">Cash Flow</div><div class="v num">$842K</div><div class="d">+9.3%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 20 L20 22 L40 15 L60 18 L80 11 L100 13 L120 7 L120 30 L0 30Z"/><path class="line" d="M0 20 L20 22 L40 15 L60 18 L80 11 L100 13 L120 7"/><circle class="end" cx="120" cy="7" r="2.6"/></svg></div>
+          <div class="tile"><div class="k">New Leads</div><div class="v num">356</div><div class="d">+18.2%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 26 L20 22 L40 24 L60 18 L80 12 L100 10 L120 5 L120 30 L0 30Z"/><path class="line" d="M0 26 L20 22 L40 24 L60 18 L80 12 L100 10 L120 5"/><circle class="end" cx="120" cy="5" r="2.6"/></svg></div>
+          <div class="tile"><div class="k"><span class="sw" data-p="Jobs in Progress" data-o="Active Projects">Jobs in Progress</span></div><div class="v num">128</div><div class="d">+8.1%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 18 L20 16 L40 19 L60 13 L80 15 L100 11 L120 9 L120 30 L0 30Z"/><path class="line" d="M0 18 L20 16 L40 19 L60 13 L80 15 L100 11 L120 9"/><circle class="end" cx="120" cy="9" r="2.6"/></svg></div>
           <div class="attn" style="grid-template-columns:1fr 1fr;">
             <div>
               <h5><span class="sw" data-p="Sales pipeline" data-o="Sales pipeline">Sales pipeline</span></h5>
@@ -709,6 +752,73 @@ function setAud(mode){
     s.classList.toggle('on', s.getAttribute('data-set') === mode);
   });
 }
+
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Auto-tag elements for scroll reveals: section headers reveal on their own,
+  // grids stagger their children.
+  var groups = ['.steps','.wk-grid','.know-list','.mk-grid','.ind-grid','.sec-grid','.flow','.hub','.probs','.b-list','.hero-chips','.offer-right','.tabs'];
+  groups.forEach(function(sel){
+    document.querySelectorAll(sel).forEach(function(g){
+      g.classList.add('reveal-group');
+      [].forEach.call(g.children, function(c){ c.classList.add('rv'); });
+    });
+  });
+  document.querySelectorAll('.band .eyebrow, .band .h-sec, .hero h1, .hero .sub, .sec-head .sub, .section-lead .sub, .offer-card, .kb, .final h2, .final .sub').forEach(function(e){ e.classList.add('rv'); });
+
+  function countUp(el){
+    if(el.dataset.counted) return; el.dataset.counted = '1';
+    var t = el.textContent.trim();
+    var m = t.match(/^([^\d.-]*)([\d,.]+)([^\d]*)$/);
+    if(!m){ return; }
+    var pre = m[1], suf = m[3], raw = m[2].replace(/,/g,'');
+    var to = parseFloat(raw), dec = (raw.split('.')[1] || '').length;
+    if(reduce || isNaN(to)){ return; }
+    var dur = 950, start = null;
+    function step(ts){
+      if(!start) start = ts;
+      var p = Math.min((ts - start) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = pre + (to * e).toFixed(dec) + suf;
+      if(p < 1) requestAnimationFrame(step); else el.textContent = pre + to.toFixed(dec) + suf;
+    }
+    requestAnimationFrame(step);
+  }
+
+  function lightFlow(flow){
+    if(reduce) return;
+    var nodes = [].slice.call(flow.querySelectorAll('.fnode'));
+    nodes.forEach(function(n, i){
+      setTimeout(function(){
+        n.classList.add('lit');
+        setTimeout(function(){ n.classList.remove('lit'); }, 620);
+      }, 220 + i * 260);
+    });
+  }
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(!en.isIntersecting) return;
+      var el = en.target;
+      if(el.classList.contains('reveal-group')){
+        [].forEach.call(el.querySelectorAll('.rv'), function(c, i){
+          setTimeout(function(){ c.classList.add('in'); }, i * 70);
+        });
+        if(el.classList.contains('flow')) lightFlow(el);
+      } else {
+        el.classList.add('in');
+        if(el.classList.contains('dash')){
+          el.querySelectorAll('.tile .v').forEach(countUp);
+        }
+      }
+      io.unobserve(el);
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+  document.querySelectorAll('.reveal-group').forEach(function(el){ io.observe(el); });
+  document.querySelectorAll('.rv').forEach(function(el){ if(!el.closest('.reveal-group')) io.observe(el); });
+  document.querySelectorAll('.dash').forEach(function(el){ io.observe(el); });
+})();
 </script>
 </body>
 </html>
