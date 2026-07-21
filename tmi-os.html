@@ -297,7 +297,46 @@
     .rv{opacity:1;transform:none;transition:none;}
     .hero-glow,.hub-core{animation:none;}
     .spark .line{stroke-dashoffset:0;}.spark .area,.spark .end{opacity:1;}
+    .ask-caret,.live-dot{animation:none;}
   }
+
+  /* ---------- enhancements: live demo, mono data, roi, proof ---------- */
+  /* mono numerals so the dashboards read like real software */
+  .dash .tile .v{font-family:var(--mono);letter-spacing:-0.01em;}
+  .mk-card .price{font-family:var(--mono);}
+  /* live "ask" demo in the command center */
+  .ask-demo{max-width:720px;margin:34px auto 0;text-align:left;}
+  .ask-bar{display:flex;align-items:center;gap:12px;background:var(--d-card);border:1px solid var(--d-line);border-radius:12px;padding:15px 18px;font-family:var(--mono);font-size:14px;color:#fff;min-height:52px;}
+  .ask-bar svg{width:17px;height:17px;color:var(--chart);flex:none;}
+  .ask-caret{display:inline-block;width:7px;height:16px;background:var(--chart);vertical-align:middle;animation:blink 1.05s step-end infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .ask-ans{margin-top:10px;background:rgba(228,255,151,0.10);border:1px solid rgba(205,238,106,0.4);border-radius:12px;padding:14px 18px;font-size:14px;color:var(--d-ink);line-height:1.55;opacity:0;transform:translateY(6px);transition:opacity .5s ease,transform .5s ease;font-weight:400;}
+  .ask-ans.in{opacity:1;transform:none;}
+  .ask-ans b{color:#fff;font-weight:600;}
+  /* live-ticking metric */
+  .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--chart);margin-left:5px;vertical-align:middle;animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(228,255,151,0.5);}50%{opacity:.5;box-shadow:0 0 0 4px rgba(228,255,151,0);}}
+  .tick-flash{animation:tickflash .8s ease;}
+  @keyframes tickflash{0%{color:var(--chart);}100%{color:#fff;}}
+  /* roi calculator in the offer */
+  .roi{border:1px solid var(--line-2);border-radius:14px;padding:22px 24px;background:var(--bg);}
+  .roi .lab{font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:13px;}
+  .roi-row{display:flex;gap:12px;flex-wrap:wrap;}
+  .roi-f{flex:1 1 130px;}
+  .roi-f label{display:block;font-size:11px;font-weight:600;color:var(--ink-3);margin-bottom:5px;}
+  .roi-f input{width:100%;font-family:var(--mono);font-size:15px;border:1px solid var(--line-2);border-radius:9px;padding:11px 12px;color:var(--ink);background:var(--bg);}
+  .roi-f input:focus{outline:none;border-color:var(--ink);}
+  .roi-out{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
+  .roi-out .n{font-family:var(--mono);font-size:27px;font-weight:700;color:var(--ink);letter-spacing:-0.02em;}
+  .roi-out .t{font-size:12px;color:var(--ink-3);text-align:right;max-width:24ch;}
+  /* proof / results strip */
+  .proof{background:var(--bg-alt);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .proof-in{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;padding:26px 0;}
+  .proof-stats{display:flex;gap:40px;flex-wrap:wrap;}
+  .proof-stat .n{font-family:var(--mono);font-size:24px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
+  .proof-stat .t{font-size:12px;color:var(--ink-3);font-weight:600;margin-top:2px;}
+  .proof-line{font-size:14px;font-weight:600;color:var(--ink-2);}
+  @media(max-width:640px){.proof-stats{gap:24px;}.proof-stat .n{font-size:20px;}}
 </style>
 </head>
 <body data-aud="phys">
@@ -374,6 +413,19 @@
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ PROOF / RESULTS STRIP (product facts; real logos + results slot in here) ============ -->
+<section class="proof">
+  <div class="wrap proof-in">
+    <div class="proof-stats">
+      <div class="proof-stat"><div class="n">30 days</div><div class="t">to a working system</div></div>
+      <div class="proof-stat"><div class="n">3 workers</div><div class="t">live at launch</div></div>
+      <div class="proof-stat"><div class="n">1 system</div><div class="t">you own, not rent</div></div>
+      <div class="proof-stat"><div class="n">24 / 7</div><div class="t">your AI team never clocks out</div></div>
+    </div>
+    <p class="proof-line">Built with you, then it runs without you.</p>
   </div>
 </section>
 
@@ -473,7 +525,13 @@
     <p class="eyebrow">Command Center</p>
     <h2 class="h-sec">See everything. <span class="lime">Know what matters.</span></h2>
     <p class="sub">Real numbers, live. Ask what needs your attention today and get one clear answer, not a spreadsheet to dig through.</p>
-    <div class="dash" style="margin-top:44px;text-align:left;">
+
+    <div class="ask-demo" id="askDemo">
+      <div class="ask-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span id="askType"></span><span class="ask-caret"></span></div>
+      <div class="ask-ans" id="askAns">Chase <b>2 overdue invoices</b> and follow up <b>5 stale leads</b>. Your sales rep booked 4 meetings overnight. Everything else is on pace for the month.</div>
+    </div>
+
+    <div class="dash" id="cmdDash" style="margin-top:22px;text-align:left;">
       <div class="dash-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dbrand">TMI <span>OS</span></span><span class="dwho">Command Center</span></div>
       <div class="dash-body">
         <div class="dash-rail">
@@ -486,7 +544,7 @@
         <div class="tiles">
           <div class="tile"><div class="k">Revenue</div><div class="v num">$2.43M</div><div class="d">+12.5%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 24 L20 21 L40 23 L60 14 L80 16 L100 8 L120 6 L120 30 L0 30Z"/><path class="line" d="M0 24 L20 21 L40 23 L60 14 L80 16 L100 8 L120 6"/><circle class="end" cx="120" cy="6" r="2.6"/></svg></div>
           <div class="tile"><div class="k">Cash Flow</div><div class="v num">$842K</div><div class="d">+9.3%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 20 L20 22 L40 15 L60 18 L80 11 L100 13 L120 7 L120 30 L0 30Z"/><path class="line" d="M0 20 L20 22 L40 15 L60 18 L80 11 L100 13 L120 7"/><circle class="end" cx="120" cy="7" r="2.6"/></svg></div>
-          <div class="tile"><div class="k">New Leads</div><div class="v num">356</div><div class="d">+18.2%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 26 L20 22 L40 24 L60 18 L80 12 L100 10 L120 5 L120 30 L0 30Z"/><path class="line" d="M0 26 L20 22 L40 24 L60 18 L80 12 L100 10 L120 5"/><circle class="end" cx="120" cy="5" r="2.6"/></svg></div>
+          <div class="tile"><div class="k">New Leads <span class="live-dot"></span></div><div class="v num" id="liveLeads">356</div><div class="d">+18.2%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 26 L20 22 L40 24 L60 18 L80 12 L100 10 L120 5 L120 30 L0 30Z"/><path class="line" d="M0 26 L20 22 L40 24 L60 18 L80 12 L100 10 L120 5"/><circle class="end" cx="120" cy="5" r="2.6"/></svg></div>
           <div class="tile"><div class="k"><span class="sw" data-p="Jobs in Progress" data-o="Active Projects">Jobs in Progress</span></div><div class="v num">128</div><div class="d">+8.1%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 18 L20 16 L40 19 L60 13 L80 15 L100 11 L120 9 L120 30 L0 30Z"/><path class="line" d="M0 18 L20 16 L40 19 L60 13 L80 15 L100 11 L120 9"/><circle class="end" cx="120" cy="9" r="2.6"/></svg></div>
           <div class="attn" style="grid-template-columns:1fr 1fr;">
             <div>
@@ -635,6 +693,14 @@
           <div class="lab">Availability</div>
           <h4>A limited number of builds each month.</h4>
           <p>Every install gets our team hands on, so we take on a set number of new companies a month. When the month is full, the next start date moves out.</p>
+        </div>
+        <div class="roi">
+          <div class="lab">What the gaps cost you now</div>
+          <div class="roi-row">
+            <div class="roi-f"><label for="roiVal">Avg deal value</label><input id="roiVal" type="text" inputmode="numeric" value="$800" oninput="roiCalc()"/></div>
+            <div class="roi-f"><label for="roiN">Leads missed / month</label><input id="roiN" type="text" inputmode="numeric" value="6" oninput="roiCalc()"/></div>
+          </div>
+          <div class="roi-out"><span class="n" id="roiOut">$57,600</span><span class="t">leaking out per year, before you add a single worker</span></div>
         </div>
         <a href="/intelligence-scorecard" class="btn btn-lime" style="justify-content:center;padding:18px;">Start with the assessment &rarr;</a>
       </div>
@@ -818,7 +884,45 @@ function setAud(mode){
   document.querySelectorAll('.reveal-group').forEach(function(el){ io.observe(el); });
   document.querySelectorAll('.rv').forEach(function(el){ if(!el.closest('.reveal-group')) io.observe(el); });
   document.querySelectorAll('.dash').forEach(function(el){ io.observe(el); });
+
+  // ----- live command center: type the question, reveal the answer, tick a metric -----
+  function typeAsk(){
+    var el = document.getElementById('askType'); if(!el || el.dataset.typed) return; el.dataset.typed = '1';
+    var q = 'What needs my attention today?';
+    if(reduce){ el.textContent = q; document.getElementById('askAns').classList.add('in'); return; }
+    var i = 0;
+    (function tick(){
+      el.textContent = q.slice(0, i++);
+      if(i <= q.length){ setTimeout(tick, 42); }
+      else { setTimeout(function(){ var a = document.getElementById('askAns'); if(a) a.classList.add('in'); }, 320); }
+    })();
+  }
+  function liveTick(){
+    var el = document.getElementById('liveLeads'); if(!el || el.dataset.ticking) return; el.dataset.ticking = '1';
+    if(reduce) return;
+    var n = 356;
+    setInterval(function(){
+      if(document.hidden) return;
+      n += 1; el.textContent = n;
+      el.classList.remove('tick-flash'); void el.offsetWidth; el.classList.add('tick-flash');
+    }, 5000);
+  }
+  var cmd = document.getElementById('askDemo');
+  if(cmd){
+    var io2 = new IntersectionObserver(function(es){
+      es.forEach(function(en){ if(en.isIntersecting){ typeAsk(); liveTick(); io2.unobserve(en.target); } });
+    }, { threshold: 0.3 });
+    io2.observe(cmd);
+  }
 })();
+
+// ----- ROI: what the gaps cost per year -----
+function roiCalc(){
+  var val = parseFloat((document.getElementById('roiVal').value || '').replace(/[^\d.]/g, '')) || 0;
+  var n = parseFloat((document.getElementById('roiN').value || '').replace(/[^\d.]/g, '')) || 0;
+  var annual = Math.round(val * n * 12);
+  document.getElementById('roiOut').textContent = '$' + annual.toLocaleString('en-US');
+}
 </script>
 </body>
 </html>
