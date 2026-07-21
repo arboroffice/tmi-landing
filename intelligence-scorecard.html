@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="apple-touch-icon" href="favicon.svg"/>
-<meta name="description" content="Score your company's intelligence in two minutes. Six questions rate how well your business remembers, sees, decides, and acts, then show your biggest gap and the first move to close it."/>
+<meta name="description" content="Score your company's intelligence in about three minutes. Eighteen questions rate how well your business remembers, sees, decides, and acts, then show your biggest gap and the first move to close it. Works for any business."/>
 <meta property="og:title" content="The Intelligent Company Scorecard | TMI"/>
 <meta property="og:description" content="Two minutes, six questions. See what level your operation runs at today and where the money is quietly leaking out."/>
 <meta property="og:type" content="website"/>
@@ -78,6 +78,7 @@
   .sc-bar-row.gap .sc-bar-fill{background:#f0a23b;}
   .sc-bar-row.gap .sc-bar-label{color:var(--ink);font-weight:700;}
   .sc-bar-val{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--ink-3);text-align:right;}
+  .sc-bar-val::after{content:"%";font-size:11px;opacity:.6;margin-left:1px;}
   .sc-gapcard{background:var(--bg-alt);border:1px solid var(--line);border-radius:16px;padding:28px 30px;margin:30px 0;}
   .sc-gapcard .k{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;}
   .sc-gapcard .v{font-family:var(--serif);font-size:19px;line-height:1.55;color:var(--ink);}
@@ -128,10 +129,10 @@
     <div class="sc-wrap">
       <p class="sc-eyebrow">The Intelligent Company Scorecard</p>
       <h1 class="sc-h1">How intelligent is your <span class="lime">company?</span></h1>
-      <p class="sc-lede">Six questions. Two minutes. You will see what level your operation runs at today, where the money is quietly leaking out, and the first move to change it.</p>
+      <p class="sc-lede">Eighteen questions. About three minutes. You will see what level your operation runs at today, where the money is quietly leaking out, and the first move to change it. Built for any business, not just one industry.</p>
       <div class="sc-meta">
-        <span>6 questions</span>
-        <span>About 2 minutes</span>
+        <span>18 questions</span>
+        <span>About 3 minutes</span>
         <span>Instant result</span>
       </div>
       <button class="btn btn-lime" onclick="startQuiz()">Start the scorecard &rarr;</button>
@@ -192,54 +193,147 @@ function closeDrawer(){ document.getElementById('drawer').classList.remove('open
 document.querySelectorAll('#drawer a').forEach(function(a){ a.addEventListener('click', closeDrawer); });
 
 // ---- quiz data (from The Intelligent Company, Chapter 14) ----
+// Industry-agnostic. Three questions per dimension, options ordered worst to
+// best and scored 1 to 4. Works for any business: agency, SaaS, ecommerce,
+// consulting, retail, service, whatever.
 var QUESTIONS = [
-  { dim:'Memory', q:'If your best employee quit tomorrow, what happens to what they know?',
+  // Memory
+  { dim:'Memory', q:`An employee who has been here two years quits tomorrow. What happens to what they knew?`,
     opts:[
-      { t:'Most of it walks out the door with them.', v:1 },
-      { t:'Some is written down, but it takes real digging to find.', v:2 },
-      { t:'It is documented well enough that the next hire could pick it up.', v:4 },
-      { t:'Any customer or job history can be pulled up in seconds by anyone.', v:5 }
+      { t:`Most of it leaves with them. We would be scrambling.`, v:1 },
+      { t:`Some of it is written down, but finding it takes digging.`, v:2 },
+      { t:`It is mostly documented, just scattered across a few places.`, v:3 },
+      { t:`Anyone on the team could pull up any customer's history in under a minute.`, v:4 }
     ]},
-  { dim:'Awareness', q:'How do you usually find out something is going wrong?',
+  { dim:'Memory', q:`How long does it take to pull up a customer's full history, every purchase, every note, every price you have quoted them?`,
     opts:[
-      { t:'From a customer complaint, after the fact.', v:1 },
-      { t:'From a weekly report that is already a few days old.', v:2 },
-      { t:'I can check current numbers when I think to look.', v:4 },
-      { t:'Yesterday’s real numbers are in front of me before the coffee brews.', v:5 }
+      { t:`We would have to ask around and hope someone remembers.`, v:1 },
+      { t:`It is out there somewhere, across a couple of tools, so it takes a few minutes.`, v:2 },
+      { t:`One system has most of it, findable in under a minute.`, v:3 },
+      { t:`Every conversation, quote, and past order is in one place, instantly.`, v:4 }
     ]},
-  { dim:'Action', q:'How much of your routine work runs without someone triggering it?',
+  { dim:'Memory', q:`When a customer comes back six months later, does anyone recognize them as a repeat customer without asking?`,
     opts:[
-      { t:'Every step needs a person: reminders, invoices, follow-ups.', v:1 },
-      { t:'A couple of repetitive tasks run on their own.', v:3 },
-      { t:'Most follow-up and billing fires automatically.', v:4 },
-      { t:'The majority of routine work happens without anyone touching it.', v:5 }
+      { t:`No, they get treated like a brand new lead every time.`, v:1 },
+      { t:`Maybe, if the same person who helped them last time happens to answer.`, v:2 },
+      { t:`Usually, most repeat customers get recognized.`, v:3 },
+      { t:`Always, every past interaction shows up automatically.`, v:4 }
     ]},
-  { dim:'Learning', q:'When the same mistake happens twice, what changes?',
+  // Awareness
+  { dim:'Awareness', q:`How do you usually find out something has gone wrong?`,
     opts:[
-      { t:'It keeps repeating and nobody spots the pattern.', v:1 },
-      { t:'We talk about it, but rarely change the process.', v:2 },
-      { t:'We usually fix the process once it stings enough.', v:4 },
-      { t:'Every recurring problem gets written into a workflow that prevents it.', v:5 }
+      { t:`A customer calls to complain. That is the first we hear of it.`, v:1 },
+      { t:`There is a weekly report, but it is old news by the time we read it.`, v:2 },
+      { t:`We check numbers most days, just not first thing.`, v:3 },
+      { t:`Yesterday's real numbers are on a screen before the coffee is done.`, v:4 }
     ]},
-  { dim:'Integration', q:'How well do your tools share information with each other?',
+  { dim:'Awareness', q:`If someone asked right now how many things are running behind, how fast could you actually answer?`,
     opts:[
-      { t:'Five or more tools and none of them talk.', v:1 },
-      { t:'A couple are connected, most still sit alone.', v:3 },
-      { t:'Most of the core tools share data.', v:4 },
-      { t:'Enter information once and it shows up everywhere it is needed.', v:5 }
+      { t:`I would have to call around to a few people first.`, v:1 },
+      { t:`I could find out within an hour or so.`, v:2 },
+      { t:`I could check a report from earlier today.`, v:3 },
+      { t:`I already know, without checking anything.`, v:4 }
     ]},
-  { dim:'Decision', q:'How long to answer a real question, like which jobs are actually profitable?',
+  { dim:'Awareness', q:`How current is the financial picture you are actually making decisions from?`,
     opts:[
-      { t:'Days and several phone calls.', v:1 },
-      { t:'About an hour and one phone call.', v:3 },
-      { t:'A few minutes of digging around.', v:4 },
-      { t:'Minutes, from numbers already sitting on a screen.', v:5 }
+      { t:`Whatever the bookkeeper sent over last month.`, v:1 },
+      { t:`A couple of weeks old, usually.`, v:2 },
+      { t:`A few days old, give or take.`, v:3 },
+      { t:`Today's numbers, live.`, v:4 }
+    ]},
+  // Action
+  { dim:'Action', q:`Reminders, invoices, follow ups. Who is actually doing that work right now?`,
+    opts:[
+      { t:`A person, by hand, every single time.`, v:1 },
+      { t:`A person, but they are pretty good about it.`, v:2 },
+      { t:`A few of these already run on their own.`, v:3 },
+      { t:`Most of this happens without anyone touching it.`, v:4 }
+    ]},
+  { dim:'Action', q:`When a lead goes quiet after getting a quote or proposal, what actually happens next?`,
+    opts:[
+      { t:`Nothing, unless someone happens to remember to follow up.`, v:1 },
+      { t:`Someone usually follows up, whenever they get to it.`, v:2 },
+      { t:`A reminder nudges someone to follow up.`, v:3 },
+      { t:`A follow up goes out automatically, no one has to remember.`, v:4 }
+    ]},
+  { dim:'Action', q:`How much of your weekly reporting requires someone to manually pull it together?`,
+    opts:[
+      { t:`All of it, by hand, every time.`, v:1 },
+      { t:`Most of it, though a template speeds it up.`, v:2 },
+      { t:`Some of it generates on its own already.`, v:3 },
+      { t:`Nearly all of it builds itself.`, v:4 }
+    ]},
+  // Learning
+  { dim:'Learning', q:`A mistake happens. Six months later, does it happen again?`,
+    opts:[
+      { t:`Yes, usually the exact same way.`, v:1 },
+      { t:`We talk about it, but the process rarely changes.`, v:2 },
+      { t:`Sometimes we fix the process, sometimes it slips.`, v:3 },
+      { t:`Almost never, it gets built into how we work.`, v:4 }
+    ]},
+  { dim:'Learning', q:`When a great employee figures out a better way to do something, does the rest of the team ever find out?`,
+    opts:[
+      { t:`Rarely. It mostly stays with them.`, v:1 },
+      { t:`Sometimes, if they happen to mention it.`, v:2 },
+      { t:`Usually, it gets shared informally.`, v:3 },
+      { t:`Always, it gets written into how the team works.`, v:4 }
+    ]},
+  { dim:'Learning', q:`Do you review what went right and wrong after a project or engagement wraps, or just move to the next one?`,
+    opts:[
+      { t:`We just move on to the next thing.`, v:1 },
+      { t:`Only if something went badly wrong.`, v:2 },
+      { t:`Most of them get at least a quick look back.`, v:3 },
+      { t:`Every one feeds back into how we do the next one.`, v:4 }
+    ]},
+  // Integration
+  { dim:'Integration', q:`How many tools does a new lead have to pass through, and do they talk to each other?`,
+    opts:[
+      { t:`Five or more, and none of them share anything.`, v:1 },
+      { t:`A handful, connected in one or two places.`, v:2 },
+      { t:`Most of it is connected, one gap left.`, v:3 },
+      { t:`Enter it once, it shows up everywhere it needs to.`, v:4 }
+    ]},
+  { dim:'Integration', q:`If a customer's address or phone number changes, how many places does someone update it by hand?`,
+    opts:[
+      { t:`Every single system it lives in.`, v:1 },
+      { t:`A couple of places, manually.`, v:2 },
+      { t:`Just one or two, most of it syncs.`, v:3 },
+      { t:`One place, everywhere else updates on its own.`, v:4 }
+    ]},
+  { dim:'Integration', q:`Does your team ever get asked "didn't I already tell you that" by a customer?`,
+    opts:[
+      { t:`Often. Information does not carry between people well.`, v:1 },
+      { t:`Sometimes.`, v:2 },
+      { t:`Rarely.`, v:3 },
+      { t:`Basically never, it is all in one place already.`, v:4 }
+    ]},
+  // Decision
+  { dim:'Decision', q:`How long does a real question take to answer, like which clients or products are actually profitable?`,
+    opts:[
+      { t:`Days, and a few phone calls.`, v:1 },
+      { t:`An hour or so, one call.`, v:2 },
+      { t:`Minutes, mostly.`, v:3 },
+      { t:`Seconds, it is already sitting on a screen.`, v:4 }
+    ]},
+  { dim:'Decision', q:`When deciding whether to hire, is that call made from real numbers, or a gut sense that things feel busy?`,
+    opts:[
+      { t:`Pure gut feeling.`, v:1 },
+      { t:`A rough sense, checked against the bank balance.`, v:2 },
+      { t:`Real numbers, checked somewhat regularly.`, v:3 },
+      { t:`Real numbers, reviewed specifically before every hire.`, v:4 }
+    ]},
+  { dim:'Decision', q:`Could someone else in the business make a good pricing decision without running it by you first?`,
+    opts:[
+      { t:`No, it all runs through me.`, v:1 },
+      { t:`Only for the simplest, most straightforward cases.`, v:2 },
+      { t:`Yes, for most situations.`, v:3 },
+      { t:`Yes, the logic is documented and consistent for anyone to use.`, v:4 }
     ]}
 ];
 
 var LEVELS = {
-  1:{ name:'On paper', desc:'The business runs on notebooks, memory, and one person’s head. If the building burned down tonight, most of what the company knows would go with it. The upside: there is enormous room to gain, and the first connected system will feel like turning the lights on.' },
-  2:{ name:'Disconnected software', desc:'You bought good tools and never wired them together, so the same customer gets typed into three systems for one job. This is the most expensive place to sit, paying for five subscriptions and getting the coordination of none. Connecting what you already own is the fastest win available.' },
+  1:{ name:'On paper', desc:'The business runs on notebooks, memory, and one person’s head. If the office disappeared tonight, most of what the company knows would go with it. The upside: there is enormous room to gain, and the first connected system will feel like turning the lights on.' },
+  2:{ name:'Disconnected software', desc:'You bought good tools and never wired them together, so the same customer gets typed into three systems by hand. This is the most expensive place to sit, paying for five subscriptions and getting the coordination of none. Connecting what you already own is the fastest win available.' },
   3:{ name:'Connected', desc:'Your tools have started sharing information instead of sitting as islands. Enter something once and it shows up elsewhere. The next climb is automation: letting the system take the routine actions so your best people stop doing them by hand.' },
   4:{ name:'Automated', desc:'Reminders fire, invoices generate, and work happens on a Saturday when nobody is logged in. You are close. The last step is a true command layer that remembers, notices, decides, and reports on the whole business without you in the loop.' },
   5:{ name:'Intelligent operating system', desc:'Every part of the business feeds one connected brain that remembers, notices, decides, and acts. You could take two weeks off with the phone off and the company would run, report on itself, and flag problems without you. The work now is staying sharp and compounding the lead.' }
@@ -248,11 +342,14 @@ var LEVELS = {
 var GAP_MOVES = {
   Memory:'capturing what your team knows into one place, so it stops walking out the door with people',
   Awareness:'putting today’s real numbers on one screen, so you stop finding out about problems from customers',
-  Action:'automating the routine follow-up and billing that currently eats your best people’s hours',
-  Learning:'turning recurring mistakes into workflows that prevent them, instead of repeating them',
+  Action:'automating the routine follow ups, invoicing, and reporting that currently eat your best people’s hours',
+  Learning:'turning recurring mistakes into a process that prevents them, instead of repeating them',
   Integration:'connecting the tools you already pay for, so information stops getting typed in three times',
   Decision:'getting the numbers onto one screen, so real questions take minutes instead of days'
 };
+
+// Six dimensions in the order they appear.
+var DIMS = ['Memory','Awareness','Action','Learning','Integration','Decision'];
 
 var answers = new Array(QUESTIONS.length).fill(null);
 var idx = 0;           // 0..QUESTIONS.length-1 for questions
@@ -321,34 +418,48 @@ function back(i){
 }
 
 function computeResult(){
-  var sum = answers.reduce(function(a, x){ return a + (x ? x.value : 0); }, 0);
-  var avg = sum / QUESTIONS.length;
+  // Per-dimension average on the 1 to 4 scale (each dimension has 3 questions).
+  var dimScores = {};
+  DIMS.forEach(function(d){
+    var vals = answers.filter(function(a){ return a && a.dimension === d; }).map(function(a){ return a.value; });
+    var avg = vals.length ? vals.reduce(function(s,v){ return s+v; }, 0) / vals.length : 0;
+    dimScores[d] = avg; // 1..4
+  });
+  // Overall average across all answered questions (1 to 4).
+  var all = answers.filter(Boolean).map(function(a){ return a.value; });
+  var overall = all.length ? all.reduce(function(s,v){ return s+v; }, 0) / all.length : 0;
+  // Level from the 1 to 4 overall average.
   var level;
-  if(avg < 1.8) level = 1;
-  else if(avg < 2.6) level = 2;
-  else if(avg < 3.5) level = 3;
-  else if(avg < 4.3) level = 4;
+  if(overall < 1.6) level = 1;
+  else if(overall < 2.2) level = 2;
+  else if(overall < 2.8) level = 3;
+  else if(overall < 3.4) level = 4;
   else level = 5;
-  // biggest gap = lowest-scoring dimension (first one if tie)
-  var gap = answers.slice().sort(function(a,b){ return a.value - b.value; })[0];
-  return { avg: Math.round(avg * 10) / 10, level: level, gap: gap };
+  // 0 to 100 intelligence score (worst answer = 0, best = 100).
+  var score = Math.round(((overall - 1) / 3) * 100);
+  // Biggest gap = lowest-scoring dimension (first in DIMS order on a tie).
+  var gap = DIMS.slice().sort(function(a,b){ return dimScores[a] - dimScores[b]; })[0];
+  return { overall: overall, score: score, level: level, gap: gap, dimScores: dimScores };
 }
+
+function pct(dimAvg){ return Math.round(((dimAvg - 1) / 3) * 100); }
 
 function renderResults(r){
   document.getElementById('scLevelName').innerHTML = 'Level ' + r.level + ' <span style=\'color:var(--ink-3)\'>·</span> <em>' + LEVELS[r.level].name + '</em>';
   document.getElementById('scLevelDesc').textContent = LEVELS[r.level].desc;
-  document.getElementById('scScoreBig').textContent = 'Your scorecard, ' + r.avg + ' out of 5';
-  // bars
+  document.getElementById('scScoreBig').textContent = 'Your intelligence score, ' + r.score + ' out of 100';
+  // one bar per dimension
   var bars = document.getElementById('scBars');
-  bars.innerHTML = answers.map(function(a){
-    var isGap = (a.dimension === r.gap.dimension);
+  bars.innerHTML = DIMS.map(function(d){
+    var isGap = (d === r.gap);
+    var p = pct(r.dimScores[d]);
     return '<div class="sc-bar-row'+(isGap?' gap':'')+'">'
-      + '<div class="sc-bar-label">'+a.dimension+'</div>'
-      + '<div class="sc-bar-track"><div class="sc-bar-fill" data-w="'+(a.value*20)+'"></div></div>'
-      + '<div class="sc-bar-val">'+a.value+'/5</div></div>';
+      + '<div class="sc-bar-label">'+d+'</div>'
+      + '<div class="sc-bar-track"><div class="sc-bar-fill" data-w="'+p+'"></div></div>'
+      + '<div class="sc-bar-val">'+p+'</div></div>';
   }).join('');
-  document.getElementById('scGap').innerHTML = '<b>'+r.gap.dimension+'.</b> The fastest return is in ' + GAP_MOVES[r.gap.dimension] + '.';
-  document.getElementById('scCtaCopy').textContent = 'On a short discovery call we will walk through your ' + r.gap.dimension.toLowerCase() + ' gap and the first move to close it, then show you what a fix looks like for a company your size.';
+  document.getElementById('scGap').innerHTML = '<b>'+r.gap+'.</b> The fastest return is in ' + GAP_MOVES[r.gap] + '.';
+  document.getElementById('scCtaCopy').textContent = 'On a short discovery call we will walk through your ' + r.gap.toLowerCase() + ' gap and the first move to close it, then show you what a fix looks like for a business like yours.';
   // animate bars after paint
   setTimeout(function(){
     document.querySelectorAll('#scBars .sc-bar-fill').forEach(function(f){ f.style.width = f.getAttribute('data-w') + '%'; });
@@ -369,8 +480,8 @@ function submitScore(e){
   var r = computeResult();
   var payload = {
     name: name, email: email, company: company,
-    level: r.level, level_name: LEVELS[r.level].name, score: r.avg,
-    gap: r.gap.dimension, answers: answers
+    level: r.level, level_name: LEVELS[r.level].name, score: r.score,
+    gap: r.gap, answers: answers
   };
   try{ if(typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Intelligence Scorecard' }); }catch(_){}
   fetch('/api/scorecard-lead', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })

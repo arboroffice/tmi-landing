@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid email required' });
 
   const scoreLine = `Level ${level != null ? level : '?'}${levelName ? ' - ' + levelName : ''}` +
-    (score != null ? ` (${score}/5)` : '') + (gap ? ` | biggest gap: ${gap}` : '');
+    (score != null ? ` (${score}/100)` : '') + (gap ? ` | biggest gap: ${gap}` : '');
 
   // 1) Store (scorecard_leads + lead + contact) - best-effort
   try {
@@ -63,7 +63,7 @@ module.exports = async function handler(req, res) {
       const { Resend } = require('resend');
       const resend = new Resend(process.env.RESEND_API_KEY);
       const answerLines = answers
-        ? '\n\nAnswers:\n' + answers.map(a => `- ${a.dimension}: ${a.label} (${a.value}/5)`).join('\n')
+        ? '\n\nAnswers:\n' + answers.map(a => `- ${a.dimension}: ${a.label} (${a.value}/4)`).join('\n')
         : '';
       resend.emails.send({
         from: 'TMI <support@tmitechai.com>',
