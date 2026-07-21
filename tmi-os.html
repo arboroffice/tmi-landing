@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="favicon.svg"/>
+<meta name="description" content="TMI OS is the operating system for intelligent companies. Connect your tools, install AI employees, automate the busywork, and run your whole company from one screen. We build it with you and stay until it works. For online and physical businesses."/>
+<meta property="og:title" content="TMI OS | The operating system for intelligent companies"/>
+<meta property="og:description" content="Connect everything. Automate the busywork. Hire AI employees. Run your company from one place. We install it, train your team, and stay until it works."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://www.tmitechai.com/tmi-os"/>
+<meta property="og:image" content="https://www.tmitechai.com/hero-og.jpg"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<link rel="canonical" href="https://www.tmitechai.com/tmi-os"/>
+<title>TMI OS | The operating system for intelligent companies</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin/>
+<style>
+  @import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+  :root{
+    --bg:#ffffff; --bg-alt:#f6f6f4; --ink:#0a0b14; --ink-2:#55576a; --ink-3:#8a8c9e;
+    --line:rgba(10,11,20,0.10); --line-2:rgba(10,11,20,0.16);
+    --chart:#E4FF97; --chart-dark:#cdee72;
+    --d-bg:#0a0b14; --d-card:#14161f; --d-line:rgba(255,255,255,0.10); --d-line-2:rgba(255,255,255,0.16);
+    --d-ink:#f4f5f2; --d-ink-2:rgba(255,255,255,0.62); --d-ink-3:rgba(255,255,255,0.40);
+    --pos:#4fae7a;
+    --sans:"General Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --maxw:1220px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+  body{font-family:var(--sans);font-weight:500;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}
+  h1,h2,h3,h4{font-weight:700;letter-spacing:-0.03em;line-height:1.03;margin:0;text-wrap:balance;}
+  p{margin:0;}
+  ::selection{background:var(--chart);color:var(--ink);}
+  .lime{color:var(--chart-dark);}
+  .dark .lime{color:var(--chart);}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  /* ---------- nav ---------- */
+  .nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+  .nav-in{max-width:var(--maxw);margin:0 auto;padding:14px 32px;display:flex;align-items:center;gap:22px;}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:18px;letter-spacing:-0.03em;}
+  .brand .mk{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;background:var(--ink);color:#fff;border-radius:7px;font-size:11px;font-weight:700;letter-spacing:0.01em;}
+  .brand .os{color:var(--ink-3);font-weight:600;}
+  .nav-links{display:flex;gap:4px;margin-left:8px;flex:1;}
+  .nav-links a{font-size:13.5px;font-weight:600;color:var(--ink-2);padding:8px 12px;border-radius:8px;transition:color .15s,background .15s;}
+  .nav-links a:hover{color:var(--ink);background:var(--bg-alt);}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:13px 22px;border-radius:9px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;transition:transform .14s ease,opacity .14s ease,background .15s;white-space:nowrap;}
+  .btn:hover{transform:translateY(-1px);opacity:.92;}
+  .btn-lime{background:var(--chart);color:var(--ink);border-color:var(--chart);}
+  .btn-lime:hover{background:var(--chart-dark);border-color:var(--chart-dark);opacity:1;}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-2);}
+  .btn-ghost:hover{background:var(--bg-alt);}
+  .btn-sm{padding:10px 16px;font-size:12px;}
+  .dark .btn-ghost{color:#fff;border-color:var(--d-line-2);}
+  .dark .btn-ghost:hover{background:rgba(255,255,255,0.06);}
+  .nav-burger{display:none;}
+
+  /* audience toggle */
+  .aud{display:inline-flex;background:var(--bg-alt);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;}
+  .aud button{font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.02em;color:var(--ink-3);background:none;border:none;padding:7px 15px;border-radius:999px;cursor:pointer;transition:color .15s,background .15s;}
+  .aud button.on{background:var(--ink);color:#fff;}
+
+  /* ---------- section rhythm ---------- */
+  .band{padding:110px 0;}
+  .band.tight{padding:84px 0;}
+  .band.alt{background:var(--bg-alt);}
+  .band.dark{background:var(--d-bg);color:var(--d-ink);}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:18px;}
+  .dark .eyebrow{color:var(--chart);}
+  .h-sec{font-size:clamp(32px,4.4vw,54px);line-height:1.04;}
+  .sub{font-size:clamp(16px,1.35vw,19px);font-weight:400;color:var(--ink-2);line-height:1.6;max-width:56ch;}
+  .dark .sub{color:var(--d-ink-2);}
+  .center{text-align:center;}
+  .center .sub{margin-left:auto;margin-right:auto;}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 90px;position:relative;overflow:hidden;}
+  .hero-grid{display:grid;grid-template-columns:1.02fr 1.15fr;gap:56px;align-items:center;}
+  .hero h1{font-size:clamp(40px,5.6vw,74px);line-height:1.0;}
+  .hero .sub{font-size:clamp(17px,1.5vw,21px);margin-top:24px;max-width:44ch;}
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px;}
+  .hero-chips{display:flex;flex-wrap:wrap;gap:9px 10px;margin-top:38px;}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:0.03em;color:var(--ink-2);background:var(--bg-alt);border:1px solid var(--line);padding:8px 14px;border-radius:999px;}
+  .chip svg{width:14px;height:14px;color:var(--ink);}
+  .hero-glow{position:absolute;right:-8%;top:-20%;width:60%;height:120%;background:radial-gradient(closest-side,rgba(228,255,151,0.5),rgba(228,255,151,0) 70%);filter:blur(20px);z-index:-1;pointer-events:none;}
+
+  /* ---------- device / dashboard mock ---------- */
+  .dash{background:var(--d-bg);border:1px solid var(--d-line);border-radius:18px;padding:16px;box-shadow:0 40px 90px -40px rgba(10,11,20,0.55);color:var(--d-ink);}
+  .dash-top{display:flex;align-items:center;gap:8px;padding:4px 6px 14px;border-bottom:1px solid var(--d-line);}
+  .dash-top .dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.18);}
+  .dash-top .dbrand{margin-left:8px;font-size:12px;font-weight:700;letter-spacing:-0.02em;color:#fff;}
+  .dash-top .dbrand span{color:var(--chart);}
+  .dash-top .dwho{margin-left:auto;font-size:11px;color:var(--d-ink-3);}
+  .dash-body{display:grid;grid-template-columns:150px 1fr;gap:14px;padding-top:14px;}
+  .dash-rail{display:flex;flex-direction:column;gap:2px;}
+  .dash-rail .r{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--d-ink-2);padding:9px 11px;border-radius:8px;}
+  .dash-rail .r svg{width:15px;height:15px;opacity:.85;}
+  .dash-rail .r.on{background:rgba(228,255,151,0.12);color:#fff;}
+  .dash-rail .r.on svg{color:var(--chart);opacity:1;}
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .tile{background:var(--d-card);border:1px solid var(--d-line);border-radius:12px;padding:13px 14px;}
+  .tile .k{font-size:10.5px;font-weight:600;letter-spacing:0.02em;color:var(--d-ink-3);text-transform:uppercase;}
+  .tile .v{font-size:21px;font-weight:700;letter-spacing:-0.02em;margin-top:6px;color:#fff;}
+  .tile .d{font-size:11px;font-weight:700;color:var(--chart);margin-top:2px;}
+  .spark{height:26px;margin-top:9px;width:100%;overflow:visible;}
+  .attn{grid-column:1 / -1;background:var(--d-card);border:1px solid var(--d-line);border-radius:12px;padding:15px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .attn h5{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--d-ink-3);font-weight:700;margin-bottom:10px;}
+  .attn .li{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--d-ink-2);padding:4px 0;}
+  .attn .li .pill{width:7px;height:7px;border-radius:50%;background:var(--chart);flex:none;}
+  .attn .li.warn .pill{background:#e8a13c;}
+
+  /* ---------- hub ---------- */
+  .hub{display:grid;grid-template-columns:1fr auto 1fr;gap:22px;align-items:center;max-width:900px;margin:52px auto 0;}
+  .hub-col{display:flex;flex-direction:column;gap:14px;}
+  .hub-node{display:flex;align-items:center;gap:11px;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:14px 16px;font-weight:600;font-size:14px;box-shadow:0 8px 24px -18px rgba(10,11,20,0.4);}
+  .hub-node.r{flex-direction:row-reverse;text-align:right;}
+  .hub-node svg{width:18px;height:18px;color:var(--ink);flex:none;}
+  .hub-core{width:132px;height:132px;border-radius:50%;background:var(--ink);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;letter-spacing:-0.03em;box-shadow:0 0 0 10px rgba(228,255,151,0.16),0 30px 60px -30px rgba(10,11,20,0.6);}
+  .hub-core b{font-size:26px;}.hub-core span{font-size:12px;color:var(--chart);letter-spacing:0.1em;}
+
+  /* ---------- worker grid ---------- */
+  .wk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:52px;}
+  .wk{background:var(--d-card);border:1px solid var(--d-line);border-radius:14px;padding:22px 20px;transition:border-color .15s,transform .15s;}
+  .wk:hover{border-color:rgba(228,255,151,0.4);transform:translateY(-2px);}
+  .wk .ic{width:34px;height:34px;color:var(--chart);margin-bottom:16px;}
+  .wk .ic svg{width:100%;height:100%;}
+  .wk h4{font-size:16px;color:#fff;letter-spacing:-0.02em;}
+  .wk p{font-size:13px;color:var(--d-ink-2);margin-top:6px;line-height:1.5;font-weight:400;}
+
+  /* ---------- knowledge ---------- */
+  .know{display:grid;grid-template-columns:0.9fr 1.1fr;gap:48px;align-items:center;margin-top:8px;}
+  .know-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .know-list .k{display:flex;align-items:center;gap:11px;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:13px 15px;font-size:14px;font-weight:600;}
+  .know-list .k svg{width:16px;height:16px;color:var(--ink-3);flex:none;}
+  .kb{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:22px;position:relative;overflow:hidden;}
+  .kb .ask{display:flex;align-items:center;gap:10px;background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--ink-3);}
+  .kb .q{margin:16px 0 8px;font-weight:700;font-size:14px;}
+  .kb .a{background:rgba(228,255,151,0.16);border:1px solid rgba(205,238,106,0.5);border-radius:12px;padding:14px 16px;font-size:13.5px;color:var(--ink-2);line-height:1.6;font-weight:400;}
+  .kb .a b{color:var(--ink);}
+  .kb-brain{position:absolute;right:-30px;bottom:-30px;width:170px;height:170px;opacity:.9;}
+
+  /* ---------- workflow ---------- */
+  .flow{display:flex;flex-wrap:wrap;gap:12px;margin-top:48px;align-items:stretch;}
+  .fnode{flex:1 1 200px;min-width:180px;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:12px;position:relative;font-weight:600;font-size:14px;}
+  .fnode .n{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--chart);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;}
+  .fnode.auto{border-color:var(--chart-dark);background:rgba(228,255,151,0.1);}
+
+  /* ---------- marketplace ---------- */
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:36px;}
+  .tabs .t{font-size:12.5px;font-weight:700;letter-spacing:0.02em;color:var(--d-ink-2);background:var(--d-card);border:1px solid var(--d-line);padding:9px 16px;border-radius:999px;}
+  .tabs .t.on{background:var(--chart);color:var(--ink);border-color:var(--chart);}
+  .mk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px;}
+  .mk-card{background:var(--d-card);border:1px solid var(--d-line);border-radius:14px;padding:22px;display:flex;flex-direction:column;}
+  .mk-card .tag{font-size:10.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart);}
+  .mk-card h4{font-size:18px;color:#fff;margin:10px 0 8px;letter-spacing:-0.02em;}
+  .mk-card p{font-size:13px;color:var(--d-ink-2);font-weight:400;line-height:1.5;flex:1;}
+  .mk-card .row{display:flex;align-items:center;justify-content:space-between;margin-top:18px;}
+  .mk-card .price{font-size:13px;font-weight:700;color:#fff;}
+  .mk-inst{font-size:11.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:var(--chart);color:var(--ink);padding:8px 16px;border-radius:8px;}
+
+  /* ---------- industries ---------- */
+  .ind-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:44px;}
+  .ind{display:flex;flex-direction:column;align-items:center;gap:11px;background:var(--bg);border:1px solid var(--line);border-radius:13px;padding:22px 12px;text-align:center;}
+  .ind svg{width:26px;height:26px;color:var(--ink);}
+  .ind span{font-size:12.5px;font-weight:600;color:var(--ink-2);}
+  .ind-set{display:none;}
+  .ind-set.on{display:block;}
+
+  /* ---------- service steps ---------- */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px;}
+  .step{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:26px 22px;}
+  .step .n{font-size:12px;font-weight:700;letter-spacing:0.16em;color:var(--chart-dark);}
+  .step h4{font-size:19px;margin:14px 0 8px;letter-spacing:-0.02em;}
+  .step p{font-size:14px;color:var(--ink-2);font-weight:400;line-height:1.55;}
+
+  /* ---------- offer ---------- */
+  .offer{display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:start;margin-top:8px;}
+  .offer-card{background:var(--d-bg);color:var(--d-ink);border-radius:20px;padding:38px 36px;box-shadow:0 40px 90px -50px rgba(10,11,20,0.6);}
+  .offer-card h3{color:#fff;font-size:26px;letter-spacing:-0.03em;}
+  .stack{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:1px;}
+  .stack li{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--d-line);font-size:14.5px;color:var(--d-ink);font-weight:500;}
+  .stack li svg{width:17px;height:17px;color:var(--chart);flex:none;margin-top:2px;}
+  .stack li .free{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--chart);white-space:nowrap;}
+  .stack li.bonus{color:var(--chart);}
+  .offer-right{display:flex;flex-direction:column;gap:16px;}
+  .box{border:1px solid var(--line-2);border-radius:14px;padding:22px 24px;}
+  .box .lab{font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px;}
+  .box h4{font-size:19px;letter-spacing:-0.02em;margin-bottom:7px;}
+  .box p{font-size:14px;color:var(--ink-2);font-weight:400;line-height:1.55;}
+  .box.guarantee{background:rgba(228,255,151,0.16);border-color:var(--chart-dark);}
+
+  /* ---------- assessment ---------- */
+  .assess{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;}
+  .probs{display:flex;flex-direction:column;gap:10px;}
+  .prob{display:flex;align-items:center;gap:13px;background:var(--d-card);border:1px solid var(--d-line);border-radius:12px;padding:15px 17px;}
+  .prob .x{width:22px;height:22px;border-radius:6px;background:rgba(232,161,60,0.18);color:#e8a13c;display:flex;align-items:center;justify-content:center;flex:none;font-weight:700;}
+  .prob .txt{font-size:13.5px;color:var(--d-ink);font-weight:500;}
+  .prob .txt span{color:var(--d-ink-3);font-weight:400;display:block;font-size:12px;margin-top:1px;}
+  .prob-found{font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart);margin-bottom:14px;}
+
+  /* ---------- builder ---------- */
+  .builder{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:20px;overflow:hidden;border:1px solid var(--d-line);}
+  .builder .scene{position:relative;min-height:420px;background:linear-gradient(180deg,#10131c 0%,#0a0b14 60%);overflow:hidden;}
+  .builder .copy{background:var(--d-bg);color:var(--d-ink);padding:48px 44px;display:flex;flex-direction:column;justify-content:center;}
+  .b-list{list-style:none;padding:0;margin:22px 0 30px;display:flex;flex-direction:column;gap:12px;}
+  .b-list li{display:flex;align-items:center;gap:11px;font-size:15px;font-weight:500;}
+  .b-list li svg{width:18px;height:18px;color:var(--chart);flex:none;}
+
+  /* ---------- security ---------- */
+  .sec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:44px;}
+  .sec{text-align:center;padding:24px 16px;}
+  .sec .ic{width:30px;height:30px;color:var(--chart);margin:0 auto 14px;}
+  .sec h4{font-size:15px;color:#fff;letter-spacing:-0.01em;}
+  .sec p{font-size:12.5px;color:var(--d-ink-3);margin-top:5px;font-weight:400;}
+
+  /* ---------- final ---------- */
+  .final{background:var(--d-bg);color:#fff;border-radius:24px;padding:72px 48px;text-align:center;position:relative;overflow:hidden;}
+  .final h2{font-size:clamp(34px,4.6vw,58px);line-height:1.02;}
+  .final h2 em{font-style:normal;color:var(--chart);}
+  .final .sub{color:var(--d-ink-2);margin:20px auto 34px;}
+  .final-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .final-glow{position:absolute;left:50%;bottom:-60%;transform:translateX(-50%);width:80%;height:120%;background:radial-gradient(closest-side,rgba(228,255,151,0.22),rgba(228,255,151,0) 70%);pointer-events:none;}
+
+  footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:44px 0;}
+  .foot-in{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;font-size:12px;letter-spacing:0.06em;color:var(--ink-3);text-transform:uppercase;}
+  .foot-in a{color:var(--ink-2);}
+
+  .sec-head{max-width:640px;}
+  .section-lead{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;}
+
+  @media(max-width:900px){
+    .hero-grid,.know,.offer,.assess,.builder{grid-template-columns:1fr;}
+    .hero-grid{gap:40px;}
+    .tiles{grid-template-columns:repeat(2,1fr);}
+    .wk-grid,.sec-grid,.steps{grid-template-columns:repeat(2,1fr);}
+    .mk-grid,.ind-grid{grid-template-columns:repeat(2,1fr);}
+    .ind-grid{grid-template-columns:repeat(3,1fr);}
+    .nav-links{display:none;}
+    .dash-body{grid-template-columns:1fr;}
+    .dash-rail{flex-direction:row;overflow-x:auto;}
+    .builder .scene{min-height:240px;}
+  }
+  @media(max-width:560px){
+    .wrap{padding:0 20px;}
+    .band{padding:76px 0;}
+    .tiles{grid-template-columns:1fr 1fr;}
+    .wk-grid,.mk-grid,.ind-grid,.sec-grid,.steps{grid-template-columns:1fr 1fr;}
+    .attn{grid-template-columns:1fr;}
+    .aud{display:none;}
+  }
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto;}}
+</style>
+</head>
+<body data-aud="phys">
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="nav-in">
+    <a href="/" class="brand"><span class="mk">TMI</span> TMI <span class="os">OS</span></a>
+    <nav class="nav-links">
+      <a href="#system">What it is</a>
+      <a href="#workforce">AI Employees</a>
+      <a href="#marketplace">Marketplace</a>
+      <a href="#offer">The offer</a>
+      <a href="#builder">Become a Builder</a>
+    </nav>
+    <div class="aud" role="group" aria-label="Business type">
+      <button id="audP" class="on" onclick="setAud('phys')">Physical</button>
+      <button id="audO" onclick="setAud('online')">Online</button>
+    </div>
+    <a href="/intelligence-scorecard" class="btn btn-sm">Take the assessment</a>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="band hero">
+  <div class="hero-glow"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">TMI OS</p>
+      <h1>The operating system for <span class="lime">intelligent companies.</span></h1>
+      <p class="sub">Connect your tools. Automate the busywork. Hire AI employees. Run your whole company from one screen. We build it with you and stay until it works.</p>
+      <div class="hero-cta">
+        <a href="#offer" class="btn btn-lime">Build your intelligent company &rarr;</a>
+        <a href="#system" class="btn btn-ghost">See TMI OS in action</a>
+      </div>
+      <div class="hero-chips">
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg> AI Workforce</span>
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Workflows</span>
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg> Knowledge</span>
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/></svg> Command Center</span>
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg> Marketplace</span>
+      </div>
+    </div>
+    <!-- dashboard mock -->
+    <div class="dash" aria-hidden="true">
+      <div class="dash-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dbrand">TMI <span>OS</span></span><span class="dwho">Good morning, Tyler</span></div>
+      <div class="dash-body">
+        <div class="dash-rail">
+          <div class="r on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/></svg> Command</div>
+          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3 3-5 7-5s7 2 7 5"/></svg> Workforce</div>
+          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Workflows</div>
+          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5h14v14H5z"/><path d="M9 9h6"/></svg> Knowledge</div>
+          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg> Reports</div>
+        </div>
+        <div class="tiles">
+          <div class="tile"><div class="k">Revenue</div><div class="v num">$2.43M</div><div class="d">+12.5%</div></div>
+          <div class="tile"><div class="k">New Leads</div><div class="v num">356</div><div class="d">+18.2%</div></div>
+          <div class="tile"><div class="k"><span class="sw" data-p="Jobs in Progress" data-o="Active Projects">Jobs in Progress</span></div><div class="v num">128</div><div class="d">+8.1%</div></div>
+          <div class="tile"><div class="k">Cash Flow</div><div class="v num">$842K</div><div class="d">+9.3%</div></div>
+          <div class="attn">
+            <div>
+              <h5>What needs your attention</h5>
+              <div class="li"><span class="pill"></span> 3 high priority tasks</div>
+              <div class="li warn"><span class="pill"></span> 2 invoices overdue</div>
+              <div class="li"><span class="pill"></span> 5 leads need follow up</div>
+            </div>
+            <div>
+              <h5>Top AI employees</h5>
+              <div class="li"><span class="pill"></span> AI Receptionist &middot; 98%</div>
+              <div class="li"><span class="pill"></span> AI Sales Rep &middot; 92%</div>
+              <div class="li"><span class="pill"></span> AI Collections &middot; 89%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ONE SYSTEM (hub) ============ -->
+<section class="band alt" id="system">
+  <div class="wrap center">
+    <p class="eyebrow">One platform</p>
+    <h2 class="h-sec">One system. <span class="lime">Every part of your company.</span></h2>
+    <p class="sub">TMI OS connects your tools, your team, your data, and your AI workforce so the whole business runs together instead of in a dozen apps that never talk.</p>
+    <div class="hub">
+      <div class="hub-col">
+        <div class="hub-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3 3-5 7-5s7 2 7 5"/></svg> AI Workforce</div>
+        <div class="hub-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Workflows</div>
+        <div class="hub-node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5h14v14H5z"/><path d="M9 9h6"/></svg> Knowledge</div>
+      </div>
+      <div class="hub-core"><b>TMI</b><span>OS</span></div>
+      <div class="hub-col">
+        <div class="hub-node r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> Integrations</div>
+        <div class="hub-node r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg> Data &amp; Reports</div>
+        <div class="hub-node r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg> Marketplace</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVICE PROMISE ============ -->
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">This is not software you figure out alone</p>
+      <h2 class="h-sec">We turn your company into an <span class="lime">intelligent company.</span></h2>
+      <p class="sub" style="margin-top:20px;">We install the systems, connect your tools, build your digital workforce, train your team, and stay until it works. The platform is the engine. We are the team that builds it around you.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n">STEP 1</div><h4>Assess</h4><p>We map how your company actually runs today and find the specific problems quietly costing you money.</p></div>
+      <div class="step"><div class="n">STEP 2</div><h4>Install</h4><p>We connect your tools, set up your command center and knowledge vault, and put your first digital employees to work.</p></div>
+      <div class="step"><div class="n">STEP 3</div><h4>Train</h4><p>Your team learns the system on real work, not a slide deck, so it sticks and gets used from day one.</p></div>
+      <div class="step"><div class="n">STEP 4</div><h4>Scale</h4><p>We stay alongside you, adding workers, workflows, and systems as the company grows into it.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WORKFORCE ============ -->
+<section class="band dark" id="workforce">
+  <div class="wrap">
+    <div class="section-lead">
+      <div class="sec-head">
+        <p class="eyebrow">Digital workforce</p>
+        <h2 class="h-sec">Hire AI employees <span class="lime">that work 24/7.</span></h2>
+      </div>
+      <p class="sub">Add digital workers to your team in minutes. They learn your business, use your knowledge, and get real work done while you sleep.</p>
+    </div>
+    <div class="wk-grid">
+      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5c0 8 7 15 15 15l1-4-5-2-2 2c-3-1.5-5-3.5-6.5-6.5l2-2-2-5z"/></svg></div><h4>AI Receptionist</h4><p>Answers every call and text, day or night, so no lead ever hits voicemail.</p></div>
+      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><h4>AI Sales Rep</h4><p>Qualifies leads, books meetings, and follows up until they buy or say no.</p></div>
+      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg></div><h4 class="sw" data-p="AI Estimator" data-o="AI Onboarder">AI Estimator</h4><p class="sw" data-p="Builds accurate quotes in minutes using your current pricing." data-o="Onboards new customers and gets them to first value fast.">Builds accurate quotes in minutes using your current pricing.</p></div>
+      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="14" height="10" rx="1.5"/><path d="M16 10h3l3 3v4h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/></svg></div><h4 class="sw" data-p="AI Dispatcher" data-o="AI Support Agent">AI Dispatcher</h4><p class="sw" data-p="Assigns jobs, tracks status, and keeps the whole team updated." data-o="Answers customer questions and resolves tickets around the clock.">Assigns jobs, tracks status, and keeps the whole team updated.</p></div>
+      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg></div><h4>AI Collections</h4><p>Chases open invoices politely and persistently until they get paid.</p></div>
+      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l16-7-3 16-5-4-3 3v-5z"/></svg></div><h4>AI Marketing</h4><p>Runs campaigns, follows up on every lead, and keeps the pipeline full.</p></div>
+      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.4"/><path d="M8 17c0-2 2-3 4-3s4 1 4 3"/></svg></div><h4>AI HR Assistant</h4><p>Screens applicants, schedules interviews, and handles the paperwork.</p></div>
+      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></div><h4>AI Ops Manager</h4><p>Watches the whole operation and surfaces what needs attention today.</p></div>
+    </div>
+    <div style="margin-top:34px;"><a href="#offer" class="btn btn-lime">Explore all AI employees &rarr;</a></div>
+  </div>
+</section>
+
+<!-- ============ KNOWLEDGE ============ -->
+<section class="band">
+  <div class="wrap">
+    <p class="eyebrow">Company knowledge</p>
+    <h2 class="h-sec">Knowledge is power. <span class="lime">Now yours is useable.</span></h2>
+    <div class="know">
+      <div>
+        <p class="sub" style="margin-bottom:26px;">Upload your SOPs, docs, videos, and files. TMI turns them into company knowledge your team and your AI workers can actually use. One source of truth for your whole company.</p>
+        <div class="know-list">
+          <div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/></svg> SOPs &amp; processes</div>
+          <div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg> Training videos</div>
+          <div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6"/></svg> Contracts</div>
+          <div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7H3V5h11"/></svg> Forms &amp; checklists</div>
+          <div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg> Policies</div>
+          <div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Price sheets</div>
+        </div>
+      </div>
+      <div class="kb">
+        <div class="ask"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg> Ask anything about your business...</div>
+        <div class="q">What is the process for preventative maintenance?</div>
+        <div class="a">According to your <b>Equipment Maintenance SOP</b>: check fluid levels, inspect belts and hoses, test all safety systems, document and upload, then schedule the next service.</div>
+        <svg class="kb-brain" viewBox="0 0 100 100" fill="none"><g stroke="#cdee72" stroke-width="1.4" opacity="0.9"><circle cx="50" cy="50" r="6" fill="#E4FF97"/><circle cx="26" cy="34" r="3.5"/><circle cx="74" cy="30" r="3.5"/><circle cx="20" cy="64" r="3.5"/><circle cx="78" cy="66" r="3.5"/><circle cx="50" cy="22" r="3"/><circle cx="44" cy="78" r="3"/><path d="M50 50L26 34M50 50L74 30M50 50L20 64M50 50L78 66M50 50L50 22M50 50L44 78M26 34L50 22M74 30L78 66"/></g></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMMAND CENTER ============ -->
+<section class="band dark">
+  <div class="wrap center">
+    <p class="eyebrow">Command Center</p>
+    <h2 class="h-sec">See everything. <span class="lime">Know what matters.</span></h2>
+    <p class="sub">Real numbers, live. Ask what needs your attention today and get one clear answer, not a spreadsheet to dig through.</p>
+    <div class="dash" style="margin-top:44px;text-align:left;">
+      <div class="dash-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dbrand">TMI <span>OS</span></span><span class="dwho">Command Center</span></div>
+      <div class="dash-body">
+        <div class="dash-rail">
+          <div class="r on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/></svg> Command</div>
+          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3 3-5 7-5s7 2 7 5"/></svg> Workforce</div>
+          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Workflows</div>
+          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5h14v14H5z"/></svg> Knowledge</div>
+          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg> Reports</div>
+        </div>
+        <div class="tiles">
+          <div class="tile"><div class="k">Revenue</div><div class="v num">$2.43M</div><div class="d">+12.5%</div></div>
+          <div class="tile"><div class="k">Cash Flow</div><div class="v num">$842K</div><div class="d">+9.3%</div></div>
+          <div class="tile"><div class="k">New Leads</div><div class="v num">356</div><div class="d">+18.2%</div></div>
+          <div class="tile"><div class="k"><span class="sw" data-p="Jobs in Progress" data-o="Active Projects">Jobs in Progress</span></div><div class="v num">128</div><div class="d">+8.1%</div></div>
+          <div class="attn" style="grid-template-columns:1fr 1fr;">
+            <div>
+              <h5><span class="sw" data-p="Sales pipeline" data-o="Sales pipeline">Sales pipeline</span></h5>
+              <div class="li"><span class="pill"></span> Qualification &middot; <span class="num">$1.21M</span></div>
+              <div class="li"><span class="pill"></span> Proposal &middot; <span class="num">$1.43M</span></div>
+              <div class="li"><span class="pill"></span> Closed won &middot; <span class="num">$570K</span></div>
+            </div>
+            <div>
+              <h5>Top performing AI employees</h5>
+              <div class="li"><span class="pill"></span> AI Receptionist &middot; 98%</div>
+              <div class="li"><span class="pill"></span> AI Sales Rep &middot; 92%</div>
+              <div class="li"><span class="pill"></span> AI Collections &middot; 89%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WORKFLOWS ============ -->
+<section class="band alt">
+  <div class="wrap">
+    <p class="eyebrow">Workflows</p>
+    <h2 class="h-sec">Automate the busywork. <span class="lime">Keep the judgment.</span></h2>
+    <p class="sub" style="margin-top:18px;">Build workflows that handle the repeatable work so your team spends its time on the calls a system cannot make. Build once. Run forever.</p>
+    <div class="flow">
+      <div class="fnode"><span class="n">1</span> New lead comes in</div>
+      <div class="fnode auto"><span class="n">2</span> AI qualifies the lead</div>
+      <div class="fnode auto"><span class="n">3</span> Meeting gets booked</div>
+      <div class="fnode"><span class="n">4</span> Team gets notified</div>
+      <div class="fnode auto"><span class="n">5</span> Estimate is created</div>
+      <div class="fnode auto"><span class="n">6</span> Follow up goes out</div>
+      <div class="fnode"><span class="n">7</span> Customer signs</div>
+      <div class="fnode auto"><span class="n">8</span> Added to your CRM</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARKETPLACE ============ -->
+<section class="band dark" id="marketplace">
+  <div class="wrap">
+    <div class="section-lead">
+      <div class="sec-head">
+        <p class="eyebrow">The Marketplace</p>
+        <h2 class="h-sec">Plug in. <span class="lime">Level up.</span></h2>
+      </div>
+      <p class="sub">Install systems, workflows, and AI employees built by TMI and by industry experts. Turn them on like apps and they are running the same day.</p>
+    </div>
+    <div class="tabs">
+      <span class="t on">All</span><span class="t">AI Employees</span><span class="t">Workflows</span><span class="t">Systems</span><span class="t">SOP Packs</span>
+    </div>
+    <div class="mk-grid">
+      <div class="mk-card"><span class="tag sw" data-p="Roofing" data-o="Agency">Roofing</span><h4 class="sw" data-p="Roofing Sales System" data-o="Agency Client System">Roofing Sales System</h4><p class="sw" data-p="A complete lead to signed contract sales process, built for roofers." data-o="Lead to signed retainer, onboarding, and reporting for agencies.">A complete lead to signed contract sales process, built for roofers.</p><div class="row"><span class="price">Included</span><span class="mk-inst">Install</span></div></div>
+      <div class="mk-card"><span class="tag sw" data-p="Restaurants" data-o="Ecommerce">Restaurants</span><h4 class="sw" data-p="Restaurant Loyalty System" data-o="Ecommerce Retention System">Restaurant Loyalty System</h4><p class="sw" data-p="Boost repeat visits and revenue with automated loyalty and follow up." data-o="Win back customers and lift repeat orders with automated flows.">Boost repeat visits and revenue with automated loyalty and follow up.</p><div class="row"><span class="price">Included</span><span class="mk-inst">Install</span></div></div>
+      <div class="mk-card"><span class="tag sw" data-p="Oil &amp; Gas" data-o="SaaS">Oil &amp; Gas</span><h4 class="sw" data-p="Oilfield Dispatch System" data-o="SaaS Onboarding System">Oilfield Dispatch System</h4><p class="sw" data-p="Streamline dispatch, tracking, and reporting for field operations." data-o="Turn trials into paying accounts with guided onboarding and nudges.">Streamline dispatch, tracking, and reporting for field operations.</p><div class="row"><span class="price">Included</span><span class="mk-inst">Install</span></div></div>
+    </div>
+    <div style="margin-top:26px;"><a href="#offer" class="btn btn-ghost">View the marketplace &rarr;</a></div>
+  </div>
+</section>
+
+<!-- ============ BUILT FOR EVERY BUSINESS ============ -->
+<section class="band">
+  <div class="wrap center">
+    <p class="eyebrow">Built for every business</p>
+    <h2 class="h-sec">Online or off. <span class="lime">If it is a company, it can be intelligent.</span></h2>
+    <p class="sub">Pre-built systems and real expertise for the way your business actually runs, whether you sell online, on the phone, or on a job site.</p>
+
+    <div class="ind-set on" data-set="phys">
+      <div class="ind-grid">
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-6h6v6"/></svg><span>Construction</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M6 8v14M18 8v14M4 22h16"/></svg><span>Oil &amp; Gas</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V7l6-3v4l6-3v4l6-3v15z"/></svg><span>Manufacturing</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="7" width="15" height="10" rx="1"/><path d="M16 10h4l3 3v4h-7"/><circle cx="6" cy="18" r="1.7"/><circle cx="18" cy="18" r="1.7"/></svg><span>Logistics</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg><span>Home Services</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21C7 17 4 13 4 9a4 4 0 018-1 4 4 0 018 1c0 4-3 8-8 12z"/></svg><span>Healthcare</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="14" height="10" rx="1.5"/><path d="M16 10h3l3 3v4h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/></svg><span>Fleet &amp; Rentals</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-6 9 6v11H3z"/><path d="M9 22V12h6v10"/></svg><span>Real Estate</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a5 5 0 015 5c0 3-5 9-5 9S7 10 7 7a5 5 0 015-5z"/><circle cx="12" cy="7" r="1.6"/></svg><span>Dental &amp; Medical</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9h18l-1.5 11H4.5z"/><path d="M8 9V6a4 4 0 018 0v3"/></svg><span>Retail</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3v8a4 4 0 004 4v6M15 3c0 3-1 5-1 8h3c0-3-1-5-1-8M14 11h2v10"/></svg><span>Restaurants</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg><span>And more</span></div>
+      </div>
+    </div>
+    <div class="ind-set" data-set="online">
+      <div class="ind-grid">
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span>SaaS</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6h15l-1.5 9H8z"/><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M6 6L5 3H2"/></svg><span>Ecommerce</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Agencies</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg><span>Creators</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg><span>Coaches</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4"/></svg><span>Course sellers</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v14H4z"/><path d="M4 9h16"/></svg><span>Professional firms</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21V7l6-3v4l6-3v4l6-3v15z"/></svg><span>Multi-location</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Newsletters</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg><span>Local business</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M6 8l6-5 6 5"/><path d="M4 21h16"/></svg><span>Service companies</span></div>
+        <div class="ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg><span>And more</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE OFFER ============ -->
+<section class="band alt" id="offer">
+  <div class="wrap">
+    <p class="eyebrow">The offer</p>
+    <h2 class="h-sec">Build your intelligent company <span class="lime">in about 30 days.</span></h2>
+    <p class="sub" style="margin-top:18px;">One install. Your tools connected, your first digital employees working, and a command center that tells you what needs your attention. Done with you, not handed over on a login screen.</p>
+
+    <div class="offer" style="margin-top:44px;">
+      <div class="offer-card">
+        <h3>What you get</h3>
+        <ul class="stack">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> TMI OS platform, built around your business</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Company knowledge vault, set up from your files</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Command center dashboard for the whole company</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Three digital employees installed and working</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Three core workflows built end to end</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Every tool you use, connected into one system</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Team training on real work, not a slide deck</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Weekly owner report, in plain language</li>
+          <li class="bonus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3l2.5 6H21l-5 4 2 7-6-4-6 4 2-7-5-4h6.5z"/></svg> Bonus: the industry system pack for your business <span class="free">Included</span></li>
+          <li class="bonus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3l2.5 6H21l-5 4 2 7-6-4-6 4 2-7-5-4h6.5z"/></svg> Bonus: 90 days of TMI Success support <span class="free">Included</span></li>
+          <li class="bonus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3l2.5 6H21l-5 4 2 7-6-4-6 4 2-7-5-4h6.5z"/></svg> Bonus: The Intelligent Company book and playbooks <span class="free">Included</span></li>
+        </ul>
+      </div>
+      <div class="offer-right">
+        <div class="box">
+          <div class="lab">The dream outcome</div>
+          <h4>A company that runs on systems, not on you.</h4>
+          <p>In about a month, the busywork runs itself, your team has AI support on every seat, and you open one screen to know exactly what needs you today.</p>
+        </div>
+        <div class="box guarantee">
+          <div class="lab">The guarantee</div>
+          <h4>Live in 30 days, or we keep working free.</h4>
+          <p>If your system is not built and running in 30 days, we keep going at no extra cost until it is. The risk is ours to carry, not yours.</p>
+        </div>
+        <div class="box">
+          <div class="lab">What it costs</div>
+          <h4>Priced like one hire. It replaces a back office.</h4>
+          <p>A digital workforce and an operating system cost less than a single mediocre full time hire, and they never call in sick. We share exact numbers on your call, matched to your size.</p>
+        </div>
+        <div class="box">
+          <div class="lab">Availability</div>
+          <h4>A limited number of builds each month.</h4>
+          <p>Every install gets our team hands on, so we take on a set number of new companies a month. When the month is full, the next start date moves out.</p>
+        </div>
+        <a href="/intelligence-scorecard" class="btn btn-lime" style="justify-content:center;padding:18px;">Start with the assessment &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ASSESSMENT (problem callout) ============ -->
+<section class="band dark">
+  <div class="wrap">
+    <div class="assess">
+      <div>
+        <p class="eyebrow">Intelligent Company Assessment</p>
+        <h2 class="h-sec">Find out what is <span class="lime">quietly costing you.</span></h2>
+        <p class="sub" style="margin-top:18px;">Answer a few questions about how your business runs. We do not grade you on a scale. We show you the specific problems draining time and money, and the first move to fix each one.</p>
+        <div style="margin-top:30px;"><a href="/intelligence-scorecard" class="btn btn-lime">Take the assessment &rarr;</a></div>
+      </div>
+      <div>
+        <div class="prob-found">We usually find 7 to 12</div>
+        <div class="probs">
+          <div class="prob"><span class="x">!</span><div class="txt">Leads slip through the cracks<span>No one follows up when the office gets busy.</span></div></div>
+          <div class="prob"><span class="x">!</span><div class="txt">You find out about problems too late<span>From a complaint, not before it happened.</span></div></div>
+          <div class="prob"><span class="x">!</span><div class="txt">Knowledge lives in one person's head<span>When they leave, it walks out the door.</span></div></div>
+          <div class="prob"><span class="x">!</span><div class="txt">Your tools do not talk to each other<span>The same info gets typed in three times.</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BECOME A BUILDER ============ -->
+<section class="band" id="builder">
+  <div class="wrap">
+    <div class="builder">
+      <div class="scene" aria-hidden="true">
+        <svg viewBox="0 0 400 420" preserveAspectRatio="xMidYMax slice" style="position:absolute;inset:0;width:100%;height:100%">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b2030"/><stop offset="1" stop-color="#0a0b14"/></linearGradient>
+            <radialGradient id="sun" cx="50%" cy="34%" r="30%"><stop offset="0" stop-color="#E4FF97" stop-opacity="0.55"/><stop offset="1" stop-color="#E4FF97" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect width="400" height="420" fill="url(#sky)"/>
+          <rect width="400" height="420" fill="url(#sun)"/>
+          <path d="M0 300 L90 210 L160 270 L240 180 L320 260 L400 210 L400 420 L0 420 Z" fill="#11141d"/>
+          <path d="M0 340 L110 270 L200 320 L300 250 L400 310 L400 420 L0 420 Z" fill="#0c0e16"/>
+          <g fill="#05060b">
+            <path d="M168 300 q6 -26 12 0 l-3 40 -6 0 z"/><circle cx="174" cy="292" r="7"/>
+            <path d="M214 300 q6 -26 12 0 l-3 40 -6 0 z"/><circle cx="220" cy="292" r="7"/>
+          </g>
+        </svg>
+      </div>
+      <div class="copy">
+        <p class="eyebrow">TMI Builder Network</p>
+        <h2 class="h-sec" style="font-size:clamp(28px,3vw,40px);">Become a Builder.</h2>
+        <p class="sub" style="color:var(--d-ink-2);margin-top:14px;">Bring your industry expertise. We bring the AI engineers, the product team, the sales, and the infrastructure. You build systems for your industry and earn on every company that installs them.</p>
+        <ul class="b-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Build AI systems without an engineering team</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Reach more companies through the marketplace</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Earn recurring revenue, shared for the long run</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Grow your name as the expert in your field</li>
+        </ul>
+        <div><a href="/venture-studio" class="btn btn-lime">Apply to become a Builder &rarr;</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECURITY ============ -->
+<section class="band dark tight">
+  <div class="wrap center">
+    <p class="eyebrow">Secure. Private. Yours.</p>
+    <h2 class="h-sec">Enterprise grade security <span class="lime">around your business.</span></h2>
+    <div class="sec-grid">
+      <div class="sec"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div><h4>SOC 2 aligned</h4><p>Controls built to enterprise standards.</p></div>
+      <div class="sec"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></div><h4>End to end encryption</h4><p>Your data is protected in transit and at rest.</p></div>
+      <div class="sec"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3 3-5 7-5s7 2 7 5"/></svg></div><h4>Role based access</h4><p>Everyone sees only what they should.</p></div>
+      <div class="sec"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M4 12h16"/><circle cx="12" cy="12" r="9"/></svg></div><h4>99.9% uptime</h4><p>The system is there when you need it.</p></div>
+    </div>
+    <p class="sub center" style="margin-top:30px;color:var(--d-ink-3);">Your data is yours. Always.</p>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="band">
+  <div class="wrap">
+    <div class="final">
+      <div class="final-glow"></div>
+      <h2>Build an <em>intelligent company.</em></h2>
+      <p class="sub center">Connect your tools, install your digital workforce, and run your whole company from one place. Start with the assessment and see exactly where to begin.</p>
+      <div class="final-cta">
+        <a href="/intelligence-scorecard" class="btn btn-lime">Take the assessment &rarr;</a>
+        <a href="#offer" class="btn btn-ghost">See the offer</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <span>&copy; 2026 TMI Technology</span>
+    <span>TMI OS &middot; The operating system for intelligent companies</span>
+    <span><a href="/the-intelligent-company-book">Read the free book</a></span>
+  </div>
+</footer>
+
+<script>
+function setAud(mode){
+  document.body.setAttribute('data-aud', mode);
+  document.getElementById('audP').classList.toggle('on', mode === 'phys');
+  document.getElementById('audO').classList.toggle('on', mode === 'online');
+  document.querySelectorAll('.sw').forEach(function(el){
+    var v = mode === 'online' ? el.getAttribute('data-o') : el.getAttribute('data-p');
+    if(v != null) el.textContent = v;
+  });
+  document.querySelectorAll('.ind-set').forEach(function(s){
+    s.classList.toggle('on', s.getAttribute('data-set') === mode);
+  });
+}
+</script>
+</body>
+</html>
