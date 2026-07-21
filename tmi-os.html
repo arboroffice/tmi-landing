@@ -337,6 +337,40 @@
   .proof-stat .t{font-size:12px;color:var(--ink-3);font-weight:600;margin-top:2px;}
   .proof-line{font-size:14px;font-weight:600;color:var(--ink-2);}
   @media(max-width:640px){.proof-stats{gap:24px;}.proof-stat .n{font-size:20px;}}
+
+  /* ---------- editorial statement (AI-proof + attention) ---------- */
+  .editorial .ed-head{font-size:clamp(30px,4.7vw,58px);line-height:1.05;letter-spacing:-0.03em;max-width:22ch;}
+  .ed-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:52px;}
+  .ed-col{border-top:2px solid var(--chart);padding-top:18px;}
+  .ed-col h4{font-size:19px;color:#fff;letter-spacing:-0.02em;margin-bottom:10px;}
+  .ed-col p{font-size:15px;color:var(--d-ink-2);line-height:1.6;font-weight:400;}
+  @media(max-width:820px){.ed-cols{grid-template-columns:1fr;gap:22px;}}
+
+  /* ---------- offer ladder (ascension) ---------- */
+  .ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:52px;text-align:left;align-items:stretch;}
+  .rung{display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line-2);border-radius:16px;padding:26px 22px;position:relative;transition:transform .15s,box-shadow .15s;}
+  .rung:hover{transform:translateY(-3px);box-shadow:0 22px 50px -34px rgba(10,11,20,0.45);}
+  .rung.core{border-color:var(--ink);box-shadow:0 26px 64px -34px rgba(10,11,20,0.5);}
+  .rung.core::before{content:"Most chosen";position:absolute;top:-11px;left:22px;background:var(--chart);color:var(--ink);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:6px;}
+  .rung-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:14px;}
+  .rung-tag{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-3);}
+  .rung-price{font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--ink);text-align:right;}
+  .rung h3{font-size:20px;letter-spacing:-0.02em;margin-bottom:8px;}
+  .rung-out{font-size:13.5px;color:var(--ink-2);line-height:1.5;font-weight:400;margin-bottom:16px;}
+  .rung ul{list-style:none;padding:0;margin:0 0 20px;display:flex;flex-direction:column;gap:9px;flex:1;}
+  .rung ul li{display:flex;gap:9px;font-size:13px;color:var(--ink-2);line-height:1.45;}
+  .rung ul li svg{width:15px;height:15px;color:var(--chart-dark);flex:none;margin-top:2px;}
+  .rung-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:13px 18px;border-radius:9px;border:1px solid var(--line-2);color:var(--ink);transition:background .15s,border-color .15s;margin-top:auto;}
+  .rung-cta:hover{background:var(--bg-alt);}
+  .rung.core .rung-cta{background:var(--chart);border-color:var(--chart);}
+  .rung.core .rung-cta:hover{background:var(--chart-dark);border-color:var(--chart-dark);}
+  .ladder-note{font-size:12px;color:var(--ink-3);margin-top:20px;text-align:center;}
+  @media(max-width:900px){.ladder{grid-template-columns:1fr 1fr;}}
+  @media(max-width:560px){.ladder{grid-template-columns:1fr;}}
+
+  /* hero audience prompt */
+  .aud-cue{display:inline-flex;align-items:center;gap:6px;margin-top:26px;font-size:12.5px;font-weight:600;color:var(--ink-3);}
+  .aud-cue b{color:var(--ink);}
 </style>
 </head>
 <body data-aud="phys">
@@ -349,7 +383,7 @@
       <a href="#system">What it is</a>
       <a href="#workforce">AI Employees</a>
       <a href="#marketplace">Marketplace</a>
-      <a href="#offer">The offer</a>
+      <a href="#ladder">Pricing</a>
       <a href="#builder">Become a Builder</a>
     </nav>
     <div class="aud" role="group" aria-label="Business type">
@@ -365,13 +399,14 @@
   <div class="hero-glow"></div>
   <div class="wrap hero-grid">
     <div>
-      <p class="eyebrow">TMI OS</p>
+      <p class="eyebrow">TMI OS &middot; Online and physical businesses</p>
       <h1>The operating system for <span class="lime">intelligent companies.</span></h1>
-      <p class="sub">Connect your tools. Automate the busywork. Hire AI employees. Run your whole company from one screen. We build it with you and stay until it works.</p>
+      <p class="sub">Connect your tools. Automate the busywork. Hire AI employees. Run your whole company from one screen, whether you sell online or on a job site. We build it with you and stay until it works.</p>
       <div class="hero-cta">
-        <a href="#offer" class="btn btn-lime">Build your intelligent company &rarr;</a>
+        <a href="#ladder" class="btn btn-lime">Build your intelligent company &rarr;</a>
         <a href="#system" class="btn btn-ghost">See TMI OS in action</a>
       </div>
+      <div class="aud-cue">See it for <b>your</b> world &rarr; switch <b>Physical</b> or <b>Online</b> at the top.</div>
       <div class="hero-chips">
         <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg> AI Workforce</span>
         <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Workflows</span>
@@ -395,7 +430,7 @@
           <div class="tile"><div class="k">Revenue</div><div class="v num">$2.43M</div><div class="d">+12.5%</div></div>
           <div class="tile"><div class="k">New Leads</div><div class="v num">356</div><div class="d">+18.2%</div></div>
           <div class="tile"><div class="k"><span class="sw" data-p="Jobs in Progress" data-o="Active Projects">Jobs in Progress</span></div><div class="v num">128</div><div class="d">+8.1%</div></div>
-          <div class="tile"><div class="k">Cash Flow</div><div class="v num">$842K</div><div class="d">+9.3%</div></div>
+          <div class="tile"><div class="k"><span class="sw" data-p="Cash Flow" data-o="MRR">Cash Flow</span></div><div class="v num">$842K</div><div class="d">+9.3%</div></div>
           <div class="attn">
             <div>
               <h5>What needs your attention</h5>
@@ -543,7 +578,7 @@
         </div>
         <div class="tiles">
           <div class="tile"><div class="k">Revenue</div><div class="v num">$2.43M</div><div class="d">+12.5%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 24 L20 21 L40 23 L60 14 L80 16 L100 8 L120 6 L120 30 L0 30Z"/><path class="line" d="M0 24 L20 21 L40 23 L60 14 L80 16 L100 8 L120 6"/><circle class="end" cx="120" cy="6" r="2.6"/></svg></div>
-          <div class="tile"><div class="k">Cash Flow</div><div class="v num">$842K</div><div class="d">+9.3%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 20 L20 22 L40 15 L60 18 L80 11 L100 13 L120 7 L120 30 L0 30Z"/><path class="line" d="M0 20 L20 22 L40 15 L60 18 L80 11 L100 13 L120 7"/><circle class="end" cx="120" cy="7" r="2.6"/></svg></div>
+          <div class="tile"><div class="k"><span class="sw" data-p="Cash Flow" data-o="MRR">Cash Flow</span></div><div class="v num">$842K</div><div class="d">+9.3%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 20 L20 22 L40 15 L60 18 L80 11 L100 13 L120 7 L120 30 L0 30Z"/><path class="line" d="M0 20 L20 22 L40 15 L60 18 L80 11 L100 13 L120 7"/><circle class="end" cx="120" cy="7" r="2.6"/></svg></div>
           <div class="tile"><div class="k">New Leads <span class="live-dot"></span></div><div class="v num" id="liveLeads">356</div><div class="d">+18.2%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 26 L20 22 L40 24 L60 18 L80 12 L100 10 L120 5 L120 30 L0 30Z"/><path class="line" d="M0 26 L20 22 L40 24 L60 18 L80 12 L100 10 L120 5"/><circle class="end" cx="120" cy="5" r="2.6"/></svg></div>
           <div class="tile"><div class="k"><span class="sw" data-p="Jobs in Progress" data-o="Active Projects">Jobs in Progress</span></div><div class="v num">128</div><div class="d">+8.1%</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 18 L20 16 L40 19 L60 13 L80 15 L100 11 L120 9 L120 30 L0 30Z"/><path class="line" d="M0 18 L20 16 L40 19 L60 13 L80 15 L100 11 L120 9"/><circle class="end" cx="120" cy="9" r="2.6"/></svg></div>
           <div class="attn" style="grid-template-columns:1fr 1fr;">
@@ -649,10 +684,95 @@
   </div>
 </section>
 
-<!-- ============ THE OFFER ============ -->
+<!-- ============ AI-PROOF + ATTENTION (editorial) ============ -->
+<section class="band dark editorial">
+  <div class="wrap">
+    <p class="eyebrow">The new way to build a company</p>
+    <h2 class="ed-head">The businesses that win the next ten years will not be the biggest. <span class="lime">They will be the most intelligent.</span></h2>
+    <div class="ed-cols">
+      <div class="ed-col">
+        <h4>Attention is the whole game.</h4>
+        <p>Online or off, the company that answers first and never drops a lead wins the customer. TMI catches every lead, follows up on its own, and turns attention into booked revenue while your competitor is still checking voicemail or a full inbox.</p>
+      </div>
+      <div class="ed-col">
+        <h4>Intelligent companies are worth more.</h4>
+        <p>A buyer pays a bigger multiple for a company that runs on systems than one that runs on the owner's memory. Becoming intelligent is not just easier to run day to day. It is worth more the day you sell.</p>
+      </div>
+      <div class="ed-col">
+        <h4>This is how you AI-proof it.</h4>
+        <p>The next decade rewards the companies whose systems are already clean enough to plug new tools into. Get intelligent now and every new AI capability makes you stronger, instead of leaving you a step behind.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OFFER LADDER (ascension) ============ -->
+<section class="band" id="ladder">
+  <div class="wrap center">
+    <p class="eyebrow">The path</p>
+    <h2 class="h-sec">Start free. <span class="lime">Climb as far as you want.</span></h2>
+    <p class="sub">Four steps, from finding your problems to running an intelligence department. Each step pays for the next, and every dollar you spend earlier is credited to the one after it.</p>
+    <div class="ladder">
+
+      <div class="rung">
+        <div class="rung-top"><span class="rung-tag">Step 1 &middot; Free</span><span class="rung-price">$0</span></div>
+        <h3>Find your problems</h3>
+        <p class="rung-out">See exactly what is costing you before you spend a dollar.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> The Intelligent Company book</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> The Intelligent Company Scorecard</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Your biggest gaps, named and ranked</li>
+        </ul>
+        <a href="/intelligence-scorecard" class="rung-cta">Take the scorecard &rarr;</a>
+      </div>
+
+      <div class="rung">
+        <div class="rung-top"><span class="rung-tag">Step 2 &middot; Blueprint</span><span class="rung-price">from $2,500</span></div>
+        <h3>Get your plan</h3>
+        <p class="rung-out">Our team maps your operation and hands you the build plan.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> A full assessment with our team</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Your workflows scored and mapped</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> A prioritized plan with the return on each fix</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Credited in full toward your Build</li>
+        </ul>
+        <a href="/intelligence-assessment" class="rung-cta">Book the blueprint &rarr;</a>
+      </div>
+
+      <div class="rung core">
+        <div class="rung-top"><span class="rung-tag">Step 3 &middot; Build</span><span class="rung-price">from $15k + $1.5k/mo</span></div>
+        <h3>Build your intelligent company</h3>
+        <p class="rung-out">We install the whole system and put your digital workforce to work.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> TMI OS installed around your business</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> 3 digital employees and 3 workflows live</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Knowledge vault and command center</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> 30-day install, or we work free until live</li>
+        </ul>
+        <a href="#offer" class="rung-cta">See what is included &rarr;</a>
+      </div>
+
+      <div class="rung">
+        <div class="rung-top"><span class="rung-tag">Step 4 &middot; Scale</span><span class="rung-price">from $3.5k/mo</span></div>
+        <h3>Run an intelligence department</h3>
+        <p class="rung-out">We stay on as the team that keeps making you sharper.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> New workers, workflows, and systems on tap</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Multi-location and enterprise rollouts</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 6"/></svg> Full marketplace and builder network access</li>
+        </ul>
+        <a href="/intelligence-assessment" class="rung-cta">Talk to us &rarr;</a>
+      </div>
+
+    </div>
+    <p class="ladder-note">Prices are starting anchors, not quotes. Your exact number depends on size and scope, and we confirm it on your call. Most companies start with the free scorecard.</p>
+  </div>
+</section>
+
+<!-- ============ THE OFFER (Build rung, deep dive) ============ -->
 <section class="band alt" id="offer">
   <div class="wrap">
-    <p class="eyebrow">The offer</p>
+    <p class="eyebrow">Step 3 &middot; Build, in detail</p>
     <h2 class="h-sec">Build your intelligent company <span class="lime">in about 30 days.</span></h2>
     <p class="sub" style="margin-top:18px;">One install. Your tools connected, your first digital employees working, and a command center that tells you what needs your attention. Done with you, not handed over on a login screen.</p>
 
@@ -686,8 +806,8 @@
         </div>
         <div class="box">
           <div class="lab">What it costs</div>
-          <h4>Priced like one hire. It replaces a back office.</h4>
-          <p>A digital workforce and an operating system cost less than a single mediocre full time hire, and they never call in sick. We share exact numbers on your call, matched to your size.</p>
+          <h4>From $15k to install, then $1.5k a month.</h4>
+          <p>Less than one mediocre full-time hire, and it never calls in sick or quits. Larger operations scale from there, and your Blueprint fee comes off the top. We confirm your exact number on the call.</p>
         </div>
         <div class="box">
           <div class="lab">Availability</div>
