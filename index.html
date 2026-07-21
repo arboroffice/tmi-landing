@@ -119,6 +119,19 @@
   .rolelist{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;}
   .rolelist span{font-size:12.5px;font-weight:600;color:var(--ink-2);background:var(--bg-alt);border:1px solid var(--line);border-radius:999px;padding:5px 11px;}
   section.alt .rolelist span{background:#fff;}
+  /* engagement ladder */
+  .ladder{margin-top:44px;}
+  .rung{position:relative;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px 32px;display:grid;grid-template-columns:118px 1fr;gap:24px;align-items:start;transition:border-color .3s,box-shadow .3s,transform .3s var(--ease);}
+  .rung:hover{border-color:var(--line-2);box-shadow:var(--shadow);transform:translateY(-2px);}
+  .rung .lv{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#7a9a1f;}
+  .rung .lv b{display:block;font-family:var(--sans);font-size:40px;font-weight:700;letter-spacing:-0.03em;color:var(--ink);line-height:1;margin-top:6px;}
+  .rung h3{font-size:24px;margin:0 0 8px;}
+  .rung .meta{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);background:var(--chart);border-radius:999px;padding:5px 12px;margin-bottom:16px;}
+  .rung ul{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;}
+  .rung li{font-size:13px;font-weight:600;color:var(--ink-2);background:var(--bg-alt);border:1px solid var(--line);border-radius:999px;padding:6px 12px;}
+  section.alt .rung li{background:#fff;}
+  .rung-arrow{display:flex;justify-content:center;color:var(--ink-3);font-size:20px;padding:9px 0;}
+  @media(max-width:640px){.rung{grid-template-columns:1fr;gap:12px;padding:24px;}.rung .lv b{font-size:32px;}}
 
   /* what we do (dark) */
   .band{position:relative;background:var(--ink);color:#fff;overflow:hidden;}
@@ -237,39 +250,53 @@
   </div>
 </section>
 
-<!-- FOUR WAYS -->
+<!-- ENGAGEMENT LADDER -->
 <section class="sec alt" id="ways">
   <div class="wrap">
     <div class="sec-head rv">
-      <div class="eyebrow"><span class="sq"></span> Four ways we work</div>
-      <h2>Every company is different. So is every engagement.</h2>
+      <div class="eyebrow"><span class="sq"></span> How we work together</div>
+      <h2>An engagement ladder, not a one-off project.</h2>
+      <p>Start where you are and climb as far as it makes sense. Each level builds on the one before it.</p>
     </div>
-    <div class="ways">
-      <div class="way rv">
-        <div class="wl">01 / AI Department</div>
-        <h3>Your outsourced AI &amp; tech team</h3>
-        <p>We identify opportunities, prioritize projects, build solutions, train your team, and continuously improve operations, without the cost of hiring an internal department.</p>
-        <div class="fit">For companies that want ongoing innovation.</div>
+    <div class="ladder">
+      <div class="rung rv">
+        <div class="lv">Level<b>01</b></div>
+        <div>
+          <h3>Intelligent Company Assessment</h3>
+          <span class="meta">2 to 4 weeks</span>
+          <ul><li>Business audit</li><li>AI opportunity report</li><li>ROI model</li><li>Operating system blueprint</li></ul>
+        </div>
       </div>
-      <div class="way rv" style="transition-delay:.07s">
-        <div class="wl">02 / Operating System</div>
-        <h3>The software you should have had</h3>
-        <p>Instead of disconnected apps and spreadsheets, your entire operation runs from one intelligent operating system, designed around how your business actually works.</p>
-        <span class="price">Starting at $25,000</span>
+      <div class="rung-arrow rv">&darr;</div>
+      <div class="rung rv">
+        <div class="lv">Level<b>02</b></div>
+        <div>
+          <h3>Operating System Build</h3>
+          <span class="meta">Custom build</span>
+          <ul><li>Build the workflows</li><li>Integrate software</li><li>Build AI agents</li><li>Dashboards</li><li>Training</li></ul>
+        </div>
       </div>
-      <div class="way rv" style="transition-delay:.14s">
-        <div class="wl">03 / Digital Employees</div>
-        <h3>Need to solve one problem?</h3>
-        <p>We install AI employees that take ownership of repetitive work, end to end.</p>
-        <div class="rolelist"><span>Dispatch</span><span>Estimating</span><span>Customer service</span><span>HR</span><span>Safety</span><span>Scheduling</span><span>Sales follow-up</span><span>AR</span><span>Reporting</span></div>
-        <span class="price" style="margin-top:16px;">Starting at $5,000</span>
+      <div class="rung-arrow rv">&darr;</div>
+      <div class="rung rv">
+        <div class="lv">Level<b>03</b></div>
+        <div>
+          <h3>AI Department</h3>
+          <span class="meta">Monthly, ongoing</span>
+          <ul><li>New automations</li><li>AI employee management</li><li>Continuous optimization</li><li>Quarterly strategy</li><li>Executive support</li></ul>
+        </div>
       </div>
-      <div class="way rv" style="transition-delay:.21s">
-        <div class="wl">04 / Growth Partner</div>
-        <h3>Already have great systems?</h3>
-        <p>We stay on as your technology and AI partner, helping your company continuously improve as it grows, new systems, expansion, and optimization month to month.</p>
-        <div class="fit">For companies ready to compound.</div>
+      <div class="rung-arrow rv">&darr;</div>
+      <div class="rung rv">
+        <div class="lv">Level<b>04</b></div>
+        <div>
+          <h3>Scale Lab</h3>
+          <span class="meta">By invitation</span>
+          <ul><li>Equity opportunities</li><li>Multi-location expansion</li><li>Acquisitions</li><li>New revenue streams</li></ul>
+        </div>
       </div>
+    </div>
+    <div class="rv" style="margin-top:40px;text-align:center;">
+      <a class="btn primary" href="/book" onclick="lead('Book a call')">Book a call &rarr;</a>
     </div>
   </div>
 </section>
