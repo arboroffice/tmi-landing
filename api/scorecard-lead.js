@@ -20,6 +20,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const b = req.body || {};
+  const sessionId = (b.session_id || '').toString().trim() || null;
   const name = (b.name || '').trim();
   const email = (b.email || '').toLowerCase().trim();
   const company = (b.company || '').trim() || null;
@@ -34,11 +35,25 @@ module.exports = async function handler(req, res) {
   const scoreLine = `Level ${level != null ? level : '?'}${levelName ? ' - ' + levelName : ''}` +
     (score != null ? ` (${score}/100)` : '') + (gap ? ` | biggest gap: ${gap}` : '');
 
+  // 0) Close out the session so the abandonment follow-up never fires for a
+  //    completed quiz - best-effort.
+  if (sessionId) {
+    try {
+      await db.update('scorecard_sessions', sessionId, {
+        completed: true, status: 'completed',
+        level, level_name: levelName, score, gap,
+        answers: Array.isArray(answers) ? answers : [],
+        completed_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+      });
+    } catch (e) { console.error('scorecard-lead session close:', e.message); }
+  }
+
   // 1) Store (scorecard_leads + lead + contact) - best-effort
   try {
     await db.insert('scorecard_leads', {
       name: name || null, email, company, phone,
       level, level_name: levelName, score, gap, answers,
+      session_id: sessionId,
       resource: 'intelligence-scorecard',
       source: 'scorecard-quiz', status: 'new', created_at: new Date().toISOString(),
     });

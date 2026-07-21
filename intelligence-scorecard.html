@@ -63,6 +63,8 @@
   .sc-form .err{font-family:var(--sans);font-size:13px;color:#c02626;font-weight:500;display:none;}
   .sc-form .err.on{display:block;}
   .sc-fine{font-family:var(--sans);font-size:12px;color:var(--ink-3);line-height:1.5;font-weight:400;margin-top:6px;}
+  .sc-consent{display:flex;align-items:flex-start;gap:10px;text-transform:none !important;letter-spacing:0 !important;font-weight:500 !important;font-size:12.5px !important;color:var(--ink-2) !important;line-height:1.5;margin:4px 0 0;cursor:pointer;}
+  .sc-consent input{width:18px;height:18px;flex:none;margin-top:1px;accent-color:var(--ink);}
 
   /* results */
   .sc-level-tag{font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px;}
@@ -124,7 +126,7 @@
 <div class="sc-progress"><div class="sc-progress-bar" id="scBar"></div></div>
 
 <main>
-  <!-- INTRO -->
+  <!-- INTRO + START (info captured up front so we can send results and follow up) -->
   <section class="sc-stage sc-step on" id="sc-intro">
     <div class="sc-wrap">
       <p class="sc-eyebrow">The Intelligent Company Scorecard</p>
@@ -135,32 +137,25 @@
         <span>About 3 minutes</span>
         <span>Instant result</span>
       </div>
-      <button class="btn btn-lime" onclick="startQuiz()">Start the scorecard &rarr;</button>
+      <form class="sc-form" id="startForm" onsubmit="return startQuiz(event)">
+        <label for="sc-name">Your name</label>
+        <input id="sc-name" type="text" autocomplete="name" placeholder="First and last" required/>
+        <label for="sc-email">Work email</label>
+        <input id="sc-email" type="email" autocomplete="email" placeholder="you@company.com" required/>
+        <label for="sc-phone">Mobile phone <span style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink-3)">(optional)</span></label>
+        <input id="sc-phone" type="tel" autocomplete="tel" placeholder="(555) 555-5555"/>
+        <label for="sc-company">Company</label>
+        <input id="sc-company" type="text" autocomplete="organization" placeholder="Company name"/>
+        <label class="sc-consent"><input type="checkbox" id="sc-consent"/> <span>Text me my results and a reminder if I do not finish. Message and data rates may apply. Reply STOP to opt out.</span></label>
+        <div class="err" id="sc-err"></div>
+        <button type="submit" class="btn btn-lime" id="startBtn">Start the scorecard &rarr;</button>
+        <p class="sc-fine">We will send your scorecard and occasional notes on building intelligent companies. Unsubscribe anytime.</p>
+      </form>
     </div>
   </section>
 
   <!-- QUESTIONS injected here -->
   <div id="sc-questions"></div>
-
-  <!-- GATE -->
-  <section class="sc-stage sc-step sc-gate" id="sc-gate">
-    <div class="sc-wrap">
-      <p class="sc-eyebrow">Last step</p>
-      <h1 class="sc-h1">Where should we send your <span class="lime">scorecard?</span></h1>
-      <p class="sc-lede">Your result is ready. Tell us where to send it and it opens right here.</p>
-      <form class="sc-form" id="scForm" onsubmit="return submitScore(event)">
-        <label for="sc-name">Your name</label>
-        <input id="sc-name" type="text" autocomplete="name" placeholder="First and last" required/>
-        <label for="sc-email">Work email</label>
-        <input id="sc-email" type="email" autocomplete="email" placeholder="you@company.com" required/>
-        <label for="sc-company">Company</label>
-        <input id="sc-company" type="text" autocomplete="organization" placeholder="Company name"/>
-        <div class="err" id="sc-err"></div>
-        <button type="submit" class="btn btn-lime" id="scSubmit">See my result &rarr;</button>
-        <p class="sc-fine">We will send your scorecard and occasional notes on building intelligent companies. Unsubscribe anytime.</p>
-      </form>
-    </div>
-  </section>
 
   <!-- RESULTS -->
   <section class="sc-stage sc-step" id="sc-results">
@@ -352,8 +347,28 @@ var GAP_MOVES = {
 var DIMS = ['Memory','Awareness','Action','Learning','Integration','Decision'];
 
 var answers = new Array(QUESTIONS.length).fill(null);
-var idx = 0;           // 0..QUESTIONS.length-1 for questions
-var TOTAL_STEPS = QUESTIONS.length + 1; // questions + gate
+var idx = 0;                              // 0..QUESTIONS.length-1 for questions
+var TOTAL_STEPS = QUESTIONS.length;       // progress is measured over the questions
+var SESSION = null;                       // { id, name, email, phone, company, sms_consent }
+
+function genId(){
+  try{ if(window.crypto && crypto.randomUUID) return crypto.randomUUID(); }catch(_){}
+  return 'sc-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+}
+function post(url, body){
+  return fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body), keepalive:true }).catch(function(){});
+}
+function saveLocal(){
+  try{ localStorage.setItem('tmi_scorecard', JSON.stringify({ session: SESSION, answers: answers, ts: Date.now() })); }catch(_){}
+}
+// Persist progress server-side so a started-but-unfinished session can be
+// followed up on and resumed later.
+function postProgress(){
+  if(!SESSION) return;
+  var answered = answers.filter(Boolean).length;
+  post('/api/scorecard-progress', { action:'progress', session_id: SESSION.id, answered: answered, answers: answers });
+  saveLocal();
+}
 
 // build question steps
 (function buildQuestions(){
@@ -386,7 +401,31 @@ function setBar(stepsDone){
   document.getElementById('scBar').style.width = pct + '%';
 }
 
-function startQuiz(){ idx = 0; show('sc-q0'); setBar(0); syncBack(0); }
+function startQuiz(e){
+  if(e) e.preventDefault();
+  var name = document.getElementById('sc-name').value.trim();
+  var email = document.getElementById('sc-email').value.trim();
+  var phone = document.getElementById('sc-phone').value.trim();
+  var company = document.getElementById('sc-company').value.trim();
+  var consent = document.getElementById('sc-consent').checked;
+  var err = document.getElementById('sc-err');
+  if(!name){ err.textContent = 'Please enter your name.'; err.classList.add('on'); return false; }
+  if(!email || email.indexOf('@') < 1){ err.textContent = 'Please enter a valid email.'; err.classList.add('on'); return false; }
+  err.classList.remove('on');
+
+  var sid = (SESSION && SESSION.id) ? SESSION.id : genId();
+  SESSION = { id: sid, name: name, email: email, phone: phone, company: company, sms_consent: consent };
+  saveLocal();
+  try{ if(typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Intelligence Scorecard start' }); }catch(_){}
+  // Capture the lead and open the session immediately (fire-and-forget).
+  post('/api/scorecard-progress', {
+    action:'start', session_id: SESSION.id,
+    name: name, email: email, phone: phone, company: company, sms_consent: consent
+  });
+
+  idx = 0; show('sc-q0'); setBar(0); syncBack(0);
+  return false;
+}
 
 function syncBack(i){
   var b = document.querySelector('#sc-q'+i+' .sc-back');
@@ -399,10 +438,11 @@ function pick(i, oi, v, btn){
   parent.querySelectorAll('.sc-opt').forEach(function(o){ o.classList.remove('sel'); });
   btn.classList.add('sel');
   setBar(i + 1);
+  postProgress();
   // small delay so the selection is visible, then advance
   setTimeout(function(){
     if(i < QUESTIONS.length - 1){ idx = i + 1; show('sc-q' + idx); syncBack(idx); restoreSel(idx); }
-    else { show('sc-gate'); }
+    else { finalizeQuiz(); }
   }, 220);
 }
 function restoreSel(i){
@@ -466,36 +506,54 @@ function renderResults(r){
   }, 80);
 }
 
-function submitScore(e){
-  e.preventDefault();
-  var name = document.getElementById('sc-name').value.trim();
-  var email = document.getElementById('sc-email').value.trim();
-  var company = document.getElementById('sc-company').value.trim();
-  var err = document.getElementById('sc-err');
-  if(!email || email.indexOf('@') < 1){ err.textContent = 'Please enter a valid email.'; err.classList.add('on'); return false; }
-  err.classList.remove('on');
-  var btn = document.getElementById('scSubmit');
-  btn.textContent = 'Scoring...'; btn.style.opacity = '0.7';
-
+// All questions answered: score, mark the session complete (owner alert +
+// closes out the follow-up), and reveal results.
+function finalizeQuiz(){
   var r = computeResult();
+  var c = SESSION || {};
   var payload = {
-    name: name, email: email, company: company,
+    session_id: c.id || null,
+    name: c.name || null, email: c.email || null, phone: c.phone || null, company: c.company || null,
+    sms_consent: !!c.sms_consent,
     level: r.level, level_name: LEVELS[r.level].name, score: r.score,
     gap: r.gap, answers: answers
   };
-  try{ if(typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Intelligence Scorecard' }); }catch(_){}
-  fetch('/api/scorecard-lead', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
-    .catch(function(){})
-    .finally(function(){
-      try{ localStorage.setItem('tmi_scorecard', JSON.stringify({ email: email, level: r.level, ts: Date.now() })); }catch(_){}
-      renderResults(r);
-      setBar(TOTAL_STEPS);
-      show('sc-results');
-    });
-  return false;
+  try{ if(typeof fbq === 'function') fbq('track', 'CompleteRegistration', { content_name: 'Intelligence Scorecard' }); }catch(_){}
+  post('/api/scorecard-lead', payload);
+  try{ localStorage.setItem('tmi_scorecard_done', JSON.stringify({ email: c.email || null, level: r.level, ts: Date.now() })); }catch(_){}
+  renderResults(r);
+  setBar(TOTAL_STEPS);
+  show('sc-results');
 }
 
 function ctaLead(){ try{ if(typeof fbq === 'function') fbq('track', 'Schedule', { content_name: 'Scorecard discovery call' }); }catch(_){} }
+
+// Resume from a follow-up link (/intelligence-scorecard?s=SESSION_ID): pull the
+// saved session, prefill contact, restore answers, and jump to the first
+// unanswered question so the visitor picks up where they left off.
+function resumeFromLink(){
+  var m = (location.search || '').match(/[?&]s=([^&]+)/);
+  if(!m) return;
+  var sid = decodeURIComponent(m[1]);
+  fetch('/api/scorecard-progress?session_id=' + encodeURIComponent(sid))
+    .then(function(res){ return res.ok ? res.json() : null; })
+    .then(function(data){
+      if(!data || !data.session) return;
+      var s = data.session;
+      if(s.completed) return; // already done, let them retake fresh
+      SESSION = { id: sid, name: s.name || '', email: s.email || '', phone: s.phone || '', company: s.company || '', sms_consent: !!s.sms_consent };
+      if(Array.isArray(s.answers)){
+        for(var i = 0; i < s.answers.length && i < answers.length; i++){ if(s.answers[i]) answers[i] = s.answers[i]; }
+      }
+      // jump to the first unanswered question
+      var next = 0; while(next < QUESTIONS.length && answers[next]) next++;
+      if(next >= QUESTIONS.length) next = QUESTIONS.length - 1;
+      idx = next;
+      show('sc-q' + idx); syncBack(idx); restoreSel(idx); setBar(answers.filter(Boolean).length);
+    })
+    .catch(function(){});
+}
+resumeFromLink();
 </script>
 <script src="/tmi-nav.js" defer></script>
 </body>
