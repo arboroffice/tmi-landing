@@ -134,18 +134,51 @@ footer{background:var(--bg-alt);padding:56px 0 32px;border-top:1px solid var(--l
 <script src="/footer-signup.js" defer></script>
 <style>h1,h2,h3,h4{font-weight:700!important;letter-spacing:-0.03em!important;}h1 em,h2 em,h3 em,h4 em{font-style:normal!important;font-weight:700!important;}</style></head>
 <body>
-
-<header class="hd">
-  <div class="hd-inner">
-    <a href="/" class="hd-brand"><img src="logo.svg" alt="TMI"/> TMI</a>
-    <nav class="hd-nav">
-      <a href="/physical">All Industries</a>
-      <a href="/news">Founders of the Future Letters</a>
+<style>
+.tnav{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,0.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(10,11,20,0.10);font-family:"General Sans",system-ui,-apple-system,sans-serif;}
+.tnav-in{max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;gap:22px;}
+.tnav-brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:18px;letter-spacing:-0.03em;color:#0a0b14;text-decoration:none;}
+.tnav-brand img{height:22px;width:auto;}
+.tnav-mk{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;background:#0a0b14;color:#fff;border-radius:7px;font-size:11px;font-weight:700;}
+.tnav-links{display:flex;gap:4px;margin-left:8px;flex:1;}
+.tnav-links a{font-size:13.5px;font-weight:600;color:#55576a;padding:8px 12px;border-radius:8px;text-decoration:none;transition:color .15s,background .15s;white-space:nowrap;}
+.tnav-links a:hover{color:#0a0b14;background:#f5f5f7;}
+.tnav-cta{display:inline-flex;align-items:center;background:#0a0b14;color:#fff;font-weight:700;font-size:12px;letter-spacing:0.02em;padding:11px 18px;border-radius:8px;text-decoration:none;white-space:nowrap;}
+.tnav-cta:hover{opacity:0.9;}
+.tnav-burger{display:none;width:40px;height:40px;flex:none;margin-left:auto;border:1px solid rgba(10,11,20,0.14);border-radius:10px;background:#fff;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.tnav-burger span{width:18px;height:2px;background:#0a0b14;border-radius:2px;display:block;}
+.tnav-drawer{display:none;flex-direction:column;gap:2px;padding:6px 20px 18px;border-bottom:1px solid rgba(10,11,20,0.10);background:#fff;}
+.tnav-drawer.open{display:flex;}
+.tnav-drawer a{font-size:15px;font-weight:600;color:#0a0b14;padding:13px 6px;text-decoration:none;border-bottom:1px solid rgba(10,11,20,0.06);}
+.tnav-drawer .tnav-cta{margin-top:12px;justify-content:center;padding:14px;border-bottom:none;color:#fff;}
+@media(max-width:860px){.tnav-links{display:none;}.tnav-burger{display:flex;}.tnav-in{padding:12px 16px;gap:10px;}.tnav-in>.tnav-cta{display:none;}}
+</style>
+<header class="tnav">
+  <div class="tnav-in">
+    <a href="/" class="tnav-brand"><span class="tnav-mk">TMI</span> TMI</a>
+    <nav class="tnav-links">
+      <a href="/the-intelligent-company-book">Read the book</a>
+      <a href="/intelligence-scorecard">Score your company</a>
       <a href="/about">About</a>
+      <a href="/portfolio">Our work</a>
+      <a href="/news">Journal</a>
     </nav>
-    <a href="/book" class="hd-cta">Book a call &rarr;</a>
+    <a href="/book" class="tnav-cta">Book a call</a>
+    <button class="tnav-burger" aria-label="Menu" onclick="tnavToggle()"><span></span><span></span><span></span></button>
+  </div>
+  <div class="tnav-drawer" id="tnavDrawer">
+    <a href="/the-intelligent-company-book">Read the book</a>
+    <a href="/intelligence-scorecard">Score your company</a>
+    <a href="/about">About</a>
+    <a href="/portfolio">Our work</a>
+    <a href="/news">Journal</a>
+    <a href="/book" class="tnav-cta">Book a call</a>
   </div>
 </header>
+<script>function tnavToggle(){var d=document.getElementById('tnavDrawer');if(d)d.classList.toggle('open');}</script>
+
+
+
 
 <section class="hero">
   <div class="hero-bg">
