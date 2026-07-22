@@ -5,7 +5,8 @@
     "api/audit-research.js": { "maxDuration": 60 },
     "api/os2-intake.js": { "maxDuration": 60 },
     "api/os2-ask.js": { "maxDuration": 60 },
-    "api/os2-run.js": { "maxDuration": 60 }
+    "api/os2-run.js": { "maxDuration": 60 },
+    "api/os2-cron.js": { "maxDuration": 300 }
   },
   "crons": [
     { "path": "/api/ceo-agent", "schedule": "0 12 * * 1" },
@@ -16,7 +17,8 @@
     { "path": "/api/rep-reminders", "schedule": "0 13 * * *" },
     { "path": "/api/campaign-send", "schedule": "0 14 * * 1-5" },
     { "path": "/api/webinar-cron", "schedule": "*/10 * * * *" },
-    { "path": "/api/scorecard-followup", "schedule": "*/15 * * * *" }
+    { "path": "/api/scorecard-followup", "schedule": "*/15 * * * *" },
+    { "path": "/api/os2-cron", "schedule": "0 13 * * *" }
   ],
   "redirects": [
     { "source": "/tmi-os", "destination": "/", "permanent": false },

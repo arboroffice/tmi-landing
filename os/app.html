@@ -316,7 +316,7 @@
   </section>
 
   <section class="view" data-view="workforce">
-    <div class="secbar" style="margin-top:0"><div><div class="h">Digital workforce</div><p class="sub">Your AI workers. Turn one on and it does its job on its cadence. Anything that writes or contacts a customer asks first until you change it.</p></div><button class="btn add" onclick="addWorker()"><svg class="icon"><use href="#i-plus"/></svg> Add worker</button></div>
+    <div class="secbar" style="margin-top:0"><div><div class="h">Digital workforce</div><p class="sub">Your AI workers. Turn one on and it runs on its cadence automatically, even when you are not here. Anything that writes or contacts a customer waits in your inbox for approval until you change that.</p></div><button class="btn add" onclick="addWorker()"><svg class="icon"><use href="#i-plus"/></svg> Add worker</button></div>
     <div id="workers" style="margin-top:22px"></div>
   </section>
 
@@ -489,7 +489,7 @@ function renderWorkers(){
         '<div class="tog'+(on?' on':'')+'" title="'+(on?'On':'Off')+'" onclick="toggleWorker(\''+w.id+'\',this)"></div>'+
       '</div></div>'+
       (w.job?'<p>'+esc(w.job)+'</p>':'')+
-      '<div class="wstat">'+(on?'On':'Off')+(w.last_run?' · last ran '+fmt(w.last_run):'')+'</div></div>';
+      '<div class="wstat">'+(on?'On · runs '+esc(w.cadence)+' automatically':'Off')+(w.last_run?' · last ran '+fmt(w.last_run):'')+'</div></div>';
   }).join('');
 }
 function workerFields(w){w=w||{};return [
