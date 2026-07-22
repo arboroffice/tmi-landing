@@ -240,6 +240,8 @@
   .member .rsel{margin-left:auto;font-family:var(--sans);font-size:13px;border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;background:#fff;color:var(--ink);}
   .member .me{margin-left:auto;font-size:12px;color:var(--ink-3);font-family:var(--mono);}
   .invite-link{font-family:var(--mono);font-size:12.5px;background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;padding:12px 14px;word-break:break-all;color:var(--ink-2);margin-top:14px;}
+  .chip2{display:inline-flex;align-items:center;gap:5px;font-size:12px;background:var(--bg-alt);border:1px solid var(--line);border-radius:999px;padding:5px 11px;color:var(--ink-2);}
+  select.rsel{font-family:var(--sans);font-size:13px;border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;background:#fff;color:var(--ink);}
   .burger{display:none;}
   @media(max-width:880px){
     .side{transform:translateX(-100%);transition:transform .3s;}
@@ -276,6 +278,8 @@
 <symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
 <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></symbol>
 <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M16 5.5a3 3 0 0 1 0 5.8M17 15c2.5.4 4 2 4 5"/></symbol>
+<symbol id="i-org" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-2h12v2"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></symbol>
 </defs></svg>
 
 <aside class="side" id="side">
@@ -292,12 +296,14 @@
   <div class="grp">Build it out</div>
   <nav>
     <a data-v="build"><svg class="icon"><use href="#i-plug"/></svg> Build with TMI <span class="tag" id="tgBuild"></span></a>
+    <a data-v="departments"><svg class="icon"><use href="#i-org"/></svg> Departments <span class="tag" id="tgDept"></span></a>
     <a data-v="workforce"><svg class="icon"><use href="#i-bot"/></svg> Workforce <span class="tag" id="tgWork"></span></a>
     <a data-v="workflows"><svg class="icon"><use href="#i-flow"/></svg> Workflows <span class="tag" id="tgFlow"></span></a>
     <a data-v="knowledge"><svg class="icon"><use href="#i-book"/></svg> Knowledge <span class="tag" id="tgKnow"></span></a>
     <a data-v="reports"><svg class="icon"><use href="#i-chart"/></svg> Reports</a>
     <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
-    <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Integrations</a>
+    <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Connect tools</a>
+    <a data-v="guardrails"><svg class="icon"><use href="#i-shield"/></svg> Guardrails</a>
     <a data-v="team" data-owner="1"><svg class="icon"><use href="#i-users"/></svg> Team <span class="tag" id="tgTeam"></span></a>
     <a data-v="settings" data-owner="1"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
   </nav>
@@ -366,6 +372,16 @@
   <section class="view" data-view="build">
     <div class="secbar" style="margin-top:0"><div><div class="h">Build with TMI</div><p class="sub">Lay out everything you want your operation to be. Anything you want wired to your real systems, connected to your books, or built for you, hand it to TMI here. We build the backend and turn it on. You will see it move from requested to building to live.</p></div><button class="btn add" onclick="addRequest()"><svg class="icon"><use href="#i-plus"/></svg> Request a build</button></div>
     <div id="buildList" style="margin-top:22px"></div>
+  </section>
+
+  <section class="view" data-view="departments">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Your departments</div><p class="sub">Lay out your company the way it really runs. Each department gets its own AI workers, numbers, and goals. This is the org chart of your intelligent company, and the picture TMI builds the backend behind.</p></div><button class="btn add" onclick="addDept()"><svg class="icon"><use href="#i-plus"/></svg> Add department</button></div>
+    <div id="deptList" style="margin-top:22px"></div>
+  </section>
+
+  <section class="view" data-view="guardrails">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Guardrails</div><p class="sub">The rules your AI company runs by. Decide what your workers can do on their own and what waits for you, set spend limits, and keep one switch that pauses everything. Set the policy here; TMI wires it into every action.</p></div></div>
+    <div id="guardrails" style="margin-top:22px"></div>
   </section>
 
   <section class="view" data-view="workforce">
@@ -481,6 +497,7 @@ function show(v){
   if((v==='command'||v==='coo')&&!briefingLoaded) loadBriefing();
   if(v==='team') loadTeam();
   if(v==='integrations') loadConnect();
+  if(v==='guardrails') loadPolicies();
   window.scrollTo(0,0);
 }
 
@@ -528,7 +545,8 @@ function renderScore(){
     '</div></div>';
 }
 function renderAll(){
-  renderScore(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderSettings(); renderFeed(); renderSugg();
+  renderScore(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg();
+  document.getElementById('tgDept').textContent=(STATE.departments||[]).length||'';
   document.getElementById('tgThreads').textContent=(STATE.threads||[]).length||'';
   document.getElementById('tgPulse').textContent=(STATE.signals||[]).length||'';
   document.getElementById('tgWork').textContent=(STATE.workers||[]).length||'';
@@ -599,9 +617,11 @@ function renderWorkers(){
       '<div class="wstat">'+(on?'On · runs '+esc(w.cadence)+' automatically':'Off')+(w.last_run?' · last ran '+fmt(w.last_run):'')+'</div></div>';
   }).join('');
 }
+function deptOptions(v){return [['','No department']].concat((STATE.departments||[]).map(function(d){return [d.id,d.name];}));}
 function workerFields(w){w=w||{};return [
   {name:'name',label:'Name',value:w.name,placeholder:'Collections Clerk'},
   {name:'job',label:'What it does',type:'textarea',value:w.job,placeholder:'Nudges overdue invoices politely until they are paid.'},
+  {name:'department_id',label:'Department',type:'select',value:w.department_id||'',options:deptOptions()},
   {name:'autonomy',label:'Autonomy',type:'select',value:w.autonomy||'approve',options:[['read','Reports only'],['approve','Asks you first'],['auto','Autonomous']]},
   {name:'cadence',label:'Runs',type:'select',value:w.cadence||'daily',options:[['realtime','Realtime'],['daily','Daily'],['weekly','Weekly']]}
 ];}
@@ -994,6 +1014,105 @@ async function loadConnect(){
   try{CONNECT=await api('/api/os2-connect',{action:'info'});}catch(e){}
   connectLoaded=true;renderIntegrations();
 }
+/* ---- departments (the org of the intelligent company) ---- */
+var DEPT_SUGG=[['Sales','Wins the work: leads, quotes, follow-up, booking.'],['Operations','Runs the work: scheduling, dispatch, jobs, delivery.'],['Finance','Handles the money: invoicing, collections, cash, reporting.'],['Customer Service','Keeps customers: questions, issues, retention.'],['Marketing','Brings demand: content, campaigns, reputation.'],['People','Builds the team: hiring, onboarding, training.']];
+function renderDepartments(){
+  var host=document.getElementById('deptList'); if(!host) return;
+  var depts=STATE.departments||[]; var workers=STATE.workers||[]; var metrics=STATE.metrics||[]; var goals=STATE.goals||[];
+  if(!depts.length){
+    host.innerHTML='<div class="empty"><h3>Design your company</h3><p>Add the departments your business runs on. Sales, Operations, Finance, whatever fits. Then staff each with AI workers. This becomes the org chart of your intelligent company.</p>'+
+      '<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center">'+DEPT_SUGG.map(function(d){return '<button class="btn ghost sm" onclick="quickDept(\''+esc(d[0])+'\')">+ '+esc(d[0])+'</button>';}).join('')+'</div></div>';
+    return;
+  }
+  host.innerHTML=depts.map(function(d){
+    var dw=workers.filter(function(w){return w.department_id===d.id;});
+    var dm=metrics.filter(function(m){return m.department_id===d.id;});
+    var dg=goals.filter(function(g){return g.department_id===d.id;});
+    return '<div class="kcard" style="padding:18px 20px"><div class="kh"><span class="badge k">Department</span><h4>'+esc(d.name)+'</h4><span class="who"><span class="pen" onclick="editDept(\''+d.id+'\')"><svg class="icon" style="width:14px;height:14px"><use href="#i-pen"/></svg></span></span></div>'+
+      (d.mandate?'<p style="font-size:13.5px;color:var(--ink-2);margin-top:8px">'+esc(d.mandate)+'</p>':'')+
+      '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:12px">'+
+        (dw.length?dw.map(function(w){return '<span class="chip2"><svg class="icon" style="width:12px;height:12px"><use href="#i-bot"/></svg> '+esc(w.name)+'</span>';}).join(''):'<span style="font-size:12.5px;color:var(--ink-3)">No workers yet</span>')+
+      '</div>'+
+      '<div class="kf"><button class="btn sm ghost" onclick="addWorkerToDept(\''+d.id+'\')">+ Worker</button>'+(dm.length?'<span class="cad" style="align-self:center">'+dm.length+' metric'+(dm.length>1?'s':'')+'</span>':'')+(dg.length?'<span class="cad" style="align-self:center">'+dg.length+' goal'+(dg.length>1?'s':'')+'</span>':'')+'</div></div>';
+  }).join('')+'<div style="margin-top:6px"><button class="btn ghost sm" onclick="addDept()">+ Add department</button></div>';
+}
+function deptFields(d){d=d||{};return [
+  {name:'name',label:'Department name',value:d.name,placeholder:'Operations'},
+  {name:'mandate',label:'What it owns',type:'textarea',value:d.mandate,placeholder:'Schedules jobs, dispatches crews, and makes sure work gets done on time.'}
+];}
+function addDept(){openForm({title:'Add a department',sub:'A function of your business your AI company will run.',fields:deptFields(),onSave:function(v){return crud('departments','create',{data:v});}});}
+function quickDept(name){var s=DEPT_SUGG.find(function(x){return x[0]===name;});crud('departments','create',{data:{name:name,mandate:s?s[1]:''}}).then(function(){toast('Added '+name);refresh();}).catch(function(e){if(e.message!=='signed out')toast(e.message);});}
+function editDept(id){var d=find('departments',id);openForm({title:'Edit department',fields:deptFields(d),del:function(){return crud('departments','delete',{id:id});},onSave:function(v){return crud('departments','update',{id:id,data:v});}});}
+function addWorkerToDept(deptId){openForm({title:'Add an AI worker',sub:'Staff this department. TMI builds the backend that makes it run.',fields:workerFields({department_id:deptId}),onSave:function(v){return crud('workers','create',{data:Object.assign({status:'ready'},v)});}});}
+
+/* ---- guardrails (governance the client sets, TMI wires) ---- */
+var GR_ACTIONS=[['email','Email a customer'],['sms','Text a customer'],['booking','Book or schedule'],['payment','Move money'],['external_write','Change a connected system']];
+var GR_MODES=[['auto','On its own'],['approve','Ask me first'],['deny','Never']];
+function renderGuardrails(){
+  var host=document.getElementById('guardrails'); if(!host) return;
+  var t=STATE.tenant||{}; var pol=STATE._policies||[];
+  function modeFor(at){var p=pol.find(function(x){return x.action_type===at&&x.scope==='tenant';});return p?p.mode:( (at==='email'||at==='sms'||at==='booking'||at==='payment'||at==='external_write')?(t.autopilot?'auto':'approve'):'auto');}
+  var rows=GR_ACTIONS.map(function(a){
+    var m=modeFor(a[0]);
+    var opts=GR_MODES.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===m?' selected':'')+'>'+o[1]+'</option>';}).join('');
+    return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)"><div style="flex:1"><div style="font-size:14px;color:var(--ink)">'+esc(a[1])+'</div></div><select class="rsel" id="gr_'+a[0]+'" style="min-width:150px">'+opts+'</select></div>';
+  }).join('');
+  var paused=STATE._paused===true;
+  host.innerHTML=
+    '<div class="kcard" style="padding:20px 22px"><div class="kh"><span class="badge '+(paused?'pending':'done')+'">'+(paused?'Paused':'Running')+'</span><h4>Company autonomy</h4></div>'+
+      '<p style="font-size:13.5px;color:var(--ink-2);margin-top:8px">One switch. Pause everything your AI workers do, instantly, no matter their settings.</p>'+
+      '<div class="mfoot" style="justify-content:flex-start"><button class="btn '+(paused?'':'ghost')+'" onclick="togglePause()">'+(paused?'Resume the company':'Pause everything')+'</button></div></div>'+
+    '<div class="kcard" style="padding:20px 22px;margin-top:14px"><div class="kh"><h4>What workers can do on their own</h4></div>'+
+      '<p style="font-size:13.5px;color:var(--ink-2);margin:6px 0 6px">Anything set to Ask me first waits in your inbox before it happens. Money and outside messages default to asking.</p>'+
+      rows+
+      '<div class="mfoot" style="justify-content:flex-start"><button class="btn" onclick="saveGuardrails()">Save rules</button></div></div>'+
+    '<div class="kcard" style="padding:20px 22px;margin-top:14px"><div class="kh"><h4>Spend limit per action</h4></div>'+
+      '<p style="font-size:13.5px;color:var(--ink-2);margin:6px 0 10px">Any single money action above this always asks you first, even on autopilot.</p>'+
+      '<div class="field"><input id="gr_limit" value="'+esc(grLimit())+'" placeholder="$500"/></div>'+
+      '<div class="mfoot" style="justify-content:flex-start"><button class="btn ghost" onclick="saveLimit()">Save limit</button></div></div>';
+}
+function grLimit(){var pol=STATE._policies||[];var p=pol.find(function(x){return x.action_type==='payment'&&x.per_action_limit;});return p?('$'+p.per_action_limit):'';}
+async function loadPolicies(){try{var j=await api('/api/os2-policy',{action:'list'});STATE._policies=j.policies||[];STATE._paused=!!j.paused;renderGuardrails();}catch(e){}}
+async function saveGuardrails(){
+  try{
+    for(var i=0;i<GR_ACTIONS.length;i++){var at=GR_ACTIONS[i][0];var sel=document.getElementById('gr_'+at);if(sel)await api('/api/os2-policy',{action:'set',scope:'tenant',action_type:at,mode:sel.value});}
+    toast('Rules saved. TMI wires these into every action.');loadPolicies();
+  }catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function saveLimit(){
+  var v=(document.getElementById('gr_limit')||{}).value||'';var n=parseFloat(String(v).replace(/[^0-9.]/g,''));
+  try{await api('/api/os2-policy',{action:'set',scope:'tenant',action_type:'payment',mode:'approve',per_action_limit:isNaN(n)?null:n});toast('Spend limit saved');loadPolicies();}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function togglePause(){try{var j=await api('/api/os2-policy',{action:'pause',on:!(STATE._paused===true)});STATE._paused=!!j.paused;toast(j.paused?'Everything paused':'Company resumed');loadPolicies();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+
+var TOOL_CATALOG=[
+  ['QuickBooks','Accounting'],['Xero','Accounting'],['Stripe','Payments'],['ServiceTitan','Field service'],
+  ['Jobber','Field service'],['Housecall Pro','Field service'],['Google Workspace','Email & calendar'],
+  ['Microsoft 365','Email & calendar'],['Slack','Messaging'],['HubSpot','CRM'],['Salesforce','CRM'],
+  ['Shopify','Commerce'],['Twilio','Phone & SMS'],['Calendly','Scheduling'],['QuickBooks Time','Timesheets']
+];
+function renderToolCatalog(host){
+  var conns=STATE.connections||[];
+  var connectedNames=conns.map(function(c){return String(c.name||'').toLowerCase();});
+  var html='<div class="kcard" style="padding:20px 22px;margin-bottom:14px"><div class="kh"><span class="badge k">Your stack</span><h4>Connect everything your business runs on</h4></div>'+
+    '<p style="font-size:13.5px;color:var(--ink-2);margin:8px 0 4px">Pick the tools you use. TMI wires each one into your OS so your numbers go live and your workers can act inside them. If a tool is not listed, we can still connect it. Anything with an API, we wire.</p>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">'+
+    TOOL_CATALOG.map(function(t){
+      var on=connectedNames.indexOf(t[0].toLowerCase())>=0;
+      return '<button class="chip2" style="cursor:'+(on?'default':'pointer')+';'+(on?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72':'')+'" onclick="'+(on?'':'requestTool(\''+esc(t[0])+'\',\''+esc(t[1])+'\')')+'">'+(on?'&#10003; ':'+ ')+esc(t[0])+'</button>';
+    }).join('')+
+    '</div>'+
+    '<div class="kf"><button class="btn sm ghost" onclick="requestTool(\'\',\'\')">Request another tool</button></div></div>';
+  host.insertAdjacentHTML('afterbegin', html);
+}
+function requestTool(name,cat){
+  var title=name?('Connect '+name):'';
+  openForm({title:'Connect a tool',sub:'TMI wires this into your OS as part of your build. You will see it go live here.',fields:[
+    {name:'title',label:'Which tool',value:title,placeholder:'e.g. Connect QuickBooks'},
+    {name:'detail',label:'Anything we should know (optional)',type:'textarea',placeholder:'Accounts, how you use it, what should flow in and out.'}
+  ],onSave:function(v){return api('/api/os2-requests',{action:'create',title:v.title,category:'integration',detail:v.detail});}});
+}
 function renderIntegrations(){
   var host=document.getElementById('integrations');if(!host)return;
   var role=(STATE.me&&STATE.me.role)||'owner';
@@ -1038,6 +1157,7 @@ function renderIntegrations(){
     html+='<div class="loading">Loading your data connection...</div>';
   }
   host.innerHTML=html;
+  renderToolCatalog(host);
 }
 function revealKey(){var el=document.getElementById('ikey');if(el&&CONNECT)el.textContent=CONNECT.key;}
 function copyKey(){try{navigator.clipboard.writeText((CONNECT&&CONNECT.key)||'');toast('Key copied');}catch(e){toast('Select and copy');}}
