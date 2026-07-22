@@ -23,20 +23,22 @@ const COLLS = {
   reports: 'os_reports',
   outputs: 'os_outputs',
   goals: 'os_goals',
+  departments: 'os_departments',
 };
 
 const FIELDS = {
-  metrics: ['label', 'value', 'unit', 'hint', 'target', 'sort'],
-  workers: ['name', 'job', 'autonomy', 'cadence', 'status', 'sort'],
-  workflows: ['name', 'trigger', 'steps', 'status', 'sort'],
-  knowledge: ['title', 'body', 'kind', 'sort'],
+  metrics: ['label', 'value', 'unit', 'hint', 'target', 'sort', 'department_id'],
+  workers: ['name', 'job', 'autonomy', 'cadence', 'status', 'sort', 'department_id', 'tools', 'inbound'],
+  workflows: ['name', 'trigger', 'steps', 'status', 'sort', 'department_id'],
+  knowledge: ['title', 'body', 'kind', 'sort', 'department_id'],
   tasks: ['title', 'detail', 'status', 'priority', 'due', 'sort'],
   reports: ['title', 'body', 'period', 'sort'],
   outputs: ['title', 'body', 'status'],
-  goals: ['title', 'metric_id', 'target', 'timeframe', 'status', 'sort'],
+  goals: ['title', 'metric_id', 'target', 'timeframe', 'status', 'sort', 'department_id'],
+  departments: ['name', 'mandate', 'sort'],
 };
 
-const NOUN = { metrics: 'metric', workers: 'worker', workflows: 'workflow', knowledge: 'knowledge item', tasks: 'task', reports: 'report', outputs: 'output', goals: 'goal' };
+const NOUN = { metrics: 'metric', workers: 'worker', workflows: 'workflow', knowledge: 'knowledge item', tasks: 'task', reports: 'report', outputs: 'output', goals: 'goal', departments: 'department' };
 
 function clean(resource, raw) {
   const data = raw || {};
@@ -47,6 +49,8 @@ function clean(resource, raw) {
     if (out.autonomy && !['read', 'approve', 'auto'].includes(out.autonomy)) out.autonomy = 'approve';
     if (out.cadence && !['realtime', 'daily', 'weekly'].includes(out.cadence)) out.cadence = 'daily';
     if (out.status && !['ready', 'active', 'paused'].includes(out.status)) out.status = 'ready';
+    if (out.tools !== undefined) out.tools = (Array.isArray(out.tools) ? out.tools : []).slice(0, 24).map((s) => String(s).slice(0, 80));
+    if (out.inbound !== undefined) out.inbound = !!out.inbound;
   }
   if (resource === 'workflows') {
     if (out.steps !== undefined) out.steps = (Array.isArray(out.steps) ? out.steps : []).slice(0, 12).map(s => String(s).slice(0, 200));
