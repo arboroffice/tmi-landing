@@ -98,6 +98,22 @@
   .reco .rtext{font-size:16px;color:var(--ink);line-height:1.6;margin-top:12px;white-space:pre-wrap;}
   .reco .rfoot{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;}
   /* company intelligence score */
+  .ovhero{background:var(--ink);color:#fff;border-radius:20px;padding:36px 36px 32px;}
+  .ovtitle{font-family:var(--serif,var(--sans));font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;}
+  .ovtitle em{font-style:normal;color:var(--chart);font-weight:400;}
+  .ovsum{font-size:15px;color:rgba(255,255,255,.7);margin-top:12px;max-width:60ch;line-height:1.5;}
+  .ovstats{display:flex;flex-wrap:wrap;gap:14px;margin-top:26px;}
+  .ovstat{background:rgba(255,255,255,.07);border-radius:14px;padding:16px 20px;min-width:130px;flex:1;}
+  .ovstat .n{font-family:var(--mono);font-size:32px;font-weight:700;letter-spacing:-0.02em;color:var(--chart);line-height:1;}
+  .ovstat .l{font-size:12px;color:rgba(255,255,255,.6);margin-top:7px;}
+  .ovtier{display:inline-block;margin-top:22px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:7px 14px;}
+  .ovtier.cert{background:var(--chart);color:var(--ink);}
+  .ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:12px;}
+  .ovcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+  .ovcard h4{font-size:15px;color:var(--ink);margin:0;}
+  .ovcard p{font-size:12.5px;color:var(--ink-2);margin:6px 0 0;line-height:1.5;}
+  .ovchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+  .ovcta{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;background:var(--bg-alt);border:1px solid var(--line);border-radius:16px;padding:24px 28px;margin-top:32px;}
   .score-card{display:flex;gap:28px;align-items:center;flex-wrap:wrap;background:var(--ink);color:#fff;border-radius:16px;padding:24px 28px;margin-top:22px;}
   .score-card .lab{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);}
   .score-card .sd{display:flex;flex-direction:column;gap:3px;}
@@ -289,6 +305,7 @@
   <div class="brand"><img src="/logo.svg" alt="TMI"/> TMI <span>OS</span></div>
   <div class="grp">Run the company</div>
   <nav id="nav">
+    <a data-v="overview"><svg class="icon"><use href="#i-spark"/></svg> My company</a>
     <a data-v="command" class="on"><svg class="icon"><use href="#i-grid"/></svg> Command Center</a>
     <a data-v="pulse"><svg class="icon"><use href="#i-clock"/></svg> Pulse <span class="tag" id="tgPulse"></span></a>
     <a data-v="coo"><svg class="icon"><use href="#i-coo"/></svg> AI COO</a>
@@ -329,6 +346,10 @@
   </div>
 
   <div id="loading" class="loading">Loading your OS...</div>
+
+  <section class="view" data-view="overview">
+    <div id="overview"></div>
+  </section>
 
   <section class="view" data-view="command">
     <div id="banner" class="banner"></div>
@@ -550,9 +571,47 @@ function boot(s){
     b.classList.add('on');
   }
   renderAll();
-  show('command');
+  var onboarded=s.tenant&&s.tenant.onboarded;
+  var empty=!(s.workers||[]).length&&!(s.departments||[]).length;
+  show((!onboarded||empty)?'blueprint':'command');
 }
 
+function renderOverview(){
+  var host=document.getElementById('overview'); if(!host) return;
+  var t=STATE.tenant||{}; var sc=STATE.score||{};
+  var workers=STATE.workers||[]; var live=workers.filter(function(w){return w.status==='active';});
+  var depts=STATE.departments||[]; var goals=(STATE.goals||[]).filter(function(g){return g.status!=='paused';});
+  var conns=STATE.connections||[]; var liveConns=conns.filter(function(c){return c.status==='live';});
+  var cert=sc.certified;
+  var html='<div class="ovhero"><div class="ovtitle">'+esc(t.name||'Your company')+' <em>on one screen</em></div>'+
+    (t.summary?'<p class="ovsum">'+esc(t.summary)+'</p>':'')+
+    '<div class="ovstats">'+
+      '<div class="ovstat"><div class="n">'+(sc.score||0)+'</div><div class="l">Intelligence Score</div></div>'+
+      '<div class="ovstat"><div class="n">'+(sc.owner_dependency!=null?sc.owner_dependency+'%':'-')+'</div><div class="l">Still runs on you</div></div>'+
+      '<div class="ovstat"><div class="n">'+live.length+'</div><div class="l">AI workers live</div></div>'+
+      '<div class="ovstat"><div class="n">'+liveConns.length+'</div><div class="l">Tools connected</div></div>'+
+    '</div>'+
+    '<span class="ovtier'+(cert?' cert':'')+'">'+(cert?'Intelligent Company Certified':esc(sc.tier||'Building')+' · '+(sc.to_certify||0)+' points to Certified')+'</span></div>';
+  if(depts.length){
+    html+='<div class="lbl" style="margin-top:32px">Your departments</div><div class="ovgrid">'+depts.map(function(d){
+      var dw=workers.filter(function(w){return w.department_id===d.id;});
+      return '<div class="ovcard"><h4>'+esc(d.name)+'</h4>'+(d.mandate?'<p>'+esc(d.mandate)+'</p>':'')+'<div class="ovchips">'+(dw.length?dw.map(function(w){return '<span class="chip2"><svg class="icon" style="width:12px;height:12px"><use href="#i-bot"/></svg> '+esc(w.name)+'</span>';}).join(''):'<span style="font-size:12px;color:var(--ink-3)">Staff this next</span>')+'</div></div>';
+    }).join('')+'</div>';
+  } else if(workers.length){
+    html+='<div class="lbl" style="margin-top:32px">Your AI workforce</div><div class="ovchips" style="margin-top:12px">'+workers.map(function(w){return '<span class="chip2"><svg class="icon" style="width:12px;height:12px"><use href="#i-bot"/></svg> '+esc(w.name)+'</span>';}).join('')+'</div>';
+  }
+  if(goals.length){
+    html+='<div class="lbl" style="margin-top:32px">Where you are headed</div><div class="ovgrid">'+goals.map(function(g){
+      var m=g.metric_id?find('metrics',g.metric_id):null;var cn=numOf(m?m.value:null),tn=numOf(g.target);var pct=(cn!=null&&tn!=null&&tn!==0)?Math.max(0,Math.min(100,Math.round(cn/tn*100))):null;
+      return '<div class="ovcard"><h4>'+esc(g.title)+'</h4><div style="font-size:13px;color:var(--ink-3);margin-top:4px">'+esc(m&&m.value!=null?m.value:'-')+' of '+esc(g.target||'?')+'</div>'+(pct!=null?'<div class="bar" style="margin-top:10px;height:7px;background:var(--bg-alt);border-radius:999px;overflow:hidden"><i style="display:block;height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--chart),var(--chart-dark))"></i></div>':'')+'</div>';
+    }).join('')+'</div>';
+  }
+  if(conns.length){
+    html+='<div class="lbl" style="margin-top:32px">Connected to your business</div><div class="ovchips" style="margin-top:12px">'+conns.map(function(c){return '<span class="chip2" style="'+(c.status==='live'?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72':'')+'">'+(c.status==='live'?'&#10003; ':'')+esc(c.name)+'</span>';}).join('')+'</div>';
+  }
+  html+='<div class="ovcta"><div><div style="font-size:18px;font-weight:700;color:var(--ink)">This is your intelligent company.</div><p style="font-size:14px;color:var(--ink-2);margin-top:6px">Design more of it, or hand the next piece to TMI to build the backend.</p></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="show(\'blueprint\')">Design more</button><button class="btn ghost" onclick="show(\'build\')">Build with TMI</button></div></div>';
+  host.innerHTML=html;
+}
 function renderScore(){
   var sc=STATE.score, el=document.getElementById('scoreCard'); if(!el) return;
   if(!sc){ el.innerHTML=''; return; }
@@ -569,7 +628,7 @@ function renderScore(){
     '</div></div>';
 }
 function renderAll(){
-  renderScore(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg();
+  renderOverview(); renderScore(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg();
   document.getElementById('tgDept').textContent=(STATE.departments||[]).length||'';
   document.getElementById('tgThreads').textContent=(STATE.threads||[]).length||'';
   document.getElementById('tgPulse').textContent=(STATE.signals||[]).length||'';
