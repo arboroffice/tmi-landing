@@ -2,7 +2,20 @@
 
 Goal: make the public site look like the landing page, on one consistent design system.
 
-Owner: Mia · Status: Draft v1 · Audit of 287 HTML pages
+Owner: Mia · Status: Decisions locked · Audit of 287 HTML pages
+
+## Decisions (locked)
+- **Canonical font: General Sans.** Note from deeper inspection: both the homepage and `tmi.css` already resolve to General Sans (`--sans`). The Barlow `<link>` on some pages is vestigial and can be removed. So there is no real font split to fix; General Sans is already the site font.
+- **Scope: marketing pages only.** Convert the 9 off-brand public pages onto `tmi.css` + the canonical nav/footer. Leave the 22 `tmi.css` pages (already consistent), leave the 185 articles, and leave the admin/OS/city-leads apps.
+- **Target system: `tmi.css`** (the shared stylesheet the 22 marketing pages already use), not the homepage's inline copy. The homepage stays as-is; it shares the same tokens and font so it reads consistently.
+
+## Canonical shell (the template every converted page uses)
+- Head: standard meta + `<link rel="stylesheet" href="/tmi.css"/>`, page-specific tweaks in a small local `<style>`.
+- Header: `<header class="nav"><div class="nav-in">` with `.nav-brand`, `.nav-links`, `.btn nav-cta`, `.nav-burger`, plus the `.drawer` mobile menu (copy verbatim from `about.html`).
+- Sections: `<section class="sec">` (or `.sec-tight`, `.hero`, `.dark`) wrapping `.wrap`, using `.eyebrow`, `.h-sec`, `.display`, `.sub`, `.btn btn-lime` / `.btn-ghost`, `.lime`.
+- Footer: `<footer class="foot">` with `.foot-grid` (copy verbatim from `about.html`).
+
+
 
 ---
 
