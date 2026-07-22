@@ -10,10 +10,36 @@
 
 const db = require('./_db');
 const { executeWorker } = require('./_osrun');
+const { scoreTenant } = require('./_osscore');
+const { tenantState, generateProof } = require('./_tmiproof');
 
 const HOUR = 3600 * 1000;
 const MAX_PER_RUN = 40;   // safety cap so one sweep can never run unbounded
 const CONCURRENCY = 3;
+const MAX_PROOF_PER_RUN = 3;   // Claude is expensive; cap auto-proof per sweep
+
+// The moment a client crosses the Certified line, the flywheel should turn on its
+// own: fire the Proof Engine once, dropping a case study and a content draft into
+// the approval queue. Guarded by proof_fired_at so each client fires exactly once.
+async function autoProof() {
+  let fired = 0;
+  try {
+    const tenants = await db.list('os_tenants', { limit: 300 });
+    for (const t of tenants) {
+      if (fired >= MAX_PROOF_PER_RUN) break;
+      if (!t.onboarded || t.proof_fired_at) continue;
+      const st = await tenantState(t.id);
+      const sc = scoreTenant(Object.assign({ onboarded: true }, st));
+      if (!sc.certified) continue;
+      try {
+        await generateProof(t, 'auto');
+        await db.update('os_tenants', t.id, { proof_fired_at: new Date().toISOString() });
+        fired++;
+      } catch (e) { console.error('autoProof', t.id, e.message); }
+    }
+  } catch (e) { console.error('autoProof sweep:', e.message); }
+  return fired;
+}
 
 function isDue(w, now) {
   const last = w.last_run ? Date.parse(w.last_run) : 0;
@@ -48,7 +74,9 @@ module.exports = async function handler(req, res) {
     }
     await Promise.all(Array.from({ length: CONCURRENCY }, drain));
 
-    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length });
+    const proofed = await autoProof();
+
+    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, proofed });
   } catch (e) {
     console.error('os2-cron:', e.message);
     return res.status(500).json({ error: 'cron failed' });

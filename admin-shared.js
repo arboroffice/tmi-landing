@@ -230,6 +230,7 @@ const TMIAdmin = (() => {
     <div class="sb-group-label">Overview</div>
     ${navItem('brief', 'Command Brief', I.command)}
     ${navItem('dashboard', 'Dashboard', I.dashboard)}
+    ${navItem('flywheel', 'Flywheel', I.flywheel)}
     ${navItem('revenue', 'Revenue', I.revenue, false, '/admin-reports#revenue')}
     ${navItem('financial-model', 'Financial Model', I.revenue)}
     ${navItem('analytics', 'Analytics', I.analytics, false, '/admin-reports#analytics')}

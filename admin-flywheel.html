@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Flywheel — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .fw-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  @media(max-width:900px){.fw-kpis{grid-template-columns:repeat(2,1fr);}}
+  .kpi{border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;background:var(--surface);}
+  .kpi .n{font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--ink);line-height:1;}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:6px;}
+  .kpi .s{font-size:11.5px;color:var(--ink-2);margin-top:4px;}
+  .fw-cols{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start;}
+  @media(max-width:1000px){.fw-cols{grid-template-columns:1fr;}}
+  .panel{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);padding:18px 20px;margin-bottom:20px;}
+  .panel h2{font-size:15px;margin:0 0 4px;}
+  .panel .sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);}
+  .row:first-of-type{border-top:none;}
+  .row .nm{flex:1;min-width:0;}
+  .row .nm b{font-size:14px;color:var(--ink);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .row .nm span{font-size:11.5px;color:var(--muted);}
+  .score{font-weight:800;font-size:16px;color:var(--ink);min-width:38px;text-align:right;}
+  .tierpill{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--bg-alt);color:var(--ink-2);border:1px solid var(--line);}
+  .tierpill.cert{background:#E4FF97;color:#0a0b14;border-color:#d0ee72;}
+  .odbar{height:6px;border-radius:999px;background:var(--bg-alt);overflow:hidden;width:70px;}
+  .odbar i{display:block;height:100%;background:linear-gradient(90deg,#E4FF97,#cdee72);}
+  .mini{font-size:11px;color:var(--muted);min-width:64px;}
+  .status-dot{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:5px;}
+  .status-dot.pending{background:#fef9c3;color:#854d0e;}
+  .status-dot.approved{background:#dcfce7;color:#166534;}
+  .status-dot.published{background:#dbeafe;color:#1e40af;}
+  .empty{padding:20px;text-align:center;color:var(--muted);font-size:13px;}
+  .money{font-variant-numeric:tabular-nums;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Flywheel</span></div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Flywheel</h1>
+        <div class="sec-head-right"><button class="btn btn-ghost btn-sm" onclick="loadAll()">Refresh</button></div>
+      </div>
+
+      <div class="fw-kpis" id="fw-kpis"></div>
+
+      <div class="fw-cols">
+        <div>
+          <div class="panel">
+            <h2>Client operating systems</h2>
+            <div class="sub">Every onboarded client, scored on the Company Intelligence Score. Fulfillment is the top of the flywheel.</div>
+            <div id="fw-os"><div class="empty">Loading clients...</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel">
+            <h2>Territories</h2>
+            <div class="sub">City reps and their pipeline. This is where demand is generated.</div>
+            <div id="fw-territories"><div class="empty">Loading territories...</div></div>
+          </div>
+          <div class="panel">
+            <h2>Proof pipeline</h2>
+            <div class="sub">Client builds become case studies become published stories. This is where demand is drawn back in.</div>
+            <div id="fw-content"><div class="empty">Loading content...</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('flywheel');
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money = n => '$'+Math.round(n||0).toLocaleString();
+
+function kpis(d){
+  const os=d.os.totals, tr=d.territories.totals, ct=d.content;
+  return [
+    ['n', os.count, 'Client systems', os.certified+' certified · avg score '+os.avg_score],
+    ['n', os.avg_owner_dependency+'%', 'Avg owner dependency', 'Lower is more systems-run'],
+    ['n', tr.booked, 'Audits booked', tr.reps+' reps · '+money(tr.pipeline_value)+' pipeline'],
+    ['n', ct.published, 'Stories published', ct.pending+' pending · '+ct.approved+' ready'],
+  ].map(k=>`<div class="kpi"><div class="n">${esc(k[1])}</div><div class="l">${esc(k[2])}</div><div class="s">${esc(k[3])}</div></div>`).join('');
+}
+
+function osRows(os){
+  if(!os.clients.length) return '<div class="empty">No onboarded clients yet.</div>';
+  return os.clients.map(c=>{
+    const od=c.owner_dependency;
+    return `<div class="row">
+      <div class="nm"><b>${esc(c.name)}</b><span>${esc(c.business_type||'')}${c.business_type?' · ':''}${c.live_workers}/${c.workers} workers live${c.proof_fired?' · proof fired':''}</span></div>
+      <div class="mini">Owner ${od}%<div class="odbar"><i style="width:${Math.min(100,od)}%"></i></div></div>
+      <span class="tierpill ${c.certified?'cert':''}">${esc(c.tier)}</span>
+      <div class="score">${c.score}</div>
+    </div>`;
+  }).join('');
+}
+
+function terrRows(tr){
+  if(!tr.reps.length) return '<div class="empty">No reps yet.</div>';
+  return tr.reps.map(r=>`<div class="row">
+      <div class="nm"><b>${esc(r.name)}</b><span>${esc(r.city||'No city')} · ${r.leads} leads${r.due?' · '+r.due+' due':''}</span></div>
+      <div class="mini money">${money(r.pipeline_value)}</div>
+      <span class="tierpill">${r.booked} booked</span>
+    </div>`).join('');
+}
+
+function contentRows(ct){
+  if(!ct.recent.length) return '<div class="empty">No content yet. Run Company Intelligence or fire the Proof Engine.</div>';
+  return ct.recent.map(c=>`<div class="row">
+      <div class="nm"><b>${esc(c.title)}</b><span>${esc(c.source)}${c.url?' · <a href="'+esc(c.url)+'" target="_blank" rel="noopener">live</a>':''}</span></div>
+      <span class="status-dot ${c.status}">${esc(c.status)}</span>
+    </div>`).join('');
+}
+
+async function loadAll(){
+  const d = await TMIAdmin.api('/api/tmi-flywheel');
+  if(!d) return;
+  document.getElementById('fw-kpis').innerHTML = kpis(d);
+  document.getElementById('fw-os').innerHTML = osRows(d.os);
+  document.getElementById('fw-territories').innerHTML = terrRows(d.territories);
+  document.getElementById('fw-content').innerHTML = contentRows(d.content);
+}
+loadAll();
+</script>
+</body>
+</html>
