@@ -88,6 +88,30 @@
   .hero-chips{display:flex;flex-wrap:wrap;gap:9px 10px;margin-top:38px;}
   .chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:0.03em;color:var(--ink-2);background:var(--bg-alt);border:1px solid var(--line);padding:8px 14px;border-radius:999px;}
   .chip svg{width:14px;height:14px;color:var(--ink);}
+  /* brief sections */
+  .tchips{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px;}
+  .tchips span{font-size:14.5px;font-weight:500;color:var(--ink);background:var(--bg-alt);border:1px solid var(--line);border-radius:999px;padding:9px 16px;}
+  .center .tchips{justify-content:center;}
+  .dark .tchips span{color:var(--d-ink);background:rgba(255,255,255,0.05);border-color:var(--d-line);}
+  .g10{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 34px;margin-top:44px;text-align:left;}
+  .g10 .c{border-top:2px solid var(--chart);padding-top:15px;}
+  .g10 .c .n{font-family:var(--mono);font-size:12px;color:var(--ink-3);}
+  .g10 h4{font-size:17px;font-weight:700;letter-spacing:-0.01em;margin-top:4px;}
+  .g10 p{font-size:14px;color:var(--ink-2);line-height:1.55;margin-top:7px;}
+  .dark .g10 p{color:var(--d-ink-2);} .dark .g10 .c .n{color:var(--d-ink-3);}
+  @media(max-width:820px){.g10{grid-template-columns:1fr 1fr;}}
+  @media(max-width:560px){.g10{grid-template-columns:1fr;}}
+  .dolist2{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;border-top:1px solid var(--line);margin-top:34px;text-align:left;}
+  .dolist2 div{font-size:16px;font-weight:500;padding:14px 0 14px 24px;border-bottom:1px solid var(--line);position:relative;}
+  .dolist2 div::before{content:"";position:absolute;left:0;top:20px;width:9px;height:9px;background:var(--chart);border-radius:2px;}
+  @media(max-width:640px){.dolist2{grid-template-columns:1fr;}}
+  .oppcard{background:var(--ink);color:#fff;border-radius:18px;padding:32px 36px;margin-top:34px;text-align:left;max-width:720px;}
+  .oppcard .cl{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--chart-dark);}
+  .oppcard .lines{margin-top:14px;display:flex;flex-direction:column;gap:9px;}
+  .oppcard .lines div{font-size:16px;color:rgba(255,255,255,0.82);}
+  .oppcard .lines b{color:#fff;font-weight:600;}
+  .oppcard .res{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.14);font-family:var(--mono);font-size:17px;font-weight:600;}
+  .oppcard .res b{color:var(--chart);}
   .hero-glow{position:absolute;right:-8%;top:-20%;width:60%;height:120%;background:radial-gradient(closest-side,rgba(228,255,151,0.5),rgba(228,255,151,0) 70%);filter:blur(20px);z-index:-1;pointer-events:none;}
 
   /* ---------- device / dashboard mock ---------- */
@@ -512,6 +536,18 @@
   </div>
 </section>
 
+<!-- ============ INSIDE TMI OS ============ -->
+<section class="band">
+  <div class="wrap center">
+    <p class="eyebrow">Inside TMI OS</p>
+    <h2 class="h-sec">Every important part of your business, <span class="lime">in one operating layer.</span></h2>
+    <p class="sub">Instead of switching between disconnected software, spreadsheets, email, and meetings, your company works from one intelligent system. Everything connects.</p>
+    <div class="tchips">
+      <span>Company Brain</span><span>Digital Workforce</span><span>Command Center</span><span>Workflows</span><span>Knowledge</span><span>Executive Reporting</span><span>Integrations</span><span>Marketplace</span><span>Activity History</span><span>Opportunity Engine</span>
+    </div>
+  </div>
+</section>
+
 <!-- ============ SERVICE PROMISE ============ -->
 <section class="band">
   <div class="wrap">
@@ -529,6 +565,50 @@
   </div>
 </section>
 
+<!-- ============ WHAT WE ACTUALLY DO ============ -->
+<section class="band alt">
+  <div class="wrap">
+    <p class="eyebrow">What we actually do</p>
+    <h2 class="h-sec">Most companies buy more software. <span class="lime">Few build a better company.</span></h2>
+    <p class="sub" style="margin-top:18px;">TMI helps companies redesign how they operate. Technology is only part of the solution. The real product is a company that runs better.</p>
+    <div class="dolist2">
+      <div>Connect your systems</div><div>Capture your company's knowledge</div>
+      <div>Build digital workers</div><div>Standardize your workflows</div>
+      <div>Give leadership real visibility</div><div>Turn reports into decisions</div>
+      <div>Reduce owner dependence</div><div>Increase enterprise value</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE NEW CATEGORY ============ -->
+<section class="band dark">
+  <div class="wrap">
+    <p class="eyebrow">The new category</p>
+    <h2 class="h-sec" style="max-width:20ch;">We don't build AI companies. We build <span class="lime">intelligent companies.</span></h2>
+    <p class="sub" style="margin-top:20px;max-width:58ch;">An intelligent company doesn't depend on one person. It doesn't lose knowledge when employees leave. It doesn't guess, and it doesn't operate in silos. It makes better decisions because the right information reaches the right people at the right time. That is what we build.</p>
+  </div>
+</section>
+
+<!-- ============ THE TMI FRAMEWORK ============ -->
+<section class="band">
+  <div class="wrap">
+    <p class="eyebrow">The TMI framework</p>
+    <h2 class="h-sec">Every engagement improves <span class="lime">these ten areas.</span></h2>
+    <div class="g10">
+      <div class="c"><div class="n">01</div><h4>Intelligence</h4><p>Your company knows what is happening, as it happens.</p></div>
+      <div class="c"><div class="n">02</div><h4>Systems</h4><p>Every critical process has a repeatable system.</p></div>
+      <div class="c"><div class="n">03</div><h4>Knowledge</h4><p>What the company knows is documented, not trapped in people's heads.</p></div>
+      <div class="c"><div class="n">04</div><h4>Workforce</h4><p>People and digital workers work together.</p></div>
+      <div class="c"><div class="n">05</div><h4>Leadership</h4><p>Managers have clear visibility and accountability.</p></div>
+      <div class="c"><div class="n">06</div><h4>Operations</h4><p>Departments communicate instead of operating separately.</p></div>
+      <div class="c"><div class="n">07</div><h4>Decisions</h4><p>Leaders receive recommendations, not just reports.</p></div>
+      <div class="c"><div class="n">08</div><h4>Growth</h4><p>The business can expand without creating chaos.</p></div>
+      <div class="c"><div class="n">09</div><h4>Enterprise value</h4><p>Easier to operate, easier to scale, easier to buy.</p></div>
+      <div class="c"><div class="n">10</div><h4>Freedom</h4><p>The owner becomes less involved in daily operations.</p></div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ WORKFORCE ============ -->
 <section class="band dark" id="workforce">
   <div class="wrap">
@@ -537,7 +617,7 @@
         <p class="eyebrow">Digital workforce</p>
         <h2 class="h-sec">Hire AI employees <span class="lime">that work 24/7.</span></h2>
       </div>
-      <p class="sub">Add digital workers to your team in minutes. They learn your business, use your knowledge, and get real work done while you sleep.</p>
+      <p class="sub">Forget chatbots. Your company gets an operating team. Add digital workers in minutes, they learn your business, use your knowledge, and get real work done while you sleep.</p>
     </div>
     <div class="wk-grid">
       <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5c0 8 7 15 15 15l1-4-5-2-2 2c-3-1.5-5-3.5-6.5-6.5l2-2-2-5z"/></svg></div><h4>AI Receptionist</h4><p>Answers every call and text, day or night, so no lead ever hits voicemail.</p></div>
@@ -549,7 +629,9 @@
       <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.4"/><path d="M8 17c0-2 2-3 4-3s4 1 4 3"/></svg></div><h4>AI HR Assistant</h4><p>Screens applicants, schedules interviews, and handles the paperwork.</p></div>
       <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></div><h4>AI Ops Manager</h4><p>Watches the whole operation and surfaces what needs attention today.</p></div>
     </div>
-    <div style="margin-top:34px;"><a href="#offer" class="btn btn-lime">Explore all AI employees &rarr;</a></div>
+    <div class="tchips" style="margin-top:30px;"><span>Reception</span><span>Sales</span><span>Marketing</span><span>Finance</span><span>Operations</span><span>HR</span><span>Customer Success</span><span>Scheduling</span><span>Collections</span><span>Research</span><span>Executive Assistant</span><span>Reporting</span></div>
+    <p class="sub" style="margin-top:20px;">Every worker knows its role. Every action is tracked. Every decision follows your company's rules.</p>
+    <div style="margin-top:30px;"><a href="#offer" class="btn btn-lime">Explore all AI employees &rarr;</a></div>
   </div>
 </section>
 
@@ -670,6 +752,25 @@
   </div>
 </section>
 
+<!-- ============ OPPORTUNITY ENGINE ============ -->
+<section class="band">
+  <div class="wrap">
+    <p class="eyebrow">The opportunity engine</p>
+    <h2 class="h-sec">It finds the money <span class="lime">before you go looking.</span></h2>
+    <p class="sub" style="margin-top:18px;">The platform doesn't wait for you to discover problems. Every day it searches your company for value and tells leadership what to fix before it gets expensive: revenue leaks, slow sales, broken workflows, missed follow-up, bottlenecks, owner dependencies, knowledge gaps, unused software, and expansion opportunities.</p>
+    <div class="oppcard">
+      <div class="cl">Instead of a chart, you get a decision</div>
+      <div class="lines">
+        <div>Website conversion dropped <b>22%</b>.</div>
+        <div>Ad spend is healthy.</div>
+        <div>Sales follow-up slowed by <b>41%</b>.</div>
+        <div>Add one follow-up sequence.</div>
+      </div>
+      <div class="res">Estimated monthly lift <b>+$48,000</b></div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ WORKFLOWS ============ -->
 <section class="band alt">
   <div class="wrap">
@@ -771,6 +872,18 @@
         <h4>This is how you AI-proof it.</h4>
         <p>The next decade rewards the companies whose systems are already clean enough to plug new tools into. Get intelligent now and every new AI capability makes you stronger, instead of leaving you a step behind.</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ENTERPRISE VALUE ============ -->
+<section class="band alt">
+  <div class="wrap">
+    <p class="eyebrow">Build enterprise value every month</p>
+    <h2 class="h-sec">The companies worth the most <span class="lime">are predictable.</span></h2>
+    <p class="sub" style="margin-top:18px;">Predictable companies have clear systems, reliable reporting, strong leadership, documented knowledge, repeatable operations, scalable infrastructure, and owner independence. Those are exactly the things buyers pay for. Whether you sell in two years or twenty, every improvement makes the business stronger today.</p>
+    <div class="tchips">
+      <span>Clear systems</span><span>Reliable reporting</span><span>Strong leadership</span><span>Documented knowledge</span><span>Repeatable operations</span><span>Scalable infrastructure</span><span>Owner independence</span>
     </div>
   </div>
 </section>
@@ -902,10 +1015,11 @@
   <div class="wrap">
     <div class="assess">
       <div>
-        <p class="eyebrow">Intelligent Company Assessment</p>
-        <h2 class="h-sec">Find out what is <span class="lime">quietly costing you.</span></h2>
-        <p class="sub" style="margin-top:18px;">Answer a few questions about how your business runs. We do not grade you on a scale. We show you the specific problems draining time and money, and the first move to fix each one.</p>
-        <div style="margin-top:30px;"><a href="/intelligence-scorecard" class="btn btn-lime">Take the assessment &rarr;</a></div>
+        <p class="eyebrow">The Enterprise Readiness Score</p>
+        <h2 class="h-sec">How intelligent is your company <span class="lime">today?</span></h2>
+        <p class="sub" style="margin-top:18px;">Measure where you stand across the ten things that decide your value, then get a custom roadmap showing exactly what increases the value of your company next.</p>
+        <div class="tchips" style="margin-top:22px;"><span>Owner dependence</span><span>Operational maturity</span><span>Leadership</span><span>Knowledge</span><span>Workflows</span><span>Reporting</span><span>Integration</span><span>Digital workforce</span><span>Growth readiness</span><span>Acquisition readiness</span></div>
+        <div style="margin-top:26px;"><a href="/intelligence-scorecard" class="btn btn-lime">Take the assessment &rarr;</a></div>
       </div>
       <div>
         <div class="prob-found">We usually find 7 to 12</div>
@@ -968,6 +1082,15 @@
       <div class="sec"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M4 12h16"/><circle cx="12" cy="12" r="9"/></svg></div><h4>99.9% uptime</h4><p>The system is there when you need it.</p></div>
     </div>
     <p class="sub center" style="margin-top:30px;color:var(--d-ink-3);">Your data is yours. Always.</p>
+  </div>
+</section>
+
+<!-- ============ OUR PROMISE ============ -->
+<section class="band alt">
+  <div class="wrap center">
+    <p class="eyebrow">Our promise</p>
+    <h2 class="h-sec" style="max-width:24ch;margin:0 auto;">Build the company you'll be proud to own in <span class="lime">twenty years.</span></h2>
+    <p class="sub center" style="margin-top:20px;max-width:60ch;">We don't believe technology alone transforms businesses. Better operating systems do, and technology makes those systems faster, smarter, and easier to scale. Our goal isn't to sell software. It is to help you build a company that creates freedom, creates opportunity, creates enterprise value, and can thrive with or without you.</p>
   </div>
 </section>
 
