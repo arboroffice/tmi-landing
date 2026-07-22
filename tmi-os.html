@@ -285,6 +285,8 @@
   .final h2 em{font-style:normal;color:var(--chart);}
   .final .sub{color:var(--d-ink-2);margin:20px auto 34px;}
   .final-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .final .btn-ghost{color:#fff;border-color:var(--d-line-2);}
+  .final .btn-ghost:hover{background:rgba(255,255,255,0.08);border-color:#fff;}
   .final-glow{position:absolute;left:50%;bottom:-60%;transform:translateX(-50%);width:80%;height:120%;background:radial-gradient(closest-side,rgba(228,255,151,0.22),rgba(228,255,151,0) 70%);pointer-events:none;}
 
   footer{background:var(--bg-alt);border-top:1px solid var(--line);padding:44px 0;}
@@ -317,8 +319,13 @@
     .band{padding:52px 0;}
     .band.tight{padding:44px 0;}
     .hero{padding:32px 0 48px;}
-    .hero h1{font-size:clamp(33px,8.8vw,44px);}
+    .hero h1{font-size:clamp(29px,7.7vw,40px);}
     .hero .sub{margin-top:18px;font-size:16px;}
+    .hero-cta{flex-direction:column;align-items:stretch;gap:10px;}
+    .hero-cta .btn{width:100%;justify-content:center;white-space:normal;text-align:center;line-height:1.25;padding:15px 18px;}
+    .dash-top .dwho{display:none;}
+    .final-cta{flex-direction:column;align-items:stretch;}
+    #pricing .btn-lime,#offer > .wrap .btn-lime,.final-cta .btn{width:100%;justify-content:center;white-space:normal;text-align:center;line-height:1.25;}
     .h-sec{font-size:clamp(26px,7.2vw,33px);line-height:1.08;}
     .eyebrow{margin-bottom:12px;}
     .sub{font-size:16px;}
@@ -504,6 +511,27 @@
   .center .eyebrow{padding-left:0;}
   .center .eyebrow::before{display:none;}
   @media(prefers-reduced-motion:reduce){.wk,.mk-card,.step,.sec,.rung,.g10 .c,.prob,.btn,.tchips span,.ind,.chip{transition:none;}}
+  /* primary button sheen sweep on hover */
+  .btn-lime{position:relative;overflow:hidden;}
+  .btn-lime>*{position:relative;z-index:1;}
+  .btn-lime::after{content:"";position:absolute;top:0;left:-130%;width:55%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,0.6),transparent);transform:skewX(-18deg);pointer-events:none;z-index:0;}
+  .btn-lime:hover::after{animation:sheen .75s cubic-bezier(.4,.1,.2,1);}
+  @keyframes sheen{from{left:-130%;}to{left:150%;}}
+  /* outcome + framework rows: subtle hover wash */
+  .dolist2 div{transition:background .18s ease,padding-left .18s ease;}
+  .dolist2 div:hover{background:rgba(228,255,151,0.12);padding-left:30px;}
+  /* pricing figures gently rise on reveal */
+  .price2 .pcard .pnum{transition:color .2s ease;}
+  .pcard:hover .pnum{color:var(--chart-dark);}
+  /* step cards get a chartreuse edge on hover for rhythm with the flow */
+  .steps.six .step{transition:transform .22s cubic-bezier(.2,.7,.2,1),box-shadow .22s ease,border-color .22s ease;}
+  .steps.six .step:hover{border-color:var(--chart-dark);box-shadow:0 20px 44px -26px rgba(205,238,106,0.5);}
+  /* dashboard mock floats gently once revealed (desktop only) */
+  @media(min-width:901px) and (prefers-reduced-motion:no-preference){
+    .hero .dash.in{animation:floaty 7s ease-in-out 1.2s infinite;}
+    @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+  }
+  @media(prefers-reduced-motion:reduce){.btn-lime::after{display:none;}.dolist2 div{transition:none;}}
   .nav-free{position:relative;}
   .nav-free::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--chart-dark);margin-right:8px;vertical-align:middle;}
   .foot{background:var(--ink);color:#fff;padding:72px 0 36px;}
@@ -1200,7 +1228,7 @@ function setAud(mode){
 
   // Auto-tag elements for scroll reveals: section headers reveal on their own,
   // grids stagger their children.
-  var groups = ['.steps','.wk-grid','.know-list','.mk-grid','.ind-grid','.sec-grid','.flow','.hub','.probs','.b-list','.hero-chips','.offer-right','.tabs'];
+  var groups = ['.steps','.wk-grid','.know-list','.mk-grid','.ind-grid','.sec-grid','.flow','.hub','.probs','.b-list','.hero-chips','.offer-right','.tabs','.dolist2','.price2','.tchips'];
   groups.forEach(function(sel){
     document.querySelectorAll(sel).forEach(function(g){
       g.classList.add('reveal-group');
