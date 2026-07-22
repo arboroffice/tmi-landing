@@ -357,13 +357,9 @@
   </section>
 
   <section class="view" data-view="integrations">
-    <div class="h">Integrations</div>
-    <p class="sub">Your metrics go live once your tools are connected. During your build, our team wires these into your OS so the command center runs on your real numbers.</p>
-    <div class="empty" style="margin-top:26px">
-      <h3>Connect your tools</h3>
-      <p>Tell your COO which tools you use and we will wire in your first live data source. Until then, your workers run on what you give them.</p>
-      <div style="margin-top:18px"><button class="askbtn" style="display:inline-flex" onclick="openAsk('What should I connect first, and what would it make live?')"><svg class="icon"><use href="#i-coo"/></svg> Ask what to connect first</button></div>
-    </div>
+    <div class="h">Live data</div>
+    <p class="sub">Feed your real numbers in and the whole OS runs on actuals: your command center, your weekly digest, your COO, and every worker. Any tool that can send a webhook can connect.</p>
+    <div id="integrations" style="margin-top:24px;max-width:760px"></div>
   </section>
 
   <section class="view" data-view="inbox">
@@ -411,6 +407,15 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on');},2200);}
 function cap(s){return String(s||'').replace(/^\w/,function(c){return c.toUpperCase();});}
 function fmt(iso){try{var d=new Date(iso);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}catch(e){return '';}}
+function slug(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40);}
+function ago(iso){try{var s=(Date.now()-Date.parse(iso))/1000;if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}catch(e){return '';}}
+function sparkSVG(history){
+  var pts=(history||[]).map(function(h){return h&&h.v;}).filter(function(v){return typeof v==='number'&&isFinite(v);});
+  if(pts.length<2)return '';
+  var min=Math.min.apply(null,pts),max=Math.max.apply(null,pts),rng=(max-min)||1,W=120,H=26;
+  var d=pts.map(function(v,i){var x=(i/(pts.length-1))*W;var y=H-((v-min)/rng)*(H-3)-1.5;return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);}).join(' ');
+  return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="width:100%;height:24px;margin-top:10px;overflow:visible"><path d="'+d+'" fill="none" stroke="var(--chart-dark)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+}
 
 async function api(path,body){
   var r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},body:JSON.stringify(body||{})});
@@ -434,6 +439,7 @@ function show(v){
   document.querySelectorAll('.view').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-view')===v);});
   if((v==='command'||v==='coo')&&!briefingLoaded) loadBriefing();
   if(v==='team') loadTeam();
+  if(v==='integrations') loadConnect();
   window.scrollTo(0,0);
 }
 
@@ -484,7 +490,9 @@ function renderMetrics(){
   document.getElementById('metrics').innerHTML = metrics.map(function(m){
     return '<div class="tile"><span class="pen" title="Edit" onclick="editMetric(\''+m.id+'\')"><svg class="icon" style="width:15px;height:15px"><use href="#i-pen"/></svg></span>'+
       '<div class="k">'+esc(m.label)+'</div><div class="v">'+esc(m.value||'-')+(m.unit?'<small>'+esc(m.unit)+'</small>':'')+'</div>'+
-      (m.hint?'<div class="hh">'+esc(m.hint)+'</div>':'')+(m.target?'<div class="tgt">Target '+esc(m.target)+'</div>':'')+'</div>';
+      (m.hint?'<div class="hh">'+esc(m.hint)+'</div>':'')+(m.target?'<div class="tgt">Target '+esc(m.target)+'</div>':'')+
+      sparkSVG(m.history)+
+      (m.updated_at?'<div class="tgt">Updated '+ago(m.updated_at)+(m.source?' · '+esc(m.source):'')+'</div>':'')+'</div>';
   }).join('')+add;
 }
 function metricFields(m){m=m||{};return [
@@ -739,6 +747,59 @@ async function changeRole(id,role){
 async function removeMember(id,name){
   if(!confirm('Remove '+name+' from the team?'))return;
   try{await api('/api/os2-team',{action:'remove',id:id});teamLoaded=false;loadTeam(true);toast('Removed');}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+
+/* ---- live data / integrations ---- */
+var CONNECT=null, connectLoaded=false;
+async function loadConnect(){
+  var role=(STATE.me&&STATE.me.role)||'owner';
+  if(connectLoaded){renderIntegrations();return;}
+  if(role==='viewer'){connectLoaded=true;renderIntegrations();return;}
+  try{CONNECT=await api('/api/os2-connect',{action:'info'});}catch(e){}
+  connectLoaded=true;renderIntegrations();
+}
+function renderIntegrations(){
+  var host=document.getElementById('integrations');if(!host)return;
+  var role=(STATE.me&&STATE.me.role)||'owner';
+  var metrics=STATE.metrics||[];
+  var live=metrics.filter(function(m){return m.updated_at;});
+  var html='<div class="kcard" style="padding:18px 22px"><div class="kh"><span class="badge '+(live.length?'done':'k')+'">'+(live.length?'Live':'No live data')+'</span><h4>'+(live.length?live.length+' metric'+(live.length>1?'s':'')+' running on real data':'No numbers connected yet')+'</h4></div>'+
+    (live.length?'<div class="body" style="max-height:none">'+live.slice(0,8).map(function(m){return esc(m.label)+': <b>'+esc(m.value||'-')+'</b> <span style="color:var(--ink-3)">· '+ago(m.updated_at)+(m.source?' · '+esc(m.source):'')+'</span>';}).join('<br>')+'</div>':'<p style="font-size:13.5px;color:var(--ink-2);margin-top:10px">Push your first value below or from a tool and it goes live everywhere in your OS.</p>')+'</div>';
+
+  if(CONNECT){
+    var masked=(CONNECT.key||'').slice(0,6)+'••••••••••••••';
+    var ex=metrics[0]?slug(metrics[0].label):'revenue_mtd';
+    html+='<div class="kcard" style="padding:22px 24px;margin-top:14px"><div class="kh"><span class="badge k">Data endpoint</span><h4>Push numbers in from any tool</h4></div>'+
+      '<p style="font-size:13.5px;color:var(--ink-2);margin-top:10px">Send a webhook from Zapier, Make, a spreadsheet, your payment or CRM tool, or your own backend. It updates your metrics instantly.</p>'+
+      '<div class="field"><label>Endpoint</label><div class="invite-link">POST '+esc(CONNECT.endpoint)+'</div></div>'+
+      '<div class="field"><label>Your key</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="invite-link" style="flex:1;min-width:200px;margin-top:0" id="ikey">'+esc(masked)+'</div><button class="link" onclick="revealKey()">Show</button><button class="link" onclick="copyKey()">Copy</button>'+(role==='owner'?'<button class="link" onclick="rotateKey()">Rotate</button>':'')+'</div></div>'+
+      '<div class="field"><label>Example body</label><div class="invite-link">{ "key": "'+esc((CONNECT.key||'').slice(0,6))+'...", "metrics": [ { "key": "'+esc(ex)+'", "value": "$0" } ] }</div></div></div>';
+    if(metrics.length){
+      html+='<div class="kcard" style="padding:22px 24px;margin-top:14px"><div class="kh"><h4>Push a value now</h4></div>'+
+        '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><select id="pushMetric" class="rsel" style="flex:1;min-width:190px">'+metrics.map(function(m){return '<option value="'+m.id+'">'+esc(m.label)+'</option>';}).join('')+'</select>'+
+        '<input id="pushValue" placeholder="e.g. $212,400" style="flex:1;min-width:150px;font-family:var(--sans);font-size:15px;border:1px solid var(--line-2);border-radius:8px;padding:10px 12px"/>'+
+        '<button class="btn" onclick="pushValue()">Update</button></div></div>';
+      html+='<div class="secbar"><span class="lbl">What to send for each metric</span></div><div class="kcard" style="padding:6px 22px">'+metrics.map(function(m){return '<div style="padding:11px 0;border-top:1px solid var(--line);font-size:13.5px;display:flex;gap:10px;align-items:center"><span style="flex:1">'+esc(m.label)+'</span><code style="font-family:var(--mono);color:var(--ink-2);background:var(--bg-alt);border:1px solid var(--line);border-radius:6px;padding:3px 9px">'+esc(slug(m.label))+'</code></div>';}).join('')+'</div>';
+    }else{
+      html+='<div class="empty" style="margin-top:14px"><p>Add a metric on the command center first, then push values to it here or from your tools.</p></div>';
+    }
+  }else if(role!=='viewer'){
+    html+='<div class="loading">Loading your data connection...</div>';
+  }
+  host.innerHTML=html;
+}
+function revealKey(){var el=document.getElementById('ikey');if(el&&CONNECT)el.textContent=CONNECT.key;}
+function copyKey(){try{navigator.clipboard.writeText((CONNECT&&CONNECT.key)||'');toast('Key copied');}catch(e){toast('Select and copy');}}
+async function rotateKey(){
+  if(!confirm('Rotate the key? Tools using the old key stop working until you update them.'))return;
+  try{CONNECT=await api('/api/os2-connect',{action:'rotate'});renderIntegrations();toast('New key generated');}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function pushValue(){
+  var sel=document.getElementById('pushMetric'),inp=document.getElementById('pushValue');
+  if(!sel||!inp)return;var v=inp.value.trim();if(!v){toast('Enter a value');return;}
+  try{await api('/api/os2-connect',{action:'push',metric_id:sel.value,value:v});await refresh();renderIntegrations();toast('Value updated');}
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 
