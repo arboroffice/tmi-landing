@@ -36,6 +36,48 @@ Today the site reads as a high-end services/agency site with an OS bolted on. V2
 
 ---
 
+## The focused cut — build now / fold / defer (operative page list)
+
+This is the operative recommendation and it **supersedes the "build everything" reading of the PRD** (and the exhaustive list in Section 6 below). The principle: a young category-definer wins by proving **one** promise deeply, not by presenting a nine-division conglomerate before it's earned. Divisions that aren't operating yet read as unfocused and *lower* trust with a high-ticket buyer. So we build what converts, ranks, or proves — and we hint at the empire in exactly one restrained place.
+
+**Legend:** **BUILD** = make it now, it converts/ranks/proves · **FOLD** = real, but lives inside another page, not its own section · **DEFER** = don't build until the thing behind it actually exists.
+
+| PRD page / section | Verdict | Why |
+|---|---|---|
+| **Homepage** (all 8 blocks) | **BUILD** | The whole repositioning lands here. Sharpen, don't sprawl. |
+| **Apply** | **BUILD** | Highest-converting page. This is the lead engine. |
+| **Platform / TMI Command** | **BUILD** | The product is your proof you're not an agency. Links to the live OS. |
+| **Solutions — hub** | **BUILD** | One clean hub. |
+| Solutions → Intelligent Company Transformation | **BUILD** | This *is* the core offer. |
+| Solutions → Digital Workforce | **BUILD** | Strongest differentiator. |
+| Solutions → Company Knowledge | **BUILD** | Differentiator; hard for competitors to copy. |
+| Solutions → Enterprise Value | **BUILD** | The money outcome; ties to the exit-readiness page you already have. |
+| Solutions → Operating Systems | **FOLD** into Transformation | The OS *is* the transformation; a separate page splits the same story. |
+| Solutions → Intelligent Departments | **FOLD** into Command/Solutions | It's a capability, not a standalone offer. |
+| Solutions → Managed Operations | **FOLD** into Transformation (as a delivery tier) | It's a *how we deliver*, not a separate product. |
+| **Departments** — 8 pages (Sales, Ops, CS, Finance, HR, Safety, Marketing, Dispatch) | **DEFER** (build 1 explainer max) | Eight near-identical pages that don't convert on their own. Show departments as capabilities inside Command. Revisit only if a vertical demands its own department page for SEO. |
+| **Industries** — hub + verticals | **BUILD** (restructure existing) | These rank and convert. You already have ~182; templatize and sharpen, don't invent 9 more from scratch. |
+| **Resources — hub + Articles + Newsletter** | **BUILD** | You have 113 articles + a newsletter. A hub + search is low-cost, high-trust. |
+| Resources → Guides / Playbooks / Templates / Checklists / Videos | **DEFER** | Don't build empty shelves. Add each type when there's real content to fill it. |
+| Resources → Books | **BUILD** (light) | The Intelligent Company book page already exists. |
+| **Research** — flagship report(s) | **BUILD** 1–2 now | "State of the Intelligent Company" + "Owner Dependence Report" as gated lead magnets. Real authority, real email capture. |
+| Research → other 3 reports | **DEFER** | Ship when written. Gated shelves with no report hurt. |
+| **About** (with a single restrained company-structure moment) | **BUILD** | This is the *one* place the bigger vision belongs — one diagram, not a nav of divisions. |
+| **Contact** | **BUILD** (edit existing) | Five routes. |
+| **Partners** (Advisor/Builder/Operator/Enterprise) | **DEFER** | Only build when the program is live and you want applicants. A partner page with no program reads as aspirational. |
+| **Ventures** (HomePro AI, TapMe, Sknpad) | **BUILD** one page (light) | You have `venture-studio.html`. One page, not a headline division. |
+| **Media** (Podcast/YouTube/Newsletter/Interviews/Case studies) | **FOLD** into Resources | It's content, not a division section. |
+| **Events** (Founders of the Future, The Room, conference) | Mostly **DEFER**; keep Founders of the Future as-is | FOTF already exists; don't build a conference/The Room section before those run. |
+| **TMI Institute** (Courses/Certification/Training) | **DEFER** entirely | Build when a course exists. Nothing kills credibility like an empty "Certification" page. |
+| **Company structure reveal** (Group → 9 divisions) | **FOLD** into About (one diagram) + optional footer org-map | Express the ambition once, restrained. Do not turn each division into a section. |
+| Marketplace / Talent / Capital / Foundation / Acquisitions | **DEFER** (not built, not in nav) | Future. No routes yet. |
+
+**Trimmed primary nav (the focused version):** Home · Platform · Solutions · Industries · Resources · About · Apply. (Research lives under Resources until there are 3+ reports; Contact in the footer/utility nav; Partners/Ventures/etc. out until real.) A 6-item nav reads more confident than a 10-item one.
+
+**What this means in one line:** build ~12–15 strong pages, fold ~6 into them, defer ~15+. The site proves one thing deeply instead of gesturing at ten.
+
+---
+
 ## 2. Honest current-state inventory
 
 | Bucket | Count | State | V2 disposition |
@@ -117,6 +159,8 @@ Keep: white bg, black text, chartreuse accent, large type, large spacing, minima
 
 ## 6. Page-by-page task list (grouped)
 
+> Read the **focused cut** section (near the top) first — it decides *whether* each page below gets built. This list is the full menu; the focused cut is the order. Anything marked DEFER/FOLD there should not be hand-built now even though it appears here.
+
 Legend: **[N]** new · **[E]** edit existing · **[K]** keep · **[T]** template (one build, many CMS entries)
 
 **Platform**
@@ -170,15 +214,17 @@ Each becomes a schema + a page template. This is what kills the "240 hand-edited
 
 ## 9. Phased roadmap
 
-- **Phase 0 — Foundation & decision.** Lock the stack (Sec 3), the message/token system, the component library, the canonical nav/footer, and the company-structure map. Ship the design-system source of truth. *(No new pages; this is the thing that prevents the next drift.)*
-- **Phase 1 — Homepage + Apply + Platform.** The three highest-leverage pages: new homepage (Sec 5), the Apply conversion page, and the Command/Platform page. Deploy. This alone delivers the positioning shift and the lead engine.
-- **Phase 2 — Solutions + Departments.** Solutions hub + 7 children, 8 department pages (template). Every page ends in Apply.
-- **Phase 3 — Industries (templated migration).** One vertical template; migrate the ~182 existing industry pages into CMS entries. Retire the hand-built variants as they're replaced.
-- **Phase 4 — Resources + Research.** Resource hub + search, articles collection, gated research reports with email capture (feeds the funnel).
-- **Phase 5 — Ecosystem.** Partners, Ventures, Institute, Events, Media, and the company-structure/About build-out. Reveal the group.
-- **Phase 6 (future, separate track) — Platform-ready.** Auth, dashboard login, workspaces, billing, roles — only if/when the website and OS converge. Lives with the OS, not the marketing site.
+Aligned to the focused cut — build the converting core first, add breadth only where content exists, and never build empty division shelves.
 
-Sequencing rule: **positioning and conversion first (Phases 0–1), breadth second (2–4), ecosystem last (5).** Don't build 8 department pages before the homepage says the new thing.
+- **Phase 0 — Foundation.** Lock the message/token system, the component library, the canonical nav/footer, and the single company-structure diagram. Ship the design-system source of truth. *(No new pages; this is what prevents the next drift.)*
+- **Phase 1 — The converting core.** New Homepage (Sec 5), Apply, and Platform/Command. Deploy. This alone delivers the repositioning and the lead engine. Measure audit applications.
+- **Phase 2 — Solutions (focused).** Solutions hub + 4 real pages (Transformation, Digital Workforce, Company Knowledge, Enterprise Value). Operating Systems / Managed Ops / Departments fold in — no standalone pages. Every page ends in Apply.
+- **Phase 3 — Industries.** One vertical template; restructure/generate the ~182 existing pages from data instead of hand-editing. Sharpen to the new message.
+- **Phase 4 — Resources + first Research report.** Resources hub + search over the 113 articles + newsletter capture, and 1–2 flagship gated reports. Defer the empty content types (guides/videos/templates) until filled.
+- **Phase 5 — About + light Ventures.** About with the single restrained structure reveal; one Ventures page. Partners/Institute/Events/Media stay deferred until the thing behind each is real.
+- **Phase 6 (future, separate track) — Platform-ready.** Auth, login, workspaces, billing, roles — only if/when the website and OS converge. Lives with the OS, not the marketing site.
+
+Sequencing rule: **prove one thing first (0–1), add depth where it converts or ranks (2–4), reveal the vision last and lightly (5).** Don't build a Certification page before a course exists, or 8 department pages before the homepage says the new thing.
 
 ---
 
