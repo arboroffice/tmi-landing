@@ -89,4 +89,34 @@ function normalize(raw) {
   };
 }
 
-module.exports = { routeTranscript };
+// A short daily focus for TMI's own intelligence layer. Given what the engine
+// has captured and a couple of real business signals, write the founder the one
+// thing to act on today. Falls back to a plain line if the model is unavailable.
+async function briefFocus(state) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  const c = state.counts || {};
+  const fallback = c.pending_content
+    ? `You have ${c.pending_content} content draft${c.pending_content === 1 ? '' : 's'} waiting for approval and ${c.open_tasks || 0} open task${c.open_tasks === 1 ? '' : 's'}. Clear the approvals first, then the tasks.`
+    : `Nothing is waiting in your intelligence layer. Run a recent meeting through it to keep the company brain current.`;
+  if (!key) return fallback;
+  try {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey: key });
+    const ctx =
+      `Content awaiting approval: ${(state.pending || []).map(p => p.title).join('; ') || 'none'}\n` +
+      `Open tasks: ${(state.openTasks || []).map(t => t.title).join('; ') || 'none'}\n` +
+      `Recent decisions: ${(state.decisions || []).slice(0, 6).join('; ') || 'none'}\n` +
+      `New leads (7d): ${c.new_leads_7d != null ? c.new_leads_7d : 'n/a'} · OS signups: ${c.os_signups != null ? c.os_signups : 'n/a'}`;
+    const msg = await client.messages.create({
+      model: MODEL, max_tokens: 260,
+      system: 'You are the COO of TMI\'s own operating system. Write the founder a 2 to 3 sentence focus for today: the single most important thing to act on, based only on what is below. Direct, specific, no hype, no emojis, no em dashes. If nothing is pressing, say so plainly.',
+      messages: [{ role: 'user', content: ctx }],
+    });
+    return (msg.content || []).map(b => b.text || '').join('').trim() || fallback;
+  } catch (e) {
+    console.error('briefFocus:', e.message);
+    return fallback;
+  }
+}
+
+module.exports = { routeTranscript, briefFocus };

@@ -51,6 +51,15 @@
         <div class="sec-head-right"><span class="filter-count">TMI runs on TMI</span></div>
       </div>
 
+      <div class="card" id="ci-brief" style="padding:18px 22px;margin-bottom:20px;border-left:4px solid var(--chart);">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <span class="panel-sec-label">Today &middot; from your intelligence layer</span>
+          <button class="btn btn-ghost btn-sm" onclick="loadBrief()">Refresh</button>
+        </div>
+        <div id="ci-focus" style="font-size:15px;line-height:1.6;color:var(--ink);margin-top:8px;">Reading your intelligence layer...</div>
+        <div class="counts" id="ci-brief-counts" style="margin-top:12px;"></div>
+      </div>
+
       <div class="ci-grid">
         <!-- capture -->
         <div class="card" style="padding:20px 22px;">
@@ -215,8 +224,22 @@ function copyText(id){
   try{ navigator.clipboard.writeText(it.body||''); TMIAdmin.toast('Copied'); }catch(e){ TMIAdmin.toast('Select and copy','error'); }
 }
 
+async function loadBrief(){
+  const el = document.getElementById('ci-focus');
+  const r = await TMIAdmin.api('/api/tmi-intel','POST',{action:'brief'});
+  if(!r){ return; }
+  el.textContent = r.focus || 'Nothing pressing right now.';
+  const c = r.counts||{};
+  document.getElementById('ci-brief-counts').innerHTML =
+    `<span class="count"><b>${c.pending_content||0}</b> to approve</span>`+
+    `<span class="count"><b>${c.open_tasks||0}</b> open tasks</span>`+
+    `<span class="count"><b>${c.new_leads_7d||0}</b> new leads · 7d</span>`+
+    `<span class="count"><b>${c.os_signups||0}</b> OS signups</span>`;
+}
+
 renderTabs();
 loadAll();
+loadBrief();
 </script>
 </body>
 </html>

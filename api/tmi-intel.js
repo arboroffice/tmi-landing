@@ -13,7 +13,10 @@
 
 const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
-const { routeTranscript } = require('./_tmiintel');
+const { routeTranscript, briefFocus } = require('./_tmiintel');
+
+const DAY = 24 * 3600 * 1000;
+async function safeList(coll, opts) { try { return await db.list(coll, opts); } catch { return []; } }
 
 const COLL = {
   meetings: 'tmi_meetings',
@@ -77,6 +80,28 @@ module.exports = async function handler(req, res) {
       const kind = String(b.kind || '');
       if (!COLL[kind]) return res.status(400).json({ error: 'Unknown kind' });
       return res.status(200).json({ items: await listColl(kind, b.limit) });
+    }
+
+    if (action === 'brief') {
+      const [content, tasks, meetings, knowledge, leads, tenants] = await Promise.all([
+        safeList('tmi_content', { order: 'created_at', ascending: false, limit: 60 }),
+        safeList('tmi_tasks', { order: 'created_at', ascending: false, limit: 60 }),
+        safeList('tmi_meetings', { order: 'created_at', ascending: false, limit: 6 }),
+        safeList('tmi_knowledge', { order: 'created_at', ascending: false, limit: 20 }),
+        safeList('leads', { order: 'created_at', ascending: false, limit: 400 }),
+        safeList('os_tenants', { limit: 500 }),
+      ]);
+      const pending = content.filter(c => c.status === 'pending');
+      const openTasks = tasks.filter(t => t.status !== 'done');
+      const cutoff = Date.now() - 7 * DAY;
+      const newLeads = leads.filter(l => l.created_at && Date.parse(l.created_at) > cutoff).length;
+      const decisions = meetings.flatMap(m => Array.isArray(m.decisions) ? m.decisions : []);
+      const counts = {
+        pending_content: pending.length, open_tasks: openTasks.length,
+        new_leads_7d: newLeads, os_signups: tenants.length, meetings_captured: meetings.length,
+      };
+      const focus = await briefFocus({ counts, pending, openTasks, decisions });
+      return res.status(200).json({ counts, focus, pending: pending.slice(0, 5), openTasks: openTasks.slice(0, 6) });
     }
 
     if (action === 'approve') {
