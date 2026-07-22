@@ -1,8 +1,8 @@
-// TMI OS — the whole dashboard state for the signed-in tenant: command center
-// metrics, AI workers, workflows, and the build feed. Everything scoped to the
-// caller's tenant_id.
+// TMI OS — the whole workspace for the signed-in tenant: command center
+// metrics, AI workers, workflows, company knowledge, tasks, generated reports,
+// and the build feed. Everything scoped to the caller's tenant_id.
 //
-// GET -> { tenant, metrics, workers, workflows, build_log }
+// GET -> { tenant, metrics, workers, workflows, knowledge, tasks, reports, build_log }
 
 const db = require('./_db');
 const { requireTenant, cors } = require('./_tenant-auth');
@@ -15,20 +15,31 @@ module.exports = async function handler(req, res) {
   const t = requireTenant(req, res);
   if (!t) return;
   const tid = t.tenant_id;
+  const w = [['tenant_id', '==', tid]];
 
   try {
-    const [tenant, metrics, workers, workflows, log] = await Promise.all([
+    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, log] = await Promise.all([
       db.getById('os_tenants', tid),
-      db.list('os_metrics', { where: [['tenant_id', '==', tid]] }),
-      db.list('os_workers', { where: [['tenant_id', '==', tid]] }),
-      db.list('os_workflows', { where: [['tenant_id', '==', tid]] }),
-      db.list('os_build_log', { where: [['tenant_id', '==', tid]], order: 'created_at', ascending: false, limit: 20 }),
+      db.list('os_metrics', { where: w }),
+      db.list('os_workers', { where: w }),
+      db.list('os_workflows', { where: w }),
+      db.list('os_knowledge', { where: w }),
+      db.list('os_tasks', { where: w }),
+      db.list('os_reports', { where: w }),
+      db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 30 }),
     ]);
     return res.status(200).json({
-      tenant: tenant ? { id: tenant.id, name: tenant.name, onboarded: !!tenant.onboarded, summary: tenant.summary || null, plan: tenant.plan || 'trial' } : null,
+      tenant: tenant ? {
+        id: tenant.id, name: tenant.name, onboarded: !!tenant.onboarded,
+        summary: tenant.summary || null, plan: tenant.plan || 'trial',
+        business_type: tenant.business_type || null, profile: tenant.profile || {},
+      } : null,
       metrics: metrics.sort(bySort),
       workers: workers.sort(bySort),
       workflows: workflows.sort(bySort),
+      knowledge: knowledge.sort(bySort),
+      tasks: tasks.sort(bySort),
+      reports: reports.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')),
       build_log: log,
     });
   } catch (e) {
