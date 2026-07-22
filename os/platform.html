@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TMI OS</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://api.fontshare.com"/>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#ffffff;--bg-alt:#f6f6f4;--panel:#fbfbfa;--ink:#0a0b14;--ink-2:#55576a;--ink-3:#8a8c9e;
+    --line:rgba(10,11,20,0.09);--line-2:rgba(10,11,20,0.14);
+    --chart:#E4FF97;--chart-dark:#cdee72;--good:#3a7d33;--warn:#8a6d00;--warn-bg:#fff4d6;
+    --sans:"General Sans",system-ui,-apple-system,sans-serif;
+    --mono:"Neue Haas Grotesk Display",ui-monospace,"SF Mono",Menlo,monospace;
+    --nav:248px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg-alt);-webkit-font-smoothing:antialiased;line-height:1.5;}
+  a{color:inherit;text-decoration:none;}
+  svg{display:block;}
+  .icon{width:17px;height:17px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none;}
+
+  /* sidebar */
+  .side{position:fixed;top:0;left:0;bottom:0;width:var(--nav);background:var(--bg);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px 12px;overflow-y:auto;}
+  .side .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;padding:8px 10px 16px;}
+  .side .brand img{height:22px;}
+  .side .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:16px 12px 8px;}
+  .side nav a{display:flex;align-items:center;gap:11px;font-size:14px;font-weight:500;color:var(--ink-2);padding:9px 12px;border-radius:9px;cursor:pointer;transition:background .12s,color .12s;position:relative;}
+  .side nav a:hover{background:var(--bg-alt);color:var(--ink);}
+  .side nav a.on{background:var(--ink);color:#fff;}
+  .side nav a.on .icon{stroke:var(--chart-dark);}
+  .side nav a .tag{margin-left:auto;font-family:var(--mono);font-size:10px;background:var(--chart);color:var(--ink);border-radius:99px;padding:2px 7px;}
+  .side .who{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 10px 4px;border-top:1px solid var(--line);}
+  .side .who .av{width:30px;height:30px;border-radius:8px;background:var(--ink);color:var(--chart);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+  .side .who .nm{font-size:13px;font-weight:600;line-height:1.2;}
+  .side .who .nm small{display:block;color:var(--ink-3);font-weight:500;font-size:11.5px;}
+
+  /* main */
+  .main{margin-left:var(--nav);min-height:100vh;}
+  .top{height:60px;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 28px;position:sticky;top:0;z-index:5;}
+  .top .co{font-weight:600;font-size:15px;}
+  .top .plan{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;background:var(--chart);color:var(--ink);border-radius:99px;padding:4px 10px;}
+  .top .right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .ask{display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:600;border-radius:10px;padding:9px 15px;cursor:pointer;border:none;font-family:var(--sans);}
+  .ask .icon{stroke:var(--chart-dark);width:15px;height:15px;}
+  .view{display:none;padding:34px 28px 80px;max-width:1120px;}
+  .view.on{display:block;}
+  .h{font-size:clamp(24px,2.6vw,32px);font-weight:700;letter-spacing:-0.02em;}
+  .sub{color:var(--ink-2);font-size:15px;margin-top:8px;max-width:64ch;}
+  .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin:36px 0 14px;}
+
+  /* cards / tiles */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:13px;}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;}
+  .tile .k{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);}
+  .tile .v{font-family:var(--mono);font-size:28px;font-weight:600;letter-spacing:-0.02em;margin-top:10px;font-variant-numeric:tabular-nums;}
+  .tile .v small{font-size:14px;color:var(--ink-3);}
+  .tile .d{font-size:12px;margin-top:6px;font-weight:600;}
+  .tile .d.up{color:var(--good);}.tile .d.dn{color:#c0261f;}
+
+  /* AI COO recommendation cards */
+  .reco{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin-bottom:16px;position:relative;overflow:hidden;}
+  .reco::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--chart-dark);}
+  .reco .rnum{font-family:var(--mono);font-size:12px;color:var(--ink-3);}
+  .reco h3{font-size:20px;font-weight:700;letter-spacing:-0.02em;margin-top:6px;max-width:40ch;}
+  .reco .why{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+  .reco .why div{display:flex;gap:10px;font-size:14px;color:var(--ink-2);align-items:flex-start;}
+  .reco .why b{color:var(--ink);font-weight:600;}
+  .reco .why .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-3);margin-top:7px;flex:none;}
+  .reco .act{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px;padding-top:18px;border-top:1px solid var(--line);}
+  .reco .lift{font-family:var(--mono);font-size:15px;font-weight:600;}
+  .reco .lift b{color:var(--good);}
+  .reco .sp{margin-left:auto;}
+  .btn{font-family:var(--sans);font-size:13.5px;font-weight:600;border-radius:10px;padding:10px 18px;cursor:pointer;border:1px solid var(--ink);background:var(--chart);color:var(--ink);border-color:var(--chart);}
+  .btn:hover{background:var(--chart-dark);}
+  .btn.ghost{background:#fff;color:var(--ink);border-color:var(--line-2);}
+  .btn.ghost:hover{background:var(--bg-alt);}
+  .btn.sm{padding:7px 13px;font-size:12.5px;}
+
+  /* opportunity feed */
+  .opp{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:10px;}
+  .opp .oi{width:34px;height:34px;border-radius:9px;background:var(--bg-alt);display:flex;align-items:center;justify-content:center;flex:none;}
+  .opp .oi .icon{stroke:var(--ink);}
+  .opp .ot{font-size:14.5px;font-weight:600;}
+  .opp .os{font-size:13px;color:var(--ink-2);margin-top:2px;}
+  .opp .ov{margin-left:auto;text-align:right;flex:none;}
+  .opp .ov .m{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--good);}
+  .opp .ov .btn{margin-top:6px;}
+
+  /* generic list rows */
+  .row{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
+  .row .r1{display:flex;align-items:center;gap:12px;}
+  .row h4{font-size:16px;font-weight:700;letter-spacing:-0.01em;}
+  .row p{font-size:13.5px;color:var(--ink-2);margin-top:7px;line-height:1.5;}
+  .badge{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:6px;}
+  .badge.auto{background:var(--chart);color:var(--ink);}
+  .badge.approve{background:var(--warn-bg);color:var(--warn);border:1px solid #f0e0a8;}
+  .badge.read{background:var(--bg-alt);color:var(--ink-2);border:1px solid var(--line);}
+  .badge.on{background:#e8f6e6;color:var(--good);}
+  .cad{margin-left:auto;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);}
+  /* toggle */
+  .tog{width:38px;height:22px;border-radius:99px;background:var(--line-2);position:relative;cursor:pointer;transition:background .15s;flex:none;}
+  .tog.on{background:var(--chart-dark);}
+  .tog::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+  .tog.on::after{left:18px;}
+
+  /* grid of cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  .pack{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;}
+  .pack .pk{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);}
+  .pack h4{font-size:19px;font-weight:700;letter-spacing:-0.02em;margin-top:8px;}
+  .pack .inc{font-size:13px;color:var(--ink-2);margin-top:12px;line-height:1.7;}
+  .pack .pf{display:flex;align-items:center;gap:12px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+  .pack .pr{font-family:var(--mono);font-size:14px;font-weight:600;}
+  .pack .pf .btn{margin-left:auto;}
+
+  .split2{display:grid;grid-template-columns:1.6fr 1fr;gap:24px;align-items:start;}
+  @media(max-width:900px){.split2{grid-template-columns:1fr;}}
+  .memo{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;}
+  .memo h3{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px;}
+  .memo .m{padding:12px 0;border-top:1px solid var(--line);font-size:14px;}
+  .memo .m:first-of-type{border-top:none;}
+  .memo .m .t{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:3px;}
+
+  .conn{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+  .conn .c{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;align-items:center;gap:12px;}
+  .conn .c .nm{font-size:14.5px;font-weight:600;}
+  .conn .c .st{font-size:12px;color:var(--ink-3);margin-top:2px;}
+  .conn .c .st.ok{color:var(--good);}
+  .conn .c .btn{margin-left:auto;}
+
+  .empty{background:#fff;border:1px dashed var(--line-2);border-radius:16px;padding:48px;text-align:center;color:var(--ink-3);}
+  .empty h3{color:var(--ink);font-size:18px;font-weight:700;margin-bottom:8px;}
+
+  /* ask COO drawer */
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:420px;max-width:92vw;background:#fff;border-left:1px solid var(--line);transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.7,.2,1);z-index:20;display:flex;flex-direction:column;}
+  .drawer.on{transform:none;}
+  .drawer .dh{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--line);font-weight:700;}
+  .drawer .dh .x{margin-left:auto;cursor:pointer;color:var(--ink-3);font-size:22px;line-height:1;}
+  .drawer .db{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;}
+  .msg{max-width:88%;font-size:14px;line-height:1.55;padding:12px 15px;border-radius:14px;}
+  .msg.coo{background:var(--bg-alt);border:1px solid var(--line);}
+  .msg.me{background:var(--ink);color:#fff;align-self:flex-end;}
+  .drawer .df{padding:16px;border-top:1px solid var(--line);display:flex;gap:8px;}
+  .drawer .df input{flex:1;font-family:var(--sans);font-size:15px;border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;}
+  .drawer .df input:focus{outline:none;border-color:var(--ink);}
+  .scrim{position:fixed;inset:0;background:rgba(10,11,20,.35);opacity:0;pointer-events:none;transition:opacity .25s;z-index:15;}
+  .scrim.on{opacity:1;pointer-events:auto;}
+
+  .burger{display:none;}
+  @media(max-width:880px){
+    .side{transform:translateX(-100%);transition:transform .3s;z-index:30;}
+    .side.open{transform:none;}
+    .main{margin-left:0;}
+    .burger{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--line-2);border-radius:9px;background:#fff;cursor:pointer;}
+  }
+</style>
+</head>
+<body>
+<!-- icon sprite -->
+<svg style="display:none" aria-hidden="true"><defs>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+<symbol id="i-coo" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+<symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4"/><circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/></symbol>
+<symbol id="i-flow" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="4" rx="1"/><rect x="15" y="10" width="6" height="4" rx="1"/><rect x="3" y="16" width="6" height="4" rx="1"/><path d="M9 6h4a2 2 0 0 1 2 2v2M9 18h4a2 2 0 0 0 2-2v-2"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 3v18"/></symbol>
+<symbol id="i-shop" viewBox="0 0 24 24"><path d="M4 7h16l-1 13H5z"/><path d="M9 7a3 3 0 0 1 6 0"/></symbol>
+<symbol id="i-net" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v5m0 0l-6 5m6-5l6 5"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+<symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v6M15 3v6"/><path d="M7 9h10v3a5 5 0 0 1-10 0z"/><path d="M12 17v4"/></symbol>
+<symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/></symbol>
+<symbol id="i-cash" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+</defs></svg>
+
+<aside class="side" id="side">
+  <div class="brand"><img src="/logo.svg" alt="TMI"/> TMI OS</div>
+  <div class="grp">Platform</div>
+  <nav>
+    <a data-v="home" class="on"><svg class="icon"><use href="#i-home"/></svg> Home</a>
+    <a data-v="command"><svg class="icon"><use href="#i-grid"/></svg> Command Center</a>
+    <a data-v="coo"><svg class="icon"><use href="#i-coo"/></svg> AI COO <span class="tag">3</span></a>
+    <a data-v="workforce"><svg class="icon"><use href="#i-bot"/></svg> Digital Workforce</a>
+    <a data-v="workflows"><svg class="icon"><use href="#i-flow"/></svg> Workflows</a>
+    <a data-v="knowledge"><svg class="icon"><use href="#i-book"/></svg> Knowledge</a>
+    <a data-v="insights"><svg class="icon"><use href="#i-spark"/></svg> Insights</a>
+  </nav>
+  <div class="grp">Grow</div>
+  <nav>
+    <a data-v="marketplace"><svg class="icon"><use href="#i-shop"/></svg> Marketplace</a>
+    <a data-v="builders"><svg class="icon"><use href="#i-net"/></svg> Builder Network</a>
+    <a data-v="reports"><svg class="icon"><use href="#i-chart"/></svg> Reports</a>
+    <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Integrations</a>
+    <a data-v="settings"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
+  </nav>
+  <div class="who">
+    <div class="av">N</div>
+    <div class="nm">Northside Dental<small>Owner plan</small></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="top">
+    <button class="burger" onclick="document.getElementById('side').classList.toggle('open')"><svg class="icon"><use href="#i-grid"/></svg></button>
+    <span class="co">Northside Dental</span>
+    <span class="plan">Operate</span>
+    <div class="right"><button class="ask" onclick="openAsk()"><svg class="icon"><use href="#i-coo"/></svg> Ask your COO</button></div>
+  </div>
+
+  <!-- HOME -->
+  <section class="view on" data-view="home">
+    <div class="h">Good morning.</div>
+    <p class="sub">Your AI COO reviewed the business overnight. Here is what it would do this week.</p>
+
+    <div class="lbl">From your AI COO</div>
+    <div class="reco">
+      <div class="rnum">Priority 01</div>
+      <h3>Your sales follow-up slowed down and it is costing you booked chairs.</h3>
+      <div class="why">
+        <div><span class="dot"></span><span>New patient inquiries are up <b>12%</b>, but average time to first follow-up went from <b>9 minutes to 41 minutes</b>.</span></div>
+        <div><span class="dot"></span><span><b>28 inquiries</b> last week never got a second touch.</span></div>
+        <div><span class="dot"></span><span>Turn on the Follow-Up worker to text every new inquiry within 2 minutes and chase no-replies for 5 days.</span></div>
+      </div>
+      <div class="act">
+        <span class="lift">Estimated lift <b>+$18,400 / mo</b></span>
+        <span class="sp"></span>
+        <button class="btn ghost sm" onclick="show('coo')">See the math</button>
+        <button class="btn sm">Turn on the worker</button>
+      </div>
+    </div>
+
+    <div class="lbl">This morning</div>
+    <div class="tiles">
+      <div class="tile"><div class="k">New patients</div><div class="v">37</div><div class="d up">+12% vs last wk</div></div>
+      <div class="tile"><div class="k">Booked revenue</div><div class="v">$146k</div><div class="d up">+4%</div></div>
+      <div class="tile"><div class="k">Chair utilization</div><div class="v">78<small>%</small></div><div class="d dn">-6%</div></div>
+      <div class="tile"><div class="k">Overdue AR</div><div class="v">$62k</div><div class="d dn">31 invoices</div></div>
+    </div>
+
+    <div class="lbl">Opportunities your OS found</div>
+    <div class="opp"><div class="oi"><svg class="icon"><use href="#i-star"/></svg></div><div><div class="ot">183 patients never got a review request</div><div class="os">Send them a review ask and recover your local ranking.</div></div><div class="ov"><div class="m">+$0 cost</div><button class="btn sm">Fix it</button></div></div>
+    <div class="opp"><div class="oi"><svg class="icon"><use href="#i-cash"/></svg></div><div><div class="ot">$62,000 in overdue invoices</div><div class="os">31 invoices past 30 days with no reminder sent.</div></div><div class="ov"><div class="m">recover $62k</div><button class="btn sm">Start collections</button></div></div>
+    <div class="opp"><div class="oi"><svg class="icon"><use href="#i-clock"/></svg></div><div><div class="ot">An AI receptionist could save ~35 staff hours / month</div><div class="os">Front desk answers 340 calls/mo. Most are scheduling.</div></div><div class="ov"><div class="m">-35 hrs/mo</div><button class="btn sm">Preview</button></div></div>
+  </section>
+
+  <!-- COMMAND CENTER -->
+  <section class="view" data-view="command">
+    <div class="h">Command center</div>
+    <p class="sub">Your whole company on one screen. Live from your connected tools.</p>
+    <div class="lbl">Today</div>
+    <div class="tiles">
+      <div class="tile"><div class="k">New patients</div><div class="v">37</div><div class="d up">+12%</div></div>
+      <div class="tile"><div class="k">Booked revenue</div><div class="v">$146k</div><div class="d up">+4%</div></div>
+      <div class="tile"><div class="k">Chair utilization</div><div class="v">78<small>%</small></div><div class="d dn">-6%</div></div>
+      <div class="tile"><div class="k">No-show rate</div><div class="v">9<small>%</small></div><div class="d up">-2%</div></div>
+      <div class="tile"><div class="k">Avg follow-up time</div><div class="v">41<small>m</small></div><div class="d dn">was 9m</div></div>
+      <div class="tile"><div class="k">Overdue AR</div><div class="v">$62k</div><div class="d dn">31 invoices</div></div>
+      <div class="tile"><div class="k">Reviews this month</div><div class="v">12</div><div class="d up">4.8 avg</div></div>
+      <div class="tile"><div class="k">Staff hours saved</div><div class="v">128</div><div class="d up">this month</div></div>
+    </div>
+  </section>
+
+  <!-- AI COO -->
+  <section class="view" data-view="coo">
+    <div class="h">AI COO</div>
+    <p class="sub">Not a chatbot. A digital operating executive that understands your goals, financials, workflows, tools, and customers, and tells you what to do about them.</p>
+
+    <div class="lbl">Here are the 3 things I would fix this week</div>
+
+    <div class="reco">
+      <div class="rnum">Priority 01 &middot; Revenue</div>
+      <h3>Sales follow-up slowed by 41% and inquiries are leaking.</h3>
+      <div class="why">
+        <div><span class="dot"></span><span>Website conversion is healthy. Ad spend is healthy.</span></div>
+        <div><span class="dot"></span><span>The gap is speed: <b>average follow-up went from 9 to 41 minutes</b>, and 28 inquiries got no second touch.</span></div>
+        <div><span class="dot"></span><span>Add one follow-up sequence run by the Follow-Up worker.</span></div>
+      </div>
+      <div class="act"><span class="lift">Estimated monthly lift <b>+$18,400</b></span><span class="sp"></span><button class="btn ghost sm">Ask why</button><button class="btn sm">Do it</button></div>
+    </div>
+
+    <div class="reco">
+      <div class="rnum">Priority 02 &middot; Cash</div>
+      <h3>$62,000 is sitting in overdue invoices with no reminders going out.</h3>
+      <div class="why">
+        <div><span class="dot"></span><span>31 invoices are more than 30 days late. None have an automated reminder.</span></div>
+        <div><span class="dot"></span><span>Turn on the Collections worker: polite reminders at 3, 7, and 14 days, escalating to a call task for your team.</span></div>
+      </div>
+      <div class="act"><span class="lift">Recover up to <b>$62,000</b></span><span class="sp"></span><button class="btn ghost sm">Ask why</button><button class="btn sm">Do it</button></div>
+    </div>
+
+    <div class="reco">
+      <div class="rnum">Priority 03 &middot; Efficiency</div>
+      <h3>Your front desk spends ~35 hours a month on calls a worker could take.</h3>
+      <div class="why">
+        <div><span class="dot"></span><span>340 inbound calls a month, most are scheduling and hours questions.</span></div>
+        <div><span class="dot"></span><span>An AI receptionist handles booking and FAQs, and routes real issues to a person.</span></div>
+      </div>
+      <div class="act"><span class="lift">Save <b>~35 hours / month</b></span><span class="sp"></span><button class="btn ghost sm">Ask why</button><button class="btn sm">Preview it</button></div>
+    </div>
+  </section>
+
+  <!-- DIGITAL WORKFORCE -->
+  <section class="view" data-view="workforce">
+    <div class="h">Digital workforce</div>
+    <p class="sub">Your AI employees. Read-only workers run on their own. Anything that writes or contacts a customer asks first, until you trust it enough to turn it loose.</p>
+    <div class="lbl">Working now</div>
+    <div class="row"><div class="r1"><h4>Morning Briefer</h4><span class="badge auto">Autonomous</span><span class="badge on">On</span><span class="cad">Daily</span><div class="tog on" style="margin-left:12px"></div></div><p>Reads your tools overnight and writes your command center and the COO's top 3.</p></div>
+    <div class="row"><div class="r1"><h4>Follow-Up Worker</h4><span class="badge approve">Asks first</span><span class="cad">Realtime</span><div class="tog" style="margin-left:auto"></div></div><p>Texts every new patient inquiry within 2 minutes and chases no-replies for 5 days. Waiting for you to turn it on.</p></div>
+    <div class="row"><div class="r1"><h4>Collections Worker</h4><span class="badge approve">Asks first</span><span class="cad">Daily</span><div class="tog" style="margin-left:auto"></div></div><p>Sends reminders on overdue invoices and escalates to a call task after 14 days.</p></div>
+    <div class="row"><div class="r1"><h4>Review Requester</h4><span class="badge auto">Autonomous</span><span class="badge on">On</span><span class="cad">Daily</span><div class="tog on" style="margin-left:12px"></div></div><p>Asks happy patients for a review the day after their visit.</p></div>
+    <div style="margin-top:8px"><button class="btn ghost" onclick="show('marketplace')">Hire another worker from the marketplace &rarr;</button></div>
+  </section>
+
+  <!-- WORKFLOWS -->
+  <section class="view" data-view="workflows">
+    <div class="h">Workflows</div>
+    <p class="sub">How work moves through your company, run by your workers.</p>
+    <div class="row"><h4>New patient intake</h4><p style="margin-top:4px;color:var(--ink-3);font-size:12.5px">When: a new inquiry arrives</p><p>Text within 2 minutes &rarr; capture insurance &rarr; offer next 3 openings &rarr; book and confirm &rarr; add to command center.</p></div>
+    <div class="row"><h4>Overdue invoice recovery</h4><p style="margin-top:4px;color:var(--ink-3);font-size:12.5px">When: an invoice passes 30 days</p><p>Reminder at day 3 &rarr; reminder at day 7 &rarr; final notice at day 14 &rarr; create a call task for the team.</p></div>
+    <div class="row"><h4>Post-visit review</h4><p style="margin-top:4px;color:var(--ink-3);font-size:12.5px">When: a visit is marked complete</p><p>Wait one day &rarr; text a thank-you and review link &rarr; log the response.</p></div>
+  </section>
+
+  <!-- KNOWLEDGE -->
+  <section class="view" data-view="knowledge">
+    <div class="h">Company brain</div>
+    <p class="sub">Everything your company knows, in one place, remembered forever. Your workers and your COO reason over this.</p>
+    <div class="split2">
+      <div>
+        <div class="lbl">Sources</div>
+        <div class="conn">
+          <div class="c"><div><div class="nm">Google Workspace</div><div class="st ok">Connected</div></div></div>
+          <div class="c"><div><div class="nm">Practice CRM</div><div class="st ok">Connected</div></div></div>
+          <div class="c"><div><div class="nm">QuickBooks</div><div class="st ok">Connected</div></div></div>
+          <div class="c"><div><div class="nm">SOP documents</div><div class="st">24 files</div></div></div>
+        </div>
+        <div class="lbl">Upload documents</div>
+        <div class="empty"><h3>Drop in what runs the business</h3>SOPs, price lists, contracts, training docs. Your workers learn from them instantly.</div>
+      </div>
+      <div class="memo">
+        <h3>Company memory</h3>
+        <div class="m">Owner approved turning on the Review Requester.<div class="t">Today, 8:12 AM</div></div>
+        <div class="m">COO flagged follow-up slowdown.<div class="t">Today, 6:00 AM</div></div>
+        <div class="m">Leadership meeting: decided to add Saturday hours.<div class="t">Mon</div></div>
+        <div class="m">Insurance mix updated by the Intake worker.<div class="t">Last week</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSIGHTS -->
+  <section class="view" data-view="insights">
+    <div class="h">Insights</div>
+    <p class="sub">The opportunity engine never stops looking for value hiding in your business.</p>
+    <div class="opp"><div class="oi"><svg class="icon"><use href="#i-star"/></svg></div><div><div class="ot">183 patients never got a review request</div><div class="os">Recover local ranking with a one-time review ask.</div></div><div class="ov"><div class="m">low effort</div><button class="btn sm">Fix it</button></div></div>
+    <div class="opp"><div class="oi"><svg class="icon"><use href="#i-cash"/></svg></div><div><div class="ot">$62,000 in overdue invoices</div><div class="os">31 invoices past due with no reminder sequence.</div></div><div class="ov"><div class="m">recover $62k</div><button class="btn sm">Start</button></div></div>
+    <div class="opp"><div class="oi"><svg class="icon"><use href="#i-clock"/></svg></div><div><div class="ot">Automating scheduling could cut ~35 staff hours / mo</div><div class="os">Most front-desk calls are booking and hours.</div></div><div class="ov"><div class="m">-35 hrs/mo</div><button class="btn sm">Preview</button></div></div>
+    <div class="opp"><div class="oi"><svg class="icon"><use href="#i-alert"/></svg></div><div><div class="ot">14% of patients are overdue for a recall</div><div class="os">A recall campaign could rebook 60 to 90 visits.</div></div><div class="ov"><div class="m">+$40k est</div><button class="btn sm">Launch</button></div></div>
+  </section>
+
+  <!-- MARKETPLACE -->
+  <section class="view" data-view="marketplace">
+    <div class="h">Marketplace</div>
+    <p class="sub">Not just apps. Complete business systems, built by industry experts. Install workers, workflows, dashboards, SOPs, and KPIs in one move.</p>
+    <div class="lbl">Business systems</div>
+    <div class="grid">
+      <div class="pack"><div class="pk">Dental system</div><h4>Dental Practice OS</h4><div class="inc">Intake &middot; Follow-up &middot; Recalls &middot; Collections &middot; Reviews &middot; Front-desk AI &middot; KPI dashboard</div><div class="pf"><span class="pr">Installed</span><button class="btn ghost sm">Manage</button></div></div>
+      <div class="pack"><div class="pk">Restaurant system</div><h4>Restaurant OS</h4><div class="inc">Reservations &middot; Reviews &middot; Inventory alerts &middot; Staff scheduling &middot; Daily sales report</div><div class="pf"><span class="pr">from $290/mo</span><button class="btn sm">Install</button></div></div>
+      <div class="pack"><div class="pk">Home services</div><h4>Roofing OS</h4><div class="inc">Lead speed-to-lead &middot; Estimates &middot; Job tracking &middot; Collections &middot; Crew dispatch</div><div class="pf"><span class="pr">from $340/mo</span><button class="btn sm">Install</button></div></div>
+      <div class="pack"><div class="pk">Professional</div><h4>Law Firm OS</h4><div class="inc">Intake &middot; Conflict checks &middot; Matter tracking &middot; Billing follow-up &middot; Client updates</div><div class="pf"><span class="pr">from $360/mo</span><button class="btn sm">Install</button></div></div>
+    </div>
+    <div class="lbl">Individual workers</div>
+    <div class="grid">
+      <div class="pack"><div class="pk">Worker</div><h4>AI Receptionist</h4><div class="inc">Answers calls, books appointments, routes real issues to a person.</div><div class="pf"><span class="pr">$120/mo</span><button class="btn sm">Add</button></div></div>
+      <div class="pack"><div class="pk">Worker</div><h4>Collections Worker</h4><div class="inc">Chases overdue invoices on a schedule and escalates to your team.</div><div class="pf"><span class="pr">$90/mo</span><button class="btn sm">Add</button></div></div>
+      <div class="pack"><div class="pk">Worker</div><h4>Recall Campaigner</h4><div class="inc">Finds overdue customers and rebooks them automatically.</div><div class="pf"><span class="pr">$90/mo</span><button class="btn sm">Add</button></div></div>
+    </div>
+  </section>
+
+  <!-- BUILDER NETWORK -->
+  <section class="view" data-view="builders">
+    <div class="h">Builder network</div>
+    <p class="sub">TMI builds the technology. Industry experts build the knowledge, and share the revenue. Roofers, dentists, lawyers, accountants, restaurants, agencies, and creators packaging what they know into installable systems.</p>
+    <div class="grid">
+      <div class="pack"><div class="pk">By a 20-year operator</div><h4>HVAC Dispatch OS</h4><div class="inc">Built by a shop owner who ran 40 trucks. Speed-to-lead, dispatch, and callbacks.</div><div class="pf"><span class="pr">from $310/mo</span><button class="btn sm">View</button></div></div>
+      <div class="pack"><div class="pk">By a CPA firm</div><h4>Accounting Client OS</h4><div class="inc">Client onboarding, document chase, deadline tracking, and status updates.</div><div class="pf"><span class="pr">from $280/mo</span><button class="btn sm">View</button></div></div>
+      <div class="pack"><div class="pk">Become a builder</div><h4>Package what you know</h4><div class="inc">Turn your operating playbook into a system thousands can install. You earn on every install.</div><div class="pf"><span class="pr">Revenue share</span><button class="btn sm">Apply</button></div></div>
+    </div>
+  </section>
+
+  <!-- REPORTS -->
+  <section class="view" data-view="reports">
+    <div class="h">Reports</div>
+    <p class="sub">What your OS did, and what it is worth.</p>
+    <div class="tiles">
+      <div class="tile"><div class="k">Staff hours saved</div><div class="v">128</div><div class="d up">this month</div></div>
+      <div class="tile"><div class="k">Revenue influenced</div><div class="v">$71k</div><div class="d up">by workers</div></div>
+      <div class="tile"><div class="k">Tasks handled</div><div class="v">2,410</div><div class="d up">by AI</div></div>
+      <div class="tile"><div class="k">Approvals by you</div><div class="v">46</div><div class="d">this month</div></div>
+    </div>
+    <div class="lbl">Monthly summary</div>
+    <div class="empty"><h3>Your first monthly report generates on the 1st</h3>A plain-language recap of what the OS did, what it saved you, and what it recommends next.</div>
+  </section>
+
+  <!-- INTEGRATIONS -->
+  <section class="view" data-view="integrations">
+    <div class="h">Integrations</div>
+    <p class="sub">Connect a tool once. Your workers use it from then on, securely.</p>
+    <div class="conn">
+      <div class="c"><div><div class="nm">Google Workspace</div><div class="st ok">Connected</div></div><button class="btn ghost sm">Manage</button></div>
+      <div class="c"><div><div class="nm">Microsoft 365</div><div class="st">Not connected</div></div><button class="btn sm">Connect</button></div>
+      <div class="c"><div><div class="nm">QuickBooks</div><div class="st ok">Connected</div></div><button class="btn ghost sm">Manage</button></div>
+      <div class="c"><div><div class="nm">HubSpot</div><div class="st">Not connected</div></div><button class="btn sm">Connect</button></div>
+      <div class="c"><div><div class="nm">Twilio SMS</div><div class="st ok">Connected</div></div><button class="btn ghost sm">Manage</button></div>
+      <div class="c"><div><div class="nm">Stripe</div><div class="st">Not connected</div></div><button class="btn sm">Connect</button></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="view" data-view="settings">
+    <div class="h">Settings</div>
+    <p class="sub">Your company, your team, and your plan.</p>
+    <div class="lbl">Plan</div>
+    <div class="row"><div class="r1"><h4>Operate</h4><span class="badge on">Active</span><span class="cad">$1,500 / mo</span></div><p>Full command center, up to 10 workers, connected tools. Upgrade to Command for every department and priority build.</p></div>
+    <div class="lbl">Need more than the platform?</div>
+    <div class="row"><div class="r1"><h4>Talk to a TMI advisor</h4></div><p>Architecture, custom integrations, operational redesign, and enterprise deployment. When the software reaches its limit, our team takes over.</p><div style="margin-top:12px"><button class="btn sm">Book a strategy call</button></div></div>
+  </section>
+</main>
+
+<!-- Ask COO drawer -->
+<div class="scrim" id="scrim" onclick="closeAsk()"></div>
+<aside class="drawer" id="drawer">
+  <div class="dh"><svg class="icon" style="stroke:var(--ink)"><use href="#i-coo"/></svg> Ask your COO <span class="x" onclick="closeAsk()">&times;</span></div>
+  <div class="db" id="db">
+    <div class="msg coo">Morning. I reviewed the business overnight. The biggest thing this week is your follow-up speed. Want me to turn on the Follow-Up worker?</div>
+    <div class="msg me">We run a dental office. What should we automate first?</div>
+    <div class="msg coo">For a practice your size, start with speed-to-lead and collections. Those two are worth about $80,000 a year combined for you. I can install both now, set them to ask before contacting a patient, and you approve the first few. Ready?</div>
+  </div>
+  <div class="df"><input placeholder="Ask anything about your business..." /><button class="btn">Send</button></div>
+</aside>
+
+<script>
+var links=document.querySelectorAll('.side nav a');
+function show(v){
+  document.querySelectorAll('.view').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-view')===v);});
+  links.forEach(function(a){a.classList.toggle('on',a.getAttribute('data-v')===v);});
+  document.getElementById('side').classList.remove('open');
+  window.scrollTo(0,0);
+}
+links.forEach(function(a){a.addEventListener('click',function(){show(a.getAttribute('data-v'));});});
+function openAsk(){document.getElementById('drawer').classList.add('on');document.getElementById('scrim').classList.add('on');}
+function closeAsk(){document.getElementById('drawer').classList.remove('on');document.getElementById('scrim').classList.remove('on');}
+// let sample toggles flip for the demo feel
+document.querySelectorAll('.tog').forEach(function(t){t.addEventListener('click',function(){t.classList.toggle('on');});});
+</script>
+</body>
+</html>
