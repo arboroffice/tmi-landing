@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Command Center | TMI OS</title>
+<title>TMI OS</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
 <meta name="robots" content="noindex"/>
 <link rel="preconnect" href="https://api.fontshare.com"/>
@@ -11,132 +11,456 @@
 <style>
   :root{
     --bg:#ffffff;--bg-alt:#f6f6f4;--ink:#0a0b14;--ink-2:#55576a;--ink-3:#8a8c9e;
-    --line:rgba(10,11,20,0.10);--line-2:rgba(10,11,20,0.16);
-    --chart:#E4FF97;--chart-dark:#cdee72;
+    --line:rgba(10,11,20,0.09);--line-2:rgba(10,11,20,0.14);
+    --chart:#E4FF97;--chart-dark:#cdee72;--good:#3a7d33;--warn:#8a6d00;--warn-bg:#fff4d6;
     --sans:"General Sans",system-ui,-apple-system,sans-serif;
     --mono:"Neue Haas Grotesk Display",ui-monospace,"SF Mono",Menlo,monospace;
+    --nav:248px;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:var(--sans);color:var(--ink);background:var(--bg-alt);-webkit-font-smoothing:antialiased;min-height:100vh;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg-alt);-webkit-font-smoothing:antialiased;line-height:1.5;}
   a{color:inherit;text-decoration:none;}
-  .top{background:#fff;border-bottom:1px solid var(--line);height:60px;display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:10;}
-  .top .brand{display:flex;align-items:center;gap:9px;font-weight:700;}
-  .top .brand img{height:22px;}
-  .top .co{font-size:14px;color:var(--ink-2);padding-left:14px;border-left:1px solid var(--line);}
-  .top .co b{color:var(--ink);font-weight:600;}
-  .top .right{margin-left:auto;display:flex;align-items:center;gap:8px;}
-  .pill{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:var(--chart);border-radius:99px;padding:5px 11px;}
-  .signout{font-size:13px;color:var(--ink-3);cursor:pointer;padding:6px 10px;border-radius:8px;}
-  .signout:hover{color:var(--ink);background:var(--bg-alt);}
-  .wrap{max-width:1180px;margin:0 auto;padding:36px 24px 80px;}
-  .hd{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
-  .hd h1{font-size:clamp(26px,3vw,38px);font-weight:700;letter-spacing:-0.03em;}
-  .hd p{color:var(--ink-2);font-size:15px;margin-top:8px;max-width:60ch;line-height:1.5;}
-  .sec-label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:44px 0 16px;}
-  /* metrics */
-  .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
-  .tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;}
-  .tile .k{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);}
-  .tile .v{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-0.02em;margin-top:12px;font-variant-numeric:tabular-nums;}
-  .tile .v small{font-size:15px;color:var(--ink-3);margin-left:3px;}
-  .tile .h{font-size:12.5px;color:var(--ink-2);margin-top:8px;line-height:1.4;}
-  /* grid split */
-  .split{display:grid;grid-template-columns:1.5fr 1fr;gap:28px;align-items:start;}
-  @media(max-width:900px){.split{grid-template-columns:1fr;}}
-  /* workers */
-  .worker{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
-  .worker .r{display:flex;align-items:center;gap:12px;}
-  .worker h3{font-size:17px;font-weight:700;letter-spacing:-0.01em;}
-  .worker .badge{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:6px;}
+  svg{display:block;}
+  .icon{width:17px;height:17px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none;}
+
+  /* sidebar */
+  .side{position:fixed;top:0;left:0;bottom:0;width:var(--nav);background:var(--bg);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px 12px;overflow-y:auto;z-index:30;}
+  .side .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;padding:8px 10px 16px;}
+  .side .brand img{height:22px;}
+  .side .brand span{color:var(--ink-3);font-weight:600;}
+  .side .grp{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:16px 12px 8px;}
+  .side nav a{display:flex;align-items:center;gap:11px;font-size:14px;font-weight:500;color:var(--ink-2);padding:9px 12px;border-radius:9px;cursor:pointer;transition:background .12s,color .12s;}
+  .side nav a:hover{background:var(--bg-alt);color:var(--ink);}
+  .side nav a.on{background:var(--ink);color:#fff;}
+  .side nav a.on .icon{stroke:var(--chart-dark);}
+  .side nav a .tag{margin-left:auto;font-family:var(--mono);font-size:10px;background:var(--chart);color:var(--ink);border-radius:99px;padding:2px 7px;}
+  .side .who{margin-top:auto;display:flex;align-items:center;gap:10px;padding:14px 10px 4px;border-top:1px solid var(--line);}
+  .side .who .av{width:32px;height:32px;border-radius:9px;background:var(--ink);color:var(--chart);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;}
+  .side .who .nm{font-size:13px;font-weight:600;line-height:1.25;overflow:hidden;}
+  .side .who .nm small{display:block;color:var(--ink-3);font-weight:500;font-size:11.5px;}
+  .side .who .out{margin-left:auto;color:var(--ink-3);cursor:pointer;padding:6px;border-radius:7px;}
+  .side .who .out:hover{color:var(--ink);background:var(--bg-alt);}
+
+  /* main */
+  .main{margin-left:var(--nav);min-height:100vh;}
+  .top{height:60px;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 28px;position:sticky;top:0;z-index:8;}
+  .top .co{font-weight:600;font-size:15px;}
+  .top .plan{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;background:var(--chart);color:var(--ink);border-radius:99px;padding:4px 10px;}
+  .top .right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .askbtn{display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:600;border-radius:10px;padding:9px 15px;cursor:pointer;border:none;font-family:var(--sans);}
+  .askbtn .icon{stroke:var(--chart-dark);width:15px;height:15px;}
+  .askbtn:hover{opacity:.92;}
+
+  .view{display:none;padding:34px 28px 90px;max-width:1120px;}
+  .view.on{display:block;animation:fade .3s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .h{font-size:clamp(24px,2.6vw,32px);font-weight:700;letter-spacing:-0.025em;}
+  .sub{color:var(--ink-2);font-size:15px;margin-top:8px;max-width:64ch;}
+  .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin:36px 0 14px;}
+
+  /* tiles */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:13px;}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;}
+  .tile .k{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);}
+  .tile .v{font-family:var(--mono);font-size:28px;font-weight:600;letter-spacing:-0.02em;margin-top:10px;font-variant-numeric:tabular-nums;}
+  .tile .v small{font-size:14px;color:var(--ink-3);margin-left:2px;}
+  .tile .hh{font-size:12.5px;color:var(--ink-2);margin-top:8px;line-height:1.4;}
+
+  /* COO card */
+  .reco{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden;}
+  .reco::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--chart-dark);}
+  .reco .rk{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);}
+  .reco .rk .icon{width:15px;height:15px;stroke:var(--ink);}
+  .reco .rtext{font-size:16px;color:var(--ink);line-height:1.6;margin-top:12px;white-space:pre-wrap;}
+  .reco .rfoot{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;gap:10px;}
+
+  /* rows (workers / workflows) */
+  .row{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
+  .row .r1{display:flex;align-items:center;gap:12px;}
+  .row h4{font-size:16px;font-weight:700;letter-spacing:-0.01em;}
+  .row p{font-size:13.5px;color:var(--ink-2);margin-top:8px;line-height:1.5;}
+  .badge{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:6px;}
   .badge.auto{background:var(--chart);color:var(--ink);}
-  .badge.approve{background:#fff4d6;color:#8a6d00;border:1px solid #f0e0a8;}
+  .badge.approve{background:var(--warn-bg);color:var(--warn);border:1px solid #f0e0a8;}
   .badge.read{background:var(--bg-alt);color:var(--ink-2);border:1px solid var(--line);}
-  .worker .cad{margin-left:auto;font-size:12px;color:var(--ink-3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;}
-  .worker p{font-size:14px;color:var(--ink-2);line-height:1.5;margin-top:8px;}
-  /* workflows */
-  .flow{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
-  .flow h4{font-size:15.5px;font-weight:700;}
-  .flow .trig{font-size:12.5px;color:var(--ink-3);margin-top:4px;}
-  .flow ol{margin:12px 0 0 0;padding-left:18px;}
+  .cad{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);}
+  .racts{display:flex;align-items:center;gap:14px;margin-left:auto;}
+  .tog{width:38px;height:22px;border-radius:99px;background:var(--line-2);position:relative;cursor:pointer;transition:background .15s;flex:none;}
+  .tog.on{background:var(--chart-dark);}
+  .tog::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+  .tog.on::after{left:18px;}
+  .link{font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;font-family:var(--sans);}
+  .link:hover{background:var(--bg-alt);}
+  .link:disabled{opacity:.5;cursor:default;}
+  .wstat{font-size:12px;color:var(--ink-3);margin-top:7px;font-family:var(--mono);}
+  .flow ol{margin:12px 0 0;padding-left:18px;}
   .flow li{font-size:13.5px;color:var(--ink-2);line-height:1.5;margin-bottom:4px;}
-  /* build feed */
-  .feed{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;}
-  .feed h3{font-size:13px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px;}
-  .feed .item{padding:12px 0;border-top:1px solid var(--line);font-size:14px;color:var(--ink);line-height:1.5;}
-  .feed .item:first-of-type{border-top:none;}
-  .feed .item .t{font-size:11px;color:var(--ink-3);font-family:var(--mono);margin-top:3px;}
-  .next{margin-top:16px;background:var(--ink);color:#fff;border-radius:12px;padding:18px;}
-  .next h4{font-size:14px;font-weight:700;}
-  .next p{font-size:13px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5;}
-  .loading{padding:80px 0;text-align:center;color:var(--ink-3);font-size:15px;}
-  .banner{background:var(--ink);color:#fff;border-radius:14px;padding:20px 24px;margin-bottom:28px;display:none;}
+  .trig{font-size:12.5px;color:var(--ink-3);margin-top:5px;}
+
+  /* activity */
+  .memo{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 20px;}
+  .memo .m{padding:14px 0;border-top:1px solid var(--line);font-size:14px;display:flex;gap:12px;align-items:flex-start;}
+  .memo .m:first-child{border-top:none;}
+  .memo .m .dot{width:7px;height:7px;border-radius:50%;background:var(--chart-dark);margin-top:6px;flex:none;}
+  .memo .m .t{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:3px;}
+
+  .empty{background:#fff;border:1px dashed var(--line-2);border-radius:16px;padding:44px;text-align:center;color:var(--ink-3);}
+  .empty h3{color:var(--ink);font-size:18px;font-weight:700;margin-bottom:8px;}
+  .empty p{max-width:46ch;margin:0 auto;font-size:14px;line-height:1.6;}
+
+  /* ask drawer */
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:94vw;background:#fff;border-left:1px solid var(--line);transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.7,.2,1);z-index:40;display:flex;flex-direction:column;}
+  .drawer.on{transform:none;}
+  .drawer .dh{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--line);font-weight:700;}
+  .drawer .dh .icon{stroke:var(--ink);}
+  .drawer .dh .x{margin-left:auto;cursor:pointer;color:var(--ink-3);font-size:24px;line-height:1;padding:0 4px;}
+  .drawer .db{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;}
+  .msg{max-width:90%;font-size:14px;line-height:1.6;padding:12px 15px;border-radius:14px;white-space:pre-wrap;}
+  .msg.coo{background:var(--bg-alt);border:1px solid var(--line);}
+  .msg.me{background:var(--ink);color:#fff;align-self:flex-end;}
+  .msg.think{color:var(--ink-3);}
+  .sugg{display:flex;flex-wrap:wrap;gap:8px;}
+  .sugg button{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);background:var(--bg-alt);border:1px solid var(--line);border-radius:99px;padding:8px 13px;cursor:pointer;}
+  .sugg button:hover{border-color:var(--line-2);color:var(--ink);}
+  .drawer .df{padding:16px;border-top:1px solid var(--line);display:flex;gap:8px;}
+  .drawer .df input{flex:1;font-family:var(--sans);font-size:15px;border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;}
+  .drawer .df input:focus{outline:none;border-color:var(--ink);}
+  .drawer .df button{background:var(--chart);border:1px solid var(--chart);border-radius:10px;padding:0 16px;font-weight:600;cursor:pointer;font-family:var(--sans);}
+  .drawer .df button:hover{background:var(--chart-dark);}
+  .scrim{position:fixed;inset:0;background:rgba(10,11,20,.35);opacity:0;pointer-events:none;transition:opacity .25s;z-index:35;}
+  .scrim.on{opacity:1;pointer-events:auto;}
+
+  .banner{background:var(--ink);color:#fff;border-radius:14px;padding:18px 22px;margin-bottom:26px;display:none;font-size:15px;line-height:1.5;}
   .banner.on{display:block;}
   .banner b{color:var(--chart);}
+  .loading{padding:90px 0;text-align:center;color:var(--ink-3);font-size:15px;}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:14px;font-weight:500;padding:12px 20px;border-radius:11px;opacity:0;transition:opacity .2s,transform .2s;z-index:50;pointer-events:none;}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+  .dots{display:inline-flex;gap:5px;vertical-align:middle;}
+  .dots span{width:7px;height:7px;border-radius:50%;background:var(--chart-dark);animation:pulse 1.1s infinite;}
+  .dots span:nth-child(2){animation-delay:.15s;}.dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes pulse{0%,100%{opacity:.3;transform:scale(.8);}50%{opacity:1;transform:scale(1);}}
+
+  .burger{display:none;}
+  @media(max-width:880px){
+    .side{transform:translateX(-100%);transition:transform .3s;}
+    .side.open{transform:none;}
+    .main{margin-left:0;}
+    .burger{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--line-2);border-radius:9px;background:#fff;cursor:pointer;flex:none;}
+    .view{padding:24px 18px 90px;}
+    .top{padding:0 14px;gap:10px;}
+    .top .co{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;}
+    .top .plan{display:none;}
+    .top .right{flex:none;}
+    .askbtn{white-space:nowrap;padding:9px 13px;}
+  }
 </style>
 </head>
 <body>
+<svg style="display:none" aria-hidden="true"><defs>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+<symbol id="i-coo" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+<symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4"/><circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/></symbol>
+<symbol id="i-flow" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="4" rx="1"/><rect x="15" y="10" width="6" height="4" rx="1"/><rect x="3" y="16" width="6" height="4" rx="1"/><path d="M9 6h4a2 2 0 0 1 2 2v2M9 18h4a2 2 0 0 0 2-2v-2"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v6M15 3v6"/><path d="M7 9h10v3a5 5 0 0 1-10 0z"/><path d="M12 17v4"/></symbol>
+<symbol id="i-out" viewBox="0 0 24 24"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h9"/></symbol>
+</defs></svg>
+
+<aside class="side" id="side">
+  <div class="brand"><img src="/logo.svg" alt="TMI"/> TMI <span>OS</span></div>
+  <div class="grp">Your company</div>
+  <nav id="nav">
+    <a data-v="command" class="on"><svg class="icon"><use href="#i-grid"/></svg> Command Center</a>
+    <a data-v="coo"><svg class="icon"><use href="#i-coo"/></svg> AI COO</a>
+    <a data-v="workforce"><svg class="icon"><use href="#i-bot"/></svg> Workforce <span class="tag" id="wtag"></span></a>
+    <a data-v="workflows"><svg class="icon"><use href="#i-flow"/></svg> Workflows</a>
+    <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
+    <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Integrations</a>
+  </nav>
+  <div class="who">
+    <div class="av" id="av">·</div>
+    <div class="nm" id="who">Loading<small id="whoPlan"></small></div>
+    <span class="out" title="Sign out" onclick="signout()"><svg class="icon"><use href="#i-out"/></svg></span>
+  </div>
+</aside>
+
+<main class="main">
   <div class="top">
-    <a class="brand" href="/os/app"><img src="/logo.svg" alt="TMI"/> OS</a>
-    <div class="co" id="co"></div>
-    <div class="right"><span class="pill" id="plan">Trial</span><span class="signout" onclick="signout()">Sign out</span></div>
+    <button class="burger" onclick="document.getElementById('side').classList.toggle('open')"><svg class="icon"><use href="#i-grid"/></svg></button>
+    <span class="co" id="co"></span>
+    <span class="plan" id="plan"></span>
+    <div class="right"><button class="askbtn" onclick="openAsk()"><svg class="icon"><use href="#i-coo"/></svg> Ask your COO</button></div>
   </div>
 
-  <div class="wrap" id="wrap">
-    <div class="loading" id="loading">Loading your OS...</div>
+  <div id="loading" class="loading">Loading your OS...</div>
+
+  <!-- COMMAND CENTER -->
+  <section class="view" data-view="command">
+    <div id="banner" class="banner"></div>
+    <div class="h">Command center</div>
+    <p class="sub" id="summary"></p>
+
+    <div class="lbl">From your AI COO</div>
+    <div class="reco">
+      <div class="rk"><svg class="icon"><use href="#i-coo"/></svg> Morning briefing</div>
+      <div class="rtext" id="briefing"><span class="dots"><span></span><span></span><span></span></span></div>
+      <div class="rfoot"><button class="link" onclick="openAsk()">Ask a follow-up</button><button class="link" onclick="loadBriefing(true)">Refresh</button></div>
+    </div>
+
+    <div class="lbl">The one screen</div>
+    <div class="tiles" id="metrics"></div>
+  </section>
+
+  <!-- AI COO -->
+  <section class="view" data-view="coo">
+    <div class="h">Your AI COO</div>
+    <p class="sub">It sees your whole OS: your metrics, your workers, your workflows, and what happened this week. Ask it anything about the business and it answers from what it can see.</p>
+    <div class="lbl">Ask</div>
+    <div class="sugg" id="suggCoo"></div>
+    <div style="margin-top:20px"><button class="askbtn" onclick="openAsk()"><svg class="icon"><use href="#i-coo"/></svg> Open the COO</button></div>
+    <div class="lbl">Latest briefing</div>
+    <div class="reco"><div class="rtext" id="briefing2"><span class="dots"><span></span><span></span><span></span></span></div></div>
+  </section>
+
+  <!-- WORKFORCE -->
+  <section class="view" data-view="workforce">
+    <div class="h">Digital workforce</div>
+    <p class="sub">Your AI workers. Turn one on and it starts doing its job on its cadence. Anything that writes or contacts a customer asks you first until you say otherwise.</p>
+    <div id="workers" style="margin-top:26px"></div>
+  </section>
+
+  <!-- WORKFLOWS -->
+  <section class="view" data-view="workflows">
+    <div class="h">Workflows</div>
+    <p class="sub">The repeatable sequences your OS runs so the same thing happens every time, without anyone remembering to do it.</p>
+    <div id="workflows" style="margin-top:26px"></div>
+  </section>
+
+  <!-- ACTIVITY -->
+  <section class="view" data-view="activity">
+    <div class="h">Activity</div>
+    <p class="sub">Everything your OS has done, newest first.</p>
+    <div class="lbl">Build feed</div>
+    <div class="memo" id="feed"></div>
+  </section>
+
+  <!-- INTEGRATIONS -->
+  <section class="view" data-view="integrations">
+    <div class="h">Integrations</div>
+    <p class="sub">Your metrics go live once your tools are connected. During your build, our team wires these into your OS so the command center runs on your real numbers.</p>
+    <div class="empty" style="margin-top:26px">
+      <h3>Connect your tools</h3>
+      <p>Tell your COO which tools you use and we will wire in your first live data source. Until then, your workers run on what you give them.</p>
+      <div style="margin-top:18px"><button class="askbtn" style="display:inline-flex" onclick="openAsk('What should I connect first?')"><svg class="icon"><use href="#i-coo"/></svg> Ask what to connect first</button></div>
+    </div>
+  </section>
+</main>
+
+<!-- ASK DRAWER -->
+<div class="scrim" id="scrim" onclick="closeAsk()"></div>
+<aside class="drawer" id="drawer">
+  <div class="dh"><svg class="icon"><use href="#i-coo"/></svg> AI COO<span class="x" onclick="closeAsk()">&times;</span></div>
+  <div class="db" id="chat"></div>
+  <div class="df">
+    <input id="ask" placeholder="Ask about your business..." onkeydown="if(event.key==='Enter')send()"/>
+    <button onclick="send()">Ask</button>
   </div>
+</aside>
+
+<div class="toast" id="toast"></div>
 
 <script>
 var TOKEN_KEY='tmios_token';
 var tok;try{tok=localStorage.getItem(TOKEN_KEY);}catch(_){}
 if(!tok) location.href='/os/';
+var STATE=null, briefingLoaded=false, askedIntro=false;
 
 function signout(){try{localStorage.removeItem(TOKEN_KEY);}catch(_){}location.href='/os/';}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2200);}
+function cap(s){return String(s||'').replace(/^\w/,function(c){return c.toUpperCase();});}
+function fmt(iso){try{var d=new Date(iso);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}catch(e){return '';}}
 
+async function api(path,body){
+  var r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},body:JSON.stringify(body||{})});
+  var j=await r.json().catch(function(){return {};});
+  if(r.status===401){signout();throw new Error('signed out');}
+  if(!r.ok) throw new Error(j.error||'Something went wrong');
+  return j;
+}
+
+/* ---- nav ---- */
+document.getElementById('nav').addEventListener('click',function(e){
+  var a=e.target.closest('a[data-v]');if(!a)return;
+  show(a.getAttribute('data-v'));
+  document.getElementById('side').classList.remove('open');
+});
+function show(v){
+  document.querySelectorAll('#nav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-v')===v);});
+  document.querySelectorAll('.view').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-view')===v);});
+  if((v==='command'||v==='coo')&&!briefingLoaded) loadBriefing();
+  window.scrollTo(0,0);
+}
+
+/* ---- load ---- */
 (async function(){
-  var r;
-  try{ r=await fetch('/api/os2-state',{headers:{Authorization:'Bearer '+tok}}); }
-  catch(e){ return; }
-  if(r.status===401){ signout(); return; }
-  var s=await r.json().catch(function(){return {};});
-  if(!r.ok){ document.getElementById('loading').textContent=s.error||'Could not load your OS.'; return; }
+  var s;
+  try{ s=await api('/api/os2-state'); }catch(e){ if(e.message!=='signed out') document.getElementById('loading').textContent='Could not load your OS.'; return; }
   if(s.tenant && !s.tenant.onboarded){ location.href='/os/onboarding'; return; }
-  render(s);
+  STATE=s; render(s);
 })();
 
 function render(s){
-  document.getElementById('co').innerHTML='<b>'+esc(s.tenant&&s.tenant.name||'Your company')+'</b>';
-  document.getElementById('plan').textContent=(s.tenant&&s.tenant.plan||'trial').replace(/^\w/,function(c){return c.toUpperCase();});
-  var isNew=/[?&]new=1/.test(location.search);
+  document.getElementById('loading').style.display='none';
+  var name=s.tenant&&s.tenant.name||'Your company';
+  document.getElementById('co').textContent=name;
+  document.getElementById('who').innerHTML=esc(name)+'<small id="whoPlan">'+cap(s.tenant&&s.tenant.plan||'trial')+' plan</small>';
+  document.getElementById('av').textContent=(name.trim()[0]||'·').toUpperCase();
+  document.getElementById('plan').textContent=cap(s.tenant&&s.tenant.plan||'trial');
+  document.getElementById('summary').textContent=s.tenant&&s.tenant.summary||'Your company on one screen.';
 
-  var metrics=(s.metrics||[]).map(function(m){
-    return '<div class="tile"><div class="k">'+esc(m.label)+'</div><div class="v">'+esc(m.value||'-')+(m.unit?'<small>'+esc(m.unit)+'</small>':'')+'</div>'+(m.hint?'<div class="h">'+esc(m.hint)+'</div>':'')+'</div>';
-  }).join('');
+  var workers=s.workers||[];
+  document.getElementById('wtag').textContent=workers.length||'';
 
-  var workers=(s.workers||[]).map(function(w){
-    return '<div class="worker"><div class="r"><h3>'+esc(w.name)+'</h3><span class="badge '+esc(w.autonomy)+'">'+({read:'Reports',approve:'Asks first',auto:'Autonomous'}[w.autonomy]||w.autonomy)+'</span><span class="cad">'+esc(w.cadence)+'</span></div>'+(w.job?'<p>'+esc(w.job)+'</p>':'')+'</div>';
-  }).join('');
+  if(/[?&]new=1/.test(location.search)){
+    var b=document.getElementById('banner');
+    b.innerHTML='Your OS is built. <b>'+workers.length+' AI workers</b> and <b>'+((s.metrics||[]).length)+' live metrics</b> are ready. Turn a worker on to put it to work.';
+    b.classList.add('on');
+  }
 
-  var flows=(s.workflows||[]).map(function(f){
-    var steps=(f.steps||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
-    return '<div class="flow"><h4>'+esc(f.name)+'</h4>'+(f.trigger?'<div class="trig">When: '+esc(f.trigger)+'</div>':'')+(steps?'<ol>'+steps+'</ol>':'')+'</div>';
-  }).join('');
-
-  var feed=(s.build_log||[]).map(function(b){
-    return '<div class="item">'+esc(b.summary)+'<div class="t">'+fmt(b.created_at)+'</div></div>';
-  }).join('')||'<div class="item">Your OS is ready.</div>';
-
-  var html=''+
-    (isNew?'<div class="banner on">Your OS is built. <b>'+((s.workers||[]).length)+' AI workers</b> and <b>'+((s.metrics||[]).length)+' live metrics</b> are set up. This is your company on one screen.</div>':'')+
-    '<div class="hd"><div><h1>Command center</h1>'+(s.tenant&&s.tenant.summary?'<p>'+esc(s.tenant.summary)+'</p>':'')+'</div></div>'+
-    '<div class="sec-label">The one screen</div><div class="metrics">'+metrics+'</div>'+
-    '<div class="split"><div><div class="sec-label">Your AI workers</div>'+workers+'<div class="sec-label">Workflows</div>'+flows+'</div>'+
-    '<div><div class="sec-label">What TMI built</div><div class="feed"><h3>Build feed</h3>'+feed+
-    '<div class="next"><h4>What is next</h4><p>Connect your tools and turn your workers on. We will reach out to wire in your first live data source.</p></div></div></div></div>';
-
-  document.getElementById('wrap').innerHTML=html;
+  renderMetrics(s.metrics||[]);
+  renderWorkers(workers);
+  renderWorkflows(s.workflows||[]);
+  renderFeed(s.build_log||[]);
+  renderSugg();
+  show('command');
 }
-function fmt(iso){try{var d=new Date(iso);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}catch(e){return '';}}
+
+function renderMetrics(metrics){
+  document.getElementById('metrics').innerHTML = metrics.length ? metrics.map(function(m){
+    return '<div class="tile"><div class="k">'+esc(m.label)+'</div><div class="v">'+esc(m.value||'-')+(m.unit?'<small>'+esc(m.unit)+'</small>':'')+'</div>'+(m.hint?'<div class="hh">'+esc(m.hint)+'</div>':'')+'</div>';
+  }).join('') : '<div class="empty" style="grid-column:1/-1"><h3>No metrics yet</h3><p>Your command center is set up but not connected to live data. Ask your COO what to connect first.</p></div>';
+}
+
+function renderWorkers(workers){
+  var host=document.getElementById('workers');
+  if(!workers.length){ host.innerHTML='<div class="empty"><h3>No workers yet</h3><p>Finish onboarding to have your first AI workers designed for your business.</p></div>'; return; }
+  host.innerHTML=workers.map(function(w){
+    var on=w.status==='active';
+    var label={read:'Reports',approve:'Asks first',auto:'Autonomous'}[w.autonomy]||w.autonomy;
+    return '<div class="row" id="w-'+esc(w.id)+'">'+
+      '<div class="r1"><h4>'+esc(w.name)+'</h4>'+
+      '<span class="badge '+esc(w.autonomy)+'">'+esc(label)+'</span>'+
+      '<span class="cad">'+esc(w.cadence)+'</span>'+
+      '<div class="racts">'+
+        '<button class="link" onclick="runWorker(\''+esc(w.id)+'\',this)">Run now</button>'+
+        '<div class="tog'+(on?' on':'')+'" title="'+(on?'On':'Off')+'" onclick="toggleWorker(\''+esc(w.id)+'\',this)"></div>'+
+      '</div></div>'+
+      (w.job?'<p>'+esc(w.job)+'</p>':'')+
+      '<div class="wstat" id="ws-'+esc(w.id)+'">'+(on?'On':'Off')+(w.last_run?' · last ran '+fmt(w.last_run):'')+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderWorkflows(flows){
+  var host=document.getElementById('workflows');
+  if(!flows.length){ host.innerHTML='<div class="empty"><h3>No workflows yet</h3><p>Your first workflows are designed during onboarding and appear here.</p></div>'; return; }
+  host.innerHTML=flows.map(function(f){
+    var steps=(f.steps||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
+    return '<div class="row flow"><div class="r1"><h4>'+esc(f.name)+'</h4><span class="badge on" style="margin-left:auto">'+esc(f.status||'active')+'</span></div>'+
+      (f.trigger?'<div class="trig">When: '+esc(f.trigger)+'</div>':'')+(steps?'<ol>'+steps+'</ol>':'')+'</div>';
+  }).join('');
+}
+
+function renderFeed(log){
+  document.getElementById('feed').innerHTML = log.length ? log.map(function(b){
+    return '<div class="m"><span class="dot"></span><div>'+esc(b.summary)+'<div class="t">'+fmt(b.created_at)+'</div></div></div>';
+  }).join('') : '<div class="m"><span class="dot"></span><div>Your OS is ready.</div></div>';
+}
+
+/* ---- worker actions ---- */
+async function toggleWorker(id,el){
+  var was=el.classList.contains('on'); el.classList.toggle('on');
+  try{
+    var j=await api('/api/os2-worker',{id:id,action:'toggle'});
+    var on=j.worker&&j.worker.status==='active';
+    el.classList.toggle('on',on); el.title=on?'On':'Off';
+    var ws=document.getElementById('ws-'+id); if(ws) ws.textContent=on?'On':'Off';
+    var w=(STATE.workers||[]).find(function(x){return x.id===id;}); if(w)w.status=j.worker.status;
+    toast(on?'Worker turned on':'Worker paused');
+    briefingLoaded=false;
+  }catch(e){ el.classList.toggle('on',was); if(e.message!=='signed out') toast(e.message); }
+}
+async function runWorker(id,btn){
+  btn.disabled=true; var t=btn.textContent; btn.textContent='Running...';
+  try{
+    await api('/api/os2-worker',{id:id,action:'run'});
+    var w=(STATE.workers||[]).find(function(x){return x.id===id;});
+    var ws=document.getElementById('ws-'+id); if(ws) ws.textContent=(w&&w.status==='active'?'On':'Off')+' · last ran just now';
+    toast('Ran '+(w?w.name:'worker'));
+    refreshFeed();
+  }catch(e){ if(e.message!=='signed out') toast(e.message); }
+  btn.disabled=false; btn.textContent=t;
+}
+async function refreshFeed(){
+  try{ var s=await api('/api/os2-state'); STATE=s; renderFeed(s.build_log||[]); }catch(_){}
+}
+
+/* ---- COO briefing + ask ---- */
+async function loadBriefing(force){
+  if(briefingLoaded && !force) return;
+  briefingLoaded=true;
+  var dots='<span class="dots"><span></span><span></span><span></span></span>';
+  document.getElementById('briefing').innerHTML=dots;
+  var b2=document.getElementById('briefing2'); if(b2) b2.innerHTML=dots;
+  try{
+    var j=await api('/api/os2-ask',{mode:'briefing'});
+    document.getElementById('briefing').textContent=j.answer;
+    if(b2) b2.textContent=j.answer;
+  }catch(e){
+    if(e.message!=='signed out'){ document.getElementById('briefing').textContent='Could not load the briefing. Try Refresh.'; briefingLoaded=false; }
+  }
+}
+
+var SUGGESTIONS=['What needs my attention today?','Which worker should I turn on first?','What is my biggest bottleneck?','What should I connect first?'];
+function renderSugg(){
+  document.getElementById('suggCoo').innerHTML=SUGGESTIONS.map(function(q){return '<button onclick="openAsk(\''+esc(q).replace(/'/g,"\\'")+'\')">'+esc(q)+'</button>';}).join('');
+}
+
+function openAsk(preset){
+  document.getElementById('scrim').classList.add('on');
+  document.getElementById('drawer').classList.add('on');
+  if(!askedIntro){
+    askedIntro=true;
+    var chat=document.getElementById('chat');
+    chat.innerHTML='<div class="msg coo">I am your COO. I can see your command center, your workers, your workflows, and this week\'s activity. Ask me anything.</div>'+
+      '<div class="sugg">'+SUGGESTIONS.map(function(q){return '<button onclick="quick(\''+esc(q).replace(/'/g,"\\'")+'\')">'+esc(q)+'</button>';}).join('')+'</div>';
+  }
+  var inp=document.getElementById('ask');
+  if(preset && typeof preset==='string'){ inp.value=preset; setTimeout(send,60); }
+  else setTimeout(function(){inp.focus();},250);
+}
+function closeAsk(){document.getElementById('scrim').classList.remove('on');document.getElementById('drawer').classList.remove('on');}
+function quick(q){document.getElementById('ask').value=q;send();}
+
+async function send(){
+  var inp=document.getElementById('ask'); var q=inp.value.trim(); if(!q) return;
+  inp.value='';
+  var chat=document.getElementById('chat');
+  var sg=chat.querySelector('.sugg'); if(sg) sg.remove();
+  chat.insertAdjacentHTML('beforeend','<div class="msg me">'+esc(q)+'</div>');
+  var think=document.createElement('div'); think.className='msg coo think'; think.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';
+  chat.appendChild(think); chat.scrollTop=chat.scrollHeight;
+  try{
+    var j=await api('/api/os2-ask',{question:q});
+    think.className='msg coo'; think.textContent=j.answer;
+  }catch(e){
+    if(e.message==='signed out') return;
+    think.className='msg coo'; think.textContent=e.message;
+  }
+  chat.scrollTop=chat.scrollHeight;
+}
 </script>
 </body>
 </html>
