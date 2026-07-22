@@ -35,6 +35,7 @@ module.exports = async function handler(req, res) {
         id: tenant.id, name: tenant.name, onboarded: !!tenant.onboarded,
         summary: tenant.summary || null, plan: tenant.plan || 'trial',
         business_type: tenant.business_type || null, profile: tenant.profile || {},
+        digest: tenant.digest !== false,
       } : null,
       metrics: metrics.sort(bySort),
       workers: workers.sort(bySort),

@@ -24,6 +24,7 @@ module.exports = async function handler(req, res) {
     const patch = {};
     if (typeof b.name === 'string' && b.name.trim()) patch.name = b.name.trim().slice(0, 120);
     if (typeof b.business_type === 'string') patch.business_type = b.business_type.trim().slice(0, 80) || null;
+    if (typeof b.digest === 'boolean') patch.digest = b.digest;
     if (b.profile && typeof b.profile === 'object') {
       const prof = Object.assign({}, tenant.profile || {});
       for (const k of PFIELDS) if (typeof b.profile[k] === 'string') prof[k] = b.profile[k].slice(0, 2000);
@@ -33,7 +34,8 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({
       tenant: {
         id: u.id, name: u.name, business_type: u.business_type || null,
-        plan: u.plan || 'trial', profile: u.profile || {}, summary: u.summary || null, onboarded: !!u.onboarded,
+        plan: u.plan || 'trial', profile: u.profile || {}, summary: u.summary || null,
+        onboarded: !!u.onboarded, digest: u.digest !== false,
       },
     });
   } catch (e) {

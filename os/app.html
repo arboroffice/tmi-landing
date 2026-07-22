@@ -669,14 +669,22 @@ function renderSettings(){
     html+='<div class="field"><label>'+esc(r[1])+'</label>'+
       (r[2]==='textarea'?'<textarea id="'+r[0]+'">'+esc(r[3])+'</textarea>':'<input id="'+r[0]+'" value="'+esc(r[3])+'"/>')+'</div>';
   });
-  html+='<div class="mfoot" style="justify-content:flex-start"><button class="btn" id="sSave" onclick="saveSettings()">Save settings</button><span class="cad" style="align-self:center;margin-left:8px">Plan: '+cap(t.plan||'trial')+'</span></div></div>';
+  html+='<div class="field"><label>Weekly digest email</label><div style="display:flex;align-items:center;gap:12px"><div class="tog'+(t.digest!==false?' on':'')+'" id="sDigest" onclick="this.classList.toggle(\'on\')"></div><span style="font-size:13px;color:var(--ink-2)">Email your owners and managers what needs them, every Monday.</span></div></div>';
+  html+='<div class="mfoot" style="justify-content:flex-start;flex-wrap:wrap;gap:10px"><button class="btn" id="sSave" onclick="saveSettings()">Save settings</button><button class="btn ghost" id="sPrev" onclick="previewDigest()"><svg class="icon"><use href="#i-inbox"/></svg> Send me a preview</button><span class="cad" style="align-self:center">Plan: '+cap(t.plan||'trial')+'</span></div></div>';
   document.getElementById('settings').innerHTML=html;
+}
+async function previewDigest(){
+  var btn=document.getElementById('sPrev');btn.disabled=true;var t=btn.innerHTML;btn.textContent='Sending...';
+  try{var j=await api('/api/os2-digest',{test:true});toast(j.sent?'Preview sent to your email':'Nothing to send yet. Add a worker or a task first.');}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+  btn.disabled=false;btn.innerHTML=t;
 }
 async function saveSettings(){
   var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
   var btn=document.getElementById('sSave');btn.disabled=true;btn.textContent='Saving...';
   try{
-    var j=await api('/api/os2-profile',{name:g('s_name'),business_type:g('s_type'),profile:{what_you_do:g('s_do'),what_you_track:g('s_track'),what_falls_through:g('s_leak'),tools:g('s_tools'),bottleneck:g('s_bottleneck')}});
+    var digestEl=document.getElementById('sDigest');
+    var j=await api('/api/os2-profile',{name:g('s_name'),business_type:g('s_type'),digest:digestEl?digestEl.classList.contains('on'):true,profile:{what_you_do:g('s_do'),what_you_track:g('s_track'),what_falls_through:g('s_leak'),tools:g('s_tools'),bottleneck:g('s_bottleneck')}});
     if(j.tenant){STATE.tenant=Object.assign({},STATE.tenant,j.tenant);document.getElementById('co').textContent=j.tenant.name;document.getElementById('who').innerHTML=esc(j.tenant.name)+'<small>'+cap(j.tenant.plan||'trial')+' plan</small>';document.getElementById('av').textContent=(String(j.tenant.name).trim()[0]||'·').toUpperCase();}
     toast('Settings saved');briefingLoaded=false;
   }catch(e){if(e.message!=='signed out')toast(e.message);}
