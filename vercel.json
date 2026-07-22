@@ -2,7 +2,8 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "functions": {
-    "api/audit-research.js": { "maxDuration": 60 }
+    "api/audit-research.js": { "maxDuration": 60 },
+    "api/os2-intake.js": { "maxDuration": 60 }
   },
   "crons": [
     { "path": "/api/ceo-agent", "schedule": "0 12 * * 1" },
@@ -921,6 +922,26 @@
         }
       ],
       "destination": "/cityleads/$1"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "os.tmitechai.com"
+        }
+      ],
+      "destination": "/os/index"
+    },
+    {
+      "source": "/(.+)",
+      "has": [
+        {
+          "type": "host",
+          "value": "os.tmitechai.com"
+        }
+      ],
+      "destination": "/os/$1"
     }
   ]
 }

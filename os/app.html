@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Command Center | TMI OS</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://api.fontshare.com"/>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#ffffff;--bg-alt:#f6f6f4;--ink:#0a0b14;--ink-2:#55576a;--ink-3:#8a8c9e;
+    --line:rgba(10,11,20,0.10);--line-2:rgba(10,11,20,0.16);
+    --chart:#E4FF97;--chart-dark:#cdee72;
+    --sans:"General Sans",system-ui,-apple-system,sans-serif;
+    --mono:"Neue Haas Grotesk Display",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg-alt);-webkit-font-smoothing:antialiased;min-height:100vh;}
+  a{color:inherit;text-decoration:none;}
+  .top{background:#fff;border-bottom:1px solid var(--line);height:60px;display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:10;}
+  .top .brand{display:flex;align-items:center;gap:9px;font-weight:700;}
+  .top .brand img{height:22px;}
+  .top .co{font-size:14px;color:var(--ink-2);padding-left:14px;border-left:1px solid var(--line);}
+  .top .co b{color:var(--ink);font-weight:600;}
+  .top .right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .pill{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:var(--chart);border-radius:99px;padding:5px 11px;}
+  .signout{font-size:13px;color:var(--ink-3);cursor:pointer;padding:6px 10px;border-radius:8px;}
+  .signout:hover{color:var(--ink);background:var(--bg-alt);}
+  .wrap{max-width:1180px;margin:0 auto;padding:36px 24px 80px;}
+  .hd{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .hd h1{font-size:clamp(26px,3vw,38px);font-weight:700;letter-spacing:-0.03em;}
+  .hd p{color:var(--ink-2);font-size:15px;margin-top:8px;max-width:60ch;line-height:1.5;}
+  .sec-label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:44px 0 16px;}
+  /* metrics */
+  .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;}
+  .tile .k{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);}
+  .tile .v{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-0.02em;margin-top:12px;font-variant-numeric:tabular-nums;}
+  .tile .v small{font-size:15px;color:var(--ink-3);margin-left:3px;}
+  .tile .h{font-size:12.5px;color:var(--ink-2);margin-top:8px;line-height:1.4;}
+  /* grid split */
+  .split{display:grid;grid-template-columns:1.5fr 1fr;gap:28px;align-items:start;}
+  @media(max-width:900px){.split{grid-template-columns:1fr;}}
+  /* workers */
+  .worker{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
+  .worker .r{display:flex;align-items:center;gap:12px;}
+  .worker h3{font-size:17px;font-weight:700;letter-spacing:-0.01em;}
+  .worker .badge{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:6px;}
+  .badge.auto{background:var(--chart);color:var(--ink);}
+  .badge.approve{background:#fff4d6;color:#8a6d00;border:1px solid #f0e0a8;}
+  .badge.read{background:var(--bg-alt);color:var(--ink-2);border:1px solid var(--line);}
+  .worker .cad{margin-left:auto;font-size:12px;color:var(--ink-3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;}
+  .worker p{font-size:14px;color:var(--ink-2);line-height:1.5;margin-top:8px;}
+  /* workflows */
+  .flow{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
+  .flow h4{font-size:15.5px;font-weight:700;}
+  .flow .trig{font-size:12.5px;color:var(--ink-3);margin-top:4px;}
+  .flow ol{margin:12px 0 0 0;padding-left:18px;}
+  .flow li{font-size:13.5px;color:var(--ink-2);line-height:1.5;margin-bottom:4px;}
+  /* build feed */
+  .feed{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;}
+  .feed h3{font-size:13px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px;}
+  .feed .item{padding:12px 0;border-top:1px solid var(--line);font-size:14px;color:var(--ink);line-height:1.5;}
+  .feed .item:first-of-type{border-top:none;}
+  .feed .item .t{font-size:11px;color:var(--ink-3);font-family:var(--mono);margin-top:3px;}
+  .next{margin-top:16px;background:var(--ink);color:#fff;border-radius:12px;padding:18px;}
+  .next h4{font-size:14px;font-weight:700;}
+  .next p{font-size:13px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5;}
+  .loading{padding:80px 0;text-align:center;color:var(--ink-3);font-size:15px;}
+  .banner{background:var(--ink);color:#fff;border-radius:14px;padding:20px 24px;margin-bottom:28px;display:none;}
+  .banner.on{display:block;}
+  .banner b{color:var(--chart);}
+</style>
+</head>
+<body>
+  <div class="top">
+    <a class="brand" href="/os/app"><img src="/logo.svg" alt="TMI"/> OS</a>
+    <div class="co" id="co"></div>
+    <div class="right"><span class="pill" id="plan">Trial</span><span class="signout" onclick="signout()">Sign out</span></div>
+  </div>
+
+  <div class="wrap" id="wrap">
+    <div class="loading" id="loading">Loading your OS...</div>
+  </div>
+
+<script>
+var TOKEN_KEY='tmios_token';
+var tok;try{tok=localStorage.getItem(TOKEN_KEY);}catch(_){}
+if(!tok) location.href='/os/';
+
+function signout(){try{localStorage.removeItem(TOKEN_KEY);}catch(_){}location.href='/os/';}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+(async function(){
+  var r;
+  try{ r=await fetch('/api/os2-state',{headers:{Authorization:'Bearer '+tok}}); }
+  catch(e){ return; }
+  if(r.status===401){ signout(); return; }
+  var s=await r.json().catch(function(){return {};});
+  if(!r.ok){ document.getElementById('loading').textContent=s.error||'Could not load your OS.'; return; }
+  if(s.tenant && !s.tenant.onboarded){ location.href='/os/onboarding'; return; }
+  render(s);
+})();
+
+function render(s){
+  document.getElementById('co').innerHTML='<b>'+esc(s.tenant&&s.tenant.name||'Your company')+'</b>';
+  document.getElementById('plan').textContent=(s.tenant&&s.tenant.plan||'trial').replace(/^\w/,function(c){return c.toUpperCase();});
+  var isNew=/[?&]new=1/.test(location.search);
+
+  var metrics=(s.metrics||[]).map(function(m){
+    return '<div class="tile"><div class="k">'+esc(m.label)+'</div><div class="v">'+esc(m.value||'-')+(m.unit?'<small>'+esc(m.unit)+'</small>':'')+'</div>'+(m.hint?'<div class="h">'+esc(m.hint)+'</div>':'')+'</div>';
+  }).join('');
+
+  var workers=(s.workers||[]).map(function(w){
+    return '<div class="worker"><div class="r"><h3>'+esc(w.name)+'</h3><span class="badge '+esc(w.autonomy)+'">'+({read:'Reports',approve:'Asks first',auto:'Autonomous'}[w.autonomy]||w.autonomy)+'</span><span class="cad">'+esc(w.cadence)+'</span></div>'+(w.job?'<p>'+esc(w.job)+'</p>':'')+'</div>';
+  }).join('');
+
+  var flows=(s.workflows||[]).map(function(f){
+    var steps=(f.steps||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
+    return '<div class="flow"><h4>'+esc(f.name)+'</h4>'+(f.trigger?'<div class="trig">When: '+esc(f.trigger)+'</div>':'')+(steps?'<ol>'+steps+'</ol>':'')+'</div>';
+  }).join('');
+
+  var feed=(s.build_log||[]).map(function(b){
+    return '<div class="item">'+esc(b.summary)+'<div class="t">'+fmt(b.created_at)+'</div></div>';
+  }).join('')||'<div class="item">Your OS is ready.</div>';
+
+  var html=''+
+    (isNew?'<div class="banner on">Your OS is built. <b>'+((s.workers||[]).length)+' AI workers</b> and <b>'+((s.metrics||[]).length)+' live metrics</b> are set up. This is your company on one screen.</div>':'')+
+    '<div class="hd"><div><h1>Command center</h1>'+(s.tenant&&s.tenant.summary?'<p>'+esc(s.tenant.summary)+'</p>':'')+'</div></div>'+
+    '<div class="sec-label">The one screen</div><div class="metrics">'+metrics+'</div>'+
+    '<div class="split"><div><div class="sec-label">Your AI workers</div>'+workers+'<div class="sec-label">Workflows</div>'+flows+'</div>'+
+    '<div><div class="sec-label">What TMI built</div><div class="feed"><h3>Build feed</h3>'+feed+
+    '<div class="next"><h4>What is next</h4><p>Connect your tools and turn your workers on. We will reach out to wire in your first live data source.</p></div></div></div></div>';
+
+  document.getElementById('wrap').innerHTML=html;
+}
+function fmt(iso){try{var d=new Date(iso);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}catch(e){return '';}}
+</script>
+</body>
+</html>

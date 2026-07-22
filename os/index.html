@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TMI OS</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://api.fontshare.com"/>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#ffffff;--bg-alt:#f6f6f4;--ink:#0a0b14;--ink-2:#55576a;--ink-3:#8a8c9e;
+    --line:rgba(10,11,20,0.10);--line-2:rgba(10,11,20,0.16);
+    --chart:#E4FF97;--chart-dark:#cdee72;
+    --sans:"General Sans",system-ui,-apple-system,sans-serif;
+    --mono:"Neue Haas Grotesk Display",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;min-height:100vh;display:grid;grid-template-columns:1.05fr 1fr;}
+  a{color:inherit;}
+  /* brand panel */
+  .brand-side{background:var(--ink);color:#fff;padding:48px 56px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;}
+  .brand-side::after{content:"";position:absolute;bottom:-160px;right:-120px;width:460px;height:460px;background:radial-gradient(circle at 50% 50%,rgba(228,255,151,.16),transparent 62%);}
+  .bs-top{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;position:relative;z-index:1;}
+  .bs-top img{height:24px;}
+  .bs-mid{position:relative;z-index:1;}
+  .bs-mid h1{font-size:clamp(30px,3vw,44px);font-weight:700;letter-spacing:-0.03em;line-height:1.06;max-width:15ch;}
+  .bs-mid h1 .l{background:var(--chart);color:var(--ink);padding:0 .12em;box-decoration-break:clone;-webkit-box-decoration-break:clone;}
+  .bs-mid p{color:rgba(255,255,255,.66);font-size:16px;line-height:1.6;margin-top:20px;max-width:42ch;}
+  .bs-steps{display:flex;flex-direction:column;gap:12px;margin-top:30px;}
+  .bs-steps div{display:flex;gap:12px;align-items:flex-start;font-size:14.5px;color:rgba(255,255,255,.82);}
+  .bs-steps b{color:var(--chart);font-family:var(--mono);font-size:13px;}
+  .bs-foot{position:relative;z-index:1;font-size:12px;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;}
+  /* auth panel */
+  .auth{display:flex;align-items:center;justify-content:center;padding:40px;}
+  .card{width:100%;max-width:420px;}
+  .tabs{display:flex;gap:4px;background:var(--bg-alt);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:26px;}
+  .tabs button{flex:1;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink-2);background:none;border:none;padding:10px;border-radius:9px;cursor:pointer;transition:background .15s,color .15s;}
+  .tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(10,11,20,.06);}
+  .card h2{font-size:26px;font-weight:700;letter-spacing:-0.02em;}
+  .card .sub{color:var(--ink-2);font-size:14.5px;margin-top:6px;line-height:1.5;}
+  form{margin-top:24px;display:flex;flex-direction:column;gap:15px;}
+  .row{display:flex;gap:12px;}
+  .row>div{flex:1;}
+  label{display:block;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px;}
+  input,select{width:100%;font-family:var(--sans);font-size:16px;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:10px;padding:13px 14px;}
+  input:focus,select:focus{outline:none;border-color:var(--ink);}
+  .btn{font-family:var(--sans);font-size:15px;font-weight:600;background:var(--chart);color:var(--ink);border:1px solid var(--chart);border-radius:10px;padding:14px;cursor:pointer;transition:background .15s,transform .15s;margin-top:6px;}
+  .btn:hover{background:var(--chart-dark);}
+  .btn:disabled{opacity:.6;cursor:default;}
+  .err{font-size:13.5px;color:#c0261f;font-weight:500;min-height:1px;display:none;}
+  .err.on{display:block;}
+  .hide{display:none;}
+  @media(max-width:860px){body{grid-template-columns:1fr;}.brand-side{display:none;}}
+</style>
+</head>
+<body>
+  <aside class="brand-side">
+    <div class="bs-top"><img src="/logo.svg" alt="TMI"/> TMI OS</div>
+    <div class="bs-mid">
+      <h1>The company that runs <span class="l">without you.</span></h1>
+      <p>Tell us about your business and TMI OS builds your command center, your AI workers, and your workflows. You watch it run.</p>
+      <div class="bs-steps">
+        <div><b>01</b> Sign up and tell us what you do</div>
+        <div><b>02</b> The builder designs your OS live</div>
+        <div><b>03</b> See your whole company on one screen</div>
+      </div>
+    </div>
+    <div class="bs-foot">TMI Technology</div>
+  </aside>
+
+  <main class="auth">
+    <div class="card">
+      <div class="tabs">
+        <button id="tabSignup" class="on" onclick="tab('signup')">Create account</button>
+        <button id="tabLogin" onclick="tab('login')">Sign in</button>
+      </div>
+
+      <!-- SIGN UP -->
+      <div id="paneSignup">
+        <h2>Build your intelligent company</h2>
+        <p class="sub">Start free. No credit card to set it up.</p>
+        <form onsubmit="return doSignup(event)">
+          <div class="row">
+            <div><label>Your name</label><input id="s-name" autocomplete="name" required/></div>
+            <div><label>Company</label><input id="s-company" autocomplete="organization" required/></div>
+          </div>
+          <div><label>Business type</label>
+            <select id="s-type">
+              <option value="">Choose one</option>
+              <option>Home services / trades</option>
+              <option>Construction</option>
+              <option>Manufacturing / industrial</option>
+              <option>Professional services</option>
+              <option>Healthcare</option>
+              <option>Agency</option>
+              <option>Ecommerce</option>
+              <option>SaaS</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div><label>Work email</label><input id="s-email" type="email" autocomplete="email" required/></div>
+          <div><label>Password</label><input id="s-password" type="password" autocomplete="new-password" placeholder="At least 8 characters" required/></div>
+          <div class="err" id="s-err"></div>
+          <button class="btn" id="s-btn" type="submit">Create account &rarr;</button>
+        </form>
+      </div>
+
+      <!-- LOG IN -->
+      <div id="paneLogin" class="hide">
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to your company OS.</p>
+        <form onsubmit="return doLogin(event)">
+          <div><label>Work email</label><input id="l-email" type="email" autocomplete="email" required/></div>
+          <div><label>Password</label><input id="l-password" type="password" autocomplete="current-password" required/></div>
+          <div class="err" id="l-err"></div>
+          <button class="btn" id="l-btn" type="submit">Sign in &rarr;</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+<script>
+var TOKEN_KEY='tmios_token';
+function tab(which){
+  document.getElementById('tabSignup').classList.toggle('on',which==='signup');
+  document.getElementById('tabLogin').classList.toggle('on',which==='login');
+  document.getElementById('paneSignup').classList.toggle('hide',which!=='signup');
+  document.getElementById('paneLogin').classList.toggle('hide',which!=='login');
+}
+function showErr(id,msg){var e=document.getElementById(id);e.textContent=msg;e.classList.add('on');}
+function clearErr(id){document.getElementById(id).classList.remove('on');}
+function save(tok){try{localStorage.setItem(TOKEN_KEY,tok);}catch(_){}}
+function routeAfter(tenant){ location.href = (tenant && tenant.onboarded) ? '/os/app' : '/os/onboarding'; }
+
+async function api(path,body,tok){
+  var r=await fetch(path,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},tok?{Authorization:'Bearer '+tok}:{}),body:JSON.stringify(body)});
+  var j=await r.json().catch(function(){return {};});
+  if(!r.ok) throw new Error(j.error||'Something went wrong');
+  return j;
+}
+
+async function doSignup(e){
+  e.preventDefault();clearErr('s-err');
+  var btn=document.getElementById('s-btn');btn.disabled=true;btn.textContent='Creating...';
+  try{
+    var j=await api('/api/os2-signup',{
+      name:document.getElementById('s-name').value.trim(),
+      company:document.getElementById('s-company').value.trim(),
+      business_type:document.getElementById('s-type').value,
+      email:document.getElementById('s-email').value.trim(),
+      password:document.getElementById('s-password').value
+    });
+    save(j.token); routeAfter(j.tenant);
+  }catch(err){showErr('s-err',err.message);btn.disabled=false;btn.textContent='Create account →';}
+  return false;
+}
+async function doLogin(e){
+  e.preventDefault();clearErr('l-err');
+  var btn=document.getElementById('l-btn');btn.disabled=true;btn.textContent='Signing in...';
+  try{
+    var j=await api('/api/os2-login',{
+      email:document.getElementById('l-email').value.trim(),
+      password:document.getElementById('l-password').value
+    });
+    save(j.token); routeAfter(j.tenant);
+  }catch(err){showErr('l-err',err.message);btn.disabled=false;btn.textContent='Sign in →';}
+  return false;
+}
+
+// Already signed in? Route straight through.
+(async function(){
+  var tok;try{tok=localStorage.getItem(TOKEN_KEY);}catch(_){}
+  if(!tok)return;
+  try{
+    var r=await fetch('/api/os2-me',{headers:{Authorization:'Bearer '+tok}});
+    if(r.ok){var j=await r.json();routeAfter(j.tenant);}
+    else{try{localStorage.removeItem(TOKEN_KEY);}catch(_){}}
+  }catch(_){}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Set up your OS | TMI OS</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://api.fontshare.com"/>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#ffffff;--bg-alt:#f6f6f4;--ink:#0a0b14;--ink-2:#55576a;--ink-3:#8a8c9e;
+    --line:rgba(10,11,20,0.10);--line-2:rgba(10,11,20,0.16);
+    --chart:#E4FF97;--chart-dark:#cdee72;
+    --sans:"General Sans",system-ui,-apple-system,sans-serif;
+    --mono:"Neue Haas Grotesk Display",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg-alt);-webkit-font-smoothing:antialiased;min-height:100vh;}
+  .top{background:#fff;border-bottom:1px solid var(--line);height:60px;display:flex;align-items:center;padding:0 28px;gap:10px;font-weight:700;}
+  .top img{height:22px;}
+  .top .prog{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-3);letter-spacing:.06em;}
+  .wrap{max-width:640px;margin:0 auto;padding:56px 24px 80px;}
+  .bar{height:4px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:44px;}
+  .bar>i{display:block;height:100%;background:var(--chart-dark);width:0;transition:width .4s cubic-bezier(.2,.7,.2,1);}
+  .step{display:none;}
+  .step.on{display:block;animation:in .35s ease;}
+  @keyframes in{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  .q-no{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);}
+  .step h2{font-size:clamp(24px,3.4vw,32px);font-weight:700;letter-spacing:-0.02em;line-height:1.1;margin-top:12px;max-width:20ch;}
+  .step p.hint{color:var(--ink-2);font-size:15px;margin-top:12px;line-height:1.55;}
+  textarea{width:100%;margin-top:22px;font-family:var(--sans);font-size:17px;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:12px;padding:16px;min-height:120px;resize:vertical;line-height:1.5;}
+  textarea:focus{outline:none;border-color:var(--ink);}
+  .nav{display:flex;gap:12px;align-items:center;margin-top:26px;}
+  .btn{font-family:var(--sans);font-size:15px;font-weight:600;background:var(--chart);color:var(--ink);border:1px solid var(--chart);border-radius:10px;padding:13px 24px;cursor:pointer;transition:background .15s;}
+  .btn:hover{background:var(--chart-dark);}
+  .btn:disabled{opacity:.55;cursor:default;}
+  .btn.ghost{background:transparent;border-color:var(--line-2);color:var(--ink-2);}
+  .btn.ghost:hover{background:#fff;}
+  .skip{font-size:13.5px;color:var(--ink-3);cursor:pointer;margin-left:auto;}
+  .skip:hover{color:var(--ink-2);}
+  /* building state */
+  .building{text-align:center;padding:40px 0;display:none;}
+  .building.on{display:block;}
+  .building h2{font-size:28px;font-weight:700;letter-spacing:-0.02em;}
+  .building p{color:var(--ink-2);margin-top:12px;}
+  .dots{display:inline-flex;gap:6px;margin-top:26px;}
+  .dots span{width:9px;height:9px;border-radius:50%;background:var(--chart-dark);animation:pulse 1.1s infinite;}
+  .dots span:nth-child(2){animation-delay:.15s;}.dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes pulse{0%,100%{opacity:.3;transform:scale(.8);}50%{opacity:1;transform:scale(1);}}
+  .buildlog{max-width:420px;margin:26px auto 0;text-align:left;font-size:14px;color:var(--ink-2);}
+  .buildlog div{padding:8px 0;border-bottom:1px solid var(--line);opacity:0;transform:translateX(-6px);transition:opacity .3s,transform .3s;}
+  .buildlog div.on{opacity:1;transform:none;}
+  .err{margin-top:16px;font-size:14px;color:#c0261f;font-weight:500;display:none;}
+  .err.on{display:block;}
+</style>
+</head>
+<body>
+  <div class="top"><img src="/logo.svg" alt="TMI"/> TMI OS <span class="prog" id="prog"></span></div>
+  <div class="wrap">
+    <div class="bar"><i id="barFill"></i></div>
+
+    <div id="steps"></div>
+
+    <div class="building" id="building">
+      <h2>Building your company OS</h2>
+      <p>The builder is designing your command center, your workers, and your workflows.</p>
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="buildlog" id="buildlog"></div>
+      <div class="err" id="buildErr"></div>
+    </div>
+  </div>
+
+<script>
+var TOKEN_KEY='tmios_token';
+var tok;try{tok=localStorage.getItem(TOKEN_KEY);}catch(_){}
+if(!tok) location.href='/os/';
+
+var QS=[
+  {key:'what_you_do', no:'About you', q:'What does your company do?', hint:'A sentence or two. What you sell, who you serve, how you make money.'},
+  {key:'what_you_track', no:'The one screen', q:'What do you want to see every morning?', hint:'The numbers or updates you wish were on one screen when you start the day.'},
+  {key:'what_falls_through', no:'The leaks', q:'What falls through the cracks?', hint:'Where things get dropped, forgotten, or slip. Follow ups, invoices, jobs, leads.'},
+  {key:'tools', no:'Your stack', q:'What tools do you use to run it?', hint:'CRM, email, calendar, accounting, spreadsheets, anything. Just name them.'},
+  {key:'bottleneck', no:'The bottleneck', q:'What is the biggest bottleneck right now?', hint:'The one thing that, if it ran itself, would change the most.'}
+];
+var answers={}, i=0;
+
+var stepsEl=document.getElementById('steps');
+QS.forEach(function(item,idx){
+  var d=document.createElement('div');d.className='step'+(idx===0?' on':'');d.id='step'+idx;
+  d.innerHTML='<div class="q-no">'+item.no+'</div><h2>'+item.q+'</h2><p class="hint">'+item.hint+'</p>'+
+    '<textarea id="ta'+idx+'" placeholder="Type your answer..."></textarea>'+
+    '<div class="nav">'+(idx>0?'<button class="btn ghost" onclick="back()">Back</button>':'')+
+    '<button class="btn" onclick="next()">'+(idx===QS.length-1?'Build my OS →':'Continue →')+'</button>'+
+    '<span class="skip" onclick="next(true)">Skip</span></div>';
+  stepsEl.appendChild(d);
+});
+
+function paint(){
+  document.querySelectorAll('.step').forEach(function(s,idx){s.classList.toggle('on',idx===i);});
+  document.getElementById('barFill').style.width=((i)/QS.length*100)+'%';
+  document.getElementById('prog').textContent=(i+1)+' / '+QS.length;
+  var ta=document.getElementById('ta'+i);if(ta)ta.focus();
+}
+function back(){if(i>0){i--;paint();}}
+function next(skip){
+  var ta=document.getElementById('ta'+i);
+  answers[QS[i].key]=skip?'':(ta?ta.value.trim():'');
+  if(i<QS.length-1){i++;paint();}
+  else build();
+}
+
+var LOG=['Reading your business','Designing your command center','Assigning your AI workers','Wiring your first workflows','Saving it to your OS'];
+function build(){
+  document.getElementById('steps').style.display='none';
+  document.querySelector('.bar').style.display='none';
+  document.getElementById('barFill').style.width='100%';
+  document.getElementById('building').classList.add('on');
+  document.getElementById('prog').textContent='';
+  var lg=document.getElementById('buildlog');
+  LOG.forEach(function(t,idx){var d=document.createElement('div');d.textContent=t;lg.appendChild(d);setTimeout(function(){d.classList.add('on');},350*idx+300);});
+  runIntake();
+}
+async function runIntake(){
+  try{
+    var r=await fetch('/api/os2-intake',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},body:JSON.stringify({answers:answers})});
+    var j=await r.json().catch(function(){return {};});
+    if(!r.ok) throw new Error(j.error||'The builder could not finish.');
+    location.href='/os/app?new=1';
+  }catch(err){
+    var e=document.getElementById('buildErr');e.textContent=err.message+' ';var b=document.createElement('button');b.className='btn';b.style.marginTop='14px';b.textContent='Try again';b.onclick=function(){e.classList.remove('on');runIntake();};
+    e.classList.add('on');e.appendChild(document.createElement('br'));e.appendChild(b);
+  }
+}
+paint();
+</script>
+</body>
+</html>
