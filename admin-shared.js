@@ -244,6 +244,7 @@ const TMIAdmin = (() => {
     ${navItem('audits', 'Audits', I.audits, false, '/admin-sales#audits')}
     ${navItem('bookings', 'Bookings', I.bookings, false, '/admin-sales#bookings')}
     ${navItem('meetings', 'Meetings', I.meetings)}
+    ${navItem('company-intelligence', 'Company Intelligence', I.level10)}
     ${navItem('applications', 'Applications', I.apps, true, '/admin-inbox#apps')}
     ${navItem('followups', 'Follow-ups', I.followup, true, '/admin-inbox#followups')}
     ${navItem('worklist', 'Today', I.level10)}

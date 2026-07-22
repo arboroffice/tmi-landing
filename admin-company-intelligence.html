@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Company Intelligence — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .ci-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:20px;align-items:start;}
+  @media(max-width:1000px){.ci-grid{grid-template-columns:1fr;}}
+  .ci-ta{width:100%;min-height:260px;max-height:520px;overflow-y:auto;border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:14px 16px;font-size:14px;line-height:1.6;color:var(--ink);background:var(--bg);resize:vertical;font-family:var(--sans);}
+  .ci-ta:focus{outline:none;border-color:var(--ink);}
+  .route-note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;}
+  .route-note b{color:var(--ink);}
+  .counts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .count{font-size:12px;font-weight:600;color:var(--ink);background:var(--bg-alt);border:1px solid var(--line);border-radius:999px;padding:6px 12px;}
+  .count b{color:var(--ink);}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:26px 0 16px;}
+  .tab{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;border:1px solid var(--line-strong);cursor:pointer;color:var(--ink-2);background:var(--surface);transition:all .12s;}
+  .tab.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .tab .n{font-family:var(--sans);opacity:.7;margin-left:5px;}
+  .ci-list{display:flex;flex-direction:column;gap:12px;}
+  .ci-card{border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;background:var(--surface);}
+  .ci-card .ch{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .ci-card h3{font-size:15.5px;margin:0;flex:1;min-width:0;}
+  .ci-card .fmt{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:5px;background:var(--chart);color:var(--ink);}
+  .ci-card .kind{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:3px 8px;border-radius:5px;background:var(--bg-alt);color:var(--muted);border:1px solid var(--line);}
+  .ci-card .angle{font-size:13px;color:var(--muted);margin-top:6px;}
+  .ci-card .body{font-size:13.5px;line-height:1.65;color:var(--ink-2);white-space:pre-wrap;margin-top:10px;border-top:1px solid var(--line);padding-top:12px;}
+  .ci-card ol{margin:10px 0 0;padding-left:20px;font-size:13.5px;line-height:1.6;color:var(--ink-2);}
+  .ci-card .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .ci-card.done{opacity:.6;}
+  .status-pill{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:3px 9px;border-radius:999px;}
+  .status-pill.pending{background:#fef3c7;color:#8a6d00;}
+  .status-pill.approved{background:#dcfce7;color:#166534;}
+  .empty-note{font-size:13px;color:var(--muted);padding:20px 0;}
+  .mtg-line{font-size:12px;color:var(--muted);margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Company Intelligence</span></div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Company Intelligence</h1>
+        <div class="sec-head-right"><span class="filter-count">TMI runs on TMI</span></div>
+      </div>
+
+      <div class="ci-grid">
+        <!-- capture -->
+        <div class="card" style="padding:20px 22px;">
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label">Meeting title</label>
+            <input class="form-input" id="ci-title" placeholder="e.g. Monday strategy, product sync, client debrief"/>
+          </div>
+          <div class="form-group" style="margin-bottom:6px;">
+            <label class="form-label">Transcript</label>
+            <textarea class="ci-ta" id="ci-transcript" placeholder="Paste a Zoom or Google Meet transcript here..."></textarea>
+          </div>
+          <button class="btn btn-primary" id="ci-run" onclick="runIntel()" style="width:100%;margin-top:10px;">Run intelligence</button>
+          <div class="route-note">Turns one meeting into <b>content</b> (held for your approval), plus <b>SOPs</b>, <b>company knowledge</b>, and <b>tasks</b> (saved automatically).</div>
+        </div>
+
+        <!-- latest run -->
+        <div class="card" id="ci-run-out" style="padding:20px 22px;display:none;">
+          <div class="panel-sec-label" style="margin-bottom:8px;">Latest run</div>
+          <div id="ci-run-summary" style="font-size:14px;line-height:1.6;color:var(--ink-2);"></div>
+          <div class="counts" id="ci-run-counts"></div>
+          <div id="ci-run-decisions" style="margin-top:14px;"></div>
+        </div>
+      </div>
+
+      <div class="tabs" id="ci-tabs"></div>
+      <div class="ci-list" id="ci-body"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('company-intelligence');
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const TABS = [
+  {kind:'content', label:'Content'},
+  {kind:'sops', label:'SOPs'},
+  {kind:'knowledge', label:'Company Brain'},
+  {kind:'tasks', label:'Tasks'},
+  {kind:'meetings', label:'Meetings'},
+];
+let active = 'content';
+let cache = {};
+
+function renderTabs(){
+  document.getElementById('ci-tabs').innerHTML = TABS.map(t=>{
+    const n = cache[t.kind] ? cache[t.kind].length : '';
+    return `<span class="tab ${t.kind===active?'on':''}" onclick="switchTab('${t.kind}')">${t.label}${n!==''?`<span class="n">${n}</span>`:''}</span>`;
+  }).join('');
+}
+function switchTab(kind){ active = kind; renderTabs(); renderList(); }
+
+async function load(kind){
+  const r = await TMIAdmin.api('/api/tmi-intel','POST',{action:'list',kind});
+  cache[kind] = (r && r.items) || [];
+  renderTabs();
+  if(kind===active) renderList();
+}
+function loadAll(){ TABS.forEach(t=>load(t.kind)); }
+
+function fmtLabel(f){ return ({letter:'Letter',linkedin:'LinkedIn',x_thread:'X thread',podcast:'Podcast',youtube:'YouTube'}[f]||f); }
+
+function renderList(){
+  const items = cache[active] || [];
+  const box = document.getElementById('ci-body');
+  if(!items.length){ box.innerHTML = `<div class="empty-note">Nothing here yet. Run a meeting through the intelligence engine above.</div>`; return; }
+  box.innerHTML = items.map(it=>{
+    if(active==='content') return contentCard(it);
+    if(active==='sops') return sopCard(it);
+    if(active==='knowledge') return knowCard(it);
+    if(active==='tasks') return taskCard(it);
+    return mtgCard(it);
+  }).join('');
+}
+
+function contentCard(c){
+  const st = c.status||'pending';
+  return `<div class="ci-card">
+    <div class="ch"><span class="fmt">${esc(fmtLabel(c.format))}</span><h3>${esc(c.title)}</h3><span class="status-pill ${st}">${st}</span></div>
+    ${c.angle?`<div class="angle">${esc(c.angle)}</div>`:''}
+    <div class="body">${esc(c.body)}</div>
+    <div class="acts">
+      ${st==='pending'?`<button class="btn btn-primary btn-sm" onclick="approve('${c.id}')">Approve</button>`:''}
+      <button class="btn btn-ghost btn-sm" onclick="copyText('${c.id}')">Copy</button>
+      <button class="btn btn-danger btn-sm" onclick="del('content','${c.id}')">Delete</button>
+    </div></div>`;
+}
+function sopCard(s){
+  const steps = (s.steps||[]).map(x=>`<li>${esc(x)}</li>`).join('');
+  return `<div class="ci-card">
+    <div class="ch"><span class="kind">SOP</span><h3>${esc(s.title)}</h3></div>
+    ${s.purpose?`<div class="angle">${esc(s.purpose)}</div>`:''}
+    ${steps?`<ol>${steps}</ol>`:''}
+    <div class="acts"><button class="btn btn-danger btn-sm" onclick="del('sops','${s.id}')">Delete</button></div></div>`;
+}
+function knowCard(k){
+  return `<div class="ci-card">
+    <div class="ch"><span class="kind">${esc(k.kind||'note')}</span><h3>${esc(k.title)}</h3></div>
+    <div class="body">${esc(k.body)}</div>
+    <div class="acts"><button class="btn btn-danger btn-sm" onclick="del('knowledge','${k.id}')">Delete</button></div></div>`;
+}
+function taskCard(t){
+  const done = t.status==='done';
+  return `<div class="ci-card ${done?'done':''}">
+    <div class="ch"><h3>${esc(t.title)}</h3>${t.owner?`<span class="kind">${esc(t.owner)}</span>`:''}${t.due?`<span class="mtg-line">${esc(t.due)}</span>`:''}</div>
+    <div class="acts">
+      ${done?'':`<button class="btn btn-primary btn-sm" onclick="complete('${t.id}')">Mark done</button>`}
+      <button class="btn btn-danger btn-sm" onclick="del('tasks','${t.id}')">Delete</button>
+    </div></div>`;
+}
+function mtgCard(m){
+  const dec = (m.decisions||[]).length;
+  return `<div class="ci-card">
+    <div class="ch"><h3>${esc(m.title)}</h3><span class="mtg-line">${TMIAdmin.fmt(m.created_at)}</span></div>
+    ${m.summary?`<div class="body">${esc(m.summary)}</div>`:''}
+    ${dec?`<div class="mtg-line" style="margin-top:8px;">${dec} decision${dec===1?'':'s'} captured</div>`:''}
+    <div class="acts"><button class="btn btn-danger btn-sm" onclick="del('meetings','${m.id}')">Delete</button></div></div>`;
+}
+
+async function runIntel(){
+  const title = document.getElementById('ci-title').value.trim();
+  const transcript = document.getElementById('ci-transcript').value.trim();
+  if(transcript.length < 40){ TMIAdmin.toast('Paste a longer transcript','error'); return; }
+  const btn = document.getElementById('ci-run');
+  btn.disabled = true; btn.textContent = 'Reading the meeting...';
+  const r = await TMIAdmin.api('/api/tmi-intel','POST',{action:'route', title, transcript});
+  btn.disabled = false; btn.textContent = 'Run intelligence';
+  if(!r){ return; }
+  const c = r.counts||{};
+  document.getElementById('ci-run-out').style.display = 'block';
+  document.getElementById('ci-run-summary').textContent = (r.meeting && r.meeting.summary) || 'Done.';
+  document.getElementById('ci-run-counts').innerHTML =
+    `<span class="count"><b>${c.content||0}</b> content</span><span class="count"><b>${c.sops||0}</b> SOPs</span><span class="count"><b>${c.knowledge||0}</b> knowledge</span><span class="count"><b>${c.tasks||0}</b> tasks</span>`;
+  const decs = (r.meeting && r.meeting.decisions) || [];
+  document.getElementById('ci-run-decisions').innerHTML = decs.length
+    ? `<div class="panel-sec-label" style="margin-bottom:6px;">Decisions</div><ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.7;color:var(--ink-2);">${decs.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>` : '';
+  document.getElementById('ci-transcript').value = '';
+  document.getElementById('ci-title').value = '';
+  TMIAdmin.toast(`Routed: ${c.content||0} drafts, ${c.sops||0} SOPs, ${c.knowledge||0} knowledge, ${c.tasks||0} tasks`);
+  active = 'content';
+  loadAll();
+}
+
+async function approve(id){
+  const r = await TMIAdmin.api('/api/tmi-intel','POST',{action:'approve',id});
+  if(r){ const it=(cache.content||[]).find(x=>x.id===id); if(it) it.status='approved'; renderList(); TMIAdmin.toast('Approved. Ready to publish.'); }
+}
+async function complete(id){
+  const r = await TMIAdmin.api('/api/tmi-intel','POST',{action:'complete',id});
+  if(r){ const it=(cache.tasks||[]).find(x=>x.id===id); if(it) it.status='done'; renderList(); }
+}
+async function del(kind,id){
+  if(!await TMIAdmin.confirm('Delete this?')) return;
+  const r = await TMIAdmin.api('/api/tmi-intel','POST',{action:'delete',kind,id});
+  if(r){ cache[kind]=(cache[kind]||[]).filter(x=>x.id!==id); renderTabs(); renderList(); TMIAdmin.toast('Deleted'); }
+}
+function copyText(id){
+  const it=(cache.content||[]).find(x=>x.id===id); if(!it) return;
+  try{ navigator.clipboard.writeText(it.body||''); TMIAdmin.toast('Copied'); }catch(e){ TMIAdmin.toast('Select and copy','error'); }
+}
+
+renderTabs();
+loadAll();
+</script>
+</body>
+</html>
