@@ -12,11 +12,27 @@ const db = require('./_db');
 const { executeWorker } = require('./_osrun');
 const { scoreTenant } = require('./_osscore');
 const { tenantState, generateProof } = require('./_tmiproof');
+const { runScan } = require('./os2-pulse');
 
 const HOUR = 3600 * 1000;
 const MAX_PER_RUN = 40;   // safety cap so one sweep can never run unbounded
 const CONCURRENCY = 3;
 const MAX_PROOF_PER_RUN = 3;   // Claude is expensive; cap auto-proof per sweep
+const MAX_PULSE_PER_RUN = 10;  // one Pulse scan per onboarded tenant, capped for cron time
+
+// Refresh every onboarded company's Pulse so signals are current each morning.
+async function pulseSweep() {
+  let scanned = 0;
+  try {
+    const tenants = await db.list('os_tenants', { limit: 300 });
+    const onboarded = tenants.filter((t) => t.onboarded).slice(0, MAX_PULSE_PER_RUN);
+    for (const t of onboarded) {
+      try { await runScan(t.id); scanned++; }
+      catch (e) { console.error('pulseSweep', t.id, e.message); }
+    }
+  } catch (e) { console.error('pulseSweep sweep:', e.message); }
+  return scanned;
+}
 
 // The moment a client crosses the Certified line, the flywheel should turn on its
 // own: fire the Proof Engine once, dropping a case study and a content draft into
@@ -75,8 +91,9 @@ module.exports = async function handler(req, res) {
     await Promise.all(Array.from({ length: CONCURRENCY }, drain));
 
     const proofed = await autoProof();
+    const pulsed = await pulseSweep();
 
-    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, proofed });
+    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, proofed, pulsed });
   } catch (e) {
     console.error('os2-cron:', e.message);
     return res.status(500).json({ error: 'cron failed' });

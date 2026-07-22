@@ -22,6 +22,7 @@ const COLLS = {
   tasks: 'os_tasks',
   reports: 'os_reports',
   outputs: 'os_outputs',
+  goals: 'os_goals',
 };
 
 const FIELDS = {
@@ -32,9 +33,10 @@ const FIELDS = {
   tasks: ['title', 'detail', 'status', 'priority', 'due', 'sort'],
   reports: ['title', 'body', 'period', 'sort'],
   outputs: ['title', 'body', 'status'],
+  goals: ['title', 'metric_id', 'target', 'timeframe', 'status', 'sort'],
 };
 
-const NOUN = { metrics: 'metric', workers: 'worker', workflows: 'workflow', knowledge: 'knowledge item', tasks: 'task', reports: 'report', outputs: 'output' };
+const NOUN = { metrics: 'metric', workers: 'worker', workflows: 'workflow', knowledge: 'knowledge item', tasks: 'task', reports: 'report', outputs: 'output', goals: 'goal' };
 
 function clean(resource, raw) {
   const data = raw || {};
@@ -59,6 +61,9 @@ function clean(resource, raw) {
   }
   if (resource === 'outputs') {
     if (out.status && !['pending', 'done', 'dismissed'].includes(out.status)) out.status = 'done';
+  }
+  if (resource === 'goals') {
+    if (out.status && !['active', 'hit', 'missed', 'paused'].includes(out.status)) out.status = 'active';
   }
   for (const k of Object.keys(out)) {
     if (typeof out[k] === 'string') out[k] = out[k].slice(0, k === 'body' ? 12000 : 2000);

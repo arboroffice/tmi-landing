@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
   const w = [['tenant_id', '==', tid]];
 
   try {
-    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, actions, requests, connections, log] = await Promise.all([
+    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, actions, requests, connections, goals, signals, log] = await Promise.all([
       db.getById('os_tenants', tid),
       db.list('os_metrics', { where: w }),
       db.list('os_workers', { where: w }),
@@ -31,6 +31,8 @@ module.exports = async function handler(req, res) {
       db.list('os_actions', { where: w, order: 'created_at', ascending: false, limit: 40 }),
       db.list('os_requests', { where: w, order: 'created_at', ascending: false, limit: 100 }),
       db.list('os_connections', { where: w, order: 'created_at', ascending: false, limit: 50 }),
+      db.list('os_goals', { where: w }),
+      db.list('os_signals', { where: [['tenant_id', '==', tid], ['status', '==', 'open']] }),
       db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 30 }),
     ]);
     const score = scoreTenant({
@@ -58,6 +60,8 @@ module.exports = async function handler(req, res) {
       actions,
       requests,
       connections,
+      goals: goals.sort(bySort),
+      signals: signals.sort((a, b) => ({ high: 0, medium: 1, low: 2 }[a.severity] - { high: 0, medium: 1, low: 2 }[b.severity])),
       build_log: log,
     });
   } catch (e) {
