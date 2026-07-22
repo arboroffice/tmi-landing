@@ -166,6 +166,25 @@
   .attn .li{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--d-ink-2);padding:4px 0;}
   .attn .li .pill{width:7px;height:7px;border-radius:50%;background:var(--chart);flex:none;}
   .attn .li.warn .pill{background:#e8a13c;}
+  .dash-rail .r{cursor:pointer;transition:background .15s ease,color .15s ease;}
+  .dash-rail .r:hover{color:#fff;background:rgba(255,255,255,0.05);}
+  .dash-views{min-height:238px;}
+  .dview{display:none;}
+  .dview.on{display:block;animation:dfade .38s ease;}
+  @keyframes dfade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+  .emp-list,.wf-list{display:flex;flex-direction:column;gap:8px;}
+  .emp,.wf{display:flex;align-items:center;gap:11px;background:var(--d-card);border:1px solid var(--d-line);border-radius:11px;padding:10px 12px;}
+  .emp-ic{width:30px;height:30px;border-radius:8px;background:rgba(228,255,151,0.12);display:grid;place-items:center;flex:none;}
+  .emp-ic svg{width:15px;height:15px;color:var(--chart);}
+  .emp-main,.wf-main{flex:1;min-width:0;}
+  .emp-name,.wf-name{font-size:12.5px;font-weight:700;color:#fff;}
+  .emp-act{font-size:11.5px;color:var(--d-ink-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .22s ease;}
+  .emp-act.flip{opacity:0;}
+  .wf-sub{font-size:11px;color:var(--d-ink-3);margin-top:2px;}
+  .emp-stat{font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--chart);display:flex;align-items:center;gap:5px;flex:none;}
+  .emp-stat .live-dot{margin:0;}
+  .wf-bar{width:60px;height:5px;border-radius:99px;background:rgba(255,255,255,0.1);overflow:hidden;flex:none;}
+  .wf-bar i{display:block;height:100%;background:var(--chart);border-radius:99px;}
 
   /* ---------- hub ---------- */
   .hub{display:grid;grid-template-columns:1fr auto 1fr;gap:22px;align-items:center;max-width:900px;margin:52px auto 0;}
@@ -612,36 +631,78 @@
         <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/></svg> Owner visibility</span>
       </div>
     </div>
-    <!-- dashboard mock -->
-    <div class="dash" aria-hidden="true">
-      <div class="dash-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dbrand">Your <span>Company</span></span><span class="dwho">Good morning, Tyler</span></div>
+    <!-- dashboard mock (interactive) -->
+    <div class="dash" id="heroDash" aria-hidden="true">
+      <div class="dash-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dbrand">Your <span>Company</span></span><span class="dwho"><span class="live-dot"></span> Live</span></div>
       <div class="dash-body">
         <div class="dash-rail">
-          <div class="r on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/></svg> Command</div>
-          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3 3-5 7-5s7 2 7 5"/></svg> Workforce</div>
-          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Workflows</div>
-          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5h14v14H5z"/><path d="M9 9h6"/></svg> Knowledge</div>
-          <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg> Reports</div>
+          <div class="r on" data-dv="command"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/></svg> Command</div>
+          <div class="r" data-dv="workforce"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3 3-5 7-5s7 2 7 5"/></svg> Workforce</div>
+          <div class="r" data-dv="workflows"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Workflows</div>
+          <div class="r" data-dv="knowledge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5h14v14H5z"/><path d="M9 9h6"/></svg> Knowledge</div>
+          <div class="r" data-dv="reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg> Reports</div>
         </div>
-        <div class="tiles">
-          <div class="tile"><div class="k">Revenue</div><div class="v num">$2.43M</div><div class="d">+12.5%</div></div>
-          <div class="tile"><div class="k">New Leads</div><div class="v num">356</div><div class="d">+18.2%</div></div>
-          <div class="tile"><div class="k"><span class="sw" data-p="Jobs in Progress" data-o="Active Projects">Jobs in Progress</span></div><div class="v num">128</div><div class="d">+8.1%</div></div>
-          <div class="tile"><div class="k"><span class="sw" data-p="Cash Flow" data-o="MRR">Cash Flow</span></div><div class="v num">$842K</div><div class="d">+9.3%</div></div>
-          <div class="attn">
-            <div>
-              <h5>What needs your attention</h5>
-              <div class="li"><span class="pill"></span> 3 high priority tasks</div>
-              <div class="li warn"><span class="pill"></span> 2 invoices overdue</div>
-              <div class="li"><span class="pill"></span> 5 leads need follow up</div>
-            </div>
-            <div>
-              <h5>Top AI employees</h5>
-              <div class="li"><span class="pill"></span> AI Receptionist &middot; 98%</div>
-              <div class="li"><span class="pill"></span> AI Sales Rep &middot; 92%</div>
-              <div class="li"><span class="pill"></span> AI Collections &middot; 89%</div>
+        <div class="dash-views">
+
+          <div class="dview on" data-v="command">
+            <div class="tiles">
+              <div class="tile"><div class="k">Revenue</div><div class="v num">$2.43M</div><div class="d">+12.5%</div></div>
+              <div class="tile"><div class="k">New Leads</div><div class="v num" data-tick>356</div><div class="d">+18.2%</div></div>
+              <div class="tile"><div class="k">Jobs in Progress</div><div class="v num">128</div><div class="d">+8.1%</div></div>
+              <div class="tile"><div class="k">Cash Flow</div><div class="v num">$842K</div><div class="d">+9.3%</div></div>
+              <div class="attn">
+                <div>
+                  <h5>Needs your attention</h5>
+                  <div class="li"><span class="pill"></span> 3 high priority tasks</div>
+                  <div class="li warn"><span class="pill"></span> 2 invoices overdue</div>
+                  <div class="li"><span class="pill"></span> 5 leads need follow up</div>
+                </div>
+                <div>
+                  <h5>Handled by your team today</h5>
+                  <div class="li"><span class="pill"></span> <span class="num" data-tick>42</span> calls answered</div>
+                  <div class="li"><span class="pill"></span> 7 quotes sent</div>
+                  <div class="li"><span class="pill"></span> 12 invoices chased</div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <div class="dview" data-v="workforce">
+            <div class="emp-list">
+              <div class="emp" data-acts="Answering an inbound call|Booked a job for 2:00 pm|Texting a missed call back"><span class="emp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5c0 8 7 15 15 15l1-4-5-2-2 2c-3-1.5-5-3.5-6.5-6.5l2-2-2-5z"/></svg></span><div class="emp-main"><div class="emp-name">AI Receptionist</div><div class="emp-act">Answering an inbound call</div></div><span class="emp-stat"><span class="live-dot"></span>24/7</span></div>
+              <div class="emp" data-acts="Following up 5 stale leads|Booked a discovery call|Sent a proposal to Ridgeline"><span class="emp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></span><div class="emp-main"><div class="emp-name">AI Sales Rep</div><div class="emp-act">Following up 5 stale leads</div></div><span class="emp-stat"><span class="live-dot"></span>24/7</span></div>
+              <div class="emp" data-acts="Assigned a job to crew 3|Rerouting for a cancellation|Confirmed tomorrow's schedule"><span class="emp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="14" height="10" rx="1.5"/><path d="M16 10h3l3 3v4h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/></svg></span><div class="emp-main"><div class="emp-name">AI Dispatcher</div><div class="emp-act">Assigned a job to crew 3</div></div><span class="emp-stat"><span class="live-dot"></span>24/7</span></div>
+              <div class="emp" data-acts="Chasing 2 overdue invoices|Payment received: $4,200|Sent a friendly reminder"><span class="emp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg></span><div class="emp-main"><div class="emp-name">AI Collections</div><div class="emp-act">Chasing 2 overdue invoices</div></div><span class="emp-stat"><span class="live-dot"></span>24/7</span></div>
+              <div class="emp" data-acts="Launched a follow-up campaign|Requested 3 reviews|Filled tomorrow's schedule"><span class="emp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l16-7-3 16-5-4-3 3v-5z"/></svg></span><div class="emp-main"><div class="emp-name">AI Marketing</div><div class="emp-act">Launched a follow-up campaign</div></div><span class="emp-stat"><span class="live-dot"></span>24/7</span></div>
+            </div>
+          </div>
+
+          <div class="dview" data-v="workflows">
+            <div class="wf-list">
+              <div class="wf"><div class="wf-main"><div class="wf-name">New lead intake</div><div class="wf-sub">Triggered 2 min ago &middot; step 3 of 4</div></div><div class="wf-bar"><i style="width:75%"></i></div></div>
+              <div class="wf"><div class="wf-main"><div class="wf-name">Missed call text-back</div><div class="wf-sub">Triggered 1 min ago &middot; sending</div></div><div class="wf-bar"><i style="width:55%"></i></div></div>
+              <div class="wf"><div class="wf-main"><div class="wf-name">Invoice follow-up</div><div class="wf-sub">Running &middot; 12 invoices in flight</div></div><div class="wf-bar"><i style="width:40%"></i></div></div>
+              <div class="wf"><div class="wf-main"><div class="wf-name">Post-job review request</div><div class="wf-sub">Queued &middot; fires on job complete</div></div><div class="wf-bar"><i style="width:15%"></i></div></div>
+            </div>
+          </div>
+
+          <div class="dview" data-v="knowledge">
+            <div class="wf-list">
+              <div class="wf"><div class="wf-main"><div class="wf-name">Pricing playbook</div><div class="wf-sub">Updated today &middot; used by 4 workers</div></div><span class="emp-stat">Live</span></div>
+              <div class="wf"><div class="wf-main"><div class="wf-name">How we quote a job</div><div class="wf-sub">SOP &middot; 6 steps</div></div><span class="emp-stat">Live</span></div>
+              <div class="wf"><div class="wf-main"><div class="wf-name">Warranty and callback policy</div><div class="wf-sub">Policy &middot; answers customers automatically</div></div><span class="emp-stat">Live</span></div>
+              <div class="wf"><div class="wf-main"><div class="wf-name">Every customer, remembered</div><div class="wf-sub">1,284 contacts &middot; full history</div></div><span class="emp-stat">Live</span></div>
+            </div>
+          </div>
+
+          <div class="dview" data-v="reports">
+            <div class="tile" style="margin-bottom:10px"><div class="k">Revenue, last 6 months</div><div class="v num">$2.43M</div><div class="d">+12.5% vs last period</div><svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none"><path class="area" d="M0 26 L20 22 L40 24 L60 18 L80 12 L100 10 L120 5 L120 30 L0 30Z"/><path class="line" d="M0 26 L20 22 L40 24 L60 18 L80 12 L100 10 L120 5"/><circle class="end" cx="120" cy="5" r="2.6"/></svg></div>
+            <div class="wf-list">
+              <div class="wf"><div class="wf-main"><div class="wf-name">Owner dependency</div><div class="wf-sub">Down from 71% to 38% this quarter</div></div><div class="wf-bar"><i style="width:38%"></i></div></div>
+              <div class="wf"><div class="wf-main"><div class="wf-name">Company Intelligence Score</div><div class="wf-sub">62 of 100 &middot; climbing</div></div><div class="wf-bar"><i style="width:62%"></i></div></div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -683,31 +744,6 @@
       <div>Growth does not create more chaos</div>
       <div>The company is valuable without the owner doing everything</div>
     </div>
-  </div>
-</section>
-
-<!-- ============ WORKFORCE ============ -->
-<section class="band dark" id="workforce">
-  <div class="wrap">
-    <div class="section-lead">
-      <div class="sec-head">
-        <p class="eyebrow">Digital workforce</p>
-        <h2 class="h-sec">Hire AI employees <span class="lime">that work 24/7.</span></h2>
-      </div>
-      <p class="sub">Forget chatbots. Your company gets an operating team. Add digital workers in minutes, they learn your business, use your knowledge, and get real work done while you sleep.</p>
-    </div>
-    <div class="wk-grid">
-      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5c0 8 7 15 15 15l1-4-5-2-2 2c-3-1.5-5-3.5-6.5-6.5l2-2-2-5z"/></svg></div><h4>AI Receptionist</h4><p>Answers every call and text, day or night, so no lead ever hits voicemail.</p></div>
-      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><h4>AI Sales Rep</h4><p>Qualifies leads, books meetings, and follows up until they buy or say no.</p></div>
-      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg></div><h4 class="sw" data-p="AI Estimator" data-o="AI Onboarder">AI Estimator</h4><p class="sw" data-p="Builds accurate quotes in minutes using your current pricing." data-o="Onboards new customers and gets them to first value fast.">Builds accurate quotes in minutes using your current pricing.</p></div>
-      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="14" height="10" rx="1.5"/><path d="M16 10h3l3 3v4h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/></svg></div><h4 class="sw" data-p="AI Dispatcher" data-o="AI Support Agent">AI Dispatcher</h4><p class="sw" data-p="Assigns jobs, tracks status, and keeps the whole team updated." data-o="Answers customer questions and resolves tickets around the clock.">Assigns jobs, tracks status, and keeps the whole team updated.</p></div>
-      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 12l2 2 4-4"/></svg></div><h4>AI Collections</h4><p>Chases open invoices politely and persistently until they get paid.</p></div>
-      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l16-7-3 16-5-4-3 3v-5z"/></svg></div><h4>AI Marketing</h4><p>Runs campaigns, follows up on every lead, and keeps the pipeline full.</p></div>
-      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.4"/><path d="M8 17c0-2 2-3 4-3s4 1 4 3"/></svg></div><h4>AI HR Assistant</h4><p>Screens applicants, schedules interviews, and handles the paperwork.</p></div>
-      <div class="wk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></div><h4>AI Ops Manager</h4><p>Watches the whole operation and surfaces what needs attention today.</p></div>
-    </div>
-    <p class="sub" style="margin-top:20px;">Every worker knows its role. Every action is tracked. Every decision follows your company's rules.</p>
-    <div style="margin-top:30px;"><a href="/intelligence-scorecard" class="btn btn-lime">Score your company &rarr;</a></div>
   </div>
 </section>
 
@@ -963,6 +999,34 @@ function roiCalc(){
   var annual = Math.round(val * n * 12);
   document.getElementById('roiOut').textContent = '$' + annual.toLocaleString('en-US');
 }
+
+// ----- interactive hero dashboard: switch views, rotate worker activity, tick numbers -----
+(function(){
+  var dash = document.getElementById('heroDash'); if(!dash) return;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var views = dash.querySelectorAll('.dview');
+  var tabs = dash.querySelectorAll('.dash-rail .r');
+  var order = ['command','workforce','workflows','knowledge','reports'];
+  var cur = 0, pausedUntil = 0;
+  function setView(v){
+    var i = order.indexOf(v); if(i < 0) return; cur = i;
+    views.forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-v') === v); });
+    tabs.forEach(function(r){ r.classList.toggle('on', r.getAttribute('data-dv') === v); });
+  }
+  tabs.forEach(function(t){ t.addEventListener('click', function(){ var v = t.getAttribute('data-dv'); if(v){ setView(v); pausedUntil = Date.now() + 9000; } }); });
+  if(reduce) return;
+  setInterval(function(){ if(document.hidden || Date.now() < pausedUntil) return; setView(order[(cur + 1) % order.length]); }, 4200);
+  dash.querySelectorAll('.emp').forEach(function(emp, idx){
+    var phrases = (emp.getAttribute('data-acts') || '').split('|').filter(Boolean);
+    if(phrases.length < 2) return;
+    var i = 0, el = emp.querySelector('.emp-act');
+    setInterval(function(){ if(document.hidden || !el) return; i = (i + 1) % phrases.length; el.classList.add('flip'); setTimeout(function(){ el.textContent = phrases[i]; el.classList.remove('flip'); }, 220); }, 3000 + idx * 400 + Math.floor(Math.random() * 900));
+  });
+  dash.querySelectorAll('[data-tick]').forEach(function(el){
+    var n = parseInt((el.textContent || '').replace(/[^\d]/g, ''), 10); if(isNaN(n)) return;
+    setInterval(function(){ if(document.hidden) return; n += 1; el.textContent = String(n); el.classList.remove('tick-flash'); void el.offsetWidth; el.classList.add('tick-flash'); }, 5000);
+  });
+})();
 </script>
 </body>
 </html>
