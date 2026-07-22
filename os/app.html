@@ -280,6 +280,9 @@
 <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M16 5.5a3 3 0 0 1 0 5.8M17 15c2.5.4 4 2 4 5"/></symbol>
 <symbol id="i-org" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-2h12v2"/></symbol>
 <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></symbol>
+<symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9l1-5h14l1 5M5 9v10h14V9M4 9h16M9 19v-5h6v5"/></symbol>
+<symbol id="i-brain" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 2 4 3 3 0 0 0 5 1V4.5A2.5 2.5 0 0 0 9 4z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-2 4 3 3 0 0 1-5 1"/></symbol>
 </defs></svg>
 
 <aside class="side" id="side">
@@ -295,11 +298,14 @@
   </nav>
   <div class="grp">Build it out</div>
   <nav>
+    <a data-v="blueprint"><svg class="icon"><use href="#i-spark"/></svg> Design my company</a>
     <a data-v="build"><svg class="icon"><use href="#i-plug"/></svg> Build with TMI <span class="tag" id="tgBuild"></span></a>
     <a data-v="departments"><svg class="icon"><use href="#i-org"/></svg> Departments <span class="tag" id="tgDept"></span></a>
+    <a data-v="marketplace"><svg class="icon"><use href="#i-store"/></svg> Marketplace</a>
     <a data-v="workforce"><svg class="icon"><use href="#i-bot"/></svg> Workforce <span class="tag" id="tgWork"></span></a>
     <a data-v="workflows"><svg class="icon"><use href="#i-flow"/></svg> Workflows <span class="tag" id="tgFlow"></span></a>
     <a data-v="knowledge"><svg class="icon"><use href="#i-book"/></svg> Knowledge <span class="tag" id="tgKnow"></span></a>
+    <a data-v="brain"><svg class="icon"><use href="#i-brain"/></svg> Company Brain</a>
     <a data-v="reports"><svg class="icon"><use href="#i-chart"/></svg> Reports</a>
     <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
     <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Connect tools</a>
@@ -382,6 +388,21 @@
   <section class="view" data-view="guardrails">
     <div class="secbar" style="margin-top:0"><div><div class="h">Guardrails</div><p class="sub">The rules your AI company runs by. Decide what your workers can do on their own and what waits for you, set spend limits, and keep one switch that pauses everything. Set the policy here; TMI wires it into every action.</p></div></div>
     <div id="guardrails" style="margin-top:22px"></div>
+  </section>
+
+  <section class="view" data-view="blueprint">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Design my company</div><p class="sub">Answer a few questions and watch your intelligent company take shape: the departments, the AI workers, the numbers to watch, the goals, and the tools to connect. See what it could be, then build it in with one tap and TMI wires the backend.</p></div></div>
+    <div id="blueprint" style="margin-top:22px"></div>
+  </section>
+
+  <section class="view" data-view="marketplace">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Marketplace</div><p class="sub">Prebuilt AI workers, departments, and processes, ready to drop into your company. Install one and it shows up in your OS. TMI wires the backend that makes it run.</p></div></div>
+    <div id="marketList" style="margin-top:22px"></div>
+  </section>
+
+  <section class="view" data-view="brain">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Company Brain</div><p class="sub">Everything your OS knows about your business in one place: your knowledge, your customers, your conversations, and what your workers produced. Ask it anything.</p></div></div>
+    <div id="brainBox" style="margin-top:22px"></div>
   </section>
 
   <section class="view" data-view="workforce">
@@ -498,6 +519,9 @@ function show(v){
   if(v==='team') loadTeam();
   if(v==='integrations') loadConnect();
   if(v==='guardrails') loadPolicies();
+  if(v==='blueprint') renderBlueprint();
+  if(v==='marketplace') loadMarket();
+  if(v==='brain') renderBrain();
   window.scrollTo(0,0);
 }
 
@@ -793,7 +817,8 @@ function renderGoals(){
     var hit=g.status==='hit';
     return '<div class="kcard" style="padding:16px 18px"><div class="kh">'+(hit?'<span class="badge done">Hit</span>':'')+'<h4>'+esc(g.title)+'</h4><span class="who">'+(g.timeframe?esc(g.timeframe):'')+' <span class="pen" style="margin-left:8px" onclick="editGoal(\''+g.id+'\')"><svg class="icon" style="width:14px;height:14px"><use href="#i-pen"/></svg></span></span></div>'+
       '<div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><div style="font-size:22px;font-weight:700;color:var(--ink)">'+esc(cur!=null?cur:'-')+'</div><div style="font-size:13px;color:var(--ink-3)">of '+esc(g.target||'?')+(m?'':' · link a metric')+'</div></div>'+
-      (pct!=null?'<div class="bar" style="margin-top:10px;height:8px;background:var(--bg-alt);border-radius:999px;overflow:hidden"><i style="display:block;height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--chart),var(--chart-dark))"></i></div>':'')+'</div>';
+      (pct!=null?'<div class="bar" style="margin-top:10px;height:8px;background:var(--bg-alt);border-radius:999px;overflow:hidden"><i style="display:block;height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--chart),var(--chart-dark))"></i></div>':'')+
+      '<div class="kf"><button class="link" onclick="planGoal(\''+g.id+'\')">Plan it with your COO &rarr;</button></div></div>';
   }).join('');
 }
 function goalFields(g){g=g||{};var opts=[['','No linked metric']].concat((STATE.metrics||[]).map(function(m){return [m.id,m.label];}));return [
@@ -1085,6 +1110,118 @@ async function saveLimit(){
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 async function togglePause(){try{var j=await api('/api/os2-policy',{action:'pause',on:!(STATE._paused===true)});STATE._paused=!!j.paused;toast(j.paused?'Everything paused':'Company resumed');loadPolicies();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+
+/* ---- blueprint (design my company from a short interview) ---- */
+var BP_Q=[
+  ['what_you_do','What does your business do?','textarea','e.g. Residential HVAC install and repair across two counties.'],
+  ['biggest_headache','What falls through the cracks most?','textarea','e.g. Follow-up on quotes, and chasing unpaid invoices.'],
+  ['tools','What tools do you run on today?','input','e.g. QuickBooks, ServiceTitan, Google Workspace'],
+  ['team_size','How big is the team?','input','e.g. 12 people, 4 crews'],
+  ['goal','What is the one goal this year?','input','e.g. Hit $3M revenue without adding office staff']
+];
+var BP_SPEC=null;
+function renderBlueprint(){
+  var host=document.getElementById('blueprint'); if(!host) return;
+  if(BP_SPEC){renderBlueprintPreview(host);return;}
+  host.innerHTML='<div class="kcard" style="padding:22px 24px">'+
+    BP_Q.map(function(q){return '<div class="field"><label>'+esc(q[1])+'</label>'+(q[2]==='textarea'?'<textarea id="bp_'+q[0]+'" placeholder="'+esc(q[3])+'"></textarea>':'<input id="bp_'+q[0]+'" placeholder="'+esc(q[3])+'"/>')+'</div>';}).join('')+
+    '<div class="mfoot" style="justify-content:flex-start"><button class="btn" id="bpGen" onclick="genBlueprint()"><svg class="icon"><use href="#i-spark"/></svg> Design my company</button></div></div>';
+}
+async function genBlueprint(){
+  var answers={};BP_Q.forEach(function(q){var el=document.getElementById('bp_'+q[0]);answers[q[0]]=el?el.value.trim():'';});
+  var btn=document.getElementById('bpGen');if(btn){btn.disabled=true;btn.innerHTML='Designing your company...';}
+  try{var j=await api('/api/os2-blueprint',{action:'generate',answers:answers});BP_SPEC=j.spec||null;renderBlueprint();}
+  catch(e){if(e.message!=='signed out')toast(e.message);if(btn){btn.disabled=false;btn.innerHTML='Design my company';}}
+}
+function renderBlueprintPreview(host){
+  var s=BP_SPEC;
+  function list(title,items,fmt){return items&&items.length?'<div style="margin-top:16px"><div class="lbl">'+title+'</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">'+items.map(fmt).join('')+'</div></div>':'';}
+  var html='<div class="kcard" style="padding:22px 24px;border-color:#d0ee72">'+
+    '<div class="kh"><span class="badge done">Your company</span><h4>'+esc(s.summary||'Your intelligent company')+'</h4></div>'+
+    list('Departments',s.departments,function(d){return '<span class="chip2"><svg class="icon" style="width:12px;height:12px"><use href="#i-org"/></svg> '+esc(d.name)+'</span>';})+
+    list('AI workers',s.workers,function(w){return '<span class="chip2"><svg class="icon" style="width:12px;height:12px"><use href="#i-bot"/></svg> '+esc(w.name)+'</span>';})+
+    list('Numbers to watch',s.metrics,function(m){return '<span class="chip2">'+esc(m.label)+'</span>';})+
+    list('Goals',s.goals,function(g){return '<span class="chip2">'+esc(g.title)+'</span>';})+
+    list('Tools to connect',s.tools,function(t){return '<span class="chip2"><svg class="icon" style="width:12px;height:12px"><use href="#i-plug"/></svg> '+esc(t.name)+'</span>';})+
+    list('Processes',s.workflows,function(f){return '<span class="chip2"><svg class="icon" style="width:12px;height:12px"><use href="#i-flow"/></svg> '+esc(f.name)+'</span>';})+
+    '<div class="mfoot" style="justify-content:flex-start;flex-wrap:wrap;gap:10px;margin-top:20px"><button class="btn" id="bpApply" onclick="applyBlueprint()">Build this into my OS</button><button class="btn ghost" onclick="BP_SPEC=null;renderBlueprint();">Start over</button><span class="cad" style="align-self:center">TMI wires the backend behind it.</span></div></div>';
+  host.innerHTML=html;
+}
+async function applyBlueprint(){
+  var btn=document.getElementById('bpApply');if(btn){btn.disabled=true;btn.innerHTML='Building your company...';}
+  try{var j=await api('/api/os2-blueprint',{action:'apply',spec:BP_SPEC});var c=j.counts||{};toast('Built: '+(c.departments||0)+' departments, '+(c.workers||0)+' workers');BP_SPEC=null;await refresh();show('departments');}
+  catch(e){if(e.message!=='signed out')toast(e.message);if(btn){btn.disabled=false;btn.innerHTML='Build this into my OS';}}
+}
+
+/* ---- marketplace ---- */
+var MARKET=null;
+var MK_KIND={worker:'Worker',department:'Department',workflow:'Workflow',pack:'Department pack'};
+async function loadMarket(){
+  var host=document.getElementById('marketList');if(!host)return;
+  if(!MARKET){host.innerHTML='<div class="empty" style="padding:24px"><p>Loading the marketplace...</p></div>';try{var j=await api('/api/os2-market',{action:'list'});MARKET=j.items||[];}catch(e){MARKET=[];}}
+  renderMarket();
+}
+function renderMarket(){
+  var host=document.getElementById('marketList');if(!host)return;var items=MARKET||[];
+  if(!items.length){host.innerHTML='<div class="empty"><h3>Marketplace</h3><p>Prebuilt workers and departments are on the way.</p></div>';return;}
+  var cats={};items.forEach(function(it){(cats[it.category||'Other']=cats[it.category||'Other']||[]).push(it);});
+  host.innerHTML=Object.keys(cats).map(function(cat){
+    return '<div class="lbl" style="margin:22px 0 12px">'+esc(cat)+'</div><div class="tiles">'+cats[cat].map(function(it){
+      return '<div class="kcard" style="padding:16px 18px"><div class="kh"><span class="badge k">'+esc(MK_KIND[it.kind]||it.kind)+'</span><h4>'+esc(it.label)+'</h4></div>'+
+        (it.tagline?'<p style="font-size:13px;color:var(--ink-2);margin-top:8px">'+esc(it.tagline)+'</p>':'')+
+        '<div class="kf"><button class="btn sm" onclick="installTemplate(\''+esc(it.id)+'\',this)">Install</button></div></div>';
+    }).join('')+'</div>';
+  }).join('');
+}
+async function installTemplate(id,btn){
+  if(btn){btn.disabled=true;btn.textContent='Installing...';}
+  try{var j=await api('/api/os2-market',{action:'install',id:id});var inst=j.installed||{};toast('Installed '+(inst.label||'it')+'. TMI wires the backend.');await refresh();}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+  if(btn){btn.disabled=false;btn.textContent='Install';}
+}
+
+/* ---- company brain ---- */
+function renderBrain(){
+  var host=document.getElementById('brainBox');if(!host)return;
+  host.innerHTML='<div class="kcard" style="padding:20px 22px"><div class="field"><label>Ask your company anything</label><textarea id="brainQ" placeholder="e.g. What did we tell Dave about his estimate? What is our cancellation policy?"></textarea></div>'+
+    '<div class="mfoot" style="justify-content:flex-start;gap:10px"><button class="btn" onclick="brainAsk()"><svg class="icon"><use href="#i-brain"/></svg> Ask</button><button class="btn ghost" onclick="brainSearch()">Search</button></div></div>'+
+    '<div id="brainOut" style="margin-top:14px"></div>';
+}
+async function brainAsk(){
+  var q=(document.getElementById('brainQ')||{}).value||'';if(!q.trim()){toast('Ask a question first');return;}
+  var out=document.getElementById('brainOut');out.innerHTML='<div class="reco"><div class="rtext"><span class="dots"><span></span><span></span><span></span></span></div></div>';
+  try{var j=await api('/api/os2-brain',{action:'ask',question:q.trim()});
+    var src=(j.sources||[]).map(function(s){return '<span class="chip2">'+esc(s.title||s.kind)+'</span>';}).join('');
+    out.innerHTML='<div class="kcard" style="padding:18px 20px"><div class="body" style="max-height:none;font-size:14.5px;color:var(--ink)">'+esc(j.answer||'The brain does not know yet.')+'</div>'+(src?'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:12px">'+src+'</div>':'')+'</div>';
+  }catch(e){out.innerHTML='';if(e.message!=='signed out')toast(e.message);}
+}
+async function brainSearch(){
+  var q=(document.getElementById('brainQ')||{}).value||'';
+  var out=document.getElementById('brainOut');out.innerHTML='<div class="reco"><div class="rtext">Searching...</div></div>';
+  try{var j=await api('/api/os2-brain',{action:'search',query:q.trim()});var r=j.results||[];
+    out.innerHTML=r.length?r.map(function(it){return '<div class="kcard" style="padding:14px 18px;margin-bottom:8px"><div class="kh"><span class="badge k">'+esc(it.kind)+'</span><h4>'+esc(it.title||'(untitled)')+'</h4></div>'+(it.snippet?'<p style="font-size:13px;color:var(--ink-2);margin-top:6px">'+esc(it.snippet)+'</p>':'')+'</div>';}).join(''):'<div class="empty" style="padding:20px"><p>Nothing yet. Your brain fills as your OS captures knowledge, customers, and conversations.</p></div>';
+  }catch(e){out.innerHTML='';if(e.message!=='signed out')toast(e.message);}
+}
+
+/* ---- plan a goal (COO orchestrator) ---- */
+async function planGoal(goalId){
+  var g=find('goals',goalId);
+  document.getElementById('mcard').innerHTML='<h3>Planning</h3><div class="reco" style="margin-top:12px"><div class="rtext"><span class="dots"><span></span><span></span><span></span></span></div></div>';
+  document.getElementById('modal').classList.add('on');window._form=null;
+  try{
+    var j=await api('/api/os2-plan',{action:'plan',goal_id:goalId});
+    var p=j.plan||{},steps=p.steps||[];window._plan=Object.assign({},p,{goal:j.goal||(g?{title:g.title,target:g.target}:null)});
+    var html='<h3>Plan to hit '+esc((j.goal&&j.goal.title)||(g&&g.title)||'your goal')+'</h3>'+
+      (p.summary?'<div class="msub">'+esc(p.summary)+'</div>':'')+
+      '<div style="margin-top:14px">'+steps.map(function(s,i){return '<div class="task"><span class="cb" style="border:none;background:none"><b style="color:var(--ink)">'+(i+1)+'</b></span><div style="flex:1"><div class="tt">'+esc(s.task_title)+'</div><div class="td">'+esc(s.why||'')+(s.worker_name?' · '+esc(s.worker_name):'')+'</div></div></div>';}).join('')+'</div>'+
+      '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Not now</button><button class="btn" onclick="applyPlan()">Set this up</button></div>';
+    document.getElementById('mcard').innerHTML=html;
+  }catch(e){closeModal();if(e.message!=='signed out')toast(e.message);}
+}
+async function applyPlan(){
+  try{var j=await api('/api/os2-plan',{action:'apply',plan:window._plan});closeModal();toast((j.created||0)+' tasks set up');refresh();}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
 
 var TOOL_CATALOG=[
   ['QuickBooks','Accounting'],['Xero','Accounting'],['Stripe','Payments'],['ServiceTitan','Field service'],
