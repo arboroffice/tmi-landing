@@ -30,6 +30,7 @@ module.exports = async function handler(req, res) {
       db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 30 }),
     ]);
     return res.status(200).json({
+      me: { id: t.sub, role: t.role || 'owner', email: t.email || null },
       tenant: tenant ? {
         id: tenant.id, name: tenant.name, onboarded: !!tenant.onboarded,
         summary: tenant.summary || null, plan: tenant.plan || 'trial',

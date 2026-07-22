@@ -211,6 +211,18 @@
   .dots span:nth-child(2){animation-delay:.15s;}.dots span:nth-child(3){animation-delay:.3s;}
   @keyframes pulse{0%,100%{opacity:.3;transform:scale(.8);}50%{opacity:1;transform:scale(1);}}
 
+  /* role gating: hide write affordances for viewers, owner-only nav for non-owners */
+  body.role-viewer .add,body.role-viewer .addtile,body.role-viewer .pen,body.role-viewer .racts,body.role-viewer .task .cb,body.role-viewer .task .del,body.role-viewer .acts,body.role-viewer #sSave{display:none !important;}
+  body:not(.role-owner) a[data-owner]{display:none !important;}
+  /* member rows */
+  .member{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:10px;}
+  .member .av{width:34px;height:34px;border-radius:9px;background:var(--ink);color:var(--chart);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;}
+  .member .nm{font-size:14.5px;font-weight:600;}
+  .member .em{font-size:12.5px;color:var(--ink-3);}
+  .member .st{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--warn);background:var(--warn-bg);border:1px solid #f0e0a8;border-radius:5px;padding:3px 7px;}
+  .member .rsel{margin-left:auto;font-family:var(--sans);font-size:13px;border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;background:#fff;color:var(--ink);}
+  .member .me{margin-left:auto;font-size:12px;color:var(--ink-3);font-family:var(--mono);}
+  .invite-link{font-family:var(--mono);font-size:12.5px;background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;padding:12px 14px;word-break:break-all;color:var(--ink-2);margin-top:14px;}
   .burger{display:none;}
   @media(max-width:880px){
     .side{transform:translateX(-100%);transition:transform .3s;}
@@ -246,6 +258,7 @@
 <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 13h4l2 3h4l2-3h4"/><path d="M4 13l2-8h12l2 8v6H4z"/></symbol>
 <symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
 <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M16 5.5a3 3 0 0 1 0 5.8M17 15c2.5.4 4 2 4 5"/></symbol>
 </defs></svg>
 
 <aside class="side" id="side">
@@ -265,7 +278,8 @@
     <a data-v="reports"><svg class="icon"><use href="#i-chart"/></svg> Reports</a>
     <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
     <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Integrations</a>
-    <a data-v="settings"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
+    <a data-v="team" data-owner="1"><svg class="icon"><use href="#i-users"/></svg> Team <span class="tag" id="tgTeam"></span></a>
+    <a data-v="settings" data-owner="1"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
   </nav>
   <div class="who">
     <div class="av" id="av">·</div>
@@ -366,6 +380,11 @@
     <p class="sub">The more your OS knows about how you run, the sharper your COO and your workers get. This grounds everything they produce.</p>
     <div id="settings" style="margin-top:24px;max-width:640px"></div>
   </section>
+
+  <section class="view" data-view="team">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Team</div><p class="sub">Everyone here shares one company OS. Owners run everything, managers operate and build, viewers can look but not change.</p></div><button class="btn add" onclick="inviteMember()"><svg class="icon"><use href="#i-plus"/></svg> Invite</button></div>
+    <div id="team" style="margin-top:22px;max-width:720px"></div>
+  </section>
 </main>
 
 <div class="scrim" id="scrim" onclick="closeAsk()"></div>
@@ -414,6 +433,7 @@ function show(v){
   document.querySelectorAll('.side a[data-v]').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-v')===v);});
   document.querySelectorAll('.view').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-view')===v);});
   if((v==='command'||v==='coo')&&!briefingLoaded) loadBriefing();
+  if(v==='team') loadTeam();
   window.scrollTo(0,0);
 }
 
@@ -433,6 +453,9 @@ function boot(s){
   document.getElementById('av').textContent=(name.trim()[0]||'·').toUpperCase();
   document.getElementById('plan').textContent=cap(s.tenant&&s.tenant.plan||'trial');
   document.getElementById('summary').textContent=s.tenant&&s.tenant.summary||'Your company on one screen.';
+  var role=(s.me&&s.me.role)||'owner';
+  document.body.classList.remove('role-owner','role-manager','role-viewer');
+  document.body.classList.add('role-'+role);
   if(/[?&]new=1/.test(location.search)){
     var b=document.getElementById('banner');
     b.innerHTML='Your OS is built. <b>'+((s.workers||[]).length)+' AI workers</b> and <b>'+((s.metrics||[]).length)+' metrics</b> are ready. Turn a worker on, or ask your COO to build more.';
@@ -660,6 +683,57 @@ async function saveSettings(){
   btn.disabled=false;btn.textContent='Save settings';
 }
 
+/* ---- team ---- */
+var TEAM=null, teamLoaded=false;
+async function loadTeam(force){
+  if(teamLoaded&&!force)return;
+  try{var j=await api('/api/os2-team',{action:'list'});TEAM=j.members||[];teamLoaded=true;renderTeam();}
+  catch(e){if(e.message!=='signed out')document.getElementById('team').innerHTML='<div class="empty"><p>'+esc(e.message)+'</p></div>';}
+}
+function renderTeam(){
+  if(!TEAM){document.getElementById('team').innerHTML='<div class="loading">Loading team...</div>';return;}
+  var meId=STATE.me&&STATE.me.id;
+  var rolesOpt=function(sel){return ['owner','manager','viewer'].map(function(r){return '<option value="'+r+'"'+(r===sel?' selected':'')+'>'+cap(r)+'</option>';}).join('');};
+  document.getElementById('tgTeam').textContent=TEAM.length||'';
+  document.getElementById('team').innerHTML=TEAM.map(function(m){
+    var isMe=m.id===meId;
+    return '<div class="member"><div class="av">'+esc(((m.name||'?').trim()[0]||'?').toUpperCase())+'</div>'+
+      '<div><div class="nm">'+esc(m.name)+(isMe?' (you)':'')+'</div><div class="em">'+esc(m.email)+'</div></div>'+
+      (m.status==='invited'?'<span class="st">Invited</span>':'')+
+      '<select class="rsel" onchange="changeRole(\''+m.id+'\',this.value)">'+rolesOpt(m.role)+'</select>'+
+      (isMe?'':'<span class="iconbtn danger" title="Remove" onclick="removeMember(\''+m.id+'\',\''+esc(m.name)+'\')"><svg class="icon"><use href="#i-trash"/></svg></span>')+
+    '</div>';
+  }).join('');
+}
+function inviteMember(){
+  openForm({title:'Invite a teammate',sub:'They get a link to set their password and join this company OS.',fields:[
+    {name:'name',label:'Name',placeholder:'Jordan Rivera'},
+    {name:'email',label:'Work email',placeholder:'jordan@company.com'},
+    {name:'role',label:'Role',type:'select',value:'manager',options:[['manager','Manager — operate and build'],['viewer','Viewer — read only'],['owner','Owner — full access']]}
+  ],onSave:async function(v){
+    var j=await api('/api/os2-team',{action:'invite',name:v.name,email:v.email,role:v.role});
+    teamLoaded=false;await loadTeam(true);
+    showInviteLink(j.join_url,v.name);
+    return {__hold:true};
+  }});
+}
+function showInviteLink(url,name){
+  window._out=url;
+  document.getElementById('mcard').innerHTML='<h3>Invite ready</h3><div class="msub">'+esc(name)+' can join with this link. We also emailed it to them.</div>'+
+    '<div class="invite-link">'+esc(url)+'</div>'+
+    '<div class="mfoot"><button class="btn ghost" style="margin-right:auto" onclick="copyOutput()"><svg class="icon"><use href="#i-copy"/></svg> Copy link</button><button class="btn" onclick="closeModal()">Done</button></div>';
+  document.getElementById('modal').classList.add('on');window._form=null;
+}
+async function changeRole(id,role){
+  try{var j=await api('/api/os2-team',{action:'role',id:id,role:role});var m=(TEAM||[]).find(function(x){return x.id===id;});if(m&&j.member)m.role=j.member.role;toast('Role updated');}
+  catch(e){if(e.message!=='signed out'){toast(e.message);teamLoaded=false;loadTeam(true);}}
+}
+async function removeMember(id,name){
+  if(!confirm('Remove '+name+' from the team?'))return;
+  try{await api('/api/os2-team',{action:'remove',id:id});teamLoaded=false;loadTeam(true);toast('Removed');}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+
 /* ---- feed ---- */
 function renderFeed(){
   var log=STATE.build_log||[];
@@ -700,7 +774,11 @@ function collect(){
 }
 async function modalSave(){
   var btn=document.getElementById('mSave');btn.disabled=true;btn.textContent='Saving...';
-  try{await window._form.onSave(collect());closeModal();toast('Saved');refresh();briefingLoaded=false;}
+  try{
+    var r=await window._form.onSave(collect());
+    if(r&&r.__hold){window._form=null;return;}   // onSave took over the modal (e.g. invite link)
+    closeModal();toast('Saved');refresh();briefingLoaded=false;
+  }
   catch(e){if(e.message!=='signed out')toast(e.message);btn.disabled=false;btn.textContent='Save';}
 }
 async function modalDelete(){

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Join your team | TMI OS</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://api.fontshare.com"/>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#ffffff;--bg-alt:#f6f6f4;--ink:#0a0b14;--ink-2:#55576a;--ink-3:#8a8c9e;--line:rgba(10,11,20,0.10);--line-2:rgba(10,11,20,0.16);--chart:#E4FF97;--chart-dark:#cdee72;--sans:"General Sans",system-ui,-apple-system,sans-serif;--mono:"Neue Haas Grotesk Display",ui-monospace,monospace;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;min-height:100vh;display:grid;grid-template-columns:1.05fr 1fr;}
+  .brand-side{background:var(--ink);color:#fff;padding:48px 56px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;}
+  .brand-side::after{content:"";position:absolute;bottom:-160px;right:-120px;width:460px;height:460px;background:radial-gradient(circle at 50% 50%,rgba(228,255,151,.16),transparent 62%);}
+  .bs-top{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;position:relative;z-index:1;}
+  .bs-top img{height:24px;}
+  .bs-mid{position:relative;z-index:1;}
+  .bs-mid h1{font-size:clamp(30px,3vw,44px);font-weight:700;letter-spacing:-0.03em;line-height:1.06;max-width:15ch;}
+  .bs-mid h1 .l{background:var(--chart);color:var(--ink);padding:0 .12em;box-decoration-break:clone;-webkit-box-decoration-break:clone;}
+  .bs-mid p{color:rgba(255,255,255,.66);font-size:16px;line-height:1.6;margin-top:20px;max-width:42ch;}
+  .bs-foot{position:relative;z-index:1;font-size:12px;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;}
+  .auth{display:flex;align-items:center;justify-content:center;padding:40px;}
+  .card{width:100%;max-width:420px;}
+  .card h2{font-size:26px;font-weight:700;letter-spacing:-0.02em;}
+  .card .sub{color:var(--ink-2);font-size:14.5px;margin-top:6px;line-height:1.5;}
+  form{margin-top:24px;display:flex;flex-direction:column;gap:15px;}
+  label{display:block;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:7px;}
+  input{width:100%;font-family:var(--sans);font-size:16px;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:10px;padding:13px 14px;}
+  input:focus{outline:none;border-color:var(--ink);}
+  .btn{font-family:var(--sans);font-size:15px;font-weight:600;background:var(--chart);color:var(--ink);border:1px solid var(--chart);border-radius:10px;padding:14px;cursor:pointer;transition:background .15s;margin-top:6px;}
+  .btn:hover{background:var(--chart-dark);}
+  .btn:disabled{opacity:.6;cursor:default;}
+  .err{font-size:13.5px;color:#c0261f;font-weight:500;min-height:1px;display:none;}
+  .err.on{display:block;}
+  @media(max-width:860px){body{grid-template-columns:1fr;}.brand-side{display:none;}}
+</style>
+</head>
+<body>
+  <aside class="brand-side">
+    <div class="bs-top"><img src="/logo.svg" alt="TMI"/> TMI OS</div>
+    <div class="bs-mid">
+      <h1>Join your <span class="l">company OS.</span></h1>
+      <p>Set your password and you are in. Your whole company runs from one screen: the command center, your AI workers, and everything the team is building.</p>
+    </div>
+    <div class="bs-foot">TMI Technology</div>
+  </aside>
+  <main class="auth">
+    <div class="card">
+      <h2>Set your password</h2>
+      <p class="sub" id="sub">You were invited to a company on TMI OS.</p>
+      <form onsubmit="return doJoin(event)">
+        <div><label>Your name</label><input id="j-name" autocomplete="name" required/></div>
+        <div><label>Password</label><input id="j-password" type="password" autocomplete="new-password" placeholder="At least 8 characters" required/></div>
+        <div class="err" id="j-err"></div>
+        <button class="btn" id="j-btn" type="submit">Join and sign in &rarr;</button>
+      </form>
+    </div>
+  </main>
+<script>
+var TOKEN_KEY='tmios_token';
+function qs(k){try{return new URLSearchParams(location.search).get(k);}catch(_){return null;}}
+var invite=qs('token');
+if(!invite){location.href='/os/';}
+function showErr(m){var e=document.getElementById('j-err');e.textContent=m;e.classList.add('on');}
+async function doJoin(e){
+  e.preventDefault();document.getElementById('j-err').classList.remove('on');
+  var btn=document.getElementById('j-btn');btn.disabled=true;btn.textContent='Setting up...';
+  try{
+    var r=await fetch('/api/os2-join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:invite,name:document.getElementById('j-name').value.trim(),password:document.getElementById('j-password').value})});
+    var j=await r.json().catch(function(){return {};});
+    if(!r.ok)throw new Error(j.error||'Could not complete sign up');
+    try{localStorage.setItem(TOKEN_KEY,j.token);}catch(_){}
+    location.href=(j.tenant&&j.tenant.onboarded)?'/os/app':'/os/app';
+  }catch(err){showErr(err.message);btn.disabled=false;btn.textContent='Join and sign in →';}
+  return false;
+}
+</script>
+</body>
+</html>

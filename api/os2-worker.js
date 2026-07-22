@@ -4,7 +4,7 @@
 // POST { id, action: 'toggle' | 'run' } -> { worker } | { ok: true }
 
 const db = require('./_db');
-const { requireTenant, cors } = require('./_tenant-auth');
+const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 
 module.exports = async function handler(req, res) {
   cors(res);
@@ -12,6 +12,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   const t = requireTenant(req, res);
   if (!t) return;
+  if (!requireRole(t, res, 'manager')) return;
 
   const b = req.body || {};
   const id = String(b.id || '');

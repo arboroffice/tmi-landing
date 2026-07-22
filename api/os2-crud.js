@@ -12,7 +12,7 @@
 //   -> { items } | { item } | { ok: true }
 
 const db = require('./_db');
-const { requireTenant, cors } = require('./_tenant-auth');
+const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 
 const COLLS = {
   metrics: 'os_metrics',
@@ -94,6 +94,9 @@ module.exports = async function handler(req, res) {
       rows.sort((a, b) => (a.sort || 0) - (b.sort || 0));
       return res.status(200).json({ items: rows });
     }
+
+    // create / update / delete are writes: viewers are read-only.
+    if (!requireRole(t, res, 'manager')) return;
 
     if (action === 'create') {
       const data = clean(resource, b.data);

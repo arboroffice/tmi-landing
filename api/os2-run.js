@@ -6,7 +6,7 @@
 // POST { id } -> { output }
 
 const db = require('./_db');
-const { requireTenant, cors } = require('./_tenant-auth');
+const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { executeWorker } = require('./_osrun');
 
 module.exports = async function handler(req, res) {
@@ -15,6 +15,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   const t = requireTenant(req, res);
   if (!t) return;
+  if (!requireRole(t, res, 'manager')) return;
 
   const id = String((req.body && req.body.id) || '');
   if (!id) return res.status(400).json({ error: 'Worker id required' });

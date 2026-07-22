@@ -56,4 +56,17 @@ function requireTenant(req, res) {
   return t;
 }
 
-module.exports = { hashPassword, verifyPassword, signTenant, verifyTenant, requireTenant, cors };
+// Role rank. Legacy tokens (all owners) and any missing role default to owner,
+// so existing accounts keep full access. viewer < manager < owner.
+const RANK = { viewer: 1, manager: 2, owner: 3 };
+function can(token, need) {
+  return (RANK[token && token.role] || RANK.owner) >= (RANK[need] || RANK.owner);
+}
+// Gate a write. Returns true if allowed; otherwise writes 403 and returns false.
+function requireRole(token, res, need) {
+  if (can(token, need)) return true;
+  res.status(403).json({ error: need === 'owner' ? 'Only the owner can do that' : 'You do not have access to change this' });
+  return false;
+}
+
+module.exports = { hashPassword, verifyPassword, signTenant, verifyTenant, requireTenant, cors, can, requireRole };
