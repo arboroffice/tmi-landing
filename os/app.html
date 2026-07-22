@@ -889,7 +889,22 @@ function renderIntegrations(){
   var role=(STATE.me&&STATE.me.role)||'owner';
   var metrics=STATE.metrics||[];
   var live=metrics.filter(function(m){return m.updated_at;});
-  var html='<div class="kcard" style="padding:18px 22px"><div class="kh"><span class="badge '+(live.length?'done':'k')+'">'+(live.length?'Live':'No live data')+'</span><h4>'+(live.length?live.length+' metric'+(live.length>1?'s':'')+' running on real data':'No numbers connected yet')+'</h4></div>'+
+  var conns=STATE.connections||[];
+  var html='';
+  if(conns.length){
+    html+='<div class="kcard" style="padding:18px 22px;margin-bottom:14px"><div class="kh"><span class="badge k">TMI connections</span><h4>Wired to your real systems</h4></div>'+
+      '<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">'+conns.map(function(c){
+        var st=c.status==='live'?'done':c.status==='paused'?'k':'approve';
+        var lbl=c.status==='live'?'Live':c.status==='paused'?'Paused':'Connecting';
+        var feeds=(c.feeds||[]).map(function(f){return esc(f.label);}).join(', ');
+        return '<div style="display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px">'+
+          '<span class="badge '+st+'">'+lbl+'</span>'+
+          '<div style="flex:1;min-width:0"><div style="font-size:14px;color:var(--ink);font-weight:600">'+esc(c.name)+'</div>'+
+          '<div style="font-size:11.5px;color:var(--ink-3)">'+(feeds?'Feeds '+feeds:'Wired by TMI')+(c.last_data_at?' · updated '+ago(c.last_data_at):'')+'</div></div></div>';
+      }).join('')+'</div>'+
+      (conns.some(function(c){return c.status==='connecting';})?'<p style="font-size:12.5px;color:var(--ink-2);margin-top:12px">TMI is wiring these. They flip to live the moment real data starts flowing.</p>':'')+'</div>';
+  }
+  html+='<div class="kcard" style="padding:18px 22px"><div class="kh"><span class="badge '+(live.length?'done':'k')+'">'+(live.length?'Live':'No live data')+'</span><h4>'+(live.length?live.length+' metric'+(live.length>1?'s':'')+' running on real data':'No numbers connected yet')+'</h4></div>'+
     (live.length?'<div class="body" style="max-height:none">'+live.slice(0,8).map(function(m){return esc(m.label)+': <b>'+esc(m.value||'-')+'</b> <span style="color:var(--ink-3)">· '+ago(m.updated_at)+(m.source?' · '+esc(m.source):'')+'</span>';}).join('<br>')+'</div>':'<p style="font-size:13.5px;color:var(--ink-2);margin-top:10px">Push your first value below or from a tool and it goes live everywhere in your OS.</p>')+'</div>';
 
   if(CONNECT){

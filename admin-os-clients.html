@@ -107,6 +107,14 @@ async function openClient(id){
     open.length ? open.map(reqCard).join('') : '<div style="color:var(--muted);font-size:13px">Nothing open. When the client files a request it lands here.</div>'
   }${closed.length?`<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:16px 0 10px">Closed</div>`+closed.map(reqCard).join(''):''}</div>`;
 
+  const conns = r.connections || [];
+  html += `<div class="panel"><h2>Data connections</h2>
+    <p style="color:var(--muted);font-size:12.5px;margin:-4px 0 12px">Wire their real tools in. A connection goes live automatically the moment data first flows to their ingest endpoint.</p>
+    ${conns.length ? conns.map(connCard).join('') : '<div style="color:var(--muted);font-size:13px;margin-bottom:12px">No connections yet.</div>'}
+    <button class="btn btn-secondary btn-sm" onclick="connectTool()">+ Connect a tool</button>
+    ${r.ingest_endpoint ? `<div style="margin-top:12px;font-size:11.5px;color:var(--muted)">Ingest endpoint: <code>${esc(r.ingest_endpoint)}</code>${r.tenant.ingest_key ? ` · key <code>${esc(String(r.tenant.ingest_key).slice(0,8))}…</code>` : ''}</div>` : ''}
+  </div>`;
+
   html += `<div class="panel"><h2>Provision into their OS</h2>
     <p style="color:var(--muted);font-size:12.5px;margin:-4px 0 12px">Build a piece for them. It appears in their OS immediately, marked built by TMI.</p>
     <div class="prov-grid">
@@ -117,6 +125,26 @@ async function openClient(id){
     </div></div>`;
 
   d.innerHTML = html;
+}
+
+function connCard(c){
+  const feeds = (c.feeds||[]).map(f=>esc(f.label)).join(', ');
+  return `<div class="req" style="margin-bottom:10px"><div class="rh"><h3>${esc(c.name)}</h3><span class="rpill ${c.status==='live'?'live':c.status==='paused'?'declined':'building'}">${esc(c.status)}</span></div>
+    ${feeds?`<div class="detail">Feeds ${feeds}</div>`:''}
+    ${c.last_data_at?`<div class="detail" style="color:var(--muted)">Last data ${new Date(c.last_data_at).toLocaleString()}</div>`:''}
+    ${c.status!=='live'?`<div class="req-acts"><button class="btn btn-primary btn-sm" onclick="setConnStatus('${c.id}','live')">Mark live</button></div>`:''}</div>`;
+}
+async function connectTool(){
+  const name = prompt('Connection name (e.g. QuickBooks, ServiceTitan):','');
+  if(name===null||!name.trim()) return;
+  const metrics = prompt('Metrics it feeds, comma separated (e.g. Revenue MTD, Unpaid invoices):','');
+  if(metrics===null) return;
+  const r = await TMIAdmin.api('/api/tmi-clients','POST',{action:'connect',tenant_id:CUR,name:name.trim(),provider:name.trim(),metric_labels:metrics});
+  if(r&&r.connection){ TMIAdmin.toast('Connection created. Point '+name.trim()+' at the ingest endpoint.'); openClient(CUR); loadClients(); }
+}
+async function setConnStatus(id,status){
+  const r = await TMIAdmin.api('/api/tmi-clients','POST',{action:'connection-update',id,status});
+  if(r){ TMIAdmin.toast('Marked '+status); openClient(CUR); }
 }
 
 function reqCard(x){

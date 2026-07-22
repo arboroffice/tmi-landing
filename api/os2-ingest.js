@@ -16,7 +16,7 @@
 
 const db = require('./_db');
 const { cors } = require('./_tenant-auth');
-const { matches, applyValue } = require('./_osmetric');
+const { matches, applyValue, slug } = require('./_osmetric');
 
 module.exports = async function handler(req, res) {
   cors(res);
@@ -60,6 +60,23 @@ module.exports = async function handler(req, res) {
       await applyValue(db, m, it.value, 'ingest');
       updated++;
     }
+
+    // Any TMI-wired connection that feeds one of these metrics is now proven live.
+    try {
+      const touchedKeys = new Set(items.map((it) => slug(it.ref)));
+      const conns = await db.list('os_connections', { where: [['tenant_id', '==', tenant.id]] });
+      const now = new Date().toISOString();
+      for (const c of conns) {
+        const feedsTouched = (c.feeds || []).some((f) => touchedKeys.has(f.key) || touchedKeys.has(slug(f.label)));
+        if (feedsTouched || !c.feeds || !c.feeds.length) {
+          const patch = { last_data_at: now };
+          if (c.status !== 'live') { patch.status = 'live'; }
+          await db.update('os_connections', c.id, patch);
+          if (c.status !== 'live') await db.insert('os_build_log', { tenant_id: tenant.id, kind: 'build', summary: `${c.name} is live and feeding your OS.`, created_at: now }).catch(() => {});
+        }
+      }
+    } catch (e) { console.error('os2-ingest connections:', e.message); }
+
     return res.status(200).json({ updated, created });
   } catch (e) {
     console.error('os2-ingest:', e.message);
