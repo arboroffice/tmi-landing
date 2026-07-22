@@ -34,6 +34,9 @@
   .status-pill{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:3px 9px;border-radius:999px;}
   .status-pill.pending{background:#fef3c7;color:#8a6d00;}
   .status-pill.approved{background:#dcfce7;color:#166534;}
+  .status-pill.published{background:#dbeafe;color:#1e40af;}
+  .ci-card .live-url{font-size:12px;margin-top:8px}
+  .ci-card .live-url a{color:#1e40af;font-weight:600}
   .empty-note{font-size:13px;color:var(--muted);padding:20px 0;}
   .mtg-line{font-size:12px;color:var(--muted);margin-top:4px;}
 </style>
@@ -171,12 +174,14 @@ function renderList(){
 
 function contentCard(c){
   const st = c.status||'pending';
-  return `<div class="ci-card">
+  return `<div class="ci-card" id="cc-${c.id}">
     <div class="ch"><span class="fmt">${esc(fmtLabel(c.format))}</span><h3>${esc(c.title)}</h3><span class="status-pill ${st}">${st}</span></div>
     ${c.angle?`<div class="angle">${esc(c.angle)}</div>`:''}
     <div class="body">${esc(c.body)}</div>
+    ${c.published_url?`<div class="live-url">Live: <a href="${esc(c.published_url)}" target="_blank" rel="noopener">${esc(c.published_url)}</a></div>`:''}
     <div class="acts">
       ${st==='pending'?`<button class="btn btn-primary btn-sm" onclick="approve('${c.id}')">Approve</button>`:''}
+      ${st==='approved'?`<button class="btn btn-primary btn-sm" onclick="publish('${c.id}')">Publish to site</button>`:''}
       <button class="btn btn-ghost btn-sm" onclick="copyText('${c.id}')">Copy</button>
       <button class="btn btn-danger btn-sm" onclick="del('content','${c.id}')">Delete</button>
     </div></div>`;
@@ -237,6 +242,15 @@ async function runIntel(){
   loadAll();
 }
 
+async function publish(id){
+  const card=document.getElementById('cc-'+id); const btn=card&&card.querySelector('.btn-primary');
+  if(btn){ btn.disabled=true; btn.textContent='Publishing to the live site...'; }
+  const r = await TMIAdmin.api('/api/tmi-publish','POST',{action:'publish',content_id:id});
+  if(r&&r.url){
+    const it=(cache.content||[]).find(x=>x.id===id); if(it){ it.status='published'; it.published_url=r.url; }
+    renderList(); TMIAdmin.toast('Published live: '+r.url);
+  } else if(btn){ btn.disabled=false; btn.textContent='Publish to site'; } // api() already toasted the reason
+}
 async function approve(id){
   const r = await TMIAdmin.api('/api/tmi-intel','POST',{action:'approve',id});
   if(r){ const it=(cache.content||[]).find(x=>x.id===id); if(it) it.status='approved'; renderList(); TMIAdmin.toast('Approved. Ready to publish.'); }
