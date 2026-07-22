@@ -289,6 +289,7 @@
   </nav>
   <div class="grp">Build it out</div>
   <nav>
+    <a data-v="build"><svg class="icon"><use href="#i-plug"/></svg> Build with TMI <span class="tag" id="tgBuild"></span></a>
     <a data-v="workforce"><svg class="icon"><use href="#i-bot"/></svg> Workforce <span class="tag" id="tgWork"></span></a>
     <a data-v="workflows"><svg class="icon"><use href="#i-flow"/></svg> Workflows <span class="tag" id="tgFlow"></span></a>
     <a data-v="knowledge"><svg class="icon"><use href="#i-book"/></svg> Knowledge <span class="tag" id="tgKnow"></span></a>
@@ -345,6 +346,11 @@
   <section class="view" data-view="tasks">
     <div class="secbar" style="margin-top:0"><div><div class="h">Tasks</div><p class="sub">What you and your OS are working on.</p></div><button class="btn add" onclick="addTask()"><svg class="icon"><use href="#i-plus"/></svg> New task</button></div>
     <div id="tasks" style="margin-top:22px"></div>
+  </section>
+
+  <section class="view" data-view="build">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Build with TMI</div><p class="sub">Lay out everything you want your operation to be. Anything you want wired to your real systems, connected to your books, or built for you, hand it to TMI here. We build the backend and turn it on. You will see it move from requested to building to live.</p></div><button class="btn add" onclick="addRequest()"><svg class="icon"><use href="#i-plus"/></svg> Request a build</button></div>
+    <div id="buildList" style="margin-top:22px"></div>
   </section>
 
   <section class="view" data-view="workforce">
@@ -507,7 +513,7 @@ function renderScore(){
     '</div></div>';
 }
 function renderAll(){
-  renderScore(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderSettings(); renderFeed(); renderSugg();
+  renderScore(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderBuild(); renderSettings(); renderFeed(); renderSugg();
   document.getElementById('tgWork').textContent=(STATE.workers||[]).length||'';
   document.getElementById('tgFlow').textContent=(STATE.workflows||[]).length||'';
   document.getElementById('tgKnow').textContent=(STATE.knowledge||[]).length||'';
@@ -515,6 +521,24 @@ function renderAll(){
   document.getElementById('tgTasks').textContent=open||'';
   var pend=(STATE.outputs||[]).filter(function(o){return o.status==='pending';}).length;
   document.getElementById('tgInbox').textContent=pend||'';
+  var reqOpen=(STATE.requests||[]).filter(function(r){return r.status==='requested'||r.status==='building';}).length;
+  document.getElementById('tgBuild').textContent=reqOpen||'';
+  renderBuildBanner();
+}
+function renderBuildBanner(){
+  if(/[?&]new=1/.test(location.search)) return; // keep the welcome banner
+  var b=document.getElementById('banner'); if(!b) return;
+  var reqs=STATE.requests||[];
+  var building=reqs.filter(function(r){return r.status==='building';}).length;
+  var requested=reqs.filter(function(r){return r.status==='requested';}).length;
+  var liveNew=reqs.filter(function(r){return r.status==='live';}).length;
+  if(building+requested>0){
+    b.innerHTML='TMI is on it. <b>'+building+' building</b>'+(requested?', <b>'+requested+' in the queue</b>':'')+'. <span class="link" onclick="show(\'build\')">See your builds &rarr;</span>';
+    b.classList.add('on');
+  }else if(liveNew>0){
+    b.innerHTML='<b>'+liveNew+'</b> of your requests '+(liveNew===1?'is':'are')+' live in your OS. <span class="link" onclick="show(\'build\')">Review &rarr;</span>';
+    b.classList.add('on');
+  }else{ b.classList.remove('on'); }
 }
 async function refresh(){ try{ STATE=await api('/api/os2-state'); renderAll(); }catch(_){} }
 
@@ -689,6 +713,36 @@ function renderInbox(){
       (resend?'<button class="link" onclick="resendAction(\''+a.id+'\')">Send now</button>':'')+'</div>';
   }).join(''):'<div class="empty" style="padding:24px"><p>Nothing sent yet. Approve a worker draft with a recipient, or connect a send channel in Settings and turn on autopilot.</p></div>';
 }
+
+/* ---- build with TMI (client requests, TMI fulfills) ---- */
+var REQ_CAT=[['worker','An AI worker'],['integration','Connect a tool'],['data','Wire in my real data'],['workflow','A workflow'],['report','A report'],['other','Something else']];
+var REQ_CATLABEL={worker:'AI worker',integration:'Integration',data:'Live data',workflow:'Workflow',report:'Report',other:'Request'};
+var REQ_STATUSLABEL={requested:'In the queue',building:'TMI is building',live:'Live',declined:'Needs a chat',cancelled:'Cancelled'};
+function reqBadge(s){var cls=s==='live'?'done':s==='building'?'approve':s==='declined'?'pending':'';return '<span class="badge '+cls+'">'+(REQ_STATUSLABEL[s]||s)+'</span>';}
+function renderBuild(){
+  var host=document.getElementById('buildList'); if(!host) return;
+  var reqs=STATE.requests||[];
+  var open=reqs.filter(function(r){return r.status!=='cancelled'&&r.status!=='declined';});
+  var closed=reqs.filter(function(r){return r.status==='cancelled'||r.status==='declined';});
+  function card(r){
+    var canCancel=r.status==='requested';
+    return '<div class="kcard"><div class="kh">'+reqBadge(r.status)+'<h4>'+esc(r.title)+'</h4><span class="who">'+esc(REQ_CATLABEL[r.category]||'Request')+' · '+fmt(r.created_at)+'</span></div>'+
+      (r.detail?'<div class="body">'+esc(r.detail)+'</div>':'')+
+      (r.tmi_note?'<div style="margin-top:10px;background:var(--bg-alt);border-radius:10px;padding:12px 14px;font-size:13.5px;color:var(--ink-2)"><strong style="color:var(--ink)">From TMI:</strong> '+esc(r.tmi_note)+'</div>':'')+
+      (canCancel?'<div class="kf"><button class="link" onclick="cancelRequest(\''+r.id+'\')">Cancel</button></div>':'')+'</div>';
+  }
+  host.innerHTML=(open.length?open.map(card).join(''):'<div class="empty"><h3>Hand TMI your first build</h3><p>Tell us what you want wired to your real systems or built for you. We build the backend and turn it on.</p><div style="margin-top:16px"><button class="btn" onclick="addRequest()">Request a build</button></div></div>')+
+    (closed.length?'<div class="lbl" style="margin-top:28px">Closed</div>'+closed.map(card).join(''):'');
+}
+function addRequest(){
+  openForm({title:'Request a build',sub:'What do you want TMI to build or wire for you? Be as specific as you like.',fields:[
+    {name:'title',label:'What you need',placeholder:'e.g. Connect my QuickBooks so revenue is live'},
+    {name:'category',label:'Type',type:'select',value:'other',options:REQ_CAT},
+    {name:'detail',label:'Details (optional)',type:'textarea',placeholder:'Anything that helps us build it right: the tool, the accounts, how it should work.'}
+  ],onSave:function(v){return api('/api/os2-requests',{action:'create',title:v.title,category:v.category,detail:v.detail});}});
+}
+async function cancelRequest(id){try{await api('/api/os2-requests',{action:'cancel',id:id});toast('Cancelled');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+
 function viewOutput(id){var o=find('outputs',id);if(o)showOutput(o);}
 function showOutput(o){
   window._out=o.body||'';

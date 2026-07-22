@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Client OS — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .oc-cols{display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;}
+  @media(max-width:1000px){.oc-cols{grid-template-columns:1fr;}}
+  .clist{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);overflow:hidden;}
+  .crow{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line);cursor:pointer;transition:background .1s;}
+  .crow:first-child{border-top:none;}
+  .crow:hover{background:var(--bg-alt);}
+  .crow.on{background:var(--bg-alt);box-shadow:inset 3px 0 0 var(--chart);}
+  .crow .nm{flex:1;min-width:0;}
+  .crow .nm b{font-size:14px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .crow .nm span{font-size:11.5px;color:var(--muted);}
+  .crow .badge-n{font-size:11px;font-weight:700;background:var(--chart);color:#0a0b14;border-radius:999px;padding:2px 8px;}
+  .crow .sc{font-weight:800;font-size:15px;min-width:30px;text-align:right;}
+  .panel{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);padding:18px 20px;margin-bottom:18px;}
+  .panel h2{font-size:15px;margin:0 0 12px;}
+  .req{border:1px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:12px;}
+  .req .rh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .req .rh h3{font-size:14.5px;margin:0;flex:1;min-width:0;}
+  .req .cat{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:5px;background:var(--bg-alt);color:var(--muted);border:1px solid var(--line);}
+  .req .detail{font-size:13px;color:var(--ink-2);margin-top:8px;line-height:1.55;white-space:pre-wrap;}
+  .rpill{font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:999px;}
+  .rpill.requested{background:#fef9c3;color:#854d0e;}
+  .rpill.building{background:#dbeafe;color:#1e40af;}
+  .rpill.live{background:#E4FF97;color:#0a0b14;}
+  .rpill.declined,.rpill.cancelled{background:var(--bg-alt);color:var(--muted);}
+  .req-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;align-items:center;}
+  .note-in{flex:1;min-width:160px;font-size:13px;padding:7px 10px;border:1px solid var(--line-strong);border-radius:var(--r-sm);font-family:var(--sans);}
+  .stat-line{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2);margin-bottom:4px;}
+  .stat-line b{color:var(--ink);}
+  .prov-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  @media(max-width:640px){.prov-grid{grid-template-columns:1fr;}}
+  .oc-empty{padding:40px;text-align:center;color:var(--muted);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .chip{font-size:11.5px;background:var(--bg-alt);border:1px solid var(--line);border-radius:999px;padding:3px 9px;color:var(--ink-2);}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Client OS</span></div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>Client OS</h1>
+        <div class="sec-head-right"><button class="btn btn-ghost btn-sm" onclick="loadClients()">Refresh</button></div>
+      </div>
+      <p style="color:var(--muted);font-size:13.5px;margin:-8px 0 20px;max-width:70ch;">Every client's operating system. They lay out what they want and file build requests; you build the real backend here and provision straight into their OS. Marking a request live shows up in their portal.</p>
+
+      <div class="oc-cols">
+        <div class="clist" id="clist"><div class="oc-empty">Loading clients...</div></div>
+        <div id="detail"><div class="panel"><div class="oc-empty">Select a client to see their OS and build queue.</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('os-clients');
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let CLIENTS=[], CUR=null;
+const CATLABEL={worker:'AI worker',integration:'Integration',data:'Live data',workflow:'Workflow',report:'Report',other:'Request'};
+
+async function loadClients(){
+  const r = await TMIAdmin.api('/api/tmi-clients','POST',{action:'list'});
+  if(!r) return;
+  CLIENTS = r.clients||[];
+  document.getElementById('clist').innerHTML = CLIENTS.length ? CLIENTS.map(c=>`
+    <div class="crow ${CUR===c.id?'on':''}" onclick="openClient('${c.id}')">
+      <div class="nm"><b>${esc(c.name)}</b><span>${esc(c.business_type||'')}${c.business_type?' · ':''}${c.live_workers}/${c.workers} live${c.certified?' · Certified':''}</span></div>
+      ${c.requests_open?`<span class="badge-n">${c.requests_open}</span>`:''}
+      <div class="sc">${c.score}</div>
+    </div>`).join('') : '<div class="oc-empty">No onboarded clients yet.</div>';
+}
+
+async function openClient(id){
+  CUR=id; loadClients();
+  const d = document.getElementById('detail');
+  d.innerHTML = '<div class="panel"><div class="oc-empty">Loading...</div></div>';
+  const r = await TMIAdmin.api('/api/tmi-clients','POST',{action:'get',tenant_id:id});
+  if(!r){ d.innerHTML='<div class="panel"><div class="oc-empty">Could not load.</div></div>'; return; }
+  const t=r.tenant, sc=r.score||{}, p=t.profile||{};
+  const reqs=r.requests||[];
+  const open=reqs.filter(x=>['requested','building'].includes(x.status));
+  const closed=reqs.filter(x=>!['requested','building'].includes(x.status));
+
+  let html = `<div class="panel">
+    <h2>${esc(t.name)}</h2>
+    <div class="stat-line"><span>Score <b>${sc.score||0}</b></span><span>Owner dependency <b>${sc.owner_dependency||0}%</b></span><span>Tier <b>${esc(sc.tier||'-')}</b></span><span>Plan <b>${esc(t.plan||'trial')}</b></span></div>
+    ${p.what_you_do?`<div style="font-size:13px;color:var(--ink-2);margin-top:8px;line-height:1.55">${esc(p.what_you_do)}</div>`:''}
+    <div class="chips"><span class="chip">${r.workers.length} workers</span><span class="chip">${r.metrics.length} metrics</span><span class="chip">${r.workflows.length} workflows</span><span class="chip">${r.knowledge.length} knowledge</span></div>
+  </div>`;
+
+  html += `<div class="panel"><h2>Build queue ${open.length?`(${open.length} open)`:''}</h2>${
+    open.length ? open.map(reqCard).join('') : '<div style="color:var(--muted);font-size:13px">Nothing open. When the client files a request it lands here.</div>'
+  }${closed.length?`<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:16px 0 10px">Closed</div>`+closed.map(reqCard).join(''):''}</div>`;
+
+  html += `<div class="panel"><h2>Provision into their OS</h2>
+    <p style="color:var(--muted);font-size:12.5px;margin:-4px 0 12px">Build a piece for them. It appears in their OS immediately, marked built by TMI.</p>
+    <div class="prov-grid">
+      <button class="btn btn-secondary btn-sm" onclick="provision('worker')">+ AI worker</button>
+      <button class="btn btn-secondary btn-sm" onclick="provision('metric')">+ Metric</button>
+      <button class="btn btn-secondary btn-sm" onclick="provision('workflow')">+ Workflow</button>
+      <button class="btn btn-secondary btn-sm" onclick="provision('knowledge')">+ Knowledge</button>
+    </div></div>`;
+
+  d.innerHTML = html;
+}
+
+function reqCard(x){
+  return `<div class="req" id="req-${x.id}">
+    <div class="rh"><span class="cat">${esc(CATLABEL[x.category]||'Request')}</span><h3>${esc(x.title)}</h3><span class="rpill ${x.status}">${esc(x.status)}</span></div>
+    ${x.detail?`<div class="detail">${esc(x.detail)}</div>`:''}
+    ${x.tmi_note?`<div class="detail" style="color:var(--ink)"><b>Your note:</b> ${esc(x.tmi_note)}</div>`:''}
+    <div class="req-acts">
+      ${x.status!=='building'?`<button class="btn btn-secondary btn-sm" onclick="setStatus('${x.id}','building')">Building</button>`:''}
+      ${x.status!=='live'?`<button class="btn btn-primary btn-sm" onclick="setStatus('${x.id}','live')">Mark live</button>`:''}
+      ${x.status!=='declined'?`<button class="btn btn-ghost btn-sm" onclick="setStatus('${x.id}','declined')">Decline</button>`:''}
+      <input class="note-in" id="note-${x.id}" placeholder="Note to the client (optional)" value="${esc(x.tmi_note||'')}"/>
+      <button class="btn btn-ghost btn-sm" onclick="saveNote('${x.id}')">Save note</button>
+    </div></div>`;
+}
+
+async function setStatus(id,status){
+  const note = (document.getElementById('note-'+id)||{}).value;
+  const r = await TMIAdmin.api('/api/tmi-clients','POST',{action:'request-update',id,status,tmi_note:note});
+  if(r){ TMIAdmin.toast('Marked '+status); openClient(CUR); loadClients(); }
+}
+async function saveNote(id){
+  const note = (document.getElementById('note-'+id)||{}).value;
+  const r = await TMIAdmin.api('/api/tmi-clients','POST',{action:'request-update',id,tmi_note:note});
+  if(r) TMIAdmin.toast('Note saved');
+}
+
+const PROV_FIELDS = {
+  worker: [['name','Name','Front Desk'],['job','What it does','Answers inbound and books jobs'],['cadence','Cadence (realtime/daily/weekly)','daily'],['autonomy','Autonomy (read/approve/auto)','approve']],
+  metric: [['label','Name','Revenue MTD'],['value','Value','$0'],['unit','Unit','']],
+  workflow: [['name','Name','New job intake'],['trigger','Trigger','A lead comes in']],
+  knowledge: [['title','Title','Pricing policy'],['body','Body','...'],['kind','Kind (sop/policy/pricing/note)','note']],
+};
+async function provision(resource){
+  const spec=PROV_FIELDS[resource]; const data={};
+  for(const [k,label,ph] of spec){
+    const v = prompt(label+':', '');
+    if(v===null) return; // cancelled
+    if(v.trim()) data[k]=v.trim();
+  }
+  if(resource==='worker'){ data.status='ready'; }
+  const r = await TMIAdmin.api('/api/tmi-clients','POST',{action:'provision',tenant_id:CUR,resource,data});
+  if(r&&r.item){ TMIAdmin.toast('Built in their OS'); openClient(CUR); loadClients(); }
+}
+
+loadClients();
+</script>
+</body>
+</html>
