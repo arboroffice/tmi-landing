@@ -710,6 +710,8 @@ function openLead(id){
     </div>
     <a class="btn" href="${bookUrl}" target="_blank" rel="noopener" style="text-decoration:none;margin-top:2px">Book the audit &rarr;</a>
     <div id="dTemplates" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px"></div>
+    <div style="display:flex;gap:7px;margin-top:8px"><button class="btn ghost sm" id="dAIText" style="flex:1">✨ Draft a text</button><button class="btn ghost sm" id="dAICall" style="flex:1">✨ Call opener</button></div>
+    <div id="dAIOut"></div>
     ${(isWarm(l)||l.context)?`<div style="margin-top:10px;background:#E4FF97;color:#0a0b14;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:700;">★ ${esc(l.priority==='hot'?'Hot lead':'Warm lead')}${l.context?(' · '+esc(l.context)):''}${l.email?('<div style="font-weight:500;margin-top:3px;">'+esc(l.email)+'</div>'):''}</div>`:''}
     <div class="statuses" id="dStatus">${STATUS.map(x=>`<button data-s="${x}" class="${l.status===x?'on '+x:''}" ${l.status===x?('style="background:var(--'+statusVar(x)+')"'):''}>${STATUS_LABEL[x]}</button>`).join('')}</div>
     <div class="field" style="margin-top:14px"><label>Contact</label><input id="d_contact" value="${esc(l.contact_name||'')}"/></div>
@@ -760,6 +762,24 @@ function openLead(id){
   const tbox=$('#dTemplates');
   if(tbox){ if(!tel){ tbox.innerHTML='<span style="font-size:12px;color:var(--muted)">Add a phone to text</span>'; }
     else tmpls.forEach(([lab,body])=>{ const bt=el('<button class="btn ghost sm" style="flex:none">'+lab+'</button>'); bt.onclick=()=>{ logInteraction(l.id,'text',{summary:'Texted ('+lab+') '+(l.contact_name||l.business_name||'lead')}).catch(()=>{}); location.href='sms:'+tel+'?&body='+encodeURIComponent(body); }; tbox.appendChild(bt); }); }
+  const aiDraft=async(kind)=>{
+    const out=$('#dAIOut'); const btns=[$('#dAIText'),$('#dAICall')].filter(Boolean);
+    btns.forEach(x=>x.disabled=true); out.innerHTML='<div class="card" style="margin-top:8px;color:var(--muted);font-size:13px"><span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span> Reading this lead…</div>';
+    try{
+      const d=await api('/api/rep-copilot',{method:'POST',body:JSON.stringify({action:'draft',lead_id:l.id,kind:kind})});
+      const body=d.body||'';
+      const canText=kind==='text'&&tel;
+      out.innerHTML='<div class="card" style="margin-top:8px"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">'+(kind==='call'?'Call opener':'Draft text')+'</div>'+
+        '<div style="font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap">'+esc(body)+'</div>'+
+        '<div style="display:flex;gap:7px;margin-top:10px">'+(canText?'<button class="btn sm" id="aiSend" style="flex:1">Text it</button>':'')+'<button class="btn ghost sm" id="aiCopy" style="flex:1">Copy</button><button class="btn ghost sm" id="aiRedo" style="flex:none">Redo</button></div></div>';
+      const cp=$('#aiCopy'); if(cp) cp.onclick=()=>{ try{ navigator.clipboard.writeText(body); toast('Copied'); }catch(e){ toast('Select and copy'); } };
+      const rd=$('#aiRedo'); if(rd) rd.onclick=()=>aiDraft(kind);
+      const sd=$('#aiSend'); if(sd) sd.onclick=()=>{ logInteraction(l.id,'text',{summary:'Texted (AI draft) '+(l.contact_name||l.business_name||'lead')}).catch(()=>{}); location.href='sms:'+tel+'?&body='+encodeURIComponent(body); };
+    }catch(ex){ out.innerHTML=''; toast(ex.message||'Could not draft'); }
+    btns.forEach(x=>x.disabled=false);
+  };
+  const at=$('#dAIText'); if(at) at.onclick=()=>aiDraft('text');
+  const ac=$('#dAICall'); if(ac) ac.onclick=()=>aiDraft('call');
   const enr=$('#dEnrich'); if(enr) enr.onclick=(e)=>{ e.preventDefault(); enrichLead(l); };
   // Tap-to-call / tap-to-text auto-log an interaction so the timeline is honest
   // about every attempt. The href still dials/opens Messages.
