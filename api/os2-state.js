@@ -6,6 +6,7 @@
 
 const db = require('./_db');
 const { requireTenant, cors } = require('./_tenant-auth');
+const { scoreTenant } = require('./_osscore');
 
 const bySort = (a, b) => (a.sort || 0) - (b.sort || 0);
 
@@ -29,8 +30,14 @@ module.exports = async function handler(req, res) {
       db.list('os_outputs', { where: w }),
       db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 30 }),
     ]);
+    const score = scoreTenant({
+      metrics, workers, workflows, knowledge,
+      onboarded: !!(tenant && tenant.onboarded),
+    });
+
     return res.status(200).json({
       me: { id: t.sub, role: t.role || 'owner', email: t.email || null },
+      score,
       tenant: tenant ? {
         id: tenant.id, name: tenant.name, onboarded: !!tenant.onboarded,
         summary: tenant.summary || null, plan: tenant.plan || 'trial',

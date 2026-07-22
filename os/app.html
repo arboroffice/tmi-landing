@@ -97,6 +97,18 @@
   .reco .rk .icon{width:15px;height:15px;stroke:var(--ink);}
   .reco .rtext{font-size:16px;color:var(--ink);line-height:1.6;margin-top:12px;white-space:pre-wrap;}
   .reco .rfoot{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;}
+  /* company intelligence score */
+  .score-card{display:flex;gap:28px;align-items:center;flex-wrap:wrap;background:var(--ink);color:#fff;border-radius:16px;padding:24px 28px;margin-top:22px;}
+  .score-card .lab{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);}
+  .score-card .sd{display:flex;flex-direction:column;gap:3px;}
+  .score-card .big{font-family:var(--mono);font-size:54px;font-weight:700;line-height:1;letter-spacing:-0.03em;color:var(--chart);}
+  .score-card .od{font-size:26px;font-weight:700;letter-spacing:-0.02em;}
+  .score-card .tier{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--chart);color:var(--ink);border-radius:999px;padding:5px 11px;align-self:flex-start;}
+  .score-card .prog{flex:1;min-width:220px;}
+  .score-card .bar{height:8px;background:rgba(255,255,255,.14);border-radius:99px;overflow:hidden;margin-top:8px;}
+  .score-card .bar>i{display:block;height:100%;background:var(--chart-dark);border-radius:99px;transition:width .6s cubic-bezier(.2,.7,.2,1);}
+  .score-card .note{font-size:13px;color:rgba(255,255,255,.72);margin-top:9px;line-height:1.5;}
+  .score-card .note a{color:var(--chart);font-weight:600;}
 
   /* rows */
   .row{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;}
@@ -302,6 +314,7 @@
     <div id="banner" class="banner"></div>
     <div class="h">Command center</div>
     <p class="sub" id="summary"></p>
+    <div id="scoreCard"></div>
     <div class="lbl" style="margin-top:28px">From your AI COO</div>
     <div class="reco" style="margin-top:12px">
       <div class="rk"><svg class="icon"><use href="#i-coo"/></svg> Morning briefing</div>
@@ -471,8 +484,23 @@ function boot(s){
   show('command');
 }
 
+function renderScore(){
+  var sc=STATE.score, el=document.getElementById('scoreCard'); if(!el) return;
+  if(!sc){ el.innerHTML=''; return; }
+  var cert=sc.certified;
+  el.innerHTML='<div class="score-card">'+
+    '<div class="sd"><div class="lab">Company Intelligence Score</div><div class="big">'+sc.score+'</div></div>'+
+    '<div class="sd"><div class="lab">Owner Dependency</div><div class="od">'+sc.owner_dependency+'</div></div>'+
+    '<span class="tier">'+esc(sc.tier)+'</span>'+
+    '<div class="prog"><div class="lab">'+(cert?'Intelligent Company Certified':(sc.to_certify+' points to Certified'))+'</div>'+
+      '<div class="bar"><i style="width:'+Math.min(100,sc.score)+'%"></i></div>'+
+      '<div class="note">'+(cert
+        ? 'You cleared the line. <a href="https://www.tmitechai.com/intelligent-company-certified" target="_blank" rel="noopener">Claim your badge &rarr;</a>'
+        : 'Turn on workers, connect live data, and capture knowledge to raise it. <a href="https://www.tmitechai.com/intelligent-company-certified" target="_blank" rel="noopener">See the standard &rarr;</a>')+'</div>'+
+    '</div></div>';
+}
 function renderAll(){
-  renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderSettings(); renderFeed(); renderSugg();
+  renderScore(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderSettings(); renderFeed(); renderSugg();
   document.getElementById('tgWork').textContent=(STATE.workers||[]).length||'';
   document.getElementById('tgFlow').textContent=(STATE.workflows||[]).length||'';
   document.getElementById('tgKnow').textContent=(STATE.knowledge||[]).length||'';

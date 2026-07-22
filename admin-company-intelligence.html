@@ -99,6 +99,7 @@ const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&l
 
 const TABS = [
   {kind:'content', label:'Content'},
+  {kind:'proof', label:'Proof Engine'},
   {kind:'sops', label:'SOPs'},
   {kind:'knowledge', label:'Company Brain'},
   {kind:'tasks', label:'Tasks'},
@@ -113,19 +114,49 @@ function renderTabs(){
     return `<span class="tab ${t.kind===active?'on':''}" onclick="switchTab('${t.kind}')">${t.label}${n!==''?`<span class="n">${n}</span>`:''}</span>`;
   }).join('');
 }
-function switchTab(kind){ active = kind; renderTabs(); renderList(); }
+function switchTab(kind){ active = kind; renderTabs(); renderList(); if(kind==='proof' && cache.proof===undefined) load('proof'); }
 
 async function load(kind){
+  if(kind==='proof'){
+    const r = await TMIAdmin.api('/api/tmi-proof','POST',{action:'list'});
+    cache.proof = (r && r.tenants) || [];
+    renderTabs();
+    if(active==='proof') renderList();
+    return;
+  }
   const r = await TMIAdmin.api('/api/tmi-intel','POST',{action:'list',kind});
   cache[kind] = (r && r.items) || [];
   renderTabs();
   if(kind===active) renderList();
 }
-function loadAll(){ TABS.forEach(t=>load(t.kind)); }
+function loadAll(){ TABS.filter(t=>t.kind!=='proof').forEach(t=>load(t.kind)); }
 
 function fmtLabel(f){ return ({letter:'Letter',linkedin:'LinkedIn',x_thread:'X thread',podcast:'Podcast',youtube:'YouTube'}[f]||f); }
 
+function renderProof(){
+  const box = document.getElementById('ci-body');
+  const rows = cache.proof;
+  if(rows===undefined){ box.innerHTML = `<div class="empty-note">Scanning your OS clients and scoring them...</div>`; return; }
+  if(!rows.length){ box.innerHTML = `<div class="empty-note">No onboarded OS clients yet. When clients build their operating system, they show up here to turn into proof.</div>`; return; }
+  box.innerHTML = rows.map(t=>`<div class="ci-card">
+    <div class="ch">
+      <span class="fmt" style="background:${t.certified?'var(--chart)':'var(--bg-alt)'};color:${t.certified?'var(--ink)':'var(--muted)'};border:1px solid var(--line);font-variant-numeric:tabular-nums;">${t.score}</span>
+      <h3>${esc(t.name)}</h3>
+      ${t.certified?`<span class="status-pill approved">Certified</span>`:`<span class="status-pill pending">${esc(t.tier)}</span>`}
+    </div>
+    <div class="angle">Owner Dependency ${t.owner_dependency} &middot; Score ${t.score}/100${t.business_type?' &middot; '+esc(t.business_type):''}</div>
+    <div class="acts"><button class="btn btn-primary btn-sm" onclick="generateProof('${t.tenant_id}',this)">Generate proof</button></div>
+  </div>`).join('');
+}
+async function generateProof(tid,btn){
+  btn.disabled=true; const lbl=btn.textContent; btn.textContent='Writing...';
+  const r = await TMIAdmin.api('/api/tmi-proof','POST',{action:'generate',tenant_id:tid});
+  btn.disabled=false; btn.textContent=lbl;
+  if(r){ TMIAdmin.toast('Case study saved. Content drafted for approval.'); load('content'); load('knowledge'); }
+}
+
 function renderList(){
+  if(active==='proof'){ renderProof(); return; }
   const items = cache[active] || [];
   const box = document.getElementById('ci-body');
   if(!items.length){ box.innerHTML = `<div class="empty-note">Nothing here yet. Run a meeting through the intelligence engine above.</div>`; return; }
