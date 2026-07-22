@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
   const w = [['tenant_id', '==', tid]];
 
   try {
-    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, log] = await Promise.all([
+    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, log] = await Promise.all([
       db.getById('os_tenants', tid),
       db.list('os_metrics', { where: w }),
       db.list('os_workers', { where: w }),
@@ -26,6 +26,7 @@ module.exports = async function handler(req, res) {
       db.list('os_knowledge', { where: w }),
       db.list('os_tasks', { where: w }),
       db.list('os_reports', { where: w }),
+      db.list('os_outputs', { where: w }),
       db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 30 }),
     ]);
     return res.status(200).json({
@@ -40,6 +41,7 @@ module.exports = async function handler(req, res) {
       knowledge: knowledge.sort(bySort),
       tasks: tasks.sort(bySort),
       reports: reports.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')),
+      outputs: outputs.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')),
       build_log: log,
     });
   } catch (e) {

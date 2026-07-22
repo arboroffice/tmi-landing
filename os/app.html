@@ -141,7 +141,11 @@
   .kcard .kh{display:flex;align-items:center;gap:10px;}
   .kcard h4{font-size:16px;font-weight:700;}
   .kcard .body{font-size:13.5px;color:var(--ink-2);margin-top:10px;line-height:1.6;white-space:pre-wrap;max-height:180px;overflow:hidden;position:relative;}
-  .kcard .kf{margin-top:12px;display:flex;gap:8px;}
+  .kcard .kf{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+  .kcard .who{margin-left:auto;font-size:12px;color:var(--ink-3);font-family:var(--mono);}
+  .badge.pending{background:var(--warn-bg);color:var(--warn);border:1px solid #f0e0a8;}
+  .badge.done{background:#e8f6e6;color:var(--good);}
+  .outbody{white-space:pre-wrap;font-size:14px;color:var(--ink);line-height:1.6;background:var(--bg-alt);border:1px solid var(--line);border-radius:12px;padding:16px 18px;max-height:52vh;overflow:auto;margin-top:14px;}
 
   .memo{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 20px;}
   .memo .m{padding:14px 0;border-top:1px solid var(--line);font-size:14px;display:flex;gap:12px;align-items:flex-start;}
@@ -239,6 +243,9 @@
 <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
 <symbol id="i-out" viewBox="0 0 24 24"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h9"/></symbol>
 <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></symbol>
+<symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 13h4l2 3h4l2-3h4"/><path d="M4 13l2-8h12l2 8v6H4z"/></symbol>
+<symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></symbol>
 </defs></svg>
 
 <aside class="side" id="side">
@@ -247,6 +254,7 @@
   <nav id="nav">
     <a data-v="command" class="on"><svg class="icon"><use href="#i-grid"/></svg> Command Center</a>
     <a data-v="coo"><svg class="icon"><use href="#i-coo"/></svg> AI COO</a>
+    <a data-v="inbox"><svg class="icon"><use href="#i-inbox"/></svg> Inbox <span class="tag" id="tgInbox"></span></a>
     <a data-v="tasks"><svg class="icon"><use href="#i-check"/></svg> Tasks <span class="tag" id="tgTasks"></span></a>
   </nav>
   <div class="grp">Build it out</div>
@@ -257,6 +265,7 @@
     <a data-v="reports"><svg class="icon"><use href="#i-chart"/></svg> Reports</a>
     <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
     <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Integrations</a>
+    <a data-v="settings"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
   </nav>
   <div class="who">
     <div class="av" id="av">·</div>
@@ -342,6 +351,21 @@
       <div style="margin-top:18px"><button class="askbtn" style="display:inline-flex" onclick="openAsk('What should I connect first, and what would it make live?')"><svg class="icon"><use href="#i-coo"/></svg> Ask what to connect first</button></div>
     </div>
   </section>
+
+  <section class="view" data-view="inbox">
+    <div class="h">Inbox</div>
+    <p class="sub">What your workers produced. Anything from an "asks first" worker waits here for your approval before it counts as sent.</p>
+    <div class="secbar"><span class="lbl">Needs approval</span></div>
+    <div id="inboxPending"></div>
+    <div class="secbar"><span class="lbl">Done</span></div>
+    <div id="inboxDone"></div>
+  </section>
+
+  <section class="view" data-view="settings">
+    <div class="h">Settings</div>
+    <p class="sub">The more your OS knows about how you run, the sharper your COO and your workers get. This grounds everything they produce.</p>
+    <div id="settings" style="margin-top:24px;max-width:640px"></div>
+  </section>
 </main>
 
 <div class="scrim" id="scrim" onclick="closeAsk()"></div>
@@ -419,12 +443,14 @@ function boot(s){
 }
 
 function renderAll(){
-  renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderFeed(); renderSugg();
+  renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderSettings(); renderFeed(); renderSugg();
   document.getElementById('tgWork').textContent=(STATE.workers||[]).length||'';
   document.getElementById('tgFlow').textContent=(STATE.workflows||[]).length||'';
   document.getElementById('tgKnow').textContent=(STATE.knowledge||[]).length||'';
   var open=(STATE.tasks||[]).filter(function(t){return t.status!=='done';}).length;
   document.getElementById('tgTasks').textContent=open||'';
+  var pend=(STATE.outputs||[]).filter(function(o){return o.status==='pending';}).length;
+  document.getElementById('tgInbox').textContent=pend||'';
 }
 async function refresh(){ try{ STATE=await api('/api/os2-state'); renderAll(); }catch(_){} }
 
@@ -479,8 +505,12 @@ async function toggleWorker(id,el){
   try{var j=await api('/api/os2-worker',{id:id,action:'toggle'});var on=j.worker&&j.worker.status==='active';var w=find('workers',id);if(w)w.status=j.worker.status;el.classList.toggle('on',on);toast(on?'Worker turned on':'Worker paused');briefingLoaded=false;refresh();}
   catch(e){el.classList.toggle('on',was);if(e.message!=='signed out')toast(e.message);}
 }
-async function runWorker(id,btn){btn.disabled=true;var t=btn.textContent;btn.textContent='Running...';
-  try{await api('/api/os2-worker',{id:id,action:'run'});var w=find('workers',id);toast('Ran '+(w?w.name:'worker'));refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}
+async function runWorker(id,btn){btn.disabled=true;var t=btn.textContent;btn.textContent='Working...';
+  try{
+    var j=await api('/api/os2-run',{id:id});
+    await refresh();briefingLoaded=false;
+    if(j.output){showOutput(j.output);toast(j.output.status==='pending'?'Draft ready for your approval':'Worker produced output');}
+  }catch(e){if(e.message!=='signed out')toast(e.message);}
   btn.disabled=false;btn.textContent=t;
 }
 
@@ -535,7 +565,9 @@ function renderTasks(){
   var tasks=(STATE.tasks||[]).slice().sort(function(a,b){var o={high:0,normal:1,low:2};return (a.status==='done')-(b.status==='done')||(o[a.priority]||1)-(o[b.priority]||1);});
   var open=tasks.filter(function(t){return t.status!=='done';});
   document.getElementById('tasks').innerHTML=tasks.length?tasks.map(taskHTML).join(''):'<div class="empty"><h3>No tasks</h3><p>Add what needs doing, or let your COO put tasks here.</p></div>';
-  document.getElementById('cmdTasks').innerHTML=open.length?open.slice(0,5).map(taskHTML).join(''):'<div class="task" style="color:var(--ink-3)"><span class="cb" style="border-color:var(--line);cursor:default"></span><div class="tt" style="font-weight:500;color:var(--ink-3)">Nothing needs your attention. Ask your COO what to do next.</div></div>';
+  var pend=(STATE.outputs||[]).filter(function(o){return o.status==='pending';}).length;
+  var nudge=pend?'<div class="task" style="border-color:#f0e0a8;background:var(--warn-bg)"><span class="cb" style="border:none;background:none;cursor:default"><svg class="icon" style="width:18px;height:18px;stroke:var(--warn);opacity:1"><use href="#i-inbox"/></svg></span><div style="flex:1"><div class="tt">'+pend+' draft'+(pend>1?'s':'')+' waiting for your approval</div><div class="td">From your workers, in the inbox.</div></div><span class="link" onclick="show(\'inbox\')" style="margin-top:2px">Review</span></div>':'';
+  document.getElementById('cmdTasks').innerHTML=nudge+(open.length?open.slice(0,5).map(taskHTML).join(''):(pend?'':'<div class="task" style="color:var(--ink-3)"><span class="cb" style="border-color:var(--line);cursor:default"></span><div class="tt" style="font-weight:500;color:var(--ink-3)">Nothing needs your attention. Ask your COO what to do next.</div></div>'));
 }
 function taskFields(t){t=t||{};return [
   {name:'title',label:'Task',value:t.title,placeholder:'Connect accounting to the OS'},
@@ -564,6 +596,68 @@ async function generateReport(){
     await refresh();show('reports');toast('Report generated');
   }catch(e){if(e.message!=='signed out')toast(e.message);}
   btn.disabled=false;btn.innerHTML=t;
+}
+
+/* ---- inbox / worker outputs ---- */
+function renderInbox(){
+  var outs=STATE.outputs||[];
+  var pending=outs.filter(function(o){return o.status==='pending';});
+  var done=outs.filter(function(o){return o.status!=='pending';});
+  document.getElementById('inboxPending').innerHTML=pending.length?pending.map(function(o){
+    return '<div class="kcard"><div class="kh"><span class="badge pending">Needs approval</span><h4>'+esc(o.title)+'</h4><span class="who">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+'</span></div>'+
+      '<div class="kf"><button class="btn sm" onclick="approveOutput(\''+o.id+'\')">Approve</button><button class="btn sm ghost" onclick="viewOutput(\''+o.id+'\')">View</button><button class="link" onclick="dismissOutput(\''+o.id+'\')">Dismiss</button></div></div>';
+  }).join(''):'<div class="empty"><h3>Nothing waiting</h3><p>When an "asks first" worker runs, its draft lands here for your approval.</p></div>';
+  document.getElementById('inboxDone').innerHTML=done.length?done.map(function(o){
+    return '<div class="kcard"><div class="kh"><span class="badge done">done</span><h4>'+esc(o.title)+'</h4><span class="who">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+'</span></div>'+
+      '<div class="kf"><button class="btn sm ghost" onclick="viewOutput(\''+o.id+'\')">View</button><button class="link" onclick="dismissOutput(\''+o.id+'\')">Remove</button></div></div>';
+  }).join(''):'<div class="empty" style="padding:24px"><p>No completed output yet. Run a worker from the Workforce tab.</p></div>';
+}
+function viewOutput(id){var o=find('outputs',id);if(o)showOutput(o);}
+function showOutput(o){
+  window._out=o.body||'';
+  var html='<h3>'+esc(o.title)+'</h3><div class="msub">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+(o.status==='pending'?' · needs your approval':'')+'</div>'+
+    '<div class="outbody">'+esc(o.body||'')+'</div>'+
+    '<div class="mfoot"><button class="btn ghost" style="margin-right:auto" onclick="copyOutput()"><svg class="icon"><use href="#i-copy"/></svg> Copy</button>'+
+    (o.status==='pending'
+      ? '<button class="btn ghost" onclick="dismissOutput(\''+o.id+'\')">Dismiss</button><button class="btn" onclick="approveOutput(\''+o.id+'\')">Approve</button>'
+      : '<button class="btn" onclick="closeModal()">Close</button>')+'</div>';
+  document.getElementById('mcard').innerHTML=html;
+  document.getElementById('modal').classList.add('on');
+  window._form=null;
+}
+function copyOutput(){try{navigator.clipboard.writeText(window._out||'');toast('Copied');}catch(e){toast('Select and copy');}}
+async function approveOutput(id){try{await crud('outputs','update',{id:id,data:{status:'done'}});closeModal();toast('Approved');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function dismissOutput(id){try{await crud('outputs','delete',{id:id});closeModal();toast('Dismissed');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+
+/* ---- settings ---- */
+function renderSettings(){
+  var t=STATE.tenant||{};var p=t.profile||{};
+  var rows=[
+    ['s_name','Company name','input',t.name||''],
+    ['s_type','Business type','input',t.business_type||''],
+    ['s_do','What your company does','textarea',p.what_you_do||''],
+    ['s_track','What you want to see every morning','textarea',p.what_you_track||''],
+    ['s_leak','What falls through the cracks','textarea',p.what_falls_through||''],
+    ['s_tools','Tools you use to run it','textarea',p.tools||''],
+    ['s_bottleneck','Your biggest bottleneck','textarea',p.bottleneck||'']
+  ];
+  var html='<div class="kcard" style="padding:22px 24px">';
+  rows.forEach(function(r){
+    html+='<div class="field"><label>'+esc(r[1])+'</label>'+
+      (r[2]==='textarea'?'<textarea id="'+r[0]+'">'+esc(r[3])+'</textarea>':'<input id="'+r[0]+'" value="'+esc(r[3])+'"/>')+'</div>';
+  });
+  html+='<div class="mfoot" style="justify-content:flex-start"><button class="btn" id="sSave" onclick="saveSettings()">Save settings</button><span class="cad" style="align-self:center;margin-left:8px">Plan: '+cap(t.plan||'trial')+'</span></div></div>';
+  document.getElementById('settings').innerHTML=html;
+}
+async function saveSettings(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+  var btn=document.getElementById('sSave');btn.disabled=true;btn.textContent='Saving...';
+  try{
+    var j=await api('/api/os2-profile',{name:g('s_name'),business_type:g('s_type'),profile:{what_you_do:g('s_do'),what_you_track:g('s_track'),what_falls_through:g('s_leak'),tools:g('s_tools'),bottleneck:g('s_bottleneck')}});
+    if(j.tenant){STATE.tenant=Object.assign({},STATE.tenant,j.tenant);document.getElementById('co').textContent=j.tenant.name;document.getElementById('who').innerHTML=esc(j.tenant.name)+'<small>'+cap(j.tenant.plan||'trial')+' plan</small>';document.getElementById('av').textContent=(String(j.tenant.name).trim()[0]||'·').toUpperCase();}
+    toast('Settings saved');briefingLoaded=false;
+  }catch(e){if(e.message!=='signed out')toast(e.message);}
+  btn.disabled=false;btn.textContent='Save settings';
 }
 
 /* ---- feed ---- */
