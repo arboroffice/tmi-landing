@@ -228,10 +228,12 @@ The OS "runs an intelligent company" when, for a real client:
 
 ---
 
-## 10. Open questions for Mia
+## 10. Decisions and open questions
 
-1. **First vertical to go deep on?** (HVAC / plumbing / med spa / oil-and-gas services) — it sets the first native connectors.
-2. **First systems to connect?** Most likely accounting + field-service + calendar. Confirm the exact tools your target clients already run on.
+**Decided: horizontal, every business, no vertical.** See `os-best-in-class.md` for the rationale. This changes the connector strategy: instead of native connectors per vertical, the OS standardizes on **MCP** (the "USB-C for AI") so it reaches whatever tools any business runs on, with a few native fast-paths (Stripe, Slack, HTTP already live). Native QuickBooks/ServiceTitan/Google remain useful fast-paths but are no longer the gating decision.
+
+Open questions:
+1. **First systems to prioritize as native fast-paths?** Likely accounting + calendar/email + payments, since nearly every business has them regardless of vertical.
 3. **Autonomy appetite.** Where should the default line sit between auto and approve for external actions and for money? (Current default: internal auto, external approve.)
 4. **Build vs buy for inbound voice** (AI receptionist) — Phase 1 (transcribe/route) or wait to Phase 3 (answer/book)?
 5. **Billing model** so metering is designed for the right plan boundaries.
