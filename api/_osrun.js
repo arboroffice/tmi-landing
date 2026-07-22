@@ -6,12 +6,15 @@
 // scheduled sweep (os2-cron).
 
 const db = require('./_db');
+const { normalizeAction, canAutoFire, runAction } = require('./_osact');
 
 const MODEL = 'claude-opus-4-8';
 
 const SYSTEM = `You are an AI worker inside a company's TMI OS. You will be given your role and the company's context. Do the job now and produce the actual, ready-to-use work product: the real message, list, summary, estimate, or draft, not a description of what you would do. Ground everything only in the company's knowledge and context. If a live data source is missing, produce the best draft from what is known and briefly note the assumption in one line. No preamble, no emojis, no em dashes.
 
-Return ONLY valid JSON: {"title":"short label of what you produced","body":"the actual work product, ready to use"}`;
+If, and only if, your work product is a message meant to be delivered to one specific recipient (a customer, a lead, a vendor, or a teammate) and you can identify who from the context, also return an "action" describing how it should be delivered. Use channel "email" or "sms". Put the recipient in "to" (an email address or phone number only if the context contains a real one; otherwise leave "to" empty and omit the action). Never invent a contact. Work that is internal (a report, an SOP, an analysis, a plan) has no action.
+
+Return ONLY valid JSON: {"title":"short label of what you produced","body":"the actual work product, ready to use","action":{"channel":"email","to":"","subject":""}}. Omit "action" entirely when the work is internal or you have no real recipient.`;
 
 async function produce(tenant, worker, s) {
   const key = process.env.ANTHROPIC_API_KEY;
@@ -47,6 +50,7 @@ async function produce(tenant, worker, s) {
   return {
     title: String(raw.title || `${worker.name} output`).slice(0, 120),
     body: String(raw.body || text || 'No output produced.').slice(0, 12000),
+    action: normalizeAction(raw.action),
   };
 }
 
@@ -64,17 +68,35 @@ async function executeWorker(worker, trigger) {
   if (!tenant) throw new Error('tenant not found');
 
   const product = await produce(tenant, worker, { knowledge, metrics, tasks });
-  const status = worker.autonomy === 'approve' ? 'pending' : 'done';
+  const action = product.action;
+  const autoFire = canAutoFire(tenant, worker, action);
+
+  // With a proposed action: fire now if policy allows, otherwise hold for approval.
+  // Without one: internal work, done unless the worker asks first.
+  let status;
+  if (action) status = autoFire ? 'done' : 'pending';
+  else status = worker.autonomy === 'approve' ? 'pending' : 'done';
 
   const output = await db.insert('os_outputs', {
     tenant_id: tid, worker_id: worker.id, worker_name: worker.name,
     title: product.title, body: product.body, status,
+    action: action || null,
     trigger: trigger || 'manual', created_at: new Date().toISOString(),
   });
+
+  let acted = null;
+  if (action && autoFire) {
+    acted = await runAction({ tenant, output, worker_name: worker.name, actor: trigger === 'scheduled' ? 'auto' : 'owner' }, action);
+    if (acted) { await db.update('os_outputs', output.id, { action_status: acted.status }); output.action_status = acted.status; }
+  }
+
   await db.update('os_workers', worker.id, { last_run: new Date().toISOString() });
+  const did = acted
+    ? (acted.status === 'sent' ? ` and ${acted.detail.replace(/\.$/, '').toLowerCase()}` : acted.status === 'filed' ? '' : ` (${acted.detail.replace(/\.$/, '').toLowerCase()})`)
+    : '';
   await db.insert('os_build_log', {
     tenant_id: tid, kind: 'run',
-    summary: `${worker.name}${trigger === 'scheduled' ? ' (auto)' : ''} produced: ${product.title}${status === 'pending' ? ' (needs approval)' : ''}.`,
+    summary: `${worker.name}${trigger === 'scheduled' ? ' (auto)' : ''} produced: ${product.title}${did}${status === 'pending' ? ' (needs approval)' : ''}.`,
     created_at: new Date().toISOString(),
   });
   return output;

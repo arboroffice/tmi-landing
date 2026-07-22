@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
   const w = [['tenant_id', '==', tid]];
 
   try {
-    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, log] = await Promise.all([
+    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, actions, log] = await Promise.all([
       db.getById('os_tenants', tid),
       db.list('os_metrics', { where: w }),
       db.list('os_workers', { where: w }),
@@ -28,6 +28,7 @@ module.exports = async function handler(req, res) {
       db.list('os_tasks', { where: w }),
       db.list('os_reports', { where: w }),
       db.list('os_outputs', { where: w }),
+      db.list('os_actions', { where: w, order: 'created_at', ascending: false, limit: 40 }),
       db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 30 }),
     ]);
     const score = scoreTenant({
@@ -43,6 +44,7 @@ module.exports = async function handler(req, res) {
         summary: tenant.summary || null, plan: tenant.plan || 'trial',
         business_type: tenant.business_type || null, profile: tenant.profile || {},
         digest: tenant.digest !== false,
+        channels: tenant.channels || {}, autopilot: !!tenant.autopilot,
       } : null,
       metrics: metrics.sort(bySort),
       workers: workers.sort(bySort),
@@ -51,6 +53,7 @@ module.exports = async function handler(req, res) {
       tasks: tasks.sort(bySort),
       reports: reports.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')),
       outputs: outputs.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')),
+      actions,
       build_log: log,
     });
   } catch (e) {
