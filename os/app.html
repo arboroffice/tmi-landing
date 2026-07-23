@@ -309,6 +309,22 @@
   .tile .live b{width:6px;height:6px;border-radius:50%;background:var(--chart-dark);animation:lpulse 2s ease-in-out infinite;}
   @keyframes lpulse{0%,100%{opacity:1;}50%{opacity:.4;}}
   @media(prefers-reduced-motion:reduce){.gauge .arc{animation:none;stroke-dashoffset:var(--off);}.tile .live b{animation:none;}}
+
+  /* ===== grow: plans + clients ===== */
+  body:not(.is-installer) [data-installer]{display:none;}
+  .plan-ladder{display:flex;flex-direction:column;gap:14px;max-width:840px;}
+  .rung2{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+  .rung2.cur{border-color:var(--ink);box-shadow:0 22px 48px -32px rgba(10,11,20,.32);}
+  .rung2 .rl{flex:1;min-width:230px;}
+  .rung2 .rtag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);}
+  .rung2.cur .rtag{color:var(--good);}
+  .rung2 h3{font-size:19px;font-weight:700;letter-spacing:-0.02em;margin:6px 0 8px;}
+  .rung2 p{font-size:13.5px;color:var(--ink-2);line-height:1.55;max-width:56ch;}
+  .rung2 .rp{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--ink);white-space:nowrap;}
+  .rung2 .ra{display:flex;flex-direction:column;align-items:flex-end;gap:10px;min-width:120px;}
+  .actban{background:var(--ink);color:#fff;padding:11px 16px;border-radius:10px;display:flex;align-items:center;gap:12px;font-size:13px;margin-bottom:18px;}
+  .actban b{color:var(--chart);}
+  .actban .link{margin-left:auto;color:#fff;border-color:rgba(255,255,255,.24);background:transparent;}
 </style>
 </head>
 <body>
@@ -368,6 +384,11 @@
     <a data-v="team" data-owner="1"><svg class="icon"><use href="#i-users"/></svg> Team <span class="tag" id="tgTeam"></span></a>
     <a data-v="settings" data-owner="1"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
   </nav>
+  <div class="grp">Grow with TMI</div>
+  <nav>
+    <a data-v="plans"><svg class="icon"><use href="#i-spark"/></svg> Plans &amp; offers</a>
+    <a data-v="clients" data-installer="1"><svg class="icon"><use href="#i-org"/></svg> Clients <span class="tag" id="tgClients"></span></a>
+  </nav>
   <div class="who">
     <div class="av" id="av">·</div>
     <div class="nm" id="who">Loading<small id="whoPlan"></small></div>
@@ -407,6 +428,17 @@
     </div>
     <div class="secbar"><span class="lbl">Goals</span><button class="btn sm ghost add" onclick="addGoal()"><svg class="icon"><use href="#i-plus"/></svg> Goal</button></div>
     <div id="goals"></div>
+  </section>
+
+  <section class="view" data-view="plans">
+    <div class="h">Plans &amp; offers</div>
+    <p class="sub">How to work with TMI. You are on the self-serve OS today. Go deeper whenever you want our team to build with you, from a custom install to founder-level partnership.</p>
+    <div id="plansBox" style="margin-top:26px"></div>
+  </section>
+
+  <section class="view" data-view="clients">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Clients</div><p class="sub">Every company you run on TMI, in one place. Create a client workspace, build their intelligent company, and open it any time. This is your installer command center.</p></div><button class="btn add" onclick="addClient()"><svg class="icon"><use href="#i-plus"/></svg> New client</button></div>
+    <div id="clientsList" style="margin-top:22px"></div>
   </section>
 
   <section class="view" data-view="threads">
@@ -581,7 +613,74 @@ function show(v){
   if(v==='blueprint') renderBlueprint();
   if(v==='marketplace') loadMarket();
   if(v==='brain') renderBrain();
+  if(v==='clients') loadClients();
   window.scrollTo(0,0);
+}
+
+/* ---- plans & offers ---- */
+function openApply(){ window.open('https://www.tmitechai.com/intelligence-assessment','_blank','noopener'); }
+function renderPlans(){
+  var host=document.getElementById('plansBox'); if(!host) return;
+  var plan=cap((STATE.tenant&&STATE.tenant.plan)||'trial');
+  var rungs=[
+    {tag:'Self-serve OS · your plan',cur:true,price:plan,h:'Build it yourself in the OS',p:'You design your intelligent company right here: departments, AI workers, the numbers to watch, and the workflows behind them.',cta:null},
+    {tag:'Done with you',price:'From $25,000',h:'Our team builds and installs it',p:'The TMI development team customizes and installs your OS: bespoke workers, real integrations wired to your tools, and custom builds.',cta:['Request a build',"show('build')"]},
+    {tag:'AI Department',price:'$5,000/mo',h:'A department that runs beside your team',p:'An intelligent department retained monthly that carries the work headcount used to, and gets sharper every month.',cta:['Apply','openApply()']},
+    {tag:'Founder & Partner',price:'By application',h:'Direct work with the founders',p:'Founder-level engagement, and the partner program for agencies and portfolios that install TMI for others.',cta:['Apply','openApply()']}
+  ];
+  host.innerHTML='<div class="plan-ladder">'+rungs.map(function(r){
+    return '<div class="rung2'+(r.cur?' cur':'')+'"><div class="rl"><div class="rtag">'+esc(r.tag)+'</div><h3>'+esc(r.h)+'</h3><p>'+esc(r.p)+'</p></div>'+
+      '<div class="ra"><div class="rp">'+esc(r.price)+'</div>'+(r.cta?'<button class="btn sm" onclick="'+r.cta[1]+'">'+esc(r.cta[0])+' &rarr;</button>':'<span class="rtag" style="color:var(--good)">Current</span>')+'</div></div>';
+  }).join('')+'</div>'+
+  '<div class="ovcta" style="margin-top:26px"><div><div style="font-size:16px;font-weight:700;color:var(--ink)">Run TMI for others?</div><p style="font-size:13.5px;color:var(--ink-2);margin-top:5px">Agencies and portfolios manage many company workspaces from one account.</p></div><button class="btn ghost" onclick="openApply()">Become a partner &rarr;</button></div>';
+}
+
+/* ---- installer: client workspaces ---- */
+var CLIENTS=null;
+async function loadClients(){
+  var host=document.getElementById('clientsList'); if(!host) return;
+  host.innerHTML='<div class="empty"><p>Loading your clients...</p></div>';
+  try{ var j=await api('/api/os2-clients',{action:'list'}); CLIENTS=j.clients||[]; renderClients();
+    var tg=document.getElementById('tgClients'); if(tg) tg.textContent=CLIENTS.length||''; }
+  catch(e){ if(e.message!=='signed out') host.innerHTML='<div class="empty"><h3>Clients unavailable</h3><p>'+esc(e.message)+'</p></div>'; }
+}
+function renderClients(){
+  var host=document.getElementById('clientsList'); if(!host) return;
+  var list=CLIENTS||[];
+  if(!list.length){ host.innerHTML='<div class="empty"><h3>No clients yet</h3><p>Create a client workspace and build their intelligent company. You can open and run it any time.</p><div style="margin-top:16px"><button class="btn" onclick="addClient()">New client</button></div></div>'; return; }
+  host.innerHTML=list.map(function(c){
+    return '<div class="row"><div class="r1"><h4>'+esc(c.name)+'</h4><span class="badge">'+esc(c.business_type||'business')+'</span><span class="cad">'+(c.onboarded?'Built':'Not built yet')+'</span>'+
+      '<div class="racts"><button class="link" onclick="openClient(\''+c.id+'\',this)">Open OS &rarr;</button></div></div>'+
+      (c.summary?'<p>'+esc(c.summary)+'</p>':'<p style="color:var(--ink-3)">Open it to build their intelligent company.</p>')+'</div>';
+  }).join('');
+}
+function addClient(){
+  openForm({title:'New client workspace',sub:'Create a company you run on TMI. You will build their OS next.',fields:[
+    {name:'name',label:'Client name',placeholder:'Acme Co'},
+    {name:'mode',label:'Type',type:'select',value:'business',options:[['business','A business'],['creator','A creator or brand']]}
+  ],onSave:function(v){ if(!v.name){throw new Error('Name required');} return api('/api/os2-clients',{action:'create',name:v.name,mode:v.mode}).then(function(){loadClients();}); }});
+}
+async function openClient(id,btn){
+  var old; if(btn){old=btn.textContent;btn.disabled=true;btn.textContent='Opening...';}
+  try{
+    var j=await api('/api/os2-clients',{action:'open',client_id:id});
+    if(j.token){ try{localStorage.setItem('tmios_parent_token',tok);localStorage.setItem(TOKEN_KEY,j.token);}catch(_){}
+      location.href='/os/app'; }
+  }catch(e){ toast(e.message); if(btn){btn.disabled=false;btn.textContent=old;} }
+}
+function renderActingBanner(s){
+  var pt; try{pt=localStorage.getItem('tmios_parent_token');}catch(_){}
+  var ex=document.getElementById('actingBanner'); if(ex) ex.remove();
+  if(!pt) return;
+  var top=document.querySelector('.top'); if(!top) return;
+  var el=document.createElement('div'); el.id='actingBanner'; el.className='actban';
+  el.innerHTML='You are working in <b>'+esc((s.tenant&&s.tenant.name)||'a client workspace')+'</b>. '+
+    '<button class="link" onclick="returnToParent()">Return to my workspace</button>';
+  top.parentNode.insertBefore(el, top.nextSibling);
+}
+function returnToParent(){
+  try{var pt=localStorage.getItem('tmios_parent_token'); if(pt){localStorage.setItem(TOKEN_KEY,pt);localStorage.removeItem('tmios_parent_token');}}catch(_){}
+  location.href='/os/app';
 }
 
 /* load */
@@ -603,6 +702,9 @@ function boot(s){
   var role=(s.me&&s.me.role)||'owner';
   document.body.classList.remove('role-owner','role-manager','role-viewer');
   document.body.classList.add('role-'+role);
+  var inst=!!(s.tenant&&(s.tenant.is_installer||s.tenant.plan==='partner'));
+  document.body.classList.toggle('is-installer',inst);
+  renderActingBanner(s);
   if(/[?&]new=1/.test(location.search)){
     var b=document.getElementById('banner');
     b.innerHTML='Your OS is built. <b>'+((s.workers||[]).length)+' AI workers</b> and <b>'+((s.metrics||[]).length)+' metrics</b> are ready. Turn a worker on, or ask your COO to build more.';
@@ -674,7 +776,7 @@ function renderScore(){
     '</div></div>';
 }
 function renderAll(){
-  renderOverview(); renderScore(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg();
+  renderOverview(); renderScore(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg(); renderPlans();
   document.getElementById('tgDept').textContent=(STATE.departments||[]).length||'';
   document.getElementById('tgThreads').textContent=(STATE.threads||[]).length||'';
   document.getElementById('tgPulse').textContent=(STATE.signals||[]).length||'';
