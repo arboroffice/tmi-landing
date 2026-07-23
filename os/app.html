@@ -335,6 +335,15 @@
   .deliv-t{font-size:14px;color:#fff;font-weight:600;line-height:1.35;}
   .deliv-w{font-size:12px;color:rgba(255,255,255,0.55);margin-top:5px;font-family:var(--mono);}
   .deliv-lab{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--chart);margin-bottom:8px;}
+
+  /* ===== voice input ===== */
+  .mic{width:36px;height:36px;border-radius:9px;border:1px solid var(--line-2);background:#fff;color:var(--ink-2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;transition:border-color .15s,background .15s,color .15s;padding:0;}
+  .mic:hover{border-color:var(--ink);color:var(--ink);}
+  .mic svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+  .mic.rec{background:var(--chart);border-color:var(--chart);color:var(--ink);animation:micp 1.3s infinite;}
+  @keyframes micp{0%,100%{box-shadow:0 0 0 0 rgba(228,255,151,.6);}50%{box-shadow:0 0 0 8px rgba(228,255,151,0);}}
+  .mic.ta-mic{position:absolute;right:10px;bottom:10px;border-radius:50%;width:38px;height:38px;z-index:2;}
+  .df .mic{margin-right:4px;}
 </style>
 </head>
 <body>
@@ -1576,6 +1585,36 @@ async function delItem(resource,id,name){
   if(!confirm('Delete '+(name||'this')+'?'))return;
   try{await crud(resource,'delete',{id:id});toast('Deleted');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}
 }
+/* ---- voice input: speak instead of type ---- */
+function _micSVG(){return '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';}
+function micButton(cls){var b=document.createElement('button');b.type='button';b.className='mic'+(cls?' '+cls:'');b.setAttribute('aria-label','Speak');b.innerHTML=_micSVG();return b;}
+function wireMic(btn,target){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){btn.style.display='none';return;}
+  var rec=null,base='';
+  function stop(){btn.classList.remove('rec');rec=null;}
+  btn.addEventListener('click',function(ev){ev.preventDefault();
+    if(rec){try{rec.stop();}catch(e){}return;}
+    document.querySelectorAll('.mic.rec').forEach(function(m){m.classList.remove('rec');});
+    try{rec=new SR();}catch(e){return;}
+    rec.lang='en-US';rec.continuous=true;rec.interimResults=true;
+    base=target.value?target.value.replace(/\s+$/,'')+' ':'';
+    btn.classList.add('rec');target.focus();
+    rec.onresult=function(e){var t='';for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;target.value=base+t;target.dispatchEvent(new Event('input'));};
+    rec.onerror=stop;rec.onend=stop;
+    try{rec.start();}catch(e){stop();}
+  });
+}
+function attachTextareaMics(scope){
+  (scope||document).querySelectorAll('textarea:not([data-mic])').forEach(function(ta){
+    ta.setAttribute('data-mic','1');
+    var field=ta.closest('.field')||ta.parentNode;if(field)field.style.position='relative';
+    ta.style.paddingRight='52px';
+    var b=micButton('ta-mic');(field||ta.parentNode).appendChild(b);wireMic(b,ta);
+  });
+}
+(function(){var ask=document.getElementById('ask');if(ask&&ask.parentNode){var b=micButton();ask.parentNode.insertBefore(b,ask.nextSibling);wireMic(b,ask);}})();
+
 function openForm(cfg){
   var fields=cfg.fields||[];
   var html='<h3>'+esc(cfg.title)+'</h3>'+(cfg.sub?'<div class="msub">'+esc(cfg.sub)+'</div>':'');
@@ -1590,6 +1629,7 @@ function openForm(cfg){
   html+='<div class="mfoot">'+(cfg.del?'<button class="btn ghost" style="margin-right:auto;border-color:var(--line-2)" onclick="modalDelete()">Delete</button>':'')+
     '<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="mSave" onclick="modalSave()">Save</button></div>';
   document.getElementById('mcard').innerHTML=html;
+  attachTextareaMics(document.getElementById('mcard'));
   document.getElementById('modal').classList.add('on');
   window._form={fields:fields,onSave:cfg.onSave,del:cfg.del};
   var first=fields[0];if(first){var el=document.getElementById(first._id);if(el)setTimeout(function(){el.focus();},80);}
