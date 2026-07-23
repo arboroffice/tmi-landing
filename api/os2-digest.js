@@ -37,14 +37,15 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // Cron mode.
+  // Cron mode. Fail closed: require a genuine Vercel cron invocation or a
+  // matching secret. If no CRON_SECRET is configured and this is not a Vercel
+  // cron, reject rather than run the sweep unauthenticated.
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const auth = req.headers.authorization || '';
-    const key = (req.query && req.query.key) || '';
-    if (!(auth === `Bearer ${secret}` || key === secret || req.headers['x-vercel-cron'])) {
-      return res.status(401).json({ error: 'unauthorized' });
-    }
+  const auth = req.headers.authorization || '';
+  const key = (req.query && req.query.key) || '';
+  const isVercelCron = !!req.headers['x-vercel-cron'];
+  if (!(isVercelCron || (secret && (auth === `Bearer ${secret}` || key === secret)))) {
+    return res.status(401).json({ error: 'unauthorized' });
   }
   if (!process.env.RESEND_API_KEY) return res.status(200).json({ sent: 0, considered: 0, note: 'no email provider' });
 
