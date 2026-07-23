@@ -449,7 +449,16 @@
   .proof-stat .n{font-family:var(--mono);font-size:24px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
   .proof-stat .t{font-size:12px;color:var(--ink-3);font-weight:600;margin-top:2px;}
   .proof-line{font-size:14px;font-weight:600;color:var(--ink-2);}
-  @media(max-width:640px){.proof-stats{gap:24px;}.proof-stat .n{font-size:20px;}}
+  @media(max-width:760px){
+    .proof-in{flex-direction:column;align-items:stretch;gap:0;padding:10px 0;}
+    .proof-stats{display:grid;grid-template-columns:1fr 1fr;gap:0;width:100%;}
+    .proof-stat{padding:20px 4px;border-bottom:1px solid var(--line);}
+    .proof-stat:nth-child(odd){border-right:1px solid var(--line);padding-right:16px;}
+    .proof-stat:nth-child(even){padding-left:18px;}
+    .proof-stat .n{font-size:23px;}
+    .proof-stat .t{font-size:12.5px;margin-top:4px;line-height:1.35;}
+    .proof-line{padding:18px 4px 4px;text-align:center;width:100%;font-size:15px;}
+  }
 
   /* ---------- editorial statement (AI-proof + attention) ---------- */
   .editorial .ed-head{font-size:clamp(30px,4.7vw,58px);line-height:1.05;letter-spacing:-0.03em;max-width:22ch;}
