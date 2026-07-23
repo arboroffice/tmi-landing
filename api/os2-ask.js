@@ -48,7 +48,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const w = [['tenant_id', '==', tid]];
-    const [tenant, metrics, workers, workflows, knowledge, tasks, log] = await Promise.all([
+    const [tenant, metrics, workers, workflows, knowledge, tasks, log, goals, signals] = await Promise.all([
       db.getById('os_tenants', tid),
       db.list('os_metrics', { where: w }),
       db.list('os_workers', { where: w }),
@@ -56,10 +56,12 @@ module.exports = async function handler(req, res) {
       db.list('os_knowledge', { where: w }),
       db.list('os_tasks', { where: w }),
       db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 10 }),
+      db.list('os_goals', { where: w }),
+      db.list('os_signals', { where: [['tenant_id', '==', tid], ['status', '==', 'open']] }),
     ]);
     if (!tenant) return res.status(404).json({ error: 'Company not found' });
 
-    const out = await run(tenant, { metrics, workers, workflows, knowledge, tasks, log }, mode, question);
+    const out = await run(tenant, { metrics, workers, workflows, knowledge, tasks, log, goals, signals }, mode, question);
     return res.status(200).json(out);
   } catch (e) {
     console.error('os2-ask:', e.message);
@@ -76,6 +78,16 @@ function context(tenant, s) {
   const k = s.knowledge.sort(bySort).map(x => `- [${x.kind || 'note'}] ${x.title}: ${String(x.body || '').slice(0, 400)}`).join('\n') || '- none yet';
   const tk = s.tasks.sort(bySort).map(x => `- (${x.status || 'open'}, ${x.priority || 'normal'}) ${x.title}`).join('\n') || '- none yet';
   const a = s.log.map(x => `- ${x.summary}`).join('\n') || '- nothing yet';
+  const metricById = {};
+  (s.metrics || []).forEach(x => { metricById[x.id] = x; });
+  const g = (s.goals || []).sort(bySort).map(x => {
+    const mt = x.metric_id && metricById[x.metric_id];
+    const now = mt ? `${mt.value || '-'}${mt.unit ? ' ' + mt.unit : ''}` : null;
+    return `- ${x.title}${x.target ? ` (target ${x.target}${now ? `, now at ${now}` : ''})` : ''}${x.timeframe ? ` by ${x.timeframe}` : ''}`;
+  }).join('\n') || '- none yet';
+  const SEV = { high: 0, medium: 1, low: 2 };
+  const sig = (s.signals || []).slice().sort((x, y) => (SEV[x.severity] ?? 1) - (SEV[y.severity] ?? 1))
+    .map(x => `- [${x.severity || 'medium'}] ${x.title}: ${String(x.insight || '').slice(0, 240)}`).join('\n') || '- none open';
   return `COMPANY: ${tenant.name}${tenant.business_type ? ' (' + tenant.business_type + ')' : ''}
 WHAT THEY DO: ${p.what_you_do || tenant.summary || 'unspecified'}
 WANTS TO SEE DAILY: ${p.what_you_track || 'unspecified'}
@@ -95,6 +107,12 @@ ${f}
 COMPANY KNOWLEDGE:
 ${k}
 
+GOALS:
+${g}
+
+WHAT PULSE IS FLAGGING (ranked):
+${sig}
+
 TASKS:
 ${tk}
 
@@ -109,7 +127,7 @@ async function run(tenant, s, mode, question) {
   const client = new Anthropic({ apiKey: key });
 
   const task = mode === 'briefing'
-    ? 'Write the owner a morning briefing: the one or two things that most need attention today, based only on the OS state below. If not enough live data is connected, name the single most valuable thing to connect first. Three sentences maximum in "answer". Propose up to two tasks in "actions" only if there is a clear next step.'
+    ? 'Write the owner a morning briefing: the one or two things that most need attention today, based only on the OS state below. Lead with what Pulse is flagging (highest severity first) and where each goal stands against its target, naming the real numbers. If a high-severity signal is open, that is your lead. If not enough live data is connected, name the single most valuable thing to connect first. Do not say "all quiet" unless there are genuinely no open signals, no goals off target, and no missing data. Three sentences maximum in "answer". Propose up to two tasks in "actions" only if there is a clear next step.'
     : mode === 'report'
       ? 'Write the owner a plain-language weekly report of their company from the OS state below: what the numbers say, what the workers and workflows are doing, what improved, and the two or three things to do next. Six to ten sentences in "answer", written in short paragraphs. Return "actions": [].'
       : `The owner says: "${question}"`;

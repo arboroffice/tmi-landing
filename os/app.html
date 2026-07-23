@@ -744,8 +744,9 @@ function boot(s){
   renderActingBanner(s);
   if(/[?&]new=1/.test(location.search)){
     var b=document.getElementById('banner');
-    b.innerHTML='Your OS is built. <b>'+((s.workers||[]).length)+' AI workers</b> and <b>'+((s.metrics||[]).length)+' metrics</b> are ready. Turn a worker on, or ask your COO to build more.';
+    b.innerHTML='Your OS is built. <b>'+((s.workers||[]).length)+' AI workers</b> and <b>'+((s.metrics||[]).length)+' metrics</b> are ready. Your COO is reading the whole company now...';
     b.classList.add('on');
+    firstWin();
   }
   renderAll();
   var onboarded=s.tenant&&s.tenant.onboarded;
@@ -1686,6 +1687,21 @@ async function loadBriefing(force){
   document.getElementById('briefing').innerHTML=dots;var b2=document.getElementById('briefing2');if(b2)b2.innerHTML=dots;
   try{var j=await api('/api/os2-ask',{mode:'briefing'});document.getElementById('briefing').textContent=j.answer||'All quiet.';if(b2)b2.textContent=j.answer||'All quiet.';}
   catch(e){if(e.message!=='signed out'){document.getElementById('briefing').textContent='Could not load the briefing. Try Refresh.';briefingLoaded=false;}}
+}
+// First-win moment: right after onboarding, the OS reads the whole company with
+// Pulse, then the COO briefs on what it actually found. The user sees the
+// machine work in the first minute instead of a quiet screen.
+async function firstWin(){
+  var b=document.getElementById('banner');
+  try{
+    var j=await api('/api/os2-pulse',{action:'scan'});
+    var n=(j.signals&&j.signals.length)||0;
+    await refresh();
+    briefingLoaded=false; loadBriefing(true);
+    if(b){b.innerHTML='Your OS is live. Your COO read the whole company and found <b>'+(n?n+' thing'+(n>1?'s':'')+' worth your attention':'nothing on fire')+'</b>. See the briefing below, or open <b>Pulse</b> for the full read.';}
+  }catch(e){
+    if(b){b.innerHTML='Your OS is built. <b>'+((STATE.workers||[]).length)+' AI workers</b> and <b>'+((STATE.metrics||[]).length)+' metrics</b> are ready. Turn a worker on, or ask your COO to build more.';}
+  }
 }
 var SUGGESTIONS=['What needs my attention today?','Add a worker that chases overdue invoices','Draft a workflow for new leads','What should I connect first?'];
 function renderSugg(){document.getElementById('suggCoo').innerHTML=SUGGESTIONS.map(function(q){return '<button onclick="openAsk(\''+esc(q).replace(/'/g,"\\'")+'\')">'+esc(q)+'</button>';}).join('');}
