@@ -11,43 +11,18 @@
 //   { "revenue_mtd": 212400, "unpaid_invoices": 38100 }
 
 const { matches, applyValue, slug } = require('./_osmetric');
+const { safeFetch, assertPublicUrl } = require('./_osnet');
 
-// Reject private, loopback, link-local, and cloud-metadata hosts (SSRF guard).
-function isBlockedHost(host) {
-  host = (host || '').toLowerCase().replace(/\.$/, '');
-  if (!host) return true;
-  if (host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal') || host === 'metadata.google.internal') return true;
-  if (host === '::1' || host.startsWith('fe80:') || host.startsWith('fc') || host.startsWith('fd')) return true;
-  const m = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (m) {
-    const a = +m[1], b = +m[2];
-    if (a === 10 || a === 127 || a === 0) return true;
-    if (a === 169 && b === 254) return true; // link-local + cloud metadata
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a >= 224) return true; // multicast / reserved
-  }
-  return false;
-}
+// Back-compat: callers still import isBlockedHost from here. Delegate to the
+// shared guard's hostname check so there is one source of truth.
+const { isBlockedHostname } = require('./_osnet');
+function isBlockedHost(host) { return isBlockedHostname(host); }
 
 // Fetch and parse the source URL as JSON. Throws a readable error on failure so
-// a manual "sync now" can tell the user exactly what went wrong.
+// a manual "sync now" can tell the user exactly what went wrong. SSRF-guarded
+// (resolves + validates every IP, refuses redirects) via _osnet.safeFetch.
 async function fetchJSON(url) {
-  let u = String(url || '').trim();
-  if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
-  let host;
-  try { host = new URL(u).hostname; } catch (e) { throw new Error('That is not a valid URL.'); }
-  if (isBlockedHost(host)) throw new Error('That host is not allowed.');
-  const ctrl = new AbortController();
-  const to = setTimeout(() => ctrl.abort(), 8000);
-  let r;
-  try {
-    r = await fetch(u, { signal: ctrl.signal, redirect: 'follow', headers: { 'User-Agent': 'TMI-OS-Sync/1.0', 'Accept': 'application/json' } });
-  } catch (e) {
-    clearTimeout(to);
-    throw new Error('Could not reach that URL.');
-  }
-  clearTimeout(to);
+  const r = await safeFetch(url, { headers: { 'User-Agent': 'TMI-OS-Sync/1.0', 'Accept': 'application/json' } });
   if (!r.ok) throw new Error(`The source returned ${r.status}.`);
   const text = (await r.text()).slice(0, 200000);
   try { return JSON.parse(text); }

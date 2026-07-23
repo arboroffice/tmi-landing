@@ -5,6 +5,7 @@
 
 const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
+const { executeWorker } = require('./_osrun');
 
 module.exports = async function handler(req, res) {
   cors(res);
@@ -35,13 +36,12 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === 'run') {
-      await db.update('os_workers', id, { last_run: new Date().toISOString() });
-      await db.insert('os_build_log', {
-        tenant_id: t.tenant_id, kind: 'run',
-        summary: `${w.name} ran a cycle.`,
-        created_at: new Date().toISOString(),
-      });
-      return res.status(200).json({ ok: true });
+      // Actually execute the worker (produce real output, gated by policy),
+      // the same path os2-run uses. Previously this faked a build-log entry
+      // without doing any work.
+      const result = await executeWorker(w, 'manual').catch((e) => ({ error: e.message }));
+      if (result && result.error) return res.status(502).json({ error: 'The worker could not run right now.' });
+      return res.status(200).json({ ok: true, result });
     }
 
     return res.status(400).json({ error: 'Unknown action' });

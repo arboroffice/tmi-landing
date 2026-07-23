@@ -12,6 +12,8 @@
 // returns { ok:false, staged:true, note } so the caller can hold it, and a real
 // call that fails returns { ok:false, error } with the real reason.
 
+const { safeFetch } = require('./_osnet');
+
 // -------------------------------------------------------------------------
 // REGISTRY: provider key -> { label, auth, actions:[{key,label,writes,params}] }
 // -------------------------------------------------------------------------
@@ -175,7 +177,7 @@ async function executeHttp(actionKey, p) {
       }
     }
     try {
-      const r = await fetch(String(p.url), init);
+      const r = await safeFetch(String(p.url), init);   // SSRF-guarded
       const body = await readBody(r);
       return { ok: r.ok, result: { status: r.status, ok: r.ok, body } };
     } catch (e) {
@@ -185,7 +187,7 @@ async function executeHttp(actionKey, p) {
   if (actionKey === 'webhook') {
     if (!p.url) return { ok: false, error: 'url is required' };
     try {
-      const r = await fetch(String(p.url), {
+      const r = await safeFetch(String(p.url), {           // SSRF-guarded
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(p.payload != null ? p.payload : {}),

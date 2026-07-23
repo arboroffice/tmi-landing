@@ -16,7 +16,7 @@
 const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { runAction, normalizeAction } = require('./_osact');
-const { evaluate, getPolicies } = require('./_ospolicy');
+const { evaluate, getPolicies, getSpentToday } = require('./_ospolicy');
 
 function log(tid, summary, kind) {
   return db.insert('os_build_log', { tenant_id: tid, kind: kind || 'act', summary, created_at: new Date().toISOString() }).catch(() => {});
@@ -29,6 +29,7 @@ async function hardStop(tenant, rawAction) {
   const a = normalizeAction(rawAction);
   if (!a || a.channel === 'internal') return null;
   if (!tenant._policies) tenant._policies = await getPolicies(tenant.id).catch(() => []);
+  if (!tenant._spentToday) tenant._spentToday = await getSpentToday(tenant.id).catch(() => ({}));
   const d = evaluate(tenant, null, String(a.channel), typeof a.amount === 'number' ? a.amount : undefined);
   return d.mode === 'deny' ? d.reason : null;
 }

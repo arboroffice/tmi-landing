@@ -107,8 +107,22 @@ module.exports = async function handler(req, res) {
       const thread = await ownThread(tid, b.thread_id);
       if (!thread) return res.status(404).json({ error: 'Thread not found' });
       const patch = {};
-      if (b.worker_id !== undefined) patch.worker_id = b.worker_id ? String(b.worker_id) : null;
-      if (b.department_id !== undefined) patch.department_id = b.department_id ? String(b.department_id) : null;
+      // Verify any referenced worker/department actually belongs to this tenant
+      // before pointing a thread at it, so a thread can't reference foreign IDs.
+      if (b.worker_id !== undefined) {
+        if (b.worker_id) {
+          const wk = await db.getById('os_workers', String(b.worker_id));
+          if (!wk || wk.tenant_id !== tid) return res.status(400).json({ error: 'Unknown worker' });
+          patch.worker_id = String(b.worker_id);
+        } else { patch.worker_id = null; }
+      }
+      if (b.department_id !== undefined) {
+        if (b.department_id) {
+          const dp = await db.getById('os_departments', String(b.department_id));
+          if (!dp || dp.tenant_id !== tid) return res.status(400).json({ error: 'Unknown department' });
+          patch.department_id = String(b.department_id);
+        } else { patch.department_id = null; }
+      }
       const updated = await db.update('os_threads', thread.id, patch);
       return res.status(200).json({ thread: updated });
     }

@@ -77,6 +77,20 @@ async function list(coll, opts = {}) {
 
   if (where.length) {
     q = q.where(where[0][0], where[0][1], where[0][2]);            // one filter to Firestore
+    // With a single filter, Firestore does all the filtering, so we can safely
+    // push ordering/limit down instead of fetching the whole collection and
+    // sorting in JS. Only order on the SAME field as the filter avoids needing
+    // a composite index; otherwise push just the limit when there is no order.
+    if (where.length === 1) {
+      if (opts.order && opts.order === where[0][0]) {
+        q = q.orderBy(opts.order, opts.ascending === false ? 'desc' : 'asc');
+        if (opts.limit) { q = q.limit(opts.limit); }
+        firestoreOrdered = true;
+      } else if (opts.limit && !opts.order) {
+        q = q.limit(opts.limit);
+        firestoreOrdered = true;
+      }
+    }
   } else if (opts.order) {
     q = q.orderBy(opts.order, opts.ascending === false ? 'desc' : 'asc');
     if (opts.limit) { q = q.limit(opts.limit); firestoreOrdered = true; }

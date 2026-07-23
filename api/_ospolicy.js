@@ -45,7 +45,7 @@ function evaluate(tenant, worker, actionType, amount) {
       return { mode: 'approve', reason: `A policy sends ${type} actions to approval.` };
     }
     // policy.mode === 'auto' - check spend before letting it run unattended.
-    const spend = checkSpend(policy, amount);
+    const spend = checkSpend(policy, amount, spentToday(tenant, type));
     if (spend) return spend;
     return { mode: 'auto', reason: `A policy lets this worker run ${type} actions on its own.` };
   }
@@ -58,7 +58,7 @@ function evaluate(tenant, worker, actionType, amount) {
   const isExternal = EXTERNAL_ACTIONS.includes(type);
   const canAuto = worker && worker.autonomy === 'auto' && tenant && tenant.autopilot === true;
   if (isExternal && canAuto) {
-    const spend = checkSpend(policy, amount);
+    const spend = checkSpend(policy, amount, spentToday(tenant, type));
     if (spend) return spend;
     return { mode: 'auto', reason: `Autopilot is on and this worker is autonomous, so ${type} runs on its own.` };
   }
@@ -67,18 +67,30 @@ function evaluate(tenant, worker, actionType, amount) {
   return { mode: 'approve', reason: `${type} actions wait for a person to approve.` };
 }
 
-// If amount exceeds the policy's per_action_limit, pull back to approval. Well
-// over the limit (more than 5x) still approves, but the reason flags the size.
-// Returns a decision object to short-circuit with, or null to continue.
-function checkSpend(policy, amount) {
-  const limit = policy && Number(policy.per_action_limit);
+// Today's already-spent total for this action type, if the caller attached it
+// (executeWorker computes it via getSpentToday). 0 when unknown.
+function spentToday(tenant, type) {
+  const m = tenant && tenant._spentToday;
+  return (m && typeof m[type] === 'number') ? m[type] : 0;
+}
+
+// Guard an unattended money action against both the per-action limit and the
+// daily limit. Anything over either pulls back to human approval. `already` is
+// today's spend so far for this action type. Returns a decision to
+// short-circuit with, or null to continue as auto.
+function checkSpend(policy, amount, already) {
   if (typeof amount !== 'number' || !isFinite(amount)) return null;
-  if (!limit || !isFinite(limit) || limit <= 0) return null;
-  if (amount <= limit) return null;
-  if (amount > limit * 5) {
-    return { mode: 'approve', reason: `Amount ${amount} is far over the ${limit} per-action limit and needs a person to approve.` };
+  const perAction = policy && Number(policy.per_action_limit);
+  if (perAction && isFinite(perAction) && perAction > 0 && amount > perAction) {
+    const far = amount > perAction * 5 ? 'far ' : '';
+    return { mode: 'approve', reason: `Amount ${amount} is ${far}over the ${perAction} per-action limit and needs a person to approve.` };
   }
-  return { mode: 'approve', reason: `Amount ${amount} is over the ${limit} per-action limit and needs a person to approve.` };
+  const daily = policy && Number(policy.daily_limit);
+  const spent = typeof already === 'number' && isFinite(already) ? already : 0;
+  if (daily && isFinite(daily) && daily > 0 && (spent + amount) > daily) {
+    return { mode: 'approve', reason: `This would put today's ${'spend'} at ${spent + amount}, over the ${daily} daily limit, so it needs a person to approve.` };
+  }
+  return null;
 }
 
 // Choose the applicable policy from a list, matching action_type and preferring
@@ -147,4 +159,22 @@ function toNum(v) {
   return isFinite(n) ? n : null;
 }
 
-module.exports = { evaluate, getPolicies, setPolicy, killSwitch };
+// Sum a tenant's money already spent today, per action type, from the audit log
+// (os_actions). Attach the result as tenant._spentToday so evaluate() can
+// enforce daily_limit. Only actions that actually went out count (sent/done).
+async function getSpentToday(tenantId) {
+  const cutoff = new Date(); cutoff.setHours(0, 0, 0, 0);
+  const iso = cutoff.toISOString();
+  const rows = await db.list('os_actions', { where: [['tenant_id', '==', String(tenantId)]] }).catch(() => []);
+  const map = {};
+  for (const r of rows) {
+    if (!r || typeof r.amount !== 'number' || !isFinite(r.amount)) continue;
+    if (r.status && !['sent', 'done', 'filed'].includes(r.status)) continue;
+    if (r.created_at && String(r.created_at) < iso) continue;
+    const type = r.channel === 'internal' ? 'internal' : String(r.channel || r.action_type || 'external_write');
+    map[type] = (map[type] || 0) + r.amount;
+  }
+  return map;
+}
+
+module.exports = { evaluate, getPolicies, setPolicy, killSwitch, getSpentToday };

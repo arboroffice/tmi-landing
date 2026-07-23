@@ -56,11 +56,13 @@ function requireTenant(req, res) {
   return t;
 }
 
-// Role rank. Legacy tokens (all owners) and any missing role default to owner,
-// so existing accounts keep full access. viewer < manager < owner.
+// Role rank. A token with no/unknown role is treated as the LEAST privileged
+// (viewer), so a missing role can never fail open to a write. Current tokens
+// always carry a role (signTenant sets it); a role-less legacy token simply
+// re-authenticates. viewer < manager < owner.
 const RANK = { viewer: 1, manager: 2, owner: 3 };
 function can(token, need) {
-  return (RANK[token && token.role] || RANK.owner) >= (RANK[need] || RANK.owner);
+  return (RANK[token && token.role] || RANK.viewer) >= (RANK[need] || RANK.owner);
 }
 // Gate a write. Returns true if allowed; otherwise writes 403 and returns false.
 function requireRole(token, res, need) {

@@ -15,6 +15,7 @@
 
 const db = require('./_db');
 const { requireTenant, cors } = require('./_tenant-auth');
+const { safeFetch } = require('./_osnet');
 
 const MODEL = 'claude-opus-4-8';
 
@@ -180,40 +181,14 @@ async function buildSpec(tenant, input) {
   return normalize(raw);
 }
 
-// Reject private, loopback, link-local, and cloud-metadata hosts (SSRF guard).
-function isBlockedHost(host) {
-  host = (host || '').toLowerCase().replace(/\.$/, '');
-  if (!host) return true;
-  if (host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal') || host === 'metadata.google.internal') return true;
-  if (host === '::1' || host.startsWith('fe80:') || host.startsWith('fc') || host.startsWith('fd')) return true;
-  const m = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (m) {
-    const a = +m[1], b = +m[2];
-    if (a === 10 || a === 127 || a === 0) return true;
-    if (a === 169 && b === 254) return true; // link-local + cloud metadata
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a >= 224) return true; // multicast / reserved
-  }
-  return false;
-}
-
-// Best-effort fetch of a site's readable text. Never throws; returns '' on failure.
+// Best-effort fetch of a site's readable text. Never throws; returns '' on
+// failure. SSRF-guarded via _osnet.safeFetch (resolves + validates every IP,
+// refuses redirects).
 async function fetchSite(url) {
   try {
-    let u = url.trim();
-    if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
-    let host;
-    try { host = new URL(u).hostname; } catch (e) { return ''; }
-    if (isBlockedHost(host)) return '';
-    const ctrl = new AbortController();
-    const to = setTimeout(() => ctrl.abort(), 7000);
-    const r = await fetch(u, {
-      signal: ctrl.signal,
-      redirect: 'follow',
+    const r = await safeFetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; TMI-OS-Builder/1.0)' },
-    });
-    clearTimeout(to);
+    }, 7000);
     if (!r.ok) return '';
     let html = await r.text();
     html = html
