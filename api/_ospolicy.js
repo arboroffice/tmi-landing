@@ -122,29 +122,30 @@ async function getPolicies(tenantId) {
   return rows;
 }
 
-// Create or replace a policy (upsert by tenant_id + scope + scope_id + action_type).
+// Upsert a policy (by tenant_id + scope + scope_id + action_type). MERGES the
+// provided fields onto any existing row: the mode and the two limits live in
+// one row, so setting rules must not wipe limits and setting limits must not
+// reset the mode. Only fields present in the spec are changed.
 async function setPolicy(tenantId, spec) {
   const tid = String(tenantId);
   const s = spec || {};
   const scope = VALID_SCOPES.includes(s.scope) ? s.scope : 'tenant';
   const scopeId = s.scope_id != null ? String(s.scope_id) : '';
   const actionType = String(s.action_type || 'internal');
-  const mode = VALID_MODES.includes(s.mode) ? s.mode : 'approve';
-  const fields = {
-    tenant_id: tid,
-    scope,
-    scope_id: scopeId,
-    action_type: actionType,
-    mode,
-    daily_limit: toNum(s.daily_limit),
-    per_action_limit: toNum(s.per_action_limit),
-    updated_at: new Date().toISOString(),
-  };
 
   const rows = await db.list('os_policies', { where: [['tenant_id', '==', tid], ['action_type', '==', actionType]] });
   const existing = rows.find(p => p.scope === scope && String(p.scope_id || '') === scopeId);
-  if (existing) return db.update('os_policies', existing.id, fields);
-  return db.insert('os_policies', fields);
+
+  const patch = { updated_at: new Date().toISOString() };
+  if (s.mode !== undefined) patch.mode = VALID_MODES.includes(s.mode) ? s.mode : 'approve';
+  if ('daily_limit' in s) patch.daily_limit = toNum(s.daily_limit);
+  if ('per_action_limit' in s) patch.per_action_limit = toNum(s.per_action_limit);
+
+  if (existing) return db.update('os_policies', existing.id, patch);
+  return db.insert('os_policies', Object.assign({
+    tenant_id: tid, scope, scope_id: scopeId, action_type: actionType,
+    mode: 'approve', daily_limit: null, per_action_limit: null,
+  }, patch));
 }
 
 // The company-wide kill switch. on=true pauses all worker autonomy.

@@ -236,6 +236,11 @@ function normalize(raw) {
     status: 'ready',
     sort: i,
   }));
+  // Activate one safe, read-only worker by default so the workforce visibly runs
+  // on day one (lifts the workforce score, produces a real first deliverable).
+  // Read-only workers only report; they never contact anyone or move money.
+  const firstRead = workers.find(w => w.autonomy === 'read');
+  if (firstRead) firstRead.status = 'active';
   const workflows = (Array.isArray(raw.workflows) ? raw.workflows : []).slice(0, 4).map((f, i) => ({
     name: String(f.name || 'Workflow').slice(0, 60),
     trigger: String(f.trigger || '').slice(0, 120),

@@ -387,6 +387,7 @@
     <a data-v="inbox"><svg class="icon"><use href="#i-inbox"/></svg> Inbox <span class="tag" id="tgInbox"></span></a>
     <a data-v="threads"><svg class="icon"><use href="#i-coo"/></svg> Conversations <span class="tag" id="tgThreads"></span></a>
     <a data-v="tasks"><svg class="icon"><use href="#i-check"/></svg> Tasks <span class="tag" id="tgTasks"></span></a>
+    <a data-v="guardrails"><svg class="icon"><use href="#i-shield"/></svg> Guardrails &amp; control</a>
   </nav>
   <div class="grp">Build it out</div>
   <nav>
@@ -401,7 +402,6 @@
     <a data-v="reports"><svg class="icon"><use href="#i-chart"/></svg> Reports</a>
     <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
     <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Connect tools</a>
-    <a data-v="guardrails"><svg class="icon"><use href="#i-shield"/></svg> Guardrails</a>
     <a data-v="team" data-owner="1"><svg class="icon"><use href="#i-users"/></svg> Team <span class="tag" id="tgTeam"></span></a>
     <a data-v="settings" data-owner="1"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
   </nav>
@@ -1276,7 +1276,7 @@ function inviteMember(){
   openForm({title:'Invite a teammate',sub:'They get a link to set their password and join this company OS.',fields:[
     {name:'name',label:'Name',placeholder:'Jordan Rivera'},
     {name:'email',label:'Work email',placeholder:'jordan@company.com'},
-    {name:'role',label:'Role',type:'select',value:'manager',options:[['manager','Manager — operate and build'],['viewer','Viewer — read only'],['owner','Owner — full access']]}
+    {name:'role',label:'Role',type:'select',value:'manager',options:[['manager','Manager (operate and build)'],['viewer','Viewer (read only)'],['owner','Owner (full access)']]}
   ],onSave:async function(v){
     var j=await api('/api/os2-team',{action:'invite',name:v.name,email:v.email,role:v.role});
     teamLoaded=false;await loadTeam(true);
@@ -1355,6 +1355,11 @@ function renderGuardrails(){
   }).join('');
   var paused=STATE._paused===true;
   host.innerHTML=
+    '<div class="kcard" style="padding:20px 22px;margin-bottom:14px"><div class="kh"><span class="badge k">How it works</span><h4>What your workers can do on their own</h4></div>'+
+      '<p style="font-size:13.5px;color:var(--ink-2);margin-top:8px">A worker only acts in the real world when four things line up. Anything short of all four means it drafts the work and parks it in your inbox for one click. Nothing reaches a customer or moves money behind your back.</p>'+
+      '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">'+
+        [['1','The worker is turned on','Off by default. You switch it on in Workforce.'],['2','Its channel is connected','Email or text needs a connected from-address in Settings, or it can only draft.'],['3','Autopilot is on for that action','Set below. Money and outside messages default to asking you first.'],['4','It stays under your limits','Per-action and daily spend caps here pull anything bigger back to approval.']].map(function(r){return '<div style="display:flex;gap:11px;align-items:flex-start"><span style="flex:none;width:22px;height:22px;border-radius:6px;background:var(--ink);color:var(--chart);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">'+r[0]+'</span><div><div style="font-size:13.5px;color:var(--ink);font-weight:600">'+r[1]+'</div><div style="font-size:12.5px;color:var(--ink-3)">'+r[2]+'</div></div></div>';}).join('')+
+      '</div></div>'+
     '<div class="kcard" style="padding:20px 22px"><div class="kh"><span class="badge '+(paused?'pending':'done')+'">'+(paused?'Paused':'Running')+'</span><h4>Company autonomy</h4></div>'+
       '<p style="font-size:13.5px;color:var(--ink-2);margin-top:8px">One switch. Pause everything your AI workers do, instantly, no matter their settings.</p>'+
       '<div class="mfoot" style="justify-content:flex-start"><button class="btn '+(paused?'':'ghost')+'" onclick="togglePause()">'+(paused?'Resume the company':'Pause everything')+'</button></div></div>'+
@@ -1362,12 +1367,13 @@ function renderGuardrails(){
       '<p style="font-size:13.5px;color:var(--ink-2);margin:6px 0 6px">Anything set to Ask me first waits in your inbox before it happens. Money and outside messages default to asking.</p>'+
       rows+
       '<div class="mfoot" style="justify-content:flex-start"><button class="btn" onclick="saveGuardrails()">Save rules</button></div></div>'+
-    '<div class="kcard" style="padding:20px 22px;margin-top:14px"><div class="kh"><h4>Spend limit per action</h4></div>'+
-      '<p style="font-size:13.5px;color:var(--ink-2);margin:6px 0 10px">Any single money action above this always asks you first, even on autopilot.</p>'+
-      '<div class="field"><input id="gr_limit" value="'+esc(grLimit())+'" placeholder="$500"/></div>'+
-      '<div class="mfoot" style="justify-content:flex-start"><button class="btn ghost" onclick="saveLimit()">Save limit</button></div></div>';
+    '<div class="kcard" style="padding:20px 22px;margin-top:14px"><div class="kh"><h4>Spend limits</h4></div>'+
+      '<p style="font-size:13.5px;color:var(--ink-2);margin:6px 0 12px">A single money action over the per-action limit, or anything that would push today past the daily limit, always asks you first, even on autopilot.</p>'+
+      '<div style="display:flex;gap:12px;flex-wrap:wrap"><div class="field" style="flex:1;min-width:150px"><label>Per action</label><input id="gr_limit" value="'+esc(grLimit('per_action_limit'))+'" placeholder="$500"/></div>'+
+      '<div class="field" style="flex:1;min-width:150px"><label>Per day</label><input id="gr_daily" value="'+esc(grLimit('daily_limit'))+'" placeholder="$2,000"/></div></div>'+
+      '<div class="mfoot" style="justify-content:flex-start"><button class="btn ghost" onclick="saveLimit()">Save limits</button></div></div>';
 }
-function grLimit(){var pol=STATE._policies||[];var p=pol.find(function(x){return x.action_type==='payment'&&x.per_action_limit;});return p?('$'+p.per_action_limit):'';}
+function grLimit(field){var pol=STATE._policies||[];var p=pol.find(function(x){return (x.action_type==='payment'||x.action_type==='external_write')&&x[field];});return p?('$'+p[field]):'';}
 async function loadPolicies(){try{var j=await api('/api/os2-policy',{action:'list'});STATE._policies=j.policies||[];STATE._paused=!!j.paused;renderGuardrails();}catch(e){}}
 async function saveGuardrails(){
   try{
@@ -1376,9 +1382,16 @@ async function saveGuardrails(){
   }catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 async function saveLimit(){
-  var v=(document.getElementById('gr_limit')||{}).value||'';var n=parseFloat(String(v).replace(/[^0-9.]/g,''));
-  try{await api('/api/os2-policy',{action:'set',scope:'tenant',action_type:'payment',mode:'approve',per_action_limit:isNaN(n)?null:n});toast('Spend limit saved');loadPolicies();}
-  catch(e){if(e.message!=='signed out')toast(e.message);}
+  var pv=(document.getElementById('gr_limit')||{}).value||'';var pn=parseFloat(String(pv).replace(/[^0-9.]/g,''));
+  var dv=(document.getElementById('gr_daily')||{}).value||'';var dn=parseFloat(String(dv).replace(/[^0-9.]/g,''));
+  var body={mode:'approve',per_action_limit:isNaN(pn)?null:pn,daily_limit:isNaN(dn)?null:dn};
+  try{
+    // Set on both money-capable action types so the caps bind whichever path a
+    // real money action takes.
+    await api('/api/os2-policy',Object.assign({action:'set',scope:'tenant',action_type:'payment'},body));
+    await api('/api/os2-policy',Object.assign({action:'set',scope:'tenant',action_type:'external_write'},body));
+    toast('Spend limits saved');loadPolicies();
+  }catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 async function togglePause(){try{var j=await api('/api/os2-policy',{action:'pause',on:!(STATE._paused===true)});STATE._paused=!!j.paused;toast(j.paused?'Everything paused':'Company resumed');loadPolicies();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 
@@ -1694,11 +1707,16 @@ async function loadBriefing(force){
 async function firstWin(){
   var b=document.getElementById('banner');
   try{
+    // Run the one worker that onboarding turned on, so a real deliverable lands
+    // in minute one. Best-effort and safe (it is a read-only reporting worker).
+    var active=(STATE.workers||[]).filter(function(w){return w.status==='active';});
+    if(active.length){ try{ await api('/api/os2-run',{id:active[0].id}); }catch(_){} }
     var j=await api('/api/os2-pulse',{action:'scan'});
     var n=(j.signals&&j.signals.length)||0;
     await refresh();
     briefingLoaded=false; loadBriefing(true);
-    if(b){b.innerHTML='Your OS is live. Your COO read the whole company and found <b>'+(n?n+' thing'+(n>1?'s':'')+' worth your attention':'nothing on fire')+'</b>. See the briefing below, or open <b>Pulse</b> for the full read.';}
+    var ranName=active.length?esc(active[0].name):'';
+    if(b){b.innerHTML='Your OS is live. Your COO read the whole company and found <b>'+(n?n+' thing'+(n>1?'s':'')+' worth your attention':'nothing on fire')+'</b>'+(ranName?', and <b>'+ranName+'</b> just filed its first report':'')+'. See the briefing below, or open <b>Pulse</b> for the full read.';}
   }catch(e){
     if(b){b.innerHTML='Your OS is built. <b>'+((STATE.workers||[]).length)+' AI workers</b> and <b>'+((STATE.metrics||[]).length)+' metrics</b> are ready. Turn a worker on, or ask your COO to build more.';}
   }

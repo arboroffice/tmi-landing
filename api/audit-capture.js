@@ -26,6 +26,12 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
+  // The public audit is now free (Intelligent Company Audit at /intelligence-
+  // assessment); this paid $1,000 flow is retired. It stays gated off unless
+  // AUDIT_PAID_ENABLED=1 is explicitly set, so the old endpoint can never charge.
+  if (process.env.AUDIT_PAID_ENABLED !== '1') {
+    return res.status(410).json({ error: 'The paid audit is retired. The audit is now free at /intelligence-assessment.', redirect: '/intelligence-assessment' });
+  }
   if (!process.env.STRIPE_SECRET_KEY) return res.status(500).json({ error: 'Stripe not configured' });
 
   const { name, company, website, email, phone } = req.body || {};
