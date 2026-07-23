@@ -1897,6 +1897,10 @@ async function loadBriefing(force){
 async function firstWin(){
   var b=document.getElementById('banner');
   try{
+    // Pull any money source connected during onboarding (bank, Stripe) so real
+    // numbers are already on the command center the moment it loads.
+    try{ await api('/api/os2-plaid',{action:'sync'}); }catch(_){}
+    try{ await api('/api/os2-connect',{action:'stripe_sync'}); }catch(_){}
     // Run the one worker that onboarding turned on, so a real deliverable lands
     // in minute one. Best-effort and safe (it is a read-only reporting worker).
     var active=(STATE.workers||[]).filter(function(w){return w.status==='active';});

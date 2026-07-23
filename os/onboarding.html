@@ -108,6 +108,7 @@
   .voicehint b{color:var(--ink-2);font-weight:600;}
 </style>
 <!-- OpenAI Ads pixel --><script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"1SVHHxEVsMKxiFJd8MnXZm",debug:false});</script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 </head>
 <body>
   <div class="top"><img src="/logo.svg" alt="TMI"/> TMI OS <span class="prog" id="prog"></span></div>
@@ -117,8 +118,8 @@
     <!-- STEP: mode -->
     <div class="step on" data-step="mode">
       <div class="q-no">Step 1</div>
-      <h2>What are we building your OS from?</h2>
-      <p class="hint">TMI reads what you already have and designs your intelligent company. You approve it before anything is built.</p>
+      <h2>Let's build your company. Where do we start?</h2>
+      <p class="hint">One link is all we need. TMI reads what you already have and designs your whole company, then shows you the plan before building a thing. Takes about a minute.</p>
       <div class="modes">
         <button class="mode" onclick="pickMode('business')">
           <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg></div>
@@ -144,7 +145,7 @@
       <textarea id="bnotes" placeholder="Optional: anything the site won't tell us. The biggest bottleneck, or where you want to start."></textarea>
       <div class="nav">
         <button class="btn ghost" onclick="goto('mode')">Back</button>
-        <button class="btn" onclick="preview()">Design my company &rarr;</button>
+        <button class="btn" id="bizNext" onclick="next()">Design my company &rarr;</button>
       </div>
     </div>
 
@@ -180,8 +181,21 @@
       <textarea id="money" placeholder="e.g. Brand deals, a $499 course, and an email list I want to grow."></textarea>
       <div class="nav">
         <button class="btn ghost" onclick="goto('niche')">Back</button>
-        <button class="btn" onclick="preview()">Build my ops system &rarr;</button>
+        <button class="btn" id="crNext" onclick="next()">Build my ops system &rarr;</button>
       </div>
+    </div>
+
+    <!-- STEP: bank (Plaid) — only shown when banking is configured -->
+    <div class="step" data-step="bank">
+      <div class="q-no">Your money, live</div>
+      <h2>Want to see your real numbers on day one?</h2>
+      <p class="hint">Connect your bank and your actual cash balance is sitting on your command center the second your OS is built. It updates itself from there. Read-only through Plaid, and you can disconnect anytime.</p>
+      <div id="bankState"></div>
+      <div class="nav">
+        <button class="btn ghost" onclick="next()" id="bankSkip">Skip for now</button>
+        <button class="btn" onclick="connectBank()" id="bankBtn">Connect my bank &rarr;</button>
+      </div>
+      <div class="voicehint" style="margin-top:18px"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V8a5 5 0 0 1 10 0v3"/></svg> Bank-grade encryption. TMI never sees your login, only the balance you approve.</div>
     </div>
 
     <!-- REVIEW / APPROVAL -->
@@ -216,8 +230,25 @@ var TOKEN_KEY='tmios_token';
 var tok;try{tok=localStorage.getItem(TOKEN_KEY);}catch(_){}
 if(!tok) location.href='/os/';
 
-var MODE=null, SPEC=null;
+var MODE=null, SPEC=null, CUR='mode', BANK=false;
 var FLOWS={ business:['mode','website'], creator:['mode','handles','niche','money'] };
+
+// If banking is set up, slot a "connect your bank" step in before the build so
+// real money lands on day one. Checked once, up front, so onboarding never shows
+// a step that can't work.
+(async function(){
+  try{
+    var r=await fetch('/api/os2-plaid',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},body:JSON.stringify({action:'status'})});
+    var j=await r.json().catch(function(){return {};});
+    if(j&&j.configured){
+      BANK=true;
+      FLOWS.business=['mode','website','bank'];
+      FLOWS.creator=['mode','handles','niche','money','bank'];
+      var bn=document.getElementById('bizNext');if(bn)bn.textContent='Continue →';
+      var cn=document.getElementById('crNext');if(cn)cn.textContent='Continue →';
+    }
+  }catch(_){}
+})();
 var PLATFORMS=[
   {key:'Instagram', icon:'<circle cx="12" cy="12" r="4"/><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="17.5" cy="6.5" r="1"/>'},
   {key:'TikTok', icon:'<path d="M9 3v12a3 3 0 1 1-3-3"/><path d="M9 7c1.5 2 3.5 3 6 3V6c-2 0-3-1-3-3"/>'},
@@ -236,6 +267,7 @@ var PLATFORMS=[
 function setBar(pct){document.getElementById('barFill').style.width=pct+'%';}
 function curFlow(){return MODE?FLOWS[MODE]:['mode'];}
 function goto(step){
+  CUR=step;
   document.querySelectorAll('.step').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-step')===step);});
   document.getElementById('review').classList.remove('on');
   var fl=curFlow(), idx=fl.indexOf(step);
@@ -243,7 +275,42 @@ function goto(step){
   document.getElementById('prog').textContent=idx>=0?(idx+1)+' / '+(fl.length+1):'';
   var el=document.querySelector('.step[data-step="'+step+'"]');var inp=el&&el.querySelector('textarea,input');if(inp)setTimeout(function(){inp.focus();},60);
 }
+// Advance to the next step in the flow, or start the build if this was the last.
+function next(){
+  var fl=curFlow(), i=fl.indexOf(CUR);
+  if(i>=0 && i<fl.length-1){ goto(fl[i+1]); }
+  else { preview(); }
+}
 function pickMode(m){MODE=m;goto(m==='business'?'website':'handles');}
+
+// ---- connect a bank (Plaid) ----
+function connectBank(){
+  var btn=document.getElementById('bankBtn'); if(btn){btn.disabled=true;btn.textContent='Opening...';}
+  fetch('/api/os2-plaid',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},body:JSON.stringify({action:'link_token'})})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(!j.link_token||typeof Plaid==='undefined'){throw new Error(j.error||'Bank connection unavailable');}
+      var handler=Plaid.create({token:j.link_token,
+        onSuccess:function(public_token){
+          if(btn)btn.textContent='Linking...';
+          fetch('/api/os2-plaid',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok},body:JSON.stringify({action:'exchange',public_token:public_token})})
+            .then(function(r){return r.json();}).then(function(){bankDone();})
+            .catch(function(){if(btn){btn.disabled=false;btn.textContent='Connect my bank →';}});
+        },
+        onExit:function(){ if(btn){btn.disabled=false;btn.textContent='Connect my bank →';} }
+      });
+      handler.open();
+    })
+    .catch(function(e){ if(btn){btn.disabled=false;btn.textContent='Connect my bank →';} var s=document.getElementById('bankState'); if(s)s.innerHTML='<div class="rsum" style="color:var(--ink-2)">'+esc(e.message||'Could not start the bank connection.')+'</div>'; });
+}
+function bankDone(){
+  try{if(window.oaiq)oaiq("measure","lead_created",{type:"customer_action"});}catch(_){}
+  var s=document.getElementById('bankState');
+  if(s)s.innerHTML='<div class="rsum" style="background:var(--chart);color:#0a0b14;border-color:var(--chart-dark)"><b>Bank connected.</b> Your real cash balance will be sitting on your command center the moment your OS is built.</div>';
+  var btn=document.getElementById('bankBtn'); if(btn){btn.textContent='Connected ✓';btn.disabled=true;}
+  var skip=document.getElementById('bankSkip'); if(skip){skip.textContent='Keep going →';skip.classList.remove('ghost');}
+  setTimeout(function(){next();},1400);
+}
 
 function gatherHandles(){
   return [].slice.call(document.querySelectorAll('#handles input')).map(function(i){
@@ -260,8 +327,8 @@ function payload(){
       monetization:(document.getElementById('money').value||'').trim(), bottleneck:'' }};
 }
 
-var LOG_B=['Reading your website','Understanding what you do','Designing your command center','Assigning your AI workers','Wiring your first workflows'];
-var LOG_C=['Reading your profiles','Mapping your audience and offers','Designing your creator command center','Assigning your AI workforce','Wiring your content and deal pipelines'];
+var LOG_B=['Reading your website','Mapping how you make money','Building your departments','Designing your command center','Hiring your AI workers','Wiring your workflows','Setting your goals','Finding what needs you first'];
+var LOG_C=['Reading your profiles','Mapping your audience and offers','Building your departments','Designing your creator command center','Hiring your AI workforce','Wiring your content and deal pipelines','Setting your goals','Finding what needs you first'];
 function showBuilding(log){
   document.querySelectorAll('.step').forEach(function(s){s.style.display='none';});
   document.getElementById('review').classList.remove('on');
