@@ -1302,14 +1302,16 @@ async function removeMember(id,name){
 }
 
 /* ---- live data / integrations ---- */
-var CONNECT=null, connectLoaded=false;
+var CONNECT=null, connectLoaded=false, MCPSERVERS=[];
 async function loadConnect(){
   var role=(STATE.me&&STATE.me.role)||'owner';
   if(connectLoaded){renderIntegrations();return;}
   if(role==='viewer'){connectLoaded=true;renderIntegrations();return;}
   try{CONNECT=await api('/api/os2-connect',{action:'info'});}catch(e){}
+  try{var mj=await api('/api/os2-mcp',{action:'list'});MCPSERVERS=mj.servers||[];}catch(e){}
   connectLoaded=true;renderIntegrations();
 }
+async function reloadMcp(){try{var mj=await api('/api/os2-mcp',{action:'list'});MCPSERVERS=mj.servers||[];}catch(e){}renderIntegrations();}
 /* ---- departments (the org of the intelligent company) ---- */
 var DEPT_SUGG=[['Sales','Wins the work: leads, quotes, follow-up, booking.'],['Operations','Runs the work: scheduling, dispatch, jobs, delivery.'],['Finance','Handles the money: invoicing, collections, cash, reporting.'],['Customer Service','Keeps customers: questions, issues, retention.'],['Marketing','Brings demand: content, campaigns, reputation.'],['People','Builds the team: hiring, onboarding, training.']];
 function renderDepartments(){
@@ -1507,29 +1509,34 @@ async function applyPlan(){
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 
-// The connectable stack, grouped by category. TMI wires any of these; anything
-// not listed can be requested as a custom integration.
+// The connectable stack, grouped by category: [name, category, domain]. The
+// domain drives the logo. TMI wires any of these; anything not listed can be
+// requested as a custom integration or connected as an MCP server.
 var TOOL_CATALOG=[
-  ['Plaid','Banking'],['Mercury','Banking'],['Brex','Banking'],['Ramp','Banking'],['Bill.com','Banking'],['Wise','Banking'],['Expensify','Banking'],
-  ['QuickBooks','Accounting'],['Xero','Accounting'],['FreshBooks','Accounting'],['NetSuite','Accounting'],['Sage','Accounting'],['Wave','Accounting'],
-  ['Stripe','Payments'],['Square','Payments'],['PayPal','Payments'],['Braintree','Payments'],['Authorize.net','Payments'],
-  ['Gusto','Payroll & HR'],['ADP','Payroll & HR'],['Rippling','Payroll & HR'],['Paychex','Payroll & HR'],['BambooHR','Payroll & HR'],['Deel','Payroll & HR'],
-  ['HubSpot','CRM'],['Salesforce','CRM'],['Pipedrive','CRM'],['Zoho CRM','CRM'],['Close','CRM'],['Copper','CRM'],['Keap','CRM'],
-  ['ServiceTitan','Field service'],['Jobber','Field service'],['Housecall Pro','Field service'],['FieldEdge','Field service'],['Workiz','Field service'],['ServiceFusion','Field service'],
-  ['Shopify','Commerce'],['WooCommerce','Commerce'],['BigCommerce','Commerce'],['Amazon Seller','Commerce'],['Etsy','Commerce'],
-  ['Google Workspace','Email & calendar'],['Microsoft 365','Email & calendar'],['Gmail','Email & calendar'],['Outlook','Email & calendar'],
-  ['Slack','Messaging'],['Microsoft Teams','Messaging'],['Discord','Messaging'],
-  ['Twilio','Phone & SMS'],['RingCentral','Phone & SMS'],['OpenPhone','Phone & SMS'],['Aircall','Phone & SMS'],['Dialpad','Phone & SMS'],
-  ['Calendly','Scheduling'],['Acuity','Scheduling'],['Cal.com','Scheduling'],
-  ['QuickBooks Time','Timesheets'],['Deputy','Timesheets'],['When I Work','Timesheets'],['Homebase','Timesheets'],
-  ['Asana','Project & ops'],['Monday.com','Project & ops'],['ClickUp','Project & ops'],['Trello','Project & ops'],['Notion','Project & ops'],['Airtable','Project & ops'],['Jira','Project & ops'],
-  ['Mailchimp','Marketing'],['Klaviyo','Marketing'],['ActiveCampaign','Marketing'],['Google Ads','Marketing'],['Meta Ads','Marketing'],
-  ['Zendesk','Support'],['Intercom','Support'],['Freshdesk','Support'],['Help Scout','Support'],
-  ['DocuSign','Docs & e-sign'],['PandaDoc','Docs & e-sign'],['Dropbox Sign','Docs & e-sign'],
-  ['Google Drive','Storage'],['Dropbox','Storage'],['Box','Storage'],['OneDrive','Storage'],
-  ['Google Analytics','Analytics'],['Segment','Analytics'],
-  ['Zapier','Automation'],['Make','Automation'],['n8n','Automation']
+  ['Plaid','Banking','plaid.com'],['Mercury','Banking','mercury.com'],['Brex','Banking','brex.com'],['Ramp','Banking','ramp.com'],['Bill.com','Banking','bill.com'],['Wise','Banking','wise.com'],['Expensify','Banking','expensify.com'],
+  ['QuickBooks','Accounting','quickbooks.intuit.com'],['Xero','Accounting','xero.com'],['FreshBooks','Accounting','freshbooks.com'],['NetSuite','Accounting','netsuite.com'],['Sage','Accounting','sage.com'],['Wave','Accounting','waveapps.com'],
+  ['Stripe','Payments','stripe.com'],['Square','Payments','squareup.com'],['PayPal','Payments','paypal.com'],['Braintree','Payments','braintreepayments.com'],['Authorize.net','Payments','authorize.net'],
+  ['Gusto','Payroll & HR','gusto.com'],['ADP','Payroll & HR','adp.com'],['Rippling','Payroll & HR','rippling.com'],['Paychex','Payroll & HR','paychex.com'],['BambooHR','Payroll & HR','bamboohr.com'],['Deel','Payroll & HR','deel.com'],
+  ['HubSpot','CRM','hubspot.com'],['Salesforce','CRM','salesforce.com'],['Pipedrive','CRM','pipedrive.com'],['Zoho CRM','CRM','zoho.com'],['Close','CRM','close.com'],['Copper','CRM','copper.com'],['Keap','CRM','keap.com'],
+  ['ServiceTitan','Field service','servicetitan.com'],['Jobber','Field service','getjobber.com'],['Housecall Pro','Field service','housecallpro.com'],['FieldEdge','Field service','fieldedge.com'],['Workiz','Field service','workiz.com'],['ServiceFusion','Field service','servicefusion.com'],
+  ['Shopify','Commerce','shopify.com'],['WooCommerce','Commerce','woocommerce.com'],['BigCommerce','Commerce','bigcommerce.com'],['Amazon Seller','Commerce','sell.amazon.com'],['Etsy','Commerce','etsy.com'],
+  ['Google Workspace','Email & calendar','workspace.google.com'],['Microsoft 365','Email & calendar','microsoft.com'],['Gmail','Email & calendar','gmail.com'],['Outlook','Email & calendar','outlook.com'],
+  ['Slack','Messaging','slack.com'],['Microsoft Teams','Messaging','teams.microsoft.com'],['Discord','Messaging','discord.com'],
+  ['Twilio','Phone & SMS','twilio.com'],['RingCentral','Phone & SMS','ringcentral.com'],['OpenPhone','Phone & SMS','openphone.com'],['Aircall','Phone & SMS','aircall.io'],['Dialpad','Phone & SMS','dialpad.com'],
+  ['Calendly','Scheduling','calendly.com'],['Acuity','Scheduling','acuityscheduling.com'],['Cal.com','Scheduling','cal.com'],
+  ['QuickBooks Time','Timesheets','tsheets.com'],['Deputy','Timesheets','deputy.com'],['When I Work','Timesheets','wheniwork.com'],['Homebase','Timesheets','joinhomebase.com'],
+  ['Asana','Project & ops','asana.com'],['Monday.com','Project & ops','monday.com'],['ClickUp','Project & ops','clickup.com'],['Trello','Project & ops','trello.com'],['Notion','Project & ops','notion.so'],['Airtable','Project & ops','airtable.com'],['Jira','Project & ops','atlassian.com'],
+  ['Mailchimp','Marketing','mailchimp.com'],['Klaviyo','Marketing','klaviyo.com'],['ActiveCampaign','Marketing','activecampaign.com'],['Google Ads','Marketing','ads.google.com'],['Meta Ads','Marketing','facebook.com'],
+  ['Zendesk','Support','zendesk.com'],['Intercom','Support','intercom.com'],['Freshdesk','Support','freshdesk.com'],['Help Scout','Support','helpscout.com'],
+  ['DocuSign','Docs & e-sign','docusign.com'],['PandaDoc','Docs & e-sign','pandadoc.com'],['Dropbox Sign','Docs & e-sign','dropbox.com'],
+  ['Google Drive','Storage','drive.google.com'],['Dropbox','Storage','dropbox.com'],['Box','Storage','box.com'],['OneDrive','Storage','onedrive.live.com'],
+  ['Google Analytics','Analytics','analytics.google.com'],['Segment','Analytics','segment.com'],
+  ['Zapier','Automation','zapier.com'],['Make','Automation','make.com'],['n8n','Automation','n8n.io']
 ];
+// Logo for a tool, from its domain, with a graceful fallback to nothing.
+function toolLogo(domain){
+  return '<img src="https://www.google.com/s2/favicons?domain='+esc(domain)+'&sz=64" alt="" width="16" height="16" loading="lazy" style="border-radius:3px;flex:none" onerror="this.style.display=\'none\'"/>';
+}
 function renderToolCatalog(host){
   var conns=STATE.connections||[];
   var connectedNames=conns.map(function(c){return String(c.name||'').toLowerCase();});
@@ -1539,7 +1546,7 @@ function renderToolCatalog(host){
   var body=order.map(function(cat){
     var chips=groups[cat].map(function(t){
       var on=connectedNames.indexOf(t[0].toLowerCase())>=0;
-      return '<button class="chip2 tchip" data-tool="'+esc(t[0].toLowerCase())+'" data-cat="'+esc(cat.toLowerCase())+'" style="cursor:'+(on?'default':'pointer')+';'+(on?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72':'')+'" onclick="'+(on?'':'requestTool(\''+esc(t[0])+'\',\''+esc(cat)+'\')')+'">'+(on?'&#10003; ':'+ ')+esc(t[0])+'</button>';
+      return '<button class="chip2 tchip" data-tool="'+esc(t[0].toLowerCase())+'" data-cat="'+esc(cat.toLowerCase())+'" style="cursor:'+(on?'default':'pointer')+';gap:7px;'+(on?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72':'')+'" onclick="'+(on?'':'requestTool(\''+esc(t[0])+'\',\''+esc(cat)+'\')')+'">'+(on?'&#10003;':toolLogo(t[2]))+' '+esc(t[0])+'</button>';
     }).join('');
     return '<div class="tgroup" data-cat="'+esc(cat.toLowerCase())+'"><div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 8px">'+esc(cat)+'</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+chips+'</div></div>';
   }).join('');
@@ -1589,7 +1596,7 @@ function renderIntegrations(){
   var role=(STATE.me&&STATE.me.role)||'owner';
   var metrics=STATE.metrics||[];
   var live=metrics.filter(function(m){return m.updated_at;});
-  var conns=STATE.connections||[];
+  var conns=(STATE.connections||[]).filter(function(c){return c.provider!=='mcp';});
   var html='';
   if(conns.length){
     html+='<div class="kcard" style="padding:18px 22px;margin-bottom:14px"><div class="kh"><span class="badge k">TMI connections</span><h4>Wired to your real systems</h4></div>'+
@@ -1620,6 +1627,8 @@ function renderIntegrations(){
               '<div class="mfoot" style="justify-content:flex-start"><button class="btn" onclick="stripeConnect()">Connect Stripe</button></div>'
             : '<p style="font-size:12.5px;color:var(--ink-3);margin-top:10px">Ask an owner to connect Stripe.</p>'))+
       '</div>';
+    // MCP servers: connect any remote MCP server by URL, like Claude's catalog.
+    html+=mcpCard(role);
     var masked=(CONNECT.key||'').slice(0,6)+'••••••••••••••';
     var ex=metrics[0]?slug(metrics[0].label):'revenue_mtd';
     html+='<div class="kcard" style="padding:22px 24px;margin-top:14px"><div class="kh"><span class="badge k">Data endpoint</span><h4>Push numbers in from any tool</h4></div>'+
@@ -1684,6 +1693,46 @@ async function stripeSync(){
 async function stripeDisconnect(){
   if(!confirm('Disconnect Stripe? Your cash and revenue metrics stop updating.'))return;
   try{await api('/api/os2-connect',{action:'stripe_disconnect'});if(CONNECT)CONNECT.stripe_connected=false;await refresh();renderIntegrations();toast('Stripe disconnected');}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+// ---- MCP servers ----
+function mcpCard(role){
+  var list=(MCPSERVERS||[]).map(function(s){
+    var tools=(s.tools||[]).slice(0,6).map(function(t){return '<span class="chip2" style="font-size:11.5px">'+esc(t.name)+'</span>';}).join('');
+    var more=(s.tool_count||0)>6?'<span style="font-size:11.5px;color:var(--ink-3);align-self:center">+'+((s.tool_count||0)-6)+' more</span>':'';
+    return '<div style="border:1px solid var(--line);border-radius:12px;padding:14px 16px">'+
+      '<div style="display:flex;align-items:center;gap:10px"><span class="badge done">Live</span>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--ink)">'+esc(s.name)+'</div>'+
+      '<div style="font-size:11.5px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(s.url)+' · '+(s.tool_count||0)+' tool'+((s.tool_count||0)===1?'':'s')+'</div></div>'+
+      '<button class="link" onclick="mcpRefresh(\''+s.id+'\')">Refresh</button>'+(role==='owner'?'<button class="link" onclick="mcpRemove(\''+s.id+'\')">Remove</button>':'')+'</div>'+
+      (tools?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">'+tools+more+'</div>':'')+'</div>';
+  }).join('');
+  return '<div class="kcard" style="padding:22px 24px;margin-top:14px"><div class="kh"><span class="badge k">MCP</span><h4>Connect an MCP server</h4></div>'+
+    '<p style="font-size:13.5px;color:var(--ink-2);margin-top:10px">Connect any Model Context Protocol server by URL, the same open standard Claude uses. The OS reads the tools it exposes and TMI wires them into your workers. This is how you connect anything, not just the tools listed above.</p>'+
+    (list?'<div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">'+list+'</div>':'')+
+    (role==='owner'
+      ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px"><input id="mcpName" placeholder="Name (optional)" style="flex:1;min-width:130px;font-family:var(--sans);font-size:14px;border:1px solid var(--line-2);border-radius:8px;padding:10px 12px"/>'+
+        '<input id="mcpUrl" placeholder="https://server.example.com/mcp" style="flex:2;min-width:200px;font-family:var(--mono);font-size:13px;border:1px solid var(--line-2);border-radius:8px;padding:10px 12px"/></div>'+
+        '<div style="margin-top:8px"><input id="mcpToken" placeholder="Auth token (optional)" autocomplete="off" style="width:100%;font-family:var(--mono);font-size:13px;border:1px solid var(--line-2);border-radius:8px;padding:10px 12px"/></div>'+
+        '<div class="mfoot" style="justify-content:flex-start"><button class="btn" onclick="mcpConnect()">Connect server</button></div>'
+      : '<p style="font-size:12.5px;color:var(--ink-3);margin-top:10px">Ask an owner to connect an MCP server.</p>')+
+    '</div>';
+}
+async function mcpConnect(){
+  var url=(document.getElementById('mcpUrl')||{}).value||'';url=url.trim();if(!url){toast('Paste the MCP server URL');return;}
+  var name=(document.getElementById('mcpName')||{}).value||'';
+  var token=(document.getElementById('mcpToken')||{}).value||'';
+  toast('Connecting to the MCP server...');
+  try{var j=await api('/api/os2-mcp',{action:'connect',url:url.trim(),name:name.trim(),token:token.trim()});await reloadMcp();toast('Connected. Found '+((j.server&&j.server.tool_count)||0)+' tool'+(((j.server&&j.server.tool_count)||0)===1?'':'s')+'.');}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function mcpRefresh(id){
+  try{await api('/api/os2-mcp',{action:'refresh',id:id});await reloadMcp();toast('Refreshed');}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function mcpRemove(id){
+  if(!confirm('Remove this MCP server?'))return;
+  try{await api('/api/os2-mcp',{action:'remove',id:id});await reloadMcp();toast('Removed');}
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 
