@@ -325,6 +325,16 @@
   .actban{background:var(--ink);color:#fff;padding:11px 16px;border-radius:10px;display:flex;align-items:center;gap:12px;font-size:13px;margin-bottom:18px;}
   .actban b{color:var(--chart);}
   .actban .link{margin-left:auto;color:#fff;border-color:rgba(255,255,255,.24);background:transparent;}
+
+  /* ===== outcome meter ===== */
+  .deliv{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:linear-gradient(135deg,#13141f,#0a0b14 62%);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px 24px;margin-top:16px;position:relative;overflow:hidden;}
+  .deliv::before{content:"";position:absolute;right:-6%;top:-60%;width:38%;height:220%;background:radial-gradient(closest-side,rgba(228,255,151,0.16),rgba(228,255,151,0) 70%);pointer-events:none;}
+  .deliv>*{position:relative;z-index:1;}
+  .deliv-n{font-family:var(--mono);font-size:40px;font-weight:700;color:var(--chart);letter-spacing:-0.02em;line-height:1;}
+  .deliv-main{flex:1;min-width:200px;}
+  .deliv-t{font-size:14px;color:#fff;font-weight:600;line-height:1.35;}
+  .deliv-w{font-size:12px;color:rgba(255,255,255,0.55);margin-top:5px;font-family:var(--mono);}
+  .deliv-lab{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--chart);margin-bottom:8px;}
 </style>
 </head>
 <body>
@@ -417,6 +427,7 @@
     <div id="scoreCard"></div>
     <div class="secbar" style="margin-top:26px"><span class="lbl">The whole company on one screen</span><button class="btn sm ghost add" onclick="addMetric()"><svg class="icon"><use href="#i-plus"/></svg> Metric</button></div>
     <div class="tiles" id="metrics"></div>
+    <div id="deliveredStrip"></div>
     <div id="pulseStrip"></div>
     <div class="secbar"><span class="lbl">Needs attention</span><button class="btn sm ghost add" onclick="addTask()"><svg class="icon"><use href="#i-plus"/></svg> Task</button></div>
     <div id="cmdTasks"></div>
@@ -617,6 +628,17 @@ function show(v){
   window.scrollTo(0,0);
 }
 
+/* ---- outcome meter: real work delivered ---- */
+function renderDelivered(){
+  var host=document.getElementById('deliveredStrip'); if(!host) return;
+  var d=STATE.delivered||{}; var n=d.sent_30d||0;
+  if(!n){ host.innerHTML=''; return; }
+  var top=(d.top||[]).map(function(x){return esc(x.name)+' '+x.n;}).join(' · ');
+  host.innerHTML='<div class="deliv"><div><div class="deliv-lab">Work delivered</div><div class="deliv-n num">'+n+'</div></div>'+
+    '<div class="deliv-main"><div class="deliv-t">customer '+(n===1?'message':'messages')+' your workers delivered in the last 30 days</div>'+
+    (top?'<div class="deliv-w">'+top+'</div>':'')+'</div></div>';
+}
+
 /* ---- plans & offers ---- */
 function openApply(){ window.open('https://www.tmitechai.com/intelligence-assessment','_blank','noopener'); }
 function renderPlans(){
@@ -776,7 +798,7 @@ function renderScore(){
     '</div></div>';
 }
 function renderAll(){
-  renderOverview(); renderScore(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg(); renderPlans();
+  renderOverview(); renderScore(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg(); renderPlans(); renderDelivered();
   document.getElementById('tgDept').textContent=(STATE.departments||[]).length||'';
   document.getElementById('tgThreads').textContent=(STATE.threads||[]).length||'';
   document.getElementById('tgPulse').textContent=(STATE.signals||[]).length||'';
@@ -1146,7 +1168,7 @@ function showOutput(o){
   window._form=null;
 }
 function copyOutput(){try{navigator.clipboard.writeText(window._out||'');toast('Copied');}catch(e){toast('Select and copy');}}
-async function approveOutput(id){try{var j=await api('/api/os2-act',{action:'approve',output_id:id});closeModal();var s=j.act&&j.act.status;toast(s==='sent'?'Approved and sent':s==='staged'?'Approved. Connect a channel in Settings to send it.':s==='failed'?'Approved, but the send failed':'Approved');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function approveOutput(id){try{var j=await api('/api/os2-act',{action:'approve',output_id:id});closeModal();if(j.blocked){toast(j.reason||'A guardrail blocks this. Change it in Guardrails.');refresh();return;}var s=j.act&&j.act.status;toast(s==='sent'?'Approved and sent':s==='staged'?'Approved. Connect a channel in Settings to send it.':s==='failed'?'Approved, but the send failed':'Approved');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function dismissOutput(id){try{await api('/api/os2-act',{action:'dismiss',output_id:id});closeModal();toast('Dismissed');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function resendAction(id){try{var j=await api('/api/os2-act',{action:'send',action_id:id});var s=j.act&&j.act.status;toast(s==='sent'?'Sent':s==='staged'?'Still not connected. Add the channel in Settings.':'Could not send');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 

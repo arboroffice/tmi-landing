@@ -15,10 +15,22 @@
 
 const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
-const { runAction } = require('./_osact');
+const { runAction, normalizeAction } = require('./_osact');
+const { evaluate, getPolicies } = require('./_ospolicy');
 
 function log(tid, summary, kind) {
   return db.insert('os_build_log', { tenant_id: tid, kind: kind || 'act', summary, created_at: new Date().toISOString() }).catch(() => {});
+}
+
+// A hard stop the owner set deliberately (a "Never" rule for this action type, or
+// the company-wide pause) blocks even a manual approve/send. "Ask me first" does
+// not block here, because approving IS the human saying yes.
+async function hardStop(tenant, rawAction) {
+  const a = normalizeAction(rawAction);
+  if (!a || a.channel === 'internal') return null;
+  if (!tenant._policies) tenant._policies = await getPolicies(tenant.id).catch(() => []);
+  const d = evaluate(tenant, null, String(a.channel), typeof a.amount === 'number' ? a.amount : undefined);
+  return d.mode === 'deny' ? d.reason : null;
 }
 
 module.exports = async function handler(req, res) {
@@ -52,6 +64,8 @@ module.exports = async function handler(req, res) {
 
       let act = null;
       if (output.action) {
+        const blocked = await hardStop(tenant, output.action);
+        if (blocked) return res.status(200).json({ blocked: true, reason: blocked, output });
         act = await runAction({ tenant, output, worker_name: output.worker_name, actor: t.email || 'owner' }, output.action);
       }
       const patch = { status: 'done' };
@@ -67,6 +81,8 @@ module.exports = async function handler(req, res) {
       if (!rec || rec.tenant_id !== tid) return res.status(404).json({ error: 'Action not found' });
       const tenant = await db.getById('os_tenants', tid);
       const output = rec.output_id ? await db.getById('os_outputs', rec.output_id) : null;
+      const blocked = await hardStop(tenant, { channel: rec.channel, to: rec.to, subject: rec.subject, body: rec.body });
+      if (blocked) return res.status(200).json({ blocked: true, reason: blocked });
       const act = await runAction(
         { tenant, output, worker_name: rec.worker_name, actor: t.email || 'owner' },
         { channel: rec.channel, to: rec.to, subject: rec.subject, body: rec.body }

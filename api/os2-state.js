@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
   const w = [['tenant_id', '==', tid]];
 
   try {
-    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, actions, requests, connections, goals, signals, departments, threads, log] = await Promise.all([
+    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, actions, requests, connections, goals, signals, departments, threads, log, sentActions] = await Promise.all([
       db.getById('os_tenants', tid),
       db.list('os_metrics', { where: w }),
       db.list('os_workers', { where: w }),
@@ -36,11 +36,24 @@ module.exports = async function handler(req, res) {
       db.list('os_departments', { where: w }),
       db.list('os_threads', { where: [['tenant_id', '==', tid], ['status', '==', 'open']], limit: 100 }),
       db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 30 }),
+      db.list('os_actions', { where: [['tenant_id', '==', tid], ['status', '==', 'sent']], order: 'created_at', ascending: false, limit: 1000 }),
     ]);
     const score = scoreTenant({
       metrics, workers, workflows, knowledge,
       onboarded: !!(tenant && tenant.onboarded),
     });
+
+    // Outcome meter: real work the workers delivered (the billable signal).
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const sent30 = sentActions.filter(a => Date.parse(a.created_at || 0) >= cutoff);
+    const byWorker = {};
+    for (const a of sent30) { const k = a.worker_name || 'A worker'; byWorker[k] = (byWorker[k] || 0) + 1; }
+    const delivered = {
+      sent_30d: sent30.length,
+      sent_total: sentActions.length,
+      workers: Object.keys(byWorker).length,
+      top: Object.entries(byWorker).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, n]) => ({ name, n })),
+    };
 
     return res.status(200).json({
       me: { id: t.sub, role: t.role || 'owner', email: t.email || null },
@@ -51,7 +64,9 @@ module.exports = async function handler(req, res) {
         business_type: tenant.business_type || null, profile: tenant.profile || {},
         digest: tenant.digest !== false,
         channels: tenant.channels || {}, autopilot: !!tenant.autopilot,
+        paused: !!tenant.paused, is_installer: !!tenant.is_installer,
       } : null,
+      delivered,
       metrics: metrics.sort(bySort),
       workers: workers.sort(bySort),
       workflows: workflows.sort(bySort),

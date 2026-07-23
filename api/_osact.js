@@ -9,6 +9,7 @@
 // admin internal agents, and the city-reps copilot.
 
 const db = require('./_db');
+const policy = require('./_ospolicy');
 
 // Push through a real provider. Returns { status, detail }.
 //   'sent'   -> delivered through a provider
@@ -74,13 +75,17 @@ function tenantChannel(tenant, channel) {
   return ch && ch.enabled && ch.from ? ch : null;
 }
 
-// Whether this action can fire without a human clicking approve. Internal actions
-// always can. External sends require an autonomous worker AND tenant autopilot.
+// Whether this action can fire without a human clicking approve. This is now
+// governed by the full policy engine: the kill switch (tenant.paused), explicit
+// per-action rules (os_policies, attached as tenant._policies), spend limits, and
+// the autonomy + autopilot defaults. Only an 'auto' decision fires unattended;
+// 'approve' holds for a human and 'deny' blocks. Callers that want per-action
+// rules enforced must attach tenant._policies first (executeWorker does).
 function canAutoFire(tenant, worker, action) {
   if (!action) return false;
-  if (tenant && tenant.paused) return false; // kill switch: honor "pause everything"
-  if (action.channel === 'internal') return true;
-  return worker && worker.autonomy === 'auto' && tenant && tenant.autopilot === true;
+  const type = action.channel === 'internal' ? 'internal' : String(action.channel || 'external_write');
+  const amount = typeof action.amount === 'number' ? action.amount : undefined;
+  return policy.evaluate(tenant, worker, type, amount).mode === 'auto';
 }
 
 // Execute an action for a tenant and write a permanent audit entry.

@@ -7,6 +7,7 @@
 
 const db = require('./_db');
 const { normalizeAction, canAutoFire, runAction } = require('./_osact');
+const { getPolicies } = require('./_ospolicy');
 
 const MODEL = 'claude-opus-4-8';
 
@@ -66,6 +67,10 @@ async function executeWorker(worker, trigger) {
     db.list('os_tasks', { where: w }),
   ]);
   if (!tenant) throw new Error('tenant not found');
+
+  // Attach this tenant's guardrail policies so the per-action rules and spend
+  // limits they set actually bind on the autonomous-fire decision below.
+  tenant._policies = await getPolicies(tid).catch(() => []);
 
   const product = await produce(tenant, worker, { knowledge, metrics, tasks });
   const action = product.action;

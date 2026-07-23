@@ -64,14 +64,26 @@ module.exports = async function handler(req, res) {
       if (!body) return res.status(400).json({ error: 'Reply body required' });
       const now = new Date().toISOString();
 
-      // Attempt real delivery through the action layer. Never let a delivery
-      // failure lose the reply: it is always recorded, sent flag reflects reality.
+      // Attempt real delivery through the action layer, which resolves the
+      // tenant's connected from-identity and writes an os_actions audit entry.
+      // Never let a delivery failure lose the reply: it is always recorded, and
+      // the sent flag reflects reality.
       let sent = false;
       try {
-        const { deliver } = require('./_osact');
+        const { runAction } = require('./_osact');
+        const tenant = await db.getById('os_tenants', tid);
         const channel = thread.channel === 'sms' ? 'sms' : 'email';
-        const result = await deliver({ channel, to: thread.from, subject: thread.subject, body });
-        sent = result && result.status === 'sent';
+        const to = String(thread.from || '').trim();
+        const validTo = channel === 'email'
+          ? /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)
+          : /^\+?[0-9()\-.\s]{7,20}$/.test(to);
+        if (tenant && validTo) {
+          const rec = await runAction(
+            { tenant, worker_name: 'Team reply', actor: t.email || 'owner' },
+            { channel, to, subject: thread.subject, body }
+          );
+          sent = rec && rec.status === 'sent';
+        }
       } catch (e) {
         console.error('os2-threads deliver:', e.message);
       }
