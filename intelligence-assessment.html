@@ -4,18 +4,18 @@
 <script>document.documentElement.classList.add('js');</script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Intelligence Assessment | TMI</title>
+<title>Apply for an Intelligent Company Audit | TMI</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="apple-touch-icon" href="favicon.svg"/>
-<meta name="description" content="Apply for a TMI Intelligence Assessment. In one assessment we show you exactly how we would redesign your business if we owned it: bottlenecks, hidden costs, where AI belongs, and your highest-ROI roadmap."/>
-<meta property="og:title" content="Intelligence Assessment | TMI"/>
-<meta property="og:description" content="In one assessment we show you exactly how we would redesign your business if we owned it."/>
+<meta name="description" content="Apply for a free Intelligent Company Audit. We show you exactly how we would rebuild your business if we owned it: where it depends on you, what that is costing you, and the highest-value path to fix it."/>
+<meta property="og:title" content="Apply for an Intelligent Company Audit | TMI"/>
+<meta property="og:description" content="In one audit we show you exactly how we would rebuild your business if we owned it."/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://www.tmitechai.com/intelligence-assessment"/>
 <meta property="og:image" content="https://www.tmitechai.com/hero-og.jpg"/>
 <meta property="og:site_name" content="TMI"/>
 <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="Intelligence Assessment | TMI"/>
+<meta name="twitter:title" content="Apply for an Intelligent Company Audit | TMI"/>
 <meta name="twitter:description" content="See exactly how we would redesign your business if we owned it."/>
 <meta name="twitter:image" content="https://www.tmitechai.com/hero-og.jpg"/>
 <link rel="canonical" href="https://www.tmitechai.com/intelligence-assessment"/>
@@ -132,35 +132,57 @@
 </head>
 <body>
 
-<nav class="top">
-  <div class="nav-in">
-    <a class="brand" href="/"><img src="/logo.svg" alt="TMI"/> TMI</a>
-    <div class="nav-links">
-      <a href="/physical">Industries</a>
-      <a href="/portfolio">Our Work</a>
+<style>
+.tnav{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,0.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(10,11,20,0.10);font-family:"General Sans",system-ui,-apple-system,sans-serif;}
+.tnav-in{max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;gap:22px;}
+.tnav-brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:18px;letter-spacing:-0.03em;color:#0a0b14;text-decoration:none;}
+.tnav-brand img{height:22px;width:auto;}
+.tnav-mk{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;background:#0a0b14;color:#fff;border-radius:7px;font-size:11px;font-weight:700;}
+.tnav-links{display:flex;gap:4px;margin-left:8px;flex:1;}
+.tnav-links a{font-size:13.5px;font-weight:600;color:#55576a;padding:8px 12px;border-radius:8px;text-decoration:none;transition:color .15s,background .15s;white-space:nowrap;}
+.tnav-links a:hover{color:#0a0b14;background:#f5f5f7;}
+.tnav-cta{display:inline-flex;align-items:center;background:#0a0b14;color:#fff;font-weight:700;font-size:12px;letter-spacing:0.02em;padding:11px 18px;border-radius:8px;text-decoration:none;white-space:nowrap;}
+.tnav-cta:hover{opacity:0.9;}
+.tnav-burger{display:none;width:40px;height:40px;flex:none;margin-left:auto;border:1px solid rgba(10,11,20,0.14);border-radius:10px;background:#fff;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.tnav-burger span{width:18px;height:2px;background:#0a0b14;border-radius:2px;display:block;}
+.tnav-drawer{display:none;flex-direction:column;gap:2px;padding:6px 20px 18px;border-bottom:1px solid rgba(10,11,20,0.10);background:#fff;}
+.tnav-drawer.open{display:flex;}
+.tnav-drawer a{font-size:15px;font-weight:600;color:#0a0b14;padding:13px 6px;text-decoration:none;border-bottom:1px solid rgba(10,11,20,0.06);}
+.tnav-drawer .tnav-cta{margin-top:12px;justify-content:center;padding:14px;border-bottom:none;color:#fff;}
+@media(max-width:860px){.tnav-links{display:none;}.tnav-burger{display:flex;}.tnav-in{padding:12px 16px;gap:10px;}.tnav-in>.tnav-cta{display:none;}}
+</style>
+<header class="tnav">
+  <div class="tnav-in">
+    <a href="/" class="tnav-brand"><span class="tnav-mk">TMI</span> TMI</a>
+    <nav class="tnav-links">
+      <a href="/the-intelligent-company-book">Read the book</a>
+      <a href="/intelligence-scorecard">Score your company</a>
       <a href="/about">About</a>
-    </div>
-    <a class="nav-cta" href="#apply">Apply now</a>
-    <button class="burger" aria-label="Menu" onclick="openDrawer()"><span></span><span></span><span></span></button>
+      <a href="/portfolio">Our work</a>
+      <a href="/news">Journal</a>
+    </nav>
+    <a href="#apply" class="tnav-cta">Apply now</a>
+    <button class="tnav-burger" aria-label="Menu" onclick="tnavToggle()"><span></span><span></span><span></span></button>
   </div>
-</nav>
-<div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer">
-  <button class="dx" aria-label="Close" onclick="closeDrawer()">&times;</button>
-  <a href="/physical" onclick="closeDrawer()">Industries</a>
-  <a href="/portfolio" onclick="closeDrawer()">Our Work</a>
-  <a href="/about" onclick="closeDrawer()">About</a>
-  <a href="#apply" class="dw-cta" onclick="closeDrawer()">Apply now &rarr;</a>
-</div>
+  <div class="tnav-drawer" id="tnavDrawer">
+    <a href="/the-intelligent-company-book">Read the book</a>
+    <a href="/intelligence-scorecard">Score your company</a>
+    <a href="/about">About</a>
+    <a href="/portfolio">Our work</a>
+    <a href="/news">Journal</a>
+    <a href="#apply" class="tnav-cta">Apply now</a>
+  </div>
+</header>
+<script>function tnavToggle(){var d=document.getElementById('tnavDrawer');if(d)d.classList.toggle('open');}</script>
 
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <div class="eyebrow rv"><span class="sq"></span> Intelligence Assessment</div>
-    <h1 class="rv">Build the intelligent version of your <span class="lime">company.</span></h1>
-    <p class="lede rv">In one assessment we'll show you exactly how we'd redesign your business if we owned it.</p>
+    <div class="eyebrow rv"><span class="sq"></span> Intelligent Company Audit</div>
+    <h1 class="rv">Apply for an <span class="lime">Intelligent Company Audit.</span></h1>
+    <p class="lede rv">In one audit we show you exactly how we would rebuild your business if we owned it: where it still depends on you, what that is costing you, and the highest-value path to fix it. The audit is free, and the plan is yours to keep.</p>
     <div class="cta-row rv">
-      <a href="#apply" class="btn primary">Apply for an Intelligence Assessment &rarr;</a>
+      <a href="#apply" class="btn primary">Apply for your audit &rarr;</a>
     </div>
   </div>
 </section>
@@ -170,7 +192,7 @@
   <div class="wrap">
     <div class="sec-head rv">
       <div class="eyebrow"><span class="sq"></span> How it works</div>
-      <h2>Four steps to a real transformation plan.</h2>
+      <h2>Four steps to a real build plan.</h2>
     </div>
     <div class="steps">
       <div class="stp rv">
@@ -197,14 +219,14 @@
       <div class="stp rv">
         <div class="n">3</div>
         <div>
-          <h3>90-minute Executive Intelligence Assessment</h3>
+          <h3>90-minute Intelligent Company Audit</h3>
           <p>Together we uncover exactly what is holding the company back.</p>
           <ul>
             <li><span class="ck">&#10003;</span> Operational bottlenecks</li>
             <li><span class="ck">&#10003;</span> Hidden costs</li>
             <li><span class="ck">&#10003;</span> System gaps</li>
-            <li><span class="ck">&#10003;</span> Automation opportunities</li>
-            <li><span class="ck">&#10003;</span> Technology recommendations</li>
+            <li><span class="ck">&#10003;</span> Manual work to eliminate</li>
+            <li><span class="ck">&#10003;</span> Where AI belongs</li>
             <li><span class="ck">&#10003;</span> Quick wins</li>
             <li><span class="ck">&#10003;</span> Long-term roadmap</li>
           </ul>
@@ -233,7 +255,7 @@
       <div><span class="ck">&#10003;</span> What's costing your business the most</div>
       <div><span class="ck">&#10003;</span> Where AI actually belongs</div>
       <div><span class="ck">&#10003;</span> What software to eliminate</div>
-      <div><span class="ck">&#10003;</span> What should be automated</div>
+      <div><span class="ck">&#10003;</span> What should run without you</div>
       <div><span class="ck">&#10003;</span> Your highest-ROI projects</div>
       <div><span class="ck">&#10003;</span> The roadmap toward becoming an intelligent company</div>
     </div>
@@ -246,8 +268,8 @@
     <div class="apply-grid">
       <div class="apply-intro rv">
         <div class="eyebrow"><span class="sq"></span> Apply</div>
-        <h2>Apply for your Intelligence Assessment.</h2>
-        <p>Tell us about your company. If it's a fit, we'll research your business and reach out within 2 business days to schedule your Executive Intelligence Assessment.</p>
+        <h2>Apply for your Intelligent Company Audit.</h2>
+        <p>Tell us about your company. If it's a fit, we'll research your business and reach out within 2 business days to schedule your audit.</p>
       </div>
 
       <div class="form-card rv">
@@ -301,23 +323,23 @@
           </div>
           <div class="field">
             <label for="industry">Industry</label>
-            <input type="text" id="industry" name="industry" placeholder="e.g. Construction, HVAC, Oil &amp; Gas, Manufacturing"/>
+            <input type="text" id="industry" name="industry" placeholder="e.g. Construction, SaaS, Professional Services, Ecommerce, Manufacturing"/>
           </div>
           <div class="field">
             <label for="current_software">Current software <span class="opt">(what you run on today)</span></label>
-            <input type="text" id="current_software" name="current_software" placeholder="e.g. QuickBooks, ServiceTitan, spreadsheets"/>
+            <input type="text" id="current_software" name="current_software" placeholder="e.g. QuickBooks, HubSpot, spreadsheets"/>
           </div>
           <div class="field">
             <label for="challenge">Biggest challenge</label>
             <textarea id="challenge" name="challenge" placeholder="What's the one thing slowing the company down right now?"></textarea>
           </div>
-          <button type="submit" class="btn primary btn-submit" id="aSubmit">Apply for an Intelligence Assessment &rarr;</button>
+          <button type="submit" class="btn primary btn-submit" id="aSubmit">Apply for your audit &rarr;</button>
           <p class="form-note">We review every application personally and reply within 2 business days.</p>
         </form>
         <div class="form-done" id="aDone">
           <div class="tick">&#10003;</div>
           <h3>Application received.</h3>
-          <p>Thanks. We'll research your business and reach out within 2 business days to schedule your Executive Intelligence Assessment.</p>
+          <p>Thanks. We'll research your business and reach out within 2 business days to schedule your Intelligent Company Audit.</p>
         </div>
       </div>
     </div>
@@ -376,7 +398,7 @@ setTimeout(function(){ if(!document.querySelector('.rv.in')) revealAll(); }, 700
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)
     }).then(function(r){return r.json().catch(function(){return {};});})
       .then(function(){ form.style.display='none'; done.classList.add('show'); done.scrollIntoView({behavior:'smooth',block:'center'}); })
-      .catch(function(){ btn.disabled=false;btn.textContent='Apply for an Intelligence Assessment →'; alert('Something went wrong. Please try again, or email mia@tmitechai.com.'); });
+      .catch(function(){ btn.disabled=false;btn.textContent='Apply for your audit →'; alert('Something went wrong. Please try again, or email mia@tmitechai.com.'); });
   });
 })();
 </script>
