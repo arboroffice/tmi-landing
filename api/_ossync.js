@@ -96,7 +96,8 @@ async function syncTenant(db, tenant) {
 // (syncStripe). A tenant can have either, both, or neither.
 async function syncSweep(db, cap = 40) {
   const { syncStripe, stripeConnected } = require('./_osstripe');
-  let synced = 0, failed = 0, stripeSynced = 0;
+  const { syncQuickbooks, quickbooksConnected } = require('./_osqbo');
+  let synced = 0, failed = 0, stripeSynced = 0, qboSynced = 0;
   try {
     const tenants = await db.list('os_tenants', { limit: 300 });
     const onboarded = tenants.filter(t => t.onboarded);
@@ -105,12 +106,13 @@ async function syncSweep(db, cap = 40) {
       catch (e) { failed++; console.error('syncSweep url', t.id, e.message); }
     }
     for (const t of onboarded.slice(0, cap)) {
-      try {
-        if (await stripeConnected(t.id)) { await syncStripe(db, t); stripeSynced++; }
-      } catch (e) { failed++; console.error('syncSweep stripe', t.id, e.message); }
+      try { if (await stripeConnected(t.id)) { await syncStripe(db, t); stripeSynced++; } }
+      catch (e) { failed++; console.error('syncSweep stripe', t.id, e.message); }
+      try { if (await quickbooksConnected(t.id)) { await syncQuickbooks(db, t); qboSynced++; } }
+      catch (e) { failed++; console.error('syncSweep qbo', t.id, e.message); }
     }
   } catch (e) { console.error('syncSweep:', e.message); }
-  return { synced, stripeSynced, failed };
+  return { synced, stripeSynced, qboSynced, failed };
 }
 
 module.exports = { isBlockedHost, fetchJSON, syncTenant, syncSweep };

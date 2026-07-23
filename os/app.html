@@ -752,6 +752,15 @@ function boot(s){
   renderAll();
   var onboarded=s.tenant&&s.tenant.onboarded;
   var empty=!(s.workers||[]).length&&!(s.departments||[]).length;
+  // Returning from an OAuth connect? Land on the integrations view with a toast.
+  var qs=location.search;
+  var mC=qs.match(/[?&]connected=([^&]+)/), mE=qs.match(/[?&]connect_error=([^&]+)/);
+  if(mC||mE||/[?&]view=integrations/.test(qs)){
+    show('integrations');
+    if(mC)toast(decodeURIComponent(mC[1])+' connected. Your numbers are syncing.');
+    else if(mE)toast('Could not finish connecting. Please try again.');
+    return;
+  }
   show((!onboarded||empty)?'blueprint':'command');
 }
 
@@ -1303,13 +1312,14 @@ async function removeMember(id,name){
 }
 
 /* ---- live data / integrations ---- */
-var CONNECT=null, connectLoaded=false, MCPSERVERS=[];
+var CONNECT=null, connectLoaded=false, MCPSERVERS=[], OAUTH=null;
 async function loadConnect(){
   var role=(STATE.me&&STATE.me.role)||'owner';
   if(connectLoaded){renderIntegrations();return;}
   if(role==='viewer'){connectLoaded=true;renderIntegrations();return;}
   try{CONNECT=await api('/api/os2-connect',{action:'info'});}catch(e){}
   try{var mj=await api('/api/os2-mcp',{action:'list'});MCPSERVERS=mj.servers||[];}catch(e){}
+  try{var oj=await api('/api/os2-oauth',{action:'providers'});OAUTH=oj;}catch(e){}
   connectLoaded=true;renderIntegrations();
 }
 async function reloadMcp(){try{var mj=await api('/api/os2-mcp',{action:'list'});MCPSERVERS=mj.servers||[];}catch(e){}renderIntegrations();}
@@ -1618,7 +1628,7 @@ function renderIntegrations(){
   var role=(STATE.me&&STATE.me.role)||'owner';
   var metrics=STATE.metrics||[];
   var live=metrics.filter(function(m){return m.updated_at;});
-  var conns=(STATE.connections||[]).filter(function(c){return c.provider!=='mcp';});
+  var conns=(STATE.connections||[]).filter(function(c){return c.provider!=='mcp'&&!c.oauth_provider;});
   var html='';
   if(conns.length){
     html+='<div class="kcard" style="padding:18px 22px;margin-bottom:14px"><div class="kh"><span class="badge k">TMI connections</span><h4>Wired to your real systems</h4></div>'+
@@ -1649,6 +1659,8 @@ function renderIntegrations(){
               '<div class="mfoot" style="justify-content:flex-start"><button class="btn" onclick="stripeConnect()">Connect Stripe</button></div>'
             : '<p style="font-size:12.5px;color:var(--ink-3);margin-top:10px">Ask an owner to connect Stripe.</p>'))+
       '</div>';
+    // One-click OAuth providers (QuickBooks, Xero, HubSpot...) when configured.
+    html+=oauthCard(role);
     // MCP servers: connect any remote MCP server by URL, like Claude's catalog.
     html+=mcpCard(role);
     var masked=(CONNECT.key||'').slice(0,6)+'••••••••••••••';
@@ -1717,6 +1729,36 @@ async function stripeDisconnect(){
   try{await api('/api/os2-connect',{action:'stripe_disconnect'});if(CONNECT)CONNECT.stripe_connected=false;await refresh();renderIntegrations();toast('Stripe disconnected');}
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
+// ---- one-click OAuth providers ----
+function oauthCard(role){
+  if(!OAUTH||!OAUTH.providers)return '';
+  var configured=OAUTH.providers.filter(function(p){return p.configured;});
+  if(!configured.length)return ''; // nothing to show until TMI adds credentials
+  var connected=OAUTH.connected||[];
+  var rows=configured.map(function(p){
+    var on=connected.indexOf(p.id)>=0;
+    return '<div style="display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px">'+
+      '<span class="badge '+(on?'done':'k')+'">'+(on?'Connected':'Ready')+'</span>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--ink)">'+esc(p.name)+'</div></div>'+
+      (on
+        ? (role==='owner'?'<button class="link" onclick="oauthDisconnect(\''+p.id+'\')">Disconnect</button>':'')
+        : (role==='owner'?'<button class="btn sm" onclick="oauthConnect(\''+p.id+'\')">Connect</button>':'<span style="font-size:12px;color:var(--ink-3)">Owner connects</span>'))+
+      '</div>';
+  }).join('');
+  return '<div class="kcard" style="padding:22px 24px;margin-top:14px"><div class="kh"><span class="badge k">One-click</span><h4>Connect with one click</h4></div>'+
+    '<p style="font-size:13.5px;color:var(--ink-2);margin-top:10px">Authorize these directly. You are sent to the provider to approve read-only access, then straight back here with your numbers syncing.</p>'+
+    '<div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">'+rows+'</div></div>';
+}
+async function oauthConnect(provider){
+  try{var j=await api('/api/os2-oauth',{action:'start',provider:provider});if(j&&j.authorizeUrl){location.href=j.authorizeUrl;}else{toast('Could not start the connection');}}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function oauthDisconnect(provider){
+  if(!confirm('Disconnect '+provider+'? Its metrics stop updating.'))return;
+  try{await api('/api/os2-oauth',{action:'disconnect',provider:provider});await reloadOauth();toast('Disconnected');}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function reloadOauth(){try{var oj=await api('/api/os2-oauth',{action:'providers'});OAUTH=oj;}catch(e){}renderIntegrations();}
 // ---- MCP servers ----
 function mcpCard(role){
   var list=(MCPSERVERS||[]).map(function(s){
