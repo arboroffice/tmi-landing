@@ -78,6 +78,7 @@ function tenantChannel(tenant, channel) {
 // always can. External sends require an autonomous worker AND tenant autopilot.
 function canAutoFire(tenant, worker, action) {
   if (!action) return false;
+  if (tenant && tenant.paused) return false; // kill switch: honor "pause everything"
   if (action.channel === 'internal') return true;
   return worker && worker.autonomy === 'auto' && tenant && tenant.autopilot === true;
 }

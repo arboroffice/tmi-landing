@@ -843,7 +843,7 @@ function renderMetrics(){
       '<div class="v">'+esc(m.value||'-')+(m.unit?'<small>'+esc(m.unit)+'</small>':'')+'</div>'+
       (m.hint?'<div class="hh">'+esc(m.hint)+'</div>':'')+(m.target?'<div class="tgt">Target '+esc(m.target)+'</div>':'')+
       sparkArea(m.history)+
-      (m.updated_at?'<div class="live"><b></b> Updated '+ago(m.updated_at)+(m.source?' · '+esc(m.source):'')+'</div>':(i===0&&metrics.length?'<div class="live"><b></b> Live</div>':''))+'</div>';
+      (m.updated_at?'<div class="live"><b></b> Live · updated '+ago(m.updated_at)+(m.source?' · '+esc(m.source):'')+'</div>':'<div class="live" style="color:var(--ink-3)">Manual</div>')+'</div>';
   }).join('')+add;
 }
 function metricFields(m){m=m||{};return [
