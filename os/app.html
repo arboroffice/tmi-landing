@@ -1507,32 +1507,82 @@ async function applyPlan(){
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 
+// The connectable stack, grouped by category. TMI wires any of these; anything
+// not listed can be requested as a custom integration.
 var TOOL_CATALOG=[
-  ['QuickBooks','Accounting'],['Xero','Accounting'],['Stripe','Payments'],['ServiceTitan','Field service'],
-  ['Jobber','Field service'],['Housecall Pro','Field service'],['Google Workspace','Email & calendar'],
-  ['Microsoft 365','Email & calendar'],['Slack','Messaging'],['HubSpot','CRM'],['Salesforce','CRM'],
-  ['Shopify','Commerce'],['Twilio','Phone & SMS'],['Calendly','Scheduling'],['QuickBooks Time','Timesheets']
+  ['Plaid','Banking'],['Mercury','Banking'],['Brex','Banking'],['Ramp','Banking'],['Bill.com','Banking'],['Wise','Banking'],['Expensify','Banking'],
+  ['QuickBooks','Accounting'],['Xero','Accounting'],['FreshBooks','Accounting'],['NetSuite','Accounting'],['Sage','Accounting'],['Wave','Accounting'],
+  ['Stripe','Payments'],['Square','Payments'],['PayPal','Payments'],['Braintree','Payments'],['Authorize.net','Payments'],
+  ['Gusto','Payroll & HR'],['ADP','Payroll & HR'],['Rippling','Payroll & HR'],['Paychex','Payroll & HR'],['BambooHR','Payroll & HR'],['Deel','Payroll & HR'],
+  ['HubSpot','CRM'],['Salesforce','CRM'],['Pipedrive','CRM'],['Zoho CRM','CRM'],['Close','CRM'],['Copper','CRM'],['Keap','CRM'],
+  ['ServiceTitan','Field service'],['Jobber','Field service'],['Housecall Pro','Field service'],['FieldEdge','Field service'],['Workiz','Field service'],['ServiceFusion','Field service'],
+  ['Shopify','Commerce'],['WooCommerce','Commerce'],['BigCommerce','Commerce'],['Amazon Seller','Commerce'],['Etsy','Commerce'],
+  ['Google Workspace','Email & calendar'],['Microsoft 365','Email & calendar'],['Gmail','Email & calendar'],['Outlook','Email & calendar'],
+  ['Slack','Messaging'],['Microsoft Teams','Messaging'],['Discord','Messaging'],
+  ['Twilio','Phone & SMS'],['RingCentral','Phone & SMS'],['OpenPhone','Phone & SMS'],['Aircall','Phone & SMS'],['Dialpad','Phone & SMS'],
+  ['Calendly','Scheduling'],['Acuity','Scheduling'],['Cal.com','Scheduling'],
+  ['QuickBooks Time','Timesheets'],['Deputy','Timesheets'],['When I Work','Timesheets'],['Homebase','Timesheets'],
+  ['Asana','Project & ops'],['Monday.com','Project & ops'],['ClickUp','Project & ops'],['Trello','Project & ops'],['Notion','Project & ops'],['Airtable','Project & ops'],['Jira','Project & ops'],
+  ['Mailchimp','Marketing'],['Klaviyo','Marketing'],['ActiveCampaign','Marketing'],['Google Ads','Marketing'],['Meta Ads','Marketing'],
+  ['Zendesk','Support'],['Intercom','Support'],['Freshdesk','Support'],['Help Scout','Support'],
+  ['DocuSign','Docs & e-sign'],['PandaDoc','Docs & e-sign'],['Dropbox Sign','Docs & e-sign'],
+  ['Google Drive','Storage'],['Dropbox','Storage'],['Box','Storage'],['OneDrive','Storage'],
+  ['Google Analytics','Analytics'],['Segment','Analytics'],
+  ['Zapier','Automation'],['Make','Automation'],['n8n','Automation']
 ];
 function renderToolCatalog(host){
   var conns=STATE.connections||[];
   var connectedNames=conns.map(function(c){return String(c.name||'').toLowerCase();});
-  var html='<div class="kcard" style="padding:20px 22px;margin-bottom:14px"><div class="kh"><span class="badge k">Your stack</span><h4>Connect everything your business runs on</h4></div>'+
-    '<p style="font-size:13.5px;color:var(--ink-2);margin:8px 0 4px">Pick the tools you use. TMI wires each one into your OS so your numbers go live and your workers can act inside them. If a tool is not listed, we can still connect it. Anything with an API, we wire.</p>'+
-    '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">'+
-    TOOL_CATALOG.map(function(t){
+  // group by category, preserving first-seen order
+  var order=[],groups={};
+  TOOL_CATALOG.forEach(function(t){ if(!groups[t[1]]){groups[t[1]]=[];order.push(t[1]);} groups[t[1]].push(t); });
+  var body=order.map(function(cat){
+    var chips=groups[cat].map(function(t){
       var on=connectedNames.indexOf(t[0].toLowerCase())>=0;
-      return '<button class="chip2" style="cursor:'+(on?'default':'pointer')+';'+(on?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72':'')+'" onclick="'+(on?'':'requestTool(\''+esc(t[0])+'\',\''+esc(t[1])+'\')')+'">'+(on?'&#10003; ':'+ ')+esc(t[0])+'</button>';
-    }).join('')+
-    '</div>'+
-    '<div class="kf"><button class="btn sm ghost" onclick="requestTool(\'\',\'\')">Request another tool</button></div></div>';
+      return '<button class="chip2 tchip" data-tool="'+esc(t[0].toLowerCase())+'" data-cat="'+esc(cat.toLowerCase())+'" style="cursor:'+(on?'default':'pointer')+';'+(on?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72':'')+'" onclick="'+(on?'':'requestTool(\''+esc(t[0])+'\',\''+esc(cat)+'\')')+'">'+(on?'&#10003; ':'+ ')+esc(t[0])+'</button>';
+    }).join('');
+    return '<div class="tgroup" data-cat="'+esc(cat.toLowerCase())+'"><div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 8px">'+esc(cat)+'</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+chips+'</div></div>';
+  }).join('');
+  var html='<div class="kcard" style="padding:20px 22px;margin-bottom:14px"><div class="kh"><span class="badge k">Your stack</span><h4>Connect everything your business runs on</h4></div>'+
+    '<p style="font-size:13.5px;color:var(--ink-2);margin:8px 0 4px">Pick the tools you use. TMI wires each one into your OS so your numbers go live and your workers can act inside them. Do not see yours? Request a custom integration and we build it. Anything with an API, we wire.</p>'+
+    '<input id="toolSearch" oninput="filterTools()" placeholder="Search '+TOOL_CATALOG.length+' integrations..." style="margin-top:14px;width:100%;font-family:var(--sans);font-size:14px;border:1px solid var(--line-2);border-radius:8px;padding:10px 12px"/>'+
+    '<div id="toolGroups">'+body+'</div>'+
+    '<div id="toolEmpty" style="display:none;font-size:13px;color:var(--ink-3);margin-top:14px">No match. <a class="link" style="display:inline" onclick="requestTool(document.getElementById(\'toolSearch\').value,\'\')">Request it as a custom integration &rarr;</a></div>'+
+    '<div class="kf" style="margin-top:16px"><button class="btn sm" onclick="requestTool(\'\',\'\')">Request a custom integration</button></div></div>';
   host.insertAdjacentHTML('afterbegin', html);
 }
+function filterTools(){
+  var q=(document.getElementById('toolSearch')||{}).value||'';q=q.trim().toLowerCase();
+  var any=false;
+  document.querySelectorAll('#toolGroups .tgroup').forEach(function(g){
+    var shown=0;
+    g.querySelectorAll('.tchip').forEach(function(c){
+      var hit=!q||c.getAttribute('data-tool').indexOf(q)>=0||c.getAttribute('data-cat').indexOf(q)>=0;
+      c.style.display=hit?'':'none';if(hit)shown++;
+    });
+    g.style.display=shown?'':'none';if(shown)any=true;
+  });
+  var e=document.getElementById('toolEmpty');if(e)e.style.display=any?'none':'block';
+}
+// Custom integration request: a real intake TMI fulfills. Captures what the tool
+// is, where its API lives, what data should flow in, and what a worker should do.
 function requestTool(name,cat){
-  var title=name?('Connect '+name):'';
-  openForm({title:'Connect a tool',sub:'TMI wires this into your OS as part of your build. You will see it go live here.',fields:[
-    {name:'title',label:'Which tool',value:title,placeholder:'e.g. Connect QuickBooks'},
-    {name:'detail',label:'Anything we should know (optional)',type:'textarea',placeholder:'Accounts, how you use it, what should flow in and out.'}
-  ],onSave:function(v){return api('/api/os2-requests',{action:'create',title:v.title,category:'integration',detail:v.detail});}});
+  openForm({title:'Request a custom integration',sub:'Tell us the tool and what you want it to do. TMI builds the connection and wires it into your OS.',fields:[
+    {name:'tool',label:'Tool or system',value:name||'',placeholder:'e.g. ServiceTitan, our in-house database, a bank'},
+    {name:'website',label:'Website or API docs link (optional)',placeholder:'https://developer.example.com'},
+    {name:'data_in',label:'What numbers or records should flow IN',type:'textarea',placeholder:'e.g. daily revenue, open jobs, unpaid invoices, new leads'},
+    {name:'actions',label:'What should your AI workers DO in it (optional)',type:'textarea',placeholder:'e.g. create an invoice, book a job, send a follow-up, update a record'},
+    {name:'notes',label:'Anything else (optional)',type:'textarea',placeholder:'Accounts, logins we should coordinate on, timing.'}
+  ],onSave:function(v){
+    var title=v.tool?('Integration: '+v.tool):'Custom integration request';
+    var detail=[
+      v.website?'API / docs: '+v.website:'',
+      v.data_in?'Data in: '+v.data_in:'',
+      v.actions?'Worker actions: '+v.actions:'',
+      v.notes?'Notes: '+v.notes:''
+    ].filter(Boolean).join('\n');
+    return api('/api/os2-requests',{action:'create',title:title,category:'integration',detail:detail});
+  }});
 }
 function renderIntegrations(){
   var host=document.getElementById('integrations');if(!host)return;
