@@ -71,6 +71,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
   .hidden{display:none !important;}
 </style>
 <script src="/rb2b.js"></script>
+<!-- OpenAI Ads pixel --><script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"1SVHHxEVsMKxiFJd8MnXZm",debug:false});</script>
 </head>
 <body>
 <div class="page">
@@ -151,6 +152,7 @@ Cal('on', { action: 'bookingSuccessful', callback: function (e) {
     var d = (e && e.detail && e.detail.data) ? e.detail.data : {};
     var uid = (d.booking && (d.booking.uid || d.booking.id)) || d.uid || '';
     if (typeof fbq === 'function') fbq('track', 'Schedule', {}, uid ? { eventID: 'booking_' + uid } : {});
+    if (window.oaiq) oaiq("measure", "lead_created", { type: "customer_action" });
   } catch (err) {}
   setTimeout(function () { window.location.href = '/thank-you'; }, 600);
 }});

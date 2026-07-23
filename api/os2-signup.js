@@ -66,6 +66,9 @@ module.exports = async function handler(req, res) {
       }).catch(() => {});
     }
 
+    // Server-side ChatGPT Ads conversion (deduped with the client pixel by event_id).
+    try { await require('./_oaiq').fireLead({ eventId: b.event_id, sourceUrl: 'https://os.tmitechai.com/' }); } catch (e) { /* best effort */ }
+
     const safeUser = { id: user.id, tenant_id: tenant.id, email, name, role: 'owner' };
     return res.status(201).json({ token, user: safeUser, tenant: { id: tenant.id, name: company, onboarded: false } });
   } catch (e) {

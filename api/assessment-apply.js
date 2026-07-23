@@ -28,7 +28,7 @@ module.exports = async function handler(req, res) {
 
   const {
     first_name, last_name, email, phone, company,
-    revenue, employees, industry, current_software, challenge, source,
+    revenue, employees, industry, current_software, challenge, source, event_id,
   } = req.body || {};
 
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid email required' });
@@ -131,6 +131,9 @@ ${challenge ? `<p style="font-size:13px;color:#555;line-height:1.6;margin-bottom
       console.error('assessment Twilio:', e.message);
     }
   }
+
+  // Server-side ChatGPT Ads conversion (deduped with the client pixel by event_id).
+  try { await require('./_oaiq').fireLead({ eventId: event_id, sourceUrl: 'https://www.tmitechai.com/intelligence-assessment' }); } catch (e) { /* best effort */ }
 
   res.status(200).json({ ok: true });
 };

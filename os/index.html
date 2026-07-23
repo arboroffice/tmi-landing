@@ -54,6 +54,7 @@
   .hide{display:none;}
   @media(max-width:860px){body{grid-template-columns:1fr;}.brand-side{display:none;}}
 </style>
+<!-- OpenAI Ads pixel --><script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"1SVHHxEVsMKxiFJd8MnXZm",debug:false});</script>
 </head>
 <body>
   <aside class="brand-side">
@@ -145,13 +146,16 @@ async function doSignup(e){
   e.preventDefault();clearErr('s-err');
   var btn=document.getElementById('s-btn');btn.disabled=true;btn.textContent='Creating...';
   try{
+    var eid='lead_'+Date.now()+'_'+Math.random().toString(36).slice(2);
     var j=await api('/api/os2-signup',{
       name:document.getElementById('s-name').value.trim(),
       company:document.getElementById('s-company').value.trim(),
       business_type:document.getElementById('s-type').value,
       email:document.getElementById('s-email').value.trim(),
-      password:document.getElementById('s-password').value
+      password:document.getElementById('s-password').value,
+      event_id:eid
     });
+    try{if(window.oaiq){oaiq("measure","registration_completed",{type:"customer_action",event_id:eid});oaiq("measure","lead_created",{type:"customer_action",event_id:eid});}}catch(_e){}
     save(j.token); routeAfter(j.tenant);
   }catch(err){showErr('s-err',err.message);btn.disabled=false;btn.textContent='Create account →';}
   return false;

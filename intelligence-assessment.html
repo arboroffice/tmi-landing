@@ -129,6 +129,7 @@
   html.js .rv.in{opacity:1;transform:none;}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;}html.js .rv{opacity:1;transform:none;transition:none;}}
 </style>
+<!-- OpenAI Ads pixel --><script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"1SVHHxEVsMKxiFJd8MnXZm",debug:false});</script>
 </head>
 <body>
 
@@ -375,6 +376,7 @@ setTimeout(function(){ if(!document.querySelector('.rv.in')) revealAll(); }, 700
   if(!form)return;
   form.addEventListener('submit',function(e){
     e.preventDefault();
+    var eid='lead_'+Date.now()+'_'+Math.random().toString(36).slice(2);
     var data={
       first_name:form.first_name.value.trim(),
       last_name:form.last_name.value.trim(),
@@ -386,7 +388,8 @@ setTimeout(function(){ if(!document.querySelector('.rv.in')) revealAll(); }, 700
       industry:form.industry.value.trim(),
       current_software:form.current_software.value.trim(),
       challenge:form.challenge.value.trim(),
-      source:'intelligence-assessment'
+      source:'intelligence-assessment',
+      event_id:eid
     };
     if(!data.first_name||!data.email||!data.email.includes('@')){
       alert('Please add your first name and a valid email.');
@@ -397,7 +400,7 @@ setTimeout(function(){ if(!document.querySelector('.rv.in')) revealAll(); }, 700
     fetch('/api/assessment-apply',{
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)
     }).then(function(r){return r.json().catch(function(){return {};});})
-      .then(function(){ form.style.display='none'; done.classList.add('show'); done.scrollIntoView({behavior:'smooth',block:'center'}); })
+      .then(function(){ try{if(window.oaiq)oaiq("measure","lead_created",{type:"customer_action",event_id:eid});}catch(_e){} form.style.display='none'; done.classList.add('show'); done.scrollIntoView({behavior:'smooth',block:'center'}); })
       .catch(function(){ btn.disabled=false;btn.textContent='Apply for your audit →'; alert('Something went wrong. Please try again, or email mia@tmitechai.com.'); });
   });
 })();

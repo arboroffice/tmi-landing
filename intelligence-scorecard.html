@@ -102,6 +102,7 @@
     .sc-gapcard{padding:24px 22px;}
   }
 </style>
+<!-- OpenAI Ads pixel --><script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"1SVHHxEVsMKxiFJd8MnXZm",debug:false});</script>
 </head>
 <body>
 
@@ -417,6 +418,7 @@ function startQuiz(e){
   SESSION = { id: sid, name: name, email: email, phone: phone, company: company, sms_consent: consent };
   saveLocal();
   try{ if(typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Intelligence Scorecard start' }); }catch(_){}
+  try{ if(window.oaiq) oaiq("measure","lead_created",{type:"customer_action"}); }catch(_){}
   // Capture the lead and open the session immediately (fire-and-forget).
   post('/api/scorecard-progress', {
     action:'start', session_id: SESSION.id,
