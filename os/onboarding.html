@@ -188,9 +188,11 @@
       <div class="q-no">Your proposal</div>
       <h2 style="font-size:clamp(24px,3.4vw,33px);font-weight:700;letter-spacing:-0.02em;margin:12px 0 22px;">Here's the company we'd build.</h2>
       <div class="rsum" id="rsum"></div>
+      <div class="rgrp" id="rdeptsWrap"><div class="lbl">Your departments</div><div class="rcards" id="rdepts"></div></div>
       <div class="rgrp"><div class="lbl">The one screen</div><div class="rchips" id="rmetrics"></div></div>
       <div class="rgrp"><div class="lbl">Your AI workforce</div><div class="rcards" id="rworkers"></div></div>
       <div class="rgrp"><div class="lbl">Workflows behind the scenes</div><div class="rcards" id="rflows"></div></div>
+      <div class="rgrp" id="rgoalsWrap"><div class="lbl">Where you are headed</div><div class="rchips" id="rgoals"></div></div>
       <div class="ract">
         <button class="btn ghost" onclick="regen()">Not quite. Redo it</button>
         <button class="btn" id="commitBtn" onclick="commit()">Build my company &rarr;</button>
@@ -291,9 +293,15 @@ function regen(){ preview(); }
 
 function renderReview(spec){
   document.getElementById('rsum').innerHTML=esc(spec.summary||'Your intelligent company, on one screen.');
+  var depts=spec.departments||[];
+  document.getElementById('rdeptsWrap').style.display=depts.length?'':'none';
+  document.getElementById('rdepts').innerHTML=depts.map(function(d){return '<div class="rcard"><h4>'+esc(d.name)+'</h4><p>'+esc(d.mandate||'')+'</p></div>';}).join('');
   document.getElementById('rmetrics').innerHTML=(spec.metrics||[]).map(function(m){return '<span class="rchip">'+esc(m.label)+'</span>';}).join('')||'<span class="rchip">Your key numbers</span>';
   document.getElementById('rworkers').innerHTML=(spec.workers||[]).map(function(w){return '<div class="rcard"><h4>'+esc(w.name)+'</h4><p>'+esc(w.job||'')+'</p></div>';}).join('');
   document.getElementById('rflows').innerHTML=(spec.workflows||[]).map(function(f){return '<div class="rcard"><span class="tag">'+esc(f.trigger||'Runs automatically')+'</span><h4 style="margin-top:6px">'+esc(f.name)+'</h4></div>';}).join('');
+  var goals=spec.goals||[];
+  document.getElementById('rgoalsWrap').style.display=goals.length?'':'none';
+  document.getElementById('rgoals').innerHTML=goals.map(function(g){return '<span class="rchip">'+esc(g.title)+(g.target?' · '+esc(g.target):'')+'</span>';}).join('');
   var r=document.getElementById('review');r.classList.add('on');
   setBar(92);document.getElementById('prog').textContent='Review';
   window.scrollTo(0,0);
