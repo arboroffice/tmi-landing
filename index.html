@@ -444,20 +444,24 @@
   .roi-out .t{font-size:12px;color:var(--ink-3);text-align:right;max-width:24ch;}
   /* proof / results strip */
   .proof{background:var(--bg-alt);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
-  .proof-in{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;padding:26px 0;}
-  .proof-stats{display:flex;gap:40px;flex-wrap:wrap;}
-  .proof-stat .n{font-family:var(--mono);font-size:24px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
-  .proof-stat .t{font-size:12px;color:var(--ink-3);font-weight:600;margin-top:2px;}
-  .proof-line{font-size:14px;font-weight:600;color:var(--ink-2);}
+  .proof-in{display:flex;flex-direction:column;align-items:center;gap:28px;padding:56px 0;}
+  .proof-eyebrow{display:inline-flex;flex-direction:column;align-items:center;gap:12px;font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);text-align:center;}
+  .proof-eyebrow::after{content:"";width:34px;height:2px;border-radius:2px;background:var(--chart-dark);}
+  .proof-stats{display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:940px;}
+  .proof-stat{text-align:center;padding:4px 22px;}
+  .proof-stat + .proof-stat{border-left:1px solid var(--line);}
+  .proof-stat .n{font-family:var(--sans);font-size:clamp(34px,3.6vw,46px);font-weight:700;letter-spacing:-0.03em;color:var(--ink);line-height:1;display:flex;align-items:baseline;justify-content:center;gap:7px;}
+  .proof-stat .n span{font-size:0.4em;font-weight:600;color:var(--ink-2);letter-spacing:-0.01em;}
+  .proof-stat .t{font-size:13px;color:var(--ink-3);font-weight:500;margin-top:12px;line-height:1.4;}
   @media(max-width:760px){
-    .proof-in{flex-direction:column;align-items:stretch;gap:0;padding:10px 0;}
-    .proof-stats{display:grid;grid-template-columns:1fr 1fr;gap:0;width:100%;}
-    .proof-stat{padding:20px 4px;border-bottom:1px solid var(--line);}
-    .proof-stat:nth-child(odd){border-right:1px solid var(--line);padding-right:16px;}
-    .proof-stat:nth-child(even){padding-left:18px;}
-    .proof-stat .n{font-size:23px;}
-    .proof-stat .t{font-size:12.5px;margin-top:4px;line-height:1.35;}
-    .proof-line{padding:18px 4px 4px;text-align:center;width:100%;font-size:15px;}
+    .proof-in{padding:38px 0;gap:24px;}
+    .proof-stats{grid-template-columns:1fr 1fr;gap:0;max-width:420px;}
+    .proof-stat{padding:20px 12px;}
+    .proof-stat + .proof-stat{border-left:none;}
+    .proof-stat:nth-child(even){border-left:1px solid var(--line);}
+    .proof-stat:nth-child(-n+2){border-bottom:1px solid var(--line);}
+    .proof-stat .n{font-size:34px;}
+    .proof-stat .t{font-size:12.5px;margin-top:8px;line-height:1.35;}
   }
 
   /* ---------- editorial statement (AI-proof + attention) ---------- */
@@ -771,13 +775,13 @@
 <!-- ============ PROOF / RESULTS STRIP (product facts; real logos + results slot in here) ============ -->
 <section class="proof">
   <div class="wrap proof-in">
+    <div class="proof-eyebrow">Built with you, then it runs without you</div>
     <div class="proof-stats">
-      <div class="proof-stat"><div class="n">30 days</div><div class="t">to a working system</div></div>
-      <div class="proof-stat"><div class="n">3 workers</div><div class="t">live at launch</div></div>
-      <div class="proof-stat"><div class="n">1 system</div><div class="t">you own, not rent</div></div>
-      <div class="proof-stat"><div class="n">24 / 7</div><div class="t">your AI team never clocks out</div></div>
+      <div class="proof-stat"><div class="n">30<span>days</span></div><div class="t">to a working system</div></div>
+      <div class="proof-stat"><div class="n">3<span>workers</span></div><div class="t">live at launch</div></div>
+      <div class="proof-stat"><div class="n">1<span>system</span></div><div class="t">you own, not rent</div></div>
+      <div class="proof-stat"><div class="n">24/7</div><div class="t">your AI team never clocks out</div></div>
     </div>
-    <p class="proof-line">Built with you, then it runs without you.</p>
   </div>
 </section>
 
