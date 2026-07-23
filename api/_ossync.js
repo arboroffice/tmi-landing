@@ -91,18 +91,26 @@ async function syncTenant(db, tenant) {
   return { updated, created };
 }
 
-// Cron entry: sync every tenant that has a source URL set. Capped for cron time.
+// Cron entry: pull every tenant's live data on schedule. Two sources, both
+// capped for cron time: a source URL (syncTenant) and a connected Stripe account
+// (syncStripe). A tenant can have either, both, or neither.
 async function syncSweep(db, cap = 40) {
-  let synced = 0, failed = 0;
+  const { syncStripe, stripeConnected } = require('./_osstripe');
+  let synced = 0, failed = 0, stripeSynced = 0;
   try {
     const tenants = await db.list('os_tenants', { limit: 300 });
-    const due = tenants.filter(t => t.sync_url && t.onboarded).slice(0, cap);
-    for (const t of due) {
+    const onboarded = tenants.filter(t => t.onboarded);
+    for (const t of onboarded.filter(t => t.sync_url).slice(0, cap)) {
       try { await syncTenant(db, t); synced++; }
-      catch (e) { failed++; console.error('syncSweep', t.id, e.message); }
+      catch (e) { failed++; console.error('syncSweep url', t.id, e.message); }
+    }
+    for (const t of onboarded.slice(0, cap)) {
+      try {
+        if (await stripeConnected(t.id)) { await syncStripe(db, t); stripeSynced++; }
+      } catch (e) { failed++; console.error('syncSweep stripe', t.id, e.message); }
     }
   } catch (e) { console.error('syncSweep:', e.message); }
-  return { synced, failed };
+  return { synced, stripeSynced, failed };
 }
 
 module.exports = { isBlockedHost, fetchJSON, syncTenant, syncSweep };

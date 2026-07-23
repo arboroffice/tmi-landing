@@ -108,6 +108,13 @@ async function hasSecret(tenantId, provider) {
   return !!(row && row.ciphertext);
 }
 
+// Permanently remove a stored credential (e.g. on disconnect). Server-only.
+async function delSecret(tenantId, provider) {
+  const row = await findRow(String(tenantId), String(provider));
+  if (row) await db.remove('os_secrets', row.id).catch(() => {});
+  return true;
+}
+
 async function listProviders(tenantId) {
   const rows = await db.list('os_secrets', { where: [['tenant_id', '==', String(tenantId)]] });
   return rows.map(r => r.provider).filter(Boolean);
@@ -120,4 +127,4 @@ async function findRow(tid, prov) {
   return rows[0] || null;
 }
 
-module.exports = { putSecret, getSecret, hasSecret, listProviders };
+module.exports = { putSecret, getSecret, hasSecret, delSecret, listProviders };

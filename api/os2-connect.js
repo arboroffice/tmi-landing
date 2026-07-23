@@ -13,6 +13,7 @@ const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { applyValue } = require('./_osmetric');
 const { syncTenant, isBlockedHost } = require('./_ossync');
+const { connectStripe, disconnectStripe, syncStripe, stripeConnected } = require('./_osstripe');
 
 const ENDPOINT = 'https://os.tmitechai.com/api/os2-ingest';
 
@@ -35,7 +36,38 @@ module.exports = async function handler(req, res) {
       if (!requireRole(t, res, 'manager')) return;
       let key = tenant.ingest_key;
       if (!key) { key = crypto.randomBytes(24).toString('hex'); await db.update('os_tenants', tid, { ingest_key: key }); }
-      return res.status(200).json({ endpoint: ENDPOINT, key, sync_url: tenant.sync_url || '', last_sync_at: tenant.last_sync_at || '' });
+      const stripe = await stripeConnected(tid).catch(() => false);
+      return res.status(200).json({ endpoint: ENDPOINT, key, sync_url: tenant.sync_url || '', last_sync_at: tenant.last_sync_at || '', stripe_connected: !!stripe });
+    }
+
+    // Connect Stripe with a read-only restricted/secret key. Owner only. The key
+    // is validated live, stored encrypted, and never returned. A first sync runs
+    // immediately so cash and revenue appear right away.
+    if (action === 'stripe_connect') {
+      if (!requireRole(t, res, 'owner')) return;
+      try {
+        const r = await connectStripe(db, Object.assign({ id: tid }, tenant), String(b.key || ''));
+        return res.status(200).json({ ok: true, cash: r.cash, revenue: r.revenue });
+      } catch (e) {
+        return res.status(400).json({ error: e.message || 'Could not connect Stripe.' });
+      }
+    }
+
+    if (action === 'stripe_disconnect') {
+      if (!requireRole(t, res, 'owner')) return;
+      await disconnectStripe(db, Object.assign({ id: tid }, tenant));
+      return res.status(200).json({ ok: true });
+    }
+
+    if (action === 'stripe_sync') {
+      if (!requireRole(t, res, 'manager')) return;
+      try {
+        const r = await syncStripe(db, Object.assign({ id: tid }, tenant));
+        if (r.skipped) return res.status(400).json({ error: 'Stripe is not connected.' });
+        return res.status(200).json({ ok: true, cash: r.cash, revenue: r.revenue });
+      } catch (e) {
+        return res.status(400).json({ error: e.message || 'Could not read Stripe right now.' });
+      }
     }
 
     // Point the OS at one HTTPS URL that returns live numbers as JSON. The cron
