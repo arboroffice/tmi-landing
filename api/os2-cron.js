@@ -13,6 +13,7 @@ const { executeWorker } = require('./_osrun');
 const { scoreTenant } = require('./_osscore');
 const { tenantState, generateProof } = require('./_tmiproof');
 const { runScan } = require('./os2-pulse');
+const { syncSweep } = require('./_ossync');
 
 const HOUR = 3600 * 1000;
 const MAX_PER_RUN = 40;   // safety cap so one sweep can never run unbounded
@@ -92,8 +93,9 @@ module.exports = async function handler(req, res) {
 
     const proofed = await autoProof();
     const pulsed = await pulseSweep();
+    const synced = await syncSweep(db);
 
-    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, proofed, pulsed });
+    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, proofed, pulsed, synced });
   } catch (e) {
     console.error('os2-cron:', e.message);
     return res.status(500).json({ error: 'cron failed' });

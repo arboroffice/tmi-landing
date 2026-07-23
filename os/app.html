@@ -1551,6 +1551,13 @@ function renderIntegrations(){
       '<div class="field"><label>Endpoint</label><div class="invite-link">POST '+esc(CONNECT.endpoint)+'</div></div>'+
       '<div class="field"><label>Your key</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="invite-link" style="flex:1;min-width:200px;margin-top:0" id="ikey">'+esc(masked)+'</div><button class="link" onclick="revealKey()">Show</button><button class="link" onclick="copyKey()">Copy</button>'+(role==='owner'?'<button class="link" onclick="rotateKey()">Rotate</button>':'')+'</div></div>'+
       '<div class="field"><label>Example body</label><div class="invite-link">{ "key": "'+esc((CONNECT.key||'').slice(0,6))+'...", "metrics": [ { "key": "'+esc(ex)+'", "value": "$0" } ] }</div></div></div>';
+    // Pull side: the OS reads one URL on a schedule so numbers stay current on their own.
+    var syncUrl=CONNECT.sync_url||'';
+    html+='<div class="kcard" style="padding:22px 24px;margin-top:14px"><div class="kh"><span class="badge '+(syncUrl?'done':'k')+'">'+(syncUrl?'Auto-syncing':'Pull on a schedule')+'</span><h4>Read your numbers automatically</h4></div>'+
+      '<p style="font-size:13.5px;color:var(--ink-2);margin-top:10px">Point the OS at one URL that returns your live numbers as JSON. A published Google Sheet, a metrics endpoint, or your own backend. The OS reads it on a schedule so your command center stays on actuals, and you can pull it yourself anytime with Sync now.</p>'+
+      '<div class="field" style="margin-top:12px"><label>Source URL</label><input id="syncUrl" value="'+esc(syncUrl)+'" placeholder="https://example.com/metrics.json"'+(role==='owner'?'':' disabled')+' style="font-family:var(--sans);font-size:15px;border:1px solid var(--line-2);border-radius:8px;padding:10px 12px;width:100%"/></div>'+
+      '<div class="mfoot" style="justify-content:flex-start;gap:10px;flex-wrap:wrap">'+(role==='owner'?'<button class="btn" onclick="saveSource()">Save source</button>':'')+(syncUrl?'<button class="btn ghost" onclick="syncNow()">Sync now</button>':'')+(CONNECT.last_sync_at?'<span class="cad" style="align-self:center">Last synced '+ago(CONNECT.last_sync_at)+'</span>':'')+'</div>'+
+      '<div class="field" style="margin-top:6px"><label>Expected JSON</label><div class="invite-link">{ "'+esc(ex)+'": 212400, "cash_on_hand": 91500 }</div></div></div>';
     if(metrics.length){
       html+='<div class="kcard" style="padding:22px 24px;margin-top:14px"><div class="kh"><h4>Push a value now</h4></div>'+
         '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><select id="pushMetric" class="rsel" style="flex:1;min-width:190px">'+metrics.map(function(m){return '<option value="'+m.id+'">'+esc(m.label)+'</option>';}).join('')+'</select>'+
@@ -1577,6 +1584,15 @@ async function pushValue(){
   var sel=document.getElementById('pushMetric'),inp=document.getElementById('pushValue');
   if(!sel||!inp)return;var v=inp.value.trim();if(!v){toast('Enter a value');return;}
   try{await api('/api/os2-connect',{action:'push',metric_id:sel.value,value:v});await refresh();renderIntegrations();toast('Value updated');}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function saveSource(){
+  var inp=document.getElementById('syncUrl');if(!inp)return;
+  try{var j=await api('/api/os2-connect',{action:'setsource',sync_url:inp.value.trim()});if(CONNECT)CONNECT.sync_url=j.sync_url;renderIntegrations();toast(j.sync_url?'Source saved. The OS reads it every hour.':'Auto-sync turned off');}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function syncNow(){
+  try{var j=await api('/api/os2-connect',{action:'syncnow'});if(CONNECT)CONNECT.last_sync_at=new Date().toISOString();await refresh();renderIntegrations();toast('Synced '+(j.updated||0)+' metric'+((j.updated||0)===1?'':'s')+(j.created?' ('+j.created+' new)':'')+'.');}
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 

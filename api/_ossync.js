@@ -1,0 +1,133 @@
+// TMI OS — scheduled data pull. The push side (os2-ingest) lets any tool send a
+// webhook in. This is the pull side: a company points the OS at one HTTPS URL
+// that returns their live numbers as JSON, and the OS reads it on a schedule so
+// the command center runs on actuals without anyone wiring a webhook. Same
+// metric pipeline as ingest (stamps time + source, keeps history, auto-creates
+// unknown keys, proves any wired connection live).
+//
+// Accepted JSON shapes at the source URL (any of):
+//   { "metrics": [ { "key": "revenue_mtd", "value": "$212,400", "unit": "" } ] }
+//   { "metric": "revenue_mtd", "value": 212400 }
+//   { "revenue_mtd": 212400, "unpaid_invoices": 38100 }
+
+const { matches, applyValue, slug } = require('./_osmetric');
+
+// Reject private, loopback, link-local, and cloud-metadata hosts (SSRF guard).
+function isBlockedHost(host) {
+  host = (host || '').toLowerCase().replace(/\.$/, '');
+  if (!host) return true;
+  if (host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal') || host === 'metadata.google.internal') return true;
+  if (host === '::1' || host.startsWith('fe80:') || host.startsWith('fc') || host.startsWith('fd')) return true;
+  const m = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (m) {
+    const a = +m[1], b = +m[2];
+    if (a === 10 || a === 127 || a === 0) return true;
+    if (a === 169 && b === 254) return true; // link-local + cloud metadata
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a >= 224) return true; // multicast / reserved
+  }
+  return false;
+}
+
+// Fetch and parse the source URL as JSON. Throws a readable error on failure so
+// a manual "sync now" can tell the user exactly what went wrong.
+async function fetchJSON(url) {
+  let u = String(url || '').trim();
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  let host;
+  try { host = new URL(u).hostname; } catch (e) { throw new Error('That is not a valid URL.'); }
+  if (isBlockedHost(host)) throw new Error('That host is not allowed.');
+  const ctrl = new AbortController();
+  const to = setTimeout(() => ctrl.abort(), 8000);
+  let r;
+  try {
+    r = await fetch(u, { signal: ctrl.signal, redirect: 'follow', headers: { 'User-Agent': 'TMI-OS-Sync/1.0', 'Accept': 'application/json' } });
+  } catch (e) {
+    clearTimeout(to);
+    throw new Error('Could not reach that URL.');
+  }
+  clearTimeout(to);
+  if (!r.ok) throw new Error(`The source returned ${r.status}.`);
+  const text = (await r.text()).slice(0, 200000);
+  try { return JSON.parse(text); }
+  catch (e) { throw new Error('The source did not return valid JSON.'); }
+}
+
+// Turn a parsed JSON body into [{ ref, value, unit }] metric items.
+function itemsFrom(body) {
+  const b = body || {};
+  let items = [];
+  if (Array.isArray(b.metrics)) {
+    items = b.metrics.map(m => ({ ref: m.key || m.label || m.metric, value: m.value, unit: m.unit }));
+  } else if (b.metric != null) {
+    items = [{ ref: b.metric, value: b.value }];
+  } else if (Array.isArray(b)) {
+    items = b.map(m => ({ ref: m && (m.key || m.label || m.metric), value: m && m.value, unit: m && m.unit }));
+  } else {
+    for (const k of Object.keys(b)) {
+      if (b[k] != null && typeof b[k] !== 'object') items.push({ ref: k, value: b[k] });
+    }
+  }
+  return items.filter(it => it.ref != null && it.value != null).slice(0, 40);
+}
+
+// Pull one tenant's source URL and write the values onto its metrics.
+// Returns { updated, created }. Throws on fetch/parse errors.
+async function syncTenant(db, tenant) {
+  if (!tenant || !tenant.sync_url) return { updated: 0, created: 0 };
+  const body = await fetchJSON(tenant.sync_url);
+  const items = itemsFrom(body);
+  if (!items.length) return { updated: 0, created: 0 };
+
+  const metrics = await db.list('os_metrics', { where: [['tenant_id', '==', tenant.id]] });
+  let updated = 0, created = 0;
+  for (const it of items) {
+    let m = metrics.find(x => matches(x, it.ref));
+    if (!m) {
+      const sort = metrics.reduce((a, r) => Math.max(a, r.sort || 0), 0) + 1;
+      m = await db.insert('os_metrics', {
+        tenant_id: tenant.id, label: String(it.ref).slice(0, 60), value: '-',
+        unit: it.unit ? String(it.unit).slice(0, 12) : '', sort, created_at: new Date().toISOString(),
+      });
+      metrics.push(m); created++;
+    }
+    await applyValue(db, m, it.value, 'sync');
+    updated++;
+  }
+
+  const now = new Date().toISOString();
+  await db.update('os_tenants', tenant.id, { last_sync_at: now }).catch(() => {});
+
+  // Any TMI-wired connection that feeds one of these metrics is now proven live.
+  try {
+    const touched = new Set(items.map(it => slug(it.ref)));
+    const conns = await db.list('os_connections', { where: [['tenant_id', '==', tenant.id]] });
+    for (const c of conns) {
+      const feedsTouched = (c.feeds || []).some(f => touched.has(f.key) || touched.has(slug(f.label)));
+      if (feedsTouched || !c.feeds || !c.feeds.length) {
+        const patch = { last_data_at: now };
+        if (c.status !== 'live') patch.status = 'live';
+        await db.update('os_connections', c.id, patch);
+      }
+    }
+  } catch (e) { console.error('syncTenant connections:', e.message); }
+
+  return { updated, created };
+}
+
+// Cron entry: sync every tenant that has a source URL set. Capped for cron time.
+async function syncSweep(db, cap = 40) {
+  let synced = 0, failed = 0;
+  try {
+    const tenants = await db.list('os_tenants', { limit: 300 });
+    const due = tenants.filter(t => t.sync_url && t.onboarded).slice(0, cap);
+    for (const t of due) {
+      try { await syncTenant(db, t); synced++; }
+      catch (e) { failed++; console.error('syncSweep', t.id, e.message); }
+    }
+  } catch (e) { console.error('syncSweep:', e.message); }
+  return { synced, failed };
+}
+
+module.exports = { isBlockedHost, fetchJSON, syncTenant, syncSweep };

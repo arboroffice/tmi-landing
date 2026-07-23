@@ -12,6 +12,7 @@ const crypto = require('crypto');
 const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { applyValue } = require('./_osmetric');
+const { syncTenant, isBlockedHost } = require('./_ossync');
 
 const ENDPOINT = 'https://os.tmitechai.com/api/os2-ingest';
 
@@ -34,7 +35,37 @@ module.exports = async function handler(req, res) {
       if (!requireRole(t, res, 'manager')) return;
       let key = tenant.ingest_key;
       if (!key) { key = crypto.randomBytes(24).toString('hex'); await db.update('os_tenants', tid, { ingest_key: key }); }
-      return res.status(200).json({ endpoint: ENDPOINT, key });
+      return res.status(200).json({ endpoint: ENDPOINT, key, sync_url: tenant.sync_url || '', last_sync_at: tenant.last_sync_at || '' });
+    }
+
+    // Point the OS at one HTTPS URL that returns live numbers as JSON. The cron
+    // reads it on a schedule; the owner can also pull it on demand below.
+    if (action === 'setsource') {
+      if (!requireRole(t, res, 'owner')) return;
+      const raw = String(b.sync_url || '').trim();
+      if (!raw) {
+        await db.update('os_tenants', tid, { sync_url: '' });
+        await db.insert('os_build_log', { tenant_id: tid, kind: 'data', summary: 'Turned off scheduled data sync.', created_at: new Date().toISOString() }).catch(() => {});
+        return res.status(200).json({ ok: true, sync_url: '' });
+      }
+      let u = raw; if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+      let host; try { host = new URL(u).hostname; } catch (e) { return res.status(400).json({ error: 'That is not a valid URL.' }); }
+      if (isBlockedHost(host)) return res.status(400).json({ error: 'That host is not allowed.' });
+      await db.update('os_tenants', tid, { sync_url: u });
+      await db.insert('os_build_log', { tenant_id: tid, kind: 'data', summary: 'Set a scheduled data sync source.', created_at: new Date().toISOString() }).catch(() => {});
+      return res.status(200).json({ ok: true, sync_url: u });
+    }
+
+    // Pull the source URL right now instead of waiting for the schedule.
+    if (action === 'syncnow') {
+      if (!requireRole(t, res, 'manager')) return;
+      if (!tenant.sync_url) return res.status(400).json({ error: 'No data source set yet.' });
+      try {
+        const r = await syncTenant(db, tenant);
+        return res.status(200).json({ ok: true, updated: r.updated, created: r.created });
+      } catch (e) {
+        return res.status(400).json({ error: e.message || 'Could not read that source.' });
+      }
     }
 
     if (action === 'rotate') {
