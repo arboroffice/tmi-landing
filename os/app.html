@@ -270,7 +270,45 @@
     .top .plan{display:none;}
     .top .right{flex:none;}
     .askbtn{white-space:nowrap;padding:9px 13px;}
+    .cmdhero{gap:20px;padding:22px;}
   }
+
+  /* ===== premium command hero ===== */
+  .cmdhero{position:relative;overflow:hidden;background:linear-gradient(135deg,#13141f 0%,#0a0b14 62%);border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:28px 32px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;box-shadow:0 30px 70px -44px rgba(10,11,20,0.6);}
+  .cmdhero::before{content:"";position:absolute;right:-8%;top:-45%;width:48%;height:170%;background:radial-gradient(closest-side,rgba(228,255,151,0.17),rgba(228,255,151,0) 70%);pointer-events:none;}
+  .cmdhero>*{position:relative;z-index:1;}
+  .gauge{width:132px;height:132px;flex:none;position:relative;}
+  .gauge .gv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .gauge .gv b{font-family:var(--mono);font-size:38px;font-weight:700;color:#fff;line-height:1;letter-spacing:-0.02em;}
+  .gauge .gv span{font-size:9.5px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--chart);margin-top:5px;}
+  .gauge .arc{stroke-dasharray:var(--c);stroke-dashoffset:var(--c);animation:gauge 1.1s cubic-bezier(.3,.7,.3,1) .2s forwards;}
+  @keyframes gauge{to{stroke-dashoffset:var(--off);}}
+  .cmdhero-stats{display:flex;gap:28px;flex-wrap:wrap;}
+  .chstat .n{font-family:var(--mono);font-size:30px;font-weight:700;color:#fff;letter-spacing:-0.02em;line-height:1;}
+  .chstat .n.lime{color:var(--chart);}
+  .chstat .l{font-size:12px;color:rgba(255,255,255,0.55);margin-top:8px;max-width:15ch;line-height:1.35;}
+  .cmdhero-prog{flex:1;min-width:210px;}
+  .cmdhero-tier{display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.11em;text-transform:uppercase;background:rgba(255,255,255,0.1);color:#fff;border-radius:99px;padding:6px 13px;margin-bottom:13px;}
+  .cmdhero-tier.cert{background:var(--chart);color:var(--ink);}
+  .cmdhero-prog .plab{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:9px;}
+  .cmdhero-bar{height:8px;background:rgba(255,255,255,0.1);border-radius:99px;overflow:hidden;}
+  .cmdhero-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--chart),var(--chart-dark));border-radius:99px;transition:width 1s cubic-bezier(.3,.7,.3,1);}
+  .cmdhero-note{font-size:12.5px;color:rgba(255,255,255,0.5);margin-top:11px;line-height:1.5;}
+  .cmdhero-note a{color:var(--chart);white-space:nowrap;}
+
+  /* ===== richer metric tiles ===== */
+  .tile .top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .tile .delta{font-family:var(--mono);font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:99px;white-space:nowrap;}
+  .tile .delta.up{color:var(--good);background:rgba(58,125,51,0.1);}
+  .tile .delta.down{color:var(--bad);background:rgba(192,38,31,0.09);}
+  .tile .delta.flat{color:var(--ink-3);background:var(--bg-alt);}
+  .tile.metric{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;}
+  .tile.metric:hover{transform:translateY(-3px);border-color:var(--line-2);box-shadow:0 18px 40px -26px rgba(10,11,20,0.34);}
+  .tile .spark-area{stroke:none;}
+  .tile .live{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);margin-top:9px;}
+  .tile .live b{width:6px;height:6px;border-radius:50%;background:var(--chart-dark);animation:lpulse 2s ease-in-out infinite;}
+  @keyframes lpulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+  @media(prefers-reduced-motion:reduce){.gauge .arc{animation:none;stroke-dashoffset:var(--off);}.tile .live b{animation:none;}}
 </style>
 </head>
 <body>
@@ -356,19 +394,19 @@
     <div class="h">Command center</div>
     <p class="sub" id="summary"></p>
     <div id="scoreCard"></div>
+    <div class="secbar" style="margin-top:26px"><span class="lbl">The whole company on one screen</span><button class="btn sm ghost add" onclick="addMetric()"><svg class="icon"><use href="#i-plus"/></svg> Metric</button></div>
+    <div class="tiles" id="metrics"></div>
     <div id="pulseStrip"></div>
-    <div class="secbar" style="margin-top:28px"><span class="lbl">Goals</span><button class="btn sm ghost add" onclick="addGoal()"><svg class="icon"><use href="#i-plus"/></svg> Goal</button></div>
-    <div id="goals"></div>
+    <div class="secbar"><span class="lbl">Needs attention</span><button class="btn sm ghost add" onclick="addTask()"><svg class="icon"><use href="#i-plus"/></svg> Task</button></div>
+    <div id="cmdTasks"></div>
     <div class="lbl" style="margin-top:28px">From your AI COO</div>
     <div class="reco" style="margin-top:12px">
       <div class="rk"><svg class="icon"><use href="#i-coo"/></svg> Morning briefing</div>
       <div class="rtext" id="briefing"><span class="dots"><span></span><span></span><span></span></span></div>
       <div class="rfoot"><button class="link" onclick="openAsk()">Ask a follow-up</button><button class="link" onclick="loadBriefing(true)">Refresh</button></div>
     </div>
-    <div class="secbar"><span class="lbl">Needs attention</span><button class="btn sm ghost add" onclick="addTask()"><svg class="icon"><use href="#i-plus"/></svg> Task</button></div>
-    <div id="cmdTasks"></div>
-    <div class="secbar"><span class="lbl">The one screen</span><button class="btn sm ghost add" onclick="addMetric()"><svg class="icon"><use href="#i-plus"/></svg> Metric</button></div>
-    <div class="tiles" id="metrics"></div>
+    <div class="secbar"><span class="lbl">Goals</span><button class="btn sm ghost add" onclick="addGoal()"><svg class="icon"><use href="#i-plus"/></svg> Goal</button></div>
+    <div id="goals"></div>
   </section>
 
   <section class="view" data-view="threads">
@@ -615,15 +653,23 @@ function renderOverview(){
 function renderScore(){
   var sc=STATE.score, el=document.getElementById('scoreCard'); if(!el) return;
   if(!sc){ el.innerHTML=''; return; }
-  var cert=sc.certified;
-  el.innerHTML='<div class="score-card">'+
-    '<div class="sd"><div class="lab">Company Intelligence Score</div><div class="big">'+sc.score+'</div></div>'+
-    '<div class="sd"><div class="lab">Owner Dependency</div><div class="od">'+sc.owner_dependency+'</div></div>'+
-    '<span class="tier">'+esc(sc.tier)+'</span>'+
-    '<div class="prog"><div class="lab">'+(cert?'Intelligent Company Certified':(sc.to_certify+' points to Certified'))+'</div>'+
-      '<div class="bar"><i style="width:'+Math.min(100,sc.score)+'%"></i></div>'+
-      '<div class="note">'+(cert
-        ? 'You cleared the line. <a href="https://www.tmitechai.com/intelligent-company-certified" target="_blank" rel="noopener">Claim your badge &rarr;</a>'
+  var cert=sc.certified, score=Math.max(0,Math.min(100,sc.score||0)), od=sc.owner_dependency;
+  var r=58, C=2*Math.PI*r, off=C*(1-score/100), runs=(od!=null)?(100-od):null;
+  el.innerHTML='<div class="cmdhero">'+
+    '<div class="gauge"><svg width="132" height="132" viewBox="0 0 132 132" style="transform:rotate(-90deg)">'+
+      '<circle cx="66" cy="66" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="9"/>'+
+      '<circle class="arc" cx="66" cy="66" r="'+r+'" fill="none" stroke="url(#gg)" stroke-width="9" stroke-linecap="round" style="--c:'+C.toFixed(1)+';--off:'+off.toFixed(1)+'"/>'+
+      '<defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4FF97"/><stop offset="1" stop-color="#cdee72"/></linearGradient></defs>'+
+    '</svg><div class="gv"><b>'+score+'</b><span>Intelligence</span></div></div>'+
+    '<div class="cmdhero-stats">'+
+      (runs!=null?'<div class="chstat"><div class="n lime">'+runs+'%</div><div class="l">Runs without you</div></div>':'')+
+      (od!=null?'<div class="chstat"><div class="n">'+od+'%</div><div class="l">Still depends on you</div></div>':'')+
+    '</div>'+
+    '<div class="cmdhero-prog"><span class="cmdhero-tier'+(cert?' cert':'')+'">'+(cert?'Intelligent Company Certified':esc(sc.tier||'Building'))+'</span>'+
+      '<div class="plab">'+(cert?'You cleared the line.':(sc.to_certify+' points to Certified'))+'</div>'+
+      '<div class="cmdhero-bar"><i style="width:'+score+'%"></i></div>'+
+      '<div class="cmdhero-note">'+(cert
+        ? '<a href="https://www.tmitechai.com/intelligent-company-certified" target="_blank" rel="noopener">Claim your badge &rarr;</a>'
         : 'Turn on workers, connect live data, and capture knowledge to raise it. <a href="https://www.tmitechai.com/intelligent-company-certified" target="_blank" rel="noopener">See the standard &rarr;</a>')+'</div>'+
     '</div></div>';
 }
@@ -661,15 +707,41 @@ function renderBuildBanner(){
 async function refresh(){ try{ STATE=await api('/api/os2-state'); renderAll(); }catch(_){} }
 
 /* ---- metrics ---- */
+function metricTrend(history){
+  var pts=(history||[]).map(function(h){return h&&h.v;}).filter(function(v){return typeof v==='number'&&isFinite(v);});
+  if(pts.length<2) return null;
+  var a=pts[pts.length-2], b=pts[pts.length-1];
+  if(a===0) return null;
+  var pct=Math.round((b-a)/Math.abs(a)*1000)/10;
+  return {dir:pct>0.05?'up':pct<-0.05?'down':'flat',pct:Math.abs(pct)};
+}
+function sparkArea(history){
+  var pts=(history||[]).map(function(h){return h&&h.v;}).filter(function(v){return typeof v==='number'&&isFinite(v);});
+  if(pts.length<2)return '';
+  var min=Math.min.apply(null,pts),max=Math.max.apply(null,pts),rng=(max-min)||1,W=120,H=34;
+  var xs=pts.map(function(v,i){return (i/(pts.length-1))*W;});
+  var ys=pts.map(function(v){return H-((v-min)/rng)*(H-4)-2;});
+  var line=xs.map(function(x,i){return (i?'L':'M')+x.toFixed(1)+' '+ys[i].toFixed(1);}).join(' ');
+  var area=line+' L'+W+' '+H+' L0 '+H+' Z';
+  var gid='ga'+Math.floor(xs[0]*1000+ys[0]*7+pts.length);
+  return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="width:100%;height:32px;margin-top:12px;overflow:visible">'+
+    '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--chart-dark)" stop-opacity="0.28"/><stop offset="1" stop-color="var(--chart-dark)" stop-opacity="0"/></linearGradient></defs>'+
+    '<path class="spark-area" d="'+area+'" fill="url(#'+gid+')"/>'+
+    '<path d="'+line+'" fill="none" stroke="var(--chart-dark)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>'+
+    '<circle cx="'+xs[xs.length-1].toFixed(1)+'" cy="'+ys[ys.length-1].toFixed(1)+'" r="2.6" fill="var(--chart-dark)"/></svg>';
+}
 function renderMetrics(){
   var metrics=STATE.metrics||[];
   var add='<div class="tile addtile" onclick="addMetric()"><svg class="icon"><use href="#i-plus"/></svg> Add metric</div>';
-  document.getElementById('metrics').innerHTML = metrics.map(function(m){
-    return '<div class="tile"><span class="pen" title="Edit" onclick="editMetric(\''+m.id+'\')"><svg class="icon" style="width:15px;height:15px"><use href="#i-pen"/></svg></span>'+
-      '<div class="k">'+esc(m.label)+'</div><div class="v">'+esc(m.value||'-')+(m.unit?'<small>'+esc(m.unit)+'</small>':'')+'</div>'+
+  document.getElementById('metrics').innerHTML = metrics.map(function(m,i){
+    var tr=metricTrend(m.history);
+    var delta=tr?'<span class="delta '+tr.dir+'">'+(tr.dir==='up'?'&#9650; ':tr.dir==='down'?'&#9660; ':'')+tr.pct+'%</span>':'';
+    return '<div class="tile metric"><span class="pen" title="Edit" onclick="editMetric(\''+m.id+'\')"><svg class="icon" style="width:15px;height:15px"><use href="#i-pen"/></svg></span>'+
+      '<div class="top-row"><div class="k">'+esc(m.label)+'</div>'+delta+'</div>'+
+      '<div class="v">'+esc(m.value||'-')+(m.unit?'<small>'+esc(m.unit)+'</small>':'')+'</div>'+
       (m.hint?'<div class="hh">'+esc(m.hint)+'</div>':'')+(m.target?'<div class="tgt">Target '+esc(m.target)+'</div>':'')+
-      sparkSVG(m.history)+
-      (m.updated_at?'<div class="tgt">Updated '+ago(m.updated_at)+(m.source?' · '+esc(m.source):'')+'</div>':'')+'</div>';
+      sparkArea(m.history)+
+      (m.updated_at?'<div class="live"><b></b> Updated '+ago(m.updated_at)+(m.source?' · '+esc(m.source):'')+'</div>':(i===0&&metrics.length?'<div class="live"><b></b> Live</div>':''))+'</div>';
   }).join('')+add;
 }
 function metricFields(m){m=m||{};return [
