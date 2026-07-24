@@ -1506,11 +1506,11 @@ function renderBuild(){
   var open=reqs.filter(function(r){return r.status!=='cancelled'&&r.status!=='declined';});
   var closed=reqs.filter(function(r){return r.status==='cancelled'||r.status==='declined';});
   function card(r){
-    var canCancel=r.status==='requested';
-    return '<div class="kcard"><div class="kh">'+reqBadge(r.status)+'<h4>'+esc(r.title)+'</h4><span class="who">'+esc(REQ_CATLABEL[r.category]||'Request')+' · '+fmt(r.created_at)+'</span></div>'+
+    var canEdit=r.status==='requested';
+    return '<div class="kcard" style="cursor:pointer" onclick="openRequest(\''+r.id+'\')"><div class="kh">'+reqBadge(r.status)+'<h4>'+esc(r.title)+'</h4><span class="who">'+esc(REQ_CATLABEL[r.category]||'Request')+' · '+fmt(r.created_at)+'</span></div>'+
       (r.detail?'<div class="body">'+esc(r.detail)+'</div>':'')+
       (r.tmi_note?'<div style="margin-top:10px;background:var(--bg-alt);border-radius:10px;padding:12px 14px;font-size:13.5px;color:var(--ink-2)"><strong style="color:var(--ink)">From TMI:</strong> '+esc(r.tmi_note)+'</div>':'')+
-      (canCancel?'<div class="kf"><button class="link" onclick="cancelRequest(\''+r.id+'\')">Cancel</button></div>':'')+'</div>';
+      '<div class="kf"><button class="link" onclick="event.stopPropagation();openRequest(\''+r.id+'\')">Open</button>'+(canEdit?'<button class="link" onclick="event.stopPropagation();editRequest(\''+r.id+'\')">Edit</button><button class="link" onclick="event.stopPropagation();cancelRequest(\''+r.id+'\')">Cancel</button>':'')+'</div></div>';
   }
   host.innerHTML=(open.length?open.map(card).join(''):'<div class="empty"><h3>Hand TMI your first build</h3><p>Tell us what you want wired to your real systems or built for you. We build the backend and turn it on.</p><div style="margin-top:16px"><button class="btn" onclick="addRequest()">Request a build</button></div></div>')+
     (closed.length?'<div class="lbl" style="margin-top:28px">Closed</div>'+closed.map(card).join(''):'');
@@ -1522,7 +1522,26 @@ function addRequest(){
     {name:'detail',label:'Details (optional)',type:'textarea',placeholder:'Anything that helps us build it right: the tool, the accounts, how it should work.'}
   ],onSave:function(v){return api('/api/os2-requests',{action:'create',title:v.title,category:v.category,detail:v.detail});}});
 }
-async function cancelRequest(id){try{await api('/api/os2-requests',{action:'cancel',id:id});toast('Cancelled');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+// A build request is openable (full detail) and editable until TMI starts it.
+function openRequest(id){
+  var r=(STATE.requests||[]).find(function(x){return x.id===id;});if(!r)return;
+  var canEdit=r.status==='requested';
+  var html='<div class="kh" style="margin-bottom:2px">'+reqBadge(r.status)+'<h3 style="margin:0">'+esc(r.title)+'</h3></div>'+
+    '<div class="msub" style="margin-top:6px">'+esc(REQ_CATLABEL[r.category]||'Request')+' · '+esc(REQ_STATUSLABEL[r.status]||r.status)+' · '+fmt(r.created_at)+'</div>'+
+    (r.detail?'<div class="outbody" style="margin-top:14px">'+esc(r.detail)+'</div>':'<p style="margin-top:14px;color:var(--ink-3);font-size:13px">No details added.</p>')+
+    (r.tmi_note?'<div style="margin-top:12px;background:var(--bg-alt);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--ink-2)"><strong style="color:var(--ink)">From TMI:</strong> '+esc(r.tmi_note)+'</div>':'')+
+    '<div class="mfoot"><button class="btn ghost" style="margin-right:auto" onclick="closeModal()">Close</button>'+(canEdit?'<button class="btn ghost" onclick="cancelRequest(\''+r.id+'\')">Cancel request</button><button class="btn" onclick="editRequest(\''+r.id+'\')">Edit</button>':'')+'</div>';
+  document.getElementById('mcard').innerHTML=html;document.getElementById('modal').classList.add('on');window._form=null;
+}
+function editRequest(id){
+  var r=(STATE.requests||[]).find(function(x){return x.id===id;});if(!r)return;
+  openForm({title:'Edit request',sub:'Update what you want TMI to build. You can edit until we start building it.',fields:[
+    {name:'title',label:'What you need',value:r.title},
+    {name:'category',label:'Type',type:'select',value:r.category||'other',options:REQ_CAT},
+    {name:'detail',label:'Details',type:'textarea',value:r.detail}
+  ],onSave:function(v){if(!guardWrite())return Promise.reject(new Error('signed out'));return api('/api/os2-requests',{action:'update',id:id,title:v.title,category:v.category,detail:v.detail});}});
+}
+async function cancelRequest(id){if(!guardWrite())return;try{await api('/api/os2-requests',{action:'cancel',id:id});closeModal();toast('Cancelled');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 
 /* ---- goals ---- */
 function numOf(v){var n=parseFloat(String(v==null?'':v).replace(/[^0-9.\-]/g,''));return isNaN(n)?null:n;}
@@ -2068,6 +2087,15 @@ var TOOL_CATALOG=[
 function toolLogo(domain){
   return '<img src="https://www.google.com/s2/favicons?domain='+esc(domain)+'&sz=64" alt="" width="16" height="16" loading="lazy" style="border-radius:3px;flex:none" onerror="this.style.display=\'none\'"/>';
 }
+// Tools that connect instantly, right here, with no TMI request ticket. Returns
+// {instant, on, fn} so the catalog chip can wire the real connector.
+function toolConnectState(name){
+  var n=String(name||'').toLowerCase();
+  if(n==='plaid'||n==='bank')return {instant:!!(PLAID&&PLAID.configured),on:!!(PLAID&&PLAID.connected),fn:'plaidConnect()'};
+  if(n==='stripe')return {instant:true,on:!!(CONNECT&&CONNECT.stripe_connected),fn:'openStripeModal()'};
+  if(n==='quickbooks'){var q=(OAUTH&&(OAUTH.providers||[]).filter(function(p){return p.id==='quickbooks';})[0]);return {instant:!!(q&&q.configured),on:!!(OAUTH&&(OAUTH.connected||[]).indexOf('quickbooks')>=0),fn:"oauthConnect('quickbooks')"};}
+  return {instant:false,on:false,fn:''};
+}
 function renderToolCatalog(host){
   var conns=STATE.connections||[];
   var connectedNames=conns.map(function(c){return String(c.name||'').toLowerCase();});
@@ -2076,13 +2104,18 @@ function renderToolCatalog(host){
   TOOL_CATALOG.forEach(function(t){ if(!groups[t[1]]){groups[t[1]]=[];order.push(t[1]);} groups[t[1]].push(t); });
   var body=order.map(function(cat){
     var chips=groups[cat].map(function(t){
-      var on=connectedNames.indexOf(t[0].toLowerCase())>=0;
-      return '<button class="chip2 tchip" data-tool="'+esc(t[0].toLowerCase())+'" data-cat="'+esc(cat.toLowerCase())+'" style="cursor:'+(on?'default':'pointer')+';gap:7px;'+(on?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72':'')+'" onclick="'+(on?'':'requestTool(\''+esc(t[0])+'\',\''+esc(cat)+'\')')+'">'+(on?'&#10003;':toolLogo(t[2]))+' '+esc(t[0])+'</button>';
+      var st=toolConnectState(t[0]);
+      var on=connectedNames.indexOf(t[0].toLowerCase())>=0||st.on;
+      var click=on?'':(st.instant?st.fn:'requestTool(\''+esc(t[0])+'\',\''+esc(cat)+'\')');
+      var icon=on?'&#10003;':(st.instant?'&#9889;':toolLogo(t[2]));
+      var style='gap:7px;'+(on?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72;cursor:default':(st.instant?'border-color:#c7d98a;cursor:pointer':'cursor:pointer'));
+      var title=on?'Connected':(st.instant?'Connect instantly':'Request this integration');
+      return '<button class="chip2 tchip" data-tool="'+esc(t[0].toLowerCase())+'" data-cat="'+esc(cat.toLowerCase())+'" title="'+title+'" style="'+style+'" onclick="'+click+'">'+icon+' '+esc(t[0])+'</button>';
     }).join('');
     return '<div class="tgroup" data-cat="'+esc(cat.toLowerCase())+'"><div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 8px">'+esc(cat)+'</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+chips+'</div></div>';
   }).join('');
   var html='<div class="kcard" style="padding:20px 22px;margin-bottom:14px"><div class="kh"><span class="badge k">Your stack</span><h4>Connect everything your business runs on</h4></div>'+
-    '<p style="font-size:13.5px;color:var(--ink-2);margin:8px 0 4px">Pick the tools you use. TMI wires each one into your OS so your numbers go live and your workers can act inside them. Do not see yours? Request a custom integration and we build it. Anything with an API, we wire.</p>'+
+    '<p style="font-size:13.5px;color:var(--ink-2);margin:8px 0 4px">A &#9889; tool connects instantly right here. Everything else, request it and TMI wires it into your OS. Anything with an API, we wire.</p>'+
     '<input id="toolSearch" oninput="filterTools()" placeholder="Search '+TOOL_CATALOG.length+' integrations..." style="margin-top:14px;width:100%;font-family:var(--sans);font-size:14px;border:1px solid var(--line-2);border-radius:8px;padding:10px 12px"/>'+
     '<div id="toolGroups">'+body+'</div>'+
     '<div id="toolEmpty" style="display:none;font-size:13px;color:var(--ink-3);margin-top:14px">No match. <a class="link" style="display:inline" onclick="requestTool(document.getElementById(\'toolSearch\').value,\'\')">Request it as a custom integration &rarr;</a></div>'+
@@ -2215,10 +2248,19 @@ async function syncNow(){
   try{var j=await api('/api/os2-connect',{action:'syncnow'});if(CONNECT)CONNECT.last_sync_at=new Date().toISOString();await refresh();renderIntegrations();toast('Synced '+(j.updated||0)+' metric'+((j.updated||0)===1?'':'s')+(j.created?' ('+j.created+' new)':'')+'.');}
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
+function openStripeModal(){
+  if(!guardWrite())return;
+  var html='<h3>Connect Stripe</h3><div class="msub" style="margin-top:6px">Paste a read-only restricted key and your cash on hand and 30-day revenue pull automatically.</div>'+
+    '<div class="field" style="margin-top:14px"><label>Stripe restricted key</label><input id="stripeKey" placeholder="rk_live_..." autocomplete="off" style="font-family:var(--mono);font-size:14px"/></div>'+
+    '<p style="font-size:12.5px;color:var(--ink-3)">Create one in Stripe under Developers &rarr; API keys &rarr; Restricted keys, with read access to Balance and Charges.</p>'+
+    '<div class="mfoot"><button class="btn ghost" style="margin-right:auto" onclick="closeModal()">Cancel</button><button class="btn" onclick="stripeConnect()">Connect Stripe</button></div>';
+  document.getElementById('mcard').innerHTML=html;document.getElementById('modal').classList.add('on');window._form=null;
+}
 async function stripeConnect(){
+  if(!guardWrite())return;
   var inp=document.getElementById('stripeKey');if(!inp)return;var k=inp.value.trim();if(!k){toast('Paste your Stripe key');return;}
   toast('Connecting Stripe...');
-  try{await api('/api/os2-connect',{action:'stripe_connect',key:k});if(CONNECT)CONNECT.stripe_connected=true;await refresh();renderIntegrations();toast('Stripe connected. Cash and revenue are live.');}
+  try{await api('/api/os2-connect',{action:'stripe_connect',key:k});if(CONNECT)CONNECT.stripe_connected=true;closeModal();await refresh();renderIntegrations();toast('Stripe connected. Cash and revenue are live.');}
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 async function stripeSync(){

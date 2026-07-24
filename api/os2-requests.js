@@ -47,6 +47,19 @@ module.exports = async function handler(req, res) {
       return res.status(201).json({ request });
     }
 
+    if (action === 'update') {
+      const id = String(b.id || '');
+      const cur = await db.getById('os_requests', id);
+      if (!cur || cur.tenant_id !== tid) return res.status(404).json({ error: 'Request not found' });
+      if (['live', 'building'].includes(cur.status)) return res.status(400).json({ error: 'TMI is already building this one. Message us to change it.' });
+      const patch = { updated_at: new Date().toISOString() };
+      if (b.title !== undefined) { const tt = String(b.title || '').slice(0, 200).trim(); if (!tt) return res.status(400).json({ error: 'A title is required' }); patch.title = tt; }
+      if (b.detail !== undefined) patch.detail = String(b.detail || '').slice(0, 4000);
+      if (b.category !== undefined && CATEGORIES.includes(b.category)) patch.category = b.category;
+      const request = await db.update('os_requests', id, patch);
+      return res.status(200).json({ request });
+    }
+
     if (action === 'cancel') {
       const id = String(b.id || '');
       const cur = await db.getById('os_requests', id);
