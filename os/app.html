@@ -199,6 +199,10 @@
   .cmdkbtn:hover{color:var(--ink);border-color:var(--ink-3);}
   .cmdkbtn span{font-family:var(--mono);font-size:11px;}
   @media(max-width:640px){.cmdkbtn span{display:none;}}
+  .bookbtn{display:inline-flex;align-items:center;gap:7px;background:var(--ink);border:1px solid var(--ink);border-radius:999px;color:var(--chart);font-family:inherit;font-size:12.5px;font-weight:700;padding:7px 14px;cursor:pointer;margin-right:8px;}
+  .bookbtn:hover{background:#1a1c2e;}
+  .bookbtn .icon{width:14px;height:14px;}
+  @media(max-width:760px){.bookbtn span{display:none;}}
   .cmdk{position:fixed;inset:0;z-index:200;display:none;}
   .cmdk.on{display:block;}
   .cmdk-bg{position:absolute;inset:0;background:rgba(10,11,20,0.44);}
@@ -560,7 +564,7 @@
     <button class="burger" aria-label="Menu" onclick="toggleNav()"><svg class="icon"><use href="#i-grid"/></svg></button>
     <span class="co" id="co"></span>
     <span class="plan" id="plan"></span>
-    <div class="right"><button class="cmdkbtn" onclick="openPalette()" title="Commands (Cmd-K)"><svg class="icon"><use href="#i-grid"/></svg><span>&#8984;K</span></button><button class="askbtn" onclick="openAsk()"><svg class="icon"><use href="#i-coo"/></svg> Ask your COO</button></div>
+    <div class="right"><button class="bookbtn" onclick="bookAudit()" title="Book your Intelligence Audit with TMI"><svg class="icon"><use href="#i-spark"/></svg><span>Book your audit</span></button><button class="cmdkbtn" onclick="openPalette()" title="Commands (Cmd-K)"><svg class="icon"><use href="#i-grid"/></svg><span>&#8984;K</span></button><button class="askbtn" onclick="openAsk()"><svg class="icon"><use href="#i-coo"/></svg> Ask your COO</button></div>
   </div>
 
   <div id="loading" class="loading">Loading your OS...</div>
@@ -866,16 +870,20 @@ function renderDelivered(){
 
 /* ---- plans & offers ---- */
 function openApply(){ window.open('https://www.tmitechai.com/intelligence-assessment','_blank','noopener'); }
+// Book the Intelligence Audit (the discovery call). Absolute URL because the OS
+// host rewrites bare /book; www serves the real page.
+function bookAudit(){ window.open('https://www.tmitechai.com/book','_blank','noopener'); }
 function renderPlans(){
   var host=document.getElementById('plansBox'); if(!host) return;
   var plan=cap((STATE.tenant&&STATE.tenant.plan)||'trial');
   var rungs=[
     {tag:'Self-serve OS · your plan',cur:true,price:plan,h:'Build it yourself in the OS',p:'You design your intelligent company right here: departments, AI workers, the numbers to watch, and the workflows behind them.',cta:null},
-    {tag:'Done with you',price:'From $25,000',h:'Our team builds and installs it',p:'The TMI development team customizes and installs your OS: bespoke workers, real integrations wired to your tools, and custom builds.',cta:['Request a build',"show('build')"]},
-    {tag:'AI Department',price:'$5,000/mo',h:'A department that runs beside your team',p:'An intelligent department retained monthly that carries the work headcount used to, and gets sharper every month.',cta:['Apply','openApply()']},
+    {tag:'Done with you',price:'From $25,000',h:'Our team builds and installs it',p:'The TMI development team customizes and installs your OS: bespoke workers, real integrations wired to your tools, and custom builds.',cta:['Book your audit','bookAudit()']},
+    {tag:'AI Department',price:'$5,000/mo',h:'A department that runs beside your team',p:'An intelligent department retained monthly that carries the work headcount used to, and gets sharper every month.',cta:['Book your audit','bookAudit()']},
     {tag:'Growth Partner',price:'By application',h:'Partner with our team',p:'You partner with our team as your ongoing growth partner: we run your intelligent department beside you and compound the systems and enterprise value quarter over quarter.',cta:['Apply','openApply()']}
   ];
-  host.innerHTML='<div class="plan-ladder">'+rungs.map(function(r){
+  host.innerHTML='<div class="actban" style="margin-bottom:20px"><div><b>Ready for TMI to build it for you?</b><div style="color:rgba(255,255,255,.72);margin-top:3px">Book your Intelligence Audit. We map where your company still depends on you and show you exactly what we would build.</div></div><button class="btn sm" style="margin-left:auto;background:var(--chart);color:var(--ink);border-color:var(--chart);flex:none" onclick="bookAudit()">Book your audit &rarr;</button></div>'+
+  '<div class="plan-ladder">'+rungs.map(function(r){
     return '<div class="rung2'+(r.cur?' cur':'')+'"><div class="rl"><div class="rtag">'+esc(r.tag)+'</div><h3>'+esc(r.h)+'</h3><p>'+esc(r.p)+'</p></div>'+
       '<div class="ra"><div class="rp">'+esc(r.price)+'</div>'+(r.cta?'<button class="btn sm" onclick="'+r.cta[1]+'">'+esc(r.cta[0])+' &rarr;</button>':'<span class="rtag" style="color:var(--good)">Current</span>')+'</div></div>';
   }).join('')+'</div>'+
@@ -1006,7 +1014,7 @@ function renderOverview(){
   if(conns.length){
     html+='<div class="lbl" style="margin-top:32px">Connected to your business</div><div class="ovchips" style="margin-top:12px">'+conns.map(function(c){return '<span class="chip2" style="'+(c.status==='live'?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72':'')+'">'+(c.status==='live'?'&#10003; ':'')+esc(c.name)+'</span>';}).join('')+'</div>';
   }
-  html+='<div class="ovcta"><div><div style="font-size:18px;font-weight:700;color:var(--ink)">This is your intelligent company.</div><p style="font-size:14px;color:var(--ink-2);margin-top:6px">Design more of it, or hand the next piece to TMI to build the backend.</p></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="show(\'blueprint\')">Design more</button><button class="btn ghost" onclick="show(\'build\')">Build with TMI</button></div></div>';
+  html+='<div class="ovcta"><div><div style="font-size:18px;font-weight:700;color:var(--ink)">This is your intelligent company.</div><p style="font-size:14px;color:var(--ink-2);margin-top:6px">Design more of it yourself, or book your audit and have TMI build the rest for you.</p></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="bookAudit()">Book your audit &rarr;</button><button class="btn ghost" onclick="show(\'blueprint\')">Design more</button></div></div>';
   host.innerHTML=html;
 }
 function renderScore(){
