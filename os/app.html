@@ -587,9 +587,9 @@
 
   <section class="view" data-view="inbox">
     <div class="h">Inbox</div>
-    <p class="sub">What your workers produced. Anything headed to a customer waits here for your approval. Approve it and the worker actually sends it, then logs the delivery below.</p>
-    <div class="secbar"><span class="lbl">Needs approval</span></div>
-    <div id="inboxPending"></div>
+    <p class="sub">One queue for everything that needs a decision: worker drafts waiting to send, new conversations, and signals from your Pulse. Nothing reaches your company unreviewed. Accept it or clear it.</p>
+    <div class="secbar"><span class="lbl">Triage</span><span class="tag" id="triageCount"></span></div>
+    <div id="inboxTriage"></div>
     <div class="secbar"><span class="lbl">Done</span></div>
     <div id="inboxDone"></div>
     <div class="secbar"><span class="lbl">Sent by your workers</span></div>
@@ -874,8 +874,7 @@ function renderAll(){
   document.getElementById('tgKnow').textContent=(STATE.knowledge||[]).length||'';
   var open=(STATE.tasks||[]).filter(function(t){return t.status!=='done';}).length;
   document.getElementById('tgTasks').textContent=open||'';
-  var pend=(STATE.outputs||[]).filter(function(o){return o.status==='pending';}).length;
-  document.getElementById('tgInbox').textContent=pend||'';
+  document.getElementById('tgInbox').textContent=triageCount()||'';
   var reqOpen=(STATE.requests||[]).filter(function(r){return r.status==='requested'||r.status==='building';}).length;
   document.getElementById('tgBuild').textContent=reqOpen||'';
   renderBuildBanner();
@@ -1131,17 +1130,51 @@ function escalationLine(o){
   }
   return who+' finished a draft and wants your sign-off.';
 }
+// The unified triage queue: every unreviewed inbound (worker draft, new
+// conversation, open Pulse signal) surfaced in one place with an accept/clear.
+// It reuses each stream's native status as the triage state rather than a
+// parallel flag, so accepting/dismissing here is the same action as elsewhere.
+function triageItems(){
+  var items=[];
+  (STATE.outputs||[]).filter(function(o){return o.status==='pending';}).forEach(function(o){
+    items.push({kind:'draft',rank:0,id:o.id,badge:'Worker draft',title:o.title,sub:escalationLine(o),when:o.created_at,obj:o});
+  });
+  (STATE.signals||[]).forEach(function(s){
+    items.push({kind:'signal',rank:s.severity==='high'?1:2,id:s.id,badge:(PULSE_SEV[s.severity]||'Signal'),title:s.title||s.insight||'Signal',sub:(s.title&&s.insight)?s.insight:(s.area||''),when:s.created_at,obj:s});
+  });
+  (STATE.threads||[]).forEach(function(t){
+    items.push({kind:'thread',rank:3,id:t.id,badge:(CHAN_LABEL[t.channel]||t.channel||'Message'),title:t.subject||t.from||'Conversation',sub:t.from||'',when:t.last_at||t.created_at,obj:t});
+  });
+  items.sort(function(a,b){return (a.rank-b.rank)||String(b.when||'').localeCompare(String(a.when||''));});
+  return items;
+}
+function triageCount(){return triageItems().length;}
+function renderTriage(){
+  var host=document.getElementById('inboxTriage'); if(!host) return;
+  var items=triageItems();
+  var cnt=document.getElementById('triageCount'); if(cnt) cnt.textContent=items.length||'';
+  if(!items.length){host.innerHTML='<div class="empty"><h3>Triage is clear</h3><p>New worker drafts, conversations, and Pulse signals land here first so nothing reaches your company unreviewed.</p></div>';return;}
+  host.innerHTML=items.map(function(it){
+    var actions;
+    if(it.kind==='draft'){
+      var send=it.obj.action&&it.obj.action.channel!=='internal';
+      actions='<button class="btn sm" onclick="approveOutput(\''+it.id+'\')">'+(send?'Approve &amp; send':'Approve')+'</button><button class="btn sm ghost" onclick="viewOutput(\''+it.id+'\')">'+(send?'Edit':'View')+'</button><button class="link" onclick="dismissOutput(\''+it.id+'\')">Decline</button>';
+    }else if(it.kind==='signal'){
+      var lab=actLabel(it.obj.action);
+      actions=(lab?'<button class="btn sm" onclick="pulseAct(\''+it.id+'\')">'+esc(lab)+'</button>':'')+'<button class="btn sm ghost" onclick="show(\'pulse\')">Open Pulse</button><button class="link" onclick="pulseDismiss(\''+it.id+'\')">Dismiss</button>';
+    }else{
+      actions='<button class="btn sm" onclick="openThread(\''+it.id+'\')">Open</button><button class="link" onclick="closeThreadStatus(\''+it.id+'\',\'closed\')">Dismiss</button>';
+    }
+    return '<div class="kcard"><div class="kh"><span class="badge k">'+esc(it.badge)+'</span><h4>'+esc(it.title)+'</h4><span class="who">'+fmt(it.when)+'</span></div>'+
+      (it.sub?'<div class="escline" style="font-weight:400;color:var(--ink-2)">'+esc(it.sub)+'</div>':'')+
+      (it.kind==='draft'&&it.obj.reason?'<div class="escwhy"><strong>Why it is asking:</strong> '+esc(it.obj.reason)+'</div>':'')+
+      '<div class="kf">'+actions+'</div></div>';
+  }).join('');
+}
 function renderInbox(){
   var outs=STATE.outputs||[];
-  var pending=outs.filter(function(o){return o.status==='pending';});
   var done=outs.filter(function(o){return o.status==='done';});
-  document.getElementById('inboxPending').innerHTML=pending.length?pending.map(function(o){
-    var send=o.action&&o.action.channel!=='internal';
-    return '<div class="kcard"><div class="kh"><span class="badge pending">Waiting on you</span><h4>'+esc(o.title)+'</h4>'+actChip(o)+'<span class="who">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+'</span></div>'+
-      '<div class="escline">'+esc(escalationLine(o))+'</div>'+
-      (o.reason?'<div class="escwhy"><strong>Why it is asking:</strong> '+esc(o.reason)+'</div>':'')+
-      '<div class="kf"><button class="btn sm" onclick="approveOutput(\''+o.id+'\')">'+(send?'Approve &amp; send':'Approve')+'</button><button class="btn sm ghost" onclick="viewOutput(\''+o.id+'\')">'+(send?'Edit':'View')+'</button><button class="link" onclick="dismissOutput(\''+o.id+'\')">Decline</button></div></div>';
-  }).join(''):'<div class="empty"><h3>Nothing waiting</h3><p>When an "asks first" worker runs, its draft lands here for your approval.</p></div>';
+  renderTriage();
   document.getElementById('inboxDone').innerHTML=done.length?done.map(function(o){
     return '<div class="kcard"><div class="kh"><span class="badge done">done</span><h4>'+esc(o.title)+'</h4>'+(o.action_status?acStatusBadge(o.action_status):'')+'<span class="who">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+'</span></div>'+
       '<div class="kf"><button class="btn sm ghost" onclick="viewOutput(\''+o.id+'\')">View</button><button class="link" onclick="dismissOutput(\''+o.id+'\')">Remove</button></div></div>';
