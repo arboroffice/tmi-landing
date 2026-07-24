@@ -12,6 +12,7 @@ const db = require('./_db');
 const { cors } = require('./_tenant-auth');
 const memory = require('./_osmemory');
 const { routeInbound } = require('./_osroute');
+const { emitEvent } = require('./_osevents');
 
 const CHANNELS = ['sms', 'email', 'form', 'call'];
 const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
@@ -58,7 +59,9 @@ module.exports = async function handler(req, res) {
       (t.last_at ? new Date(t.last_at).getTime() >= cutoff : false)
     ) || null;
 
+    let isNewThread = false;
     if (!thread) {
+      isNewThread = true;
       thread = await db.insert('os_threads', {
         tenant_id: tenant.id,
         channel,
@@ -97,6 +100,12 @@ module.exports = async function handler(req, res) {
       summary: `New ${channel} from ${from || 'unknown'}${subject ? `: ${subject}` : ''}.`,
       created_at: now,
     });
+
+    // A brand-new inbound conversation is a new lead: fire the lead_created
+    // event so any cascade the owner built on it runs. Best-effort.
+    if (isNewThread) {
+      await emitEvent(tenant, 'lead_created', { thread_id: thread.id, from, channel }, now).catch(() => {});
+    }
 
     return res.status(200).json({ ok: true, thread_id: thread.id, message });
   } catch (e) {

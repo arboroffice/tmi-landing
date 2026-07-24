@@ -1224,9 +1224,10 @@ function renderWorkflows(){
   host.innerHTML=flows.map(function(f){
     var steps=(f.steps||[]).map(function(x){return '<li>'+wfStepLabel(x)+'</li>';}).join('');
     var trg=WF_TRIG_LABEL[f.trigger]||f.trigger;
+    var fire=(f.trigger&&f.trigger!=='manual')?'<button class="link" onclick="fireEvent(\''+esc(f.trigger)+'\')" title="Fire this trigger to run every cascade that listens for it">Fire trigger</button>':'';
     return '<div class="row flow"><div class="r1"><h4>'+esc(f.name)+'</h4>'+
       '<span class="badge on">'+esc(f.status||'active')+'</span>'+
-      '<div class="racts"><button class="link" onclick="runCascade(\''+f.id+'\')">Test run</button><span class="iconbtn" title="Edit" onclick="openCascade(\''+f.id+'\')"><svg class="icon"><use href="#i-pen"/></svg></span>'+
+      '<div class="racts">'+fire+'<button class="link" onclick="runCascade(\''+f.id+'\')">Test run</button><span class="iconbtn" title="Edit" onclick="openCascade(\''+f.id+'\')"><svg class="icon"><use href="#i-pen"/></svg></span>'+
       '<span class="iconbtn danger" title="Delete" onclick="delItem(\'workflows\',\''+f.id+'\',\''+esc(f.name)+'\')"><svg class="icon"><use href="#i-trash"/></svg></span></div></div>'+
       (trg?'<div class="trig">When: '+esc(trg)+'</div>':'')+(steps?'<ol>'+steps+'</ol>':'')+'</div>';
   }).join('');
@@ -1284,6 +1285,7 @@ async function saveCascade(id){
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 async function runCascade(id){toast('Running cascade...');try{var j=await api('/api/os2-flow',{action:'run',workflow_id:id});var r=j.run||{};toast('Cascade '+(r.status||'started'));loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function fireEvent(ev){toast('Firing '+(WF_TRIG_LABEL[ev]||ev)+'...');try{var j=await api('/api/os2-flow',{action:'event',event:ev});toast(j.fired?(j.fired+' cascade'+(j.fired>1?'s':'')+' fired'):'No cascade listens for that yet');loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function loadRuns(){
   var host=document.getElementById('flowRuns'); if(!host) return;
   try{
