@@ -236,6 +236,23 @@
   .fc-draft-name{font-size:16px;font-weight:700;color:var(--ink);margin-top:6px;}
   .fc-steps{margin:8px 0 0;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:1.7;}
   .fc-draft-f{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .mkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  .mkcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s;display:flex;flex-direction:column;}
+  .mkcard:hover{border-color:var(--ink-3);box-shadow:0 8px 24px rgba(10,11,20,0.06);transform:translateY(-1px);}
+  .mkcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .mkicon{width:34px;height:34px;border-radius:9px;background:var(--bg-alt);display:flex;align-items:center;justify-content:center;color:var(--ink);}
+  .mkicon .icon{width:18px;height:18px;}
+  .mkcard h4{font-size:15.5px;font-weight:700;color:var(--ink);}
+  .mkcard p{font-size:13px;color:var(--ink-2);margin-top:7px;line-height:1.5;flex:1;}
+  .mkcard-f{display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:10px;}
+  .mklink{font-size:12px;color:var(--ink-3);font-weight:600;}
+  .mkcard:hover .mklink{color:var(--ink);}
+  .mkdetail-tag{font-size:15px;color:var(--ink-2);line-height:1.55;margin-top:12px;}
+  .mkdetail-body{font-size:14px;color:var(--ink-2);line-height:1.6;margin-top:12px;white-space:pre-wrap;}
+  .mkchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+  .mklist{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+  .mkrow{background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:13.5px;color:var(--ink);}
+  .mkrow-sub{font-size:12.5px;color:var(--ink-3);margin-top:3px;line-height:1.5;}
 
   .memo{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 20px;}
   .memo .m{padding:14px 0;border-top:1px solid var(--line);font-size:14px;display:flex;gap:12px;align-items:flex-start;}
@@ -1798,23 +1815,64 @@ async function loadMarket(){
   if(!MARKET){host.innerHTML='<div class="empty" style="padding:24px"><p>Loading the marketplace...</p></div>';try{var j=await api('/api/os2-market',{action:'list'});MARKET=j.items||[];}catch(e){MARKET=[];}}
   renderMarket();
 }
+function mkIcon(kind){return kind==='pack'||kind==='department'?'#i-org':kind==='workflow'?'#i-flow':'#i-bot';}
 function renderMarket(){
   var host=document.getElementById('marketList');if(!host)return;var items=MARKET||[];
   if(!items.length){host.innerHTML='<div class="empty"><h3>Marketplace</h3><p>Prebuilt workers and departments are on the way.</p></div>';return;}
   var cats={};items.forEach(function(it){(cats[it.category||'Other']=cats[it.category||'Other']||[]).push(it);});
   host.innerHTML=Object.keys(cats).map(function(cat){
-    return '<div class="lbl" style="margin:22px 0 12px">'+esc(cat)+'</div><div class="tiles">'+cats[cat].map(function(it){
-      return '<div class="kcard" style="padding:16px 18px"><div class="kh"><span class="badge k">'+esc(MK_KIND[it.kind]||it.kind)+'</span><h4>'+esc(it.label)+'</h4></div>'+
-        (it.tagline?'<p style="font-size:13px;color:var(--ink-2);margin-top:8px">'+esc(it.tagline)+'</p>':'')+
-        '<div class="kf"><button class="btn sm" onclick="installTemplate(\''+esc(it.id)+'\',this)">Install</button></div></div>';
+    return '<div class="lbl" style="margin:22px 0 12px">'+esc(cat)+'</div><div class="mkgrid">'+cats[cat].map(function(it){
+      return '<div class="mkcard" onclick="openMarketItem(\''+esc(it.id)+'\')">'+
+        '<div class="mkcard-top"><span class="mkicon"><svg class="icon"><use href="'+mkIcon(it.kind)+'"/></svg></span><span class="badge k">'+esc(MK_KIND[it.kind]||it.kind)+'</span></div>'+
+        '<h4>'+esc(it.label)+'</h4>'+
+        (it.tagline?'<p>'+esc(it.tagline)+'</p>':'')+
+        '<div class="mkcard-f"><span class="mklink">View details &rarr;</span><button class="btn sm" onclick="event.stopPropagation();installTemplate(\''+esc(it.id)+'\',this)">Install</button></div></div>';
     }).join('')+'</div>';
   }).join('');
+}
+// Open a marketplace item to see exactly what it does before installing.
+function openMarketItem(id){
+  var it=(MARKET||[]).find(function(x){return x.id===id;});if(!it)return;
+  var s=it.spec||{};var body='';
+  if(it.kind==='worker'){
+    var al={read:'Reports only',approve:'Asks you first',auto:'Autonomous'}[s.autonomy]||s.autonomy;
+    body='<div class="mkdetail-body">'+esc(s.job||'')+'</div>'+
+      '<div class="mkchips">'+(s.autonomy?'<span class="chip2">'+esc(al)+'</span>':'')+(s.cadence?'<span class="chip2">Runs '+esc(s.cadence)+'</span>':'')+'</div>';
+  }else if(it.kind==='department'){
+    body='<div class="mkdetail-body">'+esc(s.mandate||'')+'</div>';
+  }else if(it.kind==='workflow'){
+    var steps=(s.steps||[]).map(function(x){return '<li>'+wfStepLabel(x)+'</li>';}).join('');
+    body=(s.trigger?'<div class="mkchips"><span class="chip2">When: '+esc(s.trigger)+'</span></div>':'')+(steps?'<ol class="fc-steps">'+steps+'</ol>':'');
+  }else if(it.kind==='pack'){
+    var d=s.department||{};
+    var ws=(s.workers||[]).map(function(w){return '<div class="mkrow"><b>'+esc(w.name)+'</b><div class="mkrow-sub">'+esc(w.job||'')+'</div></div>';}).join('');
+    var extra=[];
+    if((s.metrics||[]).length)extra.push(s.metrics.length+' metric'+(s.metrics.length>1?'s':''));
+    if((s.goals||[]).length)extra.push(s.goals.length+' goal'+(s.goals.length>1?'s':''));
+    if((s.workflows||[]).length)extra.push(s.workflows.length+' workflow'+(s.workflows.length>1?'s':''));
+    body='<div class="mkdetail-body">'+esc(d.mandate||'')+'</div>'+
+      '<div class="lbl" style="margin-top:14px">Installs '+(s.workers||[]).length+' worker'+((s.workers||[]).length===1?'':'s')+'</div><div class="mklist">'+ws+'</div>'+
+      (extra.length?'<div class="mkchips" style="margin-top:12px">'+extra.map(function(e){return '<span class="chip2">'+esc(e)+'</span>';}).join('')+'</div>':'');
+  }
+  var kindLabel=MK_KIND[it.kind]||'it';
+  var html='<div class="kh" style="margin-bottom:2px"><span class="badge k">'+esc(kindLabel)+'</span><h3 style="margin:0">'+esc(it.label)+'</h3></div>'+
+    (it.category?'<div class="msub" style="margin-top:6px">'+esc(it.category)+'</div>':'')+
+    (it.tagline?'<div class="mkdetail-tag">'+esc(it.tagline)+'</div>':'')+
+    body+
+    '<div class="mfoot"><button class="btn ghost" style="margin-right:auto" onclick="closeModal()">Close</button><button class="btn" onclick="installFromModal(\''+esc(it.id)+'\',this)">Install '+esc(kindLabel.toLowerCase())+'</button></div>';
+  document.getElementById('mcard').innerHTML=html;
+  document.getElementById('modal').classList.add('on');window._form=null;
 }
 async function installTemplate(id,btn){
   if(btn){btn.disabled=true;btn.textContent='Installing...';}
   try{var j=await api('/api/os2-market',{action:'install',id:id});var inst=j.installed||{};toast('Installed '+(inst.label||'it')+'. TMI wires the backend.');await refresh();}
   catch(e){if(e.message!=='signed out')toast(e.message);}
   if(btn){btn.disabled=false;btn.textContent='Install';}
+}
+async function installFromModal(id,btn){
+  if(btn){btn.disabled=true;btn.textContent='Installing...';}
+  try{var j=await api('/api/os2-market',{action:'install',id:id});var inst=j.installed||{};closeModal();toast('Installed '+(inst.label||'it')+'. TMI wires the backend.');await refresh();}
+  catch(e){if(btn){btn.disabled=false;btn.textContent='Install';}if(e.message!=='signed out')toast(e.message);}
 }
 
 /* ---- company brain ---- */
