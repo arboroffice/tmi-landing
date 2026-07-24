@@ -117,6 +117,37 @@ async function advance(run, now) {
         history.push(entry);
         status = 'blocked'; // stay on this step until approveRun advances past it
         break;
+      } else if (type === 'task') {
+        const rec = await db.insert('os_tasks', {
+          tenant_id: run.tenant_id,
+          title: String(step.title || 'Task from cascade').slice(0, 200),
+          status: 'open', priority: step.priority === 'high' ? 'high' : 'normal',
+          created_at: iso,
+        });
+        entry.result = { task_id: rec && rec.id ? rec.id : null };
+        history.push(entry);
+        idx++;
+      } else if (type === 'metric') {
+        const label = String(step.label || '').slice(0, 80);
+        const value = String(step.value == null ? '' : step.value).slice(0, 80);
+        if (label) {
+          const existing = (await db.list('os_metrics', { where: [['tenant_id', '==', run.tenant_id]] }).catch(() => []))
+            .find(m => String(m.label || '').toLowerCase() === label.toLowerCase());
+          if (existing) await db.update('os_metrics', existing.id, { value });
+          else await db.insert('os_metrics', { tenant_id: run.tenant_id, label, value, created_at: iso });
+        }
+        entry.result = { metric: label, value };
+        history.push(entry);
+        idx++;
+      } else if (type === 'notify') {
+        await db.insert('os_build_log', {
+          tenant_id: run.tenant_id, kind: 'cascade',
+          summary: String(step.text || 'Cascade notification').slice(0, 400),
+          created_at: iso,
+        }).catch(() => {});
+        entry.result = { notified: true };
+        history.push(entry);
+        idx++;
       } else if (type === 'branch') {
         const met = evalCondition(step.condition, run.context);
         const target = met ? step.if_true : step.if_false;

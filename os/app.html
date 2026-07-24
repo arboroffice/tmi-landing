@@ -217,6 +217,14 @@
   .cyc-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
   .cyc-chip{font-size:12px;font-weight:600;color:var(--ink-2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 12px;}
   .cyc-foot{margin-top:12px;}
+  .wf-step{background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+  .wf-step-h{display:flex;align-items:center;gap:10px;}
+  .wf-step-h .wf-type{flex:1;}
+  .wf-step-h .link{font-size:12px;}
+  .wf-step-b{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .wf-step-b:empty{display:none;}
+  .wf-step-b .wf-f{flex:1;min-width:130px;}
+  .wf-step select,.wf-step input{font-family:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);box-sizing:border-box;}
 
   .memo{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 20px;}
   .memo .m{padding:14px 0;border-top:1px solid var(--line);font-size:14px;display:flex;gap:12px;align-items:flex-start;}
@@ -565,8 +573,10 @@
   </section>
 
   <section class="view" data-view="workflows">
-    <div class="secbar" style="margin-top:0"><div><div class="h">Workflows</div><p class="sub">The repeatable sequences your OS runs so the same thing happens every time.</p></div><button class="btn add" onclick="addWorkflow()"><svg class="icon"><use href="#i-plus"/></svg> Add workflow</button></div>
+    <div class="secbar" style="margin-top:0"><div><div class="h">Cascades</div><p class="sub">One event, a sequence that ripples across your company. Pick a trigger, add steps, and the OS runs them in order, pausing on a wait or an approval. When a client is won, Finance sets up billing, Ops opens a kickoff, and your COO briefs you.</p></div><button class="btn add" onclick="openCascade()"><svg class="icon"><use href="#i-plus"/></svg> Build a cascade</button></div>
     <div id="workflows" style="margin-top:22px"></div>
+    <div class="lbl" style="margin-top:30px">Recent runs</div>
+    <div id="flowRuns" style="margin-top:12px"></div>
   </section>
 
   <section class="view" data-view="knowledge">
@@ -689,6 +699,7 @@ function show(v){
   if(v==='marketplace') loadMarket();
   if(v==='brain') renderBrain();
   if(v==='clients') loadClients();
+  if(v==='workflows') loadRuns();
   window.scrollTo(0,0);
 }
 
@@ -1095,25 +1106,99 @@ function openWorker(id){
 }
 
 /* ---- workflows ---- */
+var WF_TRIGGERS=[['manual','Manual — I run it'],['client_won','A client is won'],['invoice_overdue','An invoice goes overdue'],['lead_created','A new lead comes in'],['job_completed','A job is completed'],['metric_threshold','A metric crosses a line']];
+var WF_TRIG_LABEL={manual:'Manual',client_won:'A client is won',invoice_overdue:'An invoice goes overdue',lead_created:'A new lead comes in',job_completed:'A job is completed',metric_threshold:'A metric crosses a line'};
+var WF_STEPTYPES=[['worker','Run a worker'],['task','Create a task'],['metric','Update a metric'],['notify','Notify me'],['approval','Wait for my approval'],['wait','Wait a while'],['note','Note']];
+function wfStepLabel(s){
+  if(!s)return '';
+  if(typeof s!=='object')return esc(String(s));
+  var t=s.type;
+  if(t==='worker'){var w=find('workers',s.worker_id);return 'Run '+esc((w&&w.name)||'a worker');}
+  if(t==='task')return 'Create task: '+esc(s.title||'');
+  if(t==='metric')return 'Set '+esc(s.label||'metric')+' = '+esc(s.value||'');
+  if(t==='notify')return 'Notify: '+esc(s.text||'');
+  if(t==='approval')return 'Wait for approval: '+esc(s.prompt||'');
+  if(t==='wait')return 'Wait '+((s.until_ms||0)/86400000)+' day(s)';
+  return esc(s.text||'Note');
+}
 function renderWorkflows(){
   var host=document.getElementById('workflows');var flows=STATE.workflows||[];
-  if(!flows.length){host.innerHTML='<div class="empty"><h3>No workflows yet</h3><p>Build a repeatable sequence, or ask your COO to draft one.</p><div style="margin-top:16px"><button class="btn" onclick="addWorkflow()">Add workflow</button></div></div>';return;}
+  if(!flows.length){host.innerHTML='<div class="empty"><h3>No cascades yet</h3><p>Build a cascade: one trigger, then steps that ripple across your company. When a client is won, Finance sets up billing, Ops opens a kickoff, and your COO briefs you.</p><div style="margin-top:16px"><button class="btn" onclick="openCascade()">Build a cascade</button></div></div>';return;}
   host.innerHTML=flows.map(function(f){
-    var steps=(f.steps||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
+    var steps=(f.steps||[]).map(function(x){return '<li>'+wfStepLabel(x)+'</li>';}).join('');
+    var trg=WF_TRIG_LABEL[f.trigger]||f.trigger;
     return '<div class="row flow"><div class="r1"><h4>'+esc(f.name)+'</h4>'+
       '<span class="badge on">'+esc(f.status||'active')+'</span>'+
-      '<div class="racts"><span class="iconbtn" title="Edit" onclick="editWorkflow(\''+f.id+'\')"><svg class="icon"><use href="#i-pen"/></svg></span>'+
+      '<div class="racts"><button class="link" onclick="runCascade(\''+f.id+'\')">Test run</button><span class="iconbtn" title="Edit" onclick="openCascade(\''+f.id+'\')"><svg class="icon"><use href="#i-pen"/></svg></span>'+
       '<span class="iconbtn danger" title="Delete" onclick="delItem(\'workflows\',\''+f.id+'\',\''+esc(f.name)+'\')"><svg class="icon"><use href="#i-trash"/></svg></span></div></div>'+
-      (f.trigger?'<div class="trig">When: '+esc(f.trigger)+'</div>':'')+(steps?'<ol>'+steps+'</ol>':'')+'</div>';
+      (trg?'<div class="trig">When: '+esc(trg)+'</div>':'')+(steps?'<ol>'+steps+'</ol>':'')+'</div>';
   }).join('');
 }
-function workflowFields(f){f=f||{};return [
-  {name:'name',label:'Name',value:f.name,placeholder:'New lead to booked job'},
-  {name:'trigger',label:'When it starts',value:f.trigger,placeholder:'A new lead comes in'},
-  {name:'steps',label:'Steps (one per line)',type:'lines',value:(f.steps||[]).join('\n'),placeholder:'Text the lead in 2 minutes\nQualify and book\nNotify dispatch'}
-];}
-function addWorkflow(){openForm({title:'Add a workflow',fields:workflowFields(),onSave:function(v){return crud('workflows','create',{data:Object.assign({status:'active'},v)});}});}
-function editWorkflow(id){var f=find('workflows',id);openForm({title:'Edit workflow',fields:workflowFields(f),del:function(){return crud('workflows','delete',{id:id});},onSave:function(v){return crud('workflows','update',{id:id,data:v});}});}
+/* cascade builder: structured, typed steps the engine (_osflow) actually runs */
+function wfStepBody(step,i){
+  var t=step.type;
+  if(t==='worker'){var opts=(STATE.workers||[]).map(function(w){return '<option value="'+w.id+'"'+(String(step.worker_id)===String(w.id)?' selected':'')+'>'+esc(w.name)+'</option>';}).join('');return '<select class="wf-f" data-k="worker_id" data-i="'+i+'"><option value="">Pick a worker</option>'+opts+'</select>';}
+  if(t==='task')return '<input class="wf-f" data-k="title" data-i="'+i+'" placeholder="Task title" value="'+esc(step.title||'')+'"/>';
+  if(t==='metric')return '<input class="wf-f" data-k="label" data-i="'+i+'" placeholder="Metric name" value="'+esc(step.label||'')+'"/><input class="wf-f" data-k="value" data-i="'+i+'" placeholder="Value" value="'+esc(step.value||'')+'"/>';
+  if(t==='notify')return '<input class="wf-f" data-k="text" data-i="'+i+'" placeholder="What to tell you" value="'+esc(step.text||'')+'"/>';
+  if(t==='approval')return '<input class="wf-f" data-k="prompt" data-i="'+i+'" placeholder="What to approve" value="'+esc(step.prompt||'')+'"/>';
+  if(t==='wait')return '<input class="wf-f" data-k="days" data-i="'+i+'" type="number" min="0" step="0.5" placeholder="Days to wait" value="'+esc(step.days!=null?step.days:(step.until_ms?step.until_ms/86400000:''))+'"/>';
+  return '<input class="wf-f" data-k="text" data-i="'+i+'" placeholder="Note" value="'+esc(step.text||'')+'"/>';
+}
+function wfStepRow(step,i){
+  step=step||{type:'worker'};
+  var typeSel='<select class="wf-type" data-i="'+i+'">'+WF_STEPTYPES.map(function(o){return '<option value="'+o[0]+'"'+(step.type===o[0]?' selected':'')+'>'+esc(o[1])+'</option>';}).join('')+'</select>';
+  return '<div class="wf-step" data-i="'+i+'"><div class="wf-step-h">'+typeSel+'<span class="link" onclick="wfDelStep('+i+')">Remove</span></div><div class="wf-step-b">'+wfStepBody(step,i)+'</div></div>';
+}
+function wfCollect(){
+  var steps=[];
+  document.querySelectorAll('#wfSteps .wf-step').forEach(function(el){
+    var type=el.querySelector('.wf-type').value;var s={type:type};
+    el.querySelectorAll('.wf-f').forEach(function(inp){s[inp.getAttribute('data-k')]=inp.value;});
+    if(type==='wait'){s.until_ms=Math.round((parseFloat(s.days)||0)*86400000);delete s.days;}
+    steps.push(s);
+  });
+  return steps;
+}
+function wfRenderSteps(){document.getElementById('wfSteps').innerHTML=(window._wfSteps||[]).map(wfStepRow).join('');
+  document.querySelectorAll('#wfSteps .wf-type').forEach(function(sel){sel.onchange=function(){window._wfSteps=wfCollect();var i=parseInt(sel.getAttribute('data-i'),10);window._wfSteps[i]={type:sel.value};wfRenderSteps();};});
+}
+function wfAddStep(){window._wfSteps=wfCollect();window._wfSteps.push({type:'worker'});wfRenderSteps();}
+function wfDelStep(i){window._wfSteps=wfCollect();window._wfSteps.splice(i,1);if(!window._wfSteps.length)window._wfSteps=[{type:'worker'}];wfRenderSteps();}
+function openCascade(id){
+  var f=id?find('workflows',id):null;
+  window._wfSteps=(f&&Array.isArray(f.steps)&&f.steps.length)?f.steps.map(function(s){return (s&&typeof s==='object')?Object.assign({},s):{type:'note',text:String(s||'')};}):[{type:'worker'}];
+  var trig=(f&&f.trigger)||'manual';
+  var html='<h3>'+(f?'Edit cascade':'New cascade')+'</h3><div class="msub">One trigger, a sequence of steps across your company.</div>'+
+    '<div class="field" style="margin-top:14px"><label>Name</label><input id="wfName" value="'+esc((f&&f.name)||'')+'" placeholder="Client won cascade"/></div>'+
+    '<div class="field"><label>When it starts</label><select id="wfTrigger">'+WF_TRIGGERS.map(function(o){return '<option value="'+o[0]+'"'+(trig===o[0]?' selected':'')+'>'+esc(o[1])+'</option>';}).join('')+'</select></div>'+
+    '<div class="lbl" style="margin-top:12px">Steps</div><div id="wfSteps" style="margin-top:8px"></div>'+
+    '<button class="btn ghost sm" onclick="wfAddStep()" style="margin-top:10px"><svg class="icon"><use href="#i-plus"/></svg> Add step</button>'+
+    '<div class="mfoot">'+(f?'<button class="btn ghost" style="margin-right:auto" onclick="delItem(\'workflows\',\''+f.id+'\',\''+esc(f.name)+'\')">Delete</button>':'')+'<button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="saveCascade(\''+(f?f.id:'')+'\')">Save cascade</button></div>';
+  document.getElementById('mcard').innerHTML=html;
+  document.getElementById('modal').classList.add('on');window._form=null;
+  wfRenderSteps();
+}
+async function saveCascade(id){
+  var name=(document.getElementById('wfName').value||'').trim();
+  if(!name){toast('Name it first');return;}
+  var data={name:name,trigger:document.getElementById('wfTrigger').value,steps:wfCollect(),status:'active'};
+  try{ if(id)await crud('workflows','update',{id:id,data:data}); else await crud('workflows','create',{data:data}); closeModal();toast('Cascade saved');refresh(); }
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function runCascade(id){toast('Running cascade...');try{var j=await api('/api/os2-flow',{action:'run',workflow_id:id});var r=j.run||{};toast('Cascade '+(r.status||'started'));loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function loadRuns(){
+  var host=document.getElementById('flowRuns'); if(!host) return;
+  try{
+    var j=await api('/api/os2-flow',{action:'runs'});var runs=j.runs||[];
+    host.innerHTML=runs.length?runs.slice(0,12).map(function(r){
+      var badge=r.status==='done'?'done':(r.status==='error'?'pending':'approve');
+      return '<div class="actrow"><span class="badge '+badge+'">'+esc(r.status||'')+'</span><div class="acmain"><div class="actt">'+esc(r.workflow_name||'Cascade')+'</div><div class="acd">step '+(r.step||0)+' · '+fmt(r.created_at)+'</div></div>'+(r.status==='blocked'?'<button class="link" onclick="approveRun(\''+r.id+'\')">Approve</button>':(r.status==='waiting'?'<button class="link" onclick="resumeRun(\''+r.id+'\')">Resume</button>':''))+'</div>';
+    }).join(''):'<div class="empty" style="padding:20px"><p>No runs yet. Build a cascade and hit Test run.</p></div>';
+  }catch(e){ if(e.message!=='signed out') host.innerHTML='<div class="empty" style="padding:20px"><p>Runs unavailable.</p></div>'; }
+}
+async function approveRun(id){try{await api('/api/os2-flow',{action:'approve',run_id:id});toast('Approved');loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function resumeRun(id){try{await api('/api/os2-flow',{action:'resume',run_id:id});toast('Resumed');loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 
 /* ---- knowledge ---- */
 function renderKnowledge(){

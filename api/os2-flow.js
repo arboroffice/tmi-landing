@@ -5,6 +5,7 @@
 //
 // POST { action, ... }
 //   'run'     { workflow_id, context? } (manager) -> { run }
+//   'event'   { event, context? }       (manager) -> { runs, fired }
 //   'runs'                                          -> { runs }  newest first, 50
 //   'get'     { run_id }                            -> { run }
 //   'approve' { run_id }               (manager)    -> { run }
@@ -13,11 +14,11 @@
 const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { startRun, advance, approveRun } = require('./_osflow');
+const { emitEvent } = require('./_osevents');
 
 module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (require('./_oslabs').labsClosed(res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   const t = requireTenant(req, res);
   if (!t) return;
@@ -36,6 +37,12 @@ module.exports = async function handler(req, res) {
       if (!wf || wf.tenant_id !== tid) return res.status(404).json({ error: 'Workflow not found' });
       const run = await startRun(tenant, wf, b.context || {}, new Date().toISOString());
       return res.status(200).json({ run });
+    }
+
+    if (action === 'event') {
+      if (!requireRole(t, res, 'manager')) return;
+      const runs = await emitEvent(tenant, String(b.event || ''), b.context || {}, new Date().toISOString());
+      return res.status(200).json({ runs, fired: runs.length });
     }
 
     if (action === 'runs') {

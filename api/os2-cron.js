@@ -10,6 +10,7 @@
 
 const db = require('./_db');
 const { executeWorker } = require('./_osrun');
+const { advance } = require('./_osflow');
 const { scoreTenant } = require('./_osscore');
 const { tenantState, generateProof } = require('./_tmiproof');
 const { runScan } = require('./os2-pulse');
@@ -17,6 +18,24 @@ const { runScan } = require('./os2-pulse');
 const HOUR = 3600 * 1000;
 const MAX_PER_RUN = 40;   // safety cap so one sweep can never run unbounded
 const CONCURRENCY = 3;
+const MAX_RESUME_PER_RUN = 40;  // cap on paused cascade runs resumed per sweep
+
+// Resume every workflow run that was waiting on a timer whose time has come, so a
+// cascade with a "wait 2 days" step continues on its own. Best-effort per run.
+async function resumeWaitingRuns() {
+  let resumed = 0;
+  try {
+    const now = Date.now();
+    const runs = (await db.list('os_workflow_runs', { where: [['status', '==', 'waiting']], limit: 200 }).catch(() => []))
+      .filter(r => r && (r.resume_at == null || Number(r.resume_at) <= now))
+      .slice(0, MAX_RESUME_PER_RUN);
+    for (const r of runs) {
+      try { await advance(r, new Date().toISOString()); resumed++; }
+      catch (e) { console.error('resumeWaitingRuns', r.id, e.message); }
+    }
+  } catch (e) { console.error('resumeWaitingRuns sweep:', e.message); }
+  return resumed;
+}
 const MAX_PROOF_PER_RUN = 3;   // Claude is expensive; cap auto-proof per sweep
 const MAX_PULSE_PER_RUN = 10;  // one Pulse scan per onboarded tenant, capped for cron time
 
@@ -90,12 +109,13 @@ module.exports = async function handler(req, res) {
     }
     await Promise.all(Array.from({ length: CONCURRENCY }, drain));
 
+    const resumed = await resumeWaitingRuns();
     const proofed = await autoProof();
     const pulsed = await pulseSweep();
     // Data sync runs on its own dedicated cron (os2-sync, every 6h) so it is
     // never starved by the Opus-heavy sweeps above under a tight maxDuration.
 
-    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, proofed, pulsed });
+    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, resumed, proofed, pulsed });
   } catch (e) {
     console.error('os2-cron:', e.message);
     return res.status(500).json({ error: 'cron failed' });
