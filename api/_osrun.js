@@ -6,8 +6,8 @@
 // scheduled sweep (os2-cron).
 
 const db = require('./_db');
-const { normalizeAction, canAutoFire, runAction } = require('./_osact');
-const { getPolicies, getSpentToday } = require('./_ospolicy');
+const { normalizeAction, runAction } = require('./_osact');
+const { evaluate, getPolicies, getSpentToday } = require('./_ospolicy');
 
 const MODEL = 'claude-opus-4-8';
 
@@ -78,7 +78,17 @@ async function executeWorker(worker, trigger) {
 
   const product = await produce(tenant, worker, { knowledge, metrics, tasks });
   const action = product.action;
-  const autoFire = canAutoFire(tenant, worker, action);
+
+  // Evaluate policy explicitly (rather than a bare yes/no) so that when a worker
+  // has to escalate we can record WHY on the output and show it in the inbox.
+  let autoFire = false, reason = '';
+  if (action) {
+    const type = action.channel === 'internal' ? 'internal' : String(action.channel || 'external_write');
+    const amount = typeof action.amount === 'number' ? action.amount : undefined;
+    const decision = evaluate(tenant, worker, type, amount);
+    autoFire = decision.mode === 'auto';
+    if (!autoFire) reason = decision.reason || '';
+  }
 
   // With a proposed action: fire now if policy allows, otherwise hold for approval.
   // Without one: internal work, done unless the worker asks first.
@@ -86,10 +96,14 @@ async function executeWorker(worker, trigger) {
   if (action) status = autoFire ? 'done' : 'pending';
   else status = worker.autonomy === 'approve' ? 'pending' : 'done';
 
+  // An internal work product held for sign-off gets a plain reason too.
+  if (!action && status === 'pending') reason = 'This worker asks you to approve its work before it counts as done.';
+
   const output = await db.insert('os_outputs', {
     tenant_id: tid, worker_id: worker.id, worker_name: worker.name,
     title: product.title, body: product.body, status,
     action: action || null,
+    reason: reason || null,
     trigger: trigger || 'manual', created_at: new Date().toISOString(),
   });
 

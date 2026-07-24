@@ -189,6 +189,11 @@
   .actrow .actt{font-size:13.5px;color:var(--ink);font-weight:500;}
   .actrow .acd{font-size:11.5px;color:var(--ink-3);font-family:var(--mono);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .outbody{white-space:pre-wrap;font-size:14px;color:var(--ink);line-height:1.6;background:var(--bg-alt);border:1px solid var(--line);border-radius:12px;padding:16px 18px;max-height:52vh;overflow:auto;margin-top:14px;}
+  .outedit{width:100%;box-sizing:border-box;font-family:inherit;font-size:14px;color:var(--ink);line-height:1.6;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-height:200px;max-height:52vh;overflow:auto;margin-top:14px;resize:vertical;}
+  .outedit:focus{outline:none;border-color:var(--ink-3);}
+  .escline{margin-top:10px;font-size:14px;font-weight:600;color:var(--ink);}
+  .escwhy{margin-top:8px;font-size:13px;color:var(--ink-2);background:var(--warn-bg);border:1px solid #f0e0a8;border-radius:10px;padding:9px 13px;line-height:1.5;}
+  .escwhy strong{color:var(--ink);}
 
   .memo{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 20px;}
   .memo .m{padding:14px 0;border-top:1px solid var(--line);font-size:14px;display:flex;gap:12px;align-items:flex-start;}
@@ -1090,14 +1095,26 @@ function actDesc(a){if(!a||typeof a!=='object')return '';if(a.channel==='interna
 function actChip(o){if(!o.action)return '';return '<span class="actpill">&rarr; '+actDesc(o.action)+'</span>';}
 var ACTBADGE={sent:'sent',filed:'filed',staged:'to send',failed:'failed'};
 function acStatusBadge(s){var cls=s==='sent'||s==='filed'?'done':s==='failed'?'pending':'approve';return '<span class="badge '+cls+'">'+(ACTBADGE[s]||s)+'</span>';}
+function escalationLine(o){
+  if(!o) return '';
+  var who=o.worker_name||'A worker';
+  var a=o.action;
+  if(a&&a.channel&&a.channel!=='internal'&&a.to){
+    var verb=a.channel==='sms'?'text':'email';
+    return who+' wants to '+verb+' '+a.to+' — waiting on you.';
+  }
+  return who+' finished a draft and wants your sign-off.';
+}
 function renderInbox(){
   var outs=STATE.outputs||[];
   var pending=outs.filter(function(o){return o.status==='pending';});
   var done=outs.filter(function(o){return o.status==='done';});
   document.getElementById('inboxPending').innerHTML=pending.length?pending.map(function(o){
     var send=o.action&&o.action.channel!=='internal';
-    return '<div class="kcard"><div class="kh"><span class="badge pending">Needs approval</span><h4>'+esc(o.title)+'</h4>'+actChip(o)+'<span class="who">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+'</span></div>'+
-      '<div class="kf"><button class="btn sm" onclick="approveOutput(\''+o.id+'\')">'+(send?'Approve &amp; send':'Approve')+'</button><button class="btn sm ghost" onclick="viewOutput(\''+o.id+'\')">View</button><button class="link" onclick="dismissOutput(\''+o.id+'\')">Dismiss</button></div></div>';
+    return '<div class="kcard"><div class="kh"><span class="badge pending">Waiting on you</span><h4>'+esc(o.title)+'</h4>'+actChip(o)+'<span class="who">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+'</span></div>'+
+      '<div class="escline">'+esc(escalationLine(o))+'</div>'+
+      (o.reason?'<div class="escwhy"><strong>Why it is asking:</strong> '+esc(o.reason)+'</div>':'')+
+      '<div class="kf"><button class="btn sm" onclick="approveOutput(\''+o.id+'\')">'+(send?'Approve &amp; send':'Approve')+'</button><button class="btn sm ghost" onclick="viewOutput(\''+o.id+'\')">'+(send?'Edit':'View')+'</button><button class="link" onclick="dismissOutput(\''+o.id+'\')">Decline</button></div></div>';
   }).join(''):'<div class="empty"><h3>Nothing waiting</h3><p>When an "asks first" worker runs, its draft lands here for your approval.</p></div>';
   document.getElementById('inboxDone').innerHTML=done.length?done.map(function(o){
     return '<div class="kcard"><div class="kh"><span class="badge done">done</span><h4>'+esc(o.title)+'</h4>'+(o.action_status?acStatusBadge(o.action_status):'')+'<span class="who">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+'</span></div>'+
@@ -1238,19 +1255,24 @@ function viewOutput(id){var o=find('outputs',id);if(o)showOutput(o);}
 function showOutput(o){
   window._out=o.body||'';
   var send=o.action&&o.action.channel!=='internal';
-  var html='<h3>'+esc(o.title)+'</h3><div class="msub">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+(o.status==='pending'?' · needs your approval':'')+(o.action?' · '+actDesc(o.action):'')+(o.action_status?' · '+(ACTBADGE[o.action_status]||o.action_status):'')+'</div>'+
-    '<div class="outbody">'+esc(o.body||'')+'</div>'+
+  var pending=o.status==='pending';
+  var html='<h3>'+esc(o.title)+'</h3><div class="msub">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+(pending?' · waiting on you':'')+(o.action?' · '+actDesc(o.action):'')+(o.action_status?' · '+(ACTBADGE[o.action_status]||o.action_status):'')+'</div>'+
+    (pending?'<div class="escline" style="margin-top:12px">'+esc(escalationLine(o))+'</div>':'')+
+    (pending&&o.reason?'<div class="escwhy"><strong>Why it is asking:</strong> '+esc(o.reason)+'</div>':'')+
+    (pending
+      ? '<textarea id="outEdit" class="outedit" spellcheck="true">'+esc(o.body||'')+'</textarea>'
+      : '<div class="outbody">'+esc(o.body||'')+'</div>')+
     '<div class="mfoot"><button class="btn ghost" style="margin-right:auto" onclick="copyOutput()"><svg class="icon"><use href="#i-copy"/></svg> Copy</button>'+
-    (o.status==='pending'
-      ? '<button class="btn ghost" onclick="dismissOutput(\''+o.id+'\')">Dismiss</button><button class="btn" onclick="approveOutput(\''+o.id+'\')">'+(send?'Approve &amp; send':'Approve')+'</button>'
+    (pending
+      ? '<button class="btn ghost" onclick="dismissOutput(\''+o.id+'\')">Decline</button><button class="btn" onclick="approveOutput(\''+o.id+'\')">'+(send?'Approve &amp; send':'Approve')+'</button>'
       : '<button class="btn" onclick="closeModal()">Close</button>')+'</div>';
   document.getElementById('mcard').innerHTML=html;
   document.getElementById('modal').classList.add('on');
   window._form=null;
 }
-function copyOutput(){try{navigator.clipboard.writeText(window._out||'');toast('Copied');}catch(e){toast('Select and copy');}}
-async function approveOutput(id){try{var j=await api('/api/os2-act',{action:'approve',output_id:id});closeModal();if(j.blocked){toast(j.reason||'A guardrail blocks this. Change it in Guardrails.');refresh();return;}var s=j.act&&j.act.status;toast(s==='sent'?'Approved and sent':s==='staged'?'Approved. Connect a channel in Settings to send it.':s==='failed'?'Approved, but the send failed':'Approved');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
-async function dismissOutput(id){try{await api('/api/os2-act',{action:'dismiss',output_id:id});closeModal();toast('Dismissed');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+function copyOutput(){var ed=document.getElementById('outEdit');var txt=ed?ed.value:(window._out||'');try{navigator.clipboard.writeText(txt);toast('Copied');}catch(e){toast('Select and copy');}}
+async function approveOutput(id){try{var ed=document.getElementById('outEdit');var payload={action:'approve',output_id:id};if(ed)payload.body=ed.value;var j=await api('/api/os2-act',payload);closeModal();if(j.blocked){toast(j.reason||'A guardrail blocks this. Change it in Guardrails.');refresh();return;}var s=j.act&&j.act.status;toast(s==='sent'?'Approved and sent':s==='staged'?'Approved. Connect a channel in Settings to send it.':s==='failed'?'Approved, but the send failed':'Approved');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function dismissOutput(id){try{await api('/api/os2-act',{action:'dismiss',output_id:id});closeModal();toast('Declined');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function resendAction(id){try{var j=await api('/api/os2-act',{action:'send',action_id:id});var s=j.act&&j.act.status;toast(s==='sent'?'Sent':s==='staged'?'Still not connected. Add the channel in Settings.':'Could not send');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 
 /* ---- settings ---- */

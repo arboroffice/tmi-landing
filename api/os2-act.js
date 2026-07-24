@@ -63,13 +63,26 @@ module.exports = async function handler(req, res) {
       if (!output || output.tenant_id !== tid) return res.status(404).json({ error: 'Output not found' });
       const tenant = await db.getById('os_tenants', tid);
 
-      let act = null;
-      if (output.action) {
-        const blocked = await hardStop(tenant, output.action);
-        if (blocked) return res.status(200).json({ blocked: true, reason: blocked, output });
-        act = await runAction({ tenant, output, worker_name: output.worker_name, actor: t.email || 'owner' }, output.action);
+      // The approver can edit the draft before it goes out. An edited body is
+      // carried into the action so the real send uses the approved wording.
+      const editedBody = typeof b.body === 'string' ? b.body.slice(0, 12000) : null;
+      const editedSubject = typeof b.subject === 'string' ? b.subject.slice(0, 200) : null;
+      let outAction = output.action;
+      if (outAction && (editedBody != null || editedSubject != null)) {
+        outAction = Object.assign({}, outAction);
+        if (editedBody != null) outAction.body = editedBody.slice(0, 8000);
+        if (editedSubject != null) outAction.subject = editedSubject;
       }
-      const patch = { status: 'done' };
+
+      let act = null;
+      if (outAction) {
+        const blocked = await hardStop(tenant, outAction);
+        if (blocked) return res.status(200).json({ blocked: true, reason: blocked, output });
+        act = await runAction({ tenant, output, worker_name: output.worker_name, actor: t.email || 'owner' }, outAction);
+      }
+      const patch = { status: 'done', reason: null };
+      if (editedBody != null) patch.body = editedBody;
+      if (outAction && output.action) patch.action = outAction;
       if (act) patch.action_status = act.status;
       const updated = await db.update('os_outputs', output.id, patch);
       const tail = act ? (act.status === 'sent' ? ` and ${act.detail.replace(/\.$/, '').toLowerCase()}` : act.status === 'staged' ? ' (channel not connected yet)' : act.status === 'failed' ? ' (send failed)' : '') : '';
@@ -97,6 +110,7 @@ module.exports = async function handler(req, res) {
       const output = await db.getById('os_outputs', String(b.output_id || ''));
       if (!output || output.tenant_id !== tid) return res.status(404).json({ error: 'Output not found' });
       await db.update('os_outputs', output.id, { status: 'dismissed' });
+      await log(tid, `Declined ${output.worker_name || 'a worker'}'s ${output.title || 'draft'}.`);
       return res.status(200).json({ ok: true });
     }
 
