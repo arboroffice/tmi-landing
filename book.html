@@ -67,7 +67,6 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
   button.cta:disabled{opacity:.6;cursor:default;}
   .reassure{margin-top:16px;font-size:13px;color:var(--ink-3);line-height:1.5;}
   .err{color:#c0392b;font-size:13px;margin-top:10px;min-height:16px;}
-  #cal-embed{width:100%;min-height:640px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#fff;margin-top:6px;}
   .hidden{display:none !important;}
 </style>
 <script src="/rb2b.js"></script>
@@ -80,9 +79,8 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
 
     <!-- STEP 1: details -->
     <div id="step-form">
-      <div class="steps"><b>1. Your details</b><span></span>2. Pick a time</div>
-      <h1>Book your <em>free</em> call.</h1>
-      <p class="sub">Tell us where to reach you, then grab a time on the next screen. On the call we map where your operation leaks time and money and show you what we would build.</p>
+      <h1>Request your <em>free</em> call.</h1>
+      <p class="sub">Tell us where to reach you and we will call you back to map where your operation leaks time and money and show you what we would build.</p>
       <form id="lead-form" autocomplete="on">
         <div class="row">
           <div class="field"><label for="name">Name</label><input id="name" name="name" required placeholder="Your name"/></div>
@@ -108,55 +106,24 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
             <option>Other</option>
           </select>
         </div>
-        <button class="cta" type="submit" id="submit-btn">Book my call &rarr;</button>
+        <button class="cta" type="submit" id="submit-btn">Request my call &rarr;</button>
         <div class="err" id="err"></div>
       </form>
-      <p class="reassure">Takes 15 seconds. You pick the time on the next step.</p>
+      <p class="reassure">We reach out within one business day.</p>
     </div>
 
-    <!-- STEP 2: calendar -->
-    <div id="step-cal" class="hidden">
-      <div class="steps">1. Your details<span></span><b>2. Pick a time</b></div>
-      <h1>Pick your time.</h1>
-      <p class="sub">Choose a slot that works. You will get a confirmation and a reminder before the call.</p>
-      <div id="cal-embed"></div>
+    <!-- SUCCESS -->
+    <div id="step-done" class="hidden">
+      <h1>You're on the list, <em id="done-name">friend</em>.</h1>
+      <p class="sub">Thanks for reaching out. Our team will call you within one business day at the number you gave us. Keep an eye on your phone and email for the confirmation.</p>
     </div>
   </div>
 </div>
 
 <script>
-// Cal.com embed
-(function (C, A, L) {
-  let p = function (a, ar) { a.q.push(ar); };
-  let d = C.document;
-  C.Cal = C.Cal || function () {
-    let cal = C.Cal; let ar = arguments;
-    if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement('script')).src = A; cal.loaded = true; }
-    if (ar[0] === L) { const api = function () { p(api, arguments); }; const ns = ar[1]; api.q = api.q || []; typeof ns === 'string' ? (cal.ns[ns] = api) && p(api, ar) : p(cal, ar); return; }
-    p(cal, ar);
-  };
-})(window, 'https://app.cal.com/embed/embed.js', 'init');
-Cal('init', { origin: 'https://cal.com' });
-
-function showCalendar(prefill) {
-  document.getElementById('step-form').classList.add('hidden');
-  document.getElementById('step-cal').classList.remove('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  Cal('inline', { elementOrSelector: '#cal-embed', calLink: 'mia-elianaa-a4n2hk/30min', layout: 'month_view', config: prefill });
-  Cal('ui', { styles: { branding: { brandColor: '#E4FF97' } }, hideEventTypeDetails: false, layout: 'month_view' });
-}
-
-// Booking success -> Meta Schedule event, then the thank-you page.
-Cal('on', { action: 'bookingSuccessful', callback: function (e) {
-  try {
-    var d = (e && e.detail && e.detail.data) ? e.detail.data : {};
-    var uid = (d.booking && (d.booking.uid || d.booking.id)) || d.uid || '';
-    if (typeof fbq === 'function') fbq('track', 'Schedule', {}, uid ? { eventID: 'booking_' + uid } : {});
-    if (window.oaiq) oaiq("measure", "lead_created", { type: "customer_action" });
-  } catch (err) {}
-  setTimeout(function () { window.location.href = '/thank-you'; }, 600);
-}});
-
+// Callback request only. No calendar booking on marketing pages: the visitor
+// submits their details and we call them back. A shared event_id dedupes the
+// client pixel with the server-side lead conversion.
 document.getElementById('lead-form').addEventListener('submit', async function (ev) {
   ev.preventDefault();
   var btn = document.getElementById('submit-btn');
@@ -169,18 +136,21 @@ document.getElementById('lead-form').addEventListener('submit', async function (
   var website = document.getElementById('website').value.trim();
   var heard = document.getElementById('heard').value;
   if (!name || !email || !phone) { err.textContent = 'Name, email, and phone are required.'; return; }
-  btn.disabled = true; btn.textContent = 'One sec...';
+  btn.disabled = true; btn.textContent = 'Sending...';
+  var eid = 'lead_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  try { if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Callback request' }); } catch (e) {}
+  try { if (window.oaiq) oaiq('measure', 'lead_created', { type: 'customer_action', event_id: eid }); } catch (e) {}
   try {
-    if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'Discovery Call' });
-    // Capture the lead (best-effort). Never block the booking on it.
-    fetch('/api/lead', {
+    await fetch('/api/lead', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, email: email, phone: phone, company: company, website: website, heard_from: heard, source: 'book-call' }),
-    }).catch(function () {});
+      body: JSON.stringify({ name: name, email: email, phone: phone, company: company, website: website, heard_from: heard, source: 'callback-request', event_id: eid }),
+    });
   } catch (e) {}
-  // Store for the thank-you page.
   try { sessionStorage.setItem('tmi_lead', JSON.stringify({ name: name, email: email })); } catch (e) {}
-  showCalendar({ name: name, email: email, notes: company ? ('Company: ' + company + (website ? ' - ' + website : '')) : '' });
+  var dn = document.getElementById('done-name'); if (dn) dn.textContent = name.split(' ')[0] || 'friend';
+  document.getElementById('step-form').classList.add('hidden');
+  document.getElementById('step-done').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 </script>
 </body>

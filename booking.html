@@ -1,139 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '3354624811351271');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book a Call - TMI</title>
-<meta name="robots" content="noindex, nofollow">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="robots" content="noindex"/>
+<title>Request a call | TMI</title>
+<link rel="canonical" href="https://www.tmitechai.com/book"/>
+<meta http-equiv="refresh" content="0; url=/book"/>
+<script>window.location.replace('/book' + (window.location.search || ''));</script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --bg-dark: #0a0b14; --bg-card: #111220; --chart: #E4FF97; --serif: "Barlow", sans-serif; }
-  html, body { background: var(--bg-dark); color: #fff; font-family: var(--serif); -webkit-font-smoothing: antialiased; min-height: 100vh; }
-  body::before {
-    content: '';
-    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
-    width: 900px; height: 500px;
-    background: radial-gradient(ellipse at 50% 0%, rgba(228,255,151,0.07) 0%, transparent 65%);
-    pointer-events: none; z-index: 0;
-  }
-  .page {
-    position: relative; z-index: 1;
-    display: flex; flex-direction: column; align-items: center;
-    padding: 56px 24px 80px;
-  }
-  .inner { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-  .wordmark {
-    font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
-    color: rgba(255,255,255,0.3); margin-bottom: 40px;
-  }
-  .wordmark em { color: var(--chart); font-style: normal; }
-  .check-wrap {
-    width: 64px; height: 64px;
-    background: rgba(228,255,151,0.08); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 24px;
-  }
-  h1 { font-size: clamp(26px, 4vw, 40px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
-  .sub { font-size: 16px; line-height: 1.65; color: rgba(255,255,255,0.45); max-width: 440px; margin-bottom: 48px; }
-  #cal-embed {
-    width: 100%; min-height: 620px;
-    border-radius: 14px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.07);
-    background: var(--bg-card);
-  }
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#0a0b14;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;}
+  a{color:#E4FF97;}
 </style>
-<script src="/rb2b.js"></script>
-<script src="/footer-signup.js" defer></script>
-<!-- OpenAI Ads pixel --><script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"1SVHHxEVsMKxiFJd8MnXZm",debug:false});</script>
 </head>
 <body>
-<div class="page">
-  <div class="inner">
-    <div class="wordmark">TMI - <em>Intelligent Infrastructure</em> for Field Operations</div>
-    <div class="check-wrap">
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M5 14l7 7L23 7" stroke="#E4FF97" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
-    <h1>Book your strategy call.</h1>
-    <p class="sub">Pick a time below. You and the founder will walk through your Complete Audit together and choose your path.</p>
-    <div id="gate" style="font-size:15px;color:rgba(255,255,255,0.5);">Checking your audit&hellip;</div>
-    <div id="cal-embed" style="display:none;"></div>
-  </div>
-</div>
-
-<script>
-(function (C, A, L) {
-  let p = function (a, ar) { a.q.push(ar); };
-  let d = C.document;
-  C.Cal = C.Cal || function () {
-    let cal = C.Cal; let ar = arguments;
-    if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement('script')).src = A; cal.loaded = true; }
-    if (ar[0] === L) { const api = function () { p(api, arguments); }; const ns = ar[1]; api.q = api.q || []; typeof ns === 'string' ? (cal.ns[ns] = api) && p(api, ar) : p(cal, ar); return; }
-    p(cal, ar);
-  };
-})(window, 'https://app.cal.com/embed/embed.js', 'init');
-
-Cal('init', { origin: 'https://cal.com' });
-
-// Gate: nobody books a call until the Complete Audit is paid for. We require a
-// paid Stripe session and verify it server-side before rendering the calendar.
-// No valid paid session -> send them to the funnel.
-var _cp = new URLSearchParams(window.location.search);
-var _session = _cp.get('session_id') || '';
-
-function renderCalendar(prefill) {
-  document.getElementById('gate').style.display = 'none';
-  document.getElementById('cal-embed').style.display = 'block';
-  Cal('inline', { elementOrSelector: '#cal-embed', calLink: 'mia-elianaa-a4n2hk/30min', layout: 'month_view', config: prefill });
-  Cal('ui', { styles: { branding: { brandColor: '#E4FF97' } }, hideEventTypeDetails: false, layout: 'month_view' });
-}
-
-(async function gate() {
-  if (!_session) { window.location.replace('/complete-audit'); return; }
-  try {
-    var v = await (await fetch('/api/checkout-verify?session_id=' + encodeURIComponent(_session))).json();
-    if (!v || !v.paid) { window.location.replace('/complete-audit'); return; }
-    var prefill = {};
-    if (v.email) prefill.email = v.email;
-    if (v.company) prefill.notes = 'Complete Audit - ' + v.company;
-    renderCalendar(prefill);
-  } catch (e) {
-    window.location.replace('/complete-audit');
-  }
-})();
-
-// Meta Pixel - Schedule conversion when a call is booked. Deduped with the
-// server-side Conversions API event (api/booking-confirmed.js) via the Cal
-// booking uid, so the same booking counts once.
-Cal('on', { action: 'bookingSuccessful', callback: function (e) {
-  try {
-    var d = (e && e.detail && e.detail.data) ? e.detail.data : {};
-    var uid = (d.booking && (d.booking.uid || d.booking.id)) || d.uid || '';
-    if (typeof fbq === 'function') {
-      fbq('track', 'Schedule', {}, uid ? { eventID: 'booking_' + uid } : {});
-    }
-  } catch (err) {}
-}});
-</script>
+  <p>Taking you to request your call. <a href="/book">Continue</a> if you are not redirected.</p>
 </body>
 </html>
