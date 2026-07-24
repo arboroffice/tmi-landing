@@ -764,7 +764,11 @@ async function api(path,body){
   if(!r.ok) throw new Error(j.error||'Something went wrong');
   return j;
 }
-function crud(resource,action,extra){return api('/api/os2-crud',Object.assign({resource:resource,action:action},extra||{}));}
+// Viewers are read-only. guardWrite() gives a clean message instead of letting
+// a manager-only action hit the server and come back as a raw error.
+function canWrite(){return ((STATE&&STATE.me&&STATE.me.role)||'owner')!=='viewer';}
+function guardWrite(){if(!canWrite()){toast('You have view-only access');return false;}return true;}
+function crud(resource,action,extra){var a=String(action||'');if((a==='create'||a==='update'||a==='delete')&&!guardWrite())return Promise.reject(new Error('signed out'));return api('/api/os2-crud',Object.assign({resource:resource,action:action},extra||{}));}
 function find(list,id){return (STATE[list]||[]).find(function(x){return x.id===id;});}
 
 /* nav drawer (mobile) */
@@ -1163,11 +1167,12 @@ function workerScore(w){
 function addWorker(){openForm({title:'Add an AI worker',sub:'Give it a role and how much rope it has.',fields:workerFields(),onSave:function(v){return crud('workers','create',{data:Object.assign({status:'ready'},v)});}});}
 function editWorker(id){var w=find('workers',id);openForm({title:'Edit worker',fields:workerFields(w),del:function(){return crud('workers','delete',{id:id});},onSave:function(v){return crud('workers','update',{id:id,data:v});}});}
 async function toggleWorker(id,el){
+  if(!guardWrite())return;
   var was=el.classList.contains('on');el.classList.toggle('on');
   try{var j=await api('/api/os2-worker',{id:id,action:'toggle'});var on=j.worker&&j.worker.status==='active';var w=find('workers',id);if(w)w.status=j.worker.status;el.classList.toggle('on',on);toast(on?'Worker turned on':'Worker paused');briefingLoaded=false;refresh();}
   catch(e){el.classList.toggle('on',was);if(e.message!=='signed out')toast(e.message);}
 }
-async function runWorker(id,btn){btn.disabled=true;var t=btn.textContent;btn.textContent='Working...';
+async function runWorker(id,btn){if(!guardWrite())return;btn.disabled=true;var t=btn.textContent;btn.textContent='Working...';
   try{
     var j=await api('/api/os2-run',{id:id});
     await refresh();briefingLoaded=false;
@@ -1284,8 +1289,8 @@ async function saveCascade(id){
   try{ if(id)await crud('workflows','update',{id:id,data:data}); else await crud('workflows','create',{data:data}); closeModal();toast('Cascade saved');refresh(); }
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
-async function runCascade(id){toast('Running cascade...');try{var j=await api('/api/os2-flow',{action:'run',workflow_id:id});var r=j.run||{};toast('Cascade '+(r.status||'started'));loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
-async function fireEvent(ev){toast('Firing '+(WF_TRIG_LABEL[ev]||ev)+'...');try{var j=await api('/api/os2-flow',{action:'event',event:ev});toast(j.fired?(j.fired+' cascade'+(j.fired>1?'s':'')+' fired'):'No cascade listens for that yet');loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function runCascade(id){if(!guardWrite())return;toast('Running cascade...');try{var j=await api('/api/os2-flow',{action:'run',workflow_id:id});var r=j.run||{};toast('Cascade '+(r.status||'started'));loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function fireEvent(ev){if(!guardWrite())return;toast('Firing '+(WF_TRIG_LABEL[ev]||ev)+'...');try{var j=await api('/api/os2-flow',{action:'event',event:ev});toast(j.fired?(j.fired+' cascade'+(j.fired>1?'s':'')+' fired'):'No cascade listens for that yet');loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function loadRuns(){
   var host=document.getElementById('flowRuns'); if(!host) return;
   try{
@@ -1608,8 +1613,8 @@ async function runPulse(){
   catch(e){if(e.message!=='signed out')toast(e.message);}
   if(btn){btn.disabled=false;btn.innerHTML='<svg class="icon"><use href="#i-coo"/></svg> Scan now';}
 }
-async function pulseAct(id){try{var j=await api('/api/os2-pulse',{action:'act',signal_id:id});var r=j.result||{};toast(r.task?'Task created':r.output?'Worker ran':'Done');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
-async function pulseDismiss(id){try{await api('/api/os2-pulse',{action:'dismiss',signal_id:id});refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function pulseAct(id){if(!guardWrite())return;try{var j=await api('/api/os2-pulse',{action:'act',signal_id:id});var r=j.result||{};toast(r.task?'Task created':r.output?'Worker ran':'Done');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function pulseDismiss(id){if(!guardWrite())return;try{await api('/api/os2-pulse',{action:'dismiss',signal_id:id});refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 
 function viewOutput(id){var o=find('outputs',id);if(o)showOutput(o);}
 function showOutput(o){
@@ -1631,9 +1636,9 @@ function showOutput(o){
   window._form=null;
 }
 function copyOutput(){var ed=document.getElementById('outEdit');var txt=ed?ed.value:(window._out||'');try{navigator.clipboard.writeText(txt);toast('Copied');}catch(e){toast('Select and copy');}}
-async function approveOutput(id){try{var ed=document.getElementById('outEdit');var payload={action:'approve',output_id:id};if(ed)payload.body=ed.value;var j=await api('/api/os2-act',payload);closeModal();if(j.blocked){toast(j.reason||'A guardrail blocks this. Change it in Guardrails.');refresh();return;}var s=j.act&&j.act.status;toast(s==='sent'?'Approved and sent':s==='staged'?'Approved. Connect a channel in Settings to send it.':s==='failed'?'Approved, but the send failed':'Approved');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
-async function dismissOutput(id){try{await api('/api/os2-act',{action:'dismiss',output_id:id});closeModal();toast('Declined');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
-async function resendAction(id){try{var j=await api('/api/os2-act',{action:'send',action_id:id});var s=j.act&&j.act.status;toast(s==='sent'?'Sent':s==='staged'?'Still not connected. Add the channel in Settings.':'Could not send');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function approveOutput(id){if(!guardWrite())return;try{var ed=document.getElementById('outEdit');var payload={action:'approve',output_id:id};if(ed)payload.body=ed.value;var j=await api('/api/os2-act',payload);closeModal();if(j.blocked){toast(j.reason||'A guardrail blocks this. Change it in Guardrails.');refresh();return;}var s=j.act&&j.act.status;toast(s==='sent'?'Approved and sent':s==='staged'?'Approved. Connect a channel in Settings to send it.':s==='failed'?'Approved, but the send failed':'Approved');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function dismissOutput(id){if(!guardWrite())return;try{await api('/api/os2-act',{action:'dismiss',output_id:id});closeModal();toast('Declined');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function resendAction(id){if(!guardWrite())return;try{var j=await api('/api/os2-act',{action:'send',action_id:id});var s=j.act&&j.act.status;toast(s==='sent'?'Sent':s==='staged'?'Still not connected. Add the channel in Settings.':'Could not send');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 
 /* ---- settings ---- */
 function renderSettings(){
@@ -1945,12 +1950,14 @@ function openMarketItem(id){
   document.getElementById('modal').classList.add('on');window._form=null;
 }
 async function installTemplate(id,btn){
+  if(!guardWrite())return;
   if(btn){btn.disabled=true;btn.textContent='Installing...';}
   try{var j=await api('/api/os2-market',{action:'install',id:id});var inst=j.installed||{};toast('Installed '+(inst.label||'it')+'. TMI wires the backend.');await refresh();}
   catch(e){if(e.message!=='signed out')toast(e.message);}
   if(btn){btn.disabled=false;btn.textContent='Install';}
 }
 async function installFromModal(id,btn){
+  if(!guardWrite())return;
   if(btn){btn.disabled=true;btn.textContent='Installing...';}
   try{var j=await api('/api/os2-market',{action:'install',id:id});var inst=j.installed||{};closeModal();toast('Installed '+(inst.label||'it')+'. TMI wires the backend.');await refresh();}
   catch(e){if(btn){btn.disabled=false;btn.textContent='Install';}if(e.message!=='signed out')toast(e.message);}
@@ -2470,17 +2477,19 @@ function paletteViews(){
     .map(function(v){return {label:'Go to '+v[1],key:'View',run:function(){show(v[0]);}};});
 }
 function buildCommands(){
-  var cmds=[
-    {label:'Add a task',key:'New',run:addTask},
-    {label:'Add a metric',key:'New',run:addMetric},
-    {label:'Add an AI worker',key:'New',run:addWorker},
-    {label:'Set a goal',key:'New',run:addGoal},
-    {label:'Connect a tool',key:'Go',run:function(){show('integrations');}},
-    {label:'Request a build from TMI',key:'Build',run:addRequest}
-  ];
-  (STATE&&STATE.workers||[]).forEach(function(w){
-    cmds.push({label:'Run '+(w.name||'worker'),key:'Run',run:function(){runWorkerById(w.id);}});
-  });
+  var cmds=[];
+  // Create/run commands only for roles that can write.
+  if(canWrite()){
+    cmds.push({label:'Add a task',key:'New',run:addTask});
+    cmds.push({label:'Add a metric',key:'New',run:addMetric});
+    cmds.push({label:'Add an AI worker',key:'New',run:addWorker});
+    cmds.push({label:'Set a goal',key:'New',run:addGoal});
+    cmds.push({label:'Connect a tool',key:'Go',run:function(){show('integrations');}});
+    cmds.push({label:'Request a build from TMI',key:'Build',run:addRequest});
+    (STATE&&STATE.workers||[]).forEach(function(w){
+      cmds.push({label:'Run '+(w.name||'worker'),key:'Run',run:function(){runWorkerById(w.id);}});
+    });
+  }
   return cmds.concat(paletteViews());
 }
 function fuzzy(q,s){q=q.toLowerCase();s=s.toLowerCase();var i=0;for(var c=0;c<s.length&&i<q.length;c++){if(s[c]===q[i])i++;}return i===q.length;}
@@ -2513,6 +2522,7 @@ function openPalette(){
 }
 function closePalette(){document.getElementById('cmdk').classList.remove('on');}
 function runWorkerById(id){
+  if(!guardWrite())return;
   toast('Running...');
   api('/api/os2-run',{id:id}).then(function(j){return refresh().then(function(){briefingLoaded=false;if(j.output)showOutput(j.output);});}).catch(function(e){if(e.message!=='signed out')toast(e.message);});
 }
