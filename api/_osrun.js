@@ -31,7 +31,10 @@ async function produce(tenant, worker, s) {
   const userMsg =
     `YOUR ROLE: ${worker.name}\n` +
     `WHAT YOU DO: ${worker.job}\n` +
-    `HOW OFTEN: ${worker.cadence}\n\n` +
+    `HOW OFTEN: ${worker.cadence}\n` +
+    (worker.target ? `YOUR TARGET: ${worker.target}\n` : '') +
+    (worker.procedure ? `\nYOUR OPERATING PROCEDURE (follow this exactly, step by step):\n${String(worker.procedure).slice(0, 4000)}\n` : '') +
+    `\n` +
     `--- COMPANY CONTEXT ---\n` +
     `Company: ${tenant.name}${tenant.business_type ? ' (' + tenant.business_type + ')' : ''}\n` +
     `What they do: ${p.what_you_do || tenant.summary || 'unspecified'}\n` +

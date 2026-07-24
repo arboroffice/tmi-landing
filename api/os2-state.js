@@ -55,6 +55,19 @@ module.exports = async function handler(req, res) {
       top: Object.entries(byWorker).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, n]) => ({ name, n })),
     };
 
+    // Per-worker scoreboard: what each worker delivered this week / month / total.
+    const weekCut = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const worker_stats = {};
+    for (const a of sentActions) {
+      const id = a.worker_id; if (!id) continue;
+      const st = worker_stats[id] || (worker_stats[id] = { week: 0, month: 0, total: 0, last_at: null });
+      st.total++;
+      const t = Date.parse(a.created_at || 0);
+      if (t >= cutoff) st.month++;
+      if (t >= weekCut) st.week++;
+      if (!st.last_at || (a.created_at || '') > st.last_at) st.last_at = a.created_at || null;
+    }
+
     return res.status(200).json({
       me: { id: t.sub, role: t.role || 'owner', email: t.email || null },
       score,
@@ -67,6 +80,7 @@ module.exports = async function handler(req, res) {
         paused: !!tenant.paused, is_installer: !!tenant.is_installer,
       } : null,
       delivered,
+      worker_stats,
       metrics: metrics.sort(bySort),
       workers: workers.sort(bySort),
       workflows: workflows.sort(bySort),

@@ -28,7 +28,7 @@ const COLLS = {
 
 const FIELDS = {
   metrics: ['label', 'value', 'unit', 'hint', 'target', 'sort', 'department_id'],
-  workers: ['name', 'job', 'autonomy', 'cadence', 'status', 'sort', 'department_id', 'tools', 'inbound'],
+  workers: ['name', 'job', 'autonomy', 'cadence', 'status', 'sort', 'department_id', 'tools', 'inbound', 'procedure', 'target', 'target_count', 'period'],
   workflows: ['name', 'trigger', 'steps', 'status', 'sort', 'department_id'],
   knowledge: ['title', 'body', 'kind', 'sort', 'department_id'],
   tasks: ['title', 'detail', 'status', 'priority', 'due', 'sort'],

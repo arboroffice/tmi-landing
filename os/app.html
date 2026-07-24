@@ -144,6 +144,16 @@
   .tog::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
   .tog.on::after{left:18px;}
   .wstat{font-size:12px;color:var(--ink-3);margin-top:7px;font-family:var(--mono);}
+  .wname{cursor:pointer;}
+  .wname:hover{text-decoration:underline;text-underline-offset:3px;}
+  .wboard{margin-top:12px;}
+  .wbtop{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:12.5px;color:var(--ink-2);font-weight:600;flex-wrap:wrap;}
+  .wbgoal{color:var(--ink-3);font-weight:500;font-size:12px;}
+  .wbbar{height:6px;background:var(--bg-alt);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin-top:6px;}
+  .wbbar i{display:block;height:100%;background:linear-gradient(90deg,var(--chart),var(--chart-dark));border-radius:99px;transition:width .8s cubic-bezier(.3,.7,.3,1);}
+  .wgrp{margin-top:20px;}
+  .wlbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;}
+  .card2{background:var(--bg-alt);border:1px solid var(--line);border-radius:12px;padding:14px 16px;}
   .flow ol{margin:12px 0 0;padding-left:18px;}
   .flow li{font-size:13.5px;color:var(--ink-2);line-height:1.5;margin-bottom:4px;}
   .trig{font-size:12.5px;color:var(--ink-3);margin-top:5px;}
@@ -910,15 +920,25 @@ function renderWorkers(){
   if(!workers.length){host.innerHTML='<div class="empty"><h3>No workers yet</h3><p>Add an AI worker, or ask your COO to design one for your business.</p><div style="margin-top:16px"><button class="btn" onclick="addWorker()">Add worker</button></div></div>';return;}
   host.innerHTML=workers.map(function(w){
     var on=w.status==='active';var label={read:'Reports',approve:'Asks first',auto:'Autonomous'}[w.autonomy]||w.autonomy;
-    return '<div class="row"><div class="r1"><h4>'+esc(w.name)+'</h4>'+
+    var sc=workerScore(w);
+    var board='';
+    if(sc.target>0){
+      var pct=Math.min(100,Math.round(sc.done/sc.target*100));
+      board='<div class="wboard"><div class="wbtop"><span>'+sc.done+' / '+sc.target+' this '+sc.period+'</span>'+(w.target?'<span class="wbgoal">'+esc(w.target)+'</span>':'')+'</div><div class="wbbar"><i style="width:'+pct+'%"></i></div></div>';
+    } else if(sc.total>0){
+      board='<div class="wboard"><div class="wbtop"><span>'+sc.done+' delivered this '+sc.period+' · '+sc.total+' all time</span></div></div>';
+    }
+    return '<div class="row"><div class="r1"><h4 class="wname" onclick="openWorker(\''+w.id+'\')">'+esc(w.name)+'</h4>'+
       '<span class="badge '+esc(w.autonomy)+'">'+esc(label)+'</span><span class="cad">'+esc(w.cadence)+'</span>'+
       '<div class="racts">'+
+        '<button class="link" onclick="openWorker(\''+w.id+'\')">View</button>'+
         '<button class="link" onclick="runWorker(\''+w.id+'\',this)">Run now</button>'+
         '<span class="iconbtn" title="Edit" onclick="editWorker(\''+w.id+'\')"><svg class="icon"><use href="#i-pen"/></svg></span>'+
         '<span class="iconbtn danger" title="Delete" onclick="delItem(\'workers\',\''+w.id+'\',\''+esc(w.name)+'\')"><svg class="icon"><use href="#i-trash"/></svg></span>'+
         '<div class="tog'+(on?' on':'')+'" title="'+(on?'On':'Off')+'" onclick="toggleWorker(\''+w.id+'\',this)"></div>'+
       '</div></div>'+
       (w.job?'<p>'+esc(w.job)+'</p>':'')+
+      board+
       '<div class="wstat">'+(on?'On · runs '+esc(w.cadence)+' automatically':'Off')+(w.last_run?' · last ran '+fmt(w.last_run):'')+'</div></div>';
   }).join('');
 }
@@ -926,10 +946,22 @@ function deptOptions(v){return [['','No department']].concat((STATE.departments|
 function workerFields(w){w=w||{};return [
   {name:'name',label:'Name',value:w.name,placeholder:'Collections Clerk'},
   {name:'job',label:'What it does',type:'textarea',value:w.job,placeholder:'Nudges overdue invoices politely until they are paid.'},
+  {name:'target',label:'Its target',value:w.target,placeholder:'e.g. 40 invoices chased / month'},
+  {name:'target_count',label:'Target number (for the scoreboard, optional)',value:w.target_count,placeholder:'40'},
+  {name:'period',label:'Measured',type:'select',value:w.period||'month',options:[['week','Per week'],['month','Per month']]},
+  {name:'procedure',label:'Operating procedure',type:'textarea',big:true,value:w.procedure,placeholder:'How it does the job, step by step, like instructing a new hire. e.g. When an invoice passes 30 days, send a friendly reminder. At 45 days, send a firmer note. At 60 days, flag it for me.'},
   {name:'department_id',label:'Department',type:'select',value:w.department_id||'',options:deptOptions()},
   {name:'autonomy',label:'Autonomy',type:'select',value:w.autonomy||'approve',options:[['read','Reports only'],['approve','Asks you first'],['auto','Autonomous']]},
   {name:'cadence',label:'Runs',type:'select',value:w.cadence||'daily',options:[['realtime','Realtime'],['daily','Daily'],['weekly','Weekly']]}
 ];}
+// This worker's delivered-work count vs its target, from the scoreboard aggregate.
+function workerScore(w){
+  var st=(STATE.worker_stats||{})[w.id]||{week:0,month:0,total:0};
+  var period=w.period==='week'?'week':'month';
+  var done=period==='week'?st.week:st.month;
+  var target=parseInt(String(w.target_count||'').replace(/[^0-9]/g,''),10);
+  return {period:period,done:done,total:st.total,target:isNaN(target)?0:target,last_at:st.last_at};
+}
 function addWorker(){openForm({title:'Add an AI worker',sub:'Give it a role and how much rope it has.',fields:workerFields(),onSave:function(v){return crud('workers','create',{data:Object.assign({status:'ready'},v)});}});}
 function editWorker(id){var w=find('workers',id);openForm({title:'Edit worker',fields:workerFields(w),del:function(){return crud('workers','delete',{id:id});},onSave:function(v){return crud('workers','update',{id:id,data:v});}});}
 async function toggleWorker(id,el){
@@ -944,6 +976,29 @@ async function runWorker(id,btn){btn.disabled=true;var t=btn.textContent;btn.tex
     if(j.output){showOutput(j.output);toast(j.output.status==='pending'?'Draft ready for your approval':'Worker produced output');}
   }catch(e){if(e.message!=='signed out')toast(e.message);}
   btn.disabled=false;btn.textContent=t;
+}
+// Worker profile: role, target + scoreboard, operating procedure, recent deliverables.
+function openWorker(id){
+  var w=find('workers',id);if(!w)return;
+  var on=w.status==='active';var sc=workerScore(w);
+  var dept=(STATE.departments||[]).find(function(d){return d.id===w.department_id;});
+  var acts=(STATE.actions||[]).filter(function(a){return a.worker_id===id;}).slice(0,6);
+  var alabel={read:'Reports only',approve:'Asks you first',auto:'Autonomous'}[w.autonomy]||w.autonomy;
+  var board='';
+  if(sc.target>0){var pct=Math.min(100,Math.round(sc.done/sc.target*100));
+    board='<div class="wbtop" style="font-size:14px"><span><b style="font-size:22px;font-family:var(--mono)">'+sc.done+'</b> / '+sc.target+' this '+sc.period+'</span><span class="wbgoal">'+esc(w.target||'')+'</span></div><div class="wbbar" style="height:8px;margin-top:8px"><i style="width:'+pct+'%"></i></div>';}
+  else{board='<div class="wbtop" style="font-size:14px"><span><b style="font-size:22px;font-family:var(--mono)">'+sc.done+'</b> delivered this '+sc.period+' · '+sc.total+' all time</span></div>';}
+  var deliv=acts.length?acts.map(function(a){return '<div style="padding:10px 0;border-top:1px solid var(--line);font-size:13.5px"><b>'+esc(a.title||a.channel||'Action')+'</b><div style="color:var(--ink-3);font-size:12px">'+esc(CHAN_LABEL[a.channel]||a.channel||'')+(a.to?' · '+esc(a.to):'')+' · '+ago(a.created_at)+'</div></div>';}).join(''):'<p style="font-size:13px;color:var(--ink-3);margin-top:8px">No deliverables yet. Turn it on or run it now.</p>';
+  var html='<div class="kh" style="margin-bottom:2px"><span class="badge '+(on?'done':'k')+'">'+(on?'Active':'Off')+'</span><h3 style="margin:0">'+esc(w.name)+'</h3></div>'+
+    '<div class="msub" style="margin-top:6px">'+esc(w.job||'')+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+(alabel?'<span class="chip2">'+esc(alabel)+'</span>':'')+'<span class="chip2">Runs '+esc(w.cadence||'daily')+'</span>'+(dept?'<span class="chip2">'+esc(dept.name)+'</span>':'')+'</div>'+
+    '<div class="wgrp"><div class="wlbl">Scoreboard</div><div class="card2">'+board+'</div></div>'+
+    '<div class="wgrp"><div class="wlbl">Operating procedure</div>'+(w.procedure?'<div class="card2" style="font-size:13.5px;color:var(--ink-2);white-space:pre-wrap;line-height:1.6">'+esc(w.procedure)+'</div>':'<p style="font-size:13px;color:var(--ink-3)">No procedure yet. <button class="link" onclick="closeModal();editWorker(\''+id+'\')">Add one</button> so it works the way you want.</p>')+'</div>'+
+    '<div class="wgrp"><div class="wlbl">Recent deliverables</div>'+deliv+'</div>'+
+    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Close</button><button class="btn ghost" onclick="closeModal();editWorker(\''+id+'\')">Edit</button><button class="btn" onclick="closeModal();setTimeout(function(){var b={disabled:false,textContent:\'Run\'};runWorker(\''+id+'\',b);},50)">Run now</button></div>';
+  document.getElementById('mcard').innerHTML=html;
+  document.getElementById('modal').classList.add('on');
+  window._form=null;
 }
 
 /* ---- workflows ---- */

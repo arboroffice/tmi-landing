@@ -30,7 +30,7 @@ const SHAPE = `Return ONLY valid JSON (no markdown, no prose) in exactly this sh
     { "key": "snake_case_id", "label": "Short human label", "value": "-", "unit": "", "hint": "what this tile tracks" }
   ],
   "workers": [
-    { "name": "Worker name", "job": "one sentence on what this AI worker does", "department": "the exact name of the department above it belongs to", "autonomy": "read|approve|auto", "cadence": "realtime|daily|weekly" }
+    { "name": "Worker name", "job": "one sentence on what this AI worker does", "department": "the exact name of the department above it belongs to", "autonomy": "read|approve|auto", "cadence": "realtime|daily|weekly", "target": "a concrete weekly or monthly target this worker owns, e.g. 40 invoices chased / month", "procedure": "a short plain-language operating procedure: the exact steps this worker follows every run, written as if instructing a new hire" }
   ],
   "workflows": [
     { "name": "Workflow name", "trigger": "what starts it", "steps": ["step", "step"] }
@@ -233,6 +233,8 @@ function normalize(raw) {
     department: w.department ? String(w.department).slice(0, 60) : '',
     autonomy: clampAutonomy(w.autonomy),
     cadence: clampCadence(w.cadence),
+    target: w.target ? String(w.target).slice(0, 120) : '',
+    procedure: w.procedure ? String(w.procedure).slice(0, 2000) : '',
     status: 'ready',
     sort: i,
   }));
