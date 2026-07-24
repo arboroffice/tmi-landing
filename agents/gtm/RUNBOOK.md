@@ -32,7 +32,7 @@ site + `/api`). Same names in both.
 | `AUTO_REPLY=true` | autonomous reply -> booking |
 | `INSTANTLY_WEBHOOK_SECRET` | secure the reply webhook |
 | `LINKEDIN_WEBHOOK_URL` (+`_SECRET`) | LinkedIn channel (HeyReach/Expandi/etc.) |
-| `CAL_LINK` | booking link (default `mia-elianaa-a4n2hk/30min`) |
+| `BOOK_URL` | callback-request page (default `https://www.tmitechai.com/book`) - prospects request a call, we reach out; no instant Cal.com booking |
 | `GTM_LEADS_PER_DAY` / `GTM_DRY_RUN` | batch size / dry run |
 | `GTM_SOURCE` | `apollo` (default) or `maps` |
 

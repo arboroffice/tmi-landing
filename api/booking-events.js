@@ -8,7 +8,8 @@
 const db = require('./_db');
 
 const SITE = 'https://www.tmitechai.com';
-const CAL_LINK = 'https://cal.com/mia-elianaa-a4n2hk/30min';
+// No instant Cal.com booking. Recovery nudges send people to /book to request a callback.
+const BOOK_URL = SITE + '/book';
 const FROM_NUMBER = '+18557171044';
 const STOP = ['unsubscribed', 'won', 'client', 'building', 'closed', 'lost', 'rejected', 'do_not_contact'];
 
@@ -63,8 +64,8 @@ module.exports = async function handler(req, res) {
       await email(eml, 'The plan from our call',
         `<p style="margin:0 0 16px;">Hey ${first},</p>
 <p style="margin:0 0 16px;">Good talking through your operation. The short version: here is what we would build first, in the order that pays back fastest, and the 30-day path to get there.</p>
-<p style="margin:0 0 16px;">When you are ready to move, just reply to this email or grab a time and we will scope it and kick it off.</p>${cta(CAL_LINK, 'Lock in the next step')}${unsub ? `<p style="margin:24px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsub}" style="color:#bbb;">Unsubscribe</a></p>` : ''}`);
-      await sms(phone, `${first} - good talking today. Sending over the plan from our call. Ready to move on it? Just reply, or grab a time: ${CAL_LINK} - Mia`);
+<p style="margin:0 0 16px;">When you are ready to move, just reply to this email or request a time and we will scope it and kick it off.</p>${cta(BOOK_URL, 'Lock in the next step')}${unsub ? `<p style="margin:24px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsub}" style="color:#bbb;">Unsubscribe</a></p>` : ''}`);
+      await sms(phone, `${first} - good talking today. Sending over the plan from our call. Ready to move on it? Just reply, or request a time: ${BOOK_URL} - Mia`);
       if (app) { try { await db.update('applications', app.id, { post_call_sent_at: new Date().toISOString(), status: app.status === 'booked' ? 'call_done' : app.status }); } catch (e) {} }
       return ack('post-call sent');
     }
@@ -80,9 +81,9 @@ module.exports = async function handler(req, res) {
       const cancelled = trigger === 'BOOKING_CANCELLED';
       await email(eml, cancelled ? 'Want to grab a new time?' : 'Sorry we missed you',
         `<p style="margin:0 0 16px;">Hey ${first},</p>
-<p style="margin:0 0 16px;">${cancelled ? 'No problem on the cancellation.' : 'Looks like we missed each other today, no worries, it happens.'} The offer still stands: 30 minutes to walk through your operation and the first systems we would build. Grab whatever time works.</p>${cta(CAL_LINK, 'Pick a new time')}
+<p style="margin:0 0 16px;">${cancelled ? 'No problem on the cancellation.' : 'Looks like we missed each other today, no worries, it happens.'} The offer still stands: 30 minutes to walk through your operation and the first systems we would build. Request a new time and we will get you booked.</p>${cta(BOOK_URL, 'Request a new time')}
 <p style="margin:0 0 0;">Or if now is not the moment, just reply and tell me when to circle back.</p>${unsub ? `<p style="margin:24px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsub}" style="color:#bbb;">Unsubscribe</a></p>` : ''}`);
-      await sms(phone, `${first} - ${cancelled ? 'no problem on the cancel' : 'looks like we missed each other'}. Want to grab a new time? ${CAL_LINK} - Mia`);
+      await sms(phone, `${first} - ${cancelled ? 'no problem on the cancel' : 'looks like we missed each other'}. Want to set up a new time? Request one here: ${BOOK_URL} - Mia`);
       if (app) { try { await db.update('applications', app.id, { rebook_sent_at: new Date().toISOString(), status: app.status === 'booked' ? 'no_show' : app.status }); } catch (e) {} }
       return ack('rebook sent');
     }

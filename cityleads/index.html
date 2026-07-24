@@ -700,7 +700,9 @@ function openLead(id){
   $('#sheetTitle').textContent = l.business_name||l.contact_name||'Lead';
   const b=$('#sheetBody');
   const tel=(l.phone||'').replace(/[^0-9+]/g,'');
-  const bookUrl='https://cal.com/mia-elianaa-a4n2hk/30min?'+new URLSearchParams({name:(l.contact_name||l.business_name||''),email:(l.email||''),notes:[l.business_name,l.phone].filter(Boolean).join(' · ')}).toString();
+  // No instant Cal.com booking. Leads request a callback via the public /book
+  // page; the rep works the lead and marks them for a callback in-app.
+  const bookUrl='https://www.tmitechai.com/book';
   b.innerHTML = `
     <div class="quickact">
       <a id="dCall" href="${tel?('tel:'+tel):'#'}" ${tel?'':'style="opacity:.4;pointer-events:none"'}>Call</a>
@@ -708,7 +710,7 @@ function openLead(id){
       <a href="#" id="dCheckin">📍 Check in</a>
       <a href="#" id="dEnrich">Enrich</a>
     </div>
-    <a class="btn" href="${bookUrl}" target="_blank" rel="noopener" style="text-decoration:none;margin-top:2px">Book the audit &rarr;</a>
+    <button class="btn" id="dCallback" style="margin-top:2px">Mark for audit callback &rarr;</button>
     <div id="dTemplates" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px"></div>
     <div style="display:flex;gap:7px;margin-top:8px"><button class="btn ghost sm" id="dAIText" style="flex:1">✨ Draft a text</button><button class="btn ghost sm" id="dAICall" style="flex:1">✨ Call opener</button></div>
     <div id="dAIOut"></div>
@@ -757,7 +759,7 @@ function openLead(id){
   const tmpls=[
     ['Intro', 'Hi '+nm+', this is '+rep+' with TMI. We help '+ind+' run tighter with less chaos and full visibility. Open to a quick free audit of '+co+'?'],
     ['Follow up', 'Following up '+nm+'. Still glad to run a free Business Intelligence Audit for '+co+'. 30 minutes. Does this week work?'],
-    ['Send link', 'Thanks '+nm+'. Grab a time here and we will walk your numbers: '+bookUrl],
+    ['Send link', 'Thanks '+nm+'. Request your free audit here and we will call you back to walk your numbers: '+bookUrl],
   ];
   const tbox=$('#dTemplates');
   if(tbox){ if(!tel){ tbox.innerHTML='<span style="font-size:12px;color:var(--muted)">Add a phone to text</span>'; }
@@ -785,6 +787,17 @@ function openLead(id){
   // about every attempt. The href still dials/opens Messages.
   const cbtn=$('#dCall'); if(cbtn && tel) cbtn.addEventListener('click',()=>{ logInteraction(l.id,'call',{summary:'Called '+(l.contact_name||l.business_name||'lead')}).then(()=>{ if($('#sheet').classList.contains('on')) loadInteractions(l.id); }).catch(()=>{}); toast('Logged the call'); });
   const xbtn=$('#dText'); if(xbtn && tel) xbtn.addEventListener('click',()=>{ logInteraction(l.id,'text',{summary:'Texted '+(l.contact_name||l.business_name||'lead')}).then(()=>{ if($('#sheet').classList.contains('on')) loadInteractions(l.id); }).catch(()=>{}); });
+  const cbk=$('#dCallback'); if(cbk) cbk.onclick=async()=>{
+    cbk.disabled=true;
+    const patch={id:l.id,status:'callback'};
+    if(!l.next_action_at){ const cd=cadenceDate('callback'); if(cd!==undefined) patch.next_action_at=cd; }
+    try{
+      const opt=Object.assign({},l,patch,{updated_at:new Date().toISOString()});
+      const {lead,queued}=await writeLead('PATCH',patch,opt);
+      mergeLead(lead||opt); openLead(l.id);
+      toast(queued?'Marked Callback — offline':'Marked Callback · follow-up set');
+    }catch(ex){ toast(ex.message); cbk.disabled=false; }
+  };
   const ci=$('#dCheckin'); if(ci) ci.onclick=(e)=>{ e.preventDefault(); checkIn(l); };
   const cal=$('#dCal'); if(cal) cal.onclick=(e)=>{ e.preventDefault(); addToCalendar(l); };
   const pin=$('#dPhotoInput'); if(pin) pin.onchange=()=>addPhoto(l.id,pin);
