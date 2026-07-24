@@ -20,7 +20,7 @@
 
 const db = require('./_db');
 
-const CAPS = { knowledge: 300, contacts: 500, outputs: 200, messages: 200 };
+const CAPS = { knowledge: 300, contacts: 500, outputs: 200, messages: 200, metrics: 200 };
 
 // Common words that carry no signal for overlap scoring. Kept small on purpose.
 const STOP = new Set([
@@ -55,14 +55,30 @@ function tokenize(s) {
 // capped and each query pushes a single tenant filter to Firestore.
 async function collect(tenantId) {
   const w = [['tenant_id', '==', tenantId]];
-  const [knowledge, contacts, outputs, messages] = await Promise.all([
+  const [knowledge, contacts, outputs, messages, metrics] = await Promise.all([
     db.list('os_knowledge', { where: w, limit: CAPS.knowledge }).catch(() => []),
     db.list('os_contacts', { where: w, limit: CAPS.contacts }).catch(() => []),
     db.list('os_outputs', { where: w, order: 'created_at', ascending: false, limit: CAPS.outputs }).catch(() => []),
     db.list('os_messages', { where: w, order: 'created_at', ascending: false, limit: CAPS.messages }).catch(() => []),
+    db.list('os_metrics', { where: w, limit: CAPS.metrics }).catch(() => []),
   ]);
 
   const items = [];
+
+  // Live numbers are part of what the company knows, so the brain can answer
+  // questions about revenue, cash, AR, etc. from the actual metric values.
+  for (const m of metrics) {
+    const label = clip(m.label, 160);
+    if (!label) continue;
+    const val = m.value != null && m.value !== '' ? `${m.value}${m.unit ? ' ' + clip(m.unit, 40) : ''}` : 'not connected yet';
+    items.push({
+      id: m.id,
+      kind: 'metric',
+      title: label,
+      text: `${label}: ${val}.${m.hint ? ' ' + clip(m.hint, 300) : ''}`,
+      created_at: m.updated_at || m.created_at || null,
+    });
+  }
 
   for (const k of knowledge) {
     items.push({
@@ -197,14 +213,28 @@ Rules:
 // answer plus the sources that fed it.
 async function ask(tenantId, question) {
   const q = clip(question, 2000);
-  const results = await search(tenantId, q, { limit: 12 });
-  const top = results.slice(0, 6);
+  const items = await collect(tenantId);
+  const qTokens = tokenize(q);
 
-  const sources = top.map(r => ({ kind: r.kind, title: r.title }));
+  // Score by overlap. If nothing overlaps (a near-miss in wording), fall back to
+  // the most recent knowledge plus all metrics so the brain grounds on what it
+  // holds and can attempt an answer, rather than always denying.
+  const scored = items.map(it => ({ it, s: score(qTokens, it) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
+  let top;
+  if (scored.length) {
+    top = scored.slice(0, 7).map(x => x.it);
+  } else {
+    top = items
+      .filter(it => it.kind === 'knowledge' || it.kind === 'metric')
+      .sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))
+      .slice(0, 7);
+  }
+
+  const sources = top.map(it => ({ kind: it.kind, title: it.title }));
 
   if (!top.length) {
     return {
-      answer: 'The brain does not have anything on that yet. Add the relevant knowledge, contacts, or let the workers run so there is something to answer from.',
+      answer: 'The brain does not have anything yet. Add some company knowledge, connect your data, or let the workers run so there is something to answer from.',
       sources: [],
     };
   }
@@ -214,7 +244,9 @@ async function ask(tenantId, question) {
   const Anthropic = require('@anthropic-ai/sdk');
   const client = new Anthropic({ apiKey: key });
 
-  const context = top.map((r, i) => `[${i + 1}] (${r.kind}) ${r.title}\n${r.snippet}`).join('\n\n');
+  // Feed the FULL body of each top item (not a 200-char snippet), so a real
+  // policy, SOP, or pricing sheet is answered from the whole document.
+  const context = top.map((it, i) => `[${i + 1}] (${it.kind}) ${it.title}\n${clip(it.text, 1600)}`).join('\n\n');
 
   const msg = await client.messages.create({
     model: 'claude-opus-4-8',
