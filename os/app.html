@@ -8,6 +8,7 @@
 <meta name="robots" content="noindex"/>
 <link rel="preconnect" href="https://api.fontshare.com"/>
 <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <style>
   :root{
     --bg:#ffffff;--bg-alt:#f6f6f4;--ink:#0a0b14;--ink-2:#55576a;--ink-3:#8a8c9e;
@@ -1754,7 +1755,7 @@ async function removeMember(id,name){
 }
 
 /* ---- live data / integrations ---- */
-var CONNECT=null, connectLoaded=false, MCPSERVERS=[], OAUTH=null;
+var CONNECT=null, connectLoaded=false, MCPSERVERS=[], OAUTH=null, PLAID=null;
 async function loadConnect(){
   var role=(STATE.me&&STATE.me.role)||'owner';
   if(connectLoaded){renderIntegrations();return;}
@@ -1762,6 +1763,7 @@ async function loadConnect(){
   try{CONNECT=await api('/api/os2-connect',{action:'info'});}catch(e){}
   try{var mj=await api('/api/os2-mcp',{action:'list'});MCPSERVERS=mj.servers||[];}catch(e){}
   try{var oj=await api('/api/os2-oauth',{action:'providers'});OAUTH=oj;}catch(e){}
+  try{PLAID=await api('/api/os2-plaid',{action:'status'});}catch(e){}
   connectLoaded=true;renderIntegrations();
 }
 async function reloadMcp(){try{var mj=await api('/api/os2-mcp',{action:'list'});MCPSERVERS=mj.servers||[];}catch(e){}renderIntegrations();}
@@ -2156,6 +2158,8 @@ function renderIntegrations(){
       '</div>';
     // One-click OAuth providers (QuickBooks, Xero, HubSpot...) when configured.
     html+=oauthCard(role);
+    // Bank connection via Plaid (available outside onboarding, with reconnect).
+    html+=plaidCard(role);
     // MCP servers: connect any remote MCP server by URL, like Claude's catalog.
     html+=mcpCard(role);
     var masked=(CONNECT.key||'').slice(0,6)+'••••••••••••••';
@@ -2232,12 +2236,16 @@ function oauthCard(role){
   var connected=OAUTH.connected||[];
   var rows=configured.map(function(p){
     var on=connected.indexOf(p.id)>=0;
+    // Only offer Connect for providers that actually sync data. Others connect
+    // but pull nothing, so we show "coming soon" rather than a dead button.
+    var right;
+    if(on){ right=(role==='owner'?'<button class="link" onclick="oauthDisconnect(\''+p.id+'\')">Disconnect</button>':''); }
+    else if(p.synced===false){ right='<span style="font-size:12px;color:var(--ink-3)">Sync coming soon</span>'; }
+    else { right=(role==='owner'?'<button class="btn sm" onclick="oauthConnect(\''+p.id+'\')">Connect</button>':'<span style="font-size:12px;color:var(--ink-3)">Owner connects</span>'); }
     return '<div style="display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px">'+
-      '<span class="badge '+(on?'done':'k')+'">'+(on?'Connected':'Ready')+'</span>'+
+      '<span class="badge '+(on?'done':'k')+'">'+(on?'Connected':(p.synced===false?'Soon':'Ready'))+'</span>'+
       '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--ink)">'+esc(p.name)+'</div></div>'+
-      (on
-        ? (role==='owner'?'<button class="link" onclick="oauthDisconnect(\''+p.id+'\')">Disconnect</button>':'')
-        : (role==='owner'?'<button class="btn sm" onclick="oauthConnect(\''+p.id+'\')">Connect</button>':'<span style="font-size:12px;color:var(--ink-3)">Owner connects</span>'))+
+      right+
       '</div>';
   }).join('');
   return '<div class="kcard" style="padding:22px 24px;margin-top:14px"><div class="kh"><span class="badge k">One-click</span><h4>Connect with one click</h4></div>'+
@@ -2254,6 +2262,36 @@ async function oauthDisconnect(provider){
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 async function reloadOauth(){try{var oj=await api('/api/os2-oauth',{action:'providers'});OAUTH=oj;}catch(e){}renderIntegrations();}
+// Bank connect via Plaid, reachable any time (not just onboarding) so a bank
+// can be connected later or reconnected when a link expires.
+function plaidCard(role){
+  if(!PLAID||!PLAID.configured)return '';
+  var on=!!PLAID.connected;
+  var actions='';
+  if(role==='owner'){
+    actions=on
+      ? '<button class="btn sm ghost" onclick="plaidSync()">Sync now</button><button class="link" onclick="plaidDisconnect()">Disconnect</button>'
+      : '<button class="btn sm" onclick="plaidConnect()">Connect a bank</button>';
+  } else { actions='<span style="font-size:12px;color:var(--ink-3)">Owner connects</span>'; }
+  return '<div class="kcard" style="padding:22px 24px;margin-top:14px"><div class="kh"><span class="badge '+(on?'done':'k')+'">'+(on?'Connected':'Bank')+'</span><h4>Your bank, via Plaid</h4></div>'+
+    '<p style="font-size:13.5px;color:var(--ink-2);margin-top:10px">'+(on?'Your live cash balance is on your command center and updates itself. Read-only through Plaid.':'Connect your bank and your real cash balance lands on your command center and keeps itself current. Read-only through Plaid; disconnect anytime.')+'</p>'+
+    '<div class="mfoot" style="justify-content:flex-start;gap:10px">'+actions+'</div></div>';
+}
+async function plaidConnect(){
+  if(!guardWrite())return;
+  if(typeof Plaid==='undefined'){toast('Bank connection is loading, try again in a moment');return;}
+  toast('Opening your bank...');
+  try{
+    var j=await api('/api/os2-plaid',{action:'link_token'});
+    if(!j.link_token){toast(j.error||'Bank connection unavailable');return;}
+    var handler=Plaid.create({token:j.link_token,onSuccess:function(public_token){
+      api('/api/os2-plaid',{action:'exchange',public_token:public_token}).then(function(){PLAID.connected=true;toast('Bank connected. Your cash is syncing.');renderIntegrations();refresh();}).catch(function(e){if(e.message!=='signed out')toast(e.message);});
+    },onExit:function(){}});
+    handler.open();
+  }catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function plaidSync(){if(!guardWrite())return;try{var j=await api('/api/os2-plaid',{action:'sync'});await refresh();renderIntegrations();toast('Bank synced'+(j&&j.cash!=null?' · cash '+j.cash:''));}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function plaidDisconnect(){if(!guardWrite())return;if(!confirm('Disconnect your bank? Your cash balance stops updating.'))return;try{await api('/api/os2-plaid',{action:'disconnect'});PLAID.connected=false;await refresh();renderIntegrations();toast('Bank disconnected');}catch(e){if(e.message!=='signed out')toast(e.message);}}
 // ---- MCP servers ----
 function mcpCard(role){
   var list=(MCPSERVERS||[]).map(function(s){

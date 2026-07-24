@@ -13,13 +13,16 @@ const BASE_URL = process.env.OS_BASE_URL || 'https://os.tmitechai.com';
 
 // provider id -> config. Add a provider by adding a row; no other code changes.
 const PROVIDERS = {
+  // `synced: true` means a real sync module pulls this provider's data into
+  // os_metrics (see _ossync). Providers without one connect but pull nothing,
+  // so the UI marks them "coming soon" instead of showing a live Connect button.
   quickbooks: {
     name: 'QuickBooks',
     authUrl: 'https://appcenter.intuit.com/connect/oauth2',
     tokenUrl: 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer',
     scope: 'com.intuit.quickbooks.accounting',
     idEnv: 'QBO_CLIENT_ID', secretEnv: 'QBO_CLIENT_SECRET',
-    pkce: false, returnsRealmId: true,
+    pkce: false, returnsRealmId: true, synced: true,
   },
   xero: {
     name: 'Xero',
@@ -27,7 +30,7 @@ const PROVIDERS = {
     tokenUrl: 'https://identity.xero.com/connect/token',
     scope: 'openid accounting.reports.read accounting.transactions.read offline_access',
     idEnv: 'XERO_CLIENT_ID', secretEnv: 'XERO_CLIENT_SECRET',
-    pkce: true,
+    pkce: true, synced: false,
   },
   hubspot: {
     name: 'HubSpot',
@@ -35,7 +38,7 @@ const PROVIDERS = {
     tokenUrl: 'https://api.hubapi.com/oauth/v1/token',
     scope: 'oauth crm.objects.contacts.read crm.objects.deals.read',
     idEnv: 'HUBSPOT_CLIENT_ID', secretEnv: 'HUBSPOT_CLIENT_SECRET',
-    pkce: false,
+    pkce: false, synced: false,
   },
 };
 
@@ -46,7 +49,7 @@ function redirectUri(providerId) { return `${BASE_URL}/api/os2-oauth/${providerI
 
 // List providers with whether each is configured (has env creds).
 function listProviders() {
-  return Object.keys(PROVIDERS).map((id) => ({ id, name: PROVIDERS[id].name, configured: isConfigured(PROVIDERS[id]) }));
+  return Object.keys(PROVIDERS).map((id) => ({ id, name: PROVIDERS[id].name, configured: isConfigured(PROVIDERS[id]), synced: PROVIDERS[id].synced === true }));
 }
 
 // PKCE helpers.
