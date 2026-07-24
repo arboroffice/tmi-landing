@@ -1180,13 +1180,15 @@ function openWorker(id){
   var w=find('workers',id);if(!w)return;
   var on=w.status==='active';var sc=workerScore(w);
   var dept=(STATE.departments||[]).find(function(d){return d.id===w.department_id;});
-  var acts=(STATE.actions||[]).filter(function(a){return a.worker_id===id;}).slice(0,6);
+  // Recent deliverables come from os_outputs (every work product, internal or
+  // external) so report-only workers show output too, not just external sends.
+  var outs=(STATE.outputs||[]).filter(function(o){return o.worker_id===id&&o.status!=='dismissed';}).sort(function(a,b){return (b.created_at||'').localeCompare(a.created_at||'');}).slice(0,6);
   var alabel={read:'Reports only',approve:'Asks you first',auto:'Autonomous'}[w.autonomy]||w.autonomy;
   var board='';
   if(sc.target>0){var pct=Math.min(100,Math.round(sc.done/sc.target*100));
     board='<div class="wbtop" style="font-size:14px"><span><b style="font-size:22px;font-family:var(--mono)">'+sc.done+'</b> / '+sc.target+' this '+sc.period+'</span><span class="wbgoal">'+esc(w.target||'')+'</span></div><div class="wbbar" style="height:8px;margin-top:8px"><i style="width:'+pct+'%"></i></div>';}
   else{board='<div class="wbtop" style="font-size:14px"><span><b style="font-size:22px;font-family:var(--mono)">'+sc.done+'</b> delivered this '+sc.period+' · '+sc.total+' all time</span></div>';}
-  var deliv=acts.length?acts.map(function(a){return '<div style="padding:10px 0;border-top:1px solid var(--line);font-size:13.5px"><b>'+esc(a.title||a.channel||'Action')+'</b><div style="color:var(--ink-3);font-size:12px">'+esc(CHAN_LABEL[a.channel]||a.channel||'')+(a.to?' · '+esc(a.to):'')+' · '+ago(a.created_at)+'</div></div>';}).join(''):'<p style="font-size:13px;color:var(--ink-3);margin-top:8px">No deliverables yet. Turn it on or run it now.</p>';
+  var deliv=outs.length?outs.map(function(o){return '<div style="padding:10px 0;border-top:1px solid var(--line);font-size:13.5px;cursor:pointer" onclick="viewOutput(\''+o.id+'\')"><b>'+esc(o.title||'Output')+'</b><div style="color:var(--ink-3);font-size:12px">'+(o.status==='pending'?'Waiting on you · ':'')+(o.action?esc(actDesc(o.action))+' · ':'')+ago(o.created_at)+'</div></div>';}).join(''):'<p style="font-size:13px;color:var(--ink-3);margin-top:8px">No deliverables yet. Turn it on or run it now.</p>';
   var html='<div class="kh" style="margin-bottom:2px"><span class="badge '+(on?'done':'k')+'">'+(on?'Active':'Off')+'</span><h3 style="margin:0">'+esc(w.name)+'</h3></div>'+
     '<div class="msub" style="margin-top:6px">'+esc(w.job||'')+'</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+(alabel?'<span class="chip2">'+esc(alabel)+'</span>':'')+'<span class="chip2">Runs '+esc(w.cadence||'daily')+'</span>'+(dept?'<span class="chip2">'+esc(dept.name)+'</span>':'')+'</div>'+

@@ -61,12 +61,17 @@ function normalizeAction(a) {
   let channel = ['email', 'sms', 'internal'].includes(a.channel) ? a.channel : (a.to ? 'email' : 'internal');
   const to = a.to ? String(a.to).slice(0, 200).trim() : '';
   if (channel !== 'internal' && !to) return null;
-  return {
+  const out = {
     channel,
     to,
     subject: a.subject ? String(a.subject).slice(0, 200) : '',
     body: a.body ? String(a.body).slice(0, 8000) : '',
   };
+  // Preserve a money action's type and amount so the policy engine's spend
+  // limits and the payment/booking/external_write rules actually bind.
+  if (a.type && ['payment', 'booking', 'external_write'].includes(String(a.type))) out.type = String(a.type);
+  if (typeof a.amount === 'number' && isFinite(a.amount)) out.amount = a.amount;
+  return out;
 }
 
 // The channel this tenant has turned on, with its verified from-identity, or null.
@@ -83,7 +88,7 @@ function tenantChannel(tenant, channel) {
 // rules enforced must attach tenant._policies first (executeWorker does).
 function canAutoFire(tenant, worker, action) {
   if (!action) return false;
-  const type = action.channel === 'internal' ? 'internal' : String(action.channel || 'external_write');
+  const type = action.type || (action.channel === 'internal' ? 'internal' : String(action.channel || 'external_write'));
   const amount = typeof action.amount === 'number' ? action.amount : undefined;
   return policy.evaluate(tenant, worker, type, amount).mode === 'auto';
 }
@@ -106,9 +111,14 @@ async function runAction(ctx, rawAction) {
   const rec = await db.insert('os_actions', {
     tenant_id: tid,
     output_id: (ctx.output && ctx.output.id) || null,
+    // Stamp the worker id so per-worker scoreboards (os2-state worker_stats)
+    // can attribute delivered work. Without this every scoreboard reads 0.
+    worker_id: ctx.worker_id || (ctx.output && ctx.output.worker_id) || null,
     worker_name: ctx.worker_name || (ctx.output && ctx.output.worker_name) || null,
     channel: action.channel, to: action.to, subject: action.subject,
     body: body.slice(0, 4000),
+    amount: typeof action.amount === 'number' ? action.amount : null,
+    action_type: action.type || null,
     status: result.status, detail: result.detail,
     actor: ctx.actor || 'system', created_at: new Date().toISOString(),
   });
