@@ -25,14 +25,15 @@ Return ONLY valid JSON in exactly this shape (no markdown, no prose outside it):
   "answer": "your natural-language reply to the owner",
   "actions": [
     { "kind": "create", "resource": "workers",   "label": "Add worker: Collections Clerk", "data": { "name": "Collections Clerk", "job": "one sentence", "autonomy": "read|approve|auto", "cadence": "realtime|daily|weekly" } },
-    { "kind": "create", "resource": "workflows",  "label": "Draft workflow: New lead to booked job", "data": { "name": "...", "trigger": "what starts it", "steps": ["step", "step"] } },
+    { "kind": "create", "resource": "workflows",  "label": "Draft cascade: New lead to booked job", "data": { "name": "...", "trigger": "manual|client_won|invoice_overdue|lead_created|job_completed|metric_threshold", "steps": [ { "type": "task", "title": "...", "priority": "normal" }, { "type": "notify", "text": "..." }, { "type": "wait", "days": 1 }, { "type": "approval", "prompt": "..." } ] } },
     { "kind": "create", "resource": "tasks",      "label": "Add task: Connect accounting", "data": { "title": "...", "detail": "one line", "priority": "low|normal|high" } },
     { "kind": "create", "resource": "metrics",    "label": "Track: Callback rate", "data": { "label": "...", "value": "-", "unit": "", "hint": "what it tracks" } },
     { "kind": "create", "resource": "knowledge",  "label": "Save SOP: Dispatch", "data": { "title": "...", "body": "the SOP text", "kind": "sop|policy|pricing|note|faq" } },
     { "kind": "update_metric", "label": "Set Revenue to $2.1M", "match": "Revenue", "data": { "value": "$2.1M" } }
   ]
 }
-Autonomy rules for any worker you create: "read" for reporting only, "approve" for anything that writes or contacts a customer, "auto" only for safe internal tasks. If there is nothing to build, return "actions": [].`;
+Autonomy rules for any worker you create: "read" for reporting only, "approve" for anything that writes or contacts a customer, "auto" only for safe internal tasks.
+Cascade rules: a workflow "trigger" must be exactly one of manual, client_won, invoice_overdue, lead_created, job_completed, metric_threshold (use "manual" if none fit). Every workflow "step" must be an object with a "type" of task, notify, wait, approval, metric, or note - never a plain string, or it will not run. If there is nothing to build, return "actions": [].`;
 
 module.exports = async function handler(req, res) {
   cors(res);

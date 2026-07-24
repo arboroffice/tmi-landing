@@ -14,6 +14,7 @@
 const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { CATALOG, getTemplate } = require('./_osmarket');
+const { normalizeSteps, normalizeTrigger } = require('./_ossteps');
 
 // Next sort value for a collection within one tenant: current max + 1.
 async function nextSort(coll, tid) {
@@ -45,7 +46,7 @@ async function installDepartment(tid, spec) {
 
 async function installWorkflow(tid, spec, departmentId) {
   const sort = await nextSort('os_workflows', tid);
-  const row = { tenant_id: tid, name: spec.name, trigger: spec.trigger, steps: spec.steps, status: 'draft', sort };
+  const row = { tenant_id: tid, name: spec.name, trigger: normalizeTrigger(spec.trigger), steps: normalizeSteps(spec.steps), status: 'draft', sort };
   if (departmentId) row.department_id = departmentId;
   await db.insert('os_workflows', row);
 }
@@ -75,7 +76,7 @@ async function installPack(tid, spec) {
 
   let fSort = await nextSort('os_workflows', tid);
   for (const f of spec.workflows || []) {
-    await db.insert('os_workflows', { tenant_id: tid, name: f.name, trigger: f.trigger, steps: f.steps, department_id: deptId, status: 'draft', sort: fSort++ });
+    await db.insert('os_workflows', { tenant_id: tid, name: f.name, trigger: normalizeTrigger(f.trigger), steps: normalizeSteps(f.steps), department_id: deptId, status: 'draft', sort: fSort++ });
     counts.workflows++;
   }
 

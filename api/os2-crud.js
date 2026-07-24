@@ -40,36 +40,7 @@ const FIELDS = {
 
 const NOUN = { metrics: 'metric', workers: 'worker', workflows: 'workflow', knowledge: 'knowledge item', tasks: 'task', reports: 'report', outputs: 'output', goals: 'goal', departments: 'department' };
 
-// Workflow steps are structured objects the engine (_osflow) executes:
-//   note{text} · worker{worker_id} · wait{until_ms} · approval{prompt}
-//   task{title,priority} · metric{label,value} · notify{text} · branch{...}
-// A plain string is preserved as a note so legacy string-only workflows still
-// run. Previously every step was String()'d, which destroyed real cascades.
-const STEP_TYPES = ['note', 'worker', 'wait', 'approval', 'task', 'metric', 'notify', 'branch'];
-function normalizeSteps(arr) {
-  if (!Array.isArray(arr)) return [];
-  return arr.slice(0, 20).map((s) => {
-    if (s && typeof s === 'object' && !Array.isArray(s)) {
-      const type = STEP_TYPES.includes(String(s.type)) ? String(s.type) : 'note';
-      const o = { type };
-      if (type === 'worker') o.worker_id = String(s.worker_id || '').slice(0, 64);
-      else if (type === 'wait') o.until_ms = Math.max(0, Number(s.until_ms) || 0);
-      else if (type === 'approval') o.prompt = String(s.prompt || 'Approval required').slice(0, 300);
-      else if (type === 'task') { o.title = String(s.title || '').slice(0, 200); o.priority = s.priority === 'high' ? 'high' : 'normal'; }
-      else if (type === 'metric') { o.label = String(s.label || '').slice(0, 80); o.value = String(s.value == null ? '' : s.value).slice(0, 80); }
-      else if (type === 'notify') o.text = String(s.text || '').slice(0, 400);
-      else if (type === 'branch') {
-        o.condition = (s.condition && typeof s.condition === 'object')
-          ? { field: String(s.condition.field || '').slice(0, 60), op: String(s.condition.op || '==').slice(0, 10), value: s.condition.value }
-          : null;
-        o.if_true = Number.isInteger(s.if_true) ? s.if_true : null;
-        o.if_false = Number.isInteger(s.if_false) ? s.if_false : null;
-      } else o.text = String(s.text || '').slice(0, 400);
-      return o;
-    }
-    return { type: 'note', text: s == null ? '' : String(s).slice(0, 400) };
-  });
-}
+const { normalizeSteps, normalizeTrigger } = require('./_ossteps');
 
 function clean(resource, raw) {
   const data = raw || {};
@@ -86,7 +57,7 @@ function clean(resource, raw) {
   if (resource === 'workflows') {
     if (out.steps !== undefined) out.steps = normalizeSteps(out.steps);
     if (out.status && !['active', 'paused', 'draft'].includes(out.status)) out.status = 'active';
-    if (out.trigger !== undefined) out.trigger = String(out.trigger).slice(0, 80);
+    if (out.trigger !== undefined) out.trigger = normalizeTrigger(out.trigger);
   }
   if (resource === 'tasks') {
     if (out.status && !['open', 'done'].includes(out.status)) out.status = 'open';

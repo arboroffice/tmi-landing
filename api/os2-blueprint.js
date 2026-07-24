@@ -10,6 +10,7 @@
 
 const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
+const { normalizeSteps, normalizeTrigger } = require('./_ossteps');
 
 const MODEL = 'claude-opus-4-8';
 
@@ -30,9 +31,10 @@ Return ONLY valid JSON, no preamble, in exactly this shape:
   "metrics": [{"label":"Revenue MTD","unit":"","hint":"what this number tells the owner"}],
   "goals": [{"title":"the goal","target":"the target","timeframe":"by when"}],
   "tools": [{"name":"QuickBooks","category":"Accounting"}],
-  "workflows": [{"name":"New lead intake","trigger":"A lead comes in","steps":["first step","next step"]}]
+  "workflows": [{"name":"New lead intake","trigger":"lead_created","steps":[{"type":"task","title":"Capture the lead's details","priority":"high"},{"type":"notify","text":"Confirm receipt with the lead"},{"type":"wait","days":1},{"type":"task","title":"Follow up if no reply"}]}]
 }
-Rules: 3 to 5 departments. 4 to 8 workers, each in a named department, autonomy one of read|approve|auto, cadence one of realtime|daily|weekly. 4 to 6 metrics. 1 to 3 goals. List the systems they said they use, or sensible ones for their trade. 1 to 3 workflows, steps are plain sentences.`;
+Rules: 3 to 5 departments. 4 to 8 workers, each in a named department, autonomy one of read|approve|auto, cadence one of realtime|daily|weekly. 4 to 6 metrics. 1 to 3 goals. List the systems they said they use, or sensible ones for their trade. 1 to 3 workflows.
+Each workflow trigger MUST be one of: manual, client_won, invoice_overdue, lead_created, job_completed, metric_threshold (use manual if none fit). Each workflow step MUST be an object with a "type" that is one of: task {title, priority:"normal"|"high"}, notify {text}, wait {days}, approval {prompt}, metric {label, value}, note {text}. Do not write steps as plain strings.`;
 
 function s(v, max) {
   return String(v == null ? '' : v).slice(0, max).trim();
@@ -80,8 +82,8 @@ function normalizeSpec(raw) {
   const workflows = arr(r.workflows)
     .map((f) => ({
       name: s(f && f.name, 120),
-      trigger: s(f && f.trigger, 200),
-      steps: (Array.isArray(f && f.steps) ? f.steps : []).slice(0, 12).map((x) => s(x, 200)).filter(Boolean),
+      trigger: normalizeTrigger(f && f.trigger),
+      steps: normalizeSteps(f && f.steps),
     }))
     .filter((f) => f.name)
     .slice(0, 3);
@@ -172,7 +174,7 @@ async function apply(tid, rawSpec) {
   let fsort = 0;
   for (const f of spec.workflows) {
     await db.insert('os_workflows', {
-      tenant_id: tid, name: f.name, trigger: f.trigger, steps: f.steps,
+      tenant_id: tid, name: f.name, trigger: normalizeTrigger(f.trigger), steps: normalizeSteps(f.steps),
       status: 'draft', sort: ++fsort,
     });
   }
