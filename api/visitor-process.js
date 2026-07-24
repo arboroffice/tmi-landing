@@ -35,7 +35,9 @@ function domainOf(email) {
 }
 
 function serviceToken() {
-  return jwt.sign({ svc: 'visitor-process' }, process.env.JWT_SECRET || 'dev-secret-change-me', { expiresIn: '5m' });
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET not configured');
+  return jwt.sign({ svc: 'visitor-process' }, secret, { expiresIn: '5m' });
 }
 
 async function callInternal(path, token, body) {

@@ -41,6 +41,10 @@ module.exports = async (req, res) => {
       next_public_url:          hasCreds,
       jwt_secret:               !!process.env.JWT_SECRET,
       admin_password:           !!process.env.ADMIN_PASSWORD,
+      // TMI OS production readiness
+      os_secrets_key:           !!process.env.OS_SECRETS_KEY,
+      os_cron_secret:           !!process.env.CRON_SECRET,
+      stripe:                   !!process.env.STRIPE_SECRET_KEY,
       resend:                   !!process.env.RESEND_API_KEY,
       anthropic:                !!process.env.ANTHROPIC_API_KEY,
       openai:                   !!process.env.OPENAI_API_KEY,
