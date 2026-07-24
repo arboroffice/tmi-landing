@@ -225,6 +225,17 @@
   .wf-step-b:empty{display:none;}
   .wf-step-b .wf-f{flex:1;min-width:130px;}
   .wf-step select,.wf-step input{font-family:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);box-sizing:border-box;}
+  .fc-chat{max-height:34vh;overflow:auto;margin:14px 0 10px;display:flex;flex-direction:column;gap:8px;padding:2px;}
+  .fc-msg{max-width:88%;font-size:14px;line-height:1.5;padding:10px 13px;border-radius:13px;white-space:pre-wrap;}
+  .fc-msg.me{align-self:flex-end;background:var(--chart);color:var(--ink);}
+  .fc-msg.coo{align-self:flex-start;background:var(--bg-alt);color:var(--ink);border:1px solid var(--line);}
+  .fc-input{display:flex;gap:8px;align-items:flex-end;margin-top:8px;}
+  .fc-input textarea{flex:1;min-height:44px;max-height:120px;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;resize:vertical;box-sizing:border-box;color:var(--ink);}
+  .fc-draftcard{background:linear-gradient(180deg,#fff,var(--bg-alt));border:1px solid var(--line);border-left:3px solid var(--chart-dark);border-radius:12px;padding:14px 16px;margin-bottom:6px;}
+  .fc-draft-h{display:flex;align-items:center;gap:10px;justify-content:space-between;}
+  .fc-draft-name{font-size:16px;font-weight:700;color:var(--ink);margin-top:6px;}
+  .fc-steps{margin:8px 0 0;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:1.7;}
+  .fc-draft-f{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
 
   .memo{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 20px;}
   .memo .m{padding:14px 0;border-top:1px solid var(--line);font-size:14px;display:flex;gap:12px;align-items:flex-start;}
@@ -573,7 +584,7 @@
   </section>
 
   <section class="view" data-view="workflows">
-    <div class="secbar" style="margin-top:0"><div><div class="h">Cascades</div><p class="sub">One event, a sequence that ripples across your company. Pick a trigger, add steps, and the OS runs them in order, pausing on a wait or an approval. When a client is won, Finance sets up billing, Ops opens a kickoff, and your COO briefs you.</p></div><button class="btn add" onclick="openCascade()"><svg class="icon"><use href="#i-plus"/></svg> Build a cascade</button></div>
+    <div class="secbar" style="margin-top:0"><div><div class="h">Cascades</div><p class="sub">One event, a sequence that ripples across your company. Pick a trigger, add steps, and the OS runs them in order, pausing on a wait or an approval. When a client is won, Finance sets up billing, Ops opens a kickoff, and your COO briefs you.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn add" onclick="openFlowChat()"><svg class="icon"><use href="#i-coo"/></svg> Build with AI</button><button class="btn add ghost" onclick="openCascade()"><svg class="icon"><use href="#i-plus"/></svg> Build manually</button></div></div>
     <div id="workflows" style="margin-top:22px"></div>
     <div class="lbl" style="margin-top:30px">Recent runs</div>
     <div id="flowRuns" style="margin-top:12px"></div>
@@ -1118,9 +1129,10 @@ function wfStepLabel(s){
   if(t==='metric')return 'Set '+esc(s.label||'metric')+' = '+esc(s.value||'');
   if(t==='notify')return 'Notify: '+esc(s.text||'');
   if(t==='approval')return 'Wait for approval: '+esc(s.prompt||'');
-  if(t==='wait')return 'Wait '+((s.until_ms||0)/86400000)+' day(s)';
+  if(t==='wait')return 'Wait '+humanDur(s.until_ms||0);
   return esc(s.text||'Note');
 }
+function humanDur(ms){ms=Number(ms)||0;if(ms>=86400000){var d=Math.round(ms/86400000*100)/100;return d+' day'+(d===1?'':'s');}if(ms>=3600000){var h=Math.round(ms/3600000*10)/10;return h+' hour'+(h===1?'':'s');}var m=Math.max(1,Math.round(ms/60000));return m+' min';}
 function renderWorkflows(){
   var host=document.getElementById('workflows');var flows=STATE.workflows||[];
   if(!flows.length){host.innerHTML='<div class="empty"><h3>No cascades yet</h3><p>Build a cascade: one trigger, then steps that ripple across your company. When a client is won, Finance sets up billing, Ops opens a kickoff, and your COO briefs you.</p><div style="margin-top:16px"><button class="btn" onclick="openCascade()">Build a cascade</button></div></div>';return;}
@@ -1199,6 +1211,50 @@ async function loadRuns(){
 }
 async function approveRun(id){try{await api('/api/os2-flow',{action:'approve',run_id:id});toast('Approved');loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function resumeRun(id){try{await api('/api/os2-flow',{action:'resume',run_id:id});toast('Resumed');loadRuns();refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+/* conversational cascade builder: describe it in plain language, refine together, save */
+function openFlowChat(){
+  window._fcMsgs=[];window._fcDraft=null;
+  var html='<h3>Build a cascade with AI</h3><div class="msub">Describe what should happen and what kicks it off. I will draft it and we refine together.</div>'+
+    '<div id="fcChat" class="fc-chat"></div>'+
+    '<div id="fcDraft"></div>'+
+    '<div class="fc-input"><textarea id="fcInput" rows="2" placeholder="e.g. When a new lead comes in, text them within 2 minutes, then open a task for dispatch and tell me"></textarea><button class="btn" id="fcSendBtn" onclick="fcSend()">Send</button></div>';
+  document.getElementById('mcard').innerHTML=html;
+  document.getElementById('modal').classList.add('on');window._form=null;
+  fcAppend('coo','Tell me what should happen and what kicks it off. I will draft the cascade and we can refine it together.');
+  var inp=document.getElementById('fcInput');
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();fcSend();}});
+  setTimeout(function(){inp.focus();},60);
+}
+function fcAppend(who,text){var chat=document.getElementById('fcChat');if(!chat)return;chat.insertAdjacentHTML('beforeend','<div class="fc-msg '+who+'">'+esc(text)+'</div>');chat.scrollTop=chat.scrollHeight;}
+async function fcSend(){
+  var inp=document.getElementById('fcInput');var q=(inp.value||'').trim();if(!q)return;
+  inp.value='';fcAppend('me',q);window._fcMsgs.push({role:'user',content:q});
+  var chat=document.getElementById('fcChat');
+  var think=document.createElement('div');think.className='fc-msg coo';think.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';chat.appendChild(think);chat.scrollTop=chat.scrollHeight;
+  var btn=document.getElementById('fcSendBtn');if(btn)btn.disabled=true;
+  try{
+    var j=await api('/api/os2-flowbuild',{messages:window._fcMsgs});
+    think.textContent=j.reply||'Done.';
+    window._fcMsgs.push({role:'assistant',content:j.reply||''});
+    if(j.draft){window._fcDraft=j.draft;fcRenderDraft();}
+  }catch(e){think.textContent=(e&&e.message)||'Could not build that.';}
+  if(btn)btn.disabled=false;
+  chat.scrollTop=chat.scrollHeight;
+}
+function fcRenderDraft(){
+  var host=document.getElementById('fcDraft');if(!host)return;var d=window._fcDraft;if(!d){host.innerHTML='';return;}
+  var steps=(d.steps||[]).map(function(s){return '<li>'+wfStepLabel(s)+'</li>';}).join('');
+  host.innerHTML='<div class="fc-draftcard"><div class="fc-draft-h"><span class="cyc-ey">Draft cascade</span><span class="badge k">When: '+esc(WF_TRIG_LABEL[d.trigger]||d.trigger)+'</span></div>'+
+    '<div class="fc-draft-name">'+esc(d.name||'New cascade')+'</div>'+
+    (steps?'<ol class="fc-steps">'+steps+'</ol>':'<p style="font-size:13px;color:var(--ink-3);margin-top:6px">No steps yet.</p>')+
+    '<div class="fc-draft-f"><button class="btn" onclick="fcSave()">Save cascade</button><button class="btn ghost" onclick="fcEditInBuilder()">Open in builder</button></div></div>';
+}
+async function fcSave(){
+  var d=window._fcDraft;if(!d)return;
+  try{await crud('workflows','create',{data:{name:d.name,trigger:d.trigger,steps:d.steps,status:'active'}});closeModal();toast('Cascade saved');await refresh();if(VIEW==='workflows')loadRuns();}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+function fcEditInBuilder(){var d=window._fcDraft;if(!d)return;closeModal();openCascade();setTimeout(function(){var n=document.getElementById('wfName');if(n)n.value=d.name||'';var tr=document.getElementById('wfTrigger');if(tr)tr.value=d.trigger||'manual';window._wfSteps=(d.steps||[]).map(function(s){return Object.assign({},s);});if(!window._wfSteps.length)window._wfSteps=[{type:'worker'}];wfRenderSteps();},60);}
 
 /* ---- knowledge ---- */
 function renderKnowledge(){
