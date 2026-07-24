@@ -1814,7 +1814,7 @@ function renderGuardrails(){
     '<div class="kcard" style="padding:20px 22px;margin-bottom:14px"><div class="kh"><span class="badge k">How it works</span><h4>What your workers can do on their own</h4></div>'+
       '<p style="font-size:13.5px;color:var(--ink-2);margin-top:8px">A worker only acts in the real world when four things line up. Anything short of all four means it drafts the work and parks it in your inbox for one click. Nothing reaches a customer or moves money behind your back.</p>'+
       '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">'+
-        [['1','The worker is turned on','Off by default. You switch it on in Workforce.'],['2','Its channel is connected','Email or text needs a connected from-address in Settings, or it can only draft.'],['3','Autopilot is on for that action','Set below. Money and outside messages default to asking you first.'],['4','It stays under your limits','Per-action and daily spend caps here pull anything bigger back to approval.']].map(function(r){return '<div style="display:flex;gap:11px;align-items:flex-start"><span style="flex:none;width:22px;height:22px;border-radius:6px;background:var(--ink);color:var(--chart);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">'+r[0]+'</span><div><div style="font-size:13.5px;color:var(--ink);font-weight:600">'+r[1]+'</div><div style="font-size:12.5px;color:var(--ink-3)">'+r[2]+'</div></div></div>';}).join('')+
+        [['1','The worker is turned on','Off by default. You switch it on in Workforce.'],['2','Its channel is connected','Email or text needs a connected from-address in Settings, or it can only draft.'],['3','Autopilot is on for that action','Set it in Settings. Money and outside messages default to asking you first.'],['4','It stays under your limits','Per-action and daily spend caps here pull anything bigger back to approval.']].map(function(r){return '<div style="display:flex;gap:11px;align-items:flex-start"><span style="flex:none;width:22px;height:22px;border-radius:6px;background:var(--ink);color:var(--chart);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">'+r[0]+'</span><div><div style="font-size:13.5px;color:var(--ink);font-weight:600">'+r[1]+'</div><div style="font-size:12.5px;color:var(--ink-3)">'+r[2]+'</div></div></div>';}).join('')+
       '</div></div>'+
     '<div class="kcard" style="padding:20px 22px"><div class="kh"><span class="badge '+(paused?'pending':'done')+'">'+(paused?'Paused':'Running')+'</span><h4>Company autonomy</h4></div>'+
       '<p style="font-size:13.5px;color:var(--ink-2);margin-top:8px">One switch. Pause everything your AI workers do, instantly, no matter their settings.</p>'+
@@ -1840,7 +1840,9 @@ async function saveGuardrails(){
 async function saveLimit(){
   var pv=(document.getElementById('gr_limit')||{}).value||'';var pn=parseFloat(String(pv).replace(/[^0-9.]/g,''));
   var dv=(document.getElementById('gr_daily')||{}).value||'';var dn=parseFloat(String(dv).replace(/[^0-9.]/g,''));
-  var body={mode:'approve',per_action_limit:isNaN(pn)?null:pn,daily_limit:isNaN(dn)?null:dn};
+  // Save only the caps; do not touch the mode, so the "Move money" / "Change a
+  // connected system" rule the owner picked above is preserved (setPolicy merges).
+  var body={per_action_limit:isNaN(pn)?null:pn,daily_limit:isNaN(dn)?null:dn};
   try{
     // Set on both money-capable action types so the caps bind whichever path a
     // real money action takes.
