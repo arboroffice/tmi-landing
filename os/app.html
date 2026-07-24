@@ -211,6 +211,12 @@
   .cmdk-item.sel .ci-k{background:#fff;}
   .cmdk-empty{padding:22px;text-align:center;color:var(--ink-3);font-size:13px;}
   .cmdk-foot{display:flex;gap:16px;padding:9px 16px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3);font-family:var(--mono);}
+  .cyc{margin-top:18px;background:linear-gradient(180deg,#fff,var(--bg-alt));border:1px solid var(--line);border-left:3px solid var(--chart-dark);border-radius:14px;padding:17px 20px;}
+  .cyc-ey{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);font-weight:700;}
+  .cyc-lead{font-size:14.5px;color:var(--ink-2);margin-top:8px;line-height:1.55;}
+  .cyc-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .cyc-chip{font-size:12px;font-weight:600;color:var(--ink-2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 12px;}
+  .cyc-foot{margin-top:12px;}
 
   .memo{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 20px;}
   .memo .m{padding:14px 0;border-top:1px solid var(--line);font-size:14px;display:flex;gap:12px;align-items:flex-start;}
@@ -470,6 +476,7 @@
     <div class="h">Command center</div>
     <p class="sub" id="summary"></p>
     <div id="scoreCard"></div>
+    <div id="cycleStrip"></div>
     <div class="secbar" style="margin-top:26px"><span class="lbl">The whole company on one screen</span><button class="btn sm ghost add" onclick="addMetric()"><svg class="icon"><use href="#i-plus"/></svg> Metric</button></div>
     <div class="tiles" id="metrics"></div>
     <div id="deliveredStrip"></div>
@@ -685,6 +692,62 @@ function show(v){
   window.scrollTo(0,0);
 }
 
+/* ---- operating cycle: Monday plan / Friday recap ---- */
+// The company runs on a weekly rhythm. Mon-Thu the strip is a plan (what to
+// drive); Fri-Sun it is a recap (what the workers actually delivered, real
+// numbers from worker_stats). Always live from data, so it changes across the
+// week without waiting on a cron.
+function cycleKind(){var d=new Date().getDay();return (d===5||d===6||d===0)?'recap':'plan';}
+function weekDelivered(){
+  var ws=STATE.worker_stats||{}; var sum=0, top=[];
+  Object.keys(ws).forEach(function(id){
+    var n=(ws[id]&&ws[id].week)||0; sum+=n;
+    if(n>0){var w=find('workers',id); top.push({name:(w&&w.name)||'A worker',n:n});}
+  });
+  top.sort(function(a,b){return b.n-a.n;});
+  return {sum:sum,top:top.slice(0,3)};
+}
+function renderCycle(){
+  var host=document.getElementById('cycleStrip'); if(!host) return;
+  var kind=cycleKind();
+  var wd=weekDelivered();
+  var active=(STATE.workers||[]).filter(function(w){return w.status==='active';}).length;
+  var goals=(STATE.goals||[]).filter(function(g){return g.status==='active';});
+  var hiTasks=(STATE.tasks||[]).filter(function(t){return t.status!=='done'&&t.priority==='high';}).length;
+  var waiting=triageCount();
+  var chips=[];
+  if(kind==='plan'){
+    chips.push(active+' worker'+(active===1?'':'s')+' on');
+    if(hiTasks)chips.push(hiTasks+' high-priority task'+(hiTasks===1?'':'s'));
+    if(waiting)chips.push(waiting+' waiting in triage');
+    if(goals.length)chips.push(goals.length+' goal'+(goals.length===1?'':'s')+' in flight');
+  }else{
+    chips.push(wd.sum+' deliverable'+(wd.sum===1?'':'s')+' this week');
+    if(wd.top.length)chips.push('Top: '+wd.top.map(function(x){return esc(x.name)+' '+x.n;}).join(' · '));
+    chips.push(active+' worker'+(active===1?'':'s')+' on');
+  }
+  var title=kind==='plan'?'This week’s plan':'This week’s recap';
+  var lead=kind==='plan'
+    ? (waiting?('Clear the '+waiting+' item'+(waiting===1?'':'s')+' in triage, then keep your workers pointed at your goals this week.'):'Your workers are running. Keep them pointed at your goals this week.')
+    : (wd.sum?('Your workers delivered '+wd.sum+' thing'+(wd.sum===1?'':'s')+' this week. Here is where the week landed.'):'A quiet week. Turn on a worker or connect live data to put more on autopilot.');
+  var ctaLabel=kind==='plan'?'Have your COO write the full plan':'Have your COO write the full recap';
+  host.innerHTML='<div class="cyc"><div class="cyc-h"><span class="cyc-ey">'+esc(title)+'</span></div>'+
+    '<div class="cyc-lead">'+esc(lead)+'</div>'+
+    '<div class="cyc-chips">'+chips.map(function(c){return '<span class="cyc-chip">'+c+'</span>';}).join('')+'</div>'+
+    '<div class="cyc-foot"><button class="link" onclick="writeCycle(\''+kind+'\')">'+esc(ctaLabel)+' &rarr;</button></div></div>';
+}
+async function writeCycle(kind){
+  toast('Your COO is writing...');
+  try{
+    var mode=kind==='recap'?'report':'briefing';
+    var j=await api('/api/os2-ask',{mode:mode});
+    var d=new Date().toLocaleDateString(undefined,{month:'short',day:'numeric'});
+    var title=(kind==='recap'?'Weekly recap · ':'Weekly plan · ')+d;
+    await crud('reports','create',{data:{title:title,body:j.answer||'',period:'cycle'}});
+    await refresh();show('reports');toast(kind==='recap'?'Recap written':'Plan written');
+  }catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+
 /* ---- outcome meter: real work delivered ---- */
 function renderDelivered(){
   var host=document.getElementById('deliveredStrip'); if(!host) return;
@@ -865,7 +928,7 @@ function renderScore(){
     '</div></div>';
 }
 function renderAll(){
-  renderOverview(); renderScore(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg(); renderPlans(); renderDelivered();
+  renderOverview(); renderScore(); renderCycle(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg(); renderPlans(); renderDelivered();
   document.getElementById('tgDept').textContent=(STATE.departments||[]).length||'';
   document.getElementById('tgThreads').textContent=(STATE.threads||[]).length||'';
   document.getElementById('tgPulse').textContent=(STATE.signals||[]).length||'';
