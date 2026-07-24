@@ -49,10 +49,13 @@ function sumBalance(balance) {
 }
 
 // Sum successful charges over the last 30 days. Paginates, capped so one sync can
-// never run unbounded; the cap is logged as an approximation when hit.
+// never run unbounded; the cap is logged as an approximation when hit. Also
+// returns the successful charges themselves so the sync can write them into the
+// company graph as payment records.
 async function revenue30d(key) {
   const since = Math.floor((nowMs() - 30 * 24 * 3600 * 1000) / 1000);
   let total = 0, starting_after = null, pages = 0, capped = false;
+  const charges = [];
   const MAX_PAGES = 10; // up to 1000 charges
   while (pages < MAX_PAGES) {
     let path = `/v1/charges?limit=100&created[gte]=${since}`;
@@ -62,6 +65,7 @@ async function revenue30d(key) {
     for (const c of data) {
       if (c && c.paid && c.status === 'succeeded' && !c.refunded) {
         total += (Number(c.amount) || 0) - (Number(c.amount_refunded) || 0);
+        if (charges.length < 500) charges.push(c);
       }
     }
     pages++;
@@ -69,7 +73,38 @@ async function revenue30d(key) {
     else { break; }
     if (pages === MAX_PAGES && page.has_more) capped = true;
   }
-  return { total: total / 100, capped };
+  return { total: total / 100, capped, charges };
+}
+
+// Turn Stripe charges into company-graph record specs: one payment per charge,
+// and one customer per distinct payer (deduped by Stripe customer id or email).
+function chargeSpecs(charges) {
+  const specs = [];
+  const seenCustomers = new Set();
+  for (const c of charges || []) {
+    const bd = c.billing_details || {};
+    const name = bd.name || null;
+    const email = bd.email || c.receipt_email || null;
+    const custId = c.customer || (email ? 'email:' + email : null);
+    const amount = ((Number(c.amount) || 0) - (Number(c.amount_refunded) || 0)) / 100;
+    specs.push({
+      type: 'payment', source: 'stripe', external_id: c.id,
+      title: c.description || `Payment ${money(amount)}`,
+      status: 'succeeded', amount,
+      customer_id: c.customer || null, customer_name: name,
+      fields: { email: email || undefined, currency: (c.currency || '').toUpperCase() || undefined },
+    });
+    if (custId && !seenCustomers.has(custId) && (name || email)) {
+      seenCustomers.add(custId);
+      specs.push({
+        type: 'customer', source: 'stripe', external_id: custId,
+        title: name || email, status: 'active',
+        customer_id: c.customer || null, customer_name: name || email,
+        fields: { email: email || undefined },
+      });
+    }
+  }
+  return specs;
 }
 
 // Injected so the module stays testable and avoids Date.now() in restricted
@@ -114,9 +149,18 @@ async function syncStripe(db, tenant) {
   await writeMetric(db, tid, metrics, FEEDS[0], money(cash));
   await writeMetric(db, tid, metrics, FEEDS[1], money(rev.total));
 
+  // Write the charges into the company graph as payment + customer records, and
+  // fire client_won for a first-time paying customer. Best-effort: never let a
+  // records failure break the metric sync.
+  let ingested = null;
+  try {
+    const { ingest } = require('./_osingest');
+    ingested = await ingest(tenant, chargeSpecs(rev.charges), { source: 'stripe', wonOnNewCustomer: true });
+  } catch (_e) { /* records are additive; metrics already saved */ }
+
   const now = new Date().toISOString();
   await touchConnection(db, tid, now);
-  return { cash, revenue: rev.total, capped: rev.capped };
+  return { cash, revenue: rev.total, capped: rev.capped, records: ingested };
 }
 
 // Create/refresh the os_connections row that the Live-data view shows.
@@ -153,4 +197,4 @@ async function stripeConnected(tid) {
   return hasSecret(tid, 'stripe');
 }
 
-module.exports = { connectStripe, disconnectStripe, syncStripe, stripeConnected, validateKey, sumBalance, money, _setNow, FEEDS };
+module.exports = { connectStripe, disconnectStripe, syncStripe, stripeConnected, validateKey, sumBalance, money, chargeSpecs, _setNow, FEEDS };

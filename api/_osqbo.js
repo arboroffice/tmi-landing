@@ -31,6 +31,40 @@ async function qboGet(token, realmId, path) {
   return body;
 }
 
+// Turn QuickBooks Invoice objects into company-graph record specs: one invoice
+// record per invoice (with paid/open status and due date), plus one customer per
+// distinct CustomerRef so the graph knows who the invoice is for.
+function invoiceSpecs(invoices) {
+  const specs = [];
+  const seen = new Set();
+  for (const inv of invoices || []) {
+    if (!inv || !inv.Id) continue;
+    const balance = Number(inv.Balance);
+    const total = Number(inv.TotalAmt);
+    const ref = inv.CustomerRef || {};
+    const custName = ref.name || null;
+    specs.push({
+      type: 'invoice', source: 'quickbooks', external_id: String(inv.Id),
+      title: `Invoice ${inv.DocNumber || inv.Id}`,
+      status: !isNaN(balance) && balance <= 0 ? 'paid' : 'open',
+      amount: isNaN(total) ? null : total,
+      customer_id: ref.value != null ? String(ref.value) : null,
+      customer_name: custName,
+      due_at: inv.DueDate ? `${inv.DueDate}T00:00:00Z` : null,
+      fields: { balance: isNaN(balance) ? undefined : balance, doc: inv.DocNumber || undefined },
+    });
+    const cid = ref.value != null ? String(ref.value) : null;
+    if (cid && !seen.has(cid) && custName) {
+      seen.add(cid);
+      specs.push({
+        type: 'customer', source: 'quickbooks', external_id: cid,
+        title: custName, status: 'active', customer_id: cid, customer_name: custName, fields: {},
+      });
+    }
+  }
+  return specs;
+}
+
 // Walk a QuickBooks P&L report and pull the total income (revenue) amount.
 function totalIncome(report) {
   try {
@@ -77,11 +111,23 @@ async function syncQuickbooks(db, tenant) {
   const metrics = await db.list('os_metrics', { where: [['tenant_id', '==', tid]] });
   if (income != null) await upsertMetric(db, tid, metrics, 'revenue_ytd', 'Revenue (year to date)', money(income));
 
+  // Pull invoices into the company graph and fire invoice_overdue for any that
+  // are past due. Best-effort: a records/query failure never breaks the revenue
+  // metric that already saved above.
+  let ingested = null;
+  try {
+    const q = encodeURIComponent('SELECT * FROM Invoice ORDERBY MetaData.LastUpdatedTime DESC MAXRESULTS 200');
+    const res = await qboGet(token, realmId, `/query?query=${q}&minorversion=65`);
+    const invoices = (res && res.QueryResponse && res.QueryResponse.Invoice) || [];
+    const { ingest } = require('./_osingest');
+    ingested = await ingest(tenant, invoiceSpecs(invoices), { source: 'quickbooks' });
+  } catch (_e) { /* invoices are additive; revenue metric already saved */ }
+
   const conns = await db.list('os_connections', { where: [['tenant_id', '==', tid]] });
   const c = conns.find((x) => x.oauth_provider === 'quickbooks');
   if (c) await db.update('os_connections', c.id, { last_data_at: new Date().toISOString(), status: 'live' });
 
-  return { income };
+  return { income, records: ingested };
 }
 
 async function quickbooksConnected(tid) {
@@ -89,4 +135,4 @@ async function quickbooksConnected(tid) {
   return !!(tok && tok.access_token);
 }
 
-module.exports = { syncQuickbooks, quickbooksConnected, totalIncome, money };
+module.exports = { syncQuickbooks, quickbooksConnected, totalIncome, invoiceSpecs, money };
