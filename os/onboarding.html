@@ -319,8 +319,10 @@ function gatherHandles(){
 }
 function payload(){
   if(MODE==='business'){
+    var bn=(document.getElementById('bnotes').value||'').trim();
+    // Feed the owner's note into both fields the intake reads, so it is not blank.
     return {mode:'business', website:(document.getElementById('website').value||'').trim(),
-      answers:{ what_falls_through:'', bottleneck:(document.getElementById('bnotes').value||'').trim() }};
+      answers:{ what_falls_through:bn, bottleneck:bn }};
   }
   return {mode:'creator', handles:gatherHandles(),
     answers:{ niche:(document.getElementById('niche').value||'').trim(),

@@ -130,6 +130,14 @@ module.exports = async function handler(req, res) {
     }
     if (action === 'delete') {
       await db.remove(coll, id);
+      // Deleting a department must not orphan what pointed at it: detach its
+      // workers, metrics, and goals so they fall cleanly into Unassigned.
+      if (resource === 'departments') {
+        for (const c of ['os_workers', 'os_metrics', 'os_goals']) {
+          const rows = await db.list(c, { where: [['tenant_id', '==', tid], ['department_id', '==', id]] }).catch(() => []);
+          for (const r of rows) { await db.update(c, r.id, { department_id: null }).catch(() => {}); }
+        }
+      }
       if (resource !== 'reports') log(tid, `Removed ${label(resource, cur)}.`);
       return res.status(200).json({ ok: true });
     }

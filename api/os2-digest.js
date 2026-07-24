@@ -26,6 +26,7 @@ module.exports = async function handler(req, res) {
   // Preview mode: authenticated tenant asks for its own digest.
   if (token && test) {
     try {
+      if (!process.env.RESEND_API_KEY) return res.status(200).json({ sent: 0, note: 'Email is not connected yet, so there is nothing to preview.' });
       const tenant = await db.getById('os_tenants', token.tenant_id);
       if (!tenant) return res.status(404).json({ error: 'Company not found' });
       const to = token.email ? [token.email] : await recipients(tenant.id);
@@ -146,7 +147,7 @@ function build(tenant, d) {
       <a href="${APP_URL}" style="display:inline-block;margin-top:28px;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;text-decoration:none;padding:13px 22px;border-radius:10px;">Open your OS &rarr;</a>
     </div>
   </div>
-  <div style="max-width:560px;margin:14px auto 0;text-align:center;color:#8a8c9e;font-size:11px;">TMI Technology · You are getting this because you run ${esc(name)} on TMI OS.</div>
+  <div style="max-width:560px;margin:14px auto 0;text-align:center;color:#8a8c9e;font-size:11px;">TMI Technology · You are getting this because you run ${esc(name)} on TMI OS.<br>Do not want the weekly digest? Turn it off under <a href="${APP_URL}/app?view=settings" style="color:#8a8c9e;">Settings</a>.</div>
 </div>`;
 
   const text = `${name} — your week on TMI OS\n\n` +

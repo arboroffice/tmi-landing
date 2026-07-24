@@ -835,7 +835,7 @@ function renderCycle(){
   var lead=kind==='plan'
     ? (waiting?('Clear the '+waiting+' item'+(waiting===1?'':'s')+' in triage, then keep your workers pointed at your goals this week.'):'Your workers are running. Keep them pointed at your goals this week.')
     : (wd.sum?('Your workers delivered '+wd.sum+' thing'+(wd.sum===1?'':'s')+' this week. Here is where the week landed.'):'A quiet week. Turn on a worker or connect live data to put more on autopilot.');
-  var ctaLabel=kind==='plan'?'Have your COO write the full plan':'Have your COO write the full recap';
+  var ctaLabel=kind==='plan'?'Have your COO brief the week ahead':'Have your COO write the full recap';
   host.innerHTML='<div class="cyc"><div class="cyc-h"><span class="cyc-ey">'+esc(title)+'</span></div>'+
     '<div class="cyc-lead">'+esc(lead)+'</div>'+
     '<div class="cyc-chips">'+chips.map(function(c){return '<span class="cyc-chip">'+c+'</span>';}).join('')+'</div>'+
@@ -1399,14 +1399,15 @@ function taskFields(t){t=t||{};return [
   {name:'priority',label:'Priority',type:'select',value:t.priority||'normal',options:[['high','High'],['normal','Normal'],['low','Low']]}
 ];}
 function addTask(){openForm({title:'New task',fields:taskFields(),onSave:function(v){return crud('tasks','create',{data:Object.assign({status:'open'},v)});}});}
-async function toggleTask(id){var t=find('tasks',id);if(!t)return;var next=t.status==='done'?'open':'done';t.status=next;renderTasks();try{await crud('tasks','update',{id:id,data:{status:next}});}catch(e){if(e.message!=='signed out'){t.status=next==='done'?'open':'done';renderTasks();toast(e.message);}}}
+async function toggleTask(id){var t=find('tasks',id);if(!t)return;var next=t.status==='done'?'open':'done';t.status=next;renderTasks();try{await crud('tasks','update',{id:id,data:{status:next}});briefingLoaded=false;}catch(e){if(e.message!=='signed out'){t.status=next==='done'?'open':'done';renderTasks();toast(e.message);}}}
 
 /* ---- reports ---- */
 function renderReports(){
   var host=document.getElementById('reports');var rs=STATE.reports||[];
   if(!rs.length){host.innerHTML='<div class="empty"><h3>No reports yet</h3><p>Generate a plain-language report of your company from everything in your OS.</p><div style="margin-top:16px"><button class="btn" onclick="generateReport()">Generate report</button></div></div>';return;}
   host.innerHTML=rs.map(function(r){
-    return '<div class="kcard"><div class="kh"><span class="badge k">report</span><h4>'+esc(r.title||'Company report')+'</h4>'+
+    var kind=/recap/i.test(r.title||'')?'Recap':/plan/i.test(r.title||'')?'Plan':(r.period==='month'?'Month':r.period==='cycle'?'Cycle':'Report');
+    return '<div class="kcard"><div class="kh"><span class="badge k">'+esc(kind)+'</span><h4>'+esc(r.title||'Company report')+'</h4>'+
       '<div class="racts"><span class="cad">'+fmt(r.created_at)+'</span><span class="iconbtn danger" title="Delete" onclick="delItem(\'reports\',\''+r.id+'\',\'report\')"><svg class="icon"><use href="#i-trash"/></svg></span></div></div>'+
       '<div class="body" style="max-height:none">'+esc(r.body)+'</div></div>';
   }).join('');
@@ -1614,8 +1615,8 @@ async function runPulse(){
   catch(e){if(e.message!=='signed out')toast(e.message);}
   if(btn){btn.disabled=false;btn.innerHTML='<svg class="icon"><use href="#i-coo"/></svg> Scan now';}
 }
-async function pulseAct(id){if(!guardWrite())return;try{var j=await api('/api/os2-pulse',{action:'act',signal_id:id});var r=j.result||{};toast(r.task?'Task created':r.output?'Worker ran':'Done');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
-async function pulseDismiss(id){if(!guardWrite())return;try{await api('/api/os2-pulse',{action:'dismiss',signal_id:id});refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function pulseAct(id){if(!guardWrite())return;try{var j=await api('/api/os2-pulse',{action:'act',signal_id:id});var r=j.result||{};toast(r.task?'Task created':r.output?'Worker ran':'Done');briefingLoaded=false;refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function pulseDismiss(id){if(!guardWrite())return;try{await api('/api/os2-pulse',{action:'dismiss',signal_id:id});briefingLoaded=false;refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 
 function viewOutput(id){var o=find('outputs',id);if(o)showOutput(o);}
 function showOutput(o){
@@ -1625,6 +1626,7 @@ function showOutput(o){
   var html='<h3>'+esc(o.title)+'</h3><div class="msub">'+esc(o.worker_name||'')+' · '+fmt(o.created_at)+(pending?' · waiting on you':'')+(o.action?' · '+actDesc(o.action):'')+(o.action_status?' · '+(ACTBADGE[o.action_status]||o.action_status):'')+'</div>'+
     (pending?'<div class="escline" style="margin-top:12px">'+esc(escalationLine(o))+'</div>':'')+
     (pending&&o.reason?'<div class="escwhy"><strong>Why it is asking:</strong> '+esc(o.reason)+'</div>':'')+
+    (pending&&o.action&&o.action.channel==='email'?'<div class="field" style="margin-top:12px"><label>Subject</label><input id="outSubj" value="'+esc((o.action&&o.action.subject)||'')+'"/></div>':'')+
     (pending
       ? '<textarea id="outEdit" class="outedit" spellcheck="true">'+esc(o.body||'')+'</textarea>'
       : '<div class="outbody">'+esc(o.body||'')+'</div>')+
@@ -1637,7 +1639,7 @@ function showOutput(o){
   window._form=null;
 }
 function copyOutput(){var ed=document.getElementById('outEdit');var txt=ed?ed.value:(window._out||'');try{navigator.clipboard.writeText(txt);toast('Copied');}catch(e){toast('Select and copy');}}
-async function approveOutput(id){if(!guardWrite())return;try{var ed=document.getElementById('outEdit');var payload={action:'approve',output_id:id};if(ed)payload.body=ed.value;var j=await api('/api/os2-act',payload);closeModal();if(j.blocked){toast(j.reason||'A guardrail blocks this. Change it in Guardrails.');refresh();return;}var s=j.act&&j.act.status;toast(s==='sent'?'Approved and sent':s==='staged'?'Approved. Connect a channel in Settings to send it.':s==='failed'?'Approved, but the send failed':'Approved');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function approveOutput(id){if(!guardWrite())return;try{var ed=document.getElementById('outEdit');var sj=document.getElementById('outSubj');var payload={action:'approve',output_id:id};if(ed)payload.body=ed.value;if(sj)payload.subject=sj.value;var j=await api('/api/os2-act',payload);closeModal();if(j.blocked){toast(j.reason||'A guardrail blocks this. Change it in Guardrails.');refresh();return;}var s=j.act&&j.act.status;toast(s==='sent'?'Approved and sent':s==='staged'?'Approved. Connect a channel in Settings to send it.':s==='failed'?'Approved, but the send failed':'Approved');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function dismissOutput(id){if(!guardWrite())return;try{await api('/api/os2-act',{action:'dismiss',output_id:id});closeModal();toast('Declined');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function resendAction(id){if(!guardWrite())return;try{var j=await api('/api/os2-act',{action:'send',action_id:id});var s=j.act&&j.act.status;toast(s==='sent'?'Sent':s==='staged'?'Still not connected. Add the channel in Settings.':'Could not send');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 
@@ -1956,14 +1958,14 @@ function openMarketItem(id){
 async function installTemplate(id,btn){
   if(!guardWrite())return;
   if(btn){btn.disabled=true;btn.textContent='Installing...';}
-  try{var j=await api('/api/os2-market',{action:'install',id:id});var inst=j.installed||{};toast('Installed '+(inst.label||'it')+'. TMI wires the backend.');await refresh();}
+  try{var j=await api('/api/os2-market',{action:'install',id:id});var inst=j.installed||{};toast('Installed '+(inst.label||'it')+'. Turn it on in Workforce to run it.');await refresh();}
   catch(e){if(e.message!=='signed out')toast(e.message);}
   if(btn){btn.disabled=false;btn.textContent='Install';}
 }
 async function installFromModal(id,btn){
   if(!guardWrite())return;
   if(btn){btn.disabled=true;btn.textContent='Installing...';}
-  try{var j=await api('/api/os2-market',{action:'install',id:id});var inst=j.installed||{};closeModal();toast('Installed '+(inst.label||'it')+'. TMI wires the backend.');await refresh();}
+  try{var j=await api('/api/os2-market',{action:'install',id:id});var inst=j.installed||{};closeModal();toast('Installed '+(inst.label||'it')+'. Turn it on in Workforce to run it.');await refresh();}
   catch(e){if(btn){btn.disabled=false;btn.textContent='Install';}if(e.message!=='signed out')toast(e.message);}
 }
 
@@ -2013,7 +2015,7 @@ async function planGoal(goalId){
   }catch(e){closeModal();if(e.message!=='signed out')toast(e.message);}
 }
 async function applyPlan(){
-  try{var j=await api('/api/os2-plan',{action:'apply',plan:window._plan});closeModal();toast((j.created||0)+' tasks set up');refresh();}
+  try{var j=await api('/api/os2-plan',{action:'apply',plan:window._plan});closeModal();toast((j.created||0)+' tasks set up');briefingLoaded=false;refresh();}
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 
