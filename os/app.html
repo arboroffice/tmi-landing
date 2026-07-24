@@ -523,6 +523,7 @@
   <nav id="nav">
     <a data-v="overview"><svg class="icon"><use href="#i-spark"/></svg> My company</a>
     <a data-v="command" class="on"><svg class="icon"><use href="#i-grid"/></svg> Command Center</a>
+    <a data-v="records"><svg class="icon"><use href="#i-book"/></svg> Records <span class="tag" id="tgRecords"></span></a>
     <a data-v="pulse"><svg class="icon"><use href="#i-clock"/></svg> Pulse <span class="tag" id="tgPulse"></span></a>
     <a data-v="coo"><svg class="icon"><use href="#i-coo"/></svg> AI COO</a>
     <a data-v="inbox"><svg class="icon"><use href="#i-inbox"/></svg> Inbox <span class="tag" id="tgInbox"></span></a>
@@ -593,6 +594,13 @@
     </div>
     <div class="secbar"><span class="lbl">Goals</span><button class="btn sm ghost add" onclick="addGoal()"><svg class="icon"><use href="#i-plus"/></svg> Goal</button></div>
     <div id="goals"></div>
+  </section>
+
+  <section class="view" data-view="records">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Records</div><p class="sub">Your company graph: the real customers, invoices, jobs, and payments the OS holds. Your connected tools feed this automatically, your COO and Company Brain answer from it by name and number, and your cascades fire off it. Add one by hand any time.</p></div><button class="btn add" onclick="addRecord()"><svg class="icon"><use href="#i-plus"/></svg> Add record</button></div>
+    <div class="tiles" id="recordStats" style="margin-top:22px"></div>
+    <div id="recordFilter" style="margin:22px 0 0"></div>
+    <div id="recordsList" style="margin-top:16px"></div>
   </section>
 
   <section class="view" data-view="plans">
@@ -1041,7 +1049,8 @@ function renderScore(){
     '</div></div>';
 }
 function renderAll(){
-  renderOverview(); renderScore(); renderCycle(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg(); renderPlans(); renderDelivered();
+  renderOverview(); renderScore(); renderCycle(); renderGoals(); renderPulse(); renderPulseStrip(); renderMetrics(); renderRecords(); renderWorkers(); renderWorkflows(); renderKnowledge(); renderTasks(); renderReports(); renderInbox(); renderThreads(); renderBuild(); renderDepartments(); renderGuardrails(); renderSettings(); renderFeed(); renderSugg(); renderPlans(); renderDelivered();
+  var tgRec=document.getElementById('tgRecords'); if(tgRec) tgRec.textContent=((STATE.record_stats&&STATE.record_stats.total)||(STATE.records||[]).length)||'';
   document.getElementById('tgDept').textContent=(STATE.departments||[]).length||'';
   document.getElementById('tgThreads').textContent=(STATE.threads||[]).length||'';
   document.getElementById('tgPulse').textContent=(STATE.signals||[]).length||'';
@@ -1119,6 +1128,73 @@ function metricFields(m){m=m||{};return [
 ];}
 function addMetric(){openForm({title:'Add a metric',sub:'A number you want on your command center.',fields:metricFields(),onSave:function(v){return crud('metrics','create',{data:v});}});}
 function editMetric(id){var m=find('metrics',id);openForm({title:'Edit metric',fields:metricFields(m),del:function(){return crud('metrics','delete',{id:id});},onSave:function(v){return crud('metrics','update',{id:id,data:v});}});}
+
+/* ---- records (the company graph) ---- */
+var REC_FILTER='all';
+function recCrud(action,extra){if((action==='create'||action==='update'||action==='delete')&&!guardWrite())return Promise.reject(new Error('signed out'));return api('/api/os2-records',Object.assign({action:action},extra||{}));}
+function setRecFilter(t){REC_FILTER=t;renderRecords();}
+var REC_LABELS={all:'All',customer:'Customers',lead:'Leads',invoice:'Invoices',payment:'Payments',job:'Jobs',deal:'Deals'};
+function recOverdue(r){if(!r||r.type!=='invoice'||!r.due_at)return false;var s=String(r.status||'').toLowerCase();if(s==='paid'||s==='void'||s==='draft')return false;return Date.parse(r.due_at)<Date.now();}
+function recordRow(r){
+  var overdue=recOverdue(r);
+  var money=typeof r.amount==='number'?'$'+r.amount.toLocaleString():'';
+  var title=r.title||r.customer_name||(String(r.type||'record').charAt(0).toUpperCase()+String(r.type||'record').slice(1));
+  var sub=[];
+  if(r.customer_name&&r.title) sub.push(esc(r.customer_name));
+  if(r.due_at) sub.push('due '+esc(String(r.due_at).slice(0,10)));
+  if(r.source&&r.source!=='manual') sub.push('via '+esc(r.source));
+  else sub.push('added by hand');
+  if(r.updated_at) sub.push('updated '+ago(r.updated_at));
+  return '<div class="row"><div class="r1"><h4>'+esc(title)+'</h4>'+
+    '<span class="badge k">'+esc(r.type)+'</span>'+
+    (r.status?'<span class="cad"'+(overdue?' style="color:var(--warn)"':'')+'>'+esc(r.status)+(overdue?' · overdue':'')+'</span>':'')+
+    (money?'<span class="cad" style="color:var(--ink);font-weight:600">'+money+'</span>':'')+
+    '<div class="racts"><button class="link" onclick="editRecord(\''+r.id+'\')">Edit</button></div></div>'+
+    (sub.length?'<p>'+sub.join(' · ')+'</p>':'')+'</div>';
+}
+function renderRecords(){
+  var host=document.getElementById('recordsList'); if(!host) return;
+  var st=STATE.record_stats||{counts:{},total:0,openInvoices:0,overdueInvoices:0,outstanding:0};
+  var counts=st.counts||{};
+  var recs=STATE.records||[];
+  var tiles=[
+    ['Records',st.total||0,''],
+    ['Customers & leads',(counts.customer||0)+(counts.lead||0),''],
+    ['Open invoices',st.openInvoices||0,st.outstanding?('$'+Number(st.outstanding).toLocaleString()+' outstanding'):''],
+    ['Overdue',st.overdueInvoices||0,st.overdueInvoices?'need chasing':'']
+  ];
+  var statHost=document.getElementById('recordStats');
+  if(statHost) statHost.innerHTML=tiles.map(function(t){
+    return '<div class="tile metric"><div class="top-row"><div class="k">'+esc(t[0])+'</div></div><div class="v">'+esc(t[1])+'</div>'+(t[2]?'<div class="hh">'+esc(t[2])+'</div>':'')+'</div>';
+  }).join('');
+  var types=['all','customer','lead','invoice','payment','job','deal'].filter(function(t){return t==='all'||t==='customer'||t==='lead'||t==='invoice'||(counts[t]||0)>0;});
+  var fHost=document.getElementById('recordFilter');
+  if(fHost) fHost.innerHTML=types.map(function(t){
+    var n=t==='all'?(st.total||0):(counts[t]||0);var on=REC_FILTER===t;
+    return '<button class="chip2" style="cursor:pointer;margin:0 8px 8px 0;'+(on?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setRecFilter(\''+t+'\')">'+esc(REC_LABELS[t]||t)+(n?' '+n:'')+'</button>';
+  }).join('');
+  var list=REC_FILTER==='all'?recs:recs.filter(function(r){return r.type===REC_FILTER;});
+  if(!list.length){ host.innerHTML='<div class="empty"><h3>'+(recs.length?'Nothing here yet':'No records yet')+'</h3><p>Connect your accounting or CRM under Connect tools and your customers, invoices, and payments land here on their own. Or add one by hand and your COO, Brain, and cascades can all use it.</p><div style="margin-top:16px"><button class="btn" onclick="addRecord()">Add record</button></div></div>'; return; }
+  host.innerHTML=list.map(recordRow).join('');
+}
+function recordFields(r){r=r||{};var f=r.fields||{};return [
+  {name:'type',label:'Type',type:'select',value:r.type||'customer',options:[['customer','Customer'],['lead','Lead'],['invoice','Invoice'],['payment','Payment'],['job','Job'],['deal','Deal']]},
+  {name:'title',label:'Title',value:r.title,placeholder:'Invoice #1042, or a customer name'},
+  {name:'customer_name',label:'Customer (optional)',value:r.customer_name,placeholder:'Acme Co'},
+  {name:'status',label:'Status (optional)',value:r.status,placeholder:'open, paid, won, scheduled'},
+  {name:'amount',label:'Amount (optional)',value:r.amount!=null?r.amount:'',placeholder:'2400'},
+  {name:'due_at',label:'Due date (optional)',value:r.due_at?String(r.due_at).slice(0,10):'',placeholder:'2026-08-01'},
+  {name:'email',label:'Email (optional)',value:f.email,placeholder:'name@acme.com'}
+];}
+function recordData(v){
+  var d={type:v.type,title:v.title,customer_name:v.customer_name||null,status:v.status||null,due_at:v.due_at||null,source:'manual'};
+  d.amount=v.amount!==''&&v.amount!=null?Number(v.amount):null;
+  if(isNaN(d.amount)) d.amount=null;
+  d.fields={};if(v.email)d.fields.email=v.email;
+  return d;
+}
+function addRecord(){openForm({title:'Add a record',sub:'A real customer, invoice, job, or payment. Your COO and Company Brain will use it right away.',fields:recordFields(),onSave:function(v){if(!v.title&&!v.customer_name){throw new Error('Give it a title or a customer');}return recCrud('create',{data:recordData(v)});}});}
+function editRecord(id){var r=find('records',id);if(!r)return;openForm({title:'Edit record',fields:recordFields(r),del:function(){return recCrud('delete',{id:id});},onSave:function(v){if(!v.title&&!v.customer_name){throw new Error('Give it a title or a customer');}return recCrud('update',{id:id,data:recordData(v)});}});}
 
 /* ---- workers ---- */
 function workerCardHTML(w){
@@ -2554,7 +2630,7 @@ async function applyAction(a,btn){
 /* ---- command palette (Cmd-K): jump to any view, run any worker, ask the COO ---- */
 var CMDK={items:[],sel:0};
 var PVIEWS=[
-  ['overview','My company'],['command','Command Center'],['pulse','Pulse'],['coo','AI COO'],
+  ['overview','My company'],['command','Command Center'],['records','Records'],['pulse','Pulse'],['coo','AI COO'],
   ['inbox','Inbox'],['threads','Conversations'],['tasks','Tasks'],['guardrails','Guardrails & control'],
   ['blueprint','Design my company'],['build','Build with TMI'],['departments','Departments'],
   ['marketplace','Marketplace'],['workforce','Workforce'],['workflows','Workflows'],

@@ -11,12 +11,13 @@
 
 const db = require('./_db');
 const { requireTenant, cors } = require('./_tenant-auth');
+const { graphSummary } = require('./_osrecords');
 
 const MODEL = 'claude-opus-4-8';
 
-const SYSTEM = `You are the AI COO inside TMI OS for the company described below. You can see their command center metrics, AI workers, workflows, company knowledge, open tasks, and recent activity, and nothing else. You are the operating brain of an intelligent company: the owner runs the business through you.
+const SYSTEM = `You are the AI COO inside TMI OS for the company described below. You can see their command center metrics, AI workers, workflows, company knowledge, open tasks, recent activity, and their real company records (customers, leads, invoices, payments, jobs), and nothing else. You are the operating brain of an intelligent company: the owner runs the business through you.
 
-Speak like a sharp, direct operator talking to the owner. Short and specific. No hype, no filler, no emojis, no em dashes. If a number is not connected yet (value is "-"), say so and name what to connect. Never invent figures. Never claim a worker did something the activity feed does not show. Use the company knowledge when it is relevant.
+Speak like a sharp, direct operator talking to the owner. Short and specific. No hype, no filler, no emojis, no em dashes. If a number is not connected yet (value is "-"), say so and name what to connect. Never invent figures. When you have real company records, cite them by name and number (the customer, the invoice, the amount, whether it is overdue). Never claim a worker did something the activity feed does not show. Use the company knowledge when it is relevant.
 
 You can also BUILD. When the owner asks you to add, create, draft, change, set, or turn something into part of their OS, propose it as one or more actions. Only propose actions the owner is clearly asking for or that directly answer their request. Keep every proposed object specific to THIS company.
 
@@ -49,7 +50,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const w = [['tenant_id', '==', tid]];
-    const [tenant, metrics, workers, workflows, knowledge, tasks, log, goals, signals] = await Promise.all([
+    const [tenant, metrics, workers, workflows, knowledge, tasks, log, goals, signals, graph] = await Promise.all([
       db.getById('os_tenants', tid),
       db.list('os_metrics', { where: w }),
       db.list('os_workers', { where: w }),
@@ -59,10 +60,11 @@ module.exports = async function handler(req, res) {
       db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 10 }),
       db.list('os_goals', { where: w }),
       db.list('os_signals', { where: [['tenant_id', '==', tid], ['status', '==', 'open']] }),
+      graphSummary(tid).catch(() => ''),
     ]);
     if (!tenant) return res.status(404).json({ error: 'Company not found' });
 
-    const out = await run(tenant, { metrics, workers, workflows, knowledge, tasks, log, goals, signals }, mode, question);
+    const out = await run(tenant, { metrics, workers, workflows, knowledge, tasks, log, goals, signals, graph }, mode, question);
     return res.status(200).json(out);
   } catch (e) {
     console.error('os2-ask:', e.message);
@@ -89,13 +91,14 @@ function context(tenant, s) {
   const SEV = { high: 0, medium: 1, low: 2 };
   const sig = (s.signals || []).slice().sort((x, y) => (SEV[x.severity] ?? 1) - (SEV[y.severity] ?? 1))
     .map(x => `- [${x.severity || 'medium'}] ${x.title}: ${String(x.insight || '').slice(0, 240)}`).join('\n') || '- none open';
+  const graph = String(s.graph || '').trim();
   return `COMPANY: ${tenant.name}${tenant.business_type ? ' (' + tenant.business_type + ')' : ''}
 WHAT THEY DO: ${p.what_you_do || tenant.summary || 'unspecified'}
 WANTS TO SEE DAILY: ${p.what_you_track || 'unspecified'}
 KNOWN LEAKS: ${p.what_falls_through || 'unspecified'}
 TOOLS: ${p.tools || 'unspecified'}
 BIGGEST BOTTLENECK: ${p.bottleneck || 'unspecified'}
-
+${graph ? `\nCOMPANY RECORDS (real customers, invoices, jobs, payments - cite these by name and number):\n${graph}\n` : ''}
 METRICS:
 ${m}
 

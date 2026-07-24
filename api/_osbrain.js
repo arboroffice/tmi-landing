@@ -17,10 +17,12 @@
 //   os_contacts  { tenant_id, name, company, notes, created_at }
 //   os_outputs   { tenant_id, title, body, created_at }
 //   os_messages  { tenant_id, body, created_at }
+//   os_records   { tenant_id, type, title, status, amount, customer_name, ... }
 
 const db = require('./_db');
+const { isOverdue } = require('./_osrecords');
 
-const CAPS = { knowledge: 300, contacts: 500, outputs: 200, messages: 200, metrics: 200 };
+const CAPS = { knowledge: 300, contacts: 500, outputs: 200, messages: 200, metrics: 200, records: 800 };
 
 // Common words that carry no signal for overlap scoring. Kept small on purpose.
 const STOP = new Set([
@@ -55,15 +57,43 @@ function tokenize(s) {
 // capped and each query pushes a single tenant filter to Firestore.
 async function collect(tenantId) {
   const w = [['tenant_id', '==', tenantId]];
-  const [knowledge, contacts, outputs, messages, metrics] = await Promise.all([
+  const [knowledge, contacts, outputs, messages, metrics, records] = await Promise.all([
     db.list('os_knowledge', { where: w, limit: CAPS.knowledge }).catch(() => []),
     db.list('os_contacts', { where: w, limit: CAPS.contacts }).catch(() => []),
     db.list('os_outputs', { where: w, order: 'created_at', ascending: false, limit: CAPS.outputs }).catch(() => []),
     db.list('os_messages', { where: w, order: 'created_at', ascending: false, limit: CAPS.messages }).catch(() => []),
     db.list('os_metrics', { where: w, limit: CAPS.metrics }).catch(() => []),
+    db.list('os_records', { where: w, limit: CAPS.records }).catch(() => []),
   ]);
 
   const items = [];
+
+  // Real company records - the customers, invoices, jobs, payments the OS holds.
+  // Each becomes a searchable, quotable item so the brain can answer "is Acme
+  // paid up" or "which jobs are open" from actual records, not just metrics.
+  const now = Date.now();
+  for (const r of records) {
+    const who = clip(r.customer_name, 160);
+    const money = typeof r.amount === 'number' ? `$${r.amount}` : '';
+    const st = clip(r.status, 40);
+    const title = clip(r.title, 200) || (who ? `${r.type} - ${who}` : String(r.type || 'Record'));
+    const bits = [
+      `${r.type || 'record'}${who ? ' for ' + who : ''}`,
+      money ? `amount ${money}` : '',
+      st ? `status ${st}` : '',
+      isOverdue(r, now) ? 'OVERDUE' : '',
+      r.due_at ? `due ${String(r.due_at).slice(0, 10)}` : '',
+    ].filter(Boolean);
+    const extra = r.fields && typeof r.fields === 'object'
+      ? Object.entries(r.fields).slice(0, 8).map(([k, v]) => `${k}: ${clip(v, 200)}`).join(', ') : '';
+    items.push({
+      id: r.id,
+      kind: 'record',
+      title,
+      text: `${bits.join(', ')}${extra ? '. ' + extra : ''}`,
+      created_at: r.updated_at || r.created_at || null,
+    });
+  }
 
   // Live numbers are part of what the company knows, so the brain can answer
   // questions about revenue, cash, AR, etc. from the actual metric values.

@@ -7,6 +7,7 @@
 const db = require('./_db');
 const { requireTenant, cors } = require('./_tenant-auth');
 const { scoreTenant } = require('./_osscore');
+const { isOverdue } = require('./_osrecords');
 
 const bySort = (a, b) => (a.sort || 0) - (b.sort || 0);
 
@@ -19,7 +20,7 @@ module.exports = async function handler(req, res) {
   const w = [['tenant_id', '==', tid]];
 
   try {
-    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, actions, requests, connections, goals, signals, departments, threads, log] = await Promise.all([
+    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, actions, requests, connections, goals, signals, departments, threads, log, records] = await Promise.all([
       db.getById('os_tenants', tid),
       db.list('os_metrics', { where: w }),
       db.list('os_workers', { where: w }),
@@ -36,6 +37,7 @@ module.exports = async function handler(req, res) {
       db.list('os_departments', { where: w }),
       db.list('os_threads', { where: [['tenant_id', '==', tid], ['status', '==', 'open']], limit: 100 }),
       db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 30 }),
+      db.list('os_records', { where: w, limit: 1000 }).catch(() => []),
     ]);
     const score = scoreTenant({
       metrics, workers, workflows, knowledge,
@@ -71,6 +73,23 @@ module.exports = async function handler(req, res) {
       if (!st.last_at || (o.created_at || '') > st.last_at) st.last_at = o.created_at || null;
     }
 
+    // Company graph summary: counts by type + AR headline, for the Records view
+    // and the command-center tiles.
+    const nowMs = Date.now();
+    const record_stats = { total: records.length, counts: {}, openInvoices: 0, overdueInvoices: 0, outstanding: 0 };
+    for (const r of records) {
+      record_stats.counts[r.type] = (record_stats.counts[r.type] || 0) + 1;
+      if (r.type === 'invoice') {
+        const st = String(r.status || '').toLowerCase();
+        if (st !== 'paid' && st !== 'void' && st !== 'draft') {
+          record_stats.openInvoices++;
+          if (typeof r.amount === 'number') record_stats.outstanding += r.amount;
+        }
+        if (isOverdue(r, nowMs)) record_stats.overdueInvoices++;
+      }
+    }
+    record_stats.outstanding = Math.round(record_stats.outstanding);
+
     return res.status(200).json({
       me: { id: t.sub, role: t.role || 'owner', email: t.email || null },
       score,
@@ -98,6 +117,8 @@ module.exports = async function handler(req, res) {
       signals: signals.sort((a, b) => ({ high: 0, medium: 1, low: 2 }[a.severity] - { high: 0, medium: 1, low: 2 }[b.severity])),
       departments: departments.sort(bySort),
       threads: threads.sort((a, b) => (b.last_at || b.created_at || '').localeCompare(a.last_at || a.created_at || '')),
+      records: records.sort((a, b) => (b.updated_at || b.created_at || '').localeCompare(a.updated_at || a.created_at || '')),
+      record_stats,
       build_log: log,
     });
   } catch (e) {
