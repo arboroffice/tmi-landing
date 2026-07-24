@@ -21,6 +21,7 @@ module.exports = async function handler(req, res) {
   const password = String(b.password || '');
   const company = (b.company || '').trim();
   const businessType = (b.business_type || '').trim() || null;
+  const phone = (b.phone || '').toString().trim().slice(0, 40) || null;
 
   if (!name) return res.status(400).json({ error: 'Name required' });
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Valid email required' });
@@ -45,6 +46,7 @@ module.exports = async function handler(req, res) {
       tenant_id: tenant.id,
       email,
       name,
+      phone,
       role: 'owner',
       password_hash: hashPassword(password),
       created_at: new Date().toISOString(),

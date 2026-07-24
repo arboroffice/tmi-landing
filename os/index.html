@@ -82,10 +82,16 @@
       <div id="paneSignup">
         <h2>Build your intelligent company</h2>
         <p class="sub">Start free. Set it up in minutes.</p>
-        <form onsubmit="return doSignup(event)">
+
+        <!-- STEP 1: who you are (captures the lead before the password step) -->
+        <form id="su-form1" onsubmit="return doSignupInfo(event)">
           <div class="row">
             <div><label>Your name</label><input id="s-name" autocomplete="name" required/></div>
             <div><label>Company</label><input id="s-company" autocomplete="organization" required/></div>
+          </div>
+          <div class="row">
+            <div><label>Work email</label><input id="s-email" type="email" autocomplete="email" required/></div>
+            <div><label>Phone</label><input id="s-phone" type="tel" autocomplete="tel" required placeholder="(555) 555-5555"/></div>
           </div>
           <div><label>Business type</label>
             <select id="s-type">
@@ -101,10 +107,17 @@
               <option>Other</option>
             </select>
           </div>
-          <div><label>Work email</label><input id="s-email" type="email" autocomplete="email" required/></div>
-          <div><label>Password</label><input id="s-password" type="password" autocomplete="new-password" placeholder="At least 8 characters" required/></div>
           <div class="err" id="s-err"></div>
-          <button class="btn" id="s-btn" type="submit">Create account &rarr;</button>
+          <button class="btn" id="s-btn1" type="submit">Continue &rarr;</button>
+        </form>
+
+        <!-- STEP 2: set a password -->
+        <form id="su-form2" class="hide" onsubmit="return doSignup(event)">
+          <p class="sub" style="margin-top:-6px">Almost there, <b id="su-first">friend</b>. Set a password and your OS is ready.</p>
+          <div><label>Password</label><input id="s-password" type="password" autocomplete="new-password" placeholder="At least 8 characters" required/></div>
+          <div class="err" id="s-err2"></div>
+          <button class="btn" id="s-btn" type="submit">Create my OS &rarr;</button>
+          <div style="margin-top:12px;text-align:center"><a href="#" onclick="suBack();return false;" style="font-size:13px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px">Back</a></div>
         </form>
       </div>
 
@@ -143,24 +156,51 @@ async function api(path,body,tok){
   return j;
 }
 
-async function doSignup(e){
+function suBack(){document.getElementById('su-form2').classList.add('hide');document.getElementById('su-form1').classList.remove('hide');}
+// Step 1: capture the lead the moment they give us their info, BEFORE the
+// password step, so we have it even if they bounce before finishing signup.
+async function doSignupInfo(e){
   e.preventDefault();clearErr('s-err');
+  var name=document.getElementById('s-name').value.trim();
+  var company=document.getElementById('s-company').value.trim();
+  var email=document.getElementById('s-email').value.trim();
+  var phone=document.getElementById('s-phone').value.trim();
+  if(!name||!email||!phone){showErr('s-err','Name, email, and phone are required.');return false;}
+  var btn=document.getElementById('s-btn1');btn.disabled=true;btn.textContent='Continuing...';
+  var eid='lead_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  window._suEid=eid;
+  try{if(typeof fbq==='function')fbq('track','Lead',{content_name:'OS signup start'});}catch(_e){}
+  try{if(window.oaiq)oaiq('measure','lead_created',{type:'customer_action',event_id:eid});}catch(_e){}
+  try{ await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,email:email,phone:phone,company:company,heard_from:'',source:'os-start',event_id:eid})}); }catch(_e){}
+  var f=document.getElementById('su-first');if(f)f.textContent=(name.split(' ')[0]||'friend');
+  btn.disabled=false;btn.textContent='Continue →';
+  document.getElementById('su-form1').classList.add('hide');
+  document.getElementById('su-form2').classList.remove('hide');
+  setTimeout(function(){var p=document.getElementById('s-password');if(p)p.focus();},60);
+  return false;
+}
+// Step 2: set a password and create the account.
+async function doSignup(e){
+  e.preventDefault();clearErr('s-err2');
   var btn=document.getElementById('s-btn');btn.disabled=true;btn.textContent='Creating...';
   try{
-    var eid='lead_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    var eid=window._suEid||('lead_'+Date.now()+'_'+Math.random().toString(36).slice(2));
     var j=await api('/api/os2-signup',{
       name:document.getElementById('s-name').value.trim(),
       company:document.getElementById('s-company').value.trim(),
       business_type:document.getElementById('s-type').value,
       email:document.getElementById('s-email').value.trim(),
+      phone:document.getElementById('s-phone').value.trim(),
       password:document.getElementById('s-password').value,
       event_id:eid
     });
-    try{if(window.oaiq){oaiq("measure","registration_completed",{type:"customer_action",event_id:eid});oaiq("measure","lead_created",{type:"customer_action",event_id:eid});}}catch(_e){}
+    try{if(window.oaiq){oaiq("measure","registration_completed",{type:"customer_action",event_id:eid});}}catch(_e){}
     save(j.token); routeAfter(j.tenant);
-  }catch(err){showErr('s-err',err.message);btn.disabled=false;btn.textContent='Create account →';}
+  }catch(err){showErr('s-err2',err.message);btn.disabled=false;btn.textContent='Create my OS →';}
   return false;
 }
+// If they came from /book (already gave their info), prefill so it is one tap.
+(function(){try{var l=JSON.parse(sessionStorage.getItem('tmi_lead')||'null');if(l){var n=document.getElementById('s-name'),em=document.getElementById('s-email');if(n&&l.name)n.value=l.name;if(em&&l.email)em.value=l.email;}}catch(_e){}})();
 async function doLogin(e){
   e.preventDefault();clearErr('l-err');
   var btn=document.getElementById('l-btn');btn.disabled=true;btn.textContent='Signing in...';
