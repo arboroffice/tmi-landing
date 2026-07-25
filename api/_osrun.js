@@ -9,7 +9,8 @@ const db = require('./_db');
 const { normalizeAction, runAction } = require('./_osact');
 const { evaluate, getPolicies, getSpentToday } = require('./_ospolicy');
 const llm = require('./_osllm');
-const { startTrace, finishTrace } = require('./_ostrace');
+const { startTrace, addSpan, finishTrace } = require('./_ostrace');
+const { validateOutput } = require('./_osguard');
 
 const MODEL = 'claude-opus-4-8';
 
@@ -89,6 +90,12 @@ async function executeWorker(worker, trigger) {
   }
   const action = product.action;
 
+  // Guardrail: does THIS output pass before it can auto-send? A failing check
+  // (empty, placeholder still in it, bad or missing recipient) can never fire
+  // automatically; it drops to needs-approval so a human catches it.
+  const guard = validateOutput(product, action);
+  addSpan(trace, { name: 'guardrail', kind: 'guard', error: guard.ok ? null : guard.issues.join(' '), meta: { ok: guard.ok, issues: guard.issues } });
+
   // Evaluate policy explicitly (rather than a bare yes/no) so that when a worker
   // has to escalate we can record WHY on the output and show it in the inbox.
   let autoFire = false, reason = '';
@@ -96,8 +103,8 @@ async function executeWorker(worker, trigger) {
     const type = action.channel === 'internal' ? 'internal' : String(action.channel || 'external_write');
     const amount = typeof action.amount === 'number' ? action.amount : undefined;
     const decision = evaluate(tenant, worker, type, amount);
-    autoFire = decision.mode === 'auto';
-    if (!autoFire) reason = decision.reason || '';
+    autoFire = decision.mode === 'auto' && guard.ok;
+    if (!autoFire) reason = !guard.ok ? ('Held for review: ' + guard.issues.join(' ')) : (decision.reason || '');
   }
 
   // With a proposed action: fire now if policy allows, otherwise hold for approval.
