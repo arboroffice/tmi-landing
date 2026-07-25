@@ -12,6 +12,7 @@
 //   'apply' { plan }                 -> { created }   (manager+)
 
 const db = require('./_db');
+const llm = require('./_osllm');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 
 const MODEL = 'claude-opus-4-8';
@@ -52,7 +53,7 @@ async function buildPlan(tid, goal, goalText, workers, metrics, tenant) {
   if (!key) return { summary: '', steps: [] };
   const Anthropic = require('@anthropic-ai/sdk');
   const client = new Anthropic({ apiKey: key });
-  const msg = await client.messages.create({ model: MODEL, max_tokens: 2000, system: SYSTEM, messages: [{ role: 'user', content: ctx }] });
+  const msg = await llm.create(client, { model: MODEL, max_tokens: 2000, system: SYSTEM, messages: [{ role: 'user', content: ctx }] }, { tenantId: tid, label: 'plan', workflow: 'plan' });
   const text = (msg.content || []).map((c) => c.text || '').join('').trim();
   const a = text.indexOf('{'), z = text.lastIndexOf('}');
   let raw = {};

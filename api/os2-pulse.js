@@ -16,6 +16,7 @@
 //   'dismiss'{ signal_id } -> { ok: true }
 
 const db = require('./_db');
+const llm = require('./_osllm');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { scoreTenant } = require('./_osscore');
 const { executeWorker } = require('./_osrun');
@@ -86,7 +87,7 @@ async function scan(tid) {
   if (!key) return [];
   const Anthropic = require('@anthropic-ai/sdk');
   const client = new Anthropic({ apiKey: key });
-  const msg = await client.messages.create({ model: MODEL, max_tokens: 2000, system: SYSTEM, messages: [{ role: 'user', content: ctx }] });
+  const msg = await llm.create(client, { model: MODEL, max_tokens: 2000, system: SYSTEM, messages: [{ role: 'user', content: ctx }] }, { tenantId: tid, label: 'pulse', workflow: 'pulse' });
   const text = (msg.content || []).map((b) => b.text || '').join('').trim();
   const a = text.indexOf('{'), b = text.lastIndexOf('}');
   let raw = {};

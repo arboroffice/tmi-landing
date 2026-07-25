@@ -9,6 +9,7 @@
 //   -> { reply, draft: { name, trigger, steps[] } | null }
 
 const db = require('./_db');
+const llm = require('./_osllm');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 
 const MODEL = 'claude-opus-4-8';
@@ -105,9 +106,9 @@ module.exports = async function handler(req, res) {
       : '(this company has no AI workers yet - use task steps instead of worker steps)';
 
     const sys = `${SYSTEM}\n\n--- THIS COMPANY'S AI WORKERS (use these ids for worker steps) ---\n${roster}`;
-    const msg = await client.messages.create({
+    const msg = await llm.create(client, {
       model: MODEL, max_tokens: 1500, system: sys, messages,
-    });
+    }, { tenantId: tid, label: 'flowbuild', workflow: 'flowbuild' });
 
     const text = (msg.content || []).map(b => b.text || '').join('').trim();
     const start = text.indexOf('{'), end = text.lastIndexOf('}');

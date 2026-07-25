@@ -9,6 +9,7 @@
 //   'apply'    { spec }     -> { counts }  provision the spec into this tenant (owner only)
 
 const db = require('./_db');
+const llm = require('./_osllm');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { normalizeSteps, normalizeTrigger } = require('./_ossteps');
 
@@ -99,7 +100,7 @@ function normalizeSpec(raw) {
   };
 }
 
-async function generate(answers) {
+async function generate(answers, tid) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error('ANTHROPIC_API_KEY not configured');
   const Anthropic = require('@anthropic-ai/sdk');
@@ -115,12 +116,12 @@ async function generate(answers) {
     `Goal right now: ${s(a.goal, 1000) || 'unspecified'}\n\n` +
     `Design the starting intelligent company for this business. Return only the JSON.`;
 
-  const msg = await client.messages.create({
+  const msg = await llm.create(client, {
     model: MODEL,
     max_tokens: 3000,
     system: SYSTEM,
     messages: [{ role: 'user', content: userMsg }],
-  });
+  }, { tenantId: tid, label: 'blueprint', workflow: 'blueprint' });
 
   const text = (msg.content || []).map((b) => b.text || '').join('').trim();
   const start = text.indexOf('{'), end = text.lastIndexOf('}');
@@ -217,7 +218,7 @@ module.exports = async function handler(req, res) {
 
   try {
     if (action === 'generate') {
-      const spec = await generate(b.answers);
+      const spec = await generate(b.answers, t.tenant_id);
       return res.status(200).json({ spec });
     }
 

@@ -20,6 +20,7 @@
 //   os_records   { tenant_id, type, title, status, amount, customer_name, ... }
 
 const db = require('./_db');
+const llm = require('./_osllm');
 const { isOverdue } = require('./_osrecords');
 
 const CAPS = { knowledge: 300, contacts: 500, outputs: 200, messages: 200, metrics: 200, records: 800 };
@@ -278,7 +279,7 @@ async function ask(tenantId, question) {
   // policy, SOP, or pricing sheet is answered from the whole document.
   const context = top.map((it, i) => `[${i + 1}] (${it.kind}) ${it.title}\n${clip(it.text, 1600)}`).join('\n\n');
 
-  const msg = await client.messages.create({
+  const msg = await llm.create(client, {
     model: 'claude-opus-4-8',
     max_tokens: 1500,
     system: ASK_SYSTEM,
@@ -286,7 +287,7 @@ async function ask(tenantId, question) {
       role: 'user',
       content: `Question: ${q}\n\n--- COMPANY CONTEXT ---\n${context}`,
     }],
-  });
+  }, { tenantId, label: 'brain:ask', workflow: 'brain' });
 
   const answer = (msg.content || []).map(b => b.text || '').join('').trim();
   return { answer, sources };

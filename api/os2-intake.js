@@ -14,6 +14,7 @@
 // } -> { summary, metrics, workers, workflows }
 
 const db = require('./_db');
+const llm = require('./_osllm');
 const { requireTenant, cors } = require('./_tenant-auth');
 const { safeFetch } = require('./_osnet');
 
@@ -167,12 +168,12 @@ async function buildSpec(tenant, input) {
         : `\n\n(Their website could not be read. Design from the notes above.)`);
   }
 
-  const msg = await client.messages.create({
+  const msg = await llm.create(client, {
     model: MODEL,
     max_tokens: 3000,
     system: creator ? SYSTEM_CREATOR : SYSTEM_BUSINESS,
     messages: [{ role: 'user', content: userMsg }],
-  });
+  }, { tenantId: tenant.id, label: 'intake:' + (creator ? 'creator' : 'business'), workflow: 'intake' });
 
   const text = (msg.content || []).map(b => b.text || '').join('').trim();
   const start = text.indexOf('{'), end = text.lastIndexOf('}');
