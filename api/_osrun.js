@@ -8,6 +8,8 @@
 const db = require('./_db');
 const { normalizeAction, runAction } = require('./_osact');
 const { evaluate, getPolicies, getSpentToday } = require('./_ospolicy');
+const llm = require('./_osllm');
+const { startTrace, finishTrace } = require('./_ostrace');
 
 const MODEL = 'claude-opus-4-8';
 
@@ -17,7 +19,7 @@ If, and only if, your work product is a message meant to be delivered to one spe
 
 Return ONLY valid JSON: {"title":"short label of what you produced","body":"the actual work product, ready to use","action":{"channel":"email","to":"","subject":""}}. Omit "action" entirely when the work is internal or you have no real recipient.`;
 
-async function produce(tenant, worker, s) {
+async function produce(tenant, worker, s, trace) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error('ANTHROPIC_API_KEY not configured');
   const Anthropic = require('@anthropic-ai/sdk');
@@ -42,10 +44,10 @@ async function produce(tenant, worker, s) {
     `Tools: ${p.tools || 'unspecified'}\n\n` +
     `COMPANY KNOWLEDGE:\n${know}\n\nCURRENT METRICS:\n${met}\n\nOPEN TASKS:\n${tk}`;
 
-  const msg = await client.messages.create({
+  const msg = await llm.create(client, {
     model: MODEL, max_tokens: 1600, system: SYSTEM,
     messages: [{ role: 'user', content: userMsg }],
-  });
+  }, { tenantId: tenant.id, worker_id: worker.id, label: 'worker:' + (worker.name || worker.id), workflow: 'worker_run', trace });
 
   const text = (msg.content || []).map(b => b.text || '').join('').trim();
   const start = text.indexOf('{'), end = text.lastIndexOf('}');
@@ -76,7 +78,15 @@ async function executeWorker(worker, trigger) {
   tenant._policies = await getPolicies(tid).catch(() => []);
   tenant._spentToday = await getSpentToday(tid).catch(() => ({}));
 
-  const product = await produce(tenant, worker, { knowledge, metrics, tasks });
+  // Trace the whole run so a failed or surprising output can be reconstructed.
+  const trace = startTrace(tid, { kind: 'worker', label: worker.name || worker.id, meta: { worker_id: worker.id, trigger: trigger || 'manual' } });
+  let product;
+  try {
+    product = await produce(tenant, worker, { knowledge, metrics, tasks }, trace);
+  } catch (e) {
+    await finishTrace(trace, { error: e });
+    throw e;
+  }
   const action = product.action;
 
   // Evaluate policy explicitly (rather than a bare yes/no) so that when a worker
@@ -122,6 +132,9 @@ async function executeWorker(worker, trigger) {
     summary: `${worker.name}${trigger === 'scheduled' ? ' (auto)' : ''} produced: ${product.title}${did}${status === 'pending' ? ' (needs approval)' : ''}.`,
     created_at: new Date().toISOString(),
   });
+  trace.meta.output_id = output.id;
+  trace.meta.output_status = status;
+  await finishTrace(trace, { status: 'ok' });
   return output;
 }
 

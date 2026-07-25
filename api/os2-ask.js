@@ -12,6 +12,8 @@
 const db = require('./_db');
 const { requireTenant, cors } = require('./_tenant-auth');
 const { graphSummary } = require('./_osrecords');
+const llm = require('./_osllm');
+const { startTrace, finishTrace } = require('./_ostrace');
 
 const MODEL = 'claude-opus-4-8';
 
@@ -64,8 +66,15 @@ module.exports = async function handler(req, res) {
     ]);
     if (!tenant) return res.status(404).json({ error: 'Company not found' });
 
-    const out = await run(tenant, { metrics, workers, workflows, knowledge, tasks, log, goals, signals, graph }, mode, question);
-    return res.status(200).json(out);
+    const trace = startTrace(tid, { kind: 'coo', label: mode === 'ask' ? question.slice(0, 80) : mode, meta: { mode } });
+    try {
+      const out = await run(tenant, { metrics, workers, workflows, knowledge, tasks, log, goals, signals, graph }, mode, question, trace);
+      await finishTrace(trace, { status: 'ok' });
+      return res.status(200).json(out);
+    } catch (e) {
+      await finishTrace(trace, { error: e });
+      throw e;
+    }
   } catch (e) {
     console.error('os2-ask:', e.message);
     return res.status(502).json({ error: 'The COO could not answer right now. Try again in a moment.' });
@@ -124,7 +133,7 @@ RECENT ACTIVITY:
 ${a}`;
 }
 
-async function run(tenant, s, mode, question) {
+async function run(tenant, s, mode, question, trace) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error('ANTHROPIC_API_KEY not configured');
   const Anthropic = require('@anthropic-ai/sdk');
@@ -136,12 +145,12 @@ async function run(tenant, s, mode, question) {
       ? 'Write the owner a plain-language weekly report of their company from the OS state below: what the numbers say, what the workers and workflows are doing, what improved, and the two or three things to do next. Six to ten sentences in "answer", written in short paragraphs. Return "actions": [].'
       : `The owner says: "${question}"`;
 
-  const msg = await client.messages.create({
+  const msg = await llm.create(client, {
     model: MODEL,
     max_tokens: mode === 'report' ? 2000 : 1500,
     system: SYSTEM,
     messages: [{ role: 'user', content: `${task}\n\n--- THIS COMPANY'S OS STATE ---\n${context(tenant, s)}` }],
-  });
+  }, { tenantId: tenant.id, label: 'coo:' + mode, workflow: 'coo', trace });
 
   const text = (msg.content || []).map(b => b.text || '').join('').trim();
   const start = text.indexOf('{'), end = text.lastIndexOf('}');
