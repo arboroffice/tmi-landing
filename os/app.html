@@ -1547,6 +1547,9 @@ function triageItems(){
   (STATE.threads||[]).forEach(function(t){
     items.push({kind:'thread',rank:3,id:t.id,badge:(CHAN_LABEL[t.channel]||t.channel||'Message'),title:t.subject||t.from||'Conversation',sub:t.from||'',when:t.last_at||t.created_at,obj:t});
   });
+  (STATE.approvals_runs||[]).forEach(function(r){
+    items.push({kind:'run',rank:1,id:r.id,badge:'Cascade',title:r.workflow_name||'Workflow',sub:r.prompt||'A cascade is paused for your approval.',when:r.created_at,obj:r});
+  });
   items.sort(function(a,b){return (a.rank-b.rank)||String(b.when||'').localeCompare(String(a.when||''));});
   return items;
 }
@@ -1564,6 +1567,8 @@ function renderTriage(){
     }else if(it.kind==='signal'){
       var lab=actLabel(it.obj.action);
       actions=(lab?'<button class="btn sm" onclick="pulseAct(\''+it.id+'\')">'+esc(lab)+'</button>':'')+'<button class="btn sm ghost" onclick="show(\'pulse\')">Open Pulse</button><button class="link" onclick="pulseDismiss(\''+it.id+'\')">Dismiss</button>';
+    }else if(it.kind==='run'){
+      actions='<button class="btn sm" onclick="approveTriageRun(\''+it.id+'\')">Approve &amp; continue</button><button class="btn sm ghost" onclick="show(\'workflows\')">Open cascade</button><button class="link" onclick="dismissTriageRun(\''+it.id+'\')">Decline</button>';
     }else{
       actions='<button class="btn sm" onclick="openThread(\''+it.id+'\')">Open</button><button class="link" onclick="closeThreadStatus(\''+it.id+'\',\'closed\')">Dismiss</button>';
     }
@@ -1754,6 +1759,8 @@ function showOutput(o){
 function copyOutput(){var ed=document.getElementById('outEdit');var txt=ed?ed.value:(window._out||'');try{navigator.clipboard.writeText(txt);toast('Copied');}catch(e){toast('Select and copy');}}
 async function approveOutput(id){if(!guardWrite())return;try{var ed=document.getElementById('outEdit');var sj=document.getElementById('outSubj');var payload={action:'approve',output_id:id};if(ed)payload.body=ed.value;if(sj)payload.subject=sj.value;var j=await api('/api/os2-act',payload);closeModal();if(j.blocked){toast(j.reason||'A guardrail blocks this. Change it in Guardrails.');refresh();return;}var s=j.act&&j.act.status;toast(s==='sent'?'Approved and sent':s==='staged'?'Approved. Connect a channel in Settings to send it.':s==='failed'?'Approved, but the send failed':'Approved');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function dismissOutput(id){if(!guardWrite())return;try{await api('/api/os2-act',{action:'dismiss',output_id:id});closeModal();toast('Declined');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function approveTriageRun(id){if(!guardWrite())return;try{await api('/api/os2-approvals',{action:'approve',kind:'run',id:id});toast('Approved. Cascade continuing.');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function dismissTriageRun(id){if(!guardWrite())return;try{await api('/api/os2-approvals',{action:'dismiss',kind:'run',id:id});toast('Declined');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function resendAction(id){if(!guardWrite())return;try{var j=await api('/api/os2-act',{action:'send',action_id:id});var s=j.act&&j.act.status;toast(s==='sent'?'Sent':s==='staged'?'Still not connected. Add the channel in Settings.':'Could not send');refresh();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 
 /* ---- settings ---- */

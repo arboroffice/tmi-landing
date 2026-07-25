@@ -15,23 +15,11 @@
 
 const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
-const { runAction, normalizeAction } = require('./_osact');
-const { evaluate, getPolicies, getSpentToday } = require('./_ospolicy');
+const { runAction } = require('./_osact');
+const { hardStop, approveOutput } = require('./_osapprovals');
 
 function log(tid, summary, kind) {
   return db.insert('os_build_log', { tenant_id: tid, kind: kind || 'act', summary, created_at: new Date().toISOString() }).catch(() => {});
-}
-
-// A hard stop the owner set deliberately (a "Never" rule for this action type, or
-// the company-wide pause) blocks even a manual approve/send. "Ask me first" does
-// not block here, because approving IS the human saying yes.
-async function hardStop(tenant, rawAction) {
-  const a = normalizeAction(rawAction);
-  if (!a || a.channel === 'internal') return null;
-  if (!tenant._policies) tenant._policies = await getPolicies(tenant.id).catch(() => []);
-  if (!tenant._spentToday) tenant._spentToday = await getSpentToday(tenant.id).catch(() => ({}));
-  const d = evaluate(tenant, null, String(a.channel), typeof a.amount === 'number' ? a.amount : undefined);
-  return d.mode === 'deny' ? d.reason : null;
 }
 
 module.exports = async function handler(req, res) {
@@ -63,31 +51,11 @@ module.exports = async function handler(req, res) {
       if (!output || output.tenant_id !== tid) return res.status(404).json({ error: 'Output not found' });
       const tenant = await db.getById('os_tenants', tid);
 
-      // The approver can edit the draft before it goes out. An edited body is
-      // carried into the action so the real send uses the approved wording.
-      const editedBody = typeof b.body === 'string' ? b.body.slice(0, 12000) : null;
-      const editedSubject = typeof b.subject === 'string' ? b.subject.slice(0, 200) : null;
-      let outAction = output.action;
-      if (outAction && (editedBody != null || editedSubject != null)) {
-        outAction = Object.assign({}, outAction);
-        if (editedBody != null) outAction.body = editedBody.slice(0, 8000);
-        if (editedSubject != null) outAction.subject = editedSubject;
-      }
-
-      let act = null;
-      if (outAction) {
-        const blocked = await hardStop(tenant, outAction);
-        if (blocked) return res.status(200).json({ blocked: true, reason: blocked, output });
-        act = await runAction({ tenant, output, worker_name: output.worker_name, actor: t.email || 'owner' }, outAction);
-      }
-      const patch = { status: 'done', reason: null };
-      if (editedBody != null) patch.body = editedBody;
-      if (outAction && output.action) patch.action = outAction;
-      if (act) patch.action_status = act.status;
-      const updated = await db.update('os_outputs', output.id, patch);
-      const tail = act ? (act.status === 'sent' ? ` and ${act.detail.replace(/\.$/, '').toLowerCase()}` : act.status === 'staged' ? ' (channel not connected yet)' : act.status === 'failed' ? ' (send failed)' : '') : '';
-      await log(tid, `Approved ${output.worker_name || 'a worker'}'s ${output.title}${tail}.`);
-      return res.status(200).json({ output: updated, act });
+      // Approving (with an optional inline edit) delivers the action if any,
+      // marks the output done, and logs it. Shared with the unified queue.
+      const result = await approveOutput(tenant, output, { body: b.body, subject: b.subject, actor: t.email || 'owner' });
+      if (result.blocked) return res.status(200).json({ blocked: true, reason: result.reason, output: result.output });
+      return res.status(200).json({ output: result.output, act: result.act });
     }
 
     if (action === 'send') {

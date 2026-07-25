@@ -20,7 +20,7 @@ module.exports = async function handler(req, res) {
   const w = [['tenant_id', '==', tid]];
 
   try {
-    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, actions, requests, connections, goals, signals, departments, threads, log, records] = await Promise.all([
+    const [tenant, metrics, workers, workflows, knowledge, tasks, reports, outputs, actions, requests, connections, goals, signals, departments, threads, log, records, blockedRuns] = await Promise.all([
       db.getById('os_tenants', tid),
       db.list('os_metrics', { where: w }),
       db.list('os_workers', { where: w }),
@@ -38,7 +38,18 @@ module.exports = async function handler(req, res) {
       db.list('os_threads', { where: [['tenant_id', '==', tid], ['status', '==', 'open']], limit: 100 }),
       db.list('os_build_log', { where: w, order: 'created_at', ascending: false, limit: 30 }),
       db.list('os_records', { where: w, limit: 1000 }).catch(() => []),
+      db.list('os_workflow_runs', { where: [['tenant_id', '==', tid], ['status', '==', 'blocked']], limit: 50 }).catch(() => []),
     ]);
+
+    // Cascade runs blocked on an approval step. Surfaced in the Inbox triage next
+    // to worker drafts so every human decision lives in one queue. The prompt the
+    // step is asking about lives in the run's last history entry.
+    const approvals_runs = blockedRuns.map(r => {
+      const hist = Array.isArray(r.history) ? r.history : [];
+      const last = hist[hist.length - 1];
+      const prompt = (last && last.result && last.result.prompt) ? String(last.result.prompt) : 'Approval required';
+      return { id: r.id, workflow_name: r.workflow_name || 'Workflow', prompt, created_at: r.updated_at || r.created_at || null };
+    });
     const score = scoreTenant({
       metrics, workers, workflows, knowledge,
       onboarded: !!(tenant && tenant.onboarded),
@@ -119,6 +130,7 @@ module.exports = async function handler(req, res) {
       threads: threads.sort((a, b) => (b.last_at || b.created_at || '').localeCompare(a.last_at || a.created_at || '')),
       records: records.sort((a, b) => (b.updated_at || b.created_at || '').localeCompare(a.updated_at || a.created_at || '')),
       record_stats,
+      approvals_runs,
       build_log: log,
     });
   } catch (e) {
