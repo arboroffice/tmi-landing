@@ -80,6 +80,17 @@
 
       <!-- SIGN UP -->
       <div id="paneSignup">
+
+        <!-- GATE: the OS opens only after booking the free audit. Shown to anyone
+             who has not booked; login stays available for returning owners. -->
+        <div id="suGate" class="hide">
+          <h2>Book your call first</h2>
+          <p class="sub">Your OS unlocks right after your free Business Intelligence Audit. Book the 30-minute call and you get straight in.</p>
+          <a class="btn" href="/book" style="display:block;text-align:center;text-decoration:none;margin-top:22px">Book your free audit &rarr;</a>
+          <p class="sub" style="margin-top:16px;text-align:center">Already have an account? <a href="#" onclick="tab('login');return false;" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">Sign in</a></p>
+        </div>
+
+        <div id="suReal">
         <h2>Build your intelligent company</h2>
         <p class="sub">Start free. Set it up in minutes.</p>
 
@@ -119,6 +130,7 @@
           <button class="btn" id="s-btn" type="submit">Create my OS &rarr;</button>
           <div style="margin-top:12px;text-align:center"><a href="#" onclick="suBack();return false;" style="font-size:13px;color:var(--ink-3);text-decoration:underline;text-underline-offset:3px">Back</a></div>
         </form>
+        </div><!-- /suReal -->
       </div>
 
       <!-- LOG IN -->
@@ -138,6 +150,17 @@
 
 <script>
 var TOKEN_KEY='tmios_token';
+// The OS opens only after booking the free audit. Booking sets tmi_booked (and
+// the post-booking link carries ?booked=1, which we persist here so the unlock
+// works cross-device from the confirmation email). Non-bookers see a "book
+// first" gate on the signup pane; returning owners can still sign in.
+var BOOKED=(function(){try{var u=new URLSearchParams(location.search);if(u.get('booked')==='1')localStorage.setItem('tmi_booked','1');return localStorage.getItem('tmi_booked')==='1';}catch(_){return false;}})();
+function applyGate(){
+  if(BOOKED)return;
+  var gate=document.getElementById('suGate'),real=document.getElementById('suReal');
+  if(gate)gate.classList.remove('hide');
+  if(real)real.classList.add('hide');
+}
 function tab(which){
   document.getElementById('tabSignup').classList.toggle('on',which==='signup');
   document.getElementById('tabLogin').classList.toggle('on',which==='login');
@@ -213,6 +236,9 @@ async function doLogin(e){
   }catch(err){showErr('l-err',err.message);btn.disabled=false;btn.textContent='Sign in →';}
   return false;
 }
+
+// Gate the signup pane if they have not booked (login stays open).
+applyGate();
 
 // Already signed in? Route straight through.
 (async function(){

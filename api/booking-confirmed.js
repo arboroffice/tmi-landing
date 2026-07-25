@@ -23,6 +23,7 @@ function confirmEmail(to, firstName, dateStr) {
 <p style="margin:0 0 16px;">You're confirmed for your discovery call${dateStr && dateStr !== 'TBD' ? ` on <strong>${dateStr} CT</strong>` : ''}. It's 30 minutes with me, walking through your operation and the first systems we would build.</p>
 <p style="margin:0 0 8px;">To get the most out of it, come with:</p>
 <p style="margin:0 0 16px;color:#444;">1. The one thing you most want off your plate.<br>2. A rough sense of your numbers (revenue, team size, where jobs or leads slip).<br>3. The tools you are paying for right now.</p>
+<p style="margin:0 0 20px;">Now that you're booked, your OS is unlocked. Spin up your whole company on one screen while you wait, free: <a href="https://www.tmitechai.com/os?booked=1" style="color:#6f8f2a;font-weight:700;text-decoration:none;">open your OS &rarr;</a></p>
 <p style="margin:0 0 16px;">Question before then, or want to talk sooner? Just reply to this email and a real person will get back to you.</p>
 <p style="margin:24px 0 0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>
 </td></tr><tr><td style="padding:6px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><div style="border-top:1px solid #eceee4;margin-top:8px;padding-top:16px;font-size:12px;line-height:1.6;color:#9a9ba5;">TMI Technology &middot; chaos control for growing companies<br><a href="https://www.tmitechai.com" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`,

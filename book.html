@@ -117,20 +117,20 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
         <button class="cta" type="submit" id="submit-btn">Book my audit &rarr;</button>
         <div class="err" id="err"></div>
       </form>
-      <p class="reassure">We reach out within one business day. Not ready to talk? <a href="/os">Start free in the OS &rarr;</a></p>
+      <p class="reassure">We reach out within one business day.</p>
     </div>
 
-    <!-- SUCCESS: booked, then text + free OS -->
+    <!-- SUCCESS: booked, now the free OS unlocks -->
     <div id="step-done" class="hidden">
       <span class="eyebrow">You're booked</span>
       <h1>You're booked, <em id="done-name">friend</em>.</h1>
       <p class="sub">Your Intelligence Audit is set. We will call you within one business day at the number you gave us to map where your operation leaks time and money and show you what we would build.</p>
 
       <div class="actcard">
-        <span class="badge-free">Free</span>
-        <h3>While you wait, start building.</h3>
+        <span class="badge-free">Now unlocked</span>
+        <h3>Your OS is unlocked. Start building.</h3>
         <p>Spin up your OS and watch your whole company appear on one screen: your departments, your AI workers, your numbers. It is free, and it is a live preview of exactly what we would build for you.</p>
-        <a class="actbtn lime" href="/os">Start free &rarr;</a>
+        <a class="actbtn lime" href="/os?booked=1">Open my OS &rarr;</a>
       </div>
     </div>
   </div>
@@ -164,6 +164,8 @@ document.getElementById('lead-form').addEventListener('submit', async function (
     });
   } catch (e) {}
   try { sessionStorage.setItem('tmi_lead', JSON.stringify({ name: name, email: email })); } catch (e) {}
+  // Booking is the gate to the OS: mark this browser as booked so /os opens.
+  try { localStorage.setItem('tmi_booked', '1'); } catch (e) {}
   // Personalize the success screen with the visitor's first name.
   var first = (name.split(' ')[0] || 'friend');
   var dn = document.getElementById('done-name'); if (dn) dn.textContent = first;

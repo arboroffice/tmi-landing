@@ -75,10 +75,19 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
       </ul>
     </div>
 
+    <div class="card">
+      <div class="card-k">Now unlocked</div>
+      <h2>Your OS is unlocked.</h2>
+      <p>Spin up your OS and watch your whole company appear on one screen: your departments, your AI workers, your numbers. Free, and a live preview of exactly what we would build for you.</p>
+      <a href="/os?booked=1" style="display:inline-block;width:100%;padding:18px;font-size:18px;font-weight:800;letter-spacing:-0.01em;color:#0a0b14;background:var(--chart);border-radius:12px;text-align:center;">Open my OS &rarr;</a>
+    </div>
+
     <div class="back"><a href="/">&larr; Back to tmitechai.com</a></div>
   </div>
 </div>
 <script>
+  // Booking is the gate to the OS: mark this browser as booked so /os opens.
+  try { localStorage.setItem('tmi_booked', '1'); } catch (e) {}
   // Personalize the headline if we captured a name on the book page.
   try {
     var l = JSON.parse(sessionStorage.getItem('tmi_lead') || '{}');
