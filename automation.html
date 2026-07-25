@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="apple-touch-icon" href="favicon.svg"/>
-<meta name="description" content="The TMI Intelligence Platform is the compounding intelligence layer beneath everything TMI builds. Every engagement, dataset, playbook, and result feeds one shared network that makes every future company stronger than the last."/>
-<meta property="og:title" content="TMI Intelligence Platform | The Layer That Makes Every Company Smarter"/>
-<meta property="og:description" content="One continuously improving intelligence network. Benchmarks, models, playbooks, and results that compound with every company TMI builds, acquires, or transforms."/>
+<meta name="description" content="TMI automation removes the manual handoffs and repeat work between steps. Workflows fire on real events, so nothing waits on someone remembering."/>
+<meta property="og:title" content="TMI Automation | The Work Between the Work"/>
+<meta property="og:description" content="We wire your operation so it moves without someone pushing it. Job done, invoice out. Payment late, reminder sent. Lead in, routed and followed up."/>
 <meta property="og:type" content="website"/>
-<meta property="og:url" content="https://www.tmitechai.com/intelligence-platform"/>
+<meta property="og:url" content="https://www.tmitechai.com/automation"/>
 <meta property="og:image" content="https://www.tmitechai.com/hero-og.jpg"/>
 <meta property="og:site_name" content="TMI"/>
 <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="TMI Intelligence Platform | The Compounding Intelligence Layer"/>
-<meta name="twitter:description" content="The long-term asset isn't the companies. It's the intelligence layer that makes every next company stronger."/>
+<meta name="twitter:title" content="TMI Automation | The Work Between the Work"/>
+<meta name="twitter:description" content="Event-triggered workflows that remove manual handoffs and repeat work across every department."/>
 <meta name="twitter:image" content="https://www.tmitechai.com/hero-og.jpg"/>
-<link rel="canonical" href="https://www.tmitechai.com/intelligence-platform"/>
-<title>TMI Intelligence Platform | The Compounding Intelligence Layer</title>
+<link rel="canonical" href="https://www.tmitechai.com/automation"/>
+<title>TMI Automation | The Work Between the Work</title>
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin/>
 <style>
   @import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
@@ -155,13 +155,25 @@
   .vision .rows p{padding:13px 0;border-bottom:1px solid var(--line);font-size:clamp(16px,1.7vw,20px);color:var(--ink-2);font-weight:500;}
   .vision .rows p b{color:var(--ink);font-weight:700;}
 
-  /* pillars (intelligence platform capabilities) */
-  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px;}
-  .pillar{border:1px solid var(--line);border-radius:16px;padding:28px 26px;background:#fff;transition:transform .15s,border-color .15s,box-shadow .15s;}
-  .pillar:hover{transform:translateY(-4px);border-color:var(--line-2);box-shadow:0 18px 40px -28px rgba(10,11,20,0.4);}
-  .pillar .k{font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart-dark);margin-bottom:14px;}
-  .pillar h4{font-size:19px;margin-bottom:10px;}
-  .pillar p{color:var(--ink-2);font-weight:400;font-size:14.5px;line-height:1.55;}
+  /* investment model cards */
+  .models{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px;}
+  .model{border:1px solid var(--line);border-radius:16px;padding:26px 24px;background:#fff;}
+  .model .k{font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart-dark);}
+  .model h4{font-size:20px;margin:12px 0 10px;}
+  .model p{color:var(--ink-2);font-weight:400;font-size:14.5px;line-height:1.55;}
+
+  /* vertical timeline */
+  .timeline{position:relative;margin-top:52px;max-width:820px;padding-left:38px;}
+  .timeline::before{content:"";position:absolute;left:11px;top:8px;bottom:8px;width:2px;background:linear-gradient(to bottom,var(--chart-dark),var(--d-line));}
+  .dark .timeline::before{background:linear-gradient(to bottom,var(--chart),var(--d-line));}
+  .tnode{position:relative;padding:0 0 34px 0;}
+  .tnode:last-child{padding-bottom:0;}
+  .tnode::before{content:"";position:absolute;left:-33px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--chart);border:3px solid var(--d-bg);box-shadow:0 0 0 2px var(--chart-dark);}
+  .dark .tnode::before{border-color:var(--d-bg);box-shadow:0 0 0 2px var(--chart);}
+  .tnode .ts{font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart-dark);}
+  .dark .tnode .ts{color:var(--chart);}
+  .tnode h4{font-size:clamp(19px,2.2vw,24px);margin:7px 0 8px;color:var(--d-ink);}
+  .tnode p{color:var(--d-ink-2);font-weight:400;font-size:15px;line-height:1.55;max-width:56ch;}
 
   /* final */
   .final{background:var(--d-bg);color:var(--d-ink);text-align:center;padding:110px 0;position:relative;overflow:hidden;}
@@ -183,10 +195,6 @@
   .foot-line{margin-top:52px;padding-top:34px;border-top:1px solid var(--d-line);font-size:clamp(18px,2.4vw,28px);font-weight:600;letter-spacing:-0.02em;line-height:1.3;color:#fff;}
   .foot-line span{color:var(--chart);}
   .foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:28px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--d-ink-3);}
-  .foot-social{display:flex;gap:10px;margin-top:22px;}
-  .foot-social a{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.55);transition:background .15s,color .15s;}
-  .foot-social a:hover{background:rgba(255,255,255,0.14);color:#fff;}
-  .foot-social svg{width:17px;height:17px;display:block;}
 
   /* mobile drawer */
   .mscrim{position:fixed;inset:0;background:rgba(10,11,20,0.5);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .2s;z-index:200;}
@@ -201,8 +209,7 @@
   @media(max-width:960px){
     .eco{grid-template-columns:1fr;gap:22px;}
     .engines,.method{grid-template-columns:repeat(2,1fr);}
-    .aud{grid-template-columns:1fr;}
-    .pillars{grid-template-columns:1fr 1fr;}
+    .aud,.models{grid-template-columns:1fr;}
     .foot-grid{grid-template-columns:1fr 1fr;gap:26px;}
     .foot-brand{grid-column:1 / -1;}
     .feeds{grid-template-columns:1fr;}
@@ -212,11 +219,17 @@
     .sec{padding:64px 0;}
     .hero{padding:78px 0 64px;}
     .engines,.method{grid-template-columns:1fr;}
-    .pillars{grid-template-columns:1fr;}
     .wrap{padding:0 20px;}
+    .timeline{padding-left:30px;}
+    .tnode::before{left:-27px;}
+    .timeline::before{left:7px;}
   }
   @media(min-width:641px){.nav-burger{display:none;}}
   @media(max-width:640px){.nav-burger{display:flex;}}
+  .foot-social{display:flex;gap:10px;margin-top:22px;}
+  .foot-social a{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.55);transition:background .15s,color .15s;}
+  .foot-social a:hover{background:rgba(255,255,255,0.14);color:#fff;}
+  .foot-social svg{width:17px;height:17px;display:block;}
 </style>
 </head>
 <body>
@@ -225,8 +238,8 @@
   <div class="nav-in">
     <a href="/" class="brand"><span class="mk">TMI</span> TMI</a>
     <nav class="nav-links">
-      <a href="/tmi">Ecosystem</a>
-      <a href="/intelligent-companies">Intelligent Companies</a>
+      <a href="/#ecosystem">Ecosystem</a>
+      <a href="/solutions">Solutions</a>
       <a href="/industries">Industries</a>
       <a href="/news">Intelligence</a>
       <a href="/about">About</a>
@@ -240,8 +253,8 @@
 <div class="mscrim" id="mscrim" onclick="closeM()"></div>
 <aside class="mdrawer" id="mdrawer">
   <div class="mdrawer-top"><span class="brand"><span class="mk">TMI</span> TMI</span><button class="mx" onclick="closeM()">&times;</button></div>
-  <a class="ml" href="/tmi" onclick="closeM()">Ecosystem</a>
-  <a class="ml" href="/intelligent-companies" onclick="closeM()">Intelligent Companies</a>
+  <a class="ml" href="/#ecosystem" onclick="closeM()">Ecosystem</a>
+  <a class="ml" href="/solutions" onclick="closeM()">Solutions</a>
   <a class="ml" href="/industries" onclick="closeM()">Industries</a>
   <a class="ml" href="/news" onclick="closeM()">Intelligence</a>
   <a class="ml" href="/about" onclick="closeM()">About</a>
@@ -252,12 +265,12 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap hero-in">
-    <h1>The intelligence layer that makes every company <span class="lime">smarter than the last.</span></h1>
-    <p>Everything TMI does feeds one continuously improving intelligence network. Every engagement, dataset, playbook, and result flows into a shared layer that compounds.</p>
-    <p>The long-term asset is not just the companies TMI builds and acquires. It is the intelligence that makes every future company stronger than the one before it.</p>
+    <h1>The work between the work is <span class="lime">killing your margins.</span></h1>
+    <p class="lime" style="font-size:clamp(19px,2vw,26px);font-weight:600;margin-top:26px;">The job gets done. Then someone has to remember to invoice it, chase it, and log it.</p>
+    <p>Automation at TMI means removing the manual handoffs and repeat work between steps, so the operation moves without someone pushing it. A job is completed, so the invoice goes out. A payment is late, so the reminder sends. A lead comes in, so it gets routed and followed up. The work happens because the event happened, not because someone found time for it.</p>
     <div class="hero-cta">
       <a href="/book" class="btn btn-lime">Book an Intelligence Audit</a>
-      <a href="/tmi" class="btn btn-lite">See how TMI works</a>
+      <a href="/contact" class="btn btn-lite">Talk to TMI</a>
     </div>
   </div>
 </section>
@@ -265,141 +278,131 @@
 <!-- POSITIONING STRIP -->
 <div class="strip">
   <div class="wrap strip-in">
-    <span><b>Benchmarks</b></span>
-    <span>Operating Models</span>
-    <span>Industry Playbooks</span>
-    <span>Predictive Analytics</span>
-    <span>Knowledge Graphs</span>
-    <span>Automation</span>
-    <span>Dashboards</span>
+    <span><b>Trigger</b></span>
+    <span>Route</span>
+    <span>Notify</span>
+    <span>Update</span>
+    <span>Invoice</span>
+    <span>Follow up</span>
+    <span><b>Move</b></span>
   </div>
 </div>
 
-<!-- WHY THIS MATTERS -->
+<!-- WHERE TIME LEAKS -->
 <section class="sec">
   <div class="wrap idea">
-    <p class="eyebrow">Why this matters</p>
-    <h2 class="h2">Most companies start over <span class="lime">with every client.</span></h2>
+    <p class="eyebrow">Where time leaks</p>
+    <h2 class="h2">Most of the cost is in <span class="lime">the handoffs.</span></h2>
+    <p class="lead">The job itself is not where you lose the day. You lose it in the space between steps, where a person has to move information from one place to the next and nothing happens until they do.</p>
     <div class="rows">
-      <div class="r">Consulting firms rebuild the same thinking for <b>every new engagement.</b></div>
-      <div class="r">Software companies ship <b>the same tool to everyone</b> and learn nothing back.</div>
-      <div class="r">Holding companies buy, hold, and then start <b>fresh on the next deal.</b></div>
+      <div class="r">A tech closes a job in the field, but the office does not know to invoice it until the paperwork comes back Friday. <b>Three days of float, gone, on every job.</b></div>
+      <div class="r">The same customer details get typed into the CRM, then the scheduling tool, then the accounting system. <b>Three systems, three chances to get it wrong.</b></div>
+      <div class="r">A payment goes past due and sits there, because chasing it depends on someone opening the aging report and remembering to call. <b>Cash that waited on a memory.</b></div>
+      <div class="r">A lead comes in at 7pm and sits in an inbox until morning, by which point they already called your competitor. <b>The lead was fine. The gap was not.</b></div>
     </div>
-    <p class="punch">TMI keeps everything. Every engagement, dataset, playbook, and result feeds one shared network, so every company we build makes the next one better. The asset is the <span class="lime">compounding intelligence layer.</span></p>
+    <p class="punch">Every manual handoff is a place the work can stall, and it usually does.</p>
   </div>
 </section>
 
-<!-- WHAT THE PLATFORM HOLDS -->
+<!-- WHAT TMI AUTOMATES -->
 <section class="sec alt">
   <div class="wrap">
-    <p class="eyebrow">What the platform holds</p>
-    <h2 class="h2">Nine capabilities in <span class="lime">one connected layer.</span></h2>
-    <p class="lead">Each of these grows every time a company joins the ecosystem. Nothing is discarded at the end of a project. It is captured, structured, and made reusable for the next build.</p>
-    <div class="pillars">
-      <div class="pillar">
-        <div class="k">01</div>
-        <h4>Cross-company operational benchmarks</h4>
-        <p>Real performance ranges pulled from how comparable companies actually run, so you know what good looks like before you spend a dollar building toward it.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">02</div>
-        <h4>AI models trained on real business operations</h4>
-        <p>Models shaped by live operating data from real companies, not generic text scraped off the internet. They understand how work actually moves through a business.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">03</div>
-        <h4>Industry playbooks</h4>
-        <p>The specific sequence of moves that worked inside an industry, written down and ready to reuse instead of rediscovered from scratch every time.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">04</div>
-        <h4>Executive decision support</h4>
-        <p>Structured answers for the calls owners have to make, grounded in what happened when operators in the same position made the same choices before them.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">05</div>
-        <h4>Predictive analytics</h4>
-        <p>Early signals on demand, cash, capacity, and churn, drawn from patterns that only show up once you can see across many operations at once.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">06</div>
-        <h4>Knowledge graphs</h4>
-        <p>A connected map of how people, processes, customers, equipment, and systems relate inside a business, so context is never trapped in one person's head.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">07</div>
-        <h4>Automation templates</h4>
-        <p>Prebuilt workflows for the repeatable work every operation runs, ready to drop into a new company instead of engineered again from zero.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">08</div>
-        <h4>Human performance insights</h4>
-        <p>What actually moves focus, energy, and output in the people running and working in the business, measured across real teams rather than assumed.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">09</div>
-        <h4>Enterprise dashboards</h4>
-        <p>One screen that shows the true state of the whole operation in real time, built on the same shared definitions used across every company in the network.</p>
-      </div>
+    <p class="eyebrow">What TMI automates</p>
+    <h2 class="h2">Workflows that fire on <span class="lime">real events.</span></h2>
+    <p class="lead">We connect your systems and set rules that watch for something to happen, then do the next thing without waiting on a person. The trigger is a real event in your business. The action follows every time, the same way.</p>
+    <div class="fly">
+      <div><b>Job marked complete</b> so the invoice generates and sends to the customer the same hour, not the following week.</div>
+      <div><b>Invoice goes past due</b> so a reminder sends on a set schedule, then flags a person only if it stays unpaid.</div>
+      <div><b>New lead comes in</b> so it gets routed to the right rep, logged in the CRM, and followed up before it goes cold.</div>
+      <div><b>Job gets scheduled</b> so the customer gets a confirmation and the crew gets the address, details, and history in one message.</div>
+      <div><b>Estimate gets approved</b> so the job opens, the materials list moves to purchasing, and the calendar gets held.</div>
+      <div><b>Timesheet gets submitted</b> so hours flow to payroll and job costing without anyone re-keying them.</div>
+      <div><b>Inventory drops below a set point</b> so a reorder gets drafted and the manager gets a heads up before you run out on site.</div>
     </div>
   </div>
 </section>
 
-<!-- HOW IT COMPOUNDS -->
+<!-- CROSS-DEPARTMENT EXAMPLES -->
 <section class="sec dark">
   <div class="wrap">
-    <p class="eyebrow">How it compounds</p>
-    <h2 class="h2">A flywheel that strengthens <span class="lime">the whole ecosystem.</span></h2>
+    <p class="eyebrow">Across departments</p>
+    <h2 class="h2">One event can move <span class="lime">three departments.</span></h2>
+    <p class="lead">The point of automation is not one clever shortcut in one tool. It is wiring the handoffs between departments so a single event pushes work forward everywhere it needs to go.</p>
     <div class="engines">
-      <div class="engine"><div class="n">01</div><h4>Every company adds data</h4><p>Each engagement and operation feeds the network with real, structured operating data.</p></div>
-      <div class="engine"><div class="n">02</div><h4>Data sharpens the models</h4><p>More operations mean tighter benchmarks and models that predict and prescribe better.</p></div>
-      <div class="engine"><div class="n">03</div><h4>The next build gets faster</h4><p>Better models and playbooks make the next company quicker to build and sharper from day one.</p></div>
-      <div class="engine"><div class="n">04</div><h4>Results attract more companies</h4><p>Stronger outcomes bring in more operators, more industries, and more data to learn from.</p></div>
-      <div class="engine"><div class="n">05</div><h4>The network compounds</h4><p>Every addition makes the whole layer more valuable than the sum of its parts.</p></div>
+      <div class="engine">
+        <div class="n">Field to Finance</div>
+        <h4>Done means paid</h4>
+        <p>Job completed triggers the invoice, updates job costing, and starts the payment clock. No Friday paperwork lag.</p>
+      </div>
+      <div class="engine">
+        <div class="n">Sales to Ops</div>
+        <h4>Won means scheduled</h4>
+        <p>Deal closed triggers the job creation, the crew assignment, and the customer confirmation in one pass.</p>
+      </div>
+      <div class="engine">
+        <div class="n">Finance to Owner</div>
+        <h4>Late means flagged</h4>
+        <p>Overdue balance triggers the reminder sequence, then surfaces only the accounts that still need a human call.</p>
+      </div>
+      <div class="engine">
+        <div class="n">Intake to Sales</div>
+        <h4>Lead means routed</h4>
+        <p>New inquiry triggers routing by area and trade, logs the record, and sends the first follow up automatically.</p>
+      </div>
+      <div class="engine">
+        <div class="n">Ops to Supply</div>
+        <h4>Low means reordered</h4>
+        <p>Stock below threshold triggers a draft purchase order so materials are on the truck before the next job needs them.</p>
+      </div>
     </div>
-    <p class="lead">The network never resets. Each company you add makes every other company in it, and every company after it, stronger.</p>
   </div>
 </section>
 
-<!-- WHAT IT MEANS FOR YOU -->
-<section class="sec alt">
+<!-- AUTOMATION VS DIGITAL EMPLOYEES -->
+<section class="sec">
   <div class="wrap">
-    <p class="eyebrow">What it means for you</p>
-    <h2 class="h2" style="margin-bottom:6px;">The layer works for <span class="lime">whoever you are.</span></h2>
+    <p class="eyebrow">Automation vs digital employees</p>
+    <h2 class="h2">The wiring, and <span class="lime">the workers.</span></h2>
+    <p class="lead">These are two different things, and it helps to be clear about which is which. You often want both, but they do different jobs.</p>
     <div class="aud">
       <div class="c">
-        <div class="k">For operators</div>
-        <h3>Inherit what already worked.</h3>
-        <p>You get the benefit of what worked across every company like yours, instead of paying in time and money to learn it yourself.</p>
+        <div class="k">Automation</div>
+        <h3>The wiring between steps.</h3>
+        <p>Automation is the connective tissue. It watches for an event, then does a defined action along a fixed rule. It does not weigh options or make a call. It moves the work from one step to the next, fast and the same way every time.</p>
         <ul>
-          <li>Benchmarks from real comparable operations</li>
-          <li>Playbooks proven in your industry</li>
-          <li>Automation you don't have to invent</li>
-          <li>Fewer expensive lessons learned the hard way</li>
+          <li>Fires on a trigger you define</li>
+          <li>Follows a set rule, every time</li>
+          <li>Moves and updates data between systems</li>
+          <li>Best for repeatable, predictable steps</li>
         </ul>
       </div>
       <div class="c">
-        <div class="k">For investors</div>
-        <h3>A durable, compounding asset.</h3>
-        <p>The intelligence layer is not a cost center. It is an asset that grows more valuable with every company added to the network.</p>
+        <div class="k">Digital employees</div>
+        <h3>The workers that use judgment.</h3>
+        <p>Digital employees do the work that takes reading a situation and deciding. They answer the customer whose message does not fit a template, qualify the lead that needs a real question, and handle the case that has an exception. They act, not just relay.</p>
         <ul>
-          <li>Value that accrues across the whole portfolio</li>
-          <li>Each new company strengthens the rest</li>
-          <li>Advantage that competitors cannot buy off a shelf</li>
-          <li>Improvement that keeps working after the deal closes</li>
+          <li>Handles work that needs a decision</li>
+          <li>Reads context and responds</li>
+          <li>Manages exceptions, not just the happy path</li>
+          <li>Best for judgment and conversation</li>
         </ul>
       </div>
-      <div class="c">
-        <div class="k">For founders</div>
-        <h3>Decisions backed by patterns.</h3>
-        <p>Your decisions are backed by patterns across many real operations, not opinions, hunches, or guesses about what might work.</p>
-        <ul>
-          <li>Answers grounded in what actually happened</li>
-          <li>Context from businesses further down your path</li>
-          <li>Clarity on the calls that matter most</li>
-          <li>Confidence that scales with the company</li>
-        </ul>
-      </div>
+    </div>
+    <p class="lead" style="margin-top:34px;">The simplest way to hold it: automation is the wiring that carries the work between steps, and digital employees are the workers that do the thinking at the steps. The wiring makes the operation move. The workers make it decide.</p>
+  </div>
+</section>
+
+<!-- WHAT CHANGES -->
+<section class="sec alt">
+  <div class="wrap vision">
+    <p class="eyebrow">What changes</p>
+    <h2 class="h2">Nothing waits on <span class="lime">someone remembering.</span></h2>
+    <p class="lead">When the handoffs are wired, the operation stops depending on who was paying attention that day. The work moves because the event happened.</p>
+    <div class="rows">
+      <p><b>Nothing waits on a memory.</b> Invoices, reminders, and follow ups fire on the event, not when someone gets to them.</p>
+      <p><b>Fewer errors.</b> Data is entered once and flows everywhere, so the same detail is not retyped into three systems and mangled on the way.</p>
+      <p><b>Faster cycle time.</b> Days of float between job done and invoice sent collapse to the same hour, and cash arrives sooner.</p>
+      <p><b>People do the work only people can do.</b> The team stops relaying information and starts handling the calls, decisions, and jobs that actually need them.</p>
     </div>
   </div>
 </section>
@@ -407,11 +410,11 @@
 <!-- FINAL CTA -->
 <section class="final">
   <div class="wrap final-in">
-    <h2>Every company you build<br>makes the next one <em>stronger.</em></h2>
-    <p>The Intelligence Platform is what separates TMI from a consulting firm, a software company, or a holding company. It is the layer that compounds.</p>
+    <h2>Stop pushing the work.<br><em>Wire it to move.</em></h2>
+    <p>We map where your operation stalls between steps, then automate the handoffs so the work moves on its own. Book an intelligence audit and we will show you where the time is leaking.</p>
     <div class="final-cta">
       <a href="/book" class="btn btn-lime">Book an Intelligence Audit</a>
-      <a href="/tmi" class="btn btn-lite">See how TMI works</a>
+      <a href="/contact" class="btn btn-lite">Talk to TMI</a>
     </div>
   </div>
 </section>
@@ -422,7 +425,7 @@
     <div class="foot-grid">
       <div class="foot-brand">
         <span class="mk">TMI</span>
-        <p>An intelligence and investment company. We build better humans, better companies, and more valuable assets, connected into one compounding ecosystem.</p>
+        <p>An intelligence company. We build better humans, better companies, and more valuable assets, connected into one compounding ecosystem.</p>
         <div class="foot-social" data-tmi-social>
           <a href="https://www.youtube.com/@tmitechai" target="_blank" rel="noopener" aria-label="TMI on YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.6 15.6V8.4L15.82 12z"/></svg></a>
           <a href="https://www.instagram.com/tmitechai" target="_blank" rel="noopener" aria-label="TMI on Instagram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.42.56.21.96.47 1.38.9.43.42.69.82.9 1.38.17.43.37 1.06.42 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.42 2.23-.21.56-.47.96-.9 1.38-.42.43-.82.69-1.38.9-.43.17-1.06.37-2.23.42-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.42a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.17-.43-.37-1.06-.42-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.42-2.23.21-.56.47-.96.9-1.38.42-.43.82-.69 1.38-.9.43-.17 1.06-.37 2.23-.42C8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.88 5.88 0 0 0-2.13 1.38A5.88 5.88 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.66 1.34 1.07 2.13 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.88 5.88 0 0 0 2.13-1.38 5.88 5.88 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.88 5.88 0 0 0-1.38-2.13A5.88 5.88 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0zm0 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.41-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg></a>

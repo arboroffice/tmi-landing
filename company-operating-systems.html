@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
 <link rel="apple-touch-icon" href="favicon.svg"/>
-<meta name="description" content="The TMI Intelligence Platform is the compounding intelligence layer beneath everything TMI builds. Every engagement, dataset, playbook, and result feeds one shared network that makes every future company stronger than the last."/>
-<meta property="og:title" content="TMI Intelligence Platform | The Layer That Makes Every Company Smarter"/>
-<meta property="og:description" content="One continuously improving intelligence network. Benchmarks, models, playbooks, and results that compound with every company TMI builds, acquires, or transforms."/>
+<meta name="description" content="A company operating system runs your whole company in one connected place, instead of 14 apps that don't talk to each other."/>
+<meta property="og:title" content="Company Operating Systems | TMI"/>
+<meta property="og:description" content="One system that runs the whole company. Every department, metric, workflow, and record connected, instead of a stack of apps that don't talk."/>
 <meta property="og:type" content="website"/>
-<meta property="og:url" content="https://www.tmitechai.com/intelligence-platform"/>
+<meta property="og:url" content="https://www.tmitechai.com/company-operating-systems"/>
 <meta property="og:image" content="https://www.tmitechai.com/hero-og.jpg"/>
 <meta property="og:site_name" content="TMI"/>
 <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="TMI Intelligence Platform | The Compounding Intelligence Layer"/>
-<meta name="twitter:description" content="The long-term asset isn't the companies. It's the intelligence layer that makes every next company stronger."/>
+<meta name="twitter:title" content="Company Operating Systems | TMI"/>
+<meta name="twitter:description" content="One system that runs the whole company, instead of a stack of apps that don't talk to each other."/>
 <meta name="twitter:image" content="https://www.tmitechai.com/hero-og.jpg"/>
-<link rel="canonical" href="https://www.tmitechai.com/intelligence-platform"/>
-<title>TMI Intelligence Platform | The Compounding Intelligence Layer</title>
+<link rel="canonical" href="https://www.tmitechai.com/company-operating-systems"/>
+<title>Company Operating Systems | TMI</title>
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin/>
 <style>
   @import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
@@ -155,13 +155,25 @@
   .vision .rows p{padding:13px 0;border-bottom:1px solid var(--line);font-size:clamp(16px,1.7vw,20px);color:var(--ink-2);font-weight:500;}
   .vision .rows p b{color:var(--ink);font-weight:700;}
 
-  /* pillars (intelligence platform capabilities) */
-  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px;}
-  .pillar{border:1px solid var(--line);border-radius:16px;padding:28px 26px;background:#fff;transition:transform .15s,border-color .15s,box-shadow .15s;}
-  .pillar:hover{transform:translateY(-4px);border-color:var(--line-2);box-shadow:0 18px 40px -28px rgba(10,11,20,0.4);}
-  .pillar .k{font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart-dark);margin-bottom:14px;}
-  .pillar h4{font-size:19px;margin-bottom:10px;}
-  .pillar p{color:var(--ink-2);font-weight:400;font-size:14.5px;line-height:1.55;}
+  /* investment model cards */
+  .models{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px;}
+  .model{border:1px solid var(--line);border-radius:16px;padding:26px 24px;background:#fff;}
+  .model .k{font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart-dark);}
+  .model h4{font-size:20px;margin:12px 0 10px;}
+  .model p{color:var(--ink-2);font-weight:400;font-size:14.5px;line-height:1.55;}
+
+  /* vertical timeline */
+  .timeline{position:relative;margin-top:52px;max-width:820px;padding-left:38px;}
+  .timeline::before{content:"";position:absolute;left:11px;top:8px;bottom:8px;width:2px;background:linear-gradient(to bottom,var(--chart-dark),var(--d-line));}
+  .dark .timeline::before{background:linear-gradient(to bottom,var(--chart),var(--d-line));}
+  .tnode{position:relative;padding:0 0 34px 0;}
+  .tnode:last-child{padding-bottom:0;}
+  .tnode::before{content:"";position:absolute;left:-33px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--chart);border:3px solid var(--d-bg);box-shadow:0 0 0 2px var(--chart-dark);}
+  .dark .tnode::before{border-color:var(--d-bg);box-shadow:0 0 0 2px var(--chart);}
+  .tnode .ts{font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart-dark);}
+  .dark .tnode .ts{color:var(--chart);}
+  .tnode h4{font-size:clamp(19px,2.2vw,24px);margin:7px 0 8px;color:var(--d-ink);}
+  .tnode p{color:var(--d-ink-2);font-weight:400;font-size:15px;line-height:1.55;max-width:56ch;}
 
   /* final */
   .final{background:var(--d-bg);color:var(--d-ink);text-align:center;padding:110px 0;position:relative;overflow:hidden;}
@@ -183,10 +195,6 @@
   .foot-line{margin-top:52px;padding-top:34px;border-top:1px solid var(--d-line);font-size:clamp(18px,2.4vw,28px);font-weight:600;letter-spacing:-0.02em;line-height:1.3;color:#fff;}
   .foot-line span{color:var(--chart);}
   .foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:28px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--d-ink-3);}
-  .foot-social{display:flex;gap:10px;margin-top:22px;}
-  .foot-social a{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.55);transition:background .15s,color .15s;}
-  .foot-social a:hover{background:rgba(255,255,255,0.14);color:#fff;}
-  .foot-social svg{width:17px;height:17px;display:block;}
 
   /* mobile drawer */
   .mscrim{position:fixed;inset:0;background:rgba(10,11,20,0.5);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .2s;z-index:200;}
@@ -201,8 +209,7 @@
   @media(max-width:960px){
     .eco{grid-template-columns:1fr;gap:22px;}
     .engines,.method{grid-template-columns:repeat(2,1fr);}
-    .aud{grid-template-columns:1fr;}
-    .pillars{grid-template-columns:1fr 1fr;}
+    .aud,.models{grid-template-columns:1fr;}
     .foot-grid{grid-template-columns:1fr 1fr;gap:26px;}
     .foot-brand{grid-column:1 / -1;}
     .feeds{grid-template-columns:1fr;}
@@ -212,11 +219,18 @@
     .sec{padding:64px 0;}
     .hero{padding:78px 0 64px;}
     .engines,.method{grid-template-columns:1fr;}
-    .pillars{grid-template-columns:1fr;}
     .wrap{padding:0 20px;}
+    .timeline{padding-left:30px;}
+    .tnode::before{left:-27px;}
+    .timeline::before{left:7px;}
   }
   @media(min-width:641px){.nav-burger{display:none;}}
   @media(max-width:640px){.nav-burger{display:flex;}}
+
+  .foot-social{display:flex;gap:10px;margin-top:22px;}
+  .foot-social a{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.55);transition:background .15s,color .15s;}
+  .foot-social a:hover{background:rgba(255,255,255,0.14);color:#fff;}
+  .foot-social svg{width:17px;height:17px;display:block;}
 </style>
 </head>
 <body>
@@ -225,8 +239,8 @@
   <div class="nav-in">
     <a href="/" class="brand"><span class="mk">TMI</span> TMI</a>
     <nav class="nav-links">
-      <a href="/tmi">Ecosystem</a>
-      <a href="/intelligent-companies">Intelligent Companies</a>
+      <a href="/#ecosystem">Ecosystem</a>
+      <a href="/solutions">Solutions</a>
       <a href="/industries">Industries</a>
       <a href="/news">Intelligence</a>
       <a href="/about">About</a>
@@ -240,8 +254,8 @@
 <div class="mscrim" id="mscrim" onclick="closeM()"></div>
 <aside class="mdrawer" id="mdrawer">
   <div class="mdrawer-top"><span class="brand"><span class="mk">TMI</span> TMI</span><button class="mx" onclick="closeM()">&times;</button></div>
-  <a class="ml" href="/tmi" onclick="closeM()">Ecosystem</a>
-  <a class="ml" href="/intelligent-companies" onclick="closeM()">Intelligent Companies</a>
+  <a class="ml" href="/#ecosystem" onclick="closeM()">Ecosystem</a>
+  <a class="ml" href="/solutions" onclick="closeM()">Solutions</a>
   <a class="ml" href="/industries" onclick="closeM()">Industries</a>
   <a class="ml" href="/news" onclick="closeM()">Intelligence</a>
   <a class="ml" href="/about" onclick="closeM()">About</a>
@@ -252,12 +266,13 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap hero-in">
-    <h1>The intelligence layer that makes every company <span class="lime">smarter than the last.</span></h1>
-    <p>Everything TMI does feeds one continuously improving intelligence network. Every engagement, dataset, playbook, and result flows into a shared layer that compounds.</p>
-    <p>The long-term asset is not just the companies TMI builds and acquires. It is the intelligence that makes every future company stronger than the one before it.</p>
+    <p class="eyebrow" style="color:var(--chart);">Company Operating Systems</p>
+    <h1>Your company runs on 14 apps that <span class="lime">don't talk.</span> It should run on one system.</h1>
+    <p>Right now your CRM doesn't know what your accounting software knows. Your scheduling tool doesn't know what your field app knows. Nobody sees the whole company at once, so the owner spends every day stitching the pieces together by hand.</p>
+    <p>A company operating system runs the entire business in one connected place. Every department, every metric, every workflow, every customer, every invoice, every job, in the same system, talking to each other in real time.</p>
     <div class="hero-cta">
       <a href="/book" class="btn btn-lime">Book an Intelligence Audit</a>
-      <a href="/tmi" class="btn btn-lite">See how TMI works</a>
+      <a href="/solutions" class="btn btn-lite">See how it works</a>
     </div>
   </div>
 </section>
@@ -265,139 +280,174 @@
 <!-- POSITIONING STRIP -->
 <div class="strip">
   <div class="wrap strip-in">
-    <span><b>Benchmarks</b></span>
-    <span>Operating Models</span>
-    <span>Industry Playbooks</span>
-    <span>Predictive Analytics</span>
-    <span>Knowledge Graphs</span>
-    <span>Automation</span>
-    <span>Dashboards</span>
+    <span><b>One system</b></span>
+    <span>Every department</span>
+    <span>Live metrics</span>
+    <span>Connected workflows</span>
+    <span>One set of records</span>
+    <span><b>One screen</b></span>
   </div>
 </div>
 
-<!-- WHY THIS MATTERS -->
+<!-- THE PROBLEM -->
 <section class="sec">
   <div class="wrap idea">
-    <p class="eyebrow">Why this matters</p>
-    <h2 class="h2">Most companies start over <span class="lime">with every client.</span></h2>
+    <p class="eyebrow">The problem</p>
+    <h2 class="h2">You bought software for every problem. Now the software <span class="lime">is the problem.</span></h2>
+    <p class="lead">Most companies your size run on ten to fifteen disconnected apps. One for CRM, one for accounting, one for scheduling, one for payroll, one for estimates, one for the field, one for inventory, plus a dozen spreadsheets holding it all together. None of them share a single source of truth.</p>
+    <p class="lead">So the owner becomes the integration layer. You are the only place the CRM, the accounting, and the field actually connect, and that happens in your head, on the phone, in the truck, at night. The company can't run without you because you are the connection between the tools.</p>
+    <p class="lead">And the real numbers, the ones that tell you whether a job made money or lost it, live in someone's memory or a spreadsheet that was last accurate three weeks ago. By the time you can see a problem clearly, it already cost you.</p>
+    <p class="punch">A stack of apps that don't talk is not a system. It's a pile of blind spots you pay a monthly fee for.</p>
+  </div>
+</section>
+
+<!-- WHAT A COMPANY OPERATING SYSTEM IS -->
+<section class="sec alt">
+  <div class="wrap">
+    <p class="eyebrow">What it is</p>
+    <h2 class="h2">One system that runs <span class="lime">the whole company.</span></h2>
+    <p class="lead">A company operating system is a single connected place where the entire business lives. Not another app to add to the pile. The layer that replaces the pile. Everything below sits in one system and shares the same data, so what one part learns, every part knows.</p>
+
+    <div class="eco">
+      <div class="eco-h">
+        <div class="num">01</div>
+        <h3>Every department in one place</h3>
+        <p>Sales, operations, finance, dispatch, field, and back office run inside the same system instead of separate tools. When a job closes, the schedule, the invoice, and the books all know at the same moment.</p>
+        <div class="goal">No more re-entering the same job into four different apps.</div>
+      </div>
+      <div class="caps">
+        <span>Sales and CRM</span>
+        <span>Operations and dispatch</span>
+        <span>Finance and invoicing</span>
+        <span>Field and scheduling</span>
+        <span>Inventory and equipment</span>
+        <span>Back office and admin</span>
+      </div>
+    </div>
+
+    <div class="eco">
+      <div class="eco-h">
+        <div class="num">02</div>
+        <h3>Digital employees that do the work</h3>
+        <p>The system doesn't just store information. It runs the routine work, following up, updating records, flagging what's off, and moving jobs forward, so your people stop doing the work software should have done years ago.</p>
+        <div class="goal">The repetitive work runs itself, on time, every time.</div>
+      </div>
+      <div class="caps">
+        <span>Follow-up and reminders</span>
+        <span>Data entry and updates</span>
+        <span>Scheduling and routing</span>
+        <span>Exception flagging</span>
+        <span>Reporting</span>
+      </div>
+    </div>
+
+    <div class="eco">
+      <div class="eco-h">
+        <div class="num">03</div>
+        <h3>Live metrics on the real business</h3>
+        <p>Because every department feeds the same system, the numbers are current. You see revenue, margin, job cost, crew productivity, and cash the way they are today, not the way a month-old spreadsheet remembers them.</p>
+        <div class="goal">The dashboard is the business, not a guess about the business.</div>
+      </div>
+      <div class="caps">
+        <span>Revenue and margin</span>
+        <span>Job costing</span>
+        <span>Cash position</span>
+        <span>Crew productivity</span>
+        <span>Pipeline and backlog</span>
+      </div>
+    </div>
+
+    <div class="eco">
+      <div class="eco-h">
+        <div class="num">04</div>
+        <h3>Connected workflows and records</h3>
+        <p>A customer, a job, an invoice, and a crew are the same record everywhere they appear. Update it once and it's right in every view. No duplicate customers, no version that's wrong, no reconciling apps against each other.</p>
+        <div class="goal">One record for each thing, connected to everything it touches.</div>
+      </div>
+      <div class="caps">
+        <span>One customer record</span>
+        <span>One job record</span>
+        <span>Connected invoices</span>
+        <span>Shared history</span>
+        <span>One source of truth</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IT REPLACES -->
+<section class="sec">
+  <div class="wrap">
+    <p class="eyebrow">What it replaces</p>
+    <h2 class="h2">The disconnected stack, <span class="lime">gone.</span></h2>
+    <p class="lead">These are the tools most companies duct-tape together, each holding a piece of the truth and none of them sharing it. A company operating system absorbs the jobs they do into one connected place.</p>
+    <div class="serves">
+      <span>The standalone CRM</span>
+      <span>The separate accounting software</span>
+      <span>The scheduling app</span>
+      <span>The estimating tool</span>
+      <span>The field service app</span>
+      <span>The payroll system</span>
+      <span>The inventory tracker</span>
+      <span>The dispatch board</span>
+      <span>The customer database</span>
+      <span>The dozen spreadsheets</span>
+      <span>The group texts holding it together</span>
+      <span>The whiteboard in the office</span>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT CHANGES -->
+<section class="sec alt">
+  <div class="wrap vision">
+    <p class="eyebrow">What changes</p>
+    <h2 class="h2">One screen for the whole operation, and a company that <span class="lime">runs without you in every loop.</span></h2>
+    <p class="lead">When the business runs on one system instead of a stack, three things change fast.</p>
     <div class="rows">
-      <div class="r">Consulting firms rebuild the same thinking for <b>every new engagement.</b></div>
-      <div class="r">Software companies ship <b>the same tool to everyone</b> and learn nothing back.</div>
-      <div class="r">Holding companies buy, hold, and then start <b>fresh on the next deal.</b></div>
-    </div>
-    <p class="punch">TMI keeps everything. Every engagement, dataset, playbook, and result feeds one shared network, so every company we build makes the next one better. The asset is the <span class="lime">compounding intelligence layer.</span></p>
-  </div>
-</section>
-
-<!-- WHAT THE PLATFORM HOLDS -->
-<section class="sec alt">
-  <div class="wrap">
-    <p class="eyebrow">What the platform holds</p>
-    <h2 class="h2">Nine capabilities in <span class="lime">one connected layer.</span></h2>
-    <p class="lead">Each of these grows every time a company joins the ecosystem. Nothing is discarded at the end of a project. It is captured, structured, and made reusable for the next build.</p>
-    <div class="pillars">
-      <div class="pillar">
-        <div class="k">01</div>
-        <h4>Cross-company operational benchmarks</h4>
-        <p>Real performance ranges pulled from how comparable companies actually run, so you know what good looks like before you spend a dollar building toward it.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">02</div>
-        <h4>AI models trained on real business operations</h4>
-        <p>Models shaped by live operating data from real companies, not generic text scraped off the internet. They understand how work actually moves through a business.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">03</div>
-        <h4>Industry playbooks</h4>
-        <p>The specific sequence of moves that worked inside an industry, written down and ready to reuse instead of rediscovered from scratch every time.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">04</div>
-        <h4>Executive decision support</h4>
-        <p>Structured answers for the calls owners have to make, grounded in what happened when operators in the same position made the same choices before them.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">05</div>
-        <h4>Predictive analytics</h4>
-        <p>Early signals on demand, cash, capacity, and churn, drawn from patterns that only show up once you can see across many operations at once.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">06</div>
-        <h4>Knowledge graphs</h4>
-        <p>A connected map of how people, processes, customers, equipment, and systems relate inside a business, so context is never trapped in one person's head.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">07</div>
-        <h4>Automation templates</h4>
-        <p>Prebuilt workflows for the repeatable work every operation runs, ready to drop into a new company instead of engineered again from zero.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">08</div>
-        <h4>Human performance insights</h4>
-        <p>What actually moves focus, energy, and output in the people running and working in the business, measured across real teams rather than assumed.</p>
-      </div>
-      <div class="pillar">
-        <div class="k">09</div>
-        <h4>Enterprise dashboards</h4>
-        <p>One screen that shows the true state of the whole operation in real time, built on the same shared definitions used across every company in the network.</p>
-      </div>
+      <p><b>You see the whole company on one screen.</b> Every department, every job, every number, in one place, current. You stop opening seven tabs to answer one question.</p>
+      <p><b>Decisions run on live data, not memory.</b> You price, hire, schedule, and chase cash off numbers that are true today, so a bad job shows up while you can still fix it, not after it's closed.</p>
+      <p><b>The company stops depending on the owner as the integration layer.</b> The system holds the connections that used to live in your head, so the business keeps running clean when you're not in the middle of every handoff.</p>
+      <p><b>The work that shouldn't exist disappears.</b> Re-entering data, reconciling apps, and rebuilding the same report every week stop being anyone's job.</p>
     </div>
   </div>
 </section>
 
-<!-- HOW IT COMPOUNDS -->
-<section class="sec dark">
+<!-- WHO IT'S FOR -->
+<section class="sec">
   <div class="wrap">
-    <p class="eyebrow">How it compounds</p>
-    <h2 class="h2">A flywheel that strengthens <span class="lime">the whole ecosystem.</span></h2>
-    <div class="engines">
-      <div class="engine"><div class="n">01</div><h4>Every company adds data</h4><p>Each engagement and operation feeds the network with real, structured operating data.</p></div>
-      <div class="engine"><div class="n">02</div><h4>Data sharpens the models</h4><p>More operations mean tighter benchmarks and models that predict and prescribe better.</p></div>
-      <div class="engine"><div class="n">03</div><h4>The next build gets faster</h4><p>Better models and playbooks make the next company quicker to build and sharper from day one.</p></div>
-      <div class="engine"><div class="n">04</div><h4>Results attract more companies</h4><p>Stronger outcomes bring in more operators, more industries, and more data to learn from.</p></div>
-      <div class="engine"><div class="n">05</div><h4>The network compounds</h4><p>Every addition makes the whole layer more valuable than the sum of its parts.</p></div>
-    </div>
-    <p class="lead">The network never resets. Each company you add makes every other company in it, and every company after it, stronger.</p>
-  </div>
-</section>
-
-<!-- WHAT IT MEANS FOR YOU -->
-<section class="sec alt">
-  <div class="wrap">
-    <p class="eyebrow">What it means for you</p>
-    <h2 class="h2" style="margin-bottom:6px;">The layer works for <span class="lime">whoever you are.</span></h2>
+    <p class="eyebrow">Who it's for</p>
+    <h2 class="h2">Companies that grew faster than <span class="lime">their systems.</span></h2>
+    <p class="lead">If the business got bigger and the software got more scattered, this is the fix. The point where you have real revenue and real complexity, but the operation still runs on the owner's memory and a pile of apps, is exactly where one connected system changes the trajectory.</p>
     <div class="aud">
       <div class="c">
-        <div class="k">For operators</div>
-        <h3>Inherit what already worked.</h3>
-        <p>You get the benefit of what worked across every company like yours, instead of paying in time and money to learn it yourself.</p>
+        <div class="k">Owner-led</div>
+        <h3>The owner is the glue</h3>
+        <p>Everything routes through you because you are the only place the tools connect. One system moves those connections out of your head and into something the whole company can run on.</p>
         <ul>
-          <li>Benchmarks from real comparable operations</li>
-          <li>Playbooks proven in your industry</li>
-          <li>Automation you don't have to invent</li>
-          <li>Fewer expensive lessons learned the hard way</li>
+          <li>Less time stitching apps together</li>
+          <li>A business that runs when you're out</li>
+          <li>Decisions off live numbers</li>
         </ul>
       </div>
       <div class="c">
-        <div class="k">For investors</div>
-        <h3>A durable, compounding asset.</h3>
-        <p>The intelligence layer is not a cost center. It is an asset that grows more valuable with every company added to the network.</p>
+        <div class="k">Scaling</div>
+        <h3>Growth outran the tools</h3>
+        <p>You added software for every new problem and ended up with fifteen apps and no single view. One system replaces the sprawl so growth stops adding chaos.</p>
         <ul>
-          <li>Value that accrues across the whole portfolio</li>
-          <li>Each new company strengthens the rest</li>
-          <li>Advantage that competitors cannot buy off a shelf</li>
-          <li>Improvement that keeps working after the deal closes</li>
+          <li>One source of truth</li>
+          <li>Departments that share data</li>
+          <li>Room to grow without more tools</li>
         </ul>
       </div>
       <div class="c">
-        <div class="k">For founders</div>
-        <h3>Decisions backed by patterns.</h3>
-        <p>Your decisions are backed by patterns across many real operations, not opinions, hunches, or guesses about what might work.</p>
+        <div class="k">Multi-team</div>
+        <h3>Field, office, and finance don't match</h3>
+        <p>The field says one thing, the office another, the books a third. When they run on the same system, they stop disagreeing about what actually happened.</p>
         <ul>
-          <li>Answers grounded in what actually happened</li>
-          <li>Context from businesses further down your path</li>
-          <li>Clarity on the calls that matter most</li>
-          <li>Confidence that scales with the company</li>
+          <li>Field and office in sync</li>
+          <li>Job cost you can trust</li>
+          <li>No reconciling apps by hand</li>
         </ul>
       </div>
     </div>
@@ -407,11 +457,11 @@
 <!-- FINAL CTA -->
 <section class="final">
   <div class="wrap final-in">
-    <h2>Every company you build<br>makes the next one <em>stronger.</em></h2>
-    <p>The Intelligence Platform is what separates TMI from a consulting firm, a software company, or a holding company. It is the layer that compounds.</p>
+    <h2>Stop running on 14 apps.<br><em>Run on one system.</em></h2>
+    <p>We start with an Intelligence Audit. We map the tools you run on today, find where the company is losing time and money to the gaps between them, and show you what running on one connected system would change.</p>
     <div class="final-cta">
       <a href="/book" class="btn btn-lime">Book an Intelligence Audit</a>
-      <a href="/tmi" class="btn btn-lite">See how TMI works</a>
+      <a href="/contact" class="btn btn-lite">Talk to us first</a>
     </div>
   </div>
 </section>
@@ -422,7 +472,7 @@
     <div class="foot-grid">
       <div class="foot-brand">
         <span class="mk">TMI</span>
-        <p>An intelligence and investment company. We build better humans, better companies, and more valuable assets, connected into one compounding ecosystem.</p>
+        <p>An intelligence company. We build better humans, better companies, and more valuable assets, connected into one compounding ecosystem.</p>
         <div class="foot-social" data-tmi-social>
           <a href="https://www.youtube.com/@tmitechai" target="_blank" rel="noopener" aria-label="TMI on YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.6 15.6V8.4L15.82 12z"/></svg></a>
           <a href="https://www.instagram.com/tmitechai" target="_blank" rel="noopener" aria-label="TMI on Instagram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.42.56.21.96.47 1.38.9.43.42.69.82.9 1.38.17.43.37 1.06.42 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.42 2.23-.21.56-.47.96-.9 1.38-.42.43-.82.69-1.38.9-.43.17-1.06.37-2.23.42-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.42a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.17-.43-.37-1.06-.42-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.42-2.23.21-.56.47-.96.9-1.38.42-.43.82-.69 1.38-.9.43-.17 1.06-.37 2.23-.42C8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.88 5.88 0 0 0-2.13 1.38A5.88 5.88 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.66 1.34 1.07 2.13 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.88 5.88 0 0 0 2.13-1.38 5.88 5.88 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.88 5.88 0 0 0-1.38-2.13A5.88 5.88 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0zm0 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.41-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg></a>
