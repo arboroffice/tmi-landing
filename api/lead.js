@@ -25,7 +25,7 @@ function buildInitialEmail(firstName, unsubUrl) {
 <p style="margin:0 0 16px;">Got your details. If you already grabbed a time, you're set - a separate confirmation with the call link is on its way. If you did not finish picking a time, do it here: <a href="${SITE}/book" style="color:#5a9e00;">${SITE}/book</a></p>
 <p style="margin:0 0 8px;">The call is 30 minutes. We map where your operation is leaking time and money and show you what we would build first. Come ready with:</p>
 <p style="margin:0 0 16px;color:#444;">1. The one thing you most want off your plate.<br>2. A rough sense of your numbers - revenue, team size, and where jobs or leads slip.<br>3. The tools you are paying for right now.</p>
-<p style="margin:0 0 24px;">Question before then, or want to talk sooner? Text us at <a href="tel:+13374509795" style="color:#5a9e00;">(337) 450-9795</a>.</p>
+<p style="margin:0 0 24px;">Question before then, or want to talk sooner? Just reply to this email and a real person will get back to you.</p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>
 `, unsubUrl);
 }
@@ -122,7 +122,7 @@ module.exports = async function handler(req, res) {
   // SMS to lead
   if (phone) {
     sms.messages.create({
-      body: `Hey ${firstName} - got your details. On the call we'll map where your operation is leaking time and money. Come with the one thing you most want off your plate. Questions before then? Text us at (337) 450-9795.`,
+      body: `Hey ${firstName} - got your details. On the call we'll map where your operation is leaking time and money. Come with the one thing you most want off your plate. Questions before then? Just reply here.`,
       from: FROM_NUMBER,
       to: formatPhone(phone),
     }).catch(e => console.error('Lead SMS error:', e));

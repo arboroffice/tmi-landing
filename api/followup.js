@@ -340,7 +340,7 @@ ${sig}`;
   // --- BOOKED SEQUENCE (pre-call reminders) ---
   // The intelligent audit now happens live on the call, so these just confirm,
   // prep the prospect, and make sure they hop on. No self-serve audit link.
-  const TEXT_LINE = "Question before then? Text us at (337) 450-9795.";
+  const TEXT_LINE = "Question before then? Just reply to this email.";
 
   if (step === "pre_call_24h") {
     await resend.emails.send({
