@@ -543,6 +543,7 @@
     <a data-v="brain"><svg class="icon"><use href="#i-brain"/></svg> Company Brain</a>
     <a data-v="reports"><svg class="icon"><use href="#i-chart"/></svg> Reports</a>
     <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
+    <a data-v="observe"><svg class="icon"><use href="#i-chart"/></svg> Runs &amp; cost</a>
     <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Connect tools</a>
     <a data-v="team" data-owner="1"><svg class="icon"><use href="#i-users"/></svg> Team <span class="tag" id="tgTeam"></span></a>
     <a data-v="settings" data-owner="1"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
@@ -698,6 +699,14 @@
     <div class="memo" id="feed"></div>
   </section>
 
+  <section class="view" data-view="observe">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Runs &amp; cost</div><p class="sub">Every agent run your OS makes, traced step by step, and what it costs to run. When an answer or a worker looks off, open the run to see exactly what happened, when, and where it failed.</p></div><button class="btn ghost sm" onclick="loadObserve()"><svg class="icon"><use href="#i-clock"/></svg> Refresh</button></div>
+    <div class="tiles" id="obsCost" style="margin-top:22px"></div>
+    <div id="obsWork" style="margin-top:14px"></div>
+    <div class="lbl" style="margin:30px 0 12px">Recent runs</div>
+    <div id="obsRuns"></div>
+  </section>
+
   <section class="view" data-view="integrations">
     <div class="h">Live data</div>
     <p class="sub">Feed your real numbers in and the whole OS runs on actuals: your command center, your weekly digest, your COO, and every worker. Any tool that can send a webhook can connect.</p>
@@ -799,6 +808,7 @@ function show(v){
   document.querySelectorAll('.view').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-view')===v);});
   if((v==='command'||v==='coo')&&!briefingLoaded) loadBriefing();
   if(v==='team') loadTeam();
+  if(v==='observe') loadObserve();
   if(v==='integrations') loadConnect();
   if(v==='guardrails') loadPolicies();
   if(v==='blueprint') renderBlueprint();
@@ -2467,6 +2477,59 @@ function renderFeed(){
   document.getElementById('feed').innerHTML=log.length?log.map(function(b){return '<div class="m"><span class="dot"></span><div>'+esc(b.summary)+'<div class="t">'+fmt(b.created_at)+'</div></div></div>';}).join(''):'<div class="m"><span class="dot"></span><div>Your OS is ready.</div></div>';
 }
 
+/* ---- runs & cost (observability) ---- */
+var OBS={cost:null,traces:[],loaded:false};
+function usd(n){n=Number(n)||0;if(n>=1)return '$'+n.toFixed(2);if(n>=0.01)return '$'+n.toFixed(3);if(n>0)return '$'+n.toFixed(4);return '$0';}
+function knum(n){n=Number(n)||0;return n>=1000?(Math.round(n/100)/10)+'k':String(n);}
+function secs(ms){return ms?(Math.round(ms/100)/10)+'s':'';}
+async function loadObserve(){
+  var host=document.getElementById('obsRuns'); if(host&&!OBS.loaded) host.innerHTML='<div class="empty" style="padding:22px"><p>Loading runs...</p></div>';
+  try{var c=await api('/api/os2-traces',{action:'cost',days:30});OBS.cost=c.cost||null;}catch(e){OBS.cost=null;}
+  try{var r=await api('/api/os2-traces',{action:'list',limit:80});OBS.traces=r.traces||[];}catch(e){OBS.traces=[];}
+  OBS.loaded=true;renderObserve();
+}
+function renderObserve(){
+  var c=OBS.cost||{total_usd:0,calls:0,tokens_in:0,tokens_out:0,by_workflow:{}};
+  var tiles=[['Spend, last 30 days',usd(c.total_usd),(c.calls||0)+' model calls'],['Tokens in',knum(c.tokens_in),'sent to the models'],['Tokens out',knum(c.tokens_out),'generated'],['Runs traced',String((OBS.traces||[]).length),'most recent']];
+  var ct=document.getElementById('obsCost');
+  if(ct) ct.innerHTML=tiles.map(function(t){return '<div class="tile metric"><div class="top-row"><div class="k">'+esc(t[0])+'</div></div><div class="v">'+esc(t[1])+'</div>'+(t[2]?'<div class="hh">'+esc(t[2])+'</div>':'')+'</div>';}).join('');
+  var wf=c.by_workflow||{};var keys=Object.keys(wf).sort(function(a,b){return wf[b]-wf[a];});var max=keys.length?wf[keys[0]]:0;
+  var wh=document.getElementById('obsWork');
+  if(wh) wh.innerHTML=keys.length?('<div class="lbl" style="margin:6px 0 12px">Cost by workflow</div>'+keys.map(function(k){var pct=max?Math.max(4,Math.round(wf[k]/max*100)):0;return '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px"><span style="min-width:130px;font-size:13.5px;color:var(--ink-2)">'+esc(k)+'</span><span style="flex:1;height:8px;background:var(--bg-alt);border-radius:999px;overflow:hidden"><i style="display:block;height:100%;width:'+pct+'%;background:var(--chart-dark)"></i></span><span class="cad" style="min-width:66px;text-align:right;color:var(--ink)">'+usd(wf[k])+'</span></div>';}).join('')):'';
+  var host=document.getElementById('obsRuns'); if(!host) return;
+  var list=OBS.traces||[];
+  if(!list.length){host.innerHTML='<div class="empty"><h3>No runs yet</h3><p>When your COO answers a question or a worker runs, each one is traced here with its steps and cost. Ask your COO something to see the first run.</p></div>';return;}
+  host.innerHTML=list.map(function(tr){
+    var ok=tr.status!=='error';
+    return '<div class="row" style="cursor:pointer" onclick="openTrace(\''+esc(tr.trace_id)+'\')"><div class="r1">'+
+      '<span class="badge k">'+esc(tr.kind)+'</span>'+
+      '<h4 style="flex:1;font-size:15px;font-weight:600">'+esc(tr.label||tr.kind)+'</h4>'+
+      '<span class="cad" style="color:'+(ok?'#3f8f57':'var(--warn)')+'">'+(ok?'ok':'error')+'</span>'+
+      '<span class="cad">'+(tr.span_count||0)+' steps</span>'+
+      '<span class="cad" style="color:var(--ink)">'+usd(tr.cost_usd)+'</span>'+
+      '<span class="cad">'+secs(tr.ms)+'</span>'+
+      '<span class="cad">'+ago(tr.started_at)+'</span>'+
+      '</div></div>';
+  }).join('');
+}
+async function openTrace(id){
+  try{var j=await api('/api/os2-traces',{action:'get',trace_id:id});if(j.trace)showTraceModal(j.trace);else toast('Run not found');}
+  catch(e){if(e.message!=='signed out')toast('Could not load that run');}
+}
+function showTraceModal(tr){
+  var spans=tr.spans||[];
+  var rows=spans.map(function(s){
+    var meta=[];if(s.model)meta.push(esc(s.model));if(s.tokens_in||s.tokens_out)meta.push((s.tokens_in||0)+' in / '+(s.tokens_out||0)+' out');if(s.cost_usd)meta.push(usd(s.cost_usd));if(s.ms!=null)meta.push(s.ms+'ms');
+    var err=s.error?'<div class="cad" style="color:var(--warn);margin-top:4px;text-transform:none;letter-spacing:0">'+esc(s.error)+'</div>':'';
+    return '<div style="padding:11px 0;border-bottom:1px solid var(--line)"><div style="display:flex;gap:10px;align-items:baseline"><span class="badge k">'+esc(s.kind)+'</span><span style="flex:1;font-weight:600;font-size:14px">'+esc(s.name)+'</span><span class="cad">'+meta.join(' &middot; ')+'</span></div>'+err+'</div>';
+  }).join('');
+  var head='<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><h3>'+esc(tr.label||tr.kind)+'</h3><span class="cad" style="color:'+(tr.status==='error'?'var(--warn)':'#3f8f57')+'">'+esc(tr.kind)+' &middot; '+(tr.status==='error'?'error':'ok')+'</span></div>'+
+    '<div class="msub">'+usd(tr.cost_usd)+' &middot; '+((tr.tokens_in||0)+(tr.tokens_out||0))+' tokens &middot; '+secs(tr.ms)+' &middot; '+fmt(tr.started_at)+'</div>'+
+    (tr.error?'<div style="margin-top:14px;padding:12px 14px;background:var(--warn-bg);border-radius:8px;font-size:13.5px;color:var(--warn)"><b>Failed:</b> '+esc(tr.error)+'</div>':'');
+  document.getElementById('mcard').innerHTML=head+'<div style="margin-top:16px;max-height:52vh;overflow:auto">'+(rows||'<div class="cad">No steps recorded for this run.</div>')+'</div><div class="mfoot"><button class="btn" onclick="closeModal()">Close</button></div>';
+  document.getElementById('modal').classList.add('on');
+}
+
 /* ---- delete + modal form ---- */
 async function delItem(resource,id,name){
   if(!confirm('Delete '+(name||'this')+'?'))return;
@@ -2635,6 +2698,7 @@ var PVIEWS=[
   ['blueprint','Design my company'],['build','Build with TMI'],['departments','Departments'],
   ['marketplace','Marketplace'],['workforce','Workforce'],['workflows','Workflows'],
   ['knowledge','Knowledge'],['brain','Company Brain'],['reports','Reports'],['activity','Activity'],
+  ['observe','Runs & cost'],
   ['integrations','Connect tools'],['plans','Plans & offers'],
   ['team','Team',{owner:true}],['settings','Settings',{owner:true}],['clients','Clients',{installer:true}]
 ];
