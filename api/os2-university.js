@@ -32,6 +32,36 @@ const { startTrace, finishTrace } = require('./_ostrace');
 
 const LESSON_IDS = new Set(U.FLOORS.flatMap(f => f.lessons.map(l => l.id)));
 
+// Artifacts that install into the member's real OS. This is what makes the
+// school build the company instead of only teaching about it: a finished
+// artifact becomes a live knowledge doc, worker, or workflow in their OS.
+// build(art) returns the record fields for the target collection.
+const KNOW = (kind) => ({ type: 'knowledge', coll: 'os_knowledge', build: (a) => ({ title: a.label || 'From University', body: a.content, kind }) });
+const INSTALL = {
+  info_map: KNOW('note'),
+  handoff_map: KNOW('sop'),
+  quit_test: KNOW('note'),
+  sops_three: KNOW('sop'),
+  pricing_logic: KNOW('pricing'),
+  customer_records: KNOW('note'),
+  trigger_list: KNOW('sop'),
+  software_checklist: KNOW('note'),
+  roi_calc: KNOW('report'),
+  hours_saved: KNOW('report'),
+  blind_spots_five: KNOW('note'),
+  dashboard: KNOW('report'),
+  decision_rulebook: KNOW('policy'),
+  learning_log_30: KNOW('note'),
+  quiet_customer_flag: KNOW('note'),
+  hire_decision: KNOW('note'),
+  one_screen: KNOW('report'),
+  owner_dependency: KNOW('report'),
+  two_week_test: KNOW('report'),
+  workflow_maps_three: { type: 'workflow', coll: 'os_workflows', build: (a) => ({ name: 'Workflow map (from University)', steps: [{ type: 'note', text: String(a.content || '').slice(0, 4000) }], status: 'draft', trigger: 'manual' }) },
+  digital_worker_spec: { type: 'worker', coll: 'os_workers', build: (a) => ({ name: (String(a.content || '').split('\n').find(Boolean) || 'AI worker').slice(0, 60), job: a.content, autonomy: 'approve', cadence: 'daily', status: 'ready' }) },
+};
+const INSTALLABLE = Object.keys(INSTALL);
+
 // Build an Anthropic client, or null when no key is configured (callers then
 // fall back to non-AI behavior instead of erroring).
 function aiClient() {
@@ -136,6 +166,7 @@ module.exports = async function handler(req, res) {
         scores: scores.map(s => ({ date: s.date, total: s.total, areas: s.areas, owner_dependency: s.owner_dependency })),
         artifacts,
         levels: U.LEVELS, areas: U.AREAS, area_label: U.AREA_LABEL, scorecard: U.SCORECARD, cert: U.CERT,
+        installable: INSTALLABLE,
       });
     }
 
@@ -257,6 +288,24 @@ module.exports = async function handler(req, res) {
       await stampUni(tid, { last_activity: new Date().toISOString() });
       const { standing } = await loadStanding(tdb);
       return res.status(200).json({ artifact, standing });
+    }
+
+    // Install a finished artifact into the member's real OS: it becomes a live
+    // knowledge doc, worker, or workflow. This is the school building the
+    // company, not just teaching about it.
+    if (action === 'install') {
+      const id = String(b.artifact_id || '');
+      const art = await tdb.getById('os_artifacts', id);
+      if (!art) return res.status(404).json({ error: 'Artifact not found' });
+      const map = INSTALL[art.key];
+      if (!map) return res.status(400).json({ error: 'This artifact does not install into the OS.' });
+      if (!String(art.content || '').trim()) return res.status(400).json({ error: 'Build the artifact before installing it.' });
+      if (art.installed) return res.status(200).json({ ok: true, already: true, installed_as: art.installed_as });
+      const item = await tdb.insert(map.coll, Object.assign({ created_at: new Date().toISOString(), source: 'university', sort: 0 }, map.build(art)));
+      const updated = await tdb.update('os_artifacts', id, { installed: true, installed_as: map.type, installed_ref: item.id, installed_at: new Date().toISOString() });
+      await log(tid, `Installed ${art.label || art.key} into your OS as a ${map.type}.`);
+      const { standing } = await loadStanding(tdb);
+      return res.status(200).json({ ok: true, installed_as: map.type, item, artifact: updated, standing });
     }
 
     return res.status(400).json({ error: 'Unknown action' });

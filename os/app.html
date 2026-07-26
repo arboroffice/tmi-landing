@@ -2617,6 +2617,11 @@ function renderUniversity(){
             '<button class="btn sm" onclick="uniArtifact(\''+l.artifact.key+'\')">'+(artStatus==='missing'?'Submit what you built':'Update')+'</button></div>';
           var af2=(d.artifacts||[]).find(function(a){return a.key===l.artifact.key;});
           if(af2&&af2.status==='returned'&&af2.review_note){html+='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--warn);margin-top:6px"><b>Sent back:</b> '+esc(af2.review_note)+'</div>';}
+          var installable=(d.installable||[]).indexOf(l.artifact.key)>=0;
+          if(af2&&installable){
+            if(af2.installed){html+='<div style="margin-top:6px"><span class="badge" style="background:#e8f6e6;color:#3f8f57">Installed in your OS as a '+esc(af2.installed_as||'record')+'</span></div>';}
+            else{html+='<div style="margin-top:6px"><span class="link" style="font-size:12px;color:var(--chart-dark);cursor:pointer" onclick="uniInstall(\''+af2.id+'\')">Install this into my OS &rarr;</span> <span class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3)">makes it a live record in your operating system</span></div>';}
+          }
         }
         html+='</div>';
       });
@@ -2675,6 +2680,7 @@ async function uniEnroll(){
   try{await api('/api/os2-university',{action:'enroll'});toast('Welcome to TMI University.');if(STATE&&STATE.tenant)STATE.tenant.plan='university';loadUniversity();}
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
+async function uniInstall(id){if(!guardWrite())return;try{var j=await api('/api/os2-university',{action:'install',artifact_id:id});if(j&&j.ok){toast(j.already?'Already in your OS':'Installed into your OS as a '+esc(j.installed_as));loadUniversity();}}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function uniWatch(id){try{await api('/api/os2-university',{action:'watch',lesson_id:id});(UNI.data.curriculum||[]).forEach(function(f){f.lessons.forEach(function(l){if(l.id===id)l.watched=true;});});renderUniversity();}catch(e){}}
 function uniArtifact(key){
   var d=UNI.data||{};var meta=null;(d.curriculum||[]).forEach(function(f){f.lessons.forEach(function(l){if(l.artifact&&l.artifact.key===key)meta=l.artifact;});});
