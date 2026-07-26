@@ -123,6 +123,38 @@ async function draftFor(client, lesson, industry, levelName, context, opts = {})
   return draft ? { draft } : null;
 }
 
+// ---------------------------------------------------------------------------
+// A focused 90-day plan, grounded in the member's weakest area and the floor
+// they are on right now. Three phases, concrete moves, in order.
+// ---------------------------------------------------------------------------
+const PLAN_SYSTEM = `You write a focused ninety day plan for a business owner in TMI University. Ground it in their industry, their weakest area, and the floor they are on right now. Three phases of thirty days each. Each phase has a one line focus and two or three concrete moves that are specific to their kind of business and build in order. Do not tell them to skip floors. Start where they are.
+
+Rules: third grade reading level, short sentences, no corporate language, no emojis, no em dashes, real and specific.
+
+Return ONLY valid JSON: {"phases":[{"title":"Days 1 to 30","focus":"...","moves":["...","..."]},{"title":"Days 31 to 60","focus":"...","moves":["..."]},{"title":"Days 61 to 90","focus":"...","moves":["..."]}]}. No other text.`;
+
+async function planFor(client, ctx, opts = {}) {
+  const userMsg =
+    `INDUSTRY: ${ctx.industry || 'general operating company'}\n` +
+    `LEVEL: ${ctx.levelName || 'Level 1'}\n` +
+    `WEAKEST AREA: ${ctx.weakest || 'unknown'}\n` +
+    `CURRENT FLOOR: ${ctx.floor || 'Floor 1'}\n` +
+    `ARTIFACTS STILL OPEN ON THIS FLOOR: ${(ctx.missing && ctx.missing.length) ? ctx.missing.join('; ') : 'none'}\n` +
+    `ALREADY BUILT AND VERIFIED: ${ctx.built || 0} artifacts`;
+  const msg = await llm.create(client, {
+    model: MODEL, max_tokens: 900, system: PLAN_SYSTEM,
+    messages: [{ role: 'user', content: userMsg }],
+  }, { tenantId: opts.tenantId, label: 'uni:plan', workflow: 'university_plan', trace: opts.trace });
+  const parsed = parseJson(msg);
+  if (!parsed || !Array.isArray(parsed.phases)) return null;
+  const phases = parsed.phases.slice(0, 3).map(p => ({
+    title: clean(String(p.title || '').slice(0, 60)),
+    focus: clean(String(p.focus || '').slice(0, 300)),
+    moves: (Array.isArray(p.moves) ? p.moves : []).slice(0, 4).map(m => clean(String(m).slice(0, 300))).filter(Boolean),
+  })).filter(p => p.focus || p.moves.length);
+  return phases.length ? { phases } : null;
+}
+
 // Shared: pull the JSON object out of a model reply.
 function parseJson(msg) {
   const text = (msg.content || []).map(b => b.text || '').join('').trim();
@@ -133,4 +165,4 @@ function parseJson(msg) {
 // Shared: strip any em or en dashes the model returns, brand rule.
 function clean(s) { return String(s || '').replace(/\s*[\u2014\u2013]\s*/g, ', '); }
 
-module.exports = { personalize, feedbackOn, draftFor, variantKey, industrySlug };
+module.exports = { personalize, feedbackOn, draftFor, planFor, variantKey, industrySlug };

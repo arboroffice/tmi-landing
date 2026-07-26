@@ -27,7 +27,7 @@ const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { scope } = require('./_ostenantdb');
 const U = require('./_osuniversity');
 const { contentFor } = require('./_osunicontent');
-const { personalize, feedbackOn, draftFor, variantKey } = require('./_osunipersonalize');
+const { personalize, feedbackOn, draftFor, planFor, variantKey } = require('./_osunipersonalize');
 const { startTrace, finishTrace } = require('./_ostrace');
 
 const LESSON_IDS = new Set(U.FLOORS.flatMap(f => f.lessons.map(l => l.id)));
@@ -153,6 +153,7 @@ module.exports = async function handler(req, res) {
       const progress = await tdb.list('os_progress').catch(() => []);
       const watched = new Set(progress.map(p => p.lesson_id));
       const certificate = (await tdb.list('os_certifications', { limit: 1 }).catch(() => []))[0] || null;
+      const plan = (await tdb.list('os_uni_plans', { limit: 1 }).catch(() => []))[0] || null;
       // Attach the watched flag onto the curriculum so the app can render it.
       const curriculum = U.FLOORS.map(f => ({
         key: f.key, order: f.order, title: f.title, subtitle: f.subtitle,
@@ -169,6 +170,7 @@ module.exports = async function handler(req, res) {
         levels: U.LEVELS, areas: U.AREAS, area_label: U.AREA_LABEL, scorecard: U.SCORECARD, cert: U.CERT,
         installable: INSTALLABLE,
         certificate: certificate ? { public_id: certificate.public_id, issued_at: certificate.issued_at, url: 'https://www.tmitechai.com/certificate?id=' + certificate.public_id } : null,
+        plan: plan ? { phases: plan.phases, created_at: plan.created_at } : null,
       });
     }
 
@@ -271,6 +273,36 @@ module.exports = async function handler(req, res) {
       try { fb = await feedbackOn(client, lesson, content, industry, level.name, { tenantId: tid, trace }); await finishTrace(trace, { status: 'ok' }); }
       catch (e) { await finishTrace(trace, { error: e }); }
       return res.status(200).json({ feedback: fb });
+    }
+
+    // A focused 90-day plan from their weakest area and current floor. Stored so
+    // it persists; regenerating replaces it.
+    if (action === 'plan') {
+      const client = aiClient();
+      if (!client) return res.status(200).json({ plan: null });
+      const { standing } = await loadStanding(tdb);
+      const { industry, level } = await memberContext(tid, tdb, false);
+      const score = standing.score || {};
+      const areas = score.areas || {};
+      let weakest = null, wv = 99;
+      U.AREAS.forEach(a => { const v = areas[a]; if (typeof v === 'number' && v < wv) { wv = v; weakest = a; } });
+      const floorObj = standing.floors.find(f => f.key === standing.current_floor) || {};
+      const missing = (floorObj.artifacts || []).filter(a => a.status !== 'verified').map(a => a.label);
+      const trace = startTrace(tid, { kind: 'university', label: 'plan' });
+      let p = null;
+      try {
+        p = await planFor(client, {
+          industry, levelName: level.name,
+          weakest: weakest ? (U.AREA_LABEL[weakest] + ' (' + wv + ' of 5)') : 'unknown',
+          floor: floorObj.title || standing.current_floor, missing, built: standing.artifacts_verified,
+        }, { tenantId: tid, trace });
+        await finishTrace(trace, { status: 'ok' });
+      } catch (e) { await finishTrace(trace, { error: e }); }
+      if (!p) return res.status(200).json({ plan: null });
+      const existing = (await tdb.list('os_uni_plans', { limit: 1 }))[0];
+      const rec = { phases: p.phases, created_at: new Date().toISOString() };
+      const saved = existing ? await tdb.update('os_uni_plans', existing.id, rec) : await tdb.insert('os_uni_plans', rec);
+      return res.status(200).json({ plan: saved });
     }
 
     // Draft the ugly first version of an artifact from what we know. They edit it.

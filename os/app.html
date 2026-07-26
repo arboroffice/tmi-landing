@@ -2574,9 +2574,16 @@ function renderUniversity(){
   html+='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center">';
   html+='<button class="btn" onclick="uniAssess()">'+(score?'Rescore':'Take your admissions assessment')+'</button>';
   if(score) html+='<button class="btn ghost" onclick="uniBenchmarks()">Compare to my industry</button>';
+  if(score) html+='<button class="btn ghost" onclick="uniPlan()">'+(d.plan?'Refresh my 90-day plan':'Build my 90-day plan')+'</button>';
   if(!enrolled) html+='<button class="btn ghost" onclick="uniEnroll()">Join University</button>';
   html+='<span class="cad" style="color:var(--ink-3)">Rescore every 30 days. The number moving is the point.</span></div>';
   html+='<div id="uniBench" style="margin-top:16px"></div>';
+  if(d.plan&&d.plan.phases){
+    html+='<div class="kcard" style="margin-top:16px;padding:18px 20px"><div class="lbl" style="margin:0 0 12px">Your 90-day plan</div>'+
+      d.plan.phases.map(function(ph){return '<div style="padding:10px 0;border-top:1px solid var(--line)"><div style="font-weight:600;font-size:14px">'+esc(ph.title)+'</div><div class="cad" style="text-transform:none;letter-spacing:0;color:var(--chart-dark);margin:4px 0 6px">'+esc(ph.focus)+'</div>'+
+        (ph.moves||[]).map(function(m){return '<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);padding-left:16px;position:relative;line-height:1.5;margin-top:3px">&bull; '+esc(m)+'</div>';}).join('')+'</div>';}).join('')+
+      '</div>';
+  }
   if(d.scores&&d.scores.length>1){
     var mx=Math.max.apply(null,d.scores.map(function(s){return s.total;}))||100;
     html+='<div class="lbl" style="margin:26px 0 10px">Your score over time</div><div style="display:flex;align-items:flex-end;gap:8px;height:90px">'+
@@ -2686,6 +2693,7 @@ async function uniEnroll(){
 }
 async function uniInstall(id){if(!guardWrite())return;try{var j=await api('/api/os2-university',{action:'install',artifact_id:id});if(j&&j.ok){toast(j.already?'Already in your OS':'Installed into your OS as a '+esc(j.installed_as));loadUniversity();}}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function uniCertify(){if(!guardWrite())return;try{var j=await api('/api/os2-university',{action:'certify'});if(j&&j.public_id){toast('Certified. Your public credential is live.');loadUniversity();}}catch(e){if(e.message!=='signed out')toast(e.message||'Not eligible yet');}}
+async function uniPlan(){if(!guardWrite())return;toast('Building your plan...');try{var j=await api('/api/os2-university',{action:'plan'});if(j&&j.plan){toast('Your 90-day plan is ready.');loadUniversity();}else{toast('Plan not available right now');}}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function uniBenchmarks(){
   var host=document.getElementById('uniBench');if(!host)return;host.innerHTML='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);padding:8px 0">Loading benchmarks...</div>';
   var b;try{b=await api('/api/os2-university',{action:'benchmarks'});}catch(e){host.innerHTML='';return;}
