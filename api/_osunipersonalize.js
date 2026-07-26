@@ -53,17 +53,84 @@ async function personalize(client, lesson, industry, levelName, opts = {}) {
     messages: [{ role: 'user', content: userMsg }],
   }, { tenantId: opts.tenantId, label: 'uni:personalize:' + lesson.id, workflow: 'university_personalize', trace: opts.trace });
 
+  const raw = parseJson(msg);
+  if (!raw) return null;
+  const example = clean(String(raw.example || '').slice(0, 1200).trim());
+  const for_you = clean(String(raw.for_you || '').slice(0, 600).trim());
+  if (!example && !for_you) return null;
+  return { example, for_you };
+}
+
+// ---------------------------------------------------------------------------
+// Instant feedback on a submitted artifact. Not grading (a human still verifies
+// before a floor unlocks); this is the immediate, specific coaching that no
+// course gives. Grounded in the lesson and the member's industry.
+// ---------------------------------------------------------------------------
+const FEEDBACK_SYSTEM = `You give instant feedback on one artifact a business owner just built for a TMI University lesson. You are not the final grader, a human verifies later. You are the coach who tells them, right now, whether the thing is real and what is thin.
+
+You get the lesson's teaching, the do-this step, the owner's industry, and what they submitted. Judge whether the artifact actually exists and meets the bar the lesson set. Then give three to five short sentences: what is good, what is thin or missing, and the one concrete thing to add or fix next. Be specific to their industry and use real numbers where it helps. Honest but encouraging. Never approve empty or placeholder work.
+
+Rules: third grade reading level, short sentences, no corporate language, no emojis, no em dashes.
+
+Return ONLY valid JSON: {"verdict":"strong" or "thin","feedback":"..."}. No other text.`;
+
+async function feedbackOn(client, lesson, content, industry, levelName, opts = {}) {
+  const userMsg =
+    `INDUSTRY: ${industry || 'general operating company'}\n` +
+    `THEIR LEVEL: ${levelName || 'Level 1'}\n` +
+    `LESSON: ${lesson.title}\n\n` +
+    `THE TEACHING:\n${lesson.teach || lesson.cold_open || ''}\n\n` +
+    `THE DO-THIS STEP:\n${lesson.step || ''}\n\n` +
+    `WHAT THEY SUBMITTED:\n${String(content || '').slice(0, 6000)}`;
+  const msg = await llm.create(client, {
+    model: MODEL, max_tokens: 400, system: FEEDBACK_SYSTEM,
+    messages: [{ role: 'user', content: userMsg }],
+  }, { tenantId: opts.tenantId, label: 'uni:feedback:' + lesson.id, workflow: 'university_feedback', trace: opts.trace });
+  const parsed = parseJson(msg);
+  if (!parsed) return null;
+  const verdict = parsed.verdict === 'strong' ? 'strong' : 'thin';
+  const feedback = clean(String(parsed.feedback || '').slice(0, 1500).trim());
+  if (!feedback) return null;
+  return { verdict, feedback };
+}
+
+// ---------------------------------------------------------------------------
+// Draft the ugly first version of an artifact from what we know about the
+// member's business. "Start ugly" (Floor 4) made automatic. They edit it.
+// ---------------------------------------------------------------------------
+const DRAFT_SYSTEM = `You draft the ugly first version of an artifact a business owner needs to build for a TMI University lesson. It is a starting point they will edit, not a finished product. Ground it in their industry and what you are told about their business. Make it specific and realistic, with placeholders only where you genuinely cannot know the answer, and mark those with a short note in parentheses telling them what to fill in.
+
+Rules: third grade reading level, short sentences, no corporate language, no emojis, no em dashes. Write the artifact itself, not advice about it.
+
+Return ONLY valid JSON: {"draft":"..."}. No other text.`;
+
+async function draftFor(client, lesson, industry, levelName, context, opts = {}) {
+  const userMsg =
+    `INDUSTRY: ${industry || 'general operating company'}\n` +
+    `THEIR LEVEL: ${levelName || 'Level 1'}\n` +
+    (context ? `WHAT WE KNOW ABOUT THEIR BUSINESS:\n${String(context).slice(0, 2000)}\n\n` : '') +
+    `LESSON: ${lesson.title}\n` +
+    `THE ARTIFACT TO DRAFT: ${lesson.artifact ? lesson.artifact.label : lesson.title}\n\n` +
+    `THE TEACHING:\n${lesson.teach || lesson.cold_open || ''}\n\n` +
+    `THE DO-THIS STEP:\n${lesson.step || ''}`;
+  const msg = await llm.create(client, {
+    model: MODEL, max_tokens: 1200, system: DRAFT_SYSTEM,
+    messages: [{ role: 'user', content: userMsg }],
+  }, { tenantId: opts.tenantId, label: 'uni:draft:' + lesson.id, workflow: 'university_draft', trace: opts.trace });
+  const parsed = parseJson(msg);
+  if (!parsed) return null;
+  const draft = clean(String(parsed.draft || '').slice(0, 8000).trim());
+  return draft ? { draft } : null;
+}
+
+// Shared: pull the JSON object out of a model reply.
+function parseJson(msg) {
   const text = (msg.content || []).map(b => b.text || '').join('').trim();
   const start = text.indexOf('{'), end = text.lastIndexOf('}');
   if (start === -1 || end === -1) return null;
-  let raw;
-  try { raw = JSON.parse(text.slice(start, end + 1)); } catch { return null; }
-  const example = String(raw.example || '').slice(0, 1200).trim();
-  const for_you = String(raw.for_you || '').slice(0, 600).trim();
-  if (!example && !for_you) return null;
-  // Strip any em dashes the model slipped in, brand rule.
-  const clean = s => s.replace(/\s*[\u2014\u2013]\s*/g, ', ');
-  return { example: clean(example), for_you: clean(for_you) };
+  try { return JSON.parse(text.slice(start, end + 1)); } catch { return null; }
 }
+// Shared: strip any em or en dashes the model returns, brand rule.
+function clean(s) { return String(s || '').replace(/\s*[\u2014\u2013]\s*/g, ', '); }
 
-module.exports = { personalize, variantKey, industrySlug };
+module.exports = { personalize, feedbackOn, draftFor, variantKey, industrySlug };

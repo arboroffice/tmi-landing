@@ -27,10 +27,45 @@ const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { scope } = require('./_ostenantdb');
 const U = require('./_osuniversity');
 const { contentFor } = require('./_osunicontent');
-const { personalize, variantKey } = require('./_osunipersonalize');
+const { personalize, feedbackOn, draftFor, variantKey } = require('./_osunipersonalize');
 const { startTrace, finishTrace } = require('./_ostrace');
 
 const LESSON_IDS = new Set(U.FLOORS.flatMap(f => f.lessons.map(l => l.id)));
+
+// Build an Anthropic client, or null when no key is configured (callers then
+// fall back to non-AI behavior instead of erroring).
+function aiClient() {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return null;
+  const Anthropic = require('@anthropic-ai/sdk');
+  return new Anthropic({ apiKey: key });
+}
+
+// The lesson (with its teaching) that produces a given artifact key.
+function lessonByArtifact(key) {
+  for (const f of U.FLOORS) {
+    const l = f.lessons.find(x => x.artifact && x.artifact.key === key);
+    if (l) { const c = contentFor(l.id) || {}; return { id: l.id, title: l.title, cold_open: l.cold_open, teach: c.teach || '', step: l.step, artifact: l.artifact }; }
+  }
+  return null;
+}
+
+// This member's industry, level, and (optionally) a short context string for
+// grounding a draft. Reads only this tenant's own docs.
+async function memberContext(tid, tdb, wantCtx) {
+  const tenant = await db.getById('os_tenants', tid);
+  const industry = (tenant && tenant.profile && tenant.profile.industry) || (tenant && tenant.business_type) || '';
+  const rows = await tdb.list('os_scores', { order: 'date', ascending: false, limit: 1 });
+  rows.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  const level = rows[0] ? U.levelForScore(rows[0].total) : U.LEVELS[0];
+  let ctx = '';
+  if (wantCtx) {
+    const arts = await tdb.list('os_artifacts').catch(() => []);
+    const built = arts.filter(a => a.status === 'verified').map(a => a.label || a.key).slice(0, 12);
+    ctx = `Industry: ${industry || 'unspecified'}. Level ${level.level} (${level.name}). Already built and verified: ${built.length ? built.join('; ') : 'nothing yet'}.`;
+  }
+  return { industry, level, ctx };
+}
 
 function log(tid, summary) {
   return db.insert('os_build_log', { tenant_id: tid, kind: 'university', summary, created_at: new Date().toISOString() }).catch(() => {});
@@ -142,6 +177,39 @@ module.exports = async function handler(req, res) {
 
     // Everything below writes: viewers are read-only.
     if (!requireRole(t, res, 'manager')) return;
+
+    // Instant AI feedback on what they built. Coaching, not grading; a human
+    // still verifies before a floor unlocks. Fails soft to no feedback.
+    if (action === 'feedback') {
+      const key = String(b.artifact_key || '');
+      if (!U.ARTIFACT_META[key]) return res.status(400).json({ error: 'Unknown artifact' });
+      const content = String(b.content || '').trim();
+      if (!content) return res.status(400).json({ error: 'Nothing to review yet.' });
+      const client = aiClient();
+      if (!client) return res.status(200).json({ feedback: null });
+      const lesson = lessonByArtifact(key);
+      const { industry, level } = await memberContext(tid, tdb, false);
+      const trace = startTrace(tid, { kind: 'university', label: 'feedback ' + (lesson ? lesson.id : key) });
+      let fb = null;
+      try { fb = await feedbackOn(client, lesson, content, industry, level.name, { tenantId: tid, trace }); await finishTrace(trace, { status: 'ok' }); }
+      catch (e) { await finishTrace(trace, { error: e }); }
+      return res.status(200).json({ feedback: fb });
+    }
+
+    // Draft the ugly first version of an artifact from what we know. They edit it.
+    if (action === 'draft') {
+      const key = String(b.artifact_key || '');
+      if (!U.ARTIFACT_META[key]) return res.status(400).json({ error: 'Unknown artifact' });
+      const client = aiClient();
+      if (!client) return res.status(200).json({ draft: null });
+      const lesson = lessonByArtifact(key);
+      const { industry, level, ctx } = await memberContext(tid, tdb, true);
+      const trace = startTrace(tid, { kind: 'university', label: 'draft ' + (lesson ? lesson.id : key) });
+      let d = null;
+      try { d = await draftFor(client, lesson, industry, level.name, ctx, { tenantId: tid, trace }); await finishTrace(trace, { status: 'ok' }); }
+      catch (e) { await finishTrace(trace, { error: e }); }
+      return res.status(200).json({ draft: d ? d.draft : null });
+    }
 
     if (action === 'assess') {
       const answers = (b.answers && typeof b.answers === 'object') ? b.answers : {};

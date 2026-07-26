@@ -2681,12 +2681,30 @@ function uniArtifact(key){
   var cur=(d.artifacts||[]).find(function(a){return a.key===key;});
   uniOpen('<h3>'+esc(meta?meta.label:'Artifact')+'</h3><p class="msub">Put what you built into your binder. This is what moves you up a floor, not the reading.</p>'+
     '<textarea id="uniArtText" style="width:100%;min-height:160px;border:1px solid var(--line-2);border-radius:10px;padding:12px;font:inherit;margin-top:14px" placeholder="Paste it, link it, or describe exactly what now exists in your business.">'+esc(cur?cur.content:'')+'</textarea>'+
-    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="uniSubmitArtifact(\''+key+'\')">Submit to binder</button></div>');
+    '<div id="uniFbBox" style="margin-top:10px"></div>'+
+    '<div class="mfoot" id="uniArtFoot" style="flex-wrap:wrap;gap:8px"><button class="btn ghost sm" id="uniDraftBtn" onclick="uniDraft(\''+key+'\')">Draft a first version for me</button><span style="flex:1"></span><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="uniSubmitBtn" onclick="uniSubmitArtifact(\''+key+'\')">Submit to binder</button></div>');
+}
+async function uniDraft(key){
+  if(!guardWrite())return;var btn=document.getElementById('uniDraftBtn');var ta=document.getElementById('uniArtText');
+  if(ta.value.trim()&&!confirm('Replace what is in the box with a fresh AI draft?'))return;
+  btn.disabled=true;btn.textContent='Drafting...';
+  try{var j=await api('/api/os2-university',{action:'draft',artifact_key:key});if(j&&j.draft){ta.value=j.draft;ta.focus();}else{toast('Draft not available right now');}}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+  btn.disabled=false;btn.textContent='Draft a first version for me';
 }
 async function uniSubmitArtifact(key){
   if(!guardWrite())return;var v=(document.getElementById('uniArtText').value||'').trim();if(!v){toast('Add what you built first');return;}
-  try{await api('/api/os2-university',{action:'submit',artifact_key:key,content:v});closeModal();toast('In your binder. TMI reviews it, then the floor opens.');loadUniversity();}
-  catch(e){if(e.message!=='signed out')toast(e.message);}
+  var sb=document.getElementById('uniSubmitBtn');if(sb){sb.disabled=true;sb.textContent='Submitting...';}
+  try{
+    await api('/api/os2-university',{action:'submit',artifact_key:key,content:v});
+    var fb=document.getElementById('uniFbBox');if(fb)fb.innerHTML='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3)">In your binder. Getting instant feedback...</div>';
+    var j=await api('/api/os2-university',{action:'feedback',artifact_key:key,content:v});
+    if(j&&j.feedback){
+      var strong=j.feedback.verdict==='strong';
+      if(fb)fb.innerHTML='<div style="background:'+(strong?'#e8f6e6':'var(--warn-bg)')+';border-radius:10px;padding:13px 15px;font-size:13.5px;line-height:1.6"><b>'+(strong?'Looks solid.':'The coach thinks this is thin.')+'</b> '+esc(j.feedback.feedback)+'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:8px">Instant coaching. TMI still verifies it before your floor opens.</div></div>';
+      var foot=document.getElementById('uniArtFoot');if(foot)foot.innerHTML='<span style="flex:1"></span><button class="btn ghost sm" onclick="uniArtifact(\''+key+'\')">Keep editing</button><button class="btn" onclick="closeModal();loadUniversity();">Done</button>';
+    }else{closeModal();toast('In your binder. TMI reviews it, then the floor opens.');loadUniversity();}
+  }catch(e){if(e.message!=='signed out')toast(e.message);if(sb){sb.disabled=false;sb.textContent='Submit to binder';}}
 }
 function uniAssess(){
   var d=UNI.data||{};var sc=d.scorecard||[];window._uniAns={};
