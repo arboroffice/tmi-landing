@@ -154,6 +154,8 @@ module.exports = async function handler(req, res) {
       const watched = new Set(progress.map(p => p.lesson_id));
       const certificate = (await tdb.list('os_certifications', { limit: 1 }).catch(() => []))[0] || null;
       const plan = (await tdb.list('os_uni_plans', { limit: 1 }).catch(() => []))[0] || null;
+      const ownerDep = (await tdb.list('os_owner_dep', { limit: 200 }).catch(() => []));
+      ownerDep.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
       // Attach the watched flag onto the curriculum so the app can render it.
       const curriculum = U.FLOORS.map(f => ({
         key: f.key, order: f.order, title: f.title, subtitle: f.subtitle,
@@ -171,6 +173,7 @@ module.exports = async function handler(req, res) {
         installable: INSTALLABLE,
         certificate: certificate ? { public_id: certificate.public_id, issued_at: certificate.issued_at, url: 'https://www.tmitechai.com/certificate?id=' + certificate.public_id } : null,
         plan: plan ? { phases: plan.phases, created_at: plan.created_at } : null,
+        owner_dep: ownerDep.map(x => ({ date: x.date, value: x.value })),
       });
     }
 
@@ -352,9 +355,21 @@ module.exports = async function handler(req, res) {
       });
       await log(tid, `Scored ${result.total}/100 (Level ${result.level}).`);
       const iso = new Date().toISOString();
+      if (od != null) await tdb.insert('os_owner_dep', { date: iso, value: od }).catch(() => {});
       await stampUni(tid, { last_score_at: iso, last_activity: iso });
       const { standing } = await loadStanding(tdb);
       return res.status(200).json({ score: rec, standing });
+    }
+
+    // Quick weekly owner-dependency reading without a full rescore. The number
+    // the doc says moves owners most: what percent of decisions still route
+    // through you. Lower is better.
+    if (action === 'logdep') {
+      const v = Number(b.value);
+      if (!(v >= 0 && v <= 100)) return res.status(400).json({ error: 'Enter a percent from 0 to 100.' });
+      const entry = await tdb.insert('os_owner_dep', { date: new Date().toISOString(), value: Math.round(v) });
+      await stampUni(tid, { last_activity: new Date().toISOString() });
+      return res.status(200).json({ ok: true, entry });
     }
 
     if (action === 'watch') {

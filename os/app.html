@@ -2590,6 +2590,19 @@ function renderUniversity(){
       d.scores.slice().reverse().map(function(s){var h=Math.max(6,Math.round(s.total/100*84));return '<div style="display:flex;flex-direction:column;align-items:center;gap:5px"><div style="width:34px;height:'+h+'px;background:var(--chart-dark);border-radius:5px 5px 0 0" title="'+s.total+'"></div><span class="cad" style="font-size:10px">'+s.total+'</span></div>';}).join('')+
       '</div>';
   }
+  // owner dependency tracker
+  if(score){
+    var od=d.owner_dep||[];var last=od.length?od[od.length-1].value:null;var prev=od.length>1?od[od.length-2].value:null;
+    var delta=(last!=null&&prev!=null)?(last<prev?'down '+(prev-last)+' pts':last>prev?'up '+(last-prev)+' pts':'flat'):'';
+    html+='<div class="kcard" style="margin-top:16px;padding:16px 18px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="lbl" style="margin:0">Owner dependency</div><button class="btn ghost sm" onclick="uniLogDep()">Log this week</button></div>';
+    if(last!=null){
+      html+='<div style="display:flex;align-items:flex-end;gap:14px;margin-top:12px"><div style="font-size:30px;font-weight:700">'+last+'%</div>'+(delta?'<div class="cad" style="text-transform:none;letter-spacing:0;color:'+(last<prev?'#3f8f57':last>prev?'var(--warn)':'var(--ink-3)')+'">'+esc(delta)+'</div>':'')+'</div>'+
+        '<div style="display:flex;align-items:flex-end;gap:5px;height:44px;margin-top:10px">'+od.slice(-16).map(function(e){var h=Math.max(4,Math.round(e.value/100*40));return '<div style="width:12px;height:'+h+'px;background:var(--chart-dark);border-radius:3px 3px 0 0" title="'+e.value+'%"></div>';}).join('')+'</div>';
+    }else{
+      html+='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:10px">No readings yet. Log what percent of decisions came to you this week.</div>';
+    }
+    html+='<p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:8px">The number that decides whether you own a company or a job. Lower is better. Certify under 25 percent.</p></div>';
+  }
   // certification line
   var c=st.certification||{};
   html+='<div class="kcard" style="margin-top:26px;padding:18px 20px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div class="lbl" style="margin:0">Certification line</div>'+uniChip(c.eligible?'verified':'missing')+'</div>'+
@@ -2693,6 +2706,7 @@ async function uniEnroll(){
 }
 async function uniInstall(id){if(!guardWrite())return;try{var j=await api('/api/os2-university',{action:'install',artifact_id:id});if(j&&j.ok){toast(j.already?'Already in your OS':'Installed into your OS as a '+esc(j.installed_as));loadUniversity();}}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function uniCertify(){if(!guardWrite())return;try{var j=await api('/api/os2-university',{action:'certify'});if(j&&j.public_id){toast('Certified. Your public credential is live.');loadUniversity();}}catch(e){if(e.message!=='signed out')toast(e.message||'Not eligible yet');}}
+async function uniLogDep(){if(!guardWrite())return;var v=prompt('What percent of decisions and approvals this week came to you? (0 to 100)');if(v==null)return;v=Number(v);if(!(v>=0&&v<=100)){toast('Enter a number from 0 to 100');return;}try{await api('/api/os2-university',{action:'logdep',value:v});toast('Logged');loadUniversity();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function uniPlan(){if(!guardWrite())return;toast('Building your plan...');try{var j=await api('/api/os2-university',{action:'plan'});if(j&&j.plan){toast('Your 90-day plan is ready.');loadUniversity();}else{toast('Plan not available right now');}}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function uniBenchmarks(){
   var host=document.getElementById('uniBench');if(!host)return;host.innerHTML='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);padding:8px 0">Loading benchmarks...</div>';
