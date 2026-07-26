@@ -33,6 +33,18 @@ function log(tid, summary) {
   return db.insert('os_build_log', { tenant_id: tid, kind: 'university', summary, created_at: new Date().toISOString() }).catch(() => {});
 }
 
+// Stamp activity onto the tenant's uni object so the nudge sweep (os2-cron) can
+// decide who has gone quiet and who is due for a rescore from tenant docs alone,
+// without a per-member sub-query. Read-merge so we never clobber enrolled_at or
+// the last nudge record.
+async function stampUni(tid, patch) {
+  try {
+    const tnt = await db.getById('os_tenants', tid);
+    const uni = Object.assign({}, tnt && tnt.uni, patch);
+    await db.update('os_tenants', tid, { uni });
+  } catch (e) { /* best effort */ }
+}
+
 // Load the member's latest score and all artifacts, then hand to the engine.
 async function loadStanding(tdb) {
   const [scores, artifacts] = await Promise.all([
@@ -60,7 +72,8 @@ module.exports = async function handler(req, res) {
     if (action === 'enroll') {
       const tenant = await db.getById('os_tenants', tid);
       if (!tenant) return res.status(404).json({ error: 'Tenant not found' });
-      const uni = Object.assign({ enrolled_at: new Date().toISOString() }, tenant.uni || {});
+      const now = new Date().toISOString();
+      const uni = Object.assign({ enrolled_at: now }, tenant.uni || {}, { last_activity: now });
       await db.update('os_tenants', tid, { plan: 'university', uni });
       await log(tid, 'Enrolled in TMI University.');
       const { standing } = await loadStanding(tdb);
@@ -98,6 +111,8 @@ module.exports = async function handler(req, res) {
         owner_dependency: od, answers, answered: result.answered, complete: result.complete,
       });
       await log(tid, `Scored ${result.total}/100 (Level ${result.level}).`);
+      const iso = new Date().toISOString();
+      await stampUni(tid, { last_score_at: iso, last_activity: iso });
       const { standing } = await loadStanding(tdb);
       return res.status(200).json({ score: rec, standing });
     }
@@ -107,6 +122,7 @@ module.exports = async function handler(req, res) {
       if (!LESSON_IDS.has(lesson_id)) return res.status(400).json({ error: 'Unknown lesson' });
       const existing = (await tdb.list('os_progress', { where: [['lesson_id', '==', lesson_id]], limit: 1 }))[0];
       if (!existing) await tdb.insert('os_progress', { lesson_id, watched_at: new Date().toISOString() });
+      await stampUni(tid, { last_activity: new Date().toISOString() });
       return res.status(200).json({ ok: true });
     }
 
@@ -128,6 +144,7 @@ module.exports = async function handler(req, res) {
         });
       }
       await log(tid, `Submitted artifact: ${meta.label}.`);
+      await stampUni(tid, { last_activity: new Date().toISOString() });
       const { standing } = await loadStanding(tdb);
       return res.status(200).json({ artifact, standing });
     }

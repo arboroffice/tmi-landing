@@ -14,6 +14,7 @@ const { advance } = require('./_osflow');
 const { scoreTenant } = require('./_osscore');
 const { tenantState, generateProof } = require('./_tmiproof');
 const { runScan } = require('./os2-pulse');
+const { notify } = require('./_osmail');
 
 const HOUR = 3600 * 1000;
 const MAX_PER_RUN = 40;   // safety cap so one sweep can never run unbounded
@@ -84,6 +85,50 @@ function isDue(w, now) {
   return elapsed > 20 * HOUR;
 }
 
+// TMI University nudges. The retention loop lives here. Using only the activity
+// stamps os2-university writes onto each tenant's uni object (no per-member
+// sub-queries), decide who to nudge and send one email per member per sweep:
+//   30+ days since their last score  -> rescore (the retention event)
+//   14+ days quiet                   -> do the one ten-minute artifact
+//   7+ days quiet                    -> what got in the way, make the step smaller
+// Never nudge the same member more than once every six days.
+const DAY = 24 * HOUR;
+async function universityNudges(now) {
+  let sent = 0;
+  try {
+    const members = (await db.list('os_tenants', { limit: 500 }).catch(() => [])).filter(t => t.plan === 'university');
+    for (const t of members) {
+      if (sent >= 60) break;
+      const uni = t.uni || {};
+      const nudgedAt = Date.parse(uni.last_nudge && uni.last_nudge.at || 0) || 0;
+      if (nudgedAt && (now - nudgedAt) < 6 * DAY) continue; // at most one nudge a week
+      const enrolled = Date.parse(uni.enrolled_at || 0) || 0;
+      const lastScore = Date.parse(uni.last_score_at || 0) || 0;
+      const lastAct = Date.parse(uni.last_activity || uni.enrolled_at || 0) || 0;
+      const scoreBase = lastScore || enrolled;
+      const lastKind = uni.last_nudge && uni.last_nudge.kind;
+
+      let kind = null, subject, title, lines;
+      if (scoreBase && (now - scoreBase) >= 30 * DAY && lastKind !== 'rescore') {
+        kind = 'rescore'; subject = '30 days in. Rescore your company.'; title = 'Time to rescore';
+        lines = ['You have been building for a month. Take the assessment again and watch the number move.', 'The rescore is the whole point. It is how you see the work pay off.', 'Open TMI University and hit Rescore.'];
+      } else if (lastAct && (now - lastAct) >= 14 * DAY) {
+        kind = 'day14'; subject = 'One artifact. Ten minutes.'; title = 'Pick the small one';
+        lines = ['You have been quiet for two weeks. Do not restart the whole thing.', 'Open your current floor and build the one artifact that takes ten minutes.', 'Momentum beats a perfect plan.'];
+      } else if (lastAct && (now - lastAct) >= 7 * DAY) {
+        kind = 'day7'; subject = 'What got in the way?'; title = 'Still with us?';
+        lines = ['You started a floor and it went quiet. That is almost always time, a team member, or a step that was too big.', 'Whatever it is, the fix is to make the next step smaller.', 'Ask your coach in the OS what to build next.'];
+      }
+      if (!kind) continue;
+
+      await notify(t, subject, title, lines).catch(() => {});
+      await db.update('os_tenants', t.id, { uni: Object.assign({}, uni, { last_nudge: { kind, at: new Date(now).toISOString() } }) }).catch(() => {});
+      sent++;
+    }
+  } catch (e) { console.error('universityNudges sweep:', e.message); }
+  return sent;
+}
+
 module.exports = async function handler(req, res) {
   const secret = process.env.CRON_SECRET;
   if (secret) {
@@ -112,10 +157,11 @@ module.exports = async function handler(req, res) {
     const resumed = await resumeWaitingRuns();
     const proofed = await autoProof();
     const pulsed = await pulseSweep();
+    const nudged = await universityNudges(now);
     // Data sync runs on its own dedicated cron (os2-sync, every 6h) so it is
     // never starved by the Opus-heavy sweeps above under a tight maxDuration.
 
-    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, resumed, proofed, pulsed });
+    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, resumed, proofed, pulsed, nudged });
   } catch (e) {
     console.error('os2-cron:', e.message);
     return res.status(500).json({ error: 'cron failed' });
