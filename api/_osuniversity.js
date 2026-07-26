@@ -1,12 +1,12 @@
 // TMI University - the engine, not a course.
 //
-// The rule that governs everything here: a lesson is not finished when the video
-// ends. It is finished when an artifact exists in the member's business that did
-// not exist before. So this module is built around two things, not videos:
+// The rule that governs everything here: a lesson is not finished when it is
+// read. It is finished when an artifact exists in the member's business that did
+// not exist before. So this module is built around two things, not the reading:
 //   1. the assessment score (six areas) and its HISTORY, the retention loop, and
 //   2. the Binder of artifacts, which gates progression floor by floor.
 //
-// A floor does not unlock because someone watched the lessons. It unlocks when
+// A floor does not unlock because someone read the lessons. It unlocks when
 // every required artifact for the floor below is VERIFIED in the binder. The
 // member's Level (1..5) is read separately from the latest rescore band, so a
 // member can never sit at "Level 4 in their head" while their company is a 2.
@@ -68,8 +68,9 @@ const LEVELS = [
 // ---------------------------------------------------------------------------
 // The curriculum. Orientation plus seven floors. Each lesson carries the hook
 // (cold open), the action (step), the binder deposit (artifact), and which of
-// the six scores it moves. Long teach/example copy and video_url land at film
-// time; the engine and the app only need this scaffold.
+// the six scores it moves. The long teach/example copy lives in _osunicontent;
+// the engine and the app only need this scaffold. Lessons are written, not
+// filmed. There are no videos.
 //
 // Every artifact has a stable key. The `artifacts` array on each floor is the
 // list that must be VERIFIED before the next floor unlocks. That list is the

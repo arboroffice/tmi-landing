@@ -3,8 +3,8 @@
 // can be edited on its own. Keyed by lesson id. Each entry has the teach (the
 // real content) and one concrete example with numbers. The hook (cold open),
 // the step, and the artifact live on the lesson in _osuniversity; this fills in
-// the middle so a member can learn and act before a single video is filmed.
-// No em dashes anywhere, on brand.
+// the middle so a member can learn and act straight from the written lesson.
+// There are no videos, the lessons are read. No em dashes anywhere, on brand.
 
 const CONTENT = {
   // ---- ORIENTATION ----

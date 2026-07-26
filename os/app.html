@@ -2604,7 +2604,7 @@ function renderUniversity(){
       f.lessons.forEach(function(l){
         var artStatus='missing';if(l.artifact){var af=(d.artifacts||[]).find(function(a){return a.key===l.artifact.key;});if(af)artStatus=af.status;}
         html+='<div style="padding:12px 0;border-bottom:1px solid var(--line)">'+
-          '<div style="display:flex;gap:10px;align-items:baseline"><span class="cad" style="min-width:34px;color:var(--chart-dark)">'+esc(l.id)+'</span><span style="flex:1;font-weight:600;font-size:14px">'+esc(l.title)+'</span>'+(l.watched?'<span class="cad" style="color:#3f8f57">watched</span>':'')+'</div>'+
+          '<div style="display:flex;gap:10px;align-items:baseline"><span class="cad" style="min-width:34px;color:var(--chart-dark)">'+esc(l.id)+'</span><span style="flex:1;font-weight:600;font-size:14px">'+esc(l.title)+'</span>'+(l.watched?'<span class="cad" style="color:#3f8f57">read</span>':'')+'</div>'+
           '<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin:6px 0 0;font-style:italic">'+esc(l.cold_open)+'</div>'+
           (l.teach?'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin:10px 0 0;line-height:1.65;font-size:13.5px">'+esc(l.teach)+'</div>':'')+
           (l.example?'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin:10px 0 0;line-height:1.55;font-size:13px;padding-left:12px;border-left:2px solid var(--chart-dark)"><b style="color:var(--ink-2)">'+(l.tailored?'In your business:':'For example:')+'</b> '+esc(l.example)+(l.tailored?' <span class="badge" style="background:#e8f6e6;color:#3f8f57;margin-left:6px">Tailored to '+esc(l.tailored)+'</span>':'')+'</div>':'')+
@@ -2613,7 +2613,7 @@ function renderUniversity(){
           '<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink);margin:10px 0 0"><b>Do this:</b> '+esc(l.step)+'</div>';
         if(l.artifact){
           html+='<div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">'+uniChip(artStatus)+'<span class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);flex:1">'+esc(l.artifact.label)+'</span>'+
-            '<button class="btn sm ghost" onclick="uniWatch(\''+l.id+'\')">'+(l.watched?'Watched':'Mark watched')+'</button>'+
+            '<button class="btn sm ghost" onclick="uniWatch(\''+l.id+'\')">'+(l.watched?'Read':'Mark as read')+'</button>'+
             '<button class="btn sm" onclick="uniArtifact(\''+l.artifact.key+'\')">'+(artStatus==='missing'?'Submit what you built':'Update')+'</button></div>';
           var af2=(d.artifacts||[]).find(function(a){return a.key===l.artifact.key;});
           if(af2&&af2.status==='returned'&&af2.review_note){html+='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--warn);margin-top:6px"><b>Sent back:</b> '+esc(af2.review_note)+'</div>';}
@@ -2679,7 +2679,7 @@ async function uniWatch(id){try{await api('/api/os2-university',{action:'watch',
 function uniArtifact(key){
   var d=UNI.data||{};var meta=null;(d.curriculum||[]).forEach(function(f){f.lessons.forEach(function(l){if(l.artifact&&l.artifact.key===key)meta=l.artifact;});});
   var cur=(d.artifacts||[]).find(function(a){return a.key===key;});
-  uniOpen('<h3>'+esc(meta?meta.label:'Artifact')+'</h3><p class="msub">Put what you built into your binder. This is what moves you up a floor, not the video.</p>'+
+  uniOpen('<h3>'+esc(meta?meta.label:'Artifact')+'</h3><p class="msub">Put what you built into your binder. This is what moves you up a floor, not the reading.</p>'+
     '<textarea id="uniArtText" style="width:100%;min-height:160px;border:1px solid var(--line-2);border-radius:10px;padding:12px;font:inherit;margin-top:14px" placeholder="Paste it, link it, or describe exactly what now exists in your business.">'+esc(cur?cur.content:'')+'</textarea>'+
     '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="uniSubmitArtifact(\''+key+'\')">Submit to binder</button></div>');
 }
