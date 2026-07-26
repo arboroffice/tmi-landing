@@ -2550,7 +2550,7 @@ function uniOpen(html){document.getElementById('mcard').innerHTML=html;document.
 var UNI_STATUS={verified:['Verified','#3f8f57','#e8f6e6'],submitted:['In review','var(--warn)','var(--warn-bg)'],returned:['Sent back','var(--warn)','var(--warn-bg)'],missing:['Not built','var(--ink-3)','var(--bg-alt)']};
 function uniChip(s){var m=UNI_STATUS[s]||UNI_STATUS.missing;return '<span class="badge" style="background:'+m[2]+';color:'+m[1]+'">'+m[0]+'</span>';}
 async function loadUniversity(){
-  try{UNI.data=await api('/api/os2-university',{action:'state'});UNI.loaded=true;}
+  try{UNI.data=await api('/api/os2-university',{action:'state'});UNI.loaded=true;UNI._autotailored={};}
   catch(e){if(e.message!=='signed out')document.getElementById('uniBody').innerHTML='<div class="empty" style="padding:22px"><p>Could not load University.</p></div>';return;}
   try{var cl=await api('/api/os2-coach',{action:'log'});UNI.data._coachlog=cl.messages||[];}catch(e){UNI.data._coachlog=[];}
   renderUniversity();
@@ -2607,7 +2607,9 @@ function renderUniversity(){
           '<div style="display:flex;gap:10px;align-items:baseline"><span class="cad" style="min-width:34px;color:var(--chart-dark)">'+esc(l.id)+'</span><span style="flex:1;font-weight:600;font-size:14px">'+esc(l.title)+'</span>'+(l.watched?'<span class="cad" style="color:#3f8f57">watched</span>':'')+'</div>'+
           '<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin:6px 0 0;font-style:italic">'+esc(l.cold_open)+'</div>'+
           (l.teach?'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin:10px 0 0;line-height:1.65;font-size:13.5px">'+esc(l.teach)+'</div>':'')+
-          (l.example?'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin:10px 0 0;line-height:1.55;font-size:13px;padding-left:12px;border-left:2px solid var(--chart-dark)"><b style="color:var(--ink-2)">For example:</b> '+esc(l.example)+'</div>':'')+
+          (l.example?'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin:10px 0 0;line-height:1.55;font-size:13px;padding-left:12px;border-left:2px solid var(--chart-dark)"><b style="color:var(--ink-2)">'+(l.tailored?'In your business:':'For example:')+'</b> '+esc(l.example)+(l.tailored?' <span class="badge" style="background:#e8f6e6;color:#3f8f57;margin-left:6px">Tailored to '+esc(l.tailored)+'</span>':'')+'</div>':'')+
+          (l.for_you?'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink);margin:10px 0 0;line-height:1.55;font-size:13px;background:var(--bg-alt);border-radius:8px;padding:10px 12px"><b>For your company:</b> '+esc(l.for_you)+'</div>':'')+
+          (!l.tailored&&uniIndustry()?'<div style="margin-top:8px"><span class="link" style="font-size:12px;color:var(--chart-dark);cursor:pointer" onclick="uniTailorOne(\''+l.id+'\')">Tailor this to my '+esc(uniIndustry())+' &rarr;</span></div>':'')+
           '<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink);margin:10px 0 0"><b>Do this:</b> '+esc(l.step)+'</div>';
         if(l.artifact){
           html+='<div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">'+uniChip(artStatus)+'<span class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);flex:1">'+esc(l.artifact.label)+'</span>'+
@@ -2629,8 +2631,31 @@ function renderUniversity(){
     '<div style="display:flex;gap:8px"><input id="uniCoachInput" placeholder="e.g. What should I build first?" style="flex:1;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font:inherit" onkeydown="if(event.key===\'Enter\')uniCoach()"/><button class="btn" id="uniCoachBtn" onclick="uniCoach()">Ask</button></div></div>';
   host.innerHTML=html;
   renderCoachLog();
+  uniAutoTailor();
 }
 function uniToggle(key){UNI['open_'+key]=!UNI['open_'+key];var el=document.getElementById('uniFloor_'+key);if(el)el.style.display=el.style.display==='none'?'block':'none';}
+function uniIndustry(){try{var t=STATE&&STATE.tenant;return (t&&t.profile&&t.profile.industry)||(t&&t.business_type)||'';}catch(e){return '';}}
+function uniApplyTailor(id,j){(UNI.data.curriculum||[]).forEach(function(f){f.lessons.forEach(function(l){if(l.id===id){l.example=j.lesson.example;l.for_you=j.lesson.for_you;l.tailored=j.tailored;}});});}
+UNI._inflight={};
+async function uniTailorOne(id){
+  if(UNI._inflight[id])return;UNI._inflight[id]=true;
+  try{var j=await api('/api/os2-university',{action:'lesson',lesson_id:id});if(j&&j.tailored){uniApplyTailor(id,j);renderUniversity();}}catch(e){}
+  UNI._inflight[id]=false;
+}
+// Auto-tailor the lessons on the member's current floor to their industry and
+// level. Runs once per floor per load; the server caches by industry+level so
+// this is instant after the first member in that industry.
+async function uniAutoTailor(){
+  if(!uniIndustry())return;
+  var st=(UNI.data&&UNI.data.standing)||{};var cur=st.current_floor;if(!cur)return;
+  UNI._autotailored=UNI._autotailored||{};if(UNI._autotailored[cur])return;UNI._autotailored[cur]=true;
+  var floor=(UNI.data.curriculum||[]).find(function(f){return f.key===cur;});if(!floor)return;
+  var todo=floor.lessons.filter(function(l){return !l.tailored;});var changed=false;
+  for(var i=0;i<todo.length;i++){
+    try{var j=await api('/api/os2-university',{action:'lesson',lesson_id:todo[i].id});if(j&&j.tailored){todo[i].example=j.lesson.example;todo[i].for_you=j.lesson.for_you;todo[i].tailored=j.tailored;changed=true;}}catch(e){}
+  }
+  if(changed)renderUniversity();
+}
 function renderCoachLog(){
   var log=document.getElementById('uniCoachLog');if(!log)return;var msgs=(UNI.data&&UNI.data._coachlog)||[];
   if(!msgs.length){log.innerHTML='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3)">No questions yet.</div>';return;}

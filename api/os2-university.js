@@ -27,6 +27,8 @@ const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { scope } = require('./_ostenantdb');
 const U = require('./_osuniversity');
 const { contentFor } = require('./_osunicontent');
+const { personalize, variantKey } = require('./_osunipersonalize');
+const { startTrace, finishTrace } = require('./_ostrace');
 
 const LESSON_IDS = new Set(U.FLOORS.flatMap(f => f.lessons.map(l => l.id)));
 
@@ -100,6 +102,42 @@ module.exports = async function handler(req, res) {
         artifacts,
         levels: U.LEVELS, areas: U.AREAS, area_label: U.AREA_LABEL, scorecard: U.SCORECARD, cert: U.CERT,
       });
+    }
+
+    // Tailor one lesson to this member's industry and level. The teaching is
+    // universal; the example and the for-you line are generated for their kind
+    // of business and cached per (industry, level, lesson) so it is shared and
+    // cheap. Read-side: available to viewers too, it only produces content.
+    if (action === 'lesson') {
+      const lessonId = String(b.lesson_id || '');
+      let lesson = null;
+      for (const f of U.FLOORS) { const l = f.lessons.find(x => x.id === lessonId); if (l) { lesson = l; break; } }
+      if (!lesson) return res.status(400).json({ error: 'Unknown lesson' });
+      const c = contentFor(lessonId) || {};
+      const base = { id: lesson.id, title: lesson.title, cold_open: lesson.cold_open, teach: c.teach || '', example: c.example || '', step: lesson.step, artifact: lesson.artifact, moves: lesson.moves };
+
+      const tenant = await db.getById('os_tenants', tid);
+      const industry = (tenant && tenant.profile && tenant.profile.industry) || (tenant && tenant.business_type) || '';
+      const scoreRows = await tdb.list('os_scores', { order: 'date', ascending: false, limit: 1 });
+      scoreRows.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+      const level = scoreRows[0] ? U.levelForScore(scoreRows[0].total) : U.LEVELS[0];
+      if (!industry) return res.status(200).json({ lesson: base, tailored: null });
+
+      const key = variantKey(industry, level.level, lessonId);
+      const cached = (await db.list('os_lesson_variants', { where: [['key', '==', key]], limit: 1 }))[0];
+      if (cached) return res.status(200).json({ lesson: Object.assign({}, base, { example: cached.example || base.example, for_you: cached.for_you || '' }), tailored: industry, level: level.level });
+
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) return res.status(200).json({ lesson: base, tailored: null });
+      const Anthropic = require('@anthropic-ai/sdk');
+      const client = new Anthropic({ apiKey });
+      const trace = startTrace(tid, { kind: 'university', label: 'personalize ' + lessonId, meta: { industry, level: level.level } });
+      let v = null;
+      try { v = await personalize(client, base, industry, level.name, { tenantId: tid, trace }); await finishTrace(trace, { status: 'ok' }); }
+      catch (e) { await finishTrace(trace, { error: e }); }
+      if (!v) return res.status(200).json({ lesson: base, tailored: null });
+      await db.insert('os_lesson_variants', { key, industry, level: level.level, lesson_id: lessonId, example: v.example, for_you: v.for_you, created_at: new Date().toISOString() }).catch(() => {});
+      return res.status(200).json({ lesson: Object.assign({}, base, { example: v.example || base.example, for_you: v.for_you || '' }), tailored: industry, level: level.level });
     }
 
     // Everything below writes: viewers are read-only.
