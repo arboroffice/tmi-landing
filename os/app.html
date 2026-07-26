@@ -2606,7 +2606,9 @@ function renderUniversity(){
         html+='<div style="padding:12px 0;border-bottom:1px solid var(--line)">'+
           '<div style="display:flex;gap:10px;align-items:baseline"><span class="cad" style="min-width:34px;color:var(--chart-dark)">'+esc(l.id)+'</span><span style="flex:1;font-weight:600;font-size:14px">'+esc(l.title)+'</span>'+(l.watched?'<span class="cad" style="color:#3f8f57">watched</span>':'')+'</div>'+
           '<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin:6px 0 0;font-style:italic">'+esc(l.cold_open)+'</div>'+
-          '<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink);margin:8px 0 0"><b>Do this:</b> '+esc(l.step)+'</div>';
+          (l.teach?'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin:10px 0 0;line-height:1.65;font-size:13.5px">'+esc(l.teach)+'</div>':'')+
+          (l.example?'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin:10px 0 0;line-height:1.55;font-size:13px;padding-left:12px;border-left:2px solid var(--chart-dark)"><b style="color:var(--ink-2)">For example:</b> '+esc(l.example)+'</div>':'')+
+          '<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink);margin:10px 0 0"><b>Do this:</b> '+esc(l.step)+'</div>';
         if(l.artifact){
           html+='<div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">'+uniChip(artStatus)+'<span class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);flex:1">'+esc(l.artifact.label)+'</span>'+
             '<button class="btn sm ghost" onclick="uniWatch(\''+l.id+'\')">'+(l.watched?'Watched':'Mark watched')+'</button>'+

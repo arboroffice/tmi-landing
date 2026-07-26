@@ -26,6 +26,7 @@ const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
 const { scope } = require('./_ostenantdb');
 const U = require('./_osuniversity');
+const { contentFor } = require('./_osunicontent');
 
 const LESSON_IDS = new Set(U.FLOORS.flatMap(f => f.lessons.map(l => l.id)));
 
@@ -87,7 +88,10 @@ module.exports = async function handler(req, res) {
       // Attach the watched flag onto the curriculum so the app can render it.
       const curriculum = U.FLOORS.map(f => ({
         key: f.key, order: f.order, title: f.title, subtitle: f.subtitle,
-        lessons: f.lessons.map(l => ({ id: l.id, title: l.title, cold_open: l.cold_open, step: l.step, artifact: l.artifact, moves: l.moves, watched: watched.has(l.id) })),
+        lessons: f.lessons.map(l => {
+          const c = contentFor(l.id) || {};
+          return { id: l.id, title: l.title, cold_open: l.cold_open, teach: c.teach || '', example: c.example || '', step: l.step, artifact: l.artifact, moves: l.moves, watched: watched.has(l.id) };
+        }),
         artifacts: f.artifacts,
       }));
       return res.status(200).json({
