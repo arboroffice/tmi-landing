@@ -2,62 +2,238 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "functions": {
-    "api/audit-research.js": { "maxDuration": 60 },
-    "api/os2-intake.js": { "maxDuration": 60 },
-    "api/os2-ask.js": { "maxDuration": 60 },
-    "api/os2-run.js": { "maxDuration": 60 },
-    "api/os2-cron.js": { "maxDuration": 300 },
-    "api/os2-pulse.js": { "maxDuration": 60 },
-    "api/os2-digest.js": { "maxDuration": 120 },
-    "api/tmi-intel.js": { "maxDuration": 120 },
-    "api/tmi-proof.js": { "maxDuration": 120 },
-    "api/tmi-publish.js": { "maxDuration": 120 }
+    "api/audit-research.js": {
+      "maxDuration": 60
+    },
+    "api/os2-intake.js": {
+      "maxDuration": 60
+    },
+    "api/os2-ask.js": {
+      "maxDuration": 60
+    },
+    "api/os2-run.js": {
+      "maxDuration": 60
+    },
+    "api/os2-cron.js": {
+      "maxDuration": 300
+    },
+    "api/os2-pulse.js": {
+      "maxDuration": 60
+    },
+    "api/os2-digest.js": {
+      "maxDuration": 120
+    },
+    "api/tmi-intel.js": {
+      "maxDuration": 120
+    },
+    "api/tmi-proof.js": {
+      "maxDuration": 120
+    },
+    "api/tmi-publish.js": {
+      "maxDuration": 120
+    }
   },
   "crons": [
-    { "path": "/api/ceo-agent", "schedule": "0 12 * * 1" },
-    { "path": "/api/chief-of-staff", "schedule": "30 13 * * 1-5" },
-    { "path": "/api/agents", "schedule": "0 14 * * *" },
-    { "path": "/api/visitor-digest", "schedule": "0 13 * * 1" },
-    { "path": "/api/visitor-process", "schedule": "0 */6 * * *" },
-    { "path": "/api/rep-reminders", "schedule": "0 13 * * *" },
-    { "path": "/api/campaign-send", "schedule": "0 14 * * 1-5" },
-    { "path": "/api/webinar-cron", "schedule": "*/10 * * * *" },
-    { "path": "/api/scorecard-followup", "schedule": "*/15 * * * *" },
-    { "path": "/api/os2-cron", "schedule": "0 13 * * *" },
-    { "path": "/api/os2-sync", "schedule": "0 */6 * * *" },
-    { "path": "/api/os2-digest", "schedule": "0 13 * * 1" }
+    {
+      "path": "/api/ceo-agent",
+      "schedule": "0 12 * * 1"
+    },
+    {
+      "path": "/api/chief-of-staff",
+      "schedule": "30 13 * * 1-5"
+    },
+    {
+      "path": "/api/agents",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/visitor-digest",
+      "schedule": "0 13 * * 1"
+    },
+    {
+      "path": "/api/visitor-process",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/rep-reminders",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/campaign-send",
+      "schedule": "0 14 * * 1-5"
+    },
+    {
+      "path": "/api/webinar-cron",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/scorecard-followup",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/os2-cron",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/os2-sync",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/os2-digest",
+      "schedule": "0 13 * * 1"
+    }
   ],
   "redirects": [
-    { "source": "/tmi-os", "destination": "/", "permanent": false },
-    { "source": "/tmi", "destination": "/", "permanent": false },
-    { "source": "/certified", "destination": "/intelligent-company-certified", "permanent": false },
-    { "source": "/certification", "destination": "/intelligent-company-certified", "permanent": false },
-    { "source": "/intelligent-company-audit", "destination": "/book", "permanent": false },
-    { "source": "/booking", "destination": "/book", "permanent": false },
-    { "source": "/makemoneywithai", "destination": "/book", "permanent": false },
-    { "source": "/distro", "destination": "/book", "permanent": false },
-    { "source": "/startabusiness", "destination": "/book", "permanent": false },
-    { "source": "/inbound", "destination": "/departments", "permanent": true },
-    { "source": "/outbound", "destination": "/departments", "permanent": true },
-    { "source": "/buildertrend-alternative", "destination": "/platform", "permanent": false },
-    { "source": "/fieldedge-alternative", "destination": "/platform", "permanent": false },
-    { "source": "/fleetio-alternative", "destination": "/platform", "permanent": false },
-    { "source": "/housecall-pro-alternative", "destination": "/platform", "permanent": false },
-    { "source": "/housecallpro-alternative", "destination": "/platform", "permanent": false },
-    { "source": "/jobber-alternative", "destination": "/platform", "permanent": false },
-    { "source": "/procore-alternative", "destination": "/platform", "permanent": false },
-    { "source": "/samsara-alternative", "destination": "/platform", "permanent": false },
-    { "source": "/service-fusion-alternative", "destination": "/platform", "permanent": false },
-    { "source": "/servicetitan-alternative", "destination": "/platform", "permanent": false },
-    { "source": "/complete-audit-intake", "destination": "/book", "permanent": false },
-    { "source": "/diagnose", "destination": "/book", "permanent": false },
-    { "source": "/news-online", "destination": "/news", "permanent": false },
-    { "source": "/old-index", "destination": "/", "permanent": false },
-    { "source": "/hubspot-vs-tmi", "destination": "/book", "permanent": false },
-    { "source": "/salesforce-vs-tmi", "destination": "/book", "permanent": false },
-    { "source": "/founders-of-the-future/events", "destination": "/founders-of-the-future#events", "permanent": false },
-    { "source": "/founders-of-the-future/stories", "destination": "/founders-of-the-future#stories", "permanent": false },
-    { "source": "/founders-of-the-future/apply", "destination": "/founders-of-the-future#apply", "permanent": false },
+    {
+      "source": "/tmi-os",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/tmi",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/certified",
+      "destination": "/intelligent-company-certified",
+      "permanent": false
+    },
+    {
+      "source": "/certification",
+      "destination": "/intelligent-company-certified",
+      "permanent": false
+    },
+    {
+      "source": "/intelligent-company-audit",
+      "destination": "/book",
+      "permanent": false
+    },
+    {
+      "source": "/booking",
+      "destination": "/book",
+      "permanent": false
+    },
+    {
+      "source": "/makemoneywithai",
+      "destination": "/book",
+      "permanent": false
+    },
+    {
+      "source": "/distro",
+      "destination": "/book",
+      "permanent": false
+    },
+    {
+      "source": "/startabusiness",
+      "destination": "/book",
+      "permanent": false
+    },
+    {
+      "source": "/inbound",
+      "destination": "/departments",
+      "permanent": true
+    },
+    {
+      "source": "/outbound",
+      "destination": "/departments",
+      "permanent": true
+    },
+    {
+      "source": "/buildertrend-alternative",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/fieldedge-alternative",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/fleetio-alternative",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/housecall-pro-alternative",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/housecallpro-alternative",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/jobber-alternative",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/procore-alternative",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/samsara-alternative",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/service-fusion-alternative",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/servicetitan-alternative",
+      "destination": "/company-operating-systems",
+      "permanent": false
+    },
+    {
+      "source": "/complete-audit-intake",
+      "destination": "/book",
+      "permanent": false
+    },
+    {
+      "source": "/diagnose",
+      "destination": "/book",
+      "permanent": false
+    },
+    {
+      "source": "/news-online",
+      "destination": "/news",
+      "permanent": false
+    },
+    {
+      "source": "/old-index",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/hubspot-vs-tmi",
+      "destination": "/book",
+      "permanent": false
+    },
+    {
+      "source": "/salesforce-vs-tmi",
+      "destination": "/book",
+      "permanent": false
+    },
+    {
+      "source": "/founders-of-the-future/events",
+      "destination": "/founders-of-the-future#events",
+      "permanent": false
+    },
+    {
+      "source": "/founders-of-the-future/stories",
+      "destination": "/founders-of-the-future#stories",
+      "permanent": false
+    },
+    {
+      "source": "/founders-of-the-future/apply",
+      "destination": "/founders-of-the-future#apply",
+      "permanent": false
+    },
     {
       "source": "/",
       "has": [
@@ -98,7 +274,7 @@
     },
     {
       "source": "/platform",
-      "destination": "/",
+      "destination": "/company-operating-systems",
       "permanent": true
     },
     {
@@ -436,123 +612,591 @@
       "destination": "/physical/environmental-cleanup",
       "permanent": true
     },
-    { "source": "/ai-for-agriculture", "destination": "/physical/agriculture", "permanent": true },
-    { "source": "/ai-for-apartment-maintenance", "destination": "/physical/apartment-maintenance", "permanent": true },
-    { "source": "/ai-for-boat-repair", "destination": "/physical/boat-repair", "permanent": true },
-    { "source": "/ai-for-body-shops", "destination": "/physical/body-shops", "permanent": true },
-    { "source": "/ai-for-chiropractic-clinics", "destination": "/physical/chiropractic-clinics", "permanent": true },
-    { "source": "/ai-for-commercial-maintenance", "destination": "/physical/commercial-maintenance", "permanent": true },
-    { "source": "/ai-for-concrete", "destination": "/physical/concrete", "permanent": true },
-    { "source": "/ai-for-construction", "destination": "/physical/construction", "permanent": true },
-    { "source": "/ai-for-container-transport", "destination": "/physical/container-transport", "permanent": true },
-    { "source": "/ai-for-crane-barges", "destination": "/physical/crane-barges", "permanent": true },
-    { "source": "/ai-for-crane-dispatch-offices", "destination": "/physical/crane-dispatch-offices", "permanent": true },
-    { "source": "/ai-for-crew-transportation-companies", "destination": "/physical/crew-transportation-companies", "permanent": true },
-    { "source": "/ai-for-debris-hauling-companies", "destination": "/physical/debris-hauling-companies", "permanent": true },
-    { "source": "/ai-for-dental", "destination": "/physical/dental", "permanent": true },
-    { "source": "/ai-for-diesel-mechanics", "destination": "/physical/diesel-mechanics", "permanent": true },
-    { "source": "/ai-for-diesel-shops", "destination": "/physical/diesel-shops", "permanent": true },
-    { "source": "/ai-for-dispatch-companies", "destination": "/physical/dispatch-companies", "permanent": true },
-    { "source": "/ai-for-dock-operations", "destination": "/physical/dock-operations", "permanent": true },
-    { "source": "/ai-for-electrical", "destination": "/physical/electrical", "permanent": true },
-    { "source": "/ai-for-equipment-dealers", "destination": "/physical/equipment-dealers", "permanent": true },
-    { "source": "/ai-for-equipment-dealerships", "destination": "/physical/equipment-dealerships", "permanent": true },
-    { "source": "/ai-for-equipment-transport", "destination": "/physical/equipment-transport", "permanent": true },
-    { "source": "/ai-for-feed-stores", "destination": "/physical/feed-stores", "permanent": true },
-    { "source": "/ai-for-field-labor-coordinators", "destination": "/physical/field-labor-coordinators", "permanent": true },
-    { "source": "/ai-for-fitness", "destination": "/physical/fitness", "permanent": true },
-    { "source": "/ai-for-fleet", "destination": "/physical/fleet", "permanent": true },
-    { "source": "/ai-for-forestry", "destination": "/physical/forestry", "permanent": true },
-    { "source": "/ai-for-forklift-services", "destination": "/physical/forklift-services", "permanent": true },
-    { "source": "/ai-for-freight-forwarding", "destination": "/physical/freight-forwarding", "permanent": true },
-    { "source": "/ai-for-fuel-delivery", "destination": "/physical/fuel-delivery", "permanent": true },
-    { "source": "/ai-for-fuel-lubricant-distributors", "destination": "/physical/fuel-lubricant-distributors", "permanent": true },
-    { "source": "/ai-for-harbor-services", "destination": "/physical/harbor-services", "permanent": true },
-    { "source": "/ai-for-healthcare", "destination": "/physical/healthcare", "permanent": true },
-    { "source": "/ai-for-heavy-equipment-repair", "destination": "/physical/heavy-equipment-repair", "permanent": true },
-    { "source": "/ai-for-heavy-equipment-yards", "destination": "/physical/heavy-equipment-yards", "permanent": true },
-    { "source": "/ai-for-heavy-haul", "destination": "/physical/heavy-haul", "permanent": true },
-    { "source": "/ai-for-heavy-machinery", "destination": "/physical/heavy-machinery", "permanent": true },
-    { "source": "/ai-for-hoa-management", "destination": "/physical/hoa-management", "permanent": true },
-    { "source": "/ai-for-home-health-agencies", "destination": "/physical/home-health-agencies", "permanent": true },
-    { "source": "/ai-for-home-service", "destination": "/physical/home-service", "permanent": true },
-    { "source": "/ai-for-hvac", "destination": "/physical/hvac", "permanent": true },
-    { "source": "/ai-for-industrial-catering", "destination": "/physical/industrial-catering", "permanent": true },
-    { "source": "/ai-for-industrial-cleaning", "destination": "/physical/industrial-cleaning", "permanent": true },
-    { "source": "/ai-for-industrial-courier-services", "destination": "/physical/industrial-courier-services", "permanent": true },
-    { "source": "/ai-for-industrial-laundry", "destination": "/physical/industrial-laundry", "permanent": true },
-    { "source": "/ai-for-industrial-staffing", "destination": "/physical/industrial-staffing", "permanent": true },
-    { "source": "/ai-for-industrial-supply-distributors", "destination": "/physical/industrial-supply-distributors", "permanent": true },
-    { "source": "/ai-for-inspection-companies", "destination": "/physical/inspection-companies", "permanent": true },
-    { "source": "/ai-for-irrigation-companies", "destination": "/physical/irrigation-companies", "permanent": true },
-    { "source": "/ai-for-land-clearing", "destination": "/physical/land-clearing", "permanent": true },
-    { "source": "/ai-for-landscaping", "destination": "/physical/landscaping", "permanent": true },
-    { "source": "/ai-for-legal", "destination": "/physical/legal", "permanent": true },
-    { "source": "/ai-for-manufacturing", "destination": "/physical/manufacturing", "permanent": true },
-    { "source": "/ai-for-marine-logistics", "destination": "/physical/marine-logistics", "permanent": true },
-    { "source": "/ai-for-marine-service-yards", "destination": "/physical/marine-service-yards", "permanent": true },
-    { "source": "/ai-for-marine-supply-companies", "destination": "/physical/marine-supply-companies", "permanent": true },
-    { "source": "/ai-for-marine-transportation", "destination": "/physical/marine-transportation", "permanent": true },
-    { "source": "/ai-for-mining", "destination": "/physical/mining", "permanent": true },
-    { "source": "/ai-for-mud-logging", "destination": "/physical/mud-logging", "permanent": true },
-    { "source": "/ai-for-nurseries", "destination": "/physical/nurseries", "permanent": true },
-    { "source": "/ai-for-offshore-crew-logistics", "destination": "/physical/offshore-crew-logistics", "permanent": true },
-    { "source": "/ai-for-offshore-logistics", "destination": "/physical/offshore-logistics", "permanent": true },
-    { "source": "/ai-for-offshore-staffing", "destination": "/physical/offshore-staffing", "permanent": true },
-    { "source": "/ai-for-offshore-support-vessels", "destination": "/physical/offshore-support-vessels", "permanent": true },
-    { "source": "/ai-for-oilfield-hauling", "destination": "/physical/oilfield-hauling", "permanent": true },
-    { "source": "/ai-for-oil-gas", "destination": "/physical/oil-gas", "permanent": true },
-    { "source": "/ai-for-painting", "destination": "/physical/painting", "permanent": true },
-    { "source": "/ai-for-personnel-transportation", "destination": "/physical/personnel-transportation", "permanent": true },
-    { "source": "/ai-for-pest-control", "destination": "/physical/pest-control", "permanent": true },
-    { "source": "/ai-for-physical-therapy", "destination": "/physical/physical-therapy", "permanent": true },
-    { "source": "/ai-for-pipe-inspection-companies", "destination": "/physical/pipe-inspection-companies", "permanent": true },
-    { "source": "/ai-for-pipe-yards", "destination": "/physical/pipe-yards", "permanent": true },
-    { "source": "/ai-for-plumbing", "destination": "/physical/plumbing", "permanent": true },
-    { "source": "/ai-for-port-logistics", "destination": "/physical/port-logistics", "permanent": true },
-    { "source": "/ai-for-ranches", "destination": "/physical/ranches", "permanent": true },
-    { "source": "/ai-for-real-estate", "destination": "/physical/real-estate", "permanent": true },
-    { "source": "/ai-for-refrigerated-transport", "destination": "/physical/refrigerated-transport", "permanent": true },
-    { "source": "/ai-for-restoration", "destination": "/physical/restoration", "permanent": true },
-    { "source": "/ai-for-rig-moving", "destination": "/physical/rig-moving", "permanent": true },
-    { "source": "/ai-for-roofing", "destination": "/physical/roofing", "permanent": true },
-    { "source": "/ai-for-rv-repair", "destination": "/physical/rv-repair", "permanent": true },
-    { "source": "/ai-for-safety-compliance-companies", "destination": "/physical/safety-compliance-companies", "permanent": true },
-    { "source": "/ai-for-safety-training-companies", "destination": "/physical/safety-training-companies", "permanent": true },
-    { "source": "/ai-for-sand-hauling", "destination": "/physical/sand-hauling", "permanent": true },
-    { "source": "/ai-for-shipyards", "destination": "/physical/shipyards", "permanent": true },
-    { "source": "/ai-for-snubbing-services", "destination": "/physical/snubbing-services", "permanent": true },
-    { "source": "/ai-for-storm-cleanup-contractors", "destination": "/physical/storm-cleanup-contractors", "permanent": true },
-    { "source": "/ai-for-tank-cleaning", "destination": "/physical/tank-cleaning", "permanent": true },
-    { "source": "/ai-for-temporary-fencing", "destination": "/physical/temporary-fencing", "permanent": true },
-    { "source": "/ai-for-therapy-practices", "destination": "/physical/therapy-practices", "permanent": true },
-    { "source": "/ai-for-tire-shops", "destination": "/physical/tire-shops", "permanent": true },
-    { "source": "/ai-for-utilities", "destination": "/physical/utilities", "permanent": true },
-    { "source": "/ai-for-vacation-rentals", "destination": "/physical/vacation-rentals", "permanent": true },
-    { "source": "/ai-for-vessel-maintenance", "destination": "/physical/vessel-maintenance", "permanent": true },
-    { "source": "/ai-for-vet-clinics", "destination": "/physical/vet-clinics", "permanent": true },
-    { "source": "/ai-for-vet-supply", "destination": "/physical/vet-supply", "permanent": true },
-    { "source": "/ai-for-water-hauling", "destination": "/physical/water-hauling", "permanent": true },
-    { "source": "/ai-for-water-transfer", "destination": "/physical/water-transfer", "permanent": true },
-    { "source": "/ai-for-welding-gas-distributors", "destination": "/physical/welding-gas-distributors", "permanent": true },
-    { "source": "/ai-for-welding-supply", "destination": "/physical/welding-supply", "permanent": true },
-    { "source": "/ai-for-appliance-repair", "destination": "/physical/appliance-repair", "permanent": true },
-    { "source": "/ai-for-pool-service", "destination": "/physical/pool-service", "permanent": true },
-    { "source": "/ai-for-pressure-washing", "destination": "/physical/pressure-washing", "permanent": true },
-    { "source": "/ai-for-moving-companies", "destination": "/physical/moving-companies", "permanent": true },
-    { "source": "/ai-for-towing-companies", "destination": "/physical/towing-companies", "permanent": true },
-    { "source": "/ai-for-glass-repair", "destination": "/physical/glass-repair", "permanent": true },
-    { "source": "/ai-for-locksmith-companies", "destination": "/physical/locksmith-companies", "permanent": true },
-    { "source": "/ai-for-janitorial-services", "destination": "/physical/janitorial-services", "permanent": true },
-    { "source": "/ai-for-garage-door-service", "destination": "/physical/garage-door-service", "permanent": true },
-    { "source": "/ai-for-fence-contractors", "destination": "/physical/fence-contractors", "permanent": true },
-    { "source": "/ai-for-flooring-contractors", "destination": "/physical/flooring-contractors", "permanent": true },
-    { "source": "/ai-for-drywall-contractors", "destination": "/physical/drywall-contractors", "permanent": true },
-    { "source": "/ai-for-solar-installation", "destination": "/physical/solar-installation", "permanent": true },
-    { "source": "/ai-for-security-systems", "destination": "/physical/security-systems", "permanent": true },
-    { "source": "/ai-for-generator-service", "destination": "/physical/generator-service", "permanent": true },
-    { "source": "/ai-for-fire-sprinkler", "destination": "/physical/fire-sprinkler", "permanent": true },
-    { "source": "/ai-for-elevator-service", "destination": "/physical/elevator-service", "permanent": true }
+    {
+      "source": "/ai-for-agriculture",
+      "destination": "/physical/agriculture",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-apartment-maintenance",
+      "destination": "/physical/apartment-maintenance",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-boat-repair",
+      "destination": "/physical/boat-repair",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-body-shops",
+      "destination": "/physical/body-shops",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-chiropractic-clinics",
+      "destination": "/physical/chiropractic-clinics",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-commercial-maintenance",
+      "destination": "/physical/commercial-maintenance",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-concrete",
+      "destination": "/physical/concrete",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-construction",
+      "destination": "/physical/construction",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-container-transport",
+      "destination": "/physical/container-transport",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-crane-barges",
+      "destination": "/physical/crane-barges",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-crane-dispatch-offices",
+      "destination": "/physical/crane-dispatch-offices",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-crew-transportation-companies",
+      "destination": "/physical/crew-transportation-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-debris-hauling-companies",
+      "destination": "/physical/debris-hauling-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-dental",
+      "destination": "/physical/dental",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-diesel-mechanics",
+      "destination": "/physical/diesel-mechanics",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-diesel-shops",
+      "destination": "/physical/diesel-shops",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-dispatch-companies",
+      "destination": "/physical/dispatch-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-dock-operations",
+      "destination": "/physical/dock-operations",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-electrical",
+      "destination": "/physical/electrical",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-equipment-dealers",
+      "destination": "/physical/equipment-dealers",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-equipment-dealerships",
+      "destination": "/physical/equipment-dealerships",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-equipment-transport",
+      "destination": "/physical/equipment-transport",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-feed-stores",
+      "destination": "/physical/feed-stores",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-field-labor-coordinators",
+      "destination": "/physical/field-labor-coordinators",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-fitness",
+      "destination": "/physical/fitness",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-fleet",
+      "destination": "/physical/fleet",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-forestry",
+      "destination": "/physical/forestry",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-forklift-services",
+      "destination": "/physical/forklift-services",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-freight-forwarding",
+      "destination": "/physical/freight-forwarding",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-fuel-delivery",
+      "destination": "/physical/fuel-delivery",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-fuel-lubricant-distributors",
+      "destination": "/physical/fuel-lubricant-distributors",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-harbor-services",
+      "destination": "/physical/harbor-services",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-healthcare",
+      "destination": "/physical/healthcare",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-heavy-equipment-repair",
+      "destination": "/physical/heavy-equipment-repair",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-heavy-equipment-yards",
+      "destination": "/physical/heavy-equipment-yards",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-heavy-haul",
+      "destination": "/physical/heavy-haul",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-heavy-machinery",
+      "destination": "/physical/heavy-machinery",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-hoa-management",
+      "destination": "/physical/hoa-management",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-home-health-agencies",
+      "destination": "/physical/home-health-agencies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-home-service",
+      "destination": "/physical/home-service",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-hvac",
+      "destination": "/physical/hvac",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-industrial-catering",
+      "destination": "/physical/industrial-catering",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-industrial-cleaning",
+      "destination": "/physical/industrial-cleaning",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-industrial-courier-services",
+      "destination": "/physical/industrial-courier-services",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-industrial-laundry",
+      "destination": "/physical/industrial-laundry",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-industrial-staffing",
+      "destination": "/physical/industrial-staffing",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-industrial-supply-distributors",
+      "destination": "/physical/industrial-supply-distributors",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-inspection-companies",
+      "destination": "/physical/inspection-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-irrigation-companies",
+      "destination": "/physical/irrigation-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-land-clearing",
+      "destination": "/physical/land-clearing",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-landscaping",
+      "destination": "/physical/landscaping",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-legal",
+      "destination": "/physical/legal",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-manufacturing",
+      "destination": "/physical/manufacturing",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-marine-logistics",
+      "destination": "/physical/marine-logistics",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-marine-service-yards",
+      "destination": "/physical/marine-service-yards",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-marine-supply-companies",
+      "destination": "/physical/marine-supply-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-marine-transportation",
+      "destination": "/physical/marine-transportation",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-mining",
+      "destination": "/physical/mining",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-mud-logging",
+      "destination": "/physical/mud-logging",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-nurseries",
+      "destination": "/physical/nurseries",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-offshore-crew-logistics",
+      "destination": "/physical/offshore-crew-logistics",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-offshore-logistics",
+      "destination": "/physical/offshore-logistics",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-offshore-staffing",
+      "destination": "/physical/offshore-staffing",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-offshore-support-vessels",
+      "destination": "/physical/offshore-support-vessels",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-oilfield-hauling",
+      "destination": "/physical/oilfield-hauling",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-oil-gas",
+      "destination": "/physical/oil-gas",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-painting",
+      "destination": "/physical/painting",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-personnel-transportation",
+      "destination": "/physical/personnel-transportation",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-pest-control",
+      "destination": "/physical/pest-control",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-physical-therapy",
+      "destination": "/physical/physical-therapy",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-pipe-inspection-companies",
+      "destination": "/physical/pipe-inspection-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-pipe-yards",
+      "destination": "/physical/pipe-yards",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-plumbing",
+      "destination": "/physical/plumbing",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-port-logistics",
+      "destination": "/physical/port-logistics",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-ranches",
+      "destination": "/physical/ranches",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-real-estate",
+      "destination": "/physical/real-estate",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-refrigerated-transport",
+      "destination": "/physical/refrigerated-transport",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-restoration",
+      "destination": "/physical/restoration",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-rig-moving",
+      "destination": "/physical/rig-moving",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-roofing",
+      "destination": "/physical/roofing",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-rv-repair",
+      "destination": "/physical/rv-repair",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-safety-compliance-companies",
+      "destination": "/physical/safety-compliance-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-safety-training-companies",
+      "destination": "/physical/safety-training-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-sand-hauling",
+      "destination": "/physical/sand-hauling",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-shipyards",
+      "destination": "/physical/shipyards",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-snubbing-services",
+      "destination": "/physical/snubbing-services",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-storm-cleanup-contractors",
+      "destination": "/physical/storm-cleanup-contractors",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-tank-cleaning",
+      "destination": "/physical/tank-cleaning",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-temporary-fencing",
+      "destination": "/physical/temporary-fencing",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-therapy-practices",
+      "destination": "/physical/therapy-practices",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-tire-shops",
+      "destination": "/physical/tire-shops",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-utilities",
+      "destination": "/physical/utilities",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-vacation-rentals",
+      "destination": "/physical/vacation-rentals",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-vessel-maintenance",
+      "destination": "/physical/vessel-maintenance",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-vet-clinics",
+      "destination": "/physical/vet-clinics",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-vet-supply",
+      "destination": "/physical/vet-supply",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-water-hauling",
+      "destination": "/physical/water-hauling",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-water-transfer",
+      "destination": "/physical/water-transfer",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-welding-gas-distributors",
+      "destination": "/physical/welding-gas-distributors",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-welding-supply",
+      "destination": "/physical/welding-supply",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-appliance-repair",
+      "destination": "/physical/appliance-repair",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-pool-service",
+      "destination": "/physical/pool-service",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-pressure-washing",
+      "destination": "/physical/pressure-washing",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-moving-companies",
+      "destination": "/physical/moving-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-towing-companies",
+      "destination": "/physical/towing-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-glass-repair",
+      "destination": "/physical/glass-repair",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-locksmith-companies",
+      "destination": "/physical/locksmith-companies",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-janitorial-services",
+      "destination": "/physical/janitorial-services",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-garage-door-service",
+      "destination": "/physical/garage-door-service",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-fence-contractors",
+      "destination": "/physical/fence-contractors",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-flooring-contractors",
+      "destination": "/physical/flooring-contractors",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-drywall-contractors",
+      "destination": "/physical/drywall-contractors",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-solar-installation",
+      "destination": "/physical/solar-installation",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-security-systems",
+      "destination": "/physical/security-systems",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-generator-service",
+      "destination": "/physical/generator-service",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-fire-sprinkler",
+      "destination": "/physical/fire-sprinkler",
+      "permanent": true
+    },
+    {
+      "source": "/ai-for-elevator-service",
+      "destination": "/physical/elevator-service",
+      "permanent": true
+    }
   ],
   "rewrites": [
     {
