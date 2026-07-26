@@ -544,6 +544,7 @@
     <a data-v="reports"><svg class="icon"><use href="#i-chart"/></svg> Reports</a>
     <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
     <a data-v="observe"><svg class="icon"><use href="#i-chart"/></svg> Runs &amp; cost</a>
+    <a data-v="university"><svg class="icon"><use href="#i-book"/></svg> University <span class="tag" id="tgUni"></span></a>
     <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Connect tools</a>
     <a data-v="team" data-owner="1"><svg class="icon"><use href="#i-users"/></svg> Team <span class="tag" id="tgTeam"></span></a>
     <a data-v="settings" data-owner="1"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
@@ -707,6 +708,11 @@
     <div id="obsRuns"></div>
   </section>
 
+  <section class="view" data-view="university">
+    <div class="secbar" style="margin-top:0"><div><div class="h">TMI University</div><p class="sub">Not a course. Every lesson ends with something built in your business. A floor only opens once the floor below it is verified in your binder.</p></div><button class="btn ghost sm" onclick="loadUniversity()"><svg class="icon"><use href="#i-clock"/></svg> Refresh</button></div>
+    <div id="uniBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
+  </section>
+
   <section class="view" data-view="integrations">
     <div class="h">Live data</div>
     <p class="sub">Feed your real numbers in and the whole OS runs on actuals: your command center, your weekly digest, your COO, and every worker. Any tool that can send a webhook can connect.</p>
@@ -809,6 +815,7 @@ function show(v){
   if((v==='command'||v==='coo')&&!briefingLoaded) loadBriefing();
   if(v==='team') loadTeam();
   if(v==='observe') loadObserve();
+  if(v==='university') loadUniversity();
   if(v==='integrations') loadConnect();
   if(v==='guardrails') loadPolicies();
   if(v==='blueprint') renderBlueprint();
@@ -2537,6 +2544,150 @@ function showTraceModal(tr){
   document.getElementById('modal').classList.add('on');
 }
 
+/* ---- TMI University: not a course. Artifacts gate the floors. ---- */
+var UNI={loaded:false,data:null};
+function uniOpen(html){document.getElementById('mcard').innerHTML=html;document.getElementById('modal').classList.add('on');}
+var UNI_STATUS={verified:['Verified','#3f8f57','#e8f6e6'],submitted:['In review','var(--warn)','var(--warn-bg)'],returned:['Sent back','var(--warn)','var(--warn-bg)'],missing:['Not built','var(--ink-3)','var(--bg-alt)']};
+function uniChip(s){var m=UNI_STATUS[s]||UNI_STATUS.missing;return '<span class="badge" style="background:'+m[2]+';color:'+m[1]+'">'+m[0]+'</span>';}
+async function loadUniversity(){
+  try{UNI.data=await api('/api/os2-university',{action:'state'});UNI.loaded=true;}
+  catch(e){if(e.message!=='signed out')document.getElementById('uniBody').innerHTML='<div class="empty" style="padding:22px"><p>Could not load University.</p></div>';return;}
+  try{var cl=await api('/api/os2-coach',{action:'log'});UNI.data._coachlog=cl.messages||[];}catch(e){UNI.data._coachlog=[];}
+  renderUniversity();
+  var st=UNI.data.standing||{};var badge=document.getElementById('tgUni');
+  if(badge){var open=(st.floors||[]).reduce(function(n,f){return n+(f.unlocked&&!f.complete?1:0);},0);badge.textContent=st.score?('L'+st.level):'';}
+}
+function renderUniversity(){
+  var d=UNI.data||{};var st=d.standing||{};var host=document.getElementById('uniBody');if(!host)return;
+  var enrolled=(STATE&&STATE.tenant&&STATE.tenant.plan==='university')||(d.scores&&d.scores.length)||(d.artifacts&&d.artifacts.length);
+  var score=st.score;
+  var html='';
+  // header tiles
+  var od=score&&typeof score.owner_dependency==='number'?score.owner_dependency+'%':'-';
+  html+='<div class="tiles">'+
+    '<div class="tile metric"><div class="top-row"><div class="k">Level</div></div><div class="v">'+(score?st.level+' &middot; '+esc(st.level_name):'-')+'</div><div class="hh">'+(score?esc(st.level_blurb):'Take your assessment to place in')+'</div></div>'+
+    '<div class="tile metric"><div class="top-row"><div class="k">Company Intelligence</div></div><div class="v">'+(score?score.total+'<span style="font-size:15px;color:var(--ink-3)">/100</span>':'-')+'</div><div class="hh">'+(d.scores&&d.scores.length>1?'across '+d.scores.length+' rescores':'admissions score')+'</div></div>'+
+    '<div class="tile metric"><div class="top-row"><div class="k">Owner dependency</div></div><div class="v">'+od+'</div><div class="hh">certify under 25%</div></div>'+
+    '<div class="tile metric"><div class="top-row"><div class="k">Degree</div></div><div class="v">'+(st.artifacts_verified||0)+'<span style="font-size:15px;color:var(--ink-3)">/'+(st.artifacts_total||30)+'</span></div><div class="hh">artifacts verified</div></div>'+
+  '</div>';
+  // assessment CTA + score trend
+  html+='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center">';
+  html+='<button class="btn" onclick="uniAssess()">'+(score?'Rescore':'Take your admissions assessment')+'</button>';
+  if(!enrolled) html+='<button class="btn ghost" onclick="uniEnroll()">Join University</button>';
+  html+='<span class="cad" style="color:var(--ink-3)">Rescore every 30 days. The number moving is the point.</span></div>';
+  if(d.scores&&d.scores.length>1){
+    var mx=Math.max.apply(null,d.scores.map(function(s){return s.total;}))||100;
+    html+='<div class="lbl" style="margin:26px 0 10px">Your score over time</div><div style="display:flex;align-items:flex-end;gap:8px;height:90px">'+
+      d.scores.slice().reverse().map(function(s){var h=Math.max(6,Math.round(s.total/100*84));return '<div style="display:flex;flex-direction:column;align-items:center;gap:5px"><div style="width:34px;height:'+h+'px;background:var(--chart-dark);border-radius:5px 5px 0 0" title="'+s.total+'"></div><span class="cad" style="font-size:10px">'+s.total+'</span></div>';}).join('')+
+      '</div>';
+  }
+  // certification line
+  var c=st.certification||{};
+  html+='<div class="kcard" style="margin-top:26px;padding:18px 20px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div class="lbl" style="margin:0">Certification line</div>'+uniChip(c.eligible?'verified':'missing')+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'+
+    [['Score 80+',c.score],['Every area 4+',c.every_area],['All 30 artifacts',c.all_artifacts],['Owner dep under 25%',c.owner_dependency],['Two week test',c.two_week_test]].map(function(x){return '<span class="badge" style="background:'+(x[1]?'#e8f6e6':'var(--bg-alt)')+';color:'+(x[1]?'#3f8f57':'var(--ink-3)')+'">'+(x[1]?'&#10003; ':'')+esc(x[0])+'</span>';}).join('')+
+    '</div><p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:12px">The last stretch is a build, a department, or a partnership. Almost nobody clears this on the school alone, and that is the design.</p></div>';
+  // floors
+  html+='<div class="lbl" style="margin:30px 0 12px">The seven floors</div><div id="uniFloors">';
+  (d.curriculum||[]).forEach(function(f){
+    var sf=(st.floors||[]).find(function(x){return x.key===f.key;})||{};
+    var isCurrent=st.current_floor===f.key;
+    var statusChip=sf.complete?uniChip('verified'):(sf.unlocked?'<span class="badge" style="background:var(--warn-bg);color:var(--warn)">In progress</span>':'<span class="badge" style="background:var(--bg-alt);color:var(--ink-3)">Locked</span>');
+    html+='<div class="kcard" style="margin-bottom:10px;padding:0;overflow:hidden'+(sf.unlocked?'':';opacity:.6')+'">';
+    html+='<div style="display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer" onclick="uniToggle(\''+f.key+'\')"><h4 style="flex:1;font-size:15px;font-weight:600">'+esc(f.title)+'</h4>'+
+      '<span class="cad">'+(f.artifacts.length?sf.verified_count+'/'+sf.artifact_count+' built':'')+'</span>'+statusChip+'</div>';
+    var openFloor=isCurrent||UNI['open_'+f.key];
+    html+='<div id="uniFloor_'+f.key+'" style="display:'+(openFloor?'block':'none')+';padding:0 18px 16px;border-top:1px solid var(--line)">';
+    html+='<p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin:12px 0 14px">'+esc(f.subtitle)+'</p>';
+    if(!sf.unlocked){html+='<div class="cad" style="color:var(--ink-3);text-transform:none;letter-spacing:0">Locked until the floor below is verified in your binder. That is the rule that makes this real.</div>';}
+    else{
+      f.lessons.forEach(function(l){
+        var artStatus='missing';if(l.artifact){var af=(d.artifacts||[]).find(function(a){return a.key===l.artifact.key;});if(af)artStatus=af.status;}
+        html+='<div style="padding:12px 0;border-bottom:1px solid var(--line)">'+
+          '<div style="display:flex;gap:10px;align-items:baseline"><span class="cad" style="min-width:34px;color:var(--chart-dark)">'+esc(l.id)+'</span><span style="flex:1;font-weight:600;font-size:14px">'+esc(l.title)+'</span>'+(l.watched?'<span class="cad" style="color:#3f8f57">watched</span>':'')+'</div>'+
+          '<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin:6px 0 0;font-style:italic">'+esc(l.cold_open)+'</div>'+
+          '<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink);margin:8px 0 0"><b>Do this:</b> '+esc(l.step)+'</div>';
+        if(l.artifact){
+          html+='<div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">'+uniChip(artStatus)+'<span class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);flex:1">'+esc(l.artifact.label)+'</span>'+
+            '<button class="btn sm ghost" onclick="uniWatch(\''+l.id+'\')">'+(l.watched?'Watched':'Mark watched')+'</button>'+
+            '<button class="btn sm" onclick="uniArtifact(\''+l.artifact.key+'\')">'+(artStatus==='missing'?'Submit what you built':'Update')+'</button></div>';
+          var af2=(d.artifacts||[]).find(function(a){return a.key===l.artifact.key;});
+          if(af2&&af2.status==='returned'&&af2.review_note){html+='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--warn);margin-top:6px"><b>Sent back:</b> '+esc(af2.review_note)+'</div>';}
+        }
+        html+='</div>';
+      });
+    }
+    html+='</div></div>';
+  });
+  html+='</div>';
+  // coach
+  html+='<div class="lbl" style="margin:30px 0 12px">Your coach</div>'+
+    '<div class="kcard" style="padding:18px 20px"><p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin:0 0 12px">The coach knows your scores, your floor, and your binder. Ask it what to do next.</p>'+
+    '<div id="uniCoachLog" style="max-height:320px;overflow:auto;margin-bottom:12px"></div>'+
+    '<div style="display:flex;gap:8px"><input id="uniCoachInput" placeholder="e.g. What should I build first?" style="flex:1;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font:inherit" onkeydown="if(event.key===\'Enter\')uniCoach()"/><button class="btn" id="uniCoachBtn" onclick="uniCoach()">Ask</button></div></div>';
+  host.innerHTML=html;
+  renderCoachLog();
+}
+function uniToggle(key){UNI['open_'+key]=!UNI['open_'+key];var el=document.getElementById('uniFloor_'+key);if(el)el.style.display=el.style.display==='none'?'block':'none';}
+function renderCoachLog(){
+  var log=document.getElementById('uniCoachLog');if(!log)return;var msgs=(UNI.data&&UNI.data._coachlog)||[];
+  if(!msgs.length){log.innerHTML='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3)">No questions yet.</div>';return;}
+  log.innerHTML=msgs.map(function(m){return '<div style="margin-bottom:12px"><div style="background:var(--bg-alt);border-radius:10px;padding:9px 12px;font-size:13.5px;margin-bottom:6px"><b>You:</b> '+esc(m.question)+'</div><div style="font-size:14px;line-height:1.55;white-space:pre-wrap">'+esc(m.reply)+'</div></div>';}).join('');
+  log.scrollTop=log.scrollHeight;
+}
+async function uniCoach(){
+  if(!guardWrite())return;var inp=document.getElementById('uniCoachInput');var btn=document.getElementById('uniCoachBtn');
+  var msg=(inp.value||'').trim();if(!msg)return;inp.value='';btn.disabled=true;btn.textContent='...';
+  UNI.data._coachlog=(UNI.data._coachlog||[]).concat([{question:msg,reply:'...'}]);renderCoachLog();
+  try{var j=await api('/api/os2-coach',{action:'ask',message:msg});UNI.data._coachlog[UNI.data._coachlog.length-1].reply=j.reply||'';}
+  catch(e){UNI.data._coachlog[UNI.data._coachlog.length-1].reply=(e.message==='signed out'?'':'The coach could not answer that. Try again.');}
+  btn.disabled=false;btn.textContent='Ask';renderCoachLog();
+}
+async function uniEnroll(){
+  if(!guardWrite())return;
+  try{await api('/api/os2-university',{action:'enroll'});toast('Welcome to TMI University.');if(STATE&&STATE.tenant)STATE.tenant.plan='university';loadUniversity();}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function uniWatch(id){try{await api('/api/os2-university',{action:'watch',lesson_id:id});(UNI.data.curriculum||[]).forEach(function(f){f.lessons.forEach(function(l){if(l.id===id)l.watched=true;});});renderUniversity();}catch(e){}}
+function uniArtifact(key){
+  var d=UNI.data||{};var meta=null;(d.curriculum||[]).forEach(function(f){f.lessons.forEach(function(l){if(l.artifact&&l.artifact.key===key)meta=l.artifact;});});
+  var cur=(d.artifacts||[]).find(function(a){return a.key===key;});
+  uniOpen('<h3>'+esc(meta?meta.label:'Artifact')+'</h3><p class="msub">Put what you built into your binder. This is what moves you up a floor, not the video.</p>'+
+    '<textarea id="uniArtText" style="width:100%;min-height:160px;border:1px solid var(--line-2);border-radius:10px;padding:12px;font:inherit;margin-top:14px" placeholder="Paste it, link it, or describe exactly what now exists in your business.">'+esc(cur?cur.content:'')+'</textarea>'+
+    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="uniSubmitArtifact(\''+key+'\')">Submit to binder</button></div>');
+}
+async function uniSubmitArtifact(key){
+  if(!guardWrite())return;var v=(document.getElementById('uniArtText').value||'').trim();if(!v){toast('Add what you built first');return;}
+  try{await api('/api/os2-university',{action:'submit',artifact_key:key,content:v});closeModal();toast('In your binder. TMI reviews it, then the floor opens.');loadUniversity();}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+function uniAssess(){
+  var d=UNI.data||{};var sc=d.scorecard||[];window._uniAns={};
+  var byArea={};sc.forEach(function(q){(byArea[q.area]=byArea[q.area]||[]).push(q);});
+  var html='<h3>'+((d.scores&&d.scores.length)?'Rescore your company':'Admissions assessment')+'</h3><p class="msub">Eighteen questions, about three minutes. Answer honestly. The gap between your areas is the useful part.</p>';
+  html+='<div style="max-height:60vh;overflow:auto;margin-top:14px">';
+  (d.areas||[]).forEach(function(area){
+    html+='<div class="lbl" style="margin:16px 0 8px">'+esc((d.area_label||{})[area]||area)+'</div>';
+    (byArea[area]||[]).forEach(function(q){
+      html+='<div style="margin-bottom:12px"><div style="font-size:13.5px;font-weight:600;margin-bottom:7px">'+esc(q.q)+'</div><div style="display:flex;flex-direction:column;gap:6px" data-q="'+q.id+'">'+
+        [1,3,5].map(function(v){return '<button type="button" class="uniOpt" data-q="'+q.id+'" data-v="'+v+'" onclick="uniPick(\''+q.id+'\','+v+')" style="text-align:left;border:1px solid var(--line-2);background:#fff;border-radius:9px;padding:9px 12px;font:inherit;font-size:13px;cursor:pointer">'+esc(q.a[v])+'</button>';}).join('')+
+        '</div></div>';
+    });
+  });
+  html+='</div><div class="mfoot" style="align-items:center"><span class="cad" id="uniAnsCount" style="flex:1">0 of 18</span><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" onclick="uniSubmitAssess()">See my score</button></div>';
+  uniOpen(html);
+}
+function uniPick(qid,v){window._uniAns[qid]=v;
+  document.querySelectorAll('.uniOpt[data-q="'+qid+'"]').forEach(function(b){var on=Number(b.getAttribute('data-v'))===v;b.style.background=on?'var(--chart)':'#fff';b.style.borderColor=on?'var(--chart-dark)':'var(--line-2)';});
+  var n=Object.keys(window._uniAns).length;var c=document.getElementById('uniAnsCount');if(c)c.textContent=n+' of 18';
+}
+async function uniSubmitAssess(){
+  if(!guardWrite())return;var ans=window._uniAns||{};
+  if(Object.keys(ans).length<18){toast('Answer all eighteen for a real score');return;}
+  try{var j=await api('/api/os2-university',{action:'assess',answers:ans});closeModal();toast('Scored '+j.score.total+'/100 - Level '+j.score.level);loadUniversity();}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+
 /* ---- delete + modal form ---- */
 async function delItem(resource,id,name){
   if(!confirm('Delete '+(name||'this')+'?'))return;
@@ -2705,7 +2856,7 @@ var PVIEWS=[
   ['blueprint','Design my company'],['build','Build with TMI'],['departments','Departments'],
   ['marketplace','Marketplace'],['workforce','Workforce'],['workflows','Workflows'],
   ['knowledge','Knowledge'],['brain','Company Brain'],['reports','Reports'],['activity','Activity'],
-  ['observe','Runs & cost'],
+  ['observe','Runs & cost'],['university','University'],
   ['integrations','Connect tools'],['plans','Plans & offers'],
   ['team','Team',{owner:true}],['settings','Settings',{owner:true}],['clients','Clients',{installer:true}]
 ];

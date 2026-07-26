@@ -13,10 +13,14 @@
 //   'assess'  { answers }                     -> { score, standing }  admissions or 30-day rescore (writes history)
 //   'watch'   { lesson_id }                   -> { ok }               mark a lesson watched
 //   'submit'  { artifact_key, content }       -> { artifact, standing } put/replace an artifact in the binder
-//   'review'  { artifact_id, verdict, note }  (manager) -> { artifact, standing }  grade: verify or return
 //
 // Scores are appended to os_scores (history, never overwritten) because the
 // chart of the number moving over months is the whole retention loop.
+//
+// Grading is deliberately NOT here. A member owns their own tenant, so letting
+// this endpoint verify would let a member self-verify and unlock floors, which
+// is exactly the not-a-course failure this whole design exists to prevent.
+// Verification is TMI-side, cross-tenant, and lives in the staff grading surface.
 
 const db = require('./_db');
 const { requireTenant, requireRole, cors } = require('./_tenant-auth');
@@ -124,24 +128,6 @@ module.exports = async function handler(req, res) {
         });
       }
       await log(tid, `Submitted artifact: ${meta.label}.`);
-      const { standing } = await loadStanding(tdb);
-      return res.status(200).json({ artifact, standing });
-    }
-
-    if (action === 'review') {
-      // Grading. A verdict of 'verify' is what unlocks the next floor; 'return'
-      // sends it back with a note. Verification is deliberately a separate step
-      // from submission so progress reflects built work, not claimed work.
-      const id = String(b.artifact_id || '');
-      const cur = await tdb.getById('os_artifacts', id);
-      if (!cur) return res.status(404).json({ error: 'Artifact not found' });
-      const verdict = String(b.verdict || '');
-      if (!['verify', 'return'].includes(verdict)) return res.status(400).json({ error: 'verdict must be verify or return' });
-      const status = verdict === 'verify' ? 'verified' : 'returned';
-      const artifact = await tdb.update('os_artifacts', id, {
-        status, review_note: String(b.note || '').slice(0, 2000) || null, reviewed_at: new Date().toISOString(),
-      });
-      await log(tid, `${verdict === 'verify' ? 'Verified' : 'Returned'} artifact: ${cur.label || cur.key}.`);
       const { standing } = await loadStanding(tdb);
       return res.status(200).json({ artifact, standing });
     }
