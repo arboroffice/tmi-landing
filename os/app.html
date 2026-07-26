@@ -2588,7 +2588,9 @@ function renderUniversity(){
   html+='<div class="kcard" style="margin-top:26px;padding:18px 20px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div class="lbl" style="margin:0">Certification line</div>'+uniChip(c.eligible?'verified':'missing')+'</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'+
     [['Score 80+',c.score],['Every area 4+',c.every_area],['All 30 artifacts',c.all_artifacts],['Owner dep under 25%',c.owner_dependency],['Two week test',c.two_week_test]].map(function(x){return '<span class="badge" style="background:'+(x[1]?'#e8f6e6':'var(--bg-alt)')+';color:'+(x[1]?'#3f8f57':'var(--ink-3)')+'">'+(x[1]?'&#10003; ':'')+esc(x[0])+'</span>';}).join('')+
-    '</div><p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:12px">The last stretch is a build, a department, or a partnership. Almost nobody clears this on the school alone, and that is the design.</p></div>';
+    '</div>'+
+    (d.certificate?'<div style="margin-top:14px;padding:12px 14px;background:#e8f6e6;border-radius:10px"><b style="color:#2f7a45">Intelligent Company Certified.</b> <a href="'+esc(d.certificate.url)+'" target="_blank" rel="noopener" style="color:var(--chart-dark);font-weight:600">View your public certificate &rarr;</a></div>':(c.eligible?'<div style="margin-top:14px"><button class="btn" onclick="uniCertify()">Claim your certification</button></div>':''))+
+    '<p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:12px">The last stretch is a build, a department, or a partnership. Almost nobody clears this on the school alone, and that is the design.</p></div>';
   // floors
   html+='<div class="lbl" style="margin:30px 0 12px">The seven floors</div><div id="uniFloors">';
   (d.curriculum||[]).forEach(function(f){
@@ -2683,6 +2685,7 @@ async function uniEnroll(){
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 async function uniInstall(id){if(!guardWrite())return;try{var j=await api('/api/os2-university',{action:'install',artifact_id:id});if(j&&j.ok){toast(j.already?'Already in your OS':'Installed into your OS as a '+esc(j.installed_as));loadUniversity();}}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function uniCertify(){if(!guardWrite())return;try{var j=await api('/api/os2-university',{action:'certify'});if(j&&j.public_id){toast('Certified. Your public credential is live.');loadUniversity();}}catch(e){if(e.message!=='signed out')toast(e.message||'Not eligible yet');}}
 async function uniBenchmarks(){
   var host=document.getElementById('uniBench');if(!host)return;host.innerHTML='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);padding:8px 0">Loading benchmarks...</div>';
   var b;try{b=await api('/api/os2-university',{action:'benchmarks'});}catch(e){host.innerHTML='';return;}

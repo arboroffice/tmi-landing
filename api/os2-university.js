@@ -152,6 +152,7 @@ module.exports = async function handler(req, res) {
       const { standing, scores, artifacts } = await loadStanding(tdb);
       const progress = await tdb.list('os_progress').catch(() => []);
       const watched = new Set(progress.map(p => p.lesson_id));
+      const certificate = (await tdb.list('os_certifications', { limit: 1 }).catch(() => []))[0] || null;
       // Attach the watched flag onto the curriculum so the app can render it.
       const curriculum = U.FLOORS.map(f => ({
         key: f.key, order: f.order, title: f.title, subtitle: f.subtitle,
@@ -167,6 +168,7 @@ module.exports = async function handler(req, res) {
         artifacts,
         levels: U.LEVELS, areas: U.AREAS, area_label: U.AREA_LABEL, scorecard: U.SCORECARD, cert: U.CERT,
         installable: INSTALLABLE,
+        certificate: certificate ? { public_id: certificate.public_id, issued_at: certificate.issued_at, url: 'https://www.tmitechai.com/certificate?id=' + certificate.public_id } : null,
       });
     }
 
@@ -284,6 +286,27 @@ module.exports = async function handler(req, res) {
       try { d = await draftFor(client, lesson, industry, level.name, ctx, { tenantId: tid, trace }); await finishTrace(trace, { status: 'ok' }); }
       catch (e) { await finishTrace(trace, { error: e }); }
       return res.status(200).json({ draft: d ? d.draft : null });
+    }
+
+    // Claim the Intelligent Company Certified credential. Server rechecks the
+    // line (never trusts the client), mints a public, verifiable record, and
+    // returns its public id. Idempotent: re-claiming refreshes the same record.
+    if (action === 'certify') {
+      const { standing } = await loadStanding(tdb);
+      if (!standing.certification.eligible) return res.status(400).json({ error: 'Not eligible yet.', checks: standing.certification });
+      const tenant = await db.getById('os_tenants', tid);
+      const score = standing.score || {};
+      const fields = {
+        company: (tenant && tenant.name) || 'A company', score: score.total,
+        level: standing.level, level_name: standing.level_name,
+        owner_dependency: typeof score.owner_dependency === 'number' ? score.owner_dependency : null,
+        issued_at: new Date().toISOString(), status: 'active',
+      };
+      let cert = (await tdb.list('os_certifications', { limit: 1 }))[0];
+      if (cert) cert = await tdb.update('os_certifications', cert.id, fields);
+      else { fields.public_id = require('crypto').randomBytes(8).toString('hex'); cert = await tdb.insert('os_certifications', fields); }
+      await log(tid, 'Earned Intelligent Company Certified.');
+      return res.status(200).json({ public_id: cert.public_id, url: 'https://www.tmitechai.com/certificate?id=' + cert.public_id, cert });
     }
 
     if (action === 'assess') {

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<title>Intelligent Company Certified | TMI</title>
+<meta name="description" content="Verify an Intelligent Company Certified credential from TMI."/>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin/>
+<style>
+  @import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+  :root{--bg:#0a0b14;--ink:#f4f5f2;--ink-2:rgba(255,255,255,0.62);--ink-3:rgba(255,255,255,0.40);--line:rgba(255,255,255,0.12);--chart:#E4FF97;--sans:"General Sans",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .card{width:100%;max-width:620px;background:#14161f;border:1px solid var(--line);border-radius:20px;padding:48px 44px;position:relative;overflow:hidden;}
+  .card::after{content:"";position:absolute;right:-20%;top:-40%;width:70%;height:160%;background:radial-gradient(closest-side,rgba(228,255,151,0.16),transparent 70%);pointer-events:none;}
+  .in{position:relative;z-index:1;}
+  .mk{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:-0.02em;}
+  .mk span{background:#fff;color:#0a0b14;font-size:11px;font-weight:700;padding:3px 6px;border-radius:5px;}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--chart);margin:36px 0 14px;}
+  h1{font-size:clamp(28px,5vw,42px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;margin:0;}
+  .sub{color:var(--ink-2);font-size:15px;line-height:1.6;margin-top:16px;}
+  .stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px;}
+  .stat{flex:1;min-width:140px;border:1px solid var(--line);border-radius:12px;padding:18px 20px;}
+  .stat .k{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);}
+  .stat .v{font-size:26px;font-weight:700;letter-spacing:-0.02em;margin-top:6px;}
+  .stat .v .lime{color:var(--chart);}
+  .foot{margin-top:32px;padding-top:22px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .foot a{color:var(--chart);text-decoration:none;}
+  .bad{color:var(--ink-2);font-size:16px;line-height:1.6;margin-top:20px;}
+</style>
+</head>
+<body>
+<div class="card"><div class="in" id="card">
+  <div class="mk"><span>TMI</span> TMI</div>
+  <div id="body"><div class="sub">Checking this credential...</div></div>
+</div></div>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function fmtDate(iso){try{return new Date(iso).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});}catch(e){return '';}}
+(async function(){
+  var id=new URLSearchParams(location.search).get('id')||'';
+  var body=document.getElementById('body');
+  if(!id){body.innerHTML='<div class="bad">No credential id given.</div>';return;}
+  var j;try{j=await (await fetch('/api/cert-verify?id='+encodeURIComponent(id))).json();}catch(e){j=null;}
+  if(!j||!j.valid){body.innerHTML='<div class="eyebrow">Not verified</div><h1>This credential could not be verified.</h1><div class="bad">It may have been withdrawn, or the link is wrong. Certifications are issued by TMI and verified live.</div><div class="foot"><span>TMI Technology</span><a href="/">tmi-technology.com</a></div>';return;}
+  body.innerHTML='<div class="eyebrow">Intelligent Company Certified</div>'+
+    '<h1>'+esc(j.company)+' <span style="color:var(--chart)">is certified.</span></h1>'+
+    '<div class="sub">Verified by TMI against a live operating system: a Company Intelligence Score at or above the line, every area strong, the full binder of artifacts built and checked, owner dependency under twenty five percent, and the two week test passed.</div>'+
+    '<div class="stats">'+
+      '<div class="stat"><div class="k">Company Intelligence</div><div class="v"><span class="lime">'+esc(j.score)+'</span> / 100</div></div>'+
+      (j.level_name?'<div class="stat"><div class="k">Level</div><div class="v">'+esc(j.level_name)+'</div></div>':'')+
+      (j.issued_at?'<div class="stat"><div class="k">Issued</div><div class="v" style="font-size:18px">'+esc(fmtDate(j.issued_at))+'</div></div>':'')+
+    '</div>'+
+    '<div class="foot"><span>Verified live &middot; TMI Technology</span><a href="/intelligent-company-certified">What this means &rarr;</a></div>';
+})();
+</script>
+</body>
+</html>
