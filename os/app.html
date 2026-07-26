@@ -2573,8 +2573,10 @@ function renderUniversity(){
   // assessment CTA + score trend
   html+='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center">';
   html+='<button class="btn" onclick="uniAssess()">'+(score?'Rescore':'Take your admissions assessment')+'</button>';
+  if(score) html+='<button class="btn ghost" onclick="uniBenchmarks()">Compare to my industry</button>';
   if(!enrolled) html+='<button class="btn ghost" onclick="uniEnroll()">Join University</button>';
   html+='<span class="cad" style="color:var(--ink-3)">Rescore every 30 days. The number moving is the point.</span></div>';
+  html+='<div id="uniBench" style="margin-top:16px"></div>';
   if(d.scores&&d.scores.length>1){
     var mx=Math.max.apply(null,d.scores.map(function(s){return s.total;}))||100;
     html+='<div class="lbl" style="margin:26px 0 10px">Your score over time</div><div style="display:flex;align-items:flex-end;gap:8px;height:90px">'+
@@ -2681,6 +2683,27 @@ async function uniEnroll(){
   catch(e){if(e.message!=='signed out')toast(e.message);}
 }
 async function uniInstall(id){if(!guardWrite())return;try{var j=await api('/api/os2-university',{action:'install',artifact_id:id});if(j&&j.ok){toast(j.already?'Already in your OS':'Installed into your OS as a '+esc(j.installed_as));loadUniversity();}}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function uniBenchmarks(){
+  var host=document.getElementById('uniBench');if(!host)return;host.innerHTML='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);padding:8px 0">Loading benchmarks...</div>';
+  var b;try{b=await api('/api/os2-university',{action:'benchmarks'});}catch(e){host.innerHTML='';return;}
+  if(!b||!b.available){host.innerHTML='<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3)">Take your assessment first to compare.</div>';return;}
+  var bm=b.industry_benchmark, ov=b.overall_benchmark, me=b.me;
+  var cols=[['Company Intelligence','total','avg_total'],['Memory','memory'],['Awareness','awareness'],['Action','action'],['Learning','learning'],['Integration','integration'],['Decision','decision']];
+  function meVal(k){return k==='total'?me.total:(me.areas&&me.areas[k]);}
+  function bmVal(src,row){if(!src)return null;return row[2]?src.avg_total:(src.avg_areas&&src.avg_areas[row[1]]);}
+  var rows=cols.map(function(row){
+    var mv=meVal(row[1]);var iv=bmVal(bm,row);var av=bmVal(ov,row);
+    var behind=(iv!=null&&mv<iv);
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)">'+
+      '<span style="flex:1;font-size:13.5px;font-weight:600">'+esc(row[0])+'</span>'+
+      '<span class="cad" style="min-width:70px;text-align:right;color:'+(behind?'var(--warn)':'#3f8f57')+'">you '+esc(mv==null?'-':mv)+'</span>'+
+      '<span class="cad" style="min-width:90px;text-align:right;color:var(--ink-2)">'+(bm?'ind '+esc(iv):'')+'</span>'+
+      '<span class="cad" style="min-width:70px;text-align:right;color:var(--ink-3)">all '+esc(av==null?'-':av)+'</span></div>';
+  }).join('');
+  host.innerHTML='<div class="kcard" style="padding:16px 18px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><div class="lbl" style="margin:0">You vs '+(bm?esc(b.industry)+' ('+bm.n+' companies)':'everyone')+' vs all ('+ov.n+')</div></div>'+
+    '<div style="margin-top:10px">'+rows+'</div>'+
+    (!bm?'<p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:10px">Not enough companies in your industry yet to show an industry line. Comparing to everyone.</p>':'')+'</div>';
+}
 async function uniWatch(id){try{await api('/api/os2-university',{action:'watch',lesson_id:id});(UNI.data.curriculum||[]).forEach(function(f){f.lessons.forEach(function(l){if(l.id===id)l.watched=true;});});renderUniversity();}catch(e){}}
 function uniArtifact(key){
   var d=UNI.data||{};var meta=null;(d.curriculum||[]).forEach(function(f){f.lessons.forEach(function(l){if(l.artifact&&l.artifact.key===key)meta=l.artifact;});});

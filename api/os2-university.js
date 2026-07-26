@@ -206,6 +206,50 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ lesson: Object.assign({}, base, { example: v.example || base.example, for_you: v.for_you || '' }), tailored: industry, level: level.level });
     }
 
+    // Cross-company benchmarks. Your score against your industry and against
+    // everyone. Aggregate and anonymized: only averages and counts leave this
+    // handler, never another company's row, and an industry cohort is only
+    // shown when at least three peers exist so no single company is exposed.
+    if (action === 'benchmarks') {
+      const { industry, level } = await memberContext(tid, tdb, false);
+      const mine = (await tdb.list('os_scores', { order: 'date', ascending: false, limit: 1 }));
+      mine.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+      const me = mine[0] || null;
+
+      const [allScores, tenants] = await Promise.all([
+        db.list('os_scores', { limit: 4000 }).catch(() => []),
+        db.list('os_tenants', { limit: 2000 }).catch(() => []),
+      ]);
+      const industryOf = {};
+      tenants.forEach(t2 => { industryOf[t2.id] = require('./_osunipersonalize').industrySlug((t2.profile && t2.profile.industry) || t2.business_type || ''); });
+      // Latest score per tenant.
+      const latest = {};
+      for (const s of allScores) {
+        const k = s.tenant_id; if (!k) continue;
+        if (!latest[k] || String(s.date || '') > String(latest[k].date || '')) latest[k] = s;
+      }
+      const mySlug = require('./_osunipersonalize').industrySlug(industry);
+      function agg(rows) {
+        if (!rows.length) return null;
+        const areas = {}; U.AREAS.forEach(a => { areas[a] = 0; });
+        let total = 0;
+        rows.forEach(r => { total += Number(r.total) || 0; U.AREAS.forEach(a => { areas[a] += Number((r.areas || {})[a]) || 0; }); });
+        U.AREAS.forEach(a => { areas[a] = Math.round((areas[a] / rows.length) * 100) / 100; });
+        return { n: rows.length, avg_total: Math.round(total / rows.length), avg_areas: areas };
+      }
+      const allRows = Object.values(latest);
+      const peerRows = Object.keys(latest).filter(k => industryOf[k] === mySlug).map(k => latest[k]);
+      const overall = agg(allRows);
+      const industryAgg = peerRows.length >= 3 ? agg(peerRows) : null;
+      return res.status(200).json({
+        available: !!me,
+        me: me ? { total: me.total, areas: me.areas, level: level.level } : null,
+        industry: industry || null,
+        industry_benchmark: industryAgg,
+        overall_benchmark: overall,
+      });
+    }
+
     // Everything below writes: viewers are read-only.
     if (!requireRole(t, res, 'manager')) return;
 
