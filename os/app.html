@@ -546,6 +546,7 @@
     <a data-v="observe"><svg class="icon"><use href="#i-chart"/></svg> Runs &amp; cost</a>
     <a data-v="university"><svg class="icon"><use href="#i-book"/></svg> University <span class="tag" id="tgUni"></span></a>
     <a data-v="human-design"><svg class="icon"><use href="#i-users"/></svg> Human Design <span class="tag" id="tgHD"></span></a>
+    <a data-v="team-performance"><svg class="icon"><use href="#i-users"/></svg> Team Performance <span class="tag" id="tgTP"></span></a>
     <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Connect tools</a>
     <a data-v="team" data-owner="1"><svg class="icon"><use href="#i-users"/></svg> Team <span class="tag" id="tgTeam"></span></a>
     <a data-v="settings" data-owner="1"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
@@ -719,6 +720,11 @@
     <div id="hdBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
   </section>
 
+  <section class="view" data-view="team-performance">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Team Performance</div><p class="sub">Get every person actually using AI, and watch output rise without new headcount. Track where each seat sits on the adoption curve and move them up one stage at a time. Where a person has a Human Design chart, you get a cue for how to move that specific person.</p></div></div>
+    <div id="tpBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
+  </section>
+
   <section class="view" data-view="integrations">
     <div class="h">Live data</div>
     <p class="sub">Feed your real numbers in and the whole OS runs on actuals: your command center, your weekly digest, your COO, and every worker. Any tool that can send a webhook can connect.</p>
@@ -823,6 +829,7 @@ function show(v){
   if(v==='observe') loadObserve();
   if(v==='university') loadUniversity();
   if(v==='human-design') loadHD();
+  if(v==='team-performance') loadTP();
   if(v==='integrations') loadConnect();
   if(v==='guardrails') loadPolicies();
   if(v==='blueprint') renderBlueprint();
@@ -2619,6 +2626,87 @@ function hdCopy(url){try{navigator.clipboard.writeText(url);toast('Link copied')
 async function hdRevoke(id){if(!guardWrite())return;try{await api('/api/os2-hd',{action:'revoke',id:id});toast('Cancelled');loadHD();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 async function hdRemove(id){if(!guardWrite())return;if(!confirm('Remove this chart?'))return;try{await api('/api/os2-hd',{action:'remove',id:id});toast('Removed');loadHD();}catch(e){if(e.message!=='signed out')toast(e.message);}}
 
+/* ---- Team Performance: move every seat up the AI adoption curve. ---- */
+var TP={data:null,editing:null};
+var TP_STAGES=[{v:0,label:'Not started'},{v:1,label:'Trying it'},{v:2,label:'Using weekly'},{v:3,label:'Daily driver'},{v:4,label:'Teaching others'}];
+async function loadTP(){
+  try{TP.data=await api('/api/os2-teamperf',{action:'state'});}
+  catch(e){if(e.message!=='signed out')document.getElementById('tpBody').innerHTML='<div class="empty" style="padding:22px"><p>Could not load Team Performance.</p></div>';return;}
+  tpRender();
+  var badge=document.getElementById('tgTP');if(badge)badge.textContent=(TP.data.members&&TP.data.members.length)||'';
+}
+function tpPips(stage){var s='';for(var i=0;i<5;i++){s+='<span style="width:22px;height:6px;border-radius:3px;background:'+(i<=stage?'var(--chart-dark,#cdee72)':'var(--bg-alt)')+';display:inline-block"></span>';}return '<span style="display:inline-flex;gap:4px;align-items:center">'+s+'</span>';}
+function tpMemberRow(m){
+  var tools=(m.tools&&m.tools.length)?m.tools.map(function(x){return '<span class="badge" style="background:var(--bg-alt);color:var(--ink-2)">'+esc(x)+'</span>';}).join(''):'';
+  var hd=m.hd_type?'<span class="badge k" title="Human Design">'+esc(m.hd_type)+'</span>':'';
+  var canW=guardWriteSilent();
+  return '<div class="kcard" style="padding:16px 18px;margin-bottom:10px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">'+
+      '<div style="flex:1;min-width:160px"><h4 style="font-size:16px;font-weight:600;display:inline">'+esc(m.name)+'</h4> '+hd+'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:2px">'+esc([m.role,m.seat].filter(Boolean).join(' · ')||'No role set')+'</div></div>'+
+      '<div style="text-align:right"><div class="cad" style="color:var(--ink-3)">'+esc(TP_STAGES[m.stage].label)+'</div><div style="margin-top:6px">'+tpPips(m.stage)+'</div></div>'+
+    '</div>'+
+    (tools?'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">'+tools+'</div>':'')+
+    (m.output_note?'<p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin-top:10px">'+esc(m.output_note)+'</p>':'')+
+    (m.hd_tip?'<div style="background:var(--bg-alt);border-radius:10px;padding:10px 12px;margin-top:12px"><span class="cad" style="color:var(--ink-3)">How to move a '+esc(m.hd_type)+'</span><p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink);margin-top:4px">'+esc(m.hd_tip)+'</p></div>':'')+
+    (canW?'<div style="display:flex;gap:14px;margin-top:14px"><span class="link" onclick="tpNudge(\''+m.id+'\')">Next move</span><span class="link" onclick="tpShowForm(\''+m.id+'\')">Edit</span><span class="link" onclick="tpRemove(\''+m.id+'\')">Remove</span></div>':'')+
+    '<div id="tpNudge-'+m.id+'"></div>'+
+  '</div>';
+}
+function tpRender(){
+  var d=TP.data||{};var host=document.getElementById('tpBody');if(!host)return;var s=d.summary||{};
+  var html='<div class="tiles">'+
+    '<div class="tile metric"><div class="k">Team readiness</div><div class="v" style="font-size:30px">'+(d.readiness||0)+'%</div></div>'+
+    '<div class="tile metric"><div class="k">People tracked</div><div class="v" style="font-size:30px">'+(s.people||0)+'</div></div>'+
+    '<div class="tile metric"><div class="k">Daily drivers</div><div class="v" style="font-size:30px">'+(s.daily_or_better||0)+'</div></div>'+
+    '<div class="tile metric"><div class="k">Teaching others</div><div class="v" style="font-size:30px">'+(s.teaching||0)+'</div></div>'+
+  '</div>';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px"><div class="lbl">The team</div>'+(guardWriteSilent()?'<button class="btn sm" onclick="tpShowForm()"><svg class="icon"><use href="#i-plus"/></svg> Add a person</button>':'')+'</div>';
+  html+='<div id="tpForm"></div>';
+  html+=(d.members&&d.members.length)?d.members.map(tpMemberRow).join(''):'<div class="empty" style="padding:22px"><p>No one tracked yet. Add your team and set where each person is on the AI adoption curve.</p></div>';
+  host.innerHTML=html;
+  if(TP.editing!==null) tpRenderForm();
+}
+function tpRenderForm(){
+  var m=TP.editing&&TP.editing.id?TP.editing:{stage:0,tools:[]};
+  var host=document.getElementById('tpForm');if(!host)return;
+  var opts=TP_STAGES.map(function(s){return '<option value="'+s.v+'"'+(Number(m.stage)===s.v?' selected':'')+'>'+esc(s.label)+'</option>';}).join('');
+  host.innerHTML='<div class="kcard" style="padding:18px 20px;margin-bottom:14px"><h4 style="font-size:16px;font-weight:600">'+(m.id?'Edit person':'Add a person')+'</h4>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><input id="tpName" placeholder="Name" value="'+esc(m.name||'')+'" style="flex:1;min-width:160px;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font:inherit"/>'+
+    '<input id="tpRole" placeholder="Role (e.g. Estimator)" value="'+esc(m.role||'')+'" style="flex:1;min-width:150px;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font:inherit"/></div>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><div style="flex:1;min-width:150px"><label class="cad" style="color:var(--ink-3)">Adoption stage</label><select id="tpStage" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font:inherit;margin-top:4px">'+opts+'</select></div>'+
+    '<input id="tpSeat" placeholder="Team / seat (optional)" value="'+esc(m.seat||'')+'" style="flex:1;min-width:150px;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font:inherit;align-self:flex-end"/></div>'+
+    '<input id="tpTools" placeholder="AI tools they use, comma separated" value="'+esc((m.tools||[]).join(', '))+'" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font:inherit;margin-top:10px"/>'+
+    '<input id="tpNote" placeholder="What changed in their output (optional)" value="'+esc(m.output_note||'')+'" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font:inherit;margin-top:10px"/>'+
+    '<div style="display:flex;gap:8px;margin-top:14px"><button class="btn sm" onclick="tpSave()">Save</button><button class="btn ghost sm" onclick="tpCancel()">Cancel</button></div></div>';
+  var el=document.getElementById('tpName');if(el)el.focus();
+}
+function tpShowForm(id){
+  if(!guardWrite())return;
+  if(id){var m=(TP.data.members||[]).filter(function(x){return x.id===id;})[0];TP.editing=m?Object.assign({},m):{stage:0,tools:[]};}
+  else TP.editing={stage:0,tools:[]};
+  tpRenderForm();var f=document.getElementById('tpForm');if(f)f.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function tpCancel(){TP.editing=null;var f=document.getElementById('tpForm');if(f)f.innerHTML='';}
+async function tpSave(){
+  if(!guardWrite())return;var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  var name=g('tpName').trim();if(!name){toast('Add a name');return;}
+  var tools=g('tpTools').split(',').map(function(x){return x.trim();}).filter(Boolean);
+  var payload={action:'save',name:name,role:g('tpRole').trim(),seat:g('tpSeat').trim(),stage:Number(g('tpStage')),tools:tools,output_note:g('tpNote').trim()};
+  if(TP.editing&&TP.editing.id)payload.id=TP.editing.id;
+  try{await api('/api/os2-teamperf',payload);TP.editing=null;toast('Saved');loadTP();}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function tpNudge(id){
+  try{var j=await api('/api/os2-teamperf',{action:'nudge',id:id});var slot=document.getElementById('tpNudge-'+id);
+    if(j&&j.message&&slot){slot.innerHTML='<div style="background:var(--bg-alt);border-radius:10px;padding:11px 13px;margin-top:12px;display:flex;gap:10px;align-items:flex-start"><span class="badge k" style="flex:none">Next move</span><p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink);line-height:1.5">'+esc(j.message)+'</p></div>';}}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function tpRemove(id){
+  if(!guardWrite())return;if(!confirm('Remove this person from Team Performance?'))return;
+  try{await api('/api/os2-teamperf',{action:'remove',id:id});toast('Removed');loadTP();}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+
 /* ---- TMI University: not a course. Artifacts gate the floors. ---- */
 var UNI={loaded:false,data:null};
 function uniOpen(html){document.getElementById('mcard').innerHTML=html;document.getElementById('modal').classList.add('on');}
@@ -3030,7 +3118,7 @@ var PVIEWS=[
   ['blueprint','Design my company'],['build','Build with TMI'],['departments','Departments'],
   ['marketplace','Marketplace'],['workforce','Workforce'],['workflows','Workflows'],
   ['knowledge','Knowledge'],['brain','Company Brain'],['reports','Reports'],['activity','Activity'],
-  ['observe','Runs & cost'],['university','University'],['human-design','Human Design'],
+  ['observe','Runs & cost'],['university','University'],['human-design','Human Design'],['team-performance','Team Performance'],
   ['integrations','Connect tools'],['plans','Plans & offers'],
   ['team','Team',{owner:true}],['settings','Settings',{owner:true}],['clients','Clients',{installer:true}]
 ];
