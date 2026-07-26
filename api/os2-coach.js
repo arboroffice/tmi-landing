@@ -30,10 +30,11 @@ Rules:
 - If they ask about something the school covers later, tell them which floor it lives on and why the ones underneath come first.
 - If they are stuck, ask what actually got in the way. Usually it is time, a team member, or that the step was too big. Make it smaller.
 - Do not sell. If a member is clearly past what they can build alone, say that plainly and mention the free audit once. Then drop it.
-- Never invent a number about their business. If you do not have it, ask for it.`;
+- Never invent a number about their business. If you do not have it, ask for it.
+- If their Human Design is known, coach in the grain of it, do not lecture about it. A Generator or Manifesting Generator should build the thing that lights them up and let the rest wait for a response. A Projector should not grind alone, they need the right people to invite them in and should spend their energy on who to guide, not on doing every task. A Manifestor should inform the team before they move so nothing gets blindsided. A Reflector needs a full month and the right environment before a big call. Point the next step at their Strategy and Authority. Never tell them their type is a limit.`;
 
 // Turn the member's real standing into the context block the coach reasons over.
-function contextBlock(tenant, standing, scores, artifacts) {
+function contextBlock(tenant, standing, scores, artifacts, hd) {
   const p = tenant.profile || {};
   const latest = scores[0] || null;
   const prev = scores[1] || null;
@@ -52,6 +53,7 @@ function contextBlock(tenant, standing, scores, artifacts) {
     `Artifacts still open on this floor: ${missing.length ? missing.join('; ') : 'none, ready to move up'}.`,
     returned.length ? `Sent back for more work: ${returned.join('; ')}.` : '',
     `Degree progress: ${standing.artifacts_verified} of ${standing.artifacts_total} artifacts verified.`,
+    hd && hd.type ? `Human Design: ${hd.type}. Strategy: ${hd.strategy || 'unknown'}. Authority: ${hd.authority || 'unknown'}. Profile: ${hd.profile || 'unknown'}.` : '',
   ].filter(Boolean).join('\n');
 }
 
@@ -82,16 +84,17 @@ module.exports = async function handler(req, res) {
     const key = process.env.ANTHROPIC_API_KEY;
     if (!key) return res.status(503).json({ error: 'The coach is not available right now.' });
 
-    const [tenant, scoresRaw, artifacts, history] = await Promise.all([
+    const [tenant, scoresRaw, artifacts, history, hdRows] = await Promise.all([
       db.getById('os_tenants', tid),
       tdb.list('os_scores', { order: 'date', ascending: false, limit: 12 }),
       tdb.list('os_artifacts'),
       tdb.list('os_coach_msgs', { order: 'created_at', ascending: false, limit: 8 }),
+      tdb.list('os_hd_profiles', { where: [['user_id', '==', t.sub]], limit: 1 }).catch(() => []),
     ]);
     if (!tenant) return res.status(404).json({ error: 'Tenant not found' });
     scoresRaw.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
     const standing = U.computeStanding(scoresRaw[0] || null, artifacts);
-    const context = contextBlock(tenant, standing, scoresRaw, artifacts);
+    const context = contextBlock(tenant, standing, scoresRaw, artifacts, (hdRows && hdRows[0]) || null);
 
     // Recent turns become prior messages so the coach has short-term memory.
     history.reverse();

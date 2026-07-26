@@ -545,6 +545,7 @@
     <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
     <a data-v="observe"><svg class="icon"><use href="#i-chart"/></svg> Runs &amp; cost</a>
     <a data-v="university"><svg class="icon"><use href="#i-book"/></svg> University <span class="tag" id="tgUni"></span></a>
+    <a data-v="human-design"><svg class="icon"><use href="#i-users"/></svg> Human Design <span class="tag" id="tgHD"></span></a>
     <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Connect tools</a>
     <a data-v="team" data-owner="1"><svg class="icon"><use href="#i-users"/></svg> Team <span class="tag" id="tgTeam"></span></a>
     <a data-v="settings" data-owner="1"><svg class="icon"><use href="#i-cog"/></svg> Settings</a>
@@ -713,6 +714,11 @@
     <div id="uniBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
   </section>
 
+  <section class="view" data-view="human-design">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Human Design</div><p class="sub">How each person is wired to make decisions and do their best work. Take yours, then send it to your team so you can work with their design, not against it. Computed in-house from birth data, nothing leaves the platform.</p></div></div>
+    <div id="hdBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
+  </section>
+
   <section class="view" data-view="integrations">
     <div class="h">Live data</div>
     <p class="sub">Feed your real numbers in and the whole OS runs on actuals: your command center, your weekly digest, your COO, and every worker. Any tool that can send a webhook can connect.</p>
@@ -816,6 +822,7 @@ function show(v){
   if(v==='team') loadTeam();
   if(v==='observe') loadObserve();
   if(v==='university') loadUniversity();
+  if(v==='human-design') loadHD();
   if(v==='integrations') loadConnect();
   if(v==='guardrails') loadPolicies();
   if(v==='blueprint') renderBlueprint();
@@ -2544,6 +2551,74 @@ function showTraceModal(tr){
   document.getElementById('modal').classList.add('on');
 }
 
+/* ---- Human Design: how each person is wired. Computed in-house. ---- */
+var HDS={loaded:false,data:null};
+var HD_TZ=[[-12,'UTC-12'],[-11,'UTC-11'],[-10,'Hawaii (UTC-10)'],[-9,'Alaska (UTC-9)'],[-8,'US Pacific (UTC-8)'],[-7,'US Mountain (UTC-7)'],[-6,'US Central (UTC-6)'],[-5,'US Eastern (UTC-5)'],[-4,'Atlantic (UTC-4)'],[-3,'UTC-3'],[-2,'UTC-2'],[-1,'UTC-1'],[0,'UTC / London'],[1,'Central Europe (UTC+1)'],[2,'Eastern Europe (UTC+2)'],[3,'UTC+3'],[3.5,'Iran (UTC+3:30)'],[4,'UTC+4'],[5,'Pakistan (UTC+5)'],[5.5,'India (UTC+5:30)'],[6,'UTC+6'],[7,'UTC+7'],[8,'China (UTC+8)'],[9,'Japan (UTC+9)'],[9.5,'C Australia (UTC+9:30)'],[10,'E Australia (UTC+10)'],[11,'UTC+11'],[12,'New Zealand (UTC+12)'],[13,'UTC+13'],[14,'UTC+14']];
+async function loadHD(){
+  try{HDS.data=await api('/api/os2-hd',{action:'state'});HDS.loaded=true;}
+  catch(e){if(e.message!=='signed out')document.getElementById('hdBody').innerHTML='<div class="empty" style="padding:22px"><p>Could not load Human Design.</p></div>';return;}
+  renderHD();
+  var badge=document.getElementById('tgHD');if(badge)badge.textContent=(HDS.data.team&&HDS.data.team.length?HDS.data.team.length+ (HDS.data.me?1:0):(HDS.data.me?1:''))||'';
+}
+function hdChartCard(p){
+  return '<div class="kcard" style="padding:20px 22px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h3 style="font-size:22px;font-weight:700;letter-spacing:-0.02em">'+esc(p.name||'Your chart')+'</h3><span class="cad">'+esc(p.profile||'')+' '+esc(p.angle||'')+'</span></div>'+
+    '<div class="tiles" style="margin-top:14px">'+
+      '<div class="tile metric"><div class="k">Type</div><div class="v" style="font-size:22px">'+esc(p.type||'-')+'</div></div>'+
+      '<div class="tile metric"><div class="k">Authority</div><div class="v" style="font-size:22px">'+esc(p.authority||'-')+'</div></div>'+
+      '<div class="tile metric"><div class="k">Strategy</div><div class="v" style="font-size:16px">'+esc(p.strategy||'-')+'</div></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><span class="cad" style="color:var(--ink-3)">Signature</span><span class="badge" style="background:#e8f6e6;color:#3f8f57">'+esc(p.signature||'-')+'</span><span class="cad" style="color:var(--ink-3);margin-left:8px">Not-self</span><span class="badge" style="background:var(--warn-bg);color:var(--warn)">'+esc(p.not_self||'-')+'</span></div>'+
+    (p.defined_centers?'<div style="margin-top:14px"><div class="cad" style="color:var(--ink-3);margin-bottom:6px">Defined centers</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+p.defined_centers.map(function(c){return '<span class="badge k">'+esc(c)+'</span>';}).join('')+'</div></div>':'')+
+    (p.channels&&p.channels.length?'<div style="margin-top:12px"><div class="cad" style="color:var(--ink-3);margin-bottom:6px">Channels</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+p.channels.map(function(c){return '<span class="badge" style="background:var(--bg-alt);color:var(--ink-2)">'+esc(c)+'</span>';}).join('')+'</div></div>':'')+
+    '</div>';
+}
+function hdFormHtml(){
+  var tz=HD_TZ.map(function(t){return '<option value="'+t[0]+'"'+(t[0]===-6?' selected':'')+'>'+esc(t[1])+'</option>';}).join('');
+  return '<div class="kcard" style="padding:20px 22px"><h3 style="font-size:18px;font-weight:600">Take your Human Design</h3><p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin:6px 0 14px">Exact birth time matters. Even fifteen minutes can change it.</p>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><input id="hdName" placeholder="Your name" style="flex:1;min-width:160px;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font:inherit"/></div>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><div style="flex:1;min-width:140px"><label class="cad" style="color:var(--ink-3)">Birth date</label><input id="hdDate" type="date" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font:inherit;margin-top:4px"/></div>'+
+    '<div style="flex:1;min-width:120px"><label class="cad" style="color:var(--ink-3)">Birth time</label><input id="hdTime" type="time" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font:inherit;margin-top:4px"/></div></div>'+
+    '<div style="margin-top:10px"><label class="cad" style="color:var(--ink-3)">Birth time zone</label><select id="hdTz" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font:inherit;margin-top:4px">'+tz+'</select></div>'+
+    '<button class="btn" style="margin-top:16px" id="hdGo" onclick="hdSubmit()">Get my chart</button></div>';
+}
+function hdTeamRow(p){
+  return '<div class="row"><div class="r1"><span class="badge k">'+esc(p.type||'?')+'</span><h4 style="flex:1;font-size:15px;font-weight:600">'+esc(p.name)+'</h4>'+
+    '<span class="cad">'+esc(p.authority||'')+'</span><span class="cad">'+esc(p.profile||'')+'</span>'+(guardWriteSilent()?'<span class="link" onclick="hdRemove(\''+p.id+'\')">Remove</span>':'')+'</div></div>';
+}
+function guardWriteSilent(){try{return canWrite();}catch(e){return false;}}
+function renderHD(){
+  var d=HDS.data||{};var host=document.getElementById('hdBody');if(!host)return;var html='';
+  if(d.me){html+=hdChartCard(d.me)+'<div style="margin-top:8px"><span class="link" onclick="hdShowForm()">Redo my chart</span></div>';}
+  else{html+='<div id="hdFormWrap">'+hdFormHtml()+'</div>';}
+  html+='<div class="lbl" style="margin:28px 0 12px">Send it to your team</div>'+
+    '<div class="kcard" style="padding:16px 18px"><p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin:0 0 12px">Create a link and send it to anyone on your team or a client. They take it, you keep the chart.</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="hdInviteName" placeholder="Their name (optional)" style="flex:1;min-width:180px;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px;font:inherit"/><button class="btn" onclick="hdInvite()">Create intake link</button></div><div id="hdInviteOut" style="margin-top:10px"></div></div>';
+  if(d.invites&&d.invites.length){
+    html+='<div class="lbl" style="margin:22px 0 10px">Pending links</div>'+d.invites.map(function(iv){return '<div class="row"><div class="r1"><h4 style="flex:1;font-size:14px;font-weight:600">'+esc(iv.invited_name||'Unnamed link')+'</h4><span class="link" onclick="hdCopy(\''+esc(iv.url)+'\')">Copy link</span><span class="link" onclick="hdRevoke(\''+iv.id+'\')">Cancel</span></div></div>';}).join('');
+  }
+  html+='<div class="lbl" style="margin:28px 0 12px">Your team’s design</div>';
+  html+=(d.team&&d.team.length)?d.team.map(hdTeamRow).join(''):'<div class="empty" style="padding:20px"><p>No teammate charts yet. Create a link above and send it.</p></div>';
+  host.innerHTML=html;
+}
+function hdShowForm(){var w=document.getElementById('hdBody');/* re-render with form on top */HDS.data.me=null;renderHD();}
+async function hdSubmit(){
+  if(!guardWrite())return;var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  var name=g('hdName').trim(),date=g('hdDate'),time=g('hdTime'),tz=g('hdTz');
+  if(!date||!time){toast('Add your birth date and exact time');return;}
+  var btn=document.getElementById('hdGo');if(btn){btn.disabled=true;btn.textContent='Building your chart...';}
+  try{var j=await api('/api/os2-hd',{action:'submit',name:name,date:date,time:time,tz_offset:Number(tz)});if(j&&j.profile){toast('You are a '+j.profile.type);loadHD();}}
+  catch(e){if(e.message!=='signed out')toast(e.message);if(btn){btn.disabled=false;btn.textContent='Get my chart';}}
+}
+async function hdInvite(){
+  if(!guardWrite())return;var name=(document.getElementById('hdInviteName')||{}).value||'';
+  try{var j=await api('/api/os2-hd',{action:'invite',name:name.trim()});if(j&&j.url){var out=document.getElementById('hdInviteOut');if(out)out.innerHTML='<div style="background:var(--bg-alt);border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="cad" style="text-transform:none;letter-spacing:0;flex:1;word-break:break-all">'+esc(j.url)+'</span><button class="btn sm" onclick="hdCopy(\''+esc(j.url)+'\')">Copy</button></div>';loadHD();}}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+function hdCopy(url){try{navigator.clipboard.writeText(url);toast('Link copied');}catch(e){toast('Copy failed, select it manually');}}
+async function hdRevoke(id){if(!guardWrite())return;try{await api('/api/os2-hd',{action:'revoke',id:id});toast('Cancelled');loadHD();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function hdRemove(id){if(!guardWrite())return;if(!confirm('Remove this chart?'))return;try{await api('/api/os2-hd',{action:'remove',id:id});toast('Removed');loadHD();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+
 /* ---- TMI University: not a course. Artifacts gate the floors. ---- */
 var UNI={loaded:false,data:null};
 function uniOpen(html){document.getElementById('mcard').innerHTML=html;document.getElementById('modal').classList.add('on');}
@@ -2955,7 +3030,7 @@ var PVIEWS=[
   ['blueprint','Design my company'],['build','Build with TMI'],['departments','Departments'],
   ['marketplace','Marketplace'],['workforce','Workforce'],['workflows','Workflows'],
   ['knowledge','Knowledge'],['brain','Company Brain'],['reports','Reports'],['activity','Activity'],
-  ['observe','Runs & cost'],['university','University'],
+  ['observe','Runs & cost'],['university','University'],['human-design','Human Design'],
   ['integrations','Connect tools'],['plans','Plans & offers'],
   ['team','Team',{owner:true}],['settings','Settings',{owner:true}],['clients','Clients',{installer:true}]
 ];

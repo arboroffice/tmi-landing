@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<title>Human Design Intake | TMI</title>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin/>
+<style>
+  @import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+  :root{--bg:#0a0b14;--card:#14161f;--ink:#f4f5f2;--ink-2:rgba(255,255,255,0.62);--ink-3:rgba(255,255,255,0.40);--line:rgba(255,255,255,0.14);--chart:#E4FF97;--sans:"General Sans",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;-webkit-font-smoothing:antialiased;}
+  .card{width:100%;max-width:540px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:40px 36px;position:relative;overflow:hidden;}
+  .card::after{content:"";position:absolute;right:-20%;top:-40%;width:70%;height:160%;background:radial-gradient(closest-side,rgba(228,255,151,0.15),transparent 70%);pointer-events:none;}
+  .in{position:relative;z-index:1;}
+  .mk{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:15px;}
+  .mk span{background:#fff;color:#0a0b14;font-size:11px;font-weight:700;padding:3px 6px;border-radius:5px;}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--chart);margin:30px 0 12px;}
+  h1{font-size:clamp(24px,4vw,34px);font-weight:700;letter-spacing:-0.03em;line-height:1.08;margin:0;}
+  .sub{color:var(--ink-2);font-size:14.5px;line-height:1.6;margin-top:14px;}
+  label{display:block;font-size:12px;font-weight:600;letter-spacing:0.04em;color:var(--ink-3);text-transform:uppercase;margin:18px 0 6px;}
+  input,select{width:100%;background:#0f111b;border:1px solid var(--line);border-radius:10px;padding:12px 13px;font:inherit;font-size:15px;color:var(--ink);}
+  input:focus,select:focus{outline:none;border-color:var(--chart);}
+  .row{display:flex;gap:12px;}.row>div{flex:1;}
+  .btn{width:100%;margin-top:24px;background:var(--chart);color:#0a0b14;border:none;border-radius:999px;padding:14px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;}
+  .btn:disabled{opacity:0.6;cursor:default;}
+  .note{color:var(--ink-3);font-size:12px;line-height:1.5;margin-top:14px;}
+  .err{color:#ffb4a2;font-size:13px;margin-top:12px;display:none;}
+  .ok .big{font-size:44px;font-weight:700;letter-spacing:-0.02em;color:var(--chart);margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="card"><div class="in" id="root">
+  <div class="mk"><span>TMI</span> TMI</div>
+  <div id="body"><div class="sub">Loading...</div></div>
+</div></div>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+var TZ=[[-12,'UTC-12'],[-11,'UTC-11'],[-10,'Hawaii (UTC-10)'],[-9,'Alaska (UTC-9)'],[-8,'US Pacific (UTC-8)'],[-7,'US Mountain (UTC-7)'],[-6,'US Central (UTC-6)'],[-5,'US Eastern (UTC-5)'],[-4,'Atlantic (UTC-4)'],[-3,'UTC-3'],[-2,'UTC-2'],[-1,'UTC-1'],[0,'UTC / London (UTC+0)'],[1,'Central Europe (UTC+1)'],[2,'Eastern Europe (UTC+2)'],[3,'UTC+3'],[3.5,'Iran (UTC+3:30)'],[4,'UTC+4'],[5,'Pakistan (UTC+5)'],[5.5,'India (UTC+5:30)'],[6,'UTC+6'],[7,'UTC+7'],[8,'China / Singapore (UTC+8)'],[9,'Japan (UTC+9)'],[9.5,'Central Australia (UTC+9:30)'],[10,'East Australia (UTC+10)'],[11,'UTC+11'],[12,'New Zealand (UTC+12)'],[13,'UTC+13'],[14,'UTC+14']];
+var token=new URLSearchParams(location.search).get('token')||'';
+function fail(m){var e=document.getElementById('err');if(e){e.textContent=m;e.style.display='block';}}
+(async function(){
+  var body=document.getElementById('body');
+  if(!token){body.innerHTML='<div class="sub">This intake link is missing its token. Ask whoever sent it for a fresh link.</div>';return;}
+  var j;try{j=await (await fetch('/api/hd-intake?token='+encodeURIComponent(token))).json();}catch(e){j=null;}
+  if(!j||!j.valid){body.innerHTML='<div class="sub">This link is not valid anymore. Ask for a fresh one.</div>';return;}
+  var opts=TZ.map(function(t){return '<option value="'+t[0]+'"'+(t[0]===-6?' selected':'')+'>'+esc(t[1])+'</option>';}).join('');
+  body.innerHTML='<div class="eyebrow">'+esc(j.company)+' &middot; Human Design</div>'+
+    '<h1>Get your Human Design chart.</h1>'+
+    '<p class="sub">It takes your exact birth details and maps how you are wired to make decisions and do your best work. '+esc(j.company)+' keeps this so your team can work with your design, not against it.</p>'+
+    '<label>Your name</label><input id="name" placeholder="Jordan Lee" value="'+esc(j.invited_name||'')+'"/>'+
+    '<div class="row"><div><label>Birth date</label><input id="date" type="date"/></div><div><label>Birth time</label><input id="time" type="time"/></div></div>'+
+    '<label>Birth time zone</label><select id="tz">'+opts+'</select>'+
+    '<div class="err" id="err"></div>'+
+    '<button class="btn" id="go" onclick="submitIntake()">Get my chart</button>'+
+    '<p class="note">Exact birth time matters, even fifteen minutes can change the result. If you are not sure, use your best estimate and confirm it later.</p>';
+})();
+async function submitIntake(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  var name=g('name').trim(),date=g('date'),time=g('time'),tz=g('tz');
+  document.getElementById('err').style.display='none';
+  if(!name){return fail('Add your name.');}
+  if(!date){return fail('Add your birth date.');}
+  if(!time){return fail('Add your birth time. It really matters.');}
+  var btn=document.getElementById('go');btn.disabled=true;btn.textContent='Building your chart...';
+  var j;try{j=await (await fetch('/api/hd-intake',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token,name:name,date:date,time:time,tz_offset:Number(tz)})})).json();}catch(e){j=null;}
+  if(!j||!j.ok){btn.disabled=false;btn.textContent='Get my chart';return fail((j&&j.error)||'Something went wrong. Try again.');}
+  document.getElementById('body').innerHTML='<div class="ok"><div class="eyebrow">Your Human Design</div><h1>You are a</h1><div class="big">'+esc(j.type)+'</div>'+
+    '<p class="sub"><b style="color:var(--ink)">Strategy:</b> '+esc(j.strategy)+'<br/><b style="color:var(--ink)">Authority:</b> '+esc(j.authority)+'<br/><b style="color:var(--ink)">Profile:</b> '+esc(j.profile)+'</p>'+
+    '<p class="note">Saved. Your team can now work with how you are wired. You can close this page.</p></div>';
+}
+</script>
+</body>
+</html>
