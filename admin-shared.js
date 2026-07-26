@@ -256,6 +256,7 @@ const TMIAdmin = (() => {
     <div class="sb-group-label">Clients</div>
     ${navItem('clients', 'Clients', I.clients, false, '/admin-clients')}
     ${navItem('os-clients', 'Client OS', I.grid || I.clients, false, '/admin-os-clients')}
+    ${navItem('university', 'University', I.clients, false, '/admin-university')}
     ${navItem('client-health', 'Client Health', I.clientHealth, false, '/admin-clients#health')}
     ${navItem('retention-plan', 'Retention Plan', I.clientHealth)}
     ${navItem('projects', 'Projects', I.projects, false, '/admin-work#projects')}

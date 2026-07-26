@@ -10,7 +10,7 @@
 //   'review' { artifact_id, verdict, note }   -> { artifact, standing }   verify | return
 
 const db = require('./_db');
-const { requireAuth, cors } = require('./_auth');
+const { verifyToken, cors } = require('./_auth');
 const U = require('./_osuniversity');
 
 async function standingFor(tid) {
@@ -27,8 +27,8 @@ module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-  const admin = requireAuth(req, res);
-  if (!admin) return;
+  const admin = verifyToken(req);
+  if (!admin) return res.status(401).json({ error: 'Unauthorized' });
 
   const b = req.body || {};
   const action = String(b.action || 'queue');

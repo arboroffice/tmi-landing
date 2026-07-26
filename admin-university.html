@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>University — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .u-queue{display:flex;flex-direction:column;gap:14px;margin-top:6px;}
+  .u-card{border:1px solid var(--line);border-radius:12px;padding:18px 20px;background:#fff;}
+  .u-meta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:12px;color:var(--muted,#8a8c9e);}
+  .u-meta b{color:var(--ink,#0a0b14);font-size:14px;font-weight:600;}
+  .u-chip{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:#f3f4ef;color:#55576a;}
+  .u-body{margin:12px 0 14px;padding:12px 14px;background:#faf9f4;border:1px solid var(--line);border-radius:8px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;max-height:240px;overflow:auto;}
+  .u-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .u-empty{padding:40px;text-align:center;color:var(--muted,#8a8c9e);}
+  .u-note{width:100%;min-height:70px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;font-size:13px;margin-bottom:10px;display:none;}
+</style>
+<!-- OpenAI Ads pixel --><script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"1SVHHxEVsMKxiFJd8MnXZm",debug:false});</script>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">University</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadQueue()">Refresh</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sec-head">
+        <h1>University — grading</h1>
+      </div>
+      <p style="color:var(--muted,#8a8c9e);font-size:14px;max-width:70ch;margin:0 0 20px">Members submit an artifact when a lesson is done. Nothing unlocks until it is verified here against the rubric: does the thing actually exist in their business. A member can never verify their own work. Verifying opens the next floor for them.</p>
+      <div class="sec-head" style="margin-bottom:10px"><span class="filter-count" id="u-count"></span></div>
+      <div class="u-queue" id="u-queue"><div class="u-empty">Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+<script src="admin-shared.js"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function ago(iso){try{var s=Math.floor((Date.now()-new Date(iso))/1000);if(s<3600)return Math.max(1,Math.floor(s/60))+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}catch(e){return '';}}
+
+async function loadQueue(){
+  var host=document.getElementById('u-queue');
+  var j=await TMIAdmin.api('/api/tmi-university','POST',{action:'queue'});
+  if(!j){return;} // 401 handled by shared api (redirects to /admin)
+  var items=j.items||[];
+  document.getElementById('u-count').textContent=items.length+' awaiting review';
+  if(!items.length){host.innerHTML='<div class="u-empty">Queue is clear. Nothing waiting on review.</div>';return;}
+  host.innerHTML=items.map(function(it){
+    return '<div class="u-card" id="art-'+esc(it.id)+'">'+
+      '<div class="u-meta"><b>'+esc(it.company)+'</b><span class="u-chip">'+esc(it.floor||'')+'</span><span>'+esc(it.label||it.key)+'</span><span style="margin-left:auto">'+esc(ago(it.updated_at||it.created_at))+'</span></div>'+
+      '<div class="u-body">'+esc(it.content||'(empty)')+'</div>'+
+      '<textarea class="u-note" id="note-'+esc(it.id)+'" placeholder="What needs work? This note goes to the member."></textarea>'+
+      '<div class="u-actions">'+
+        '<button class="btn btn-primary btn-sm" onclick="review(\''+esc(it.id)+'\',\'verify\')">Verify &amp; unlock</button>'+
+        '<button class="btn btn-ghost btn-sm" onclick="toggleNote(\''+esc(it.id)+'\')">Send back</button>'+
+      '</div></div>';
+  }).join('');
+}
+function toggleNote(id){
+  var n=document.getElementById('note-'+id);
+  if(n.style.display==='block'){ // second click submits the return
+    review(id,'return');
+  }else{
+    n.style.display='block';n.focus();
+    // change the button label to make the two-step obvious
+    var btns=document.querySelectorAll('#art-'+id+' .u-actions .btn-ghost');
+    if(btns[0]) btns[0].textContent='Confirm send back';
+  }
+}
+async function review(id,verdict){
+  var note=verdict==='return'?(document.getElementById('note-'+id)||{}).value||'':'';
+  if(verdict==='return'&&!note.trim()){TMIAdmin.toast('Add a note so the member knows what to fix','error');return;}
+  var j=await TMIAdmin.api('/api/tmi-university','POST',{action:'review',artifact_id:id,verdict:verdict,note:note});
+  if(!j)return;
+  TMIAdmin.toast(verdict==='verify'?'Verified. Their next floor is open.':'Sent back to the member.');
+  var card=document.getElementById('art-'+id);if(card)card.remove();
+  var left=document.querySelectorAll('.u-card').length;
+  document.getElementById('u-count').textContent=left+' awaiting review';
+  if(!left)document.getElementById('u-queue').innerHTML='<div class="u-empty">Queue is clear. Nothing waiting on review.</div>';
+}
+
+TMIAdmin.initSidebar('university');
+loadQueue();
+</script>
+</body>
+</html>
