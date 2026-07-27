@@ -1,10 +1,10 @@
-// Creates a Stripe Checkout Session for the $1,000 Complete Audit.
+// Creates a Stripe Checkout Session for the $5,000 Intelligent Company Audit.
 // POST { email?, company? } -> { url }
 
 const { cors } = require('./_auth');
 
 const SITE = 'https://www.tmitechai.com';
-const PRICE_CENTS = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 100000); // $1,000
+const PRICE_CENTS = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 500000); // $5,000
 
 module.exports = async function handler(req, res) {
   cors(res);
@@ -22,7 +22,7 @@ module.exports = async function handler(req, res) {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: 'TMI Complete Audit',
+            name: 'TMI Intelligent Company Audit',
             description: 'Detailed operational audit + 30-minute strategy call with the founder and a strategist.',
           },
           unit_amount: PRICE_CENTS,

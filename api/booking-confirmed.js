@@ -40,7 +40,7 @@ module.exports = async function handler(req, res) {
 
   if (!email) return res.status(400).json({ error: 'No email in payload' });
 
-  // Paid Complete Audit customers take precedence. They may ALSO exist as a cold
+  // Paid Intelligent Company Audit customers take precedence. They may ALSO exist as a cold
   // lead (e.g. an outbound prospect who later paid), so check applications first
   // and handle the audit booking before the normal lead flow.
   {
@@ -57,7 +57,7 @@ module.exports = async function handler(req, res) {
         try {
           if (process.env.TWILIO_ACCOUNT_SID) {
             twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN).messages.create({
-              body: `Complete Audit call booked: ${appLead.name || ''} | ${email} | ${dateStr} CT`,
+              body: `Intelligent Company Audit call booked: ${appLead.name || ''} | ${email} | ${dateStr} CT`,
               from: FROM_NUMBER, to: ALERT_NUMBER,
             }).catch(() => {});
           }
@@ -75,7 +75,7 @@ module.exports = async function handler(req, res) {
               company: appLead.company || appLead.name || null,
               account_label: [appLead.name, appLead.company].filter(Boolean).join(' · ') || appLead.company || email,
               contact_email: email,
-              title: 'Complete Audit strategy call',
+              title: 'Intelligent Company Audit strategy call',
               sales_stage: 'Discovery',
               transcript: '',
               status: 'scheduled',

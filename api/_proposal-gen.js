@@ -85,7 +85,7 @@ async function generateProposal(opts) {
 <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
 <p style="font-size:13px;letter-spacing:0.18em;text-transform:uppercase;color:#E4FF97;margin:0 0 16px;">Your build proposal</p>
 <h1 style="font-weight:400;font-size:26px;margin:0 0 14px;">Three ways to build it.</h1>
-<p style="color:rgba(255,255,255,0.66);line-height:1.65;margin:0 0 24px;">Following your Complete Audit and our call, here is exactly what TMI would build for ${company || 'your company'} and the three ways to get there: do it yourself, do it with us, or have us build and install it for you.</p>
+<p style="color:rgba(255,255,255,0.66);line-height:1.65;margin:0 0 24px;">Following your Intelligent Company Audit and our call, here is exactly what TMI would build for ${company || 'your company'} and the three ways to get there: do it yourself, do it with us, or have us build and install it for you.</p>
 <p style="margin:0 0 8px;"><a href="${link}" style="background:#E4FF97;color:#0a0b14;font-weight:700;padding:14px 28px;border-radius:999px;text-decoration:none;display:inline-block;">View your proposal</a></p>
 <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:34px 0 0;border-top:1px solid rgba(255,255,255,0.12);padding-top:16px;">TMI Technology</p>
 </div></body></html>`,

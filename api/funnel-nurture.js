@@ -67,8 +67,8 @@ module.exports = async function handler(req, res) {
       const unsub = app ? `${SITE}/api/unsubscribe?id=${app.id}` : null;
       await email(b.email, 'One quick step to start your audit',
         `<p style="margin:0 0 16px;">Hey ${name},</p>
-<p style="margin:0 0 16px;">Your Complete Audit is paid and ready to build. We just need your intake - about 10 to 15 minutes of detail on how your business runs. The more you give us, the sharper your audit and the more we get done on the call.</p>${cta(url, 'Finish my intake')}`, unsub);
-      if (b.touch === 'second') await sms(app && app.phone, `${name} - your Complete Audit is paid and waiting on your intake (10-15 min). Finish here: ${url}`);
+<p style="margin:0 0 16px;">Your Intelligent Company Audit is paid and ready to build. We just need your intake - about 10 to 15 minutes of detail on how your business runs. The more you give us, the sharper your audit and the more we get done on the call.</p>${cta(url, 'Finish my intake')}`, unsub);
+      if (b.touch === 'second') await sms(app && app.phone, `${name} - your Intelligent Company Audit is paid and waiting on your intake (10-15 min). Finish here: ${url}`);
       return ack();
     }
 

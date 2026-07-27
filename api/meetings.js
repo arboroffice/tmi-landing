@@ -59,7 +59,7 @@ module.exports = async (req, res) => {
             prep_brief:   b.prep_brief || existing.prep_brief || null,
             company:      b.company || existing.company || null,
             account_label: b.account_label || existing.account_label || null,
-            title:        b.title || existing.title || 'Complete Audit strategy call',
+            title:        b.title || existing.title || 'Intelligent Company Audit strategy call',
             sales_stage:  b.sales_stage || existing.sales_stage || null,
             transcript:   String(b.transcript),
             duration_sec: b.duration_sec || existing.duration_sec || null,

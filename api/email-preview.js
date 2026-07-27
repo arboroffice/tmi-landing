@@ -62,8 +62,8 @@ function samples(to) {
     html: emailWrap(
       `<p>Hey ${first},</p>` +
       `<p>Quick thought while it's on my mind. In almost every operation we audit, the money does not leak where the owner expects. It leaks in the handoffs: the lead that waits, the invoice that slips out late, the job nobody costed until it was over.</p>` +
-      `<p>The free audit maps exactly where yours leaks and hands you a 30-day plan, and you keep the audit either way.</p>` +
-      `<p>${btn(auditUrl, 'Get your free audit', true)}</p>` +
+      `<p>The Intelligent Company Audit maps exactly where yours leaks and hands you a 30-day plan, and you keep the audit either way.</p>` +
+      `<p>${btn(auditUrl, 'Get your Intelligent Company Audit', true)}</p>` +
       `<p>The TMI team</p>`,
       unsub
     ),

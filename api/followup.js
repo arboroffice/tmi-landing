@@ -55,7 +55,7 @@ async function handler(req, res) {
   const preCallSteps = ['pre_call_24h', 'pre_call_2h', 'pre_call_1h', 'pre_call_10m'];
 
   // Statuses where the lead has converted, gone dead, or opted out. Once a lead
-  // reaches any of them, all cold and Intelligence Audit nurture follow-up stops.
+  // reaches any of them, all cold and Intelligent Company Audit nurture follow-up stops.
   //
   // Verified against the admin portal (admin-leads.html): the lead pipeline is
   // new -> contacted -> qualified -> proposal -> won -> lost. "Convert to client"
@@ -85,14 +85,14 @@ async function handler(req, res) {
       return res.status(200).json({ skipped: true, reason: 'not booked' });
     }
   } else {
-    // Cold + Intelligence Audit nurture steps stop once the lead has converted
+    // Cold + Intelligent Company Audit nurture steps stop once the lead has converted
     // (booked / client / building / etc.) or gone dead.
     if (STOP_STATUSES.includes(lead.status)) {
       return res.status(200).json({ skipped: true, reason: `suppressed - status is "${lead.status}"` });
     }
   }
 
-  // Pull the lead's most recent Intelligence Audit (if any) so the campaign can
+  // Pull the lead's most recent Intelligent Company Audit (if any) so the campaign can
   // reference their actual industry and biggest bottleneck.
   let audit = null;
   try {
@@ -250,13 +250,13 @@ ${sig}`;
   }
 
   // ─── INTELLIGENCE AUDIT CAMPAIGN ───
-  // 7-day sequence for people who completed the Intelligence Audit, plus a
+  // 7-day sequence for people who completed the Intelligent Company Audit, plus a
   // 30-day check-in. Framed around the three bottlenecks: founder, information,
   // latency. Stops automatically once the lead converts (see STOP_STATUSES).
 
   if (step === 'ia_day1_sms' && lead.phone) {
     await sms.messages.create({
-      body: `Hey ${firstName} - your TMI Intelligence Audit is in your inbox. The short version: the ceiling on most operations isn't the market, it's that ${worstLine}. Worth 15 min to walk through what we'd build first? ${SITE}/booking`,
+      body: `Hey ${firstName} - your TMI Intelligent Company Audit is in your inbox. The short version: the ceiling on most operations isn't the market, it's that ${worstLine}. Worth 15 min to walk through what we'd build first? ${SITE}/booking`,
       from: FROM_NUMBER,
       to: formatPhone(lead.phone),
     });
@@ -325,7 +325,7 @@ ${sig}`;
     await resend.emails.send({
       from: 'TMI <support@tmitechai.com>',
       to: lead.email,
-      subject: `${firstName}, 30 days since your Intelligence Audit`,
+      subject: `${firstName}, 30 days since your Intelligent Company Audit`,
       html: emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">It's been about a month since you ran the audit. Checking in, no agenda.</p>

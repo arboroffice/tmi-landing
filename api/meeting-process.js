@@ -118,7 +118,7 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'transcript required' });
   }
 
-  // Ground the artifact in the paid Complete Audit when this call is attached to
+  // Ground the artifact in the paid Intelligent Company Audit when this call is attached to
   // one, so the PRD/digest reflects both the conversation and the audit findings.
   let auditContext = '';
   if (auditId) {

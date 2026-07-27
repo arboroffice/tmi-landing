@@ -12,9 +12,9 @@
 
   const ROUTES = {
     audit: {
-      label: 'Get the Complete Audit - $1,000',
-      url: '/complete-audit',
-      note: 'A detailed operational audit, then 30 minutes with the founder and a strategist.',
+      label: 'Book the Intelligent Company Audit',
+      url: '/book',
+      note: 'A detailed operational audit, then 30 minutes with the founder and a strategist. It credits toward your build if you move forward.',
     },
   };
 

@@ -36,7 +36,7 @@ function buildStepEmail(reg, step) {
   } else if (step === 'followup_2h') {
     if (reg.attended) {
       subject = `Your next step after the class`;
-      body = `<p>Hey ${first},</p><p>Thanks for spending 40 minutes with us. You've seen the framework, the three systems that let a company run without the owner in the middle of everything.</p><p>When you're ready to map exactly where yours is leaking, just <b>reply to this email</b> and we'll set up your Business Intelligence Audit, a private call where we look at your operation the way we would if we owned it.</p><p>Or reply to this email with a question first.</p><p>- The TMI team</p>`;
+      body = `<p>Hey ${first},</p><p>Thanks for spending 40 minutes with us. You've seen the framework, the three systems that let a company run without the owner in the middle of everything.</p><p>When you're ready to map exactly where yours is leaking, just <b>reply to this email</b> and we'll set up your Intelligent Company Audit, a private call where we look at your operation the way we would if we owned it.</p><p>Or reply to this email with a question first.</p><p>- The TMI team</p>`;
     } else {
       subject = `You missed it, grab the next session`;
       body = `<p>Hey ${first},</p><p>Looks like ${when} didn't work out. No problem, we run it live every Tuesday. Grab your seat for the next one:</p><p>${btn(W.SITE + '/webinar', 'Save my seat →', true)}</p><p>It's 40 minutes on the system that removes the owner as the bottleneck. Worth the time.</p><p>- The TMI team</p>`;

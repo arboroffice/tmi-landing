@@ -1,4 +1,4 @@
-// Serves the Complete Audit intake schema to the intake form.
+// Serves the Intelligent Company Audit intake schema to the intake form.
 
 const { cors } = require('./_auth');
 
