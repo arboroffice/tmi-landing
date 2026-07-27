@@ -97,8 +97,8 @@ module.exports = async function handler(req, res) {
           `Hi ${first},\n\n` +
           `You're on the list for ${eventName}. We're finalizing the date and venue and you'll be the first to know, with the details sent straight to you.\n\n` +
           `This is a room for business owners building the future. Come ready to meet other operators and see what running on intelligent systems actually looks like.\n\n` +
-          `If you'd like your own operation mapped before then, you can get a free Business Intelligence Audit here: https://www.tmitechai.com/audit\n\n` +
-          `— The TMI team`,
+          `If you'd like your own operation mapped before then, you can book your Intelligent Company Audit here: https://www.tmitechai.com/book\n\n` +
+          `- The TMI team`,
       });
       await resend.emails.send({
         from: 'TMI <support@tmitechai.com>',

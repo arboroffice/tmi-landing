@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Payments &amp; OS — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px;}
+  .tile{background:var(--card,#fff);border:1px solid var(--line,rgba(0,0,0,0.08));border-radius:12px;padding:16px 18px;}
+  .tile .k{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted,#86868b);}
+  .tile .v{font-size:26px;font-weight:800;letter-spacing:-0.02em;margin-top:6px;}
+  .tile .s{font-size:12px;color:var(--muted,#86868b);margin-top:4px;}
+  table.pay{width:100%;border-collapse:collapse;background:var(--card,#fff);border:1px solid var(--line,rgba(0,0,0,0.08));border-radius:12px;overflow:hidden;}
+  table.pay th{text-align:left;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted,#86868b);padding:11px 14px;border-bottom:1px solid var(--line,rgba(0,0,0,0.08));}
+  table.pay td{padding:12px 14px;font-size:13.5px;border-bottom:1px solid var(--line,rgba(0,0,0,0.06));vertical-align:top;}
+  table.pay tr:last-child td{border-bottom:none;}
+  .who{font-weight:600;}
+  .sub{font-size:12px;color:var(--muted,#86868b);}
+  .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.04em;padding:4px 9px;border-radius:999px;}
+  .pill.paid{background:#e8f6e6;color:#3a7d33;}
+  .pill.unpaid{background:#f3f3f3;color:#86868b;}
+  .pill.os{background:#eef4ff;color:#3a5bbf;}
+  .pill.noos{background:#fff4d6;color:#8a6d00;}
+  .filters{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+  .filters input,.filters select{padding:8px 11px;border:1px solid var(--line-strong,rgba(0,0,0,0.13));border-radius:8px;font:inherit;font-size:13px;}
+  .amt{font-weight:700;}
+  .osbtn{font-size:12px;font-weight:600;color:#3a5bbf;}
+  .empty{padding:40px;text-align:center;color:var(--muted,#86868b);}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Payments &amp; OS</span></div>
+      <div class="topbar-actions"><button class="btn btn-ghost btn-sm" onclick="loadPayments()">Refresh</button></div>
+    </div>
+
+    <div class="content" style="padding:24px 28px;">
+      <div class="tiles" id="tiles"></div>
+
+      <div class="filters">
+        <input id="search" placeholder="Search name, company, email..." oninput="render()" style="flex:1;min-width:200px"/>
+        <select id="filter" onchange="render()">
+          <option value="all">All leads</option>
+          <option value="paid">Paid only</option>
+          <option value="unpaid">Unpaid only</option>
+          <option value="os">On the OS</option>
+          <option value="paid-noos">Paid, not on OS yet</option>
+        </select>
+        <span class="sub" id="count"></span>
+      </div>
+
+      <table class="pay">
+        <thead><tr><th>Customer</th><th>Payment</th><th>Amount</th><th>Paid</th><th>Their OS</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="toast-root"></div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('payments');
+
+var DATA = { summary: {}, payments: [] };
+
+function money(n) { return n == null ? '-' : '$' + Number(n).toLocaleString('en-US'); }
+function fmtDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); } catch (e) { return '-'; } }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+async function loadPayments() {
+  var j = await TMIAdmin.api('/api/admin-payments');
+  if (!j) return;
+  DATA = j;
+  renderTiles();
+  render();
+}
+
+function renderTiles() {
+  var s = DATA.summary || {};
+  document.getElementById('tiles').innerHTML =
+    tile('Revenue collected', money(s.revenue), 'From ' + (s.paid || 0) + ' paid audits') +
+    tile('This month', money(s.revenue_mtd), 'Audit revenue MTD') +
+    tile('Paid audits', (s.paid || 0), (s.leads || 0) + ' audit leads total') +
+    tile('Paying + on the OS', (s.paid_on_os || 0), (s.on_os || 0) + ' leads have an OS') +
+    tile('Audit price', money(s.audit_price), 'Credits toward the build');
+}
+function tile(k, v, s) { return '<div class="tile"><div class="k">' + esc(k) + '</div><div class="v">' + v + '</div><div class="s">' + esc(s || '') + '</div></div>'; }
+
+function render() {
+  var q = (document.getElementById('search').value || '').toLowerCase();
+  var f = document.getElementById('filter').value;
+  var rows = (DATA.payments || []).filter(function (p) {
+    if (f === 'paid' && !p.paid) return false;
+    if (f === 'unpaid' && p.paid) return false;
+    if (f === 'os' && !p.os) return false;
+    if (f === 'paid-noos' && !(p.paid && !p.os)) return false;
+    if (q && !((p.name || '') + ' ' + (p.company || '') + ' ' + (p.email || '')).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('count').textContent = rows.length + ' shown';
+  if (!rows.length) { document.getElementById('rows').innerHTML = '<tr><td colspan="5" class="empty">No matching records.</td></tr>'; return; }
+  document.getElementById('rows').innerHTML = rows.map(function (p) {
+    var pay = p.paid ? '<span class="pill paid">Paid</span>' : '<span class="pill unpaid">' + esc(p.status || 'captured') + '</span>';
+    var os = p.os
+      ? '<div><span class="pill os">On the OS</span> <span class="sub">' + esc(p.os.plan) + (p.os.onboarded ? ', onboarded' : ', not onboarded yet') + '</span><div class="sub">' + esc(p.os.name || '') + '</div><a class="osbtn" href="/admin-os-clients">View in Client OS &rarr;</a></div>'
+      : '<span class="pill noos">No OS yet</span>';
+    return '<tr>' +
+      '<td><div class="who">' + esc(p.name || p.company || 'Unknown') + '</div>' + (p.company ? '<div class="sub">' + esc(p.company) + '</div>' : '') + '<div class="sub">' + esc(p.email || '') + (p.phone ? ' &middot; ' + esc(p.phone) : '') + '</div></td>' +
+      '<td>' + pay + (p.stripe_session ? '<div class="sub" title="' + esc(p.stripe_session) + '">' + esc(String(p.stripe_session).slice(0, 18)) + '...</div>' : '') + '</td>' +
+      '<td class="amt">' + money(p.amount) + '</td>' +
+      '<td>' + fmtDate(p.paid_at) + '</td>' +
+      '<td>' + os + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+loadPayments();
+</script>
+</body>
+</html>

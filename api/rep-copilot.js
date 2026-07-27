@@ -26,14 +26,14 @@ async function draft(rep, lead, history, kind) {
   const ind = lead.industry || 'operations';
   const repName = (rep.name || 'the TMI team').split(' ')[0] || 'the TMI team';
 
-  const fallback = `Hi ${nm}, this is ${repName} with TMI. We help ${ind} run tighter with less chaos and full visibility. Open to a quick free audit of ${co}? Takes 15 minutes.`;
+  const fallback = `Hi ${nm}, this is ${repName} with TMI. We help ${ind} run tighter with less chaos and full visibility. We do an Intelligent Company Audit that maps exactly where ${co} leaks time and money, then builds the fix. Worth a short conversation?`;
   if (!apiKey) return fallback;
 
   const hist = history.length
     ? history.map((h, i) => `${i + 1}. ${String(h).slice(0, 200)}`).join('\n')
     : 'No prior contact logged.';
 
-  const prompt = `You are the outreach copilot for a TMI field rep who door-knocks industrial and trades business owners and books a free 15-minute Business Intelligence Audit. You are not closing a sale, you are earning a short call.
+  const prompt = `You are the outreach copilot for a TMI field rep who door-knocks industrial and trades business owners and pitches the Intelligent Company Audit, a paid engagement that maps the operation, scores it, and lays out a 30-day plan, and whose fee credits toward the build. You are not closing the sale on the spot, you are earning a short call with the owner. Do not lead with the price. Only if the owner asks or is clearly interested, share that the audit is $5,000 and credits in full toward the build.
 
 Write ${KIND[kind] || KIND.text} for this specific lead. Ground it in where the conversation actually stands. Do not repeat an opener if they have already been contacted; move it forward. No hype, no emojis, no em dashes, plain dashes only. Sign as ${repName} when a sign-off fits.
 

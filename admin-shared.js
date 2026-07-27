@@ -255,6 +255,7 @@ const TMIAdmin = (() => {
     ${navItem('proposals', 'Proposals', I.proposals)}
     <div class="sb-group-label">Clients</div>
     ${navItem('clients', 'Clients', I.clients, false, '/admin-clients')}
+    ${navItem('payments', 'Payments &amp; OS', I.cityMoney || I.revenue)}
     ${navItem('os-clients', 'Client OS', I.grid || I.clients, false, '/admin-os-clients')}
     ${navItem('university', 'University', I.clients, false, '/admin-university')}
     ${navItem('client-health', 'Client Health', I.clientHealth, false, '/admin-clients#health')}
