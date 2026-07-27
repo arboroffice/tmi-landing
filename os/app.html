@@ -545,6 +545,7 @@
     <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
     <a data-v="observe"><svg class="icon"><use href="#i-chart"/></svg> Runs &amp; cost</a>
     <a href="/university"><svg class="icon"><use href="#i-book"/></svg> University</a>
+    <a data-v="people"><svg class="icon"><use href="#i-users"/></svg> People <span class="tag" id="tgPeople"></span></a>
     <a data-v="human-design"><svg class="icon"><use href="#i-users"/></svg> Human Design <span class="tag" id="tgHD"></span></a>
     <a data-v="team-performance"><svg class="icon"><use href="#i-users"/></svg> Team Performance <span class="tag" id="tgTP"></span></a>
     <a data-v="integrations"><svg class="icon"><use href="#i-plug"/></svg> Connect tools</a>
@@ -715,6 +716,11 @@
     <div id="uniBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
   </section>
 
+  <section class="view" data-view="people">
+    <div class="secbar" style="margin-top:0"><div><div class="h">People</div><p class="sub">Everyone on the team in one place: how they are wired, where they are on the AI adoption curve, and what they are learning. Pulls together Human Design, Team Performance, and University.</p></div></div>
+    <div id="peopleBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
+  </section>
+
   <section class="view" data-view="human-design">
     <div class="secbar" style="margin-top:0"><div><div class="h">Human Design</div><p class="sub">How each person is wired to make decisions and do their best work. Take yours, then send it to your team so you can work with their design, not against it. Computed in-house from birth data, nothing leaves the platform.</p></div></div>
     <div id="hdBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
@@ -828,6 +834,7 @@ function show(v){
   if(v==='team') loadTeam();
   if(v==='observe') loadObserve();
   if(v==='university') loadUniversity();
+  if(v==='people') loadPeople();
   if(v==='human-design') loadHD();
   if(v==='team-performance') loadTP();
   if(v==='integrations') loadConnect();
@@ -2558,6 +2565,47 @@ function showTraceModal(tr){
   document.getElementById('modal').classList.add('on');
 }
 
+/* ---- People: HD + Team Performance + University in one view per person. ---- */
+var PEOPLE={data:null};
+async function loadPeople(){
+  try{PEOPLE.data=await api('/api/os2-people',{action:'state'});}
+  catch(e){if(e.message!=='signed out')document.getElementById('peopleBody').innerHTML='<div class="empty" style="padding:22px"><p>Could not load People.</p></div>';return;}
+  renderPeople();
+  var badge=document.getElementById('tgPeople');if(badge)badge.textContent=((PEOPLE.data.people||[]).length)||'';
+}
+function peopleStatusBadge(s){return s==='done'?'<span class="badge" style="background:#e8f6e6;color:#3f8f57">Done</span>':s==='in_progress'?'<span class="badge" style="background:var(--warn-bg);color:var(--warn)">In progress</span>':'<span class="badge">Assigned</span>';}
+function peopleCard(p){
+  var head='<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><div><h3 style="font-size:18px;font-weight:700;display:inline">'+esc(p.name)+'</h3>'+(p.is_me?' <span class="badge k">You</span>':'')+'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:2px">'+esc(p.role||(p.is_member?'Team member':'On the team'))+'</div></div></div>';
+  // Human Design
+  var hd='';
+  if(p.hd){
+    hd='<div style="margin-top:14px"><div class="cad" style="color:var(--ink-3);margin-bottom:6px">Human Design</div>'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="badge k">'+esc(p.hd.type)+'</span><span class="badge" style="background:var(--bg-alt);color:var(--ink-2)">'+esc(p.hd.authority||'')+'</span><span class="badge" style="background:var(--bg-alt);color:var(--ink-2)">'+esc(p.hd.profile||'')+'</span>'+(p.hd.definition?'<span class="cad" style="color:var(--ink-3)">'+esc(p.hd.definition)+'</span>':'')+
+      '<span class="link" style="margin-left:auto" onclick="hdGuide(\''+p.hd.id+'\')">Working guide</span></div></div>';
+  }
+  // Adoption
+  var ad='';
+  if(p.adoption){
+    ad='<div style="margin-top:14px"><div class="cad" style="color:var(--ink-3);margin-bottom:6px">AI adoption</div>'+
+      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="font-size:14px;font-weight:600">'+esc(p.adoption.stage_label)+'</span>'+tpPips(p.adoption.stage)+
+      (p.adoption.tools&&p.adoption.tools.length?'<span style="display:flex;gap:5px;flex-wrap:wrap">'+p.adoption.tools.map(function(x){return '<span class="badge" style="background:var(--bg-alt);color:var(--ink-2)">'+esc(x)+'</span>';}).join('')+'</span>':'')+'</div></div>';
+  }
+  // University
+  var uni='';
+  if(p.university&&p.university.length){
+    uni='<div style="margin-top:14px"><div class="cad" style="color:var(--ink-3);margin-bottom:6px">University'+(p.university_summary?' &middot; '+esc(p.university_summary):'')+'</div>'+
+      '<div style="display:flex;flex-direction:column;gap:6px">'+p.university.map(function(a){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:13.5px;font-weight:500">'+esc(a.floor_title)+'</span>'+peopleStatusBadge(a.status)+'</div>';}).join('')+'</div></div>';
+  }
+  var empty=(!p.hd&&!p.adoption&&!(p.university&&p.university.length))?'<p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:12px">No chart, adoption, or assignments yet. Add them in Human Design, Team Performance, or University.</p>':'';
+  return '<div class="kcard" style="padding:18px 20px">'+head+hd+ad+uni+empty+'</div>';
+}
+function renderPeople(){
+  var d=PEOPLE.data||{};var host=document.getElementById('peopleBody');if(!host)return;
+  var ppl=d.people||[];
+  if(!ppl.length){host.innerHTML='<div class="empty" style="padding:22px"><p>No people yet. Take your Human Design, add your team in Team Performance, or assign a University floor.</p></div>';return;}
+  host.innerHTML=ppl.map(peopleCard).join('');
+}
+
 /* ---- Human Design: how each person is wired. Computed in-house. ---- */
 var HDS={loaded:false,data:null};
 var HD_TZ=[[-12,'UTC-12'],[-11,'UTC-11'],[-10,'Hawaii (UTC-10)'],[-9,'Alaska (UTC-9)'],[-8,'US Pacific (UTC-8)'],[-7,'US Mountain (UTC-7)'],[-6,'US Central (UTC-6)'],[-5,'US Eastern (UTC-5)'],[-4,'Atlantic (UTC-4)'],[-3,'UTC-3'],[-2,'UTC-2'],[-1,'UTC-1'],[0,'UTC / London'],[1,'Central Europe (UTC+1)'],[2,'Eastern Europe (UTC+2)'],[3,'UTC+3'],[3.5,'Iran (UTC+3:30)'],[4,'UTC+4'],[5,'Pakistan (UTC+5)'],[5.5,'India (UTC+5:30)'],[6,'UTC+6'],[7,'UTC+7'],[8,'China (UTC+8)'],[9,'Japan (UTC+9)'],[9.5,'C Australia (UTC+9:30)'],[10,'E Australia (UTC+10)'],[11,'UTC+11'],[12,'New Zealand (UTC+12)'],[13,'UTC+13'],[14,'UTC+14']];
@@ -3223,7 +3271,7 @@ var PVIEWS=[
   ['blueprint','Design my company'],['build','Build with TMI'],['departments','Departments'],
   ['marketplace','Marketplace'],['workforce','Workforce'],['workflows','Workflows'],
   ['knowledge','Knowledge'],['brain','Company Brain'],['reports','Reports'],['activity','Activity'],
-  ['observe','Runs & cost'],['human-design','Human Design'],['team-performance','Team Performance'],
+  ['observe','Runs & cost'],['people','People'],['human-design','Human Design'],['team-performance','Team Performance'],
   ['integrations','Connect tools'],['plans','Plans & offers'],
   ['team','Team',{owner:true}],['settings','Settings',{owner:true}],['clients','Clients',{installer:true}]
 ];
