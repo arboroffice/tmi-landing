@@ -1,4 +1,4 @@
-// Serves the branded, hosted Complete Audit report for a paid submission.
+// Serves the branded, hosted Intelligent Company Audit report for a paid submission.
 // GET /audit-report?id=<submissionId>  (the id is an unguessable Firestore id)
 
 const dbx = require('./_db');
@@ -6,7 +6,7 @@ const { renderReportPage } = require('./_audit-report-render');
 
 function notFound(res, msg) {
   res.status(404).setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.send(`<!doctype html><meta charset="utf-8"><title>Not found</title><div style="font-family:system-ui;padding:60px;text-align:center;color:#555">${msg || 'This audit could not be found.'} <a href="https://www.tmitechai.com/complete-audit">Start the Complete Audit</a></div>`);
+  res.send(`<!doctype html><meta charset="utf-8"><title>Not found</title><div style="font-family:system-ui;padding:60px;text-align:center;color:#555">${msg || 'This audit could not be found.'} <a href="https://www.tmitechai.com/complete-audit">Start the Intelligent Company Audit</a></div>`);
 }
 
 module.exports = async function handler(req, res) {

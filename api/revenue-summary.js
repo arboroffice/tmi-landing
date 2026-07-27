@@ -1,10 +1,10 @@
-// Revenue the funnel actually collects: paid $1,000 Complete Audits + accepted
+// Revenue the funnel actually collects: paid $5,000 Intelligent Company Audits + accepted
 // build-proposal deposits (real Stripe charges). Admin-only.
 
 const { cors, requireAuth } = require('./_auth');
 const dbx = require('./_db');
 
-const AUDIT_PRICE = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 100000) / 100; // $1,000
+const AUDIT_PRICE = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 500000) / 100; // $5,000
 
 module.exports = async function handler(req, res) {
   cors(res);

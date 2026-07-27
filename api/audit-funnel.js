@@ -1,4 +1,4 @@
-// Complete Audit funnel for the admin command center.
+// Intelligent Company Audit funnel for the admin command center.
 // Captured -> Paid -> Booked, conversion rates, and the worklist of
 // captured-but-unpaid leads to follow up by hand.
 

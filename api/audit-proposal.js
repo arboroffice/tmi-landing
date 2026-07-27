@@ -1,4 +1,4 @@
-// Generate (or refresh) a build proposal from a paid Complete Audit and send it
+// Generate (or refresh) a build proposal from a paid Intelligent Company Audit and send it
 // to the client. Grounds the three priced paths in the audit and the latest PRD
 // from the strategy call. POST { submissionId, notes? }  (auth required)
 

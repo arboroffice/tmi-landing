@@ -1,4 +1,4 @@
-// Renders the paid Complete Audit deliverable as a branded, on-brand report:
+// Renders the paid Intelligent Company Audit deliverable as a branded, on-brand report:
 // a markdown -> HTML converter plus the full report page with the Intelligence
 // Score visualized. Shared by api/audit-report.js (hosted page) and
 // api/audit-intake.js (the delivery email). No external deps.

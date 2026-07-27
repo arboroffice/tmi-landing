@@ -1,4 +1,4 @@
-// One-click resume for a captured-but-unpaid Complete Audit lead.
+// One-click resume for a captured-but-unpaid Intelligent Company Audit lead.
 // GET /api/audit-resume?id=<applicationId> -> 302 straight into a fresh Stripe
 // Checkout session prefilled with their email. Used in the nurture emails so a
 // lead drops back into payment in one click. Falls back to /complete-audit.
@@ -6,7 +6,7 @@
 const dbx = require('./_db');
 
 const SITE = 'https://www.tmitechai.com';
-const PRICE_CENTS = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 100000); // $1,000
+const PRICE_CENTS = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 500000); // $5,000
 
 function redirect(res, url) {
   res.statusCode = 302;
@@ -33,7 +33,7 @@ module.exports = async function handler(req, res) {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: 'TMI Complete Audit',
+            name: 'TMI Intelligent Company Audit',
             description: 'Detailed operational audit, Intelligence Score, 30-day plan, and a 30-minute strategy call with the founder and a strategist.',
           },
           unit_amount: PRICE_CENTS,
@@ -41,8 +41,8 @@ module.exports = async function handler(req, res) {
         quantity: 1,
       }],
       customer_email: app.email,
-      success_url: `${SITE}/complete-audit-intake?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${SITE}/complete-audit`,
+      success_url: `${SITE}/thank-you?paid=audit&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${SITE}/book`,
       metadata: { product: 'complete_audit', company: app.company || '', application_id: app.id },
     });
     return redirect(res, session.url);

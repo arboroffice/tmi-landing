@@ -1,4 +1,4 @@
-// Stripe webhook: the source of truth for Complete Audit payments.
+// Stripe webhook: the source of truth for Intelligent Company Audit payments.
 //
 // checkout.session.completed (paid) -> mark the captured lead paid, stop the
 // nurture chain, and alert the team. This fires even if the customer closes the
@@ -54,15 +54,15 @@ async function markPaid(session) {
     await dbx.update('applications', app.id, {
       status: 'paid', paid_at: new Date().toISOString(), stripe_session: session.id,
     });
-    alertTeam(`PAID Complete Audit: ${app.name || company || email} | ${email || 'no email'}`);
+    alertTeam(`PAID Intelligent Company Audit: ${app.name || company || email} | ${email || 'no email'}`);
     // Immediate payment confirmation + next step to the customer (in case they
     // closed the tab before the intake page loaded).
     if (email) {
       const cfn = (app.name || 'there').split(/\s+/)[0];
       const intake = `https://www.tmitechai.com/complete-audit-intake?session_id=${encodeURIComponent(session.id)}`;
-      sendEmail(email, 'Payment received - your Complete Audit is underway', `
+      sendEmail(email, 'Payment received - your Intelligent Company Audit is underway', `
 <p style="margin:0 0 16px;">Hey ${cfn},</p>
-<p style="margin:0 0 16px;">Your Complete Audit payment came through - thank you. You're in.</p>
+<p style="margin:0 0 16px;">Your Intelligent Company Audit payment came through - thank you. You're in.</p>
 <p style="margin:0 0 16px;">The one thing we need from you now is a short intake so we build the audit around your actual operation. It takes about 10 to 15 minutes, and the more detail you give, the sharper it comes back.</p>
 <p style="margin:0 0 24px;"><a href="${intake}" style="color:#5a9e00;font-weight:600;">Start your intake &rarr;</a></p>
 <p style="margin:0 0 16px;">Once it's in, we build your written diagnosis and the plan, then you book a call to walk through it. Reply here anytime.</p>
@@ -85,7 +85,7 @@ async function markPaid(session) {
       email: email ? email.toLowerCase() : null, company: company || null,
       source: 'complete_audit', status: 'paid', paid_at: new Date().toISOString(), stripe_session: session.id,
     }).catch(() => {});
-    alertTeam(`PAID Complete Audit (no prior capture): ${email || company || session.id}`);
+    alertTeam(`PAID Intelligent Company Audit (no prior capture): ${email || company || session.id}`);
   }
 }
 
@@ -121,7 +121,7 @@ async function markRefunded(event) {
   const app = await dbx.findOne('applications', 'email', String(email).toLowerCase()).catch(() => null);
   if (app) {
     await dbx.update('applications', app.id, { status: 'refunded', refunded_at: new Date().toISOString() });
-    alertTeam(`REFUND/dispute on Complete Audit: ${app.name || email}`);
+    alertTeam(`REFUND/dispute on Intelligent Company Audit: ${app.name || email}`);
   }
 }
 
@@ -162,7 +162,7 @@ module.exports = async function handler(req, res) {
       if (!(s.metadata && s.metadata.product === 'build_deposit')) {
         const em = (s.customer_details && s.customer_details.email) || s.customer_email || null;
         const co = (s.metadata && s.metadata.company) || '';
-        if (em || co) alertTeam(`Abandoned Complete Audit checkout: ${co || em || s.id}${em ? ' | ' + em : ''} - follow up`);
+        if (em || co) alertTeam(`Abandoned Intelligent Company Audit checkout: ${co || em || s.id}${em ? ' | ' + em : ''} - follow up`);
       }
     } else if (event.type === 'charge.refunded' || event.type === 'refund.created' || event.type === 'charge.dispute.created') {
       await markRefunded(event);

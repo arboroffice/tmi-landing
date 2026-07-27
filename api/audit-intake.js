@@ -1,4 +1,4 @@
-// Complete Audit intake submission. Verifies the Stripe payment, stores the
+// Intelligent Company Audit intake submission. Verifies the Stripe payment, stores the
 // answers, generates + emails the detailed audit deliverable, and returns the
 // booking link for the 30-minute strategy call.
 
@@ -15,7 +15,7 @@ module.exports = async function handler(req, res) {
   const { session_id, email, company, industry, answers, name, phone, website, research, diagnosis } = req.body || {};
   if (!answers || typeof answers !== 'object') return res.status(400).json({ error: 'answers required' });
 
-  // The Complete Audit is free. Capture the email and proceed, no payment gate.
+  // The Intelligent Company Audit is free. Capture the email and proceed, no payment gate.
   // (A legacy Stripe session is still honored if one happens to be present.)
   let paidEmail = email;
   try {
@@ -125,10 +125,10 @@ module.exports = async function handler(req, res) {
           await new Resend(process.env.RESEND_API_KEY).emails.send({
             from: 'TMI <support@tmitechai.com>',
             to: paidEmail,
-            subject: `Your Complete Audit — ${company || answers.company || 'TMI'}`,
+            subject: `Your Intelligent Company Audit — ${company || answers.company || 'TMI'}`,
             html: `<!DOCTYPE html><html><body style="background:#0a0b14;font-family:Arial,sans-serif;color:#fff;margin:0;padding:0;">
 <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
-<p style="font-size:13px;letter-spacing:0.18em;text-transform:uppercase;color:#E4FF97;margin:0 0 18px;">The Complete Audit</p>
+<p style="font-size:13px;letter-spacing:0.18em;text-transform:uppercase;color:#E4FF97;margin:0 0 18px;">The Intelligent Company Audit</p>
 <h1 style="font-weight:400;font-size:26px;margin:0 0 14px;">Your audit for ${cn} is ready.</h1>
 <p style="color:rgba(255,255,255,0.66);line-height:1.65;margin:0 0 8px;">We mapped how your operation runs, where time and money leak, your Intelligence Score${meta.score != null ? ` (<strong style="color:#fff;">${meta.score}/100</strong>)` : ''}, and a 30-day plan to fix it.</p>
 <p style="margin:26px 0;"><a href="${reportUrl}" style="background:#E4FF97;color:#0a0b14;font-weight:700;padding:14px 28px;border-radius:999px;text-decoration:none;display:inline-block;">View your audit</a></p>
@@ -136,7 +136,7 @@ module.exports = async function handler(req, res) {
 <p style="margin:18px 0 0;"><a href="${bookingLink}" style="color:#E4FF97;">Book your strategy call &rarr;</a></p>
 <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:34px 0 0;border-top:1px solid rgba(255,255,255,0.12);padding-top:16px;">TMI Technology</p>
 </div></body></html>`,
-            text: `Your Complete Audit for ${cn} is ready: ${reportUrl}\n\nBook your 30-minute strategy call: ${bookingLink}\n\n---\n\n${md}`,
+            text: `Your Intelligent Company Audit for ${cn} is ready: ${reportUrl}\n\nBook your 30-minute strategy call: ${bookingLink}\n\n---\n\n${md}`,
           });
         }
         // Notify the team (they prep + run the call).
@@ -145,7 +145,7 @@ module.exports = async function handler(req, res) {
           await new Resend(process.env.RESEND_API_KEY).emails.send({
             from: 'TMI <support@tmitechai.com>',
             to: process.env.GTM_DIGEST_EMAIL || 'support@tmitechai.com',
-            subject: `New Complete Audit: ${company || answers.company} (${paidEmail})`,
+            subject: `New Intelligent Company Audit: ${company || answers.company} (${paidEmail})`,
             text: md,
           });
         }
