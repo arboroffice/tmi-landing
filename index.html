@@ -116,6 +116,27 @@
   .caps{display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;}
   .caps span{font-size:14px;color:var(--ink-2);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 13px;line-height:1.2;}
   .sec.alt .caps span{background:#fff;}
+  .sec.dark .caps span{background:rgba(255,255,255,0.05);border-color:var(--d-line);color:var(--d-ink-2);}
+
+  /* ecosystem accordion (merged What TMI is + The ecosystem) */
+  .eco-divider{height:1px;background:var(--d-line);margin:52px 0 8px;}
+  .eco-sub{font-size:13px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--chart);margin:40px 0 8px;}
+  .acc{border:1px solid var(--d-line);border-radius:14px;margin-bottom:12px;background:rgba(255,255,255,0.02);transition:border-color .15s;}
+  .acc[open]{border-color:rgba(228,255,151,0.4);}
+  .acc summary{list-style:none;cursor:pointer;padding:22px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .acc summary::-webkit-details-marker{display:none;}
+  .acc .a-num{font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--chart);white-space:nowrap;min-width:150px;}
+  .acc .a-title{font-size:clamp(18px,2vw,24px);font-weight:700;letter-spacing:-0.02em;color:var(--d-ink);flex:1;min-width:200px;line-height:1.15;}
+  .acc .a-plus{width:20px;height:20px;flex:none;position:relative;margin-left:auto;}
+  .acc .a-plus::before,.acc .a-plus::after{content:"";position:absolute;background:var(--chart);border-radius:2px;transition:transform .2s;}
+  .acc .a-plus::before{left:0;right:0;top:9px;height:2px;}
+  .acc .a-plus::after{top:0;bottom:0;left:9px;width:2px;}
+  .acc[open] .a-plus::after{transform:scaleY(0);}
+  .acc .a-body{padding:0 24px 26px;}
+  .acc .a-body p{color:var(--d-ink-2);font-weight:400;line-height:1.6;margin-bottom:14px;max-width:64ch;}
+  .acc .a-body .goal{color:var(--d-ink);font-weight:600;}
+  .acc .a-body .expl{display:inline-flex;align-items:center;gap:7px;margin:4px 0 18px;font-weight:600;font-size:14px;color:var(--chart);}
+  @media(max-width:640px){.acc .a-num{min-width:0;}.acc summary{gap:8px;}}
 
   /* engines */
   .engines{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:48px;}
@@ -287,8 +308,8 @@
   </div>
 </section>
 
-<!-- WHAT TMI IS -->
-<section class="sec dark">
+<!-- WHAT TMI IS + THE ECOSYSTEM (merged) -->
+<section class="sec dark" id="ecosystem">
   <div class="wrap">
     <p class="eyebrow">What TMI is</p>
     <h2 class="h2">TMI is <span class="lime">the umbrella.</span></h2>
@@ -301,78 +322,70 @@
       <div class="feed"><b>Our investment division</b><p>turns those improvements into long-term equity value.</p></div>
       <div class="feed"><b>Not random brands</b><p>This is not a collection of random brands. It is one operating system.</p></div>
     </div>
-  </div>
-</section>
 
-<!-- THE TMI ECOSYSTEM -->
-<section class="sec" id="ecosystem">
-  <div class="wrap">
-    <p class="eyebrow">The TMI ecosystem</p>
+    <div class="eco-divider"></div>
+    <p class="eco-sub">The TMI ecosystem</p>
     <h2 class="h2">One company. <span class="lime">Five engines of value.</span></h2>
+    <p class="lead" style="margin-bottom:36px">Open each one to see what it does and what it includes.</p>
 
-    <div class="eco">
-      <div class="eco-h">
-        <div class="num">Human Performance</div>
-        <h3>Make your team perform like a bigger company.</h3>
+    <details class="acc" open>
+      <summary><span class="a-num">Human Performance</span><span class="a-title">Make your team perform like a bigger company.</span><span class="a-plus"></span></summary>
+      <div class="a-body">
         <p>We put AI next to every person on the team: a copilot for their role, digital employees for the grunt work, and the right information already in front of them. Then we train the team to actually use it, so the tools drive real output instead of gathering dust. Your people stop doing robot work and get back to the work that grows the company.</p>
         <p class="goal">More output from the same team. No hiring spree required.</p>
-        <a href="/human-performance" style="display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-weight:600;font-size:14px;color:var(--chart-dark);">Explore Human Performance &rarr;</a>
+        <a href="/human-performance" class="expl">Explore Human Performance &rarr;</a>
+        <div class="caps">
+          <span>AI copilots for every role</span><span>Hands-on AI training</span><span>Adoption that sticks</span><span>Digital employees for the busywork</span><span>Real-time information at every desk</span><span>Automated reporting &amp; follow-up</span><span>Role playbooks built in</span><span>Decision support</span><span>Upskilling to your best standard</span><span>More output per person</span><span>Scale without new headcount</span>
+        </div>
       </div>
-      <div class="caps">
-        <span>AI copilots for every role</span><span>Hands-on AI training</span><span>Adoption that sticks</span><span>Digital employees for the busywork</span><span>Real-time information at every desk</span><span>Automated reporting &amp; follow-up</span><span>Role playbooks built in</span><span>Decision support</span><span>Upskilling to your best standard</span><span>More output per person</span><span>Scale without new headcount</span>
-      </div>
-    </div>
+    </details>
 
-    <div class="eco">
-      <div class="eco-h">
-        <div class="num">Intelligent Companies</div>
-        <h3>Turn traditional businesses into intelligent companies.</h3>
+    <details class="acc">
+      <summary><span class="a-num">Intelligent Companies</span><span class="a-title">Turn traditional businesses into intelligent companies.</span><span class="a-plus"></span></summary>
+      <div class="a-body">
         <p>TMI redesigns operations, installs AI systems, connects departments, improves reporting, and removes unnecessary work.</p>
         <p class="goal">A company that grows without the same cost, confusion, and owner dependency.</p>
-        <a href="/intelligent-companies" style="display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-weight:600;font-size:14px;color:var(--chart-dark);">Explore Intelligent Companies &rarr;</a>
+        <a href="/intelligent-companies" class="expl">Explore Intelligent Companies &rarr;</a>
+        <div class="caps">
+          <span>Custom company operating systems</span><span>AI employees</span><span>Sales systems</span><span>Customer service systems</span><span>Scheduling &amp; dispatch</span><span>Operations management</span><span>Finance workflows</span><span>Inventory systems</span><span>Compliance systems</span><span>Internal knowledge systems</span><span>Dashboards &amp; business intelligence</span><span>Automated marketing &amp; follow-up</span>
+        </div>
       </div>
-      <div class="caps">
-        <span>Custom company operating systems</span><span>AI employees</span><span>Sales systems</span><span>Customer service systems</span><span>Scheduling &amp; dispatch</span><span>Operations management</span><span>Finance workflows</span><span>Inventory systems</span><span>Compliance systems</span><span>Internal knowledge systems</span><span>Dashboards &amp; business intelligence</span><span>Automated marketing &amp; follow-up</span>
-      </div>
-    </div>
+    </details>
 
-    <div class="eco">
-      <div class="eco-h">
-        <div class="num">Capital &amp; Partnership</div>
-        <h3>We don't only advise companies. We partner with them.</h3>
+    <details class="acc">
+      <summary><span class="a-num">Capital &amp; Partnership</span><span class="a-title">We don't only advise companies. We partner with them.</span><span class="a-plus"></span></summary>
+      <div class="a-body">
         <p>We invest in the companies we help build and partner with them for the long term, working to improve operations, expand margins, strengthen leadership, and increase enterprise value.</p>
         <p class="goal">We are in it for the long term, helping build stronger, smarter, more valuable companies.</p>
-        <a href="/capital" style="display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-weight:600;font-size:14px;color:var(--chart-dark);">Explore Capital &rarr;</a>
+        <a href="/capital" class="expl">Explore Capital &rarr;</a>
+        <div class="caps">
+          <span>Strategic partnerships</span><span>Revenue-share agreements</span><span>Minority investments</span><span>Long-term partnership</span><span>Aligned incentives</span>
+        </div>
       </div>
-      <div class="caps">
-        <span>Strategic partnerships</span><span>Revenue-share agreements</span><span>Minority investments</span><span>Long-term partnership</span><span>Aligned incentives</span>
-      </div>
-    </div>
+    </details>
 
-    <div class="eco">
-      <div class="eco-h">
-        <div class="num">Leadership &amp; the AI-ready team</div>
-        <h3>A company can't grow past the people leading it.</h3>
+    <details class="acc">
+      <summary><span class="a-num">Leadership &amp; AI-ready team</span><span class="a-title">A company can't grow past the people leading it.</span><span class="a-plus"></span></summary>
+      <div class="a-body">
         <p>We help owners and managers lead a modern, AI-powered operation: delegating to systems and digital employees, making calls on live data, and building a team that scales without the founder in every loop.</p>
         <p class="goal">Less owner bottleneck. A team that runs the company with you.</p>
+        <div class="caps">
+          <span>Leadership development</span><span>Delegation that sticks</span><span>Decisions on live data</span><span>Building an AI-ready team</span><span>Founder-to-CEO transition</span><span>Operating cadence</span><span>Change management</span><span>Private operator rooms</span>
+        </div>
       </div>
-      <div class="caps">
-        <span>Leadership development</span><span>Delegation that sticks</span><span>Decisions on live data</span><span>Building an AI-ready team</span><span>Founder-to-CEO transition</span><span>Operating cadence</span><span>Change management</span><span>Private operator rooms</span>
-      </div>
-    </div>
+    </details>
 
-    <div class="eco">
-      <div class="eco-h">
-        <div class="num">Media &amp; Community</div>
-        <h3>Media isn't separate from the business. It's the front door.</h3>
+    <details class="acc">
+      <summary><span class="a-num">Media &amp; Community</span><span class="a-title">Media isn't separate from the business. It's the front door.</span><span class="a-plus"></span></summary>
+      <div class="a-body">
         <p>Through content, events, interviews, education, and community, we bring together founders, operators, investors, experts, and future partners.</p>
         <p class="goal">The people who follow TMI today may become the companies we build, fund, or partner with tomorrow.</p>
-        <a href="/community" style="display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-weight:600;font-size:14px;color:var(--chart-dark);">Explore Community &rarr;</a>
+        <a href="/community" class="expl">Explore Community &rarr;</a>
+        <div class="caps">
+          <span>Trust</span><span>Attention</span><span>Education</span><span>Talent</span><span>Partnerships</span><span>Customers</span><span>Investors</span><span>Acquisition opportunities</span>
+        </div>
       </div>
-      <div class="caps">
-        <span>Trust</span><span>Attention</span><span>Education</span><span>Talent</span><span>Partnerships</span><span>Customers</span><span>Investors</span><span>Acquisition opportunities</span>
-      </div>
-    </div>
+    </details>
   </div>
 </section>
 
