@@ -129,6 +129,25 @@ async function universityNudges(now) {
   return sent;
 }
 
+// Watch every company's alert rules against its real numbers and fire the ones
+// that crossed a line, into the feed plus email/SMS. This is the awareness
+// promise: you hear about it the day it happens.
+async function alertsSweep() {
+  let fired = 0;
+  try {
+    const { scope } = require('./_ostenantdb');
+    const A = require('./_osalerts');
+    const tenants = (await db.list('os_tenants', { limit: 500 }).catch(() => [])).filter(t => t.onboarded);
+    for (const t of tenants.slice(0, 200)) {
+      try {
+        const out = await A.evaluate(scope(t.id), db, t.id, { cooldownHours: 12 });
+        fired += out.length;
+      } catch (e) { console.error('alertsSweep', t.id, e.message); }
+    }
+  } catch (e) { console.error('alertsSweep sweep:', e.message); }
+  return fired;
+}
+
 module.exports = async function handler(req, res) {
   const secret = process.env.CRON_SECRET;
   if (secret) {
@@ -158,10 +177,11 @@ module.exports = async function handler(req, res) {
     const proofed = await autoProof();
     const pulsed = await pulseSweep();
     const nudged = await universityNudges(now);
+    const alerted = await alertsSweep();
     // Data sync runs on its own dedicated cron (os2-sync, every 6h) so it is
     // never starved by the Opus-heavy sweeps above under a tight maxDuration.
 
-    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, resumed, proofed, pulsed, nudged });
+    return res.status(200).json({ ran, failed, considered: workers.length, due: due.length, resumed, proofed, pulsed, nudged, alerted });
   } catch (e) {
     console.error('os2-cron:', e.message);
     return res.status(500).json({ error: 'cron failed' });

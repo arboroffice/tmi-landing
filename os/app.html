@@ -513,6 +513,7 @@
 <symbol id="i-org" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-2h12v2"/></symbol>
 <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></symbol>
 <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
 <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9l1-5h14l1 5M5 9v10h14V9M4 9h16M9 19v-5h6v5"/></symbol>
 <symbol id="i-brain" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 2 4 3 3 0 0 0 5 1V4.5A2.5 2.5 0 0 0 9 4z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-2 4 3 3 0 0 1-5 1"/></symbol>
 </defs></svg>
@@ -544,6 +545,7 @@
     <a data-v="reports"><svg class="icon"><use href="#i-chart"/></svg> Reports</a>
     <a data-v="activity"><svg class="icon"><use href="#i-clock"/></svg> Activity</a>
     <a data-v="observe"><svg class="icon"><use href="#i-chart"/></svg> Runs &amp; cost</a>
+    <a data-v="alerts"><svg class="icon"><use href="#i-bell"/></svg> Alerts <span class="tag" id="tgAlerts"></span></a>
     <a href="/university"><svg class="icon"><use href="#i-book"/></svg> University</a>
     <a data-v="people"><svg class="icon"><use href="#i-users"/></svg> People <span class="tag" id="tgPeople"></span></a>
     <a data-v="human-design"><svg class="icon"><use href="#i-users"/></svg> Human Design <span class="tag" id="tgHD"></span></a>
@@ -716,6 +718,11 @@
     <div id="uniBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
   </section>
 
+  <section class="view" data-view="alerts">
+    <div class="secbar" style="margin-top:0"><div><div class="h">Alerts</div><p class="sub">Find out the day it happens, not from an angry customer. Set a line on any number that matters and get told the moment it is crossed, here and by email or text.</p></div><button class="btn ghost sm" onclick="alertsCheck()"><svg class="icon"><use href="#i-clock"/></svg> Check now</button></div>
+    <div id="alertsBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
+  </section>
+
   <section class="view" data-view="people">
     <div class="secbar" style="margin-top:0"><div><div class="h">People</div><p class="sub">Everyone on the team in one place: how they are wired, where they are on the AI adoption curve, and what they are learning. Pulls together Human Design, Team Performance, and University.</p></div></div>
     <div id="peopleBody" style="margin-top:22px"><div class="empty" style="padding:22px"><p>Loading...</p></div></div>
@@ -834,6 +841,7 @@ function show(v){
   if(v==='team') loadTeam();
   if(v==='observe') loadObserve();
   if(v==='university') loadUniversity();
+  if(v==='alerts') loadAlerts();
   if(v==='people') loadPeople();
   if(v==='human-design') loadHD();
   if(v==='team-performance') loadTP();
@@ -2565,6 +2573,79 @@ function showTraceModal(tr){
   document.getElementById('modal').classList.add('on');
 }
 
+/* ---- Alerts / Awareness: get told the day a number crosses a line. ---- */
+var ALERTS={data:null,editing:null};
+var ALERT_OPS=[['>','goes above'],['>=','reaches'],['<','drops below'],['<=','drops to'],['==','equals']];
+function alertFmt(v,unit){if(v==null)return '-';return unit==='$'?('$'+Math.round(Number(v)).toLocaleString()):String(Math.round(Number(v)*100)/100);}
+async function loadAlerts(){
+  try{ALERTS.data=await api('/api/os2-alerts',{action:'state'});}
+  catch(e){if(e.message!=='signed out')document.getElementById('alertsBody').innerHTML='<div class="empty" style="padding:22px"><p>Could not load Alerts.</p></div>';return;}
+  renderAlerts();
+  var unread=(ALERTS.data.alerts||[]).filter(function(a){return !a.read;}).length;
+  var badge=document.getElementById('tgAlerts');if(badge)badge.textContent=unread||'';
+}
+function alertOpWord(op){var m={'>':'above','>=':'at or above','<':'below','<=':'at or below','==':'at'};return m[op]||op;}
+function alertRuleRow(r){
+  var can=guardWriteSilent();
+  var tripped=r.current!=null&&(function(){switch(r.op){case '>':return r.current>r.threshold;case '>=':return r.current>=r.threshold;case '<':return r.current<r.threshold;case '<=':return r.current<=r.threshold;case '==':return r.current===r.threshold;}return false;})();
+  var chips=[];if(r.channels&&r.channels.email)chips.push('Email');if(r.channels&&r.channels.sms)chips.push('Text');chips.push('In app');
+  return '<div class="kcard" style="padding:14px 16px;margin-bottom:10px;'+(r.active===false?'opacity:.55':'')+'">'+
+    '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">'+
+    '<div style="flex:1;min-width:180px"><h4 style="font-size:15px;font-weight:600">'+esc(r.metric_label||r.metric_key)+' '+esc(alertOpWord(r.op))+' '+alertFmt(r.threshold,r.unit)+'</h4>'+
+    '<div class="cad" style="text-transform:none;letter-spacing:0;color:'+(tripped?'var(--bad)':'var(--ink-3)')+';margin-top:2px">Now: '+alertFmt(r.current,r.unit)+(tripped?' &middot; over the line':'')+'</div></div>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+chips.map(function(c){return '<span class="badge" style="background:var(--bg-alt);color:var(--ink-2)">'+esc(c)+'</span>';}).join('')+
+    (can?' <span class="link" onclick="alertsToggle(\''+r.id+'\','+(r.active===false)+')">'+(r.active===false?'Enable':'Pause')+'</span><span class="link" onclick="alertsEdit(\''+r.id+'\')">Edit</span><span class="link" onclick="alertsRemove(\''+r.id+'\')">Remove</span>':'')+
+    '</div></div></div>';
+}
+function alertRuleForm(){
+  var d=ALERTS.data||{};var cat=d.catalog||[];var e=ALERTS.editing||{channels:{}};
+  var mopts=cat.map(function(c){return '<option value="'+esc(c.key)+'"'+(e.metric_key===c.key?' selected':'')+'>'+esc(c.label)+'</option>';}).join('');
+  var oopts=ALERT_OPS.map(function(o){return '<option value="'+o[0]+'"'+(e.op===o[0]?' selected':'')+'>'+esc(o[1])+'</option>';}).join('');
+  return '<div class="kcard" style="padding:16px 18px;margin-bottom:14px"><h4 style="font-size:15px;font-weight:600">'+(e.id?'Edit alert':'New alert')+'</h4>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:flex-end">'+
+    '<div style="flex:2;min-width:200px"><label class="cad" style="color:var(--ink-3)">Tell me when</label><select id="alMetric" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font:inherit;margin-top:4px">'+mopts+'</select></div>'+
+    '<div style="flex:1;min-width:130px"><label class="cad" style="color:var(--ink-3)">Condition</label><select id="alOp" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font:inherit;margin-top:4px">'+oopts+'</select></div>'+
+    '<div style="flex:1;min-width:100px"><label class="cad" style="color:var(--ink-3)">Number</label><input id="alTh" type="number" value="'+(e.threshold!=null?esc(e.threshold):'')+'" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font:inherit;margin-top:4px"/></div></div>'+
+    '<div style="display:flex;gap:16px;margin-top:12px;align-items:center;flex-wrap:wrap"><span class="cad" style="color:var(--ink-3)">Also send</span>'+
+    '<label style="display:flex;gap:6px;align-items:center;font-size:14px"><input type="checkbox" id="alEmail"'+(e.channels&&e.channels.email?' checked':'')+'/> Email</label>'+
+    '<label style="display:flex;gap:6px;align-items:center;font-size:14px"><input type="checkbox" id="alSms"'+(e.channels&&e.channels.sms?' checked':'')+'/> Text</label>'+
+    '<span class="cad" style="color:var(--ink-3)">In-app is always on.</span></div>'+
+    '<div style="display:flex;gap:8px;margin-top:14px"><button class="btn sm" onclick="alertsSave()">Save alert</button><button class="btn ghost sm" onclick="alertsCancel()">Cancel</button></div></div>';
+}
+function renderAlerts(){
+  var d=ALERTS.data||{};var host=document.getElementById('alertsBody');if(!host)return;
+  var can=!!d.can_manage;var html='';
+  var alerts=d.alerts||[];var unread=alerts.filter(function(a){return !a.read;});
+  html+='<div class="lbl" style="margin:0 0 10px">Recent alerts</div>';
+  if(alerts.length){
+    if(unread.length)html+='<div style="margin-bottom:10px"><span class="link" onclick="alertsMarkAll()">Mark all read ('+unread.length+')</span></div>';
+    html+=alerts.slice(0,20).map(function(a){return '<div class="kcard" style="padding:13px 16px;margin-bottom:8px;border-left:3px solid '+(a.read?'var(--line-2)':'var(--bad)')+'"><div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span style="font-size:14.5px;font-weight:'+(a.read?'400':'600')+'">'+esc(a.message)+'</span><span class="cad" style="color:var(--ink-3);white-space:nowrap">'+esc(ago(a.created_at))+'</span></div></div>';}).join('');
+  }else{html+='<div class="empty" style="padding:20px"><p>Nothing has crossed a line. Set an alert below and the OS will watch it for you.</p></div>';}
+  html+='<div class="lbl" style="margin:26px 0 12px">Your alerts</div>';
+  html+='<div id="alertFormMount"></div>';
+  if(can)html+='<div style="margin-bottom:12px"><button class="btn sm" onclick="alertsNew()"><svg class="icon"><use href="#i-plus"/></svg> Add an alert</button></div>';
+  var rules=d.rules||[];
+  html+=rules.length?rules.map(alertRuleRow).join(''):'<div class="empty" style="padding:20px"><p>No alerts set yet.'+(can?' Add one to start watching a number.':'')+'</p></div>';
+  host.innerHTML=html;
+  if(ALERTS.editing!==null)document.getElementById('alertFormMount').innerHTML=alertRuleForm();
+}
+function alertsNew(){if(!guardWrite())return;ALERTS.editing={channels:{email:false,sms:false}};document.getElementById('alertFormMount').innerHTML=alertRuleForm();}
+function alertsEdit(id){if(!guardWrite())return;var r=(ALERTS.data.rules||[]).filter(function(x){return x.id===id;})[0];ALERTS.editing=r?Object.assign({},r):{channels:{}};document.getElementById('alertFormMount').innerHTML=alertRuleForm();}
+function alertsCancel(){ALERTS.editing=null;var m=document.getElementById('alertFormMount');if(m)m.innerHTML='';}
+async function alertsSave(){
+  if(!guardWrite())return;var g=function(id){var e=document.getElementById(id);return e?e.value:'';};
+  var metric=g('alMetric'),op=g('alOp'),th=g('alTh');
+  if(th===''||isNaN(Number(th))){toast('Set a number');return;}
+  var payload={action:'save',metric_key:metric,op:op,threshold:Number(th),channels:{email:!!document.getElementById('alEmail').checked,sms:!!document.getElementById('alSms').checked}};
+  if(ALERTS.editing&&ALERTS.editing.id)payload.id=ALERTS.editing.id;
+  try{await api('/api/os2-alerts',payload);ALERTS.editing=null;toast('Alert saved');loadAlerts();}
+  catch(e){if(e.message!=='signed out')toast(e.message);}
+}
+async function alertsToggle(id,active){if(!guardWrite())return;try{await api('/api/os2-alerts',{action:'toggle',id:id,active:active});loadAlerts();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function alertsRemove(id){if(!guardWrite())return;if(!confirm('Remove this alert?'))return;try{await api('/api/os2-alerts',{action:'remove',id:id});toast('Removed');loadAlerts();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function alertsCheck(){if(!guardWrite())return;toast('Checking your numbers...');try{var j=await api('/api/os2-alerts',{action:'evaluate'});toast(j.count?j.count+' alert'+(j.count>1?'s':'')+' fired':'Nothing crossed a line');loadAlerts();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+async function alertsMarkAll(){try{await api('/api/os2-alerts',{action:'read',all:true});loadAlerts();}catch(e){if(e.message!=='signed out')toast(e.message);}}
+
 /* ---- People: HD + Team Performance + University in one view per person. ---- */
 var PEOPLE={data:null};
 async function loadPeople(){
@@ -3271,7 +3352,7 @@ var PVIEWS=[
   ['blueprint','Design my company'],['build','Build with TMI'],['departments','Departments'],
   ['marketplace','Marketplace'],['workforce','Workforce'],['workflows','Workflows'],
   ['knowledge','Knowledge'],['brain','Company Brain'],['reports','Reports'],['activity','Activity'],
-  ['observe','Runs & cost'],['people','People'],['human-design','Human Design'],['team-performance','Team Performance'],
+  ['observe','Runs & cost'],['alerts','Alerts'],['people','People'],['human-design','Human Design'],['team-performance','Team Performance'],
   ['integrations','Connect tools'],['plans','Plans & offers'],
   ['team','Team',{owner:true}],['settings','Settings',{owner:true}],['clients','Clients',{installer:true}]
 ];
