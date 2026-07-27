@@ -2,8 +2,10 @@
   if (window.__tmiChatLoaded) return;
   window.__tmiChatLoaded = true;
 
-  // Don't show on the dedicated diagnose page
-  if (/\/diagnose/.test(location.pathname)) return;
+  // Marketing only: never show on the diagnose page, app, admin, or any
+  // transactional / document flow (proposals, invoices, certificates, booking,
+  // intake, thank-you, etc.).
+  if (/\/(diagnose|os|admin|platform|tmi-os|booking|thank-you|disconnect|hd-intake|certificate|intelligent-company-certified|invoice-view|proposal-view|proposal-sign|build-proposal|sales-playbook|city-leads)(\b|\/|$)/.test(location.pathname)) return;
 
   const OPENING =
     "Hi - I'm TMI's AI assistant, here to help figure out where AI fits in your operation. Tell me what you do, roughly how big you are, and what's the thing eating the most of your time or margin right now.";
