@@ -2630,6 +2630,17 @@ function renderHD(){
       '<div class="kcard" style="padding:16px 18px"><p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin:0 0 12px">Read the whole team together: who should own which decisions, how to run meetings for this mix, who to pair, and the one friction to watch.</p>'+
       '<button class="btn sm" onclick="hdTeamReading(false)">Read the team</button> '+(guardWriteSilent()?'<button class="btn ghost sm" onclick="hdTeamReading(true)">Refresh</button>':'')+
       '<div id="hdReadingOut" style="margin-top:12px"></div></div>';
+    // Two-person fit
+    var ppl=hdPeople();
+    var optsA=ppl.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join('');
+    var optsB=ppl.map(function(p,i){return '<option value="'+p.id+'"'+(i===1?' selected':'')+'>'+esc(p.name)+'</option>';}).join('');
+    html+='<div class="lbl" style="margin:24px 0 12px">How any two work together</div>'+
+      '<div class="kcard" style="padding:16px 18px"><p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin:0 0 12px">Pick two people and see where they click, where they will grind, and how to pair them.</p>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select id="hdFitA" style="flex:1;min-width:140px;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font:inherit">'+optsA+'</select>'+
+      '<span class="cad" style="color:var(--ink-3)">and</span>'+
+      '<select id="hdFitB" style="flex:1;min-width:140px;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font:inherit">'+optsB+'</select>'+
+      '<button class="btn sm" onclick="hdFit()">Compare</button></div>'+
+      '<div id="hdFitOut" style="margin-top:12px"></div></div>';
   }
   html+='<div class="lbl" style="margin:28px 0 12px">Send it to your team</div>'+
     '<div class="kcard" style="padding:16px 18px"><p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin:0 0 12px">Create a link and send it to anyone on your team or a client. They take it, you keep the chart.</p>'+
@@ -2693,6 +2704,30 @@ async function hdTeamReading(refresh){
   out.innerHTML='<p class="cad" style="color:var(--ink-3)">Reading the team...</p>';
   try{var j=await api('/api/os2-hd',{action:'team_reading',refresh:!!refresh});
     out.innerHTML='<div style="border-top:1px solid var(--line);margin-top:4px;padding-top:14px">'+hdProse(j.reading)+'</div>';
+  }catch(e){if(e.message!=='signed out')out.innerHTML='<p class="cad" style="color:var(--warn)">'+esc(e.message)+'</p>';}
+}
+function hdPeople(){var d=HDS.data||{};var out=[];if(d.me)out.push({id:d.me.id,name:d.me.name||'You'});(d.team||[]).forEach(function(p){out.push({id:p.id,name:p.name||'Team member'});});return out;}
+function hdChips(label,arr,color){
+  if(!arr||!arr.length)return '';
+  return '<div style="margin-top:10px"><div class="cad" style="color:var(--ink-3);margin-bottom:5px">'+esc(label)+'</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+arr.map(function(x){return '<span class="badge" style="'+color+'">'+esc(x.centers||x)+'</span>';}).join('')+'</div></div>';
+}
+async function hdFit(){
+  var a=(document.getElementById('hdFitA')||{}).value,b=(document.getElementById('hdFitB')||{}).value;
+  var out=document.getElementById('hdFitOut');if(!out)return;
+  if(!a||!b||a===b){out.innerHTML='<p class="cad" style="color:var(--warn)">Pick two different people.</p>';return;}
+  out.innerHTML='<p class="cad" style="color:var(--ink-3)">Reading how they work together...</p>';
+  try{
+    var j=await api('/api/os2-hd',{action:'connection',id_a:a,id_b:b});
+    var f=j.facts||{};var c=f.counts||{};
+    var head='<div style="border-top:1px solid var(--line);margin-top:4px;padding-top:14px"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
+      '<span class="badge" style="background:#e8f6e6;color:#3f8f57">Click: '+(c.click||0)+'</span>'+
+      '<span class="badge" style="background:var(--warn-bg);color:var(--warn)">Grind: '+(c.grind||0)+'</span>'+
+      '<span class="badge" style="background:var(--bg-alt);color:var(--ink-2)">Same: '+(c.same||0)+'</span></div>';
+    var shapes='';
+    if(f.a_shapes_b&&f.a_shapes_b.length)shapes+='<p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin-top:8px"><b>'+esc(f.a&&f.a.name)+'</b> steadily shapes <b>'+esc(f.b&&f.b.name)+'</b> in: '+esc(f.a_shapes_b.join(', '))+'.</p>';
+    if(f.b_shapes_a&&f.b_shapes_a.length)shapes+='<p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-2);margin-top:4px"><b>'+esc(f.b&&f.b.name)+'</b> steadily shapes <b>'+esc(f.a&&f.a.name)+'</b> in: '+esc(f.b_shapes_a.join(', '))+'.</p>';
+    var brief=j.brief?'<div style="margin-top:14px">'+hdProse(j.brief)+'</div>':'';
+    out.innerHTML=head+brief+shapes+'</div>';
   }catch(e){if(e.message!=='signed out')out.innerHTML='<p class="cad" style="color:var(--warn)">'+esc(e.message)+'</p>';}
 }
 

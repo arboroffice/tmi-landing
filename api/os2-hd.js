@@ -39,6 +39,14 @@ Rules:
 - Use people's names and their types. Do not invent anyone who was not given.
 - Never frame a person as a problem. Frame it as how to set them up to win.`;
 
+const SYSTEM_CONNECT = `You explain how two people on a company team work together, from their Human Design connection. Plain and practical: where they click, where they will grind, who tends to shape whom, and how to actually work together day to day.
+
+Rules:
+- Simple words. Short sentences. No spiritual language. No em dashes. No emojis. No gate numbers or jargon in the output.
+- Turn the mechanics you are given into human, work terms: "where you click" means they complement and pull toward each other; "where you grind" means one can feel pushed by the other; "shapes" means one person steadily influences the other in that area.
+- Concrete. The owner should know who to pair, who needs a buffer, and how these two should divide work.
+- Never frame either person as the problem.`;
+
 // The light shape shown in a team list (no raw birth data, no full bodygraph).
 function teamCard(p) {
   return {
@@ -116,6 +124,55 @@ module.exports = async function handler(req, res) {
       const out = await makeGuide(tid, tdb, p, force);
       if (!out.guide) return res.status(out.error ? 503 : 500).json({ error: out.error || 'Could not build the guide.' });
       return res.status(200).json({ guide: out.guide, cached: !!out.cached });
+    }
+
+    if (action === 'connection') {
+      const idA = String(b.id_a || ''), idB = String(b.id_b || '');
+      if (!idA || !idB || idA === idB) return res.status(400).json({ error: 'Pick two different people.' });
+      const [pa, pb] = await Promise.all([tdb.getById('os_hd_profiles', idA), tdb.getById('os_hd_profiles', idB)]);
+      if (!pa || !pb) return res.status(404).json({ error: 'One of those charts was not found.' });
+      if (!pa.type || !pb.type) return res.status(400).json({ error: 'Both people need a computed chart.' });
+      const conn = M.connection(pa, pb);
+      const facts = {
+        a: { id: pa.id, name: pa.name || 'Person A', type: pa.type },
+        b: { id: pb.id, name: pb.name || 'Person B', type: pb.type },
+        counts: conn.counts,
+        click: conn.click, grind: conn.grind, same: conn.same,
+        a_shapes_b: conn.a_shapes_b, b_shapes_a: conn.b_shapes_a,
+      };
+      // Cache the AI brief per unordered pair; regenerate if either chart changed.
+      const pairKey = [idA, idB].sort().join('_');
+      const sig = [idA + ':' + (pa.updated_at || pa.computed_at || ''), idB + ':' + (pb.updated_at || pb.computed_at || '')].sort().join('|');
+      const existing = (await tdb.list('os_hd_connections', { where: [['pair', '==', pairKey]], limit: 1 }))[0] || null;
+      const force = !!b.refresh;
+      if (existing && !force && existing.signature === sig) {
+        return res.status(200).json({ facts, brief: existing.brief, cached: true });
+      }
+      const key = process.env.ANTHROPIC_API_KEY;
+      if (!key) return res.status(200).json({ facts, brief: null });
+      const Anthropic = require('@anthropic-ai/sdk');
+      const client = new Anthropic({ apiKey: key });
+      const nameA = pa.name || 'Person A', nameB = pb.name || 'Person B';
+      const prompt = `${M.connectionSummary(pa, pb, nameA, nameB, conn)}
+
+Write the brief in four short labelled parts, each two to four sentences:
+Where you two click. Where you will grind. Who shapes whom. How to work together.`;
+      const trace = startTrace(tid, { kind: 'human-design', label: 'connection', meta: { a: nameA, b: nameB } });
+      let text;
+      try {
+        const msg = await llm.create(client, {
+          model: MODEL, max_tokens: 900, system: SYSTEM_CONNECT,
+          messages: [{ role: 'user', content: prompt }],
+        }, { tenantId: tid, label: 'hd:connection', workflow: 'human_design_connection', trace });
+        text = (msg.content || []).map(x => x.text || '').join('').trim();
+        await finishTrace(trace, { status: 'ok' });
+      } catch (e) { await finishTrace(trace, { error: e }); return res.status(200).json({ facts, brief: null }); }
+      const now = new Date().toISOString();
+      if (text) {
+        if (existing) await tdb.update('os_hd_connections', existing.id, { brief: text, signature: sig, updated_at: now });
+        else await tdb.insert('os_hd_connections', { pair: pairKey, brief: text, signature: sig, created_at: now, updated_at: now });
+      }
+      return res.status(200).json({ facts, brief: text || null, cached: false });
     }
 
     if (action === 'team_reading') {

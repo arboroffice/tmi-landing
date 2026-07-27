@@ -221,6 +221,69 @@ function enrich(chart) {
   };
 }
 
+// ---- Two-person fit (connection) ------------------------------------------
+// Put two charts together and read where they click, where they grind, and who
+// shapes whom. This is real HD connection theory in plain terms:
+//   - click (electromagnetic): each person brings one half of a channel the
+//     other is missing, so together it lights up. Natural pull, they complete
+//     each other there.
+//   - same (companionship): both already have the whole channel. They see it
+//     the same way, which is easy but can be an echo chamber.
+//   - grind (compromise): one has the whole channel, the other has just one
+//     half. The half person gets consistently conditioned by the whole person
+//     there, and can feel pushed.
+//   - conditioning: one person's DEFINED center meets the other's OPEN center.
+//     The defined person steadily shapes the open person in that area.
+function gateSet(chart) { return new Set(gatesFromChart(chart)); }
+function fullChannelSet(chart) { return new Set((chart.channels || []).map(String)); }
+
+function connection(a, b) {
+  const ga = gateSet(a), gb = gateSet(b);
+  const fa = fullChannelSet(a), fb = fullChannelSet(b);
+  const click = [], same = [], grind = [];
+  (HD.CHANNELS || []).forEach(pair => {
+    const [g1, g2] = pair;
+    const label = g1 + '-' + g2;
+    const aFull = fa.has(label), bFull = fb.has(label);
+    const aHas1 = ga.has(g1), aHas2 = ga.has(g2), bHas1 = gb.has(g1), bHas2 = gb.has(g2);
+    const centers = [HD.GATE_CENTER[g1], HD.GATE_CENTER[g2]];
+    const centerName = centers[0] === centers[1] ? centers[0] : centers.join(' to ');
+    if (aFull && bFull) { same.push({ channel: label, centers: centerName }); return; }
+    // electromagnetic: neither has it whole, but each brings a different half.
+    if (!aFull && !bFull && ((aHas1 && bHas2 && !aHas2 && !bHas1) || (aHas2 && bHas1 && !aHas1 && !bHas2))) { click.push({ channel: label, centers: centerName }); return; }
+    // compromise: one whole, the other has just one half.
+    if (aFull && !bFull && (bHas1 || bHas2)) { grind.push({ channel: label, centers: centerName, dominant: 'a' }); return; }
+    if (bFull && !aFull && (aHas1 || aHas2)) { grind.push({ channel: label, centers: centerName, dominant: 'b' }); return; }
+  });
+  // Conditioning: defined center in one, open in the other.
+  const defA = new Set(a.defined_centers || []), defB = new Set(b.defined_centers || []);
+  const openA = new Set(a.open_centers || []), openB = new Set(b.open_centers || []);
+  const aShapesB = [], bShapesA = [];
+  (HD.CENTERS || []).forEach(c => {
+    if (defA.has(c) && openB.has(c)) aShapesB.push(c);
+    if (defB.has(c) && openA.has(c)) bShapesA.push(c);
+  });
+  return {
+    click, same, grind, a_shapes_b: aShapesB, b_shapes_a: bShapesA,
+    counts: { click: click.length, same: same.length, grind: grind.length },
+  };
+}
+
+// Facts about a pairing, written for a language model to turn into a brief.
+function connectionSummary(a, b, nameA, nameB, conn) {
+  const c = conn || connection(a, b);
+  const chList = arr => arr.length ? arr.map(x => x.channel + ' (' + x.centers + ')').join(', ') : 'none';
+  return [
+    `${nameA}: ${a.type}, ${a.authority} authority.`,
+    `${nameB}: ${b.type}, ${b.authority} authority.`,
+    `Where they click (each brings a half, natural pull): ${chList(c.click)}.`,
+    `Where they are the same (both already have it): ${chList(c.same)}.`,
+    `Where they grind (one has it whole, the other feels pushed there): ${chList(c.grind)}.`,
+    `${nameA} steadily shapes ${nameB} in these areas (defined meets open): ${c.a_shapes_b.join(', ') || 'none'}.`,
+    `${nameB} steadily shapes ${nameA} in these areas: ${c.b_shapes_a.join(', ') || 'none'}.`,
+  ].join('\n');
+}
+
 // A compact factual summary of a chart, for feeding a language model.
 function summaryLine(chart, name) {
   const def = definitionOf(chart);
@@ -233,4 +296,4 @@ function summaryLine(chart, name) {
   ].join(' ');
 }
 
-module.exports = { TYPE, STRATEGY, AUTHORITY, PROFILE, CENTER, enrich, definitionOf, gatesFromChart, activationList, summaryLine, DEFINITION_MEANING };
+module.exports = { TYPE, STRATEGY, AUTHORITY, PROFILE, CENTER, enrich, definitionOf, gatesFromChart, activationList, summaryLine, DEFINITION_MEANING, connection, connectionSummary };
