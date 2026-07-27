@@ -76,8 +76,82 @@
       + '<p class="sub" style="margin-top:18px">A floor opens when the floor below it is verified in your binder. That is the whole difference between this and a course.</p>'
       + '</div></section>';
 
-    host.innerHTML = hero + assess + floors;
+    var team = '<section class="sec" style="padding-top:8px"><div class="wrap">'
+      + '<div class="sec-h"><div><span class="lbl">The team</span><h2>Assign floors and track who has done what.</h2></div></div>'
+      + '<div id="assignMount"><div class="kcard"><p class="sub" style="margin-top:0">Loading the team...</p></div></div>'
+      + '</div></section>';
+
+    host.innerHTML = hero + assess + floors + team;
     if (!latest) _uniStartAssess();
+    loadAssignments();
+  }
+
+  // ---- ASSIGNMENTS --------------------------------------------------------
+  var ASG = null;
+  async function loadAssignments() {
+    try { ASG = await api('/api/os2-uniassign', { action: 'state' }); } catch (e) { ASG = null; }
+    renderAssignments();
+  }
+  function renderAssignments() {
+    var mount = document.getElementById('assignMount');
+    if (!mount) return;
+    if (!ASG) { mount.innerHTML = '<div class="kcard"><p class="sub" style="margin-top:0">Could not load the team.</p></div>'; return; }
+    var can = !!ASG.can_manage;
+    var floors = ASG.floors || [];
+    var assignments = ASG.assignments || [];
+    var html = '';
+    if (can) {
+      var rosterOpts = (ASG.roster || []).map(function (r) { return '<option value="' + esc(r.name) + '">' + esc(r.name) + (r.source === 'chart' ? ' (chart)' : '') + '</option>'; }).join('');
+      var floorOpts = floors.map(function (f) { return '<option value="' + esc(f.key) + '">' + esc(f.key === 'orientation' ? 'Orientation' : ('Floor ' + f.order + ': ' + f.title)) + '</option>'; }).join('');
+      html += '<div class="kcard"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'
+        + '<div style="flex:1;min-width:160px"><label class="lbl">Person</label><br/><input id="asgName" list="asgRoster" placeholder="Name" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font:inherit;margin-top:5px"/>'
+        + '<datalist id="asgRoster">' + rosterOpts + '</datalist></div>'
+        + '<div style="flex:1;min-width:160px"><label class="lbl">Floor</label><br/><select id="asgFloor" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font:inherit;margin-top:5px">' + floorOpts + '</select></div>'
+        + '<button class="btn" id="asgBtn">Assign</button></div></div>';
+    }
+    // Group by person.
+    var byPerson = {};
+    assignments.forEach(function (a) { (byPerson[a.assignee] = byPerson[a.assignee] || []).push(a); });
+    var names = Object.keys(byPerson);
+    if (!names.length) {
+      html += '<div class="empty">No floors assigned yet.' + (can ? ' Assign one above to start tracking the team.' : '') + '</div>';
+    } else {
+      html += names.map(function (name) {
+        var rows = byPerson[name].map(function (a) {
+          var badge = a.status === 'done' ? '<span class="badge good">Done</span>' : a.status === 'in_progress' ? '<span class="badge warn">In progress</span>' : '<span class="badge">Assigned</span>';
+          var ctrl = can
+            ? '<select data-status="' + a.id + '" style="border:1px solid var(--line-2);border-radius:8px;padding:5px 8px;font:inherit;font-size:12.5px">'
+              + ['assigned', 'in_progress', 'done'].map(function (s) { return '<option value="' + s + '"' + (a.status === s ? ' selected' : '') + '>' + ({ assigned: 'Assigned', in_progress: 'In progress', done: 'Done' })[s] + '</option>'; }).join('')
+              + '</select> <span class="link" data-remove="' + a.id + '">Remove</span>'
+            : badge;
+          return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)"><a href="/university/' + esc(a.floor_key) + '" style="font-weight:600;font-size:14.5px">' + esc(a.floor_title) + '</a><div style="display:flex;gap:10px;align-items:center">' + ctrl + '</div></div>';
+        }).join('');
+        var done = byPerson[name].filter(function (a) { return a.status === 'done'; }).length;
+        return '<div class="kcard"><div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="font-size:17px">' + esc(name) + '</h3><span class="lbl">' + done + '/' + byPerson[name].length + ' done</span></div>' + rows + '</div>';
+      }).join('');
+    }
+    mount.innerHTML = html;
+    var btn = document.getElementById('asgBtn');
+    if (btn) btn.addEventListener('click', doAssign);
+    mount.querySelectorAll('[data-status]').forEach(function (sel) { sel.addEventListener('change', function () { setStatus(sel.getAttribute('data-status'), sel.value); }); });
+    mount.querySelectorAll('[data-remove]').forEach(function (el) { el.addEventListener('click', function () { removeAssign(el.getAttribute('data-remove')); }); });
+  }
+  async function doAssign() {
+    var name = (document.getElementById('asgName') || {}).value || '';
+    var floor = (document.getElementById('asgFloor') || {}).value || '';
+    name = name.trim();
+    if (!name) { toast('Add a name'); return; }
+    var ref = ((ASG.roster || []).filter(function (r) { return r.name.toLowerCase() === name.toLowerCase(); })[0] || {}).ref || null;
+    try { await api('/api/os2-uniassign', { action: 'assign', assignee: name, assignee_ref: ref, floor_key: floor }); toast('Assigned'); loadAssignments(); }
+    catch (e) { if (e.message !== 'signed out') toast(e.message); }
+  }
+  async function setStatus(id, status) {
+    try { await api('/api/os2-uniassign', { action: 'status', id: id, status: status }); loadAssignments(); }
+    catch (e) { if (e.message !== 'signed out') toast(e.message); }
+  }
+  async function removeAssign(id) {
+    try { await api('/api/os2-uniassign', { action: 'remove', id: id }); toast('Removed'); loadAssignments(); }
+    catch (e) { if (e.message !== 'signed out') toast(e.message); }
   }
 
   function tile(k, v) { return '<div class="tile"><div class="k">' + esc(k) + '</div><div class="v">' + v + '</div></div>'; }
