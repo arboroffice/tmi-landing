@@ -127,10 +127,17 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
       <p class="sub">Your Intelligent Company Audit is set. We will call you within one business day at the number you gave us to map where your operation leaks time and money and show you what we would build. The Intelligent Company Audit is $5,000, and it credits in full toward your build if you move forward.</p>
 
       <div class="actcard">
+        <h3>Lock in your Intelligent Company Audit.</h3>
+        <p>The audit is $5,000, and it credits in full toward your build if you move forward. Pay now to reserve your audit and your strategy call with the founder and a strategist.</p>
+        <a class="actbtn lime" id="pay-btn" href="#">Pay &amp; start &rarr;</a>
+        <div class="err" id="pay-err" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="actcard">
         <span class="badge-free">Now unlocked</span>
         <h3>Your OS is unlocked. Start building.</h3>
         <p>Spin up your OS and watch your whole company appear on one screen: your departments, your AI workers, your numbers. It is free, and it is a live preview of exactly what we would build for you.</p>
-        <a class="actbtn lime" href="/os?booked=1">Open my OS &rarr;</a>
+        <a class="actbtn" href="/os?booked=1">Open my OS &rarr;</a>
       </div>
     </div>
   </div>
@@ -172,6 +179,30 @@ document.getElementById('lead-form').addEventListener('submit', async function (
   document.getElementById('step-form').classList.add('hidden');
   document.getElementById('step-done').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Pay for the Intelligent Company Audit: capture the lead, then hand off to
+// Stripe hosted Checkout. Uses the details already entered on the form.
+document.getElementById('pay-btn').addEventListener('click', async function (ev) {
+  ev.preventDefault();
+  var btn = ev.currentTarget;
+  var perr = document.getElementById('pay-err');
+  perr.textContent = '';
+  var g = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
+  var payload = { name: g('name'), email: g('email'), phone: g('phone'), company: g('company'), website: g('website') };
+  if (!payload.name || !payload.email) { perr.textContent = 'We need your name and email to start the audit.'; return; }
+  btn.style.pointerEvents = 'none'; var label = btn.textContent; btn.textContent = 'Taking you to checkout...';
+  try {
+    var r = await fetch('/api/audit-capture', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+    });
+    var j = await r.json().catch(function () { return {}; });
+    if (r.ok && j.url) { window.location.href = j.url; return; }
+    perr.textContent = (j && j.error) || 'Could not start checkout. Please try again or email support@tmitechai.com.';
+  } catch (e) {
+    perr.textContent = 'Could not start checkout. Please try again or email support@tmitechai.com.';
+  }
+  btn.style.pointerEvents = ''; btn.textContent = label;
 });
 </script>
 <script src="/chat-widget.js" defer></script>

@@ -88,11 +88,21 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
 <script>
   // Booking is the gate to the OS: mark this browser as booked so /os opens.
   try { localStorage.setItem('tmi_booked', '1'); } catch (e) {}
+  var paidAudit = false;
+  try { paidAudit = new URLSearchParams(location.search).get('paid') === 'audit'; } catch (e) {}
   // Personalize the headline if we captured a name on the book page.
+  var firstName = '';
   try {
     var l = JSON.parse(sessionStorage.getItem('tmi_lead') || '{}');
-    if (l && l.name) document.getElementById('head').textContent = "You're booked, " + String(l.name).split(' ')[0] + '.';
+    if (l && l.name) firstName = String(l.name).split(' ')[0];
   } catch (e) {}
+  if (paidAudit) {
+    document.getElementById('head').textContent = firstName ? ("Payment received, " + firstName + ".") : "Payment received.";
+    var sub = document.querySelector('.sub');
+    if (sub) sub.textContent = "Your Intelligent Company Audit is confirmed. Check your email for the receipt. We will reach out to schedule your strategy call and send the short intake that builds your audit. The $5,000 credits in full toward your build if you move forward.";
+  } else if (firstName) {
+    document.getElementById('head').textContent = "You're booked, " + firstName + ".";
+  }
 </script>
 </body>
 </html>
