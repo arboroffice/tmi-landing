@@ -261,8 +261,11 @@ img{display:block;max-width:100%;}
 .rv.in{opacity:1;transform:none;}
 
 /* ---- HERO ---- */
-.chero{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:#05060c;color:#fff;}
-.chero .aurora{position:absolute;inset:-25%;pointer-events:none;
+.chero{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:#000;color:#fff;}
+.chero .heroimg{position:absolute;inset:-6%;z-index:0;background:#000 url('/hero-bg.jpg') center/cover no-repeat;will-change:transform;animation:heroKen 34s ease-in-out infinite alternate;}
+.chero .heroimg::after{content:"";position:absolute;inset:0;background:radial-gradient(70% 65% at 50% 52%, rgba(0,0,0,0.55), rgba(0,0,0,0.18) 60%, rgba(0,0,0,0.55));}
+@keyframes heroKen{0%{transform:scale(1.06) translate(-1.5%,-1%);}100%{transform:scale(1.16) translate(2%,1.5%);}}
+.chero .aurora{opacity:0.7;position:absolute;inset:-25%;pointer-events:none;z-index:1;
   background:
     radial-gradient(38% 46% at 22% 32%, rgba(228,255,151,0.20), transparent 62%),
     radial-gradient(42% 52% at 80% 22%, rgba(96,124,255,0.16), transparent 62%),
@@ -429,6 +432,7 @@ img{display:block;max-width:100%;}
 
 <!-- 1. HERO -->
 <section class="chero cine" id="top">
+  <div class="heroimg" id="heroImg"></div>
   <div class="aurora" id="heroAurora"></div>
   <div class="stars"></div>
   <div class="chero-in" id="heroText">
