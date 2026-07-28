@@ -5,7 +5,7 @@
 
 export const CAMPAIGN = {
   name: 'Intelligent Company Shift',
-  positioning: 'We redesign industrial companies into intelligent companies. Lead with visibility (the free Business Intelligence Audit), not AI.',
+  positioning: 'We redesign industrial companies into intelligent companies. Lead with visibility (the Business Intelligence Audit), not AI.',
   angle: 'What your company looks like as an intelligent company. Opportunity and upside, never a critique.',
 
   offer: {

@@ -186,7 +186,7 @@ export function renderAuditPage(d) {
 </head>
 <body>
 
-<header class="hd"><div class="wrap"><a href="/" class="brand"><img src="/logo.svg" alt="TMI"/> TMI</a><a href="/complete-audit" class="hd-cta">Get your free audit &rarr;</a></div></header>
+<header class="hd"><div class="wrap"><a href="/" class="brand"><img src="/logo.svg" alt="TMI"/> TMI</a><a href="/complete-audit" class="hd-cta">Get your audit &rarr;</a></div></header>
 
 <section class="hero"><div class="wrap">
   <div class="meta">Operational intelligence review &middot; Prepared for ${esc(d.companyName)}</div>
@@ -248,7 +248,7 @@ ${demo}
   <div class="eyebrow">This is the preview</div>
   <h2>Want the complete picture for ${esc(d.companyName)}?</h2>
   <p>The Complete Audit goes deep on your real operation, then you sit down with the founder and a strategist to map exactly what to fix and how. It is free.</p>
-  <a href="/complete-audit?company=${encodeURIComponent(d.companyName)}" class="btn">Get your free Complete Audit &rarr;</a>
+  <a href="/complete-audit?company=${encodeURIComponent(d.companyName)}" class="btn">Get your Complete Audit &rarr;</a>
   <p class="note">Prepared by TMI &middot; A preliminary review from public information.</p>
 </div></section>
 

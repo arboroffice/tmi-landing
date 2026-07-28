@@ -18,7 +18,7 @@ async function coach(stats, lines) {
     ],
   };
   if (!apiKey || !lines.length) return fallback;
-  const prompt = `You are a sales coach for a field rep who door-knocks industrial and trades business owners for TMI. Their job is to spark interest and book a free 15-minute audit call, not to close. Here is today's activity.
+  const prompt = `You are a sales coach for a field rep who door-knocks industrial and trades business owners for TMI. Their job is to spark interest and book a 15-minute audit call, not to close. Here is today's activity.
 
 Stats: ${stats.doors} doors logged, ${stats.conversations} conversations, ${stats.booked} audits booked, ${stats.due} follow-ups still due.
 

@@ -31,7 +31,7 @@ export async function buildCompleteAudit({ company, industry, answers = {}, rese
   const msg = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 5500,
-    system: `You are TMI's senior operations strategist writing the free TMI Business Intelligence Audit for ${company || 'a company'}. This is not a workshop and not generic marketing advice. Before the call, TMI's system researched their company: their website, the software they run, their reviews, their market, and what their competitors are doing. This document is "here is everything we found." It must feel like a premium paid engagement even though it is free, and it is what the founder and a TMI strategist walk through on a 30-minute call.
+    system: `You are TMI's senior operations strategist writing the TMI Business Intelligence Audit for ${company || 'a company'}. This is not a workshop and not generic marketing advice. Before the call, TMI's system researched their company: their website, the software they run, their reviews, their market, and what their competitors are doing. This document is "here is everything we found." It must feel like a premium paid engagement, and it is what the founder and a TMI strategist walk through on a 30-minute call.
 
 The strategic job of this report: prove we already did the homework, then make TMI the obvious company to build everything it recommends. It is the first step of a $25k to $50k implementation, not just a discovery call.
 

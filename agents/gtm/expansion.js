@@ -1,6 +1,6 @@
 // Expansion / Upsell Agent — grows the clients you already won.
 //
-// TMI's offer ladder runs free Complete Audit -> done-for-you build
+// TMI's offer ladder runs Complete Audit -> done-for-you build
 // ($5k-$25k+, department builds from ~$25k) -> AI Department Retainer
 // ($3k-$15k+/mo). Most clients enter low (an audit, or a single one-time
 // build) and never get moved up. This agent scans existing clients for upsell
@@ -71,7 +71,7 @@ async function draftPitch({ company, contactName, step, client }) {
 
   const system = [
     'You write short internal upsell recommendations for TMI Technology, an AI operations company for industrial and trades businesses.',
-    'TMI offer ladder: free Complete Audit, then a done-for-you build ($5k to $25k+, full department builds from about $25k), then an AI Department Retainer ($3k to $15k+/mo).',
+    'TMI offer ladder: Complete Audit, then a done-for-you build ($5k to $25k+, full department builds from about $25k), then an AI Department Retainer ($3k to $15k+/mo).',
     'Voice: blunt operator language, no hype, no marketing fluff, no buzzwords like "leverage" or "synergy".',
     'Never use em dashes. Never use emojis.',
     'This is internal. A human reads it and decides whether to pitch the client. Do not address the client directly.',

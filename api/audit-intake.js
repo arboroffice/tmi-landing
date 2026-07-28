@@ -15,7 +15,7 @@ module.exports = async function handler(req, res) {
   const { session_id, email, company, industry, answers, name, phone, website, research, diagnosis } = req.body || {};
   if (!answers || typeof answers !== 'object') return res.status(400).json({ error: 'answers required' });
 
-  // The Intelligent Company Audit is free. Capture the email and proceed, no payment gate.
+  // The Intelligent Company Audit is $5,000. Capture the email and proceed.
   // (A legacy Stripe session is still honored if one happens to be present.)
   let paidEmail = email;
   try {

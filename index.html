@@ -209,12 +209,18 @@
   /* mobile drawer */
   .mscrim{position:fixed;inset:0;background:rgba(10,11,20,0.5);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .2s;z-index:200;}
   .mscrim.on{opacity:1;pointer-events:auto;}
-  .mdrawer{position:fixed;top:0;right:0;bottom:0;width:min(84vw,340px);background:var(--bg);z-index:201;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.7,.2,1);padding:20px 22px;display:flex;flex-direction:column;gap:4px;box-shadow:-20px 0 60px -30px rgba(0,0,0,.5);}
+  .mdrawer{position:fixed;top:0;right:0;bottom:0;width:min(86vw,360px);background:var(--bg);z-index:201;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.7,.2,1);padding:18px 22px 22px;display:flex;flex-direction:column;box-shadow:-20px 0 60px -30px rgba(0,0,0,.5);overflow-y:auto;}
   .mdrawer.on{transform:translateX(0);}
-  .mdrawer-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-  .mx{background:none;border:none;font-size:26px;line-height:1;cursor:pointer;color:var(--ink);}
-  .mdrawer a.ml{font-size:16px;color:var(--ink);padding:12px 6px;border-bottom:1px solid var(--line);}
-  .mdrawer .btn{margin-top:14px;}
+  .mdrawer-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .mx{background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:var(--ink);padding:0 4px;}
+  .mdrawer a.ml{font-size:18px;font-weight:600;letter-spacing:-0.01em;color:var(--ink);padding:17px 4px;border-bottom:1px solid var(--line);}
+  .mdrawer a.ml:active{color:var(--ink-2);}
+  .mdrawer-social{display:flex;gap:10px;padding:20px 2px 4px;margin-top:auto;}
+  .mdrawer-social a{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink);border:1px solid var(--line);transition:background .15s,border-color .15s;}
+  .mdrawer-social a:hover{background:var(--bg-alt);}
+  .mdrawer-social svg{width:18px;height:18px;fill:currentColor;}
+  .mdrawer .mdcta{display:flex;align-items:center;justify-content:center;margin-top:10px;width:100%;background:var(--ink);color:#fff;font-weight:700;font-size:16px;letter-spacing:-0.01em;padding:16px;border-radius:14px;}
+  .mdrawer .mdcta:hover{background:#000;}
 
   @media(max-width:960px){
     .eco{grid-template-columns:1fr;gap:22px;}
@@ -500,15 +506,19 @@ body::after{content:"";position:fixed;inset:0;z-index:150;pointer-events:none;op
 
 <div class="mscrim" id="mscrim" onclick="closeM()"></div>
 <aside class="mdrawer" id="mdrawer">
-  <div class="mdrawer-top"><span class="brand"><span class="mk">TMI</span> TMI</span><button class="mx" onclick="closeM()">&times;</button></div>
-  <a class="ml" href="#ecosystem" onclick="closeM()">Ecosystem</a>
-  <a class="ml" href="/solutions" onclick="closeM()">Solutions</a>
-  <a class="ml" href="/intelligent-companies" onclick="closeM()">Intelligent Companies</a>
-  <a class="ml" href="/industries" onclick="closeM()">Industries</a>
-  <a class="ml" href="/news" onclick="closeM()">Intelligence</a>
+  <div class="mdrawer-top"><span class="brand"><span class="mk">TMI</span> TMI</span><button class="mx" aria-label="Close" onclick="closeM()">&times;</button></div>
+  <a class="ml" href="/the-intelligent-company-book" onclick="closeM()">Read the book</a>
+  <a class="ml" href="/intelligence-scorecard" onclick="closeM()">Score your company</a>
   <a class="ml" href="/about" onclick="closeM()">About</a>
-  <a class="ml" href="/contact" onclick="closeM()">Contact</a>
-  <a class="btn btn-lime" href="/book" onclick="closeM()">Book a Strategy Call</a>
+  <a class="ml" href="/portfolio" onclick="closeM()">Our work</a>
+  <a class="ml" href="/news" onclick="closeM()">Journal</a>
+  <div class="mdrawer-social">
+    <a href="https://www.youtube.com/@tmitechai" target="_blank" rel="noopener" aria-label="TMI on YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.6 15.6V8.4L15.82 12z"/></svg></a>
+    <a href="https://www.instagram.com/tmitechai" target="_blank" rel="noopener" aria-label="TMI on Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.42.56.21.96.47 1.38.9.43.42.69.82.9 1.38.17.43.37 1.06.42 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.42 2.23-.21.56-.47.96-.9 1.38-.42.43-.82.69-1.38.9-.43.17-1.06.37-2.23.42-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.42a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.17-.43-.37-1.06-.42-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.42-2.23.21-.56.47-.96.9-1.38.42-.43.82-.69 1.38-.9.43-.17 1.06-.37 2.23-.42C8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.88 5.88 0 0 0-2.13 1.38A5.88 5.88 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.66 1.34 1.07 2.13 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.88 5.88 0 0 0 2.13-1.38 5.88 5.88 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.88 5.88 0 0 0-1.38-2.13A5.88 5.88 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0zm0 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.41-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg></a>
+    <a href="https://www.linkedin.com/company/tmiai/" target="_blank" rel="noopener" aria-label="TMI on LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>
+    <a href="https://www.facebook.com/share/19Hiw8KsUq/?mibextid=wwXIfr" target="_blank" rel="noopener" aria-label="TMI on Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.09 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.09 24 18.1 24 12.07z"/></svg></a>
+  </div>
+  <a class="mdcta" href="/book" onclick="closeM()">Book a Strategy Call</a>
 </aside>
 
 <!-- 1. HERO -->
@@ -589,7 +599,7 @@ body::after{content:"";position:fixed;inset:0;z-index:150;pointer-events:none;op
 </section>
 
 <!-- 8. ECOSYSTEM -->
-<section class="scn dark cine" style="text-align:center;background:#05060c;">
+<section class="scn dark cine" id="ecosystem" style="text-align:center;background:#05060c;">
   <div class="scn-wrap">
     <div class="eyebrow-s rv">One ecosystem</div>
     <h2 class="big-h rv">Everything compounds.</h2>
