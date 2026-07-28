@@ -39,56 +39,72 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  :root{--bg:#ffffff;--bg-card:#f6f6f4;--ink:#0a0b14;--ink-2:#55576a;--ink-3:#8a8c9e;--line:rgba(10,11,20,0.12);--line-2:rgba(10,11,20,0.16);--chart:#E4FF97;--chart-dark:#cdee72;--serif:"Barlow",system-ui,sans-serif;}
-  html,body{background:var(--bg);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased;min-height:100vh;}
-  body::before{content:'';position:fixed;top:0;left:50%;transform:translateX(-50%);width:900px;height:520px;background:radial-gradient(ellipse at 50% 0%,rgba(228,255,151,0.22) 0%,transparent 65%);pointer-events:none;z-index:0;}
-  a{color:inherit;}
-  .page{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:52px 20px 80px;}
-  .inner{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;text-align:center;}
-  .wordmark{font-size:12px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:22px;}
-  .wordmark em{color:var(--ink);font-style:normal;}
-  .eyebrow{font-size:11px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:#3a7d33;background:#e8f6e6;border:1px solid #cfe9d2;border-radius:999px;padding:5px 12px;margin-bottom:20px;}
-  h1{font-size:clamp(28px,4.4vw,42px);font-weight:800;letter-spacing:-0.02em;line-height:1.05;margin-bottom:14px;color:var(--ink);}
+  :root{--bg:#ffffff;--bg-soft:#f7f8f5;--bg-card:#ffffff;--ink:#0a0b14;--ink-2:#54566a;--ink-3:#8a8c9e;--line:rgba(10,11,20,0.10);--line-2:rgba(10,11,20,0.16);--chart:#E4FF97;--chart-dark:#cdee72;--serif:"Barlow",system-ui,sans-serif;}
+  html{scroll-behavior:smooth;}
+  html,body{background:var(--bg-soft);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased;min-height:100vh;}
+  a{color:inherit;text-decoration:none;}
+  /* top brand bar so the page has an anchor instead of empty space */
+  .topbar{position:sticky;top:0;z-index:10;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(10,11,20,0.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+  .topbar .brand{display:inline-flex;align-items:center;gap:9px;font-size:15px;font-weight:800;letter-spacing:-0.01em;color:#fff;}
+  .topbar .brand .mk{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;background:var(--chart);color:#0a0b14;font-size:11px;font-weight:800;letter-spacing:0;}
+  .topbar .back{font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);transition:color .15s;}
+  .topbar .back:hover{color:#fff;}
+  /* soft glow anchored to the hero, not the whole viewport */
+  .page{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:44px 20px 72px;}
+  .page::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:820px;max-width:130vw;height:360px;background:radial-gradient(ellipse at 50% 0%,rgba(228,255,151,0.28) 0%,transparent 68%);pointer-events:none;z-index:-1;}
+  .inner{width:100%;max-width:540px;display:flex;flex-direction:column;align-items:center;text-align:center;}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:#3a7d33;background:#eaf7e7;border:1px solid #cfe9d2;border-radius:999px;padding:6px 13px;margin-bottom:18px;}
+  h1{font-size:clamp(30px,5vw,44px);font-weight:800;letter-spacing:-0.025em;line-height:1.04;margin-bottom:14px;color:var(--ink);}
   h1 em{font-style:italic;color:var(--ink);}
-  .sub{font-size:16px;line-height:1.6;color:var(--ink-2);max-width:460px;margin-bottom:34px;}
-  form{width:100%;display:flex;flex-direction:column;gap:12px;text-align:left;}
-  .field label{display:block;font-size:12px;font-weight:600;letter-spacing:0.02em;color:var(--ink-2);margin-bottom:6px;}
-  .field input,.field select{width:100%;padding:14px 16px;font:inherit;font-size:16px;color:var(--ink);background:#fff;border:1px solid var(--line-2);border-radius:11px;transition:border-color .15s,box-shadow .15s;}
+  .sub{font-size:16px;line-height:1.6;color:var(--ink-2);max-width:440px;margin-bottom:30px;}
+  /* the form sits in a real card for weight and trust */
+  .card{width:100%;background:var(--bg-card);border:1px solid var(--line);border-radius:20px;padding:26px 24px;box-shadow:0 20px 50px -30px rgba(10,11,20,0.4),0 2px 8px -4px rgba(10,11,20,0.08);}
+  form{width:100%;display:flex;flex-direction:column;gap:14px;text-align:left;}
+  .field label{display:block;font-size:12px;font-weight:700;letter-spacing:0.02em;color:var(--ink-2);margin-bottom:7px;}
+  .field input,.field select{width:100%;padding:14px 16px;font:inherit;font-size:16px;color:var(--ink);background:#fbfbfa;border:1px solid var(--line-2);border-radius:12px;transition:border-color .15s,box-shadow .15s,background .15s;}
   .field input::placeholder{color:var(--ink-3);}
-  .field input:focus,.field select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(228,255,151,0.45);}
+  .field input:focus,.field select:focus{outline:none;background:#fff;border-color:var(--ink);box-shadow:0 0 0 3px rgba(228,255,151,0.5);}
   .field select{appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23888' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;}
   .field select option{color:#111;}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   @media(max-width:460px){.row{grid-template-columns:1fr;}}
-  button.cta{margin-top:8px;width:100%;padding:16px;font:inherit;font-size:16px;font-weight:800;letter-spacing:-0.01em;color:#0a0b14;background:var(--chart);border:none;border-radius:11px;cursor:pointer;transition:background .15s;}
+  button.cta{margin-top:6px;width:100%;padding:16px;font:inherit;font-size:16px;font-weight:800;letter-spacing:-0.01em;color:#0a0b14;background:var(--chart);border:none;border-radius:12px;cursor:pointer;transition:background .15s,transform .1s;}
   button.cta:hover{background:var(--chart-dark);}
+  button.cta:active{transform:translateY(1px);}
   button.cta:disabled{opacity:.6;cursor:default;}
-  .reassure{margin-top:16px;font-size:13px;color:var(--ink-3);line-height:1.5;}
+  .reassure{margin-top:18px;font-size:13px;color:var(--ink-3);line-height:1.5;}
   .reassure a{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;font-weight:600;}
   .err{color:#c0392b;font-size:13px;margin-top:10px;min-height:16px;}
   .hidden{display:none !important;}
-  /* success cards: the free OS */
-  .actcard{width:100%;background:var(--bg-card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;text-align:left;margin-top:16px;}
+  /* success cards */
+  .actcard{width:100%;background:var(--bg-card);border:1px solid var(--line);border-radius:18px;padding:24px;text-align:left;margin-top:16px;box-shadow:0 16px 40px -30px rgba(10,11,20,0.4);}
+  .actcard.primary{border-color:rgba(10,11,20,0.16);box-shadow:0 24px 60px -34px rgba(10,11,20,0.5);}
   .actcard h3{font-size:19px;font-weight:800;color:var(--ink);margin-bottom:6px;letter-spacing:-0.01em;}
   .actcard p{font-size:14px;color:var(--ink-2);line-height:1.55;margin-bottom:16px;}
-  .actbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;font:inherit;font-size:16px;font-weight:800;border-radius:11px;cursor:pointer;text-decoration:none;transition:background .15s;}
+  .actbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;font:inherit;font-size:16px;font-weight:800;border-radius:12px;cursor:pointer;text-decoration:none;transition:background .15s;}
   .actbtn.lime{background:var(--chart);color:#0a0b14;}
   .actbtn.lime:hover{background:var(--chart-dark);}
-  .badge-free{display:inline-block;font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#3a7d33;background:#e8f6e6;border:1px solid #cfe9d2;border-radius:999px;padding:3px 9px;margin-bottom:10px;}
+  .actbtn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line-2);}
+  .actbtn.ghost:hover{background:var(--bg-soft);}
+  .badge-free{display:inline-block;font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#3a7d33;background:#eaf7e7;border:1px solid #cfe9d2;border-radius:999px;padding:3px 9px;margin-bottom:10px;}
 </style>
 <script src="/rb2b.js"></script>
 <!-- OpenAI Ads pixel --><script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"1SVHHxEVsMKxiFJd8MnXZm",debug:false});</script>
 </head>
 <body>
+<header class="topbar">
+  <a href="/" class="brand"><span class="mk">TMI</span> TMI</a>
+  <a href="/" class="back">&larr; Back to site</a>
+</header>
 <div class="page">
   <div class="inner">
-    <div class="wordmark">TMI <em>Tech AI</em></div>
 
     <!-- STEP 1: book the audit -->
     <div id="step-form">
       <span class="eyebrow">The Intelligent Company Audit</span>
       <h1>Book your Intelligent Company <em>Audit</em>.</h1>
-      <p class="sub">The audit is a 30-minute call where we map exactly where your operation leaks time and money and show you what we would build. Tell us where to reach you and we will call you back within one business day.</p>
+      <p class="sub">The audit is a working call where we map exactly where your operation leaks time and money and show you what we would build. Tell us where to reach you and we will call you back within one business day.</p>
+      <div class="card">
       <form id="lead-form" autocomplete="on">
         <div class="row">
           <div class="field"><label for="name">Name</label><input id="name" name="name" required placeholder="Your name"/></div>
@@ -117,7 +133,8 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
         <button class="cta" type="submit" id="submit-btn">Book my audit &rarr;</button>
         <div class="err" id="err"></div>
       </form>
-      <p class="reassure">We reach out within one business day.</p>
+      </div>
+      <p class="reassure">We reach out within one business day. Your first strategy call is the audit.</p>
     </div>
 
     <!-- SUCCESS: booked, now the free OS unlocks -->
@@ -126,7 +143,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"/></
       <h1>You're booked, <em id="done-name">friend</em>.</h1>
       <p class="sub">Your Intelligent Company Audit is set. We will call you within one business day at the number you gave us to map where your operation leaks time and money and show you what we would build. The Intelligent Company Audit is $5,000, and it credits in full toward your build if you move forward.</p>
 
-      <div class="actcard">
+      <div class="actcard primary">
         <h3>Lock in your Intelligent Company Audit.</h3>
         <p>The audit is $5,000, and it credits in full toward your build if you move forward. Pay now to reserve your audit and your strategy call with the founder and a strategist.</p>
         <a class="actbtn lime" id="pay-btn" href="#">Pay &amp; start &rarr;</a>
