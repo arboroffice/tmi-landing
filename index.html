@@ -209,7 +209,8 @@
   /* mobile drawer */
   .mscrim{position:fixed;inset:0;background:rgba(10,11,20,0.5);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .2s;z-index:200;}
   .mscrim.on{opacity:1;pointer-events:auto;}
-  .mdrawer{position:fixed;top:0;right:0;bottom:0;width:min(86vw,360px);background:var(--bg);z-index:201;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.7,.2,1);padding:18px 22px 22px;display:flex;flex-direction:column;box-shadow:-20px 0 60px -30px rgba(0,0,0,.5);overflow-y:auto;}
+  .mdrawer{position:fixed;top:0;right:0;bottom:0;width:100vw;background:var(--bg);z-index:201;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,.7,.2,1);padding:18px 22px 22px;display:flex;flex-direction:column;overflow-y:auto;}
+  @media(min-width:520px){.mdrawer{width:min(88vw,400px);box-shadow:-20px 0 60px -30px rgba(0,0,0,.5);}}
   .mdrawer.on{transform:translateX(0);}
   .mdrawer-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
   .mx{background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:var(--ink);padding:0 4px;}
