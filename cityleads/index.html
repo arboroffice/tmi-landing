@@ -478,6 +478,12 @@ function renderPlan(){
     <div class="card" style="background:var(--ink);color:#fff;margin-top:16px;padding:15px 17px;border:none">
       <div style="font-size:13.5px;line-height:1.5">Your one job: get the owner interested and <b style="color:var(--chart)">book them onto the audit</b>, a call with Mia. You do not close. You do not quote price. You spark interest and book the call.</div>
     </div>
+    <div class="card" id="pAsk" style="margin-top:12px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">What do I say?</div>
+      <textarea id="pAskQ" rows="2" placeholder="Type what the owner said, e.g. I don't have the budget, or just send me info" style="width:100%;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;color:var(--ink);resize:vertical"></textarea>
+      <button class="btn ghost sm" id="pAskGo" style="width:100%;margin-top:8px">✨ Get the line</button>
+      <div id="pAskOut"></div>
+    </div>
     <a class="btn ghost" href="https://www.tmitechai.com/sales-playbook" target="_blank" rel="noopener" style="margin-top:12px">Open the full sales playbook →</a>
     <a class="btn ghost" href="https://www.tmitechai.com/sop/city-rep-master-guide" target="_blank" rel="noopener" style="margin-top:8px">Open the master rep guide →</a>
     <a class="btn ghost" href="https://www.tmitechai.com/sop/social-media-playbook" target="_blank" rel="noopener" style="margin-top:8px">Open the social &amp; media playbook →</a>
@@ -492,6 +498,18 @@ function renderPlan(){
     <div style="height:24px"></div>
   `;
   $('#pBack').onclick=()=>switchTab('today');
+  const SP='<span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span>';
+  const askGo=$('#pAskGo'); if(askGo) askGo.onclick=async()=>{
+    const q=($('#pAskQ').value||'').trim(); if(!q){ toast('Type what they said'); return; }
+    const out=$('#pAskOut'); askGo.disabled=true; out.innerHTML='<div style="margin-top:10px;color:var(--muted);font-size:13px">'+SP+' Finding the line…</div>';
+    try{
+      const d=await api('/api/rep-ask',{method:'POST',body:JSON.stringify({action:'ask',question:q})});
+      out.innerHTML='<div class="card" style="margin-top:10px;background:var(--bg)"><div style="font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap">'+esc(d.answer||'')+'</div><div style="display:flex;gap:7px;margin-top:10px"><button class="btn sm" id="pAskCopy" style="flex:1">Copy</button><button class="btn ghost sm" id="pAskRedo" style="flex:none">Redo</button></div></div>';
+      const cp=$('#pAskCopy'); if(cp) cp.onclick=()=>{ try{ navigator.clipboard.writeText(d.answer); toast('Copied'); }catch(e){ toast('Select and copy'); } };
+      const rd=$('#pAskRedo'); if(rd) rd.onclick=()=>askGo.onclick();
+    }catch(ex){ out.innerHTML=''; toast(ex.message||'Could not answer'); }
+    askGo.disabled=false;
+  };
 }
 
 /* ---- Leads ---- */
