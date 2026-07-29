@@ -41,6 +41,8 @@
         <div id="team-map" style="height:440px;width:100%;background:#e7e8e2;"></div>
       </div>
 
+      <div id="team-commissions" style="margin-bottom:22px;"></div>
+
       <div id="team-feed" style="margin-bottom:22px;"></div>
 
       <!-- create form -->
@@ -193,6 +195,32 @@ async function loadFunnel(){
 let teamMap=null, teamMarkers=[];
 const REP_COLORS=['#2f6bd6','#d1483a','#3f8f2a','#7a5bd0','#c98a12','#0891b2','#be185d','#4d7c0f','#b45309','#6d28d9'];
 function whenMaps(cb,tries){ tries=tries||0; if(window.google&&google.maps){ cb(); } else if(tries<40){ setTimeout(()=>whenMaps(cb,tries+1),150); } }
+async function loadCommissions(){
+  const box=document.getElementById('team-commissions'); if(!box) return;
+  let d; try{ d=await TMIAdmin.api('/api/rep-commissions'); }catch(e){ box.innerHTML=''; return; }
+  const items=(d&&d.items)||[]; const t=(d&&d.totals)||{pending:0,paid:0,count:0};
+  const money=n=>'$'+Math.round(n||0).toLocaleString();
+  if(!items.length){ box.innerHTML='<div class="card"><div class="panel-sec-label" style="margin-bottom:6px;">Commissions</div><p style="font-size:13px;color:var(--muted);margin:0;">No commissions yet. They appear here when a rep marks a deal won.</p></div>'; return; }
+  const rows=items.slice(0,60).map(c=>`<tr>
+    <td style="font-weight:600;">${esc(c.rep)}</td>
+    <td>${esc(c.business_name||'—')}</td>
+    <td>${c.deal_value!=null?money(c.deal_value):'—'}</td>
+    <td style="font-weight:700;">${money(c.commission)}</td>
+    <td>${c.status==='paid'?'<span class="badge" style="background:#e8f6e6;color:#3f8f57;">Paid</span>':'<span class="badge" style="background:#fff5e0;color:#a06800;">Pending</span>'}</td>
+    <td style="text-align:right;">${c.status==='paid'?`<button class="btn btn-ghost btn-sm" onclick="setCommission('${c.id}','pending')">Undo</button>`:`<button class="btn btn-primary btn-sm" onclick="setCommission('${c.id}','paid')">Mark paid</button>`}</td>
+  </tr>`).join('');
+  box.innerHTML=`<div class="card" style="padding:0;overflow:hidden;">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="panel-sec-label" style="margin:0;">Commissions</div>
+      <div style="font-size:13px;font-weight:700;">${money(t.pending)} <span style="color:var(--muted);font-weight:500;">pending</span> &middot; ${money(t.paid)} <span style="color:var(--muted);font-weight:500;">paid</span></div>
+    </div>
+    <div style="overflow-x:auto;"><table class="data-table" style="width:100%;min-width:560px;"><thead><tr><th>Rep</th><th>Deal</th><th>Deal value</th><th>Commission (20%)</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+  </div>`;
+}
+async function setCommission(id,status){
+  try{ await TMIAdmin.api('/api/rep-commissions','PATCH',{id:id,status:status}); TMIAdmin.toast(status==='paid'?'Marked paid':'Marked pending'); loadCommissions(); }
+  catch(e){ TMIAdmin.toast(e.message||'Could not update'); }
+}
 async function loadTeamMap(){
   let d; try{ d=await TMIAdmin.api('/api/reps-admin?map=1'); }catch(e){ return; }
   const pins=(d&&d.pins)||[]; const repList=(d&&d.reps)||[];
@@ -228,7 +256,7 @@ async function load(){
   const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.booked_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
   const stat=(n,l)=>`<div class="card" style="text-align:center;padding:16px 12px;margin:0;"><div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;line-height:1;">${n}</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;">${l}</div></div>`;
   document.getElementById('team-stats').innerHTML = stat(reps.length,'Reps')+stat(tl,'Total leads')+stat(tb2,'Booked / won')+stat(td,'Logged today');
-  loadFeed(); loadFunnel(); loadTeamMap();
+  loadFeed(); loadFunnel(); loadTeamMap(); loadCommissions();
   if(!reps.length){ tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
   tb.innerHTML = reps.map(r=>`
     <tr style="cursor:pointer" onclick="openRep('${r.id}')">
