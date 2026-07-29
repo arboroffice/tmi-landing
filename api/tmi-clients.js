@@ -49,19 +49,28 @@ module.exports = async function handler(req, res) {
       const tenants = await db.list('os_tenants', { limit: 300 });
       const clients = [];
       for (const t of tenants) {
-        if (!t.onboarded) continue;
+        const base = {
+          id: t.id, name: t.name, business_type: t.business_type || null,
+          plan: t.plan || 'trial', onboarded: !!t.onboarded, paid: !!t.paid, created_at: t.created_at || null,
+        };
+        if (!t.onboarded) {
+          // Trial / not-yet-onboarded tenants used to be invisible here. Surface
+          // them as a lightweight row (skip the heavy per-tenant state rollup) so
+          // admin can see every company, not just the onboarded ones.
+          clients.push(Object.assign(base, { score: 0, tier: null, certified: false, requests_open: 0, requests_total: 0, workers: 0, live_workers: 0 }));
+          continue;
+        }
         const reqs = await db.list('os_requests', { where: [['tenant_id', '==', t.id]], limit: 200 });
         const st = await tenantState(t.id);
         const sc = scoreTenant(Object.assign({ onboarded: true }, st));
-        clients.push({
-          id: t.id, name: t.name, business_type: t.business_type || null, plan: t.plan || 'trial',
+        clients.push(Object.assign(base, {
           score: sc.score, tier: sc.tier, certified: sc.certified,
           requests_open: reqs.filter((r) => ['requested', 'building'].includes(r.status)).length,
           requests_total: reqs.length,
           workers: st.workers.length, live_workers: st.workers.filter((w) => w.status === 'active').length,
-        });
+        }));
       }
-      clients.sort((a, b) => (b.requests_open - a.requests_open) || (b.score - a.score));
+      clients.sort((a, b) => (Number(b.onboarded) - Number(a.onboarded)) || (b.requests_open - a.requests_open) || (b.score - a.score));
       return res.status(200).json({ clients });
     }
 

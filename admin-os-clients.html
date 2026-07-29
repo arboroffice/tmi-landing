@@ -78,12 +78,14 @@ async function loadClients(){
   const r = await TMIAdmin.api('/api/tmi-clients','POST',{action:'list'});
   if(!r) return;
   CLIENTS = r.clients||[];
-  document.getElementById('clist').innerHTML = CLIENTS.length ? CLIENTS.map(c=>`
-    <div class="crow ${CUR===c.id?'on':''}" onclick="openClient('${c.id}')">
-      <div class="nm"><b>${esc(c.name)}</b><span>${esc(c.business_type||'')}${c.business_type?' · ':''}${c.live_workers}/${c.workers} live${c.certified?' · Certified':''}</span></div>
+  document.getElementById('clist').innerHTML = CLIENTS.length ? CLIENTS.map(c=>{
+    const status = !c.onboarded ? (c.paid?'Paid · setup pending':'Trial') : (c.live_workers+'/'+c.workers+' live'+(c.certified?' · Certified':''));
+    return `<div class="crow ${CUR===c.id?'on':''}" onclick="openClient('${c.id}')">
+      <div class="nm"><b>${esc(c.name)}</b><span>${esc(c.business_type||'')}${c.business_type?' · ':''}${status}</span></div>
       ${c.requests_open?`<span class="badge-n">${c.requests_open}</span>`:''}
-      <div class="sc">${c.score}</div>
-    </div>`).join('') : '<div class="oc-empty">No onboarded clients yet.</div>';
+      <div class="sc">${c.onboarded?c.score:'—'}</div>
+    </div>`;
+  }).join('') : '<div class="oc-empty">No clients yet.</div>';
 }
 
 async function openClient(id){
