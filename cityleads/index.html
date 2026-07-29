@@ -1150,6 +1150,14 @@ function renderMe(){
     {e:'💵',label:'$10k club',earned:dealTotal>=10000,hint:'$10k won'},
   ];
   const badgeHtml=BADGES.map(b=>`<div style="flex:none;width:88px;text-align:center;opacity:${b.earned?1:0.35}"><div style="font-size:26px;line-height:1;${b.earned?'':'filter:grayscale(1)'}">${b.e}</div><div style="font-size:11px;font-weight:700;margin-top:4px">${b.label}</div><div style="font-size:10px;color:var(--muted)">${b.earned?'Earned':b.hint}</div></div>`).join('');
+  // Rep growth curve — the reciprocal of the OS Team Performance stages.
+  const MILE=[{at:total>=25,need:'Log 25 doors'},{at:streak>=3,need:'Hold a 3-day streak'},{at:booked>=1,need:'Book an audit'},{at:wonLeads.length>=1,need:'Close your first deal'},{at:wonLeads.length>=3,need:'Close 3 deals'}];
+  const mileHit=MILE.filter(x=>x.at).length;
+  const STAGE_NAMES=['Rookie','Grinder','Booker','Closer','Top rep','Legend'];
+  const stageName=STAGE_NAMES[Math.min(mileHit,5)];
+  const nextMile=MILE.find(x=>!x.at);
+  const stageBars=MILE.map((_,i)=>'<div style="flex:1;height:6px;border-radius:3px;background:'+(i<mileHit?'#3f8f2a':'var(--line)')+'"></div>').join('');
+  const stageCard=`<div class="card"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Your rep level</div><div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font-size:22px;font-weight:800;letter-spacing:-.02em">${stageName}</div><div style="font-size:12px;color:var(--muted)">${mileHit}/5</div></div><div style="display:flex;gap:4px;margin-top:10px">${stageBars}</div>${nextMile?('<div style="font-size:12.5px;color:var(--muted);margin-top:10px">Next: <b style="color:var(--ink)">'+nextMile.need+'</b> to level up.</div>'):'<div style="font-size:12.5px;color:var(--muted);margin-top:10px">Maxed out. You are a legend.</div>'}</div>`;
   s.innerHTML=`
     <div class="card">
       <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em">${esc(ME.name||'')}</div>
@@ -1179,6 +1187,7 @@ function renderMe(){
       <div class="stat"><div class="n">${wonLeads.length}</div><div class="l">Won</div></div>
       <div class="stat"><div class="n">${conv}%</div><div class="l">Book rate</div></div>
     </div>
+    ${stageCard}
     <div class="card">
       <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Badges</div>
       <div style="display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px">${badgeHtml}</div>
