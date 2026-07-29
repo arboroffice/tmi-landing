@@ -2705,11 +2705,36 @@ function peopleCard(p){
   var empty=(!p.hd&&!p.adoption&&!(p.university&&p.university.length))?'<p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:12px">No chart, adoption, or assignments yet. Add them in Human Design, Team Performance, or University.</p>':'';
   return '<div class="kcard" style="padding:18px 20px">'+head+hd+ad+uni+empty+'</div>';
 }
+// Team standings: rank members by momentum on the two things the OS actually
+// grows, AI adoption and University, from data already loaded. The company-side
+// reciprocal of the field rep leaderboard.
+function peopleScore(p){
+  var s=0;
+  if(p.adoption&&typeof p.adoption.stage==='number')s+=p.adoption.stage*10;
+  if(p.university&&p.university.length){s+=p.university.filter(function(a){return a.status==='done';}).length*6;s+=p.university.filter(function(a){return a.status==='in_progress';}).length*2;}
+  if(p.hd)s+=3;
+  return s;
+}
+function peopleStandings(ppl){
+  var ranked=ppl.map(function(p){return {p:p,s:peopleScore(p)};}).filter(function(x){return x.s>0;}).sort(function(a,b){return b.s-a.s;});
+  if(ranked.length<2)return '';
+  var max=ranked[0].s||1;
+  var rows=ranked.slice(0,8).map(function(x,i){
+    var p=x.p,pct=Math.round(x.s/max*100),done=p.university?p.university.filter(function(a){return a.status==='done';}).length:0;
+    var sub=[];if(p.adoption&&p.adoption.stage_label)sub.push(p.adoption.stage_label);if(done)sub.push(done+' floor'+(done>1?'s':'')+' done');
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-top:'+(i?'1px solid var(--line)':'none')+'">'+
+      '<div style="width:24px;height:24px;flex:none;border-radius:50%;background:'+(i<3?'var(--chart)':'var(--bg-alt)')+';color:var(--ink);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center">'+(i+1)+'</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:'+(p.is_me?'800':'600')+';font-size:14.5px">'+esc(p.name)+(p.is_me?' <span class="badge k">You</span>':'')+'</div>'+(sub.length?'<div class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:1px">'+esc(sub.join(' · '))+'</div>':'')+'</div>'+
+      '<div style="width:88px;flex:none"><div style="height:7px;border-radius:4px;background:var(--line);overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--chart)"></div></div></div>'+
+    '</div>';
+  }).join('');
+  return '<div class="kcard" style="padding:18px 20px;margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px"><h3 style="font-size:16px;font-weight:700">Team standings</h3><span class="cad" style="color:var(--ink-3)">AI adoption + University</span></div>'+rows+'<p class="cad" style="text-transform:none;letter-spacing:0;color:var(--ink-3);margin-top:10px">Who is furthest along adopting AI and finishing their University floors.</p></div>';
+}
 function renderPeople(){
   var d=PEOPLE.data||{};var host=document.getElementById('peopleBody');if(!host)return;
   var ppl=d.people||[];
   if(!ppl.length){host.innerHTML='<div class="empty" style="padding:22px"><p>No people yet. Take your Human Design, add your team in Team Performance, or assign a University floor.</p></div>';return;}
-  host.innerHTML=ppl.map(peopleCard).join('');
+  host.innerHTML=peopleStandings(ppl)+ppl.map(peopleCard).join('');
 }
 
 /* ---- Human Design: how each person is wired. Computed in-house. ---- */
