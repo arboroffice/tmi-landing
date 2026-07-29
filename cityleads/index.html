@@ -405,13 +405,34 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>swit
 /* ---- Today ---- */
 function isToday(iso){ if(!iso) return false; const d=new Date(iso), n=new Date(); return d.toDateString()===n.toDateString(); }
 function dueToday(l){ if(!l.next_action_at) return false; return new Date(l.next_action_at) <= new Date() && !['won','lost','not_interested'].includes(l.status); }
+// One signal, one action. The single highest-priority move right now, from this
+// rep's own leads. Mirrors the OS Pulse pattern in the field tool.
+function todayMove(){
+  const nm=l=>l.contact_name||l.business_name||'this lead';
+  const cold=LEADS.filter(l=>isWarm(l)&&l.status==='new'&&l.created_at&&(Date.now()-new Date(l.created_at).getTime())>5*864e5);
+  if(cold.length) return {t:'Save a warm lead going cold',d:nm(cold[0])+' has been untouched 5+ days. Reach out before it dies.',lead:cold[0].id};
+  const due=LEADS.filter(dueToday).sort((a,b)=>new Date(a.next_action_at)-new Date(b.next_action_at));
+  if(due.length){ const l=due[0]; return {t:'Follow-up due now',d:nm(l)+(l.business_name&&l.contact_name?(' at '+l.business_name):'')+' is due. Call or text.',lead:l.id}; }
+  const cb=LEADS.filter(l=>l.status==='callback');
+  if(cb.length) return {t:'Chase a callback',d:nm(cb[0])+' asked for a callback. Close the loop.',lead:cb[0].id};
+  const warm=LEADS.filter(l=>isWarm(l)&&l.status==='new');
+  if(warm.length) return {t:'Work a warm lead',d:nm(warm[0])+' is warm and waiting. Go get the audit booked.',lead:warm[0].id};
+  if(!LEADS.filter(l=>isToday(l.created_at)).length) return {t:'Log your first door',d:'No doors logged yet today. Walk your cluster and log the first one.',go:'log'};
+  return {t:'You are on track',d:'Nothing overdue. Keep walking your cluster and book an audit.',go:'plan'};
+}
 function renderToday(){
   const loggedToday = LEADS.filter(l=>isToday(l.created_at)).length;
   const booked = LEADS.filter(l=>l.status==='booked'||l.status==='won').length;
   const due = LEADS.filter(dueToday);
   const rot = LEADS.filter(l=>isWarm(l)&&l.status==='new'&&l.created_at&&(Date.now()-new Date(l.created_at).getTime())>5*864e5);
+  const mv = todayMove();
   const s=$('#s-today');
   s.innerHTML = `
+    <div class="card" id="tMove" style="background:#E4FF97;color:#0a0b14;cursor:pointer;margin-bottom:12px">
+      <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.7">Your move right now</div>
+      <div style="font-size:16px;font-weight:800;letter-spacing:-.01em;margin-top:3px">${esc(mv.t)}</div>
+      <div style="font-size:13px;font-weight:600;margin-top:3px;line-height:1.45">${esc(mv.d)}</div>
+    </div>
     <div class="stat-grid">
       <div class="stat"><div class="n">${loggedToday}</div><div class="l">Logged today</div></div>
       <div class="stat"><div class="n">${booked}</div><div class="l">Audits booked</div></div>
@@ -432,6 +453,7 @@ function renderToday(){
   $('#tLog').onclick=()=>switchTab('log');
   $('#tMap').onclick=()=>switchTab('map');
   $('#tPlan').onclick=()=>switchTab('plan');
+  const mvb=$('#tMove'); if(mvb) mvb.onclick=()=>{ if(mv.lead) openLead(mv.lead); else if(mv.go) switchTab(mv.go); };
   $('#tDebrief').onclick=runDebrief;
   paintPending();
   const rb=$('#tRot'); if(rb) rb.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
