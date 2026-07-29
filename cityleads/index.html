@@ -714,6 +714,7 @@ function openLead(id){
     <div id="dTemplates" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px"></div>
     <div style="display:flex;gap:7px;margin-top:8px"><button class="btn ghost sm" id="dAIText" style="flex:1">✨ Draft a text</button><button class="btn ghost sm" id="dAICall" style="flex:1">✨ Call opener</button></div>
     <div id="dAIOut"></div>
+    <div id="dHD"></div>
     ${(isWarm(l)||l.context)?`<div style="margin-top:10px;background:#E4FF97;color:#0a0b14;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:700;">★ ${esc(l.priority==='hot'?'Hot lead':'Warm lead')}${l.context?(' · '+esc(l.context)):''}${l.email?('<div style="font-weight:500;margin-top:3px;">'+esc(l.email)+'</div>'):''}</div>`:''}
     <div class="statuses" id="dStatus">${STATUS.map(x=>`<button data-s="${x}" class="${l.status===x?'on '+x:''}" ${l.status===x?('style="background:var(--'+statusVar(x)+')"'):''}>${STATUS_LABEL[x]}</button>`).join('')}</div>
     <div class="field" style="margin-top:14px"><label>Contact</label><input id="d_contact" value="${esc(l.contact_name||'')}"/></div>
@@ -802,6 +803,7 @@ function openLead(id){
   const cal=$('#dCal'); if(cal) cal.onclick=(e)=>{ e.preventDefault(); addToCalendar(l); };
   const pin=$('#dPhotoInput'); if(pin) pin.onchange=()=>addPhoto(l.id,pin);
   loadPhotos(l.id);
+  loadLeadHD(l);
   $('#dSave').onclick=async()=>{
     const btn=$('#dSave'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
     try{
@@ -1147,6 +1149,7 @@ function renderMe(){
         <button class="btn ghost sm" id="mePushBtn" style="flex:none">Enable</button>
       </div>
     </div>
+    <div class="card" id="meHD"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Your Human Design</div><div style="font-size:13px;color:var(--muted);margin-top:8px">Loading…</div></div>
     <div class="card" id="meBoard"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Leaderboard</div><div style="font-size:13px;color:var(--muted);margin-top:8px">Loading…</div></div>
     <button class="btn ghost" id="meRefresh">Refresh</button>
     <div style="height:10px"></div>
@@ -1162,6 +1165,7 @@ function renderMe(){
   $('#meRefresh').onclick=async()=>{ await loadLeads(); toast('Up to date'); renderMe(); };
   $('#meOut').onclick=logout;
   loadLeaderboard();
+  loadRepHD();
 }
 async function loadLeaderboard(){
   const box=$('#meBoard'); if(!box) return;
@@ -1173,6 +1177,56 @@ async function loadLeaderboard(){
   box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">'+label+' leaderboard</div><div style="display:flex;gap:6px">'+tabs+'</div></div>'+
     (rows.length? rows.slice(0,8).map(r=>'<div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;'+(r.isMe?'background:#E4FF97;':'')+'"><div style="width:22px;font-weight:800;color:var(--ink-2)">'+(medal(r.rank)||r.rank)+'</div><div style="flex:1;font-size:14px;font-weight:'+(r.isMe?'800':'600')+'">'+esc((r.name||'').split(' ')[0])+(r.isMe?' (you)':'')+'</div><div style="font-size:12px;color:var(--ink-2)">'+r.won+'W · '+r.booked+'B · '+r.visits+'V</div></div>').join('') : '<div style="font-size:13px;color:var(--muted)">No standings yet.</div>');
   box.querySelectorAll('button[data-r]').forEach(b=>b.onclick=()=>{ LB_RANGE=b.dataset.r; loadLeaderboard(); });
+}
+
+/* ---- Human Design (rep + prospect) ---- */
+const HD_TZ=[['Eastern (EST, UTC-5)',-5],['Eastern (EDT, UTC-4)',-4],['Central (CST, UTC-6)',-6],['Central (CDT, UTC-5)',-5],['Mountain (MST, UTC-7)',-7],['Mountain (MDT, UTC-6)',-6],['Pacific (PST, UTC-8)',-8],['Pacific (PDT, UTC-7)',-7],['UTC',0]];
+function hdTzOptions(sel){ return HD_TZ.map(o=>'<option value="'+o[1]+'"'+(o[1]===sel?' selected':'')+'>'+o[0]+'</option>').join(''); }
+function hdProse(text){
+  return String(text||'').split(/\n\n+/).map(function(bl){
+    var m=bl.match(/^([^\n:]{2,44}):\s*\n?([\s\S]*)$/);
+    if(m) return '<div style="margin-bottom:10px"><div style="font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:3px">'+esc(m[1])+'</div><div style="font-size:13.5px;line-height:1.5;color:var(--ink)">'+esc(m[2].trim())+'</div></div>';
+    return '<div style="font-size:13.5px;line-height:1.5;color:var(--ink);margin-bottom:8px">'+esc(bl)+'</div>';
+  }).join('');
+}
+function hdChartTiles(chart){
+  var t=[['Type',chart.type],['Authority',chart.authority],['Strategy',chart.strategy],['Profile',chart.profile]];
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">'+t.map(function(kv){return '<div style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px"><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700">'+kv[0]+'</div><div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:2px">'+esc(kv[1]||'')+'</div></div>';}).join('')+'</div>';
+}
+var HD_SPIN='<span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span>';
+async function loadRepHD(){
+  var box=$('#meHD'); if(!box) return;
+  var d; try{ d=await api('/api/rep-hd',{method:'POST',body:JSON.stringify({action:'me'})}); }catch(e){ box.style.display='none'; return; }
+  var head='<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Your Human Design</div>';
+  if(!d.chart){
+    box.innerHTML=head+'<div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">See how you sell best. Add your birth details. It stays private and is computed in-house, nothing leaves the platform.</div>'+
+      '<div class="row" style="gap:10px"><div class="field" style="flex:1"><label>Birth date</label><input id="rhDate" type="date"/></div><div class="field" style="flex:1"><label>Birth time</label><input id="rhTime" type="time"/></div></div>'+
+      '<div class="field"><label>Time zone at birth</label><select id="rhTz">'+hdTzOptions(-6)+'</select></div>'+
+      '<button class="btn" id="rhGo">Compute my design</button>';
+    $('#rhGo').onclick=async function(){ var btn=$('#rhGo'); if(!$('#rhDate').value){ toast('Add your birth date'); return; } btn.disabled=true; btn.innerHTML=HD_SPIN; try{ await api('/api/rep-hd',{method:'POST',body:JSON.stringify({action:'submit_self',date:$('#rhDate').value,time:$('#rhTime').value,tz_offset:Number($('#rhTz').value)})}); toast('Design saved'); loadRepHD(); }catch(ex){ toast(ex.message); btn.disabled=false; btn.textContent='Compute my design'; } };
+    return;
+  }
+  box.innerHTML=head+hdChartTiles(d.chart)+'<button class="btn ghost sm" id="rhGuide" style="margin-top:10px;width:100%">✨ How you sell best</button><div id="rhGuideOut">'+(d.guide?('<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+hdProse(d.guide)+'</div>'):'')+'</div>';
+  $('#rhGuide').onclick=async function(){ var o=$('#rhGuideOut'); $('#rhGuide').disabled=true; o.innerHTML='<div style="margin-top:8px;color:var(--muted);font-size:13px">'+HD_SPIN+' Reading your design…</div>'; try{ var g=await api('/api/rep-hd',{method:'POST',body:JSON.stringify({action:'guide_self'})}); o.innerHTML='<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+hdProse(g.guide)+'</div>'; }catch(ex){ o.innerHTML=''; toast(ex.message); } $('#rhGuide').disabled=false; };
+}
+async function loadLeadHD(l){
+  var box=$('#dHD'); if(!box) return;
+  var d; try{ d=await api('/api/rep-hd',{method:'POST',body:JSON.stringify({action:'lead',lead_id:l.id})}); }catch(e){ box.innerHTML=''; return; }
+  var head='<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px">Owner Human Design</div>';
+  if(!d.chart){
+    box.innerHTML=head+'<div style="font-size:12.5px;color:var(--muted);margin-bottom:8px">Know how to approach this owner. Add their birth details if you have them, from the call or your research.</div>'+
+      '<div class="row" style="gap:10px"><div class="field" style="flex:1"><label>Birth date</label><input id="lhDate" type="date"/></div><div class="field" style="flex:1"><label>Birth time</label><input id="lhTime" type="time"/></div></div>'+
+      '<div class="field"><label>Time zone at birth</label><select id="lhTz">'+hdTzOptions(-6)+'</select></div>'+
+      '<button class="btn ghost sm" id="lhGo" style="width:100%">Compute owner design</button>';
+    $('#lhGo').onclick=async function(){ var btn=$('#lhGo'); if(!$('#lhDate').value){ toast('Add a birth date'); return; } btn.disabled=true; btn.innerHTML=HD_SPIN; try{ await api('/api/rep-hd',{method:'POST',body:JSON.stringify({action:'submit_lead',lead_id:l.id,date:$('#lhDate').value,time:$('#lhTime').value,tz_offset:Number($('#lhTz').value)})}); toast('Owner design saved'); loadLeadHD(l); }catch(ex){ toast(ex.message); btn.disabled=false; btn.textContent='Compute owner design'; } };
+    return;
+  }
+  box.innerHTML=head+hdChartTiles(d.chart)+
+    '<div style="display:flex;gap:7px;margin-top:10px"><button class="btn ghost sm" id="lhApproach" style="flex:1">✨ How to approach</button><button class="btn ghost sm" id="lhFit" style="flex:1">✨ Fit with you</button></div>'+
+    '<div id="lhOut">'+(d.guide?('<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+hdProse(d.guide)+'</div>'):'')+'</div>';
+  var run=async function(action,label){ var o=$('#lhOut'); o.innerHTML='<div style="margin-top:8px;color:var(--muted);font-size:13px">'+HD_SPIN+' '+label+'</div>'; try{ var r=await api('/api/rep-hd',{method:'POST',body:JSON.stringify({action:action,lead_id:l.id})}); var text=action==='fit'?(r.fit&&r.fit.brief):r.guide; var extra=(action==='fit'&&r.fit)?('<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Click '+r.fit.counts.click+' · Grind '+r.fit.counts.grind+' · Same '+r.fit.counts.same+'</div>'):''; o.innerHTML='<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+extra+hdProse(text)+'</div>'; }catch(ex){ o.innerHTML=''; toast(ex.message); } };
+  $('#lhApproach').onclick=function(){ run('approach','Reading this owner…'); };
+  $('#lhFit').onclick=function(){ run('fit','Reading you two…'); };
 }
 
 /* ---- start ---- */
