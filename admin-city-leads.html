@@ -201,10 +201,11 @@ async function saveNotes() {
 
 async function acceptApp() {
   if (!currentApp) return;
-  await TMIAdmin.api('/api/city-leads', 'PATCH', { id: currentApp.id, status: 'accepted' }).catch(() => {});
+  const res = await TMIAdmin.api('/api/city-leads', 'PATCH', { id: currentApp.id, status: 'accepted' }).catch(() => null);
   currentApp.status = 'accepted';
   document.getElementById('btn-accept').style.display = 'none';
-  TMIAdmin.toast('Application accepted');
+  const p = res && res.provisioned;
+  TMIAdmin.toast(p ? (p.created ? 'Accepted — rep login created and emailed' : 'Accepted — linked to existing rep') : 'Application accepted');
   renderTable();
 }
 
