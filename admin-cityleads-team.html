@@ -206,18 +206,21 @@ async function loadCommissions(){
     <td>${esc(c.business_name||'—')}</td>
     <td>${c.deal_value!=null?money(c.deal_value):'—'}</td>
     <td style="font-weight:700;">${money(c.commission)}</td>
-    <td>${c.status==='paid'?'<span class="badge" style="background:#e8f6e6;color:#3f8f57;">Paid</span>':'<span class="badge" style="background:#fff5e0;color:#a06800;">Pending</span>'}</td>
-    <td style="text-align:right;">${c.status==='paid'?`<button class="btn btn-ghost btn-sm" onclick="setCommission('${c.id}','pending')">Undo</button>`:`<button class="btn btn-primary btn-sm" onclick="setCommission('${c.id}','paid')">Mark paid</button>`}</td>
+    <td>${c.verified?'<span class="badge" style="background:#e8f6e6;color:#3f8f57;">Verified paid</span>':'<span class="badge" style="background:#f3f3f3;color:#888;">Unverified</span>'}</td>
+    <td>${c.status==='paid'?'<span class="badge" style="background:#e8f6e6;color:#3f8f57;">Paid out</span>':'<span class="badge" style="background:#fff5e0;color:#a06800;">Pending</span>'}</td>
+    <td style="text-align:right;">${c.status==='paid'?`<button class="btn btn-ghost btn-sm" onclick="setCommission('${c.id}','pending',false)">Undo</button>`:`<button class="btn btn-primary btn-sm" onclick="setCommission('${c.id}','paid',${c.verified?'true':'false'})">Mark paid</button>`}</td>
   </tr>`).join('');
   box.innerHTML=`<div class="card" style="padding:0;overflow:hidden;">
     <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
       <div class="panel-sec-label" style="margin:0;">Commissions</div>
-      <div style="font-size:13px;font-weight:700;">${money(t.pending)} <span style="color:var(--muted);font-weight:500;">pending</span> &middot; ${money(t.paid)} <span style="color:var(--muted);font-weight:500;">paid</span></div>
+      <div style="font-size:13px;font-weight:700;">${money(t.pendingVerified||0)} <span style="color:var(--muted);font-weight:500;">verified pending</span> &middot; ${money(t.pending)} <span style="color:var(--muted);font-weight:500;">total pending</span> &middot; ${money(t.paid)} <span style="color:var(--muted);font-weight:500;">paid</span></div>
     </div>
-    <div style="overflow-x:auto;"><table class="data-table" style="width:100%;min-width:560px;"><thead><tr><th>Rep</th><th>Deal</th><th>Deal value</th><th>Commission (20%)</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div style="overflow-x:auto;"><table class="data-table" style="width:100%;min-width:640px;"><thead><tr><th>Rep</th><th>Deal</th><th>Deal value</th><th>Commission (20%)</th><th>Payment</th><th>Payout</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div style="padding:10px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);">Verified means the customer's audit payment is confirmed. Unverified is a rep-marked win with no confirmed payment yet.</div>
   </div>`;
 }
-async function setCommission(id,status){
+async function setCommission(id,status,verified){
+  if(status==='paid' && verified===false && !confirm('This commission is not verified against a confirmed payment yet. Pay it out anyway?')) return;
   try{ await TMIAdmin.api('/api/rep-commissions','PATCH',{id:id,status:status}); TMIAdmin.toast(status==='paid'?'Marked paid':'Marked pending'); loadCommissions(); }
   catch(e){ TMIAdmin.toast(e.message||'Could not update'); }
 }

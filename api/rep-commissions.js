@@ -17,15 +17,20 @@ module.exports = async (req, res) => {
         db.list('reps', { limit: 300 }).catch(() => []),
       ]);
       const nameOf = {}; (reps || []).forEach((r) => { nameOf[r.id] = r.name || r.email || 'Rep'; });
-      let pending = 0, paid = 0;
+      // Reconcile each commission against its linked application: "verified" means
+      // that customer actually paid (application.status === 'paid'), so admin does
+      // not pay out on a rep-entered "won" that never became a real payment.
+      await db.hydrateMany(rows || [], 'application_id', 'applications', '_app').catch(() => {});
+      let pending = 0, paid = 0, pendingVerified = 0;
       const items = (rows || []).map((c) => {
         const status = c.status === 'paid' ? 'paid' : 'pending';
         const amt = Number(c.commission) || 0;
-        if (status === 'paid') paid += amt; else pending += amt;
+        const verified = !!(c._app && c._app.status === 'paid');
+        if (status === 'paid') paid += amt; else { pending += amt; if (verified) pendingVerified += amt; }
         return {
           id: c.id, rep_id: c.rep_id, rep: nameOf[c.rep_id] || 'Rep',
           business_name: c.business_name || null, deal_value: c.deal_value != null ? Number(c.deal_value) : null,
-          commission: amt, status, created_at: c.created_at, paid_at: c.paid_at || null,
+          commission: amt, status, verified, created_at: c.created_at, paid_at: c.paid_at || null,
           application_id: c.application_id || null, rep_lead_id: c.rep_lead_id || null,
         };
       });
@@ -34,7 +39,7 @@ module.exports = async (req, res) => {
         const g = byRep[c.rep_id] || (byRep[c.rep_id] = { rep_id: c.rep_id, rep: c.rep, pending: 0, paid: 0, count: 0 });
         g.count++; if (c.status === 'paid') g.paid += c.commission; else g.pending += c.commission;
       });
-      return res.json({ items, totals: { pending, paid, count: items.length }, byRep: Object.values(byRep).sort((a, b) => b.pending - a.pending) });
+      return res.json({ items, totals: { pending, paid, count: items.length, pendingVerified }, byRep: Object.values(byRep).sort((a, b) => b.pending - a.pending) });
     }
 
     if (req.method === 'PATCH') {
