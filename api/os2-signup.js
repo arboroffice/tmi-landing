@@ -52,6 +52,21 @@ module.exports = async function handler(req, res) {
       created_at: new Date().toISOString(),
     });
 
+    // Honor a prior paid Intelligent Company Audit: if this email already paid,
+    // stand up a paid tenant (not trial) and link the tenant back to the
+    // application, so a $5k purchase actually means a paid OS and admin/payments
+    // get a reliable tenant<->application join instead of guessing by email.
+    let paid = false;
+    try {
+      const apps = await db.list('applications', { where: [['email', '==', email]], limit: 20 }).catch(() => []);
+      const paidApp = (apps || []).find((a) => (a.status === 'paid' || a.status === 'won'));
+      if (paidApp) {
+        paid = true;
+        await db.update('os_tenants', tenant.id, { plan: 'audit_paid', paid: true, paid_at: paidApp.paid_at || new Date().toISOString() }).catch(() => {});
+        if (!paidApp.tenant_id) await db.update('applications', paidApp.id, { tenant_id: tenant.id, os_claimed_at: new Date().toISOString() }).catch(() => {});
+      }
+    } catch (e) { console.error('os2-signup paid-link:', e.message); }
+
     const token = signTenant(user);
 
     // Best-effort owner alerts

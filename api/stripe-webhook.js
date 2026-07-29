@@ -44,16 +44,30 @@ async function findApp({ applicationId, email }) {
   return null;
 }
 
+// A paid audit should stand up (or upgrade) the buyer's OS. If they already have
+// an OS tenant, flip it to the paid plan and link it back to the application so
+// admin/payments have a reliable tenant<->application join instead of an
+// email-guess. If they have not signed up yet, os2-signup honors the paid
+// application when they do. Best-effort, never blocks the webhook.
+async function linkPaidTenant(email, appId) {
+  if (!email) return;
+  const user = await dbx.findOne('os_users', 'email', String(email).toLowerCase()).catch(() => null);
+  if (!user || !user.tenant_id) return;
+  await dbx.update('os_tenants', user.tenant_id, { plan: 'audit_paid', paid: true, paid_at: new Date().toISOString() }).catch(() => {});
+  if (appId) await dbx.update('applications', appId, { tenant_id: user.tenant_id, os_claimed_at: new Date().toISOString() }).catch(() => {});
+}
+
 async function markPaid(session) {
   const email = (session.customer_details && session.customer_details.email) || session.customer_email || null;
   const applicationId = (session.metadata && session.metadata.application_id) || null;
   const company = (session.metadata && session.metadata.company) || '';
   const app = await findApp({ applicationId, email });
   if (app) {
-    if (app.status === 'paid' || app.status === 'booked') return; // idempotent
+    if (app.status === 'paid') return; // already settled; a prior 'booked' (e.g. a rep booking) still needs the payment recorded
     await dbx.update('applications', app.id, {
       status: 'paid', paid_at: new Date().toISOString(), stripe_session: session.id,
     });
+    await linkPaidTenant(email, app.id).catch(() => {});
     alertTeam(`PAID Intelligent Company Audit: ${app.name || company || email} | ${email || 'no email'}`);
     // Immediate payment confirmation + next step to the customer (in case they
     // closed the tab before the intake page loaded).
@@ -81,10 +95,11 @@ async function markPaid(session) {
     } catch (e) { console.error('schedule paid_no_intake:', e.message); }
   } else {
     // Paid but no captured lead on file (rare) - still log it so it is recoverable.
-    await dbx.insert('applications', {
+    const created = await dbx.insert('applications', {
       email: email ? email.toLowerCase() : null, company: company || null,
       source: 'complete_audit', status: 'paid', paid_at: new Date().toISOString(), stripe_session: session.id,
-    }).catch(() => {});
+    }).catch(() => null);
+    await linkPaidTenant(email, created && created.id).catch(() => {});
     alertTeam(`PAID Intelligent Company Audit (no prior capture): ${email || company || session.id}`);
   }
 }
