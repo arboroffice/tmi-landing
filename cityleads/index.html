@@ -1167,6 +1167,7 @@ function renderMe(){
       <div style="font-size:11px;opacity:.65;text-transform:uppercase;letter-spacing:.07em">Commission earned</div>
       <div style="font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:2px">${money(commission)}</div>
       <div style="font-size:12px;opacity:.65;margin-top:2px">20% of ${money(dealTotal)} won · ${wonLeads.length} deal${wonLeads.length===1?'':'s'}</div>
+      <div id="mePay" style="font-size:12px;opacity:.85;margin-top:8px"></div>
     </div>
     <div class="card" id="meEarn">
       <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700"><span>This month's goal</span><button id="meEarnEdit" style="font-size:12px;color:var(--blue);font-weight:700">${money(monthCommission)} / ${money(earnGoal)}</button></div>
@@ -1215,6 +1216,13 @@ function renderMe(){
   $('#meOut').onclick=logout;
   loadLeaderboard();
   loadRepHD();
+  loadRepPay();
+}
+async function loadRepPay(){
+  const box=$('#mePay'); if(!box) return;
+  let d; try{ d=await api('/api/rep-me-commissions',{method:'POST',body:'{}'}); }catch(e){ return; }
+  const money=n=>'$'+Math.round(n||0).toLocaleString();
+  box.innerHTML='Paid out '+money(d.paid)+' · '+money(d.pending)+' pending';
 }
 async function loadLeaderboard(){
   const box=$('#meBoard'); if(!box) return;
