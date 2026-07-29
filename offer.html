@@ -177,6 +177,21 @@
   .final .cta-row{margin-top:34px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
   .final .kick{margin-top:30px;font-size:12px;letter-spacing:0.24em;text-transform:uppercase;color:var(--chart);font-weight:700;}
 
+  /* bonuses */
+  .bonus-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:38px;}
+  .bonus{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-weight:600;font-size:15px;}
+  .bonus .plus{flex:none;width:24px;height:24px;border-radius:7px;background:rgba(228,255,151,0.14);color:var(--chart);display:inline-flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;line-height:1;}
+  @media(max-width:900px){.bonus-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:520px){.bonus-grid{grid-template-columns:1fr;}}
+
+  /* testimonial */
+  .tband{background:linear-gradient(180deg,var(--bg-2),var(--bg));}
+  .tstmt{max-width:840px;margin:0 auto;text-align:center;}
+  .tstmt .q{font-size:clamp(22px,3.2vw,36px);font-weight:700;letter-spacing:-0.02em;line-height:1.25;}
+  .tstmt .q .lime{color:var(--chart);}
+  .tstmt .a{margin-top:22px;color:var(--chart);font-weight:700;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;}
+  .tstmt .a small{display:block;color:var(--ink-3);font-weight:600;margin-top:5px;text-transform:none;letter-spacing:0;font-size:13px;}
+
   /* footer */
   .foot{background:#07080f;border-top:1px solid var(--line);padding:64px 0 34px;}
   .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:32px;}
@@ -229,7 +244,7 @@
   <div class="wrap">
     <div class="eyebrow rv">The Irresistible Offer</div>
     <h1 class="rv">We do not sell AI. We build <span class="lime">intelligent companies.</span></h1>
-    <p class="sub rv">More profit. Less owner involvement. Higher valuation.</p>
+    <p class="sub rv">More profit. Less owner dependence. Higher valuation.</p>
     <div class="cta-row rv">
       <a href="/book" class="btn btn-lime">Book your Intelligence Audit</a>
       <a href="#framework" class="btn btn-ghost">See the framework</a>
@@ -267,28 +282,24 @@
       <div class="prob-card rv">
         <h3>Owner problems</h3>
         <ul>
-          <li><span class="x">&times;</span>Everything depends on me</li>
+          <li><span class="x">&times;</span>Everything depends on you</li>
           <li><span class="x">&times;</span>Employees do not follow systems</li>
           <li><span class="x">&times;</span>Information is scattered</li>
-          <li><span class="x">&times;</span>The company cannot scale</li>
           <li><span class="x">&times;</span>Hiring is difficult</li>
           <li><span class="x">&times;</span>The team wastes time</li>
-          <li><span class="x">&times;</span>Nobody knows what everyone else knows</li>
-          <li><span class="x">&times;</span>I cannot leave for vacation</li>
+          <li><span class="x">&times;</span>You cannot leave for vacation</li>
           <li><span class="x">&times;</span>The business is not sellable</li>
         </ul>
       </div>
       <div class="prob-card rv">
         <h3>Company problems</h3>
         <ul>
-          <li><span class="x">&times;</span>Manual work everywhere</li>
+          <li><span class="x">&times;</span>Manual work</li>
           <li><span class="x">&times;</span>Repeated mistakes</li>
           <li><span class="x">&times;</span>Slow response times</li>
           <li><span class="x">&times;</span>Lost leads</li>
           <li><span class="x">&times;</span>Poor follow-up</li>
-          <li><span class="x">&times;</span>Reporting takes forever</li>
           <li><span class="x">&times;</span>Knowledge lives in people's heads</li>
-          <li><span class="x">&times;</span>Departments do not communicate</li>
           <li><span class="x">&times;</span>No visibility</li>
         </ul>
       </div>
@@ -300,7 +311,7 @@
 <section class="band promise">
   <div class="wrap">
     <div class="eyebrow rv">The promise</div>
-    <p class="quote rv">Imagine walking into work and every department already knows exactly what to do.</p>
+    <p class="quote rv">We turn your business into an intelligent company that creates more profit, runs smoother, and gives you <span class="lime">your life back.</span></p>
     <div class="tag rv">That is what TMI builds.<small>An intelligent company</small></div>
   </div>
 </section>
@@ -335,11 +346,11 @@
         <h3>Intelligence Audit</h3>
         <div class="pd">We uncover what is holding your company back.</div>
         <ul>
-          <li>Bottlenecks</li><li>Owner dependency</li><li>Revenue leaks</li><li>Labor waste</li><li>Missing systems</li><li>Automation opportunities</li><li>Department mapping</li>
+          <li>Discover bottlenecks</li><li>Map owner dependency</li><li>Find revenue leaks</li><li>Identify opportunities</li><li>Prioritize what matters</li>
         </ul>
         <div class="deliver">
           <div class="dl">Deliverables</div>
-          <ul><li>Company Score</li><li>Roadmap</li><li>ROI projection</li><li>Priority list</li></ul>
+          <ul><li>Company Score</li><li>Executive Report</li><li>AI Roadmap</li><li>ROI Projection</li></ul>
         </div>
       </div>
       <div class="phase rv">
@@ -347,7 +358,7 @@
         <h3>Operating System</h3>
         <div class="pd">We document, build, and create your company's brain.</div>
         <ul>
-          <li>SOPs</li><li>Process maps</li><li>Company knowledge</li><li>Dashboards</li><li>Department playbooks</li>
+          <li>Document everything</li><li>Build process maps</li><li>Create SOPs</li><li>Build playbooks</li><li>Centralize knowledge</li>
         </ul>
       </div>
       <div class="phase rv">
@@ -356,15 +367,19 @@
         <div class="pk">Digital employees</div>
         <div class="pd">We deploy AI employees that work 24/7.</div>
         <ul>
-          <li>Sales</li><li>Marketing</li><li>Customer service</li><li>Scheduling</li><li>Dispatch</li><li>Accounting</li><li>Collections</li><li>HR, and more</li>
+          <li>Sales, CS, scheduling</li><li>Dispatch, collections</li><li>Marketing, HR</li><li>Accounting, recruiting</li><li>Operations, and more</li>
         </ul>
+        <div class="deliver">
+          <div class="dl">Starting at</div>
+          <div style="font-size:22px;font-weight:700;color:var(--chart);letter-spacing:-0.02em;">$5,000</div>
+        </div>
       </div>
       <div class="phase rv">
         <div class="pn">4</div>
         <h3>Intelligence Layer</h3>
         <div class="pd">We connect everything into one unified system.</div>
         <ul>
-          <li>CRM</li><li>Accounting</li><li>Phone</li><li>Email</li><li>Calendar</li><li>Inventory</li><li>Documents, and more</li>
+          <li>Connect everything</li><li>CRM, accounting, ERP</li><li>Calendar, email, phone</li><li>Documents, inventory</li><li>Forms, sensors, data</li>
         </ul>
       </div>
       <div class="phase rv">
@@ -372,7 +387,7 @@
         <h3>Executive Command Center</h3>
         <div class="pd">One dashboard. All your data. Real-time visibility.</div>
         <ul>
-          <li>Revenue</li><li>Margins</li><li>Cash flow</li><li>Projects</li><li>Sales</li><li>Employees</li><li>KPIs</li><li>Predictions &amp; alerts</li>
+          <li>Real-time dashboards</li><li>KPIs &amp; performance</li><li>Alerts &amp; predictions</li><li>Decisions made easy</li><li>Business at a glance</li>
         </ul>
       </div>
     </div>
@@ -382,7 +397,7 @@
 <!-- OFFER STACK -->
 <section class="band">
   <div class="wrap center">
-    <div class="eyebrow rv">Our offer stack</div>
+    <div class="eyebrow rv">Our offer ladder</div>
     <h2 class="h-sec rv">Start anywhere. Build the whole thing.</h2>
     <p class="sec-lead rv">Every engagement starts with the audit. From there you build at the pace and scope that fits.</p>
   </div>
@@ -419,7 +434,7 @@
         <div class="price">Pricing<b>Custom</b></div>
       </div>
       <div class="offer rv">
-        <h3>Private Equity Partnership</h3>
+        <h3>Private Equity Portfolio Transformation</h3>
         <p>We make your portfolio companies more valuable.</p>
         <div class="price">Pricing<b>Custom</b></div>
       </div>
@@ -432,40 +447,69 @@
   </div>
 </section>
 
+<!-- EXCLUSIVE BONUSES -->
+<section class="band">
+  <div class="wrap center">
+    <div class="eyebrow rv">Exclusive bonuses</div>
+    <h2 class="h-sec rv">What you also get.</h2>
+  </div>
+  <div class="wrap">
+    <div class="bonus-grid">
+      <div class="bonus rv"><span class="plus">+</span>Executive KPI Dashboard</div>
+      <div class="bonus rv"><span class="plus">+</span>AI Prompt Library</div>
+      <div class="bonus rv"><span class="plus">+</span>Company Knowledge Vault</div>
+      <div class="bonus rv"><span class="plus">+</span>Leadership AI Toolkit</div>
+      <div class="bonus rv"><span class="plus">+</span>Employee Training Portal</div>
+      <div class="bonus rv"><span class="plus">+</span>Quarterly Optimization</div>
+      <div class="bonus rv"><span class="plus">+</span>New AI Features (90 days)</div>
+    </div>
+  </div>
+</section>
+
 <!-- VALUE STACK + RISK REVERSAL -->
 <section class="band">
   <div class="wrap">
-    <div class="eyebrow rv">The value stack</div>
-    <h2 class="h-sec rv">What you get.</h2>
+    <div class="eyebrow rv">The value you get</div>
+    <h2 class="h-sec rv">Everything that comes with it.</h2>
     <div class="value-wrap">
       <div class="value-list">
         <div class="vi rv"><span class="ck">&#10003;</span>Business Audit</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Executive Roadmap</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Process Mapping</div>
-        <div class="vi rv"><span class="ck">&#10003;</span>Documentation</div>
-        <div class="vi rv"><span class="ck">&#10003;</span>SOP Creation</div>
+        <div class="vi rv"><span class="ck">&#10003;</span>Documentation &amp; SOPs</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Knowledge Base</div>
         <div class="vi rv"><span class="ck">&#10003;</span>AI Employees</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Integrations</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Dashboards</div>
-        <div class="vi rv"><span class="ck">&#10003;</span>Analytics</div>
-        <div class="vi rv"><span class="ck">&#10003;</span>Reporting</div>
+        <div class="vi rv"><span class="ck">&#10003;</span>Reporting &amp; Analytics</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Executive Coaching</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Team Training</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Change Management</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Implementation</div>
-        <div class="vi rv"><span class="ck">&#10003;</span>Launch</div>
-        <div class="vi rv"><span class="ck">&#10003;</span>Support</div>
+        <div class="vi rv"><span class="ck">&#10003;</span>Go-Live Support</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Optimization</div>
+        <div class="vi rv"><span class="ck">&#10003;</span>Quarterly Reviews</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Future Roadmap</div>
+        <div class="vi rv"><span class="ck">&#10003;</span>New AI Features</div>
         <div class="vi rv"><span class="ck">&#10003;</span>Ongoing Innovation</div>
+        <div class="vi rv"><span class="ck">&#10003;</span>And more</div>
       </div>
       <div class="risk rv">
-        <h3>Risk reversal</h3>
+        <h3>Our guarantee</h3>
         <p>ROI in 30 days, or we keep working at no additional cost until it delivers measurable value.</p>
         <div class="or">Or</div>
-        <p>If we do not find enough opportunity during your Audit to justify the investment, we tell you not to move forward.</p>
+        <p>If we do not find enough opportunity in your Audit to justify the investment, we tell you not to move forward.</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="band tband">
+  <div class="wrap">
+    <div class="tstmt">
+      <p class="q rv">TMI built our system, our AI employees, and our dashboards. Our business runs <span class="lime">better without us.</span></p>
+      <div class="a rv">Industry Owner<small>$18M revenue</small></div>
     </div>
   </div>
 </section>
