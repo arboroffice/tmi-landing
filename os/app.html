@@ -604,7 +604,7 @@
   </section>
 
   <section class="view" data-view="records">
-    <div class="secbar" style="margin-top:0"><div><div class="h">Records</div><p class="sub">Your company graph: the real customers, invoices, jobs, and payments the OS holds. Your connected tools feed this automatically, your COO and Company Brain answer from it by name and number, and your cascades fire off it. Add one by hand any time.</p></div><button class="btn add" onclick="addRecord()"><svg class="icon"><use href="#i-plus"/></svg> Add record</button></div>
+    <div class="secbar" style="margin-top:0"><div><div class="h">Records</div><p class="sub">Your company graph: the real customers, invoices, jobs, and payments the OS holds. Your connected tools feed this automatically, your COO and Company Brain answer from it by name and number, and your cascades fire off it. Add one by hand, speak it, or snap a photo.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="recSpeak" onclick="captureRecordVoice(this)">Speak</button><button class="btn ghost" onclick="captureRecordScan()">Scan</button><button class="btn add" onclick="addRecord()"><svg class="icon"><use href="#i-plus"/></svg> Add record</button></div></div>
     <div class="tiles" id="recordStats" style="margin-top:22px"></div>
     <div id="recordFilter" style="margin:22px 0 0"></div>
     <div id="recordsList" style="margin-top:16px"></div>
@@ -1241,6 +1241,31 @@ function recordData(v){
 }
 function addRecord(){openForm({title:'Add a record',sub:'A real customer, invoice, job, or payment. Your COO and Company Brain will use it right away.',fields:recordFields(),onSave:function(v){if(!v.title&&!v.customer_name){throw new Error('Give it a title or a customer');}return recCrud('create',{data:recordData(v)});}});}
 function editRecord(id){var r=find('records',id);if(!r)return;openForm({title:'Edit record',fields:recordFields(r),del:function(){return recCrud('delete',{id:id});},onSave:function(v){if(!v.title&&!v.customer_name){throw new Error('Give it a title or a customer');}return recCrud('update',{id:id,data:recordData(v)});}});}
+/* ---- voice + photo capture into records (borrowed from the field tool) ---- */
+function openCapturedRecord(r){openForm({title:'Confirm the record',sub:'We pulled this from your capture. Fix anything, then save. Your COO and Brain use it right away.',fields:recordFields(r||{}),onSave:function(v){if(!v.title&&!v.customer_name){throw new Error('Give it a title or a customer');}return recCrud('create',{data:recordData(v)});}});}
+function captureRecordScan(){
+  if(!guardWrite())return;
+  var inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.capture='environment';
+  inp.onchange=function(){var f=inp.files&&inp.files[0];if(!f)return;var rd=new FileReader();rd.onload=async function(){
+    try{toast('Reading the photo...');var d=await api('/api/os2-capture',{action:'scan',image:rd.result});if(!d||!d.record){toast('Could not read that photo');return;}openCapturedRecord(d.record);}catch(e){toast(e.message||'Scan failed');}
+  };rd.readAsDataURL(f);};
+  inp.click();
+}
+var OS_REC=null;
+async function captureRecordVoice(btn){
+  if(!guardWrite())return;
+  if(OS_REC&&OS_REC.state==='recording'){OS_REC.stop();return;}
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Voice capture is not supported on this device');return;}
+  var stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:true});}catch(e){toast('Microphone permission is needed');return;}
+  var chunks=[];var mr;try{mr=new MediaRecorder(stream);}catch(e){stream.getTracks().forEach(function(t){t.stop();});toast('Cannot record here');return;}
+  OS_REC=mr;var lab=btn?btn.textContent:'';if(btn)btn.textContent='Stop';
+  mr.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data);};
+  mr.onstop=function(){stream.getTracks().forEach(function(t){t.stop();});OS_REC=null;if(btn)btn.textContent=lab;
+    if(!chunks.length)return;var blob=new Blob(chunks,{type:mr.mimeType||'audio/webm'});var rd=new FileReader();
+    rd.onload=async function(){try{toast('Transcribing...');var d=await api('/api/os2-capture',{action:'voice',audio:rd.result});if(!d||!d.record){toast(d&&d.transcript?('Heard "'+d.transcript.slice(0,50)+'" but could not shape a record'):'Could not catch that');return;}openCapturedRecord(d.record);}catch(e){toast(e.message||'Voice capture failed');}};
+    rd.readAsDataURL(blob);};
+  try{mr.start();toast('Recording... tap Stop when done');}catch(e){OS_REC=null;stream.getTracks().forEach(function(t){t.stop();});if(btn)btn.textContent=lab;toast('Cannot record here');}
+}
 
 /* ---- workers ---- */
 function workerCardHTML(w){
