@@ -173,6 +173,7 @@
     <section class="screen" id="s-log"></section>
     <section class="screen" id="s-me"></section>
     <section class="screen" id="s-plan"></section>
+    <section class="screen" id="s-guides"></section>
   </div>
 
   <nav class="tabbar">
@@ -386,7 +387,7 @@ async function loadLeads(){
 }
 
 /* ---- tabs ---- */
-const TITLES = {today:'Today',leads:'My Leads',map:'Map',log:'Log a Lead',me:'Me',plan:'Day Plan'};
+const TITLES = {today:'Today',leads:'My Leads',map:'Map',log:'Log a Lead',me:'Me',plan:'Day Plan',guides:'Guides'};
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.tab===tab));
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
@@ -398,6 +399,7 @@ function switchTab(tab){
   if(tab==='log') renderLog();
   if(tab==='me') renderMe();
   if(tab==='plan') renderPlan();
+  if(tab==='guides') renderGuides();
   if(tab==='map') setTimeout(initMap,50);
 }
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
@@ -509,6 +511,7 @@ function renderPlan(){
     <a class="btn ghost" href="https://www.tmitechai.com/sales-playbook" target="_blank" rel="noopener" style="margin-top:12px">Open the full sales playbook →</a>
     <a class="btn ghost" href="https://www.tmitechai.com/sop/city-rep-master-guide" target="_blank" rel="noopener" style="margin-top:8px">Open the master rep guide →</a>
     <a class="btn ghost" href="https://www.tmitechai.com/sop/social-media-playbook" target="_blank" rel="noopener" style="margin-top:8px">Open the social &amp; media playbook →</a>
+    <button class="btn ghost" id="pGuides" style="margin-top:8px">See all guides &amp; playbooks →</button>
 
     <div class="h-eyebrow" style="margin-top:22px">The play — oil &amp; gas + industrial, Acadiana</div>
     ${sec('Before you leave (15 min)', "Pick <b>one cluster</b>, not the whole map. Pull <b>12–15 targets</b> from My Leads and write the <b>owner's name</b> next to each. Owner-operated shops are the whole game. Load the route so you are never more than 5 minutes between stops.")}
@@ -520,6 +523,7 @@ function renderPlan(){
     <div style="height:24px"></div>
   `;
   $('#pBack').onclick=()=>switchTab('today');
+  const pg=$('#pGuides'); if(pg) pg.onclick=()=>switchTab('guides');
   const SP='<span class="spin" style="border-color:rgba(0,0,0,.2);border-top-color:#0a0b14"></span>';
   const askGo=$('#pAskGo'); if(askGo) askGo.onclick=async()=>{
     const q=($('#pAskQ').value||'').trim(); if(!q){ toast('Type what they said'); return; }
@@ -532,6 +536,71 @@ function renderPlan(){
     }catch(ex){ out.innerHTML=''; toast(ex.message||'Could not answer'); }
     askGo.disabled=false;
   };
+}
+
+/* ---- Guides hub ---- */
+// One place for every rep resource. The SOP + playbook files live in this repo but
+// are served from the apex marketing host (www.tmitechai.com). We must use absolute
+// links there: on cityleads.tmitechai.com the vercel rewrite maps /(.+) to
+// /cityleads/$1, so a bare "/sop/x" would wrongly resolve to /cityleads/sop/x.
+// Same base + clean URLs (no .html) the Day Plan already uses.
+const GUIDE_BASE = 'https://www.tmitechai.com';
+const GUIDES = [
+  { id:'master', title:'Master rep guide', url:GUIDE_BASE+'/sop/city-rep-master-guide',
+    desc:'Full field training: the pitch, getting past the gate, and how to book the audit.',
+    tags:[] },
+  { id:'playbook', title:'Full sales playbook', url:GUIDE_BASE+'/sales-playbook',
+    desc:'The complete motion: objections, scripts, and every step from door to booked call.',
+    tags:[] },
+  { id:'social', title:'Social & media playbook', url:GUIDE_BASE+'/sop/social-media-playbook',
+    desc:'How to film, post, and warm up doors with content before you ever knock.',
+    tags:[] },
+  { id:'touchpoints', title:'SMS & email touchpoints', url:GUIDE_BASE+'/sop/sms-email-touchpoints',
+    desc:'The exact texts and emails to send after every visit so leads stay alive.',
+    tags:[] },
+  { id:'healthcare', title:'Healthcare & wellness study guide', url:GUIDE_BASE+'/sop/healthcare-wellness-study-guide',
+    desc:'Talking points and specifics for selling into clinics, med spas, and wellness.',
+    tags:['health','wellness','medical','med spa','medspa','clinic','dental','care','hospital','therapy'] },
+];
+function featuredGuideId(){
+  // Role awareness. The rep API (/api/rep-me) currently returns city but no
+  // department, so we read ME.department first (future-proof) and fall back to
+  // ME.city. If the signal names a vertical we recognize, that guide leads.
+  const signal = String((ME && (ME.department||ME.city)) || '').toLowerCase();
+  if(!signal) return null;
+  for(const g of GUIDES){ if(g.tags.some(t=>signal.includes(t))) return g.id; }
+  return null;
+}
+function renderGuides(){
+  const s=$('#s-guides');
+  const featId = featuredGuideId();
+  const card=(g,feat)=>`
+    <a class="card" href="${g.url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;color:inherit;margin:0 0 10px;${feat?'background:#E4FF97;color:#0a0b14':''}">
+      ${feat?'<div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.7;margin-bottom:4px">For your patch</div>':''}
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+        <div style="font-size:15.5px;font-weight:800;letter-spacing:-.01em">${esc(g.title)}</div>
+        <span style="flex:none;font-weight:800">→</span>
+      </div>
+      <div style="font-size:13px;font-weight:600;margin-top:3px;line-height:1.45;${feat?'':'color:var(--ink-2)'}">${esc(g.desc)}</div>
+    </a>`;
+  const ordered = featId ? [GUIDES.find(g=>g.id===featId), ...GUIDES.filter(g=>g.id!==featId)] : GUIDES;
+  const cards = ordered.map(g=>card(g, featId && g.id===featId)).join('');
+  s.innerHTML = `
+    <button class="btn ghost sm" id="gBack" style="width:auto;align-self:flex-start">← Me</button>
+    <div class="h-eyebrow">Guides &amp; playbooks</div>
+    <div style="font-size:12.5px;color:var(--muted);margin:2px 0 14px">Everything you need in the field. Opens in a new tab so you don't lose your place.</div>
+    ${cards}
+    <div class="card" id="gPlan" style="cursor:pointer;background:var(--ink);color:#fff;border:none;margin-top:4px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+        <div style="font-size:15.5px;font-weight:800;letter-spacing:-.01em">Today's Day Plan</div>
+        <span style="flex:none;font-weight:800;color:var(--chart)">→</span>
+      </div>
+      <div style="font-size:13px;font-weight:600;margin-top:3px;line-height:1.45;opacity:.85">Your scoreboard, the route, and the play for oil &amp; gas and industrial in Acadiana.</div>
+    </div>
+    ${featId?'':'<div style="font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5">Showing every guide. When your profile carries a department or a vertical city, the guide that matches your patch moves to the top.</div>'}
+    <div style="height:24px"></div>`;
+  $('#gBack').onclick=()=>switchTab('me');
+  $('#gPlan').onclick=()=>switchTab('plan');
 }
 
 /* ---- Leads ---- */
@@ -1163,6 +1232,10 @@ function renderMe(){
       <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em">${esc(ME.name||'')}</div>
       <div style="color:var(--muted);font-size:14px;margin-top:2px">${esc(ME.email||'')}${ME.city?(' · '+esc(ME.city)):''}</div>
     </div>
+    <div class="card" id="meGuides" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><div style="font-weight:800;font-size:15px">Guides &amp; playbooks</div><div style="font-size:12.5px;color:var(--muted);margin-top:2px">Every rep guide and the Day Plan, one tap away.</div></div>
+      <span style="flex:none;font-weight:800;font-size:18px;color:var(--muted)">→</span>
+    </div>
     <div class="card" style="background:var(--ink);color:#fff">
       <div style="font-size:11px;opacity:.65;text-transform:uppercase;letter-spacing:.07em">Commission earned</div>
       <div style="font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:2px">${money(commission)}</div>
@@ -1205,6 +1278,7 @@ function renderMe(){
     <div style="height:10px"></div>
     <button class="btn ghost" id="meOut" style="color:var(--red)">Sign out</button>`;
   const w=$('#meWarm'); if(w) w.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
+  const mg=$('#meGuides'); if(mg) mg.onclick=()=>switchTab('guides');
   const ee=$('#meEarnEdit'); if(ee) ee.onclick=()=>{ const v=prompt('Set your monthly commission goal ($):', String(earnGoal)); if(v==null) return; const n=parseInt(String(v).replace(/[^0-9]/g,''),10); if(Number.isFinite(n)&&n>0){ localStorage.setItem('cl_earn_goal',String(n)); renderMe(); } };
   const pb=$('#mePushBtn'); if(pb){ pushState().then(st=>{
     if(st==='unsupported'){ pb.style.display='none'; $('#mePushState').textContent='Not supported on this device.'; }
