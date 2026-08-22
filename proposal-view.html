@@ -26,58 +26,19 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/doc.css"/>
   <style>
-    :root {
-      --bg: #ffffff;
-      --bg-alt: #f5f5f7;
-      --bg-deep: #0a0b14;
-      --ink: #1a1a1a;
-      --ink-2: #505060;
-      --muted: #86868b;
-      --line: rgba(0,0,0,0.08);
-      --line-strong: rgba(0,0,0,0.13);
-      --chart: #E4FF97;
-      --chart-dark: #D0FF6A;
-      --green: #22c55e;
-      --green-bg: #f0fdf4;
-      --sans: "Barlow", system-ui, sans-serif;
-    }
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-    body {
-      font-family: var(--sans);
-      background: var(--bg-alt);
-      color: var(--ink);
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-      line-height: 1.5;
-    }
-    a { color: inherit; text-decoration: none; }
+    /* Proposal-specific styles (shared .doc-* system lives in /doc.css).
+       This is the single canonical proposal page: read-only + accepted
+       banner, inline accept & sign block, and tiered build path picker. */
 
-    /* Header */
-    .doc-header {
-      background: var(--bg);
-      border-bottom: 1px solid var(--line);
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .doc-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--ink);
-    }
-    .doc-brand img { height: 24px; width: auto; }
-    .doc-type {
-      font-size: 12px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 500;
+    /* Extra tokens used only by the build path picker */
+    :root {
+      --card: #ffffff;
+      --ink2: rgba(10,11,20,0.62);
+      --ink3: rgba(10,11,20,0.45);
+      --chart2: #D0FF6A;
+      --serif: "Barlow", system-ui, sans-serif;
     }
 
     /* Accepted banner */
@@ -105,121 +66,9 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
       flex-shrink: 0;
     }
 
-    /* Page wrap */
-    .page-wrap {
-      max-width: 760px;
-      margin: 48px auto;
-      padding: 0 24px;
-    }
-
-    /* Document card */
-    .doc-card {
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-
-    /* Doc top */
-    .doc-top {
-      padding: 48px 48px 36px;
-      border-bottom: 1px solid var(--line);
-    }
-    .doc-title {
-      font-size: clamp(26px, 3vw, 38px);
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      color: var(--ink);
-      margin: 0 0 20px;
-      line-height: 1.1;
-    }
-    .doc-meta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-    }
-    .doc-meta-item { display: flex; flex-direction: column; gap: 3px; }
-    .doc-meta-label {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 500;
-    }
-    .doc-meta-val {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--ink-2);
-    }
-
-    /* Status badge */
-    .status-badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 999px;
-      background: #f1f5f9;
-      color: #64748b;
-    }
-    .status-badge.accepted { background: #dcfce7; color: #15803d; }
-    .status-badge.declined { background: #fee2e2; color: #b91c1c; }
-    .status-badge.sent { background: #dbeafe; color: #1d4ed8; }
-    .status-badge.viewed { background: #fef9c3; color: #854d0e; }
-    .status-badge.draft { background: #f1f5f9; color: #64748b; }
-
-    /* Line items */
-    .doc-section { padding: 36px 48px; }
-    .section-label {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-    .li-table { width: 100%; border-collapse: collapse; }
-    .li-table thead tr {
-      border-bottom: 1px solid var(--line-strong);
-    }
-    .li-table thead th {
-      font-size: 10px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 600;
-      padding: 0 0 10px;
-      text-align: left;
-    }
-    .li-table thead th.right { text-align: right; }
-    .li-table tbody tr {
-      border-bottom: 1px solid var(--line);
-    }
-    .li-table tbody tr:last-child { border-bottom: none; }
-    .li-table tbody td {
-      padding: 12px 0;
-      font-size: 14px;
-      color: var(--ink-2);
-      vertical-align: top;
-    }
-    .li-table tbody td.desc { color: var(--ink); font-weight: 500; }
-    .li-table tbody td.right { text-align: right; font-weight: 600; color: var(--ink); }
-    .li-table tbody td.num { color: var(--ink-2); }
-    .col-desc { width: 45%; }
-    .col-qty { width: 12%; }
-    .col-price { width: 20%; }
-    .col-total { width: 23%; }
-
     /* Total row */
     .doc-total-section {
       padding: 0 48px 36px;
-    }
-    .total-divider {
-      height: 1px;
-      background: var(--line-strong);
-      margin-bottom: 20px;
     }
     .total-row {
       display: flex;
@@ -241,98 +90,134 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
       color: var(--ink);
     }
 
-    /* Notes */
-    .doc-notes {
-      padding: 0 48px 40px;
+    /* Accept & sign block (folded in from proposal-sign) */
+    .sign-block {
+      padding: 36px 48px 44px;
       border-top: 1px solid var(--line);
-      margin-top: 8px;
-    }
-    .doc-notes .section-label { margin-top: 28px; }
-    .notes-text {
-      font-size: 14px;
-      color: var(--ink-2);
-      line-height: 1.7;
-      white-space: pre-wrap;
-    }
-
-    /* Footer */
-    .doc-footer {
-      padding: 24px 48px;
       background: var(--bg-alt);
-      border-top: 1px solid var(--line);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
     }
-    .doc-footer-text {
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-    }
-    .doc-footer-link {
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-    }
-    .doc-footer-link:hover { color: var(--ink); }
-
-    /* Loading */
-    .loading-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 24px;
-      gap: 16px;
-    }
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border: 2px solid var(--line-strong);
-      border-top-color: var(--ink);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { font-size: 14px; color: var(--muted); }
-
-    /* Error */
-    .error-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 24px;
-      gap: 12px;
-      text-align: center;
-    }
-    .error-icon {
-      font-size: 36px;
-      margin-bottom: 8px;
-    }
-    .error-title {
-      font-size: 22px;
+    .sign-head {
+      font-size: 18px;
       font-weight: 600;
       color: var(--ink);
-      margin: 0;
+      margin: 0 0 6px;
     }
-    .error-sub {
+    .sign-sub {
       font-size: 14px;
+      color: var(--ink-2);
+      margin: 0 0 24px;
+    }
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       color: var(--muted);
-      margin: 0;
+      font-weight: 600;
+      margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      font-family: var(--sans);
+      font-size: 15px;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: var(--ink); }
+    #name-input { font-size: 20px; font-weight: 600; }
+    .accept-btn {
+      width: 100%;
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--bg-deep);
+      background: var(--chart);
+      border: none;
+      border-radius: 999px;
+      padding: 15px 24px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.15s;
+    }
+    .accept-btn:hover { background: var(--chart-dark); }
+    .accept-btn:disabled { opacity: 0.55; cursor: default; }
+    .legal-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 16px 0 0;
+      line-height: 1.5;
+    }
+    .form-error {
+      font-size: 13px;
+      color: #b91c1c;
+      margin: 12px 0 0;
+      display: none;
     }
 
+    /* Sign confirmation */
+    .confirm-wrap {
+      padding: 64px 48px 72px;
+      text-align: center;
+      border-top: 1px solid var(--line);
+      background: var(--green-bg);
+    }
+    .confirm-check {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-size: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+    .confirm-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #15803d;
+      margin: 0 0 8px;
+    }
+    .confirm-sub { font-size: 15px; color: var(--ink-2); margin: 0; }
+
+    /* Tiered build path picker (folded in from build-proposal) */
+    .page-wrap.build-wide { max-width: 1040px; }
+    .hero { padding: 12px 0 8px; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink3); margin-bottom: 14px; }
+    .hero h1 { font-weight: 400; font-size: clamp(30px,4.4vw,48px); letter-spacing: -0.02em; line-height: 1.04; margin: 0 0 14px; color: var(--ink); }
+    .summary { color: var(--ink2); font-size: 17px; max-width: 62ch; }
+    .build-accepted { display: none; background: rgba(228,255,151,0.18); border: 1px solid rgba(205,238,114,0.6); border-radius: 12px; padding: 16px 20px; margin: 26px 0 0; color: var(--ink); font-size: 15px; }
+    .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin: 36px 0 30px; }
+    @media(max-width:820px){ .grid { grid-template-columns: 1fr; } }
+    .path { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 26px 24px; display: flex; flex-direction: column; }
+    .path.rec { border-color: rgba(205,238,114,0.9); box-shadow: 0 0 0 1px rgba(205,238,114,0.55); }
+    .rec-tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #0a0b14; background: var(--chart); border-radius: 999px; padding: 3px 10px; margin-bottom: 12px; align-self: flex-start; }
+    .path h3 { font-weight: 500; font-size: 21px; margin: 0 0 4px; color: var(--ink); }
+    .path .tl { font-size: 12px; color: var(--ink3); margin-bottom: 16px; }
+    .price { font-size: 34px; color: var(--ink); line-height: 1; margin: 0 0 4px; }
+    .price small { font-size: 13px; color: var(--ink3); }
+    .dep { font-size: 12px; color: var(--ink3); margin-bottom: 18px; }
+    .scope { list-style: none; margin: 0 0 22px; padding: 0; flex: 1; }
+    .scope li { font-size: 14px; color: var(--ink2); padding: 8px 0 8px 22px; position: relative; border-top: 1px solid var(--line); }
+    .scope li:first-child { border-top: none; }
+    .scope li:before { content: ""; position: absolute; left: 0; top: 15px; width: 7px; height: 7px; border-radius: 50%; background: var(--chart); }
+    .btn { display: block; text-align: center; background: var(--chart); color: #0a0b14; font-weight: 700; font-size: 14px; padding: 14px 18px; border-radius: 999px; text-decoration: none; transition: background .15s; }
+    .btn:hover { background: var(--chart2); }
+    .btn.ghost { background: transparent; color: var(--ink2); border: 1px solid var(--line-strong); }
+
     @media (max-width: 600px) {
-      .doc-header { padding: 14px 20px; }
-      .doc-top { padding: 32px 24px 24px; }
-      .doc-section { padding: 24px 24px; }
       .doc-total-section { padding: 0 24px 28px; }
-      .doc-notes { padding: 0 24px 32px; }
-      .doc-footer { padding: 20px 24px; }
       .accepted-banner { padding: 12px 20px; }
-      .doc-meta-row { gap: 16px; }
+      .sign-block { padding: 28px 24px 36px; }
+      .confirm-wrap { padding: 48px 24px 56px; }
     }
   </style>
 <script src="/rb2b.js"></script>
@@ -367,6 +252,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
 (function () {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
+  const justAccepted = params.get('accepted') === '1';
 
   function fmt(dateStr) {
     if (!dateStr) return '-';
@@ -391,6 +277,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
       </div>`;
   }
 
+  // -------- Read-only proposal + accepted banner (standard scope) --------
   function renderProposal(p) {
     const clientName = p.client_name
       || (p.contacts ? `${p.contacts.first_name || ''} ${p.contacts.last_name || ''}`.trim() || p.contacts.company : null)
@@ -466,7 +353,7 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
       ${footerHtml}
     `;
 
-    if (p.status === 'accepted') {
+    if (p.status === 'accepted' || p.status === 'won') {
       document.getElementById('accepted-banner').style.display = 'flex';
     }
   }
@@ -475,6 +362,218 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
     return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  // -------- Tiered build path picker + deposit CTA (from build-proposal) --------
+  function money(n){ return '$' + (Number(n)||0).toLocaleString(); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function renderBuild(p){
+    var b = p.build || {};
+    var paths = b.paths || [];
+    var accepted = (p.status === 'accepted') || justAccepted;
+    var acceptedPath = p.accepted_path || '';
+    var cards = paths.map(function(path){
+      var rec = (b.recommended === path.key);
+      var isAcceptedOne = accepted && acceptedPath && acceptedPath === path.key;
+      var full = (path.key === 'diy') || (Number(path.deposit) >= Number(path.price));
+      var cta;
+      if (accepted) {
+        cta = isAcceptedOne
+          ? '<div class="btn" style="cursor:default;background:#E4FF97;color:#0a0b14;">Selected ✓</div>'
+          : '<div class="btn ghost" style="cursor:default;opacity:.5;">Not selected</div>';
+      } else {
+        var label = Number(path.price) <= 0 ? 'Choose this path' : (full ? 'Choose & pay ' + money(path.price) : 'Choose & pay ' + money(path.deposit) + ' deposit');
+        cta = '<a class="btn" href="/api/proposal-deposit?id=' + encodeURIComponent(id) + '&path=' + encodeURIComponent(path.key) + '">' + label + '</a>';
+      }
+      var priceBlock = Number(path.price) <= 0
+        ? '<div class="price">Included<small></small></div><div class="dep">Part of your audit engagement</div>'
+        : '<div class="price">' + money(path.price) + '</div>' + (full ? '<div class="dep">Paid in full</div>' : '<div class="dep">' + money(path.deposit) + ' deposit to start</div>');
+      return '<div class="path' + (rec ? ' rec' : '') + '">' +
+        (rec ? '<span class="rec-tag">Recommended</span>' : '') +
+        '<h3>' + esc(path.name) + '</h3>' +
+        '<div class="tl">' + esc(path.timeline || '') + '</div>' +
+        priceBlock +
+        '<ul class="scope">' + (path.scope||[]).map(function(s){return '<li>'+esc(s)+'</li>';}).join('') + '</ul>' +
+        cta + '</div>';
+    }).join('');
+
+    var wrap = document.querySelector('.page-wrap');
+    wrap.classList.add('build-wide');
+    wrap.innerHTML =
+      '<div class="hero"><div class="eyebrow">Your build proposal</div>' +
+      '<h1>' + esc(p.company || 'Your build') + '</h1>' +
+      '<p class="summary">' + esc(b.summary || '') + '</p>' +
+      (accepted ? '<div class="build-accepted" style="display:block;">You\'re in. We\'ll be in touch to kick off' + (acceptedPath ? ' your ' + esc((paths.find(function(x){return x.key===acceptedPath;})||{}).name || '') + ' build' : '') + '.</div>' : '') +
+      '</div>' +
+      '<div class="grid">' + cards + '</div>';
+  }
+
+  // -------- Accept & sign flow (folded in verbatim from proposal-sign) --------
+  function startSignFlow() {
+    const card = document.getElementById('doc-card');
+
+    function currency(n) {
+      return '$' + parseFloat(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function escHtml(s) {
+      return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function renderError(title, msg) {
+      card.innerHTML = `
+        <div class="error-wrap">
+          <div class="error-icon">&#128274;</div>
+          <h2 class="error-title">${escHtml(title || 'Proposal not found')}</h2>
+          <p class="error-sub">${escHtml(msg || 'This proposal link may be invalid or expired.')}</p>
+        </div>`;
+    }
+
+    function lineItemsHtml(p) {
+      const items = (p.line_items && p.line_items.length ? p.line_items : p.sections) || [];
+      if (!items.length) return '';
+      const rows = items.map(li => {
+        const qty = parseFloat(li.qty || li.quantity || 1);
+        const price = parseFloat(li.price || li.unit_price || li.amount || 0);
+        const lineTotal = qty * price;
+        return `<tr>
+          <td class="desc">${escHtml(li.desc || li.description || li.name || '')}</td>
+          <td class="num">${qty}</td>
+          <td class="num">${currency(price)}</td>
+          <td class="right">${currency(lineTotal)}</td>
+        </tr>`;
+      }).join('');
+      return `
+        <div class="doc-section">
+          <div class="section-label">Line Items</div>
+          <table class="li-table">
+            <thead>
+              <tr>
+                <th class="col-desc">Description</th>
+                <th class="col-qty">Qty</th>
+                <th class="col-price">Unit Price</th>
+                <th class="col-total right">Total</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    }
+
+    function totalHtml(p) {
+      if (p.total == null) return '';
+      return `
+        <div class="doc-total-section">
+          <div class="total-divider"></div>
+          <div class="total-row">
+            <span class="total-label">Total</span>
+            <span class="total-amount">${currency(p.total)}</span>
+          </div>
+        </div>`;
+    }
+
+    function topHtml(p) {
+      return `
+        <div class="doc-top">
+          <h1 class="doc-title">${escHtml(p.title || 'Proposal')}</h1>
+          <div class="doc-meta-row">
+            <div class="doc-meta-item"><div class="doc-meta-label">Document</div><div class="doc-meta-val">Proposal</div></div>
+            ${p.total != null ? `<div class="doc-meta-item"><div class="doc-meta-label">Amount</div><div class="doc-meta-val">${currency(p.total)}</div></div>` : ''}
+          </div>
+        </div>`;
+    }
+
+    function footerHtml() {
+      return `
+        <div class="doc-footer">
+          <span class="doc-footer-text">Prepared by TMI Technology</span>
+          <a class="doc-footer-link" href="https://www.tmitechai.com">tmitechai.com</a>
+        </div>`;
+    }
+
+    function confirmHtml() {
+      return `
+        <div class="confirm-wrap">
+          <div class="confirm-check">&#10003;</div>
+          <h2 class="confirm-title">Signed - thank you.</h2>
+          <p class="confirm-sub">We'll be in touch.</p>
+        </div>`;
+    }
+
+    function renderAlreadyAccepted(p) {
+      card.innerHTML = topHtml(p) + lineItemsHtml(p) + totalHtml(p) + confirmHtml() + footerHtml();
+    }
+
+    function renderSignable(p) {
+      card.innerHTML = topHtml(p) + lineItemsHtml(p) + totalHtml(p) + `
+        <div class="sign-block">
+          <h3 class="sign-head">Accept &amp; sign</h3>
+          <p class="sign-sub">Type your full name below to accept this proposal.</p>
+          <div class="field">
+            <label for="name-input">Your full name</label>
+            <input id="name-input" type="text" autocomplete="name" placeholder="Jane Smith"/>
+          </div>
+          <div class="field">
+            <label for="email-input">Email</label>
+            <input id="email-input" type="email" autocomplete="email" placeholder="you@company.com"/>
+          </div>
+          <button id="accept-btn" class="accept-btn">Accept &amp; Sign</button>
+          <p id="form-error" class="form-error"></p>
+          <p class="legal-note">By typing your name and clicking Accept &amp; Sign, you agree to the terms of this proposal. This typed-name signature is recorded with a timestamp as your electronic acceptance.</p>
+        </div>` + footerHtml();
+
+      const btn = document.getElementById('accept-btn');
+      const nameInput = document.getElementById('name-input');
+      const emailInput = document.getElementById('email-input');
+      const errEl = document.getElementById('form-error');
+
+      btn.addEventListener('click', function () {
+        const typed_name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        errEl.style.display = 'none';
+        if (!typed_name) {
+          errEl.textContent = 'Please type your full name to accept.';
+          errEl.style.display = 'block';
+          return;
+        }
+        btn.disabled = true;
+        btn.textContent = 'Signing...';
+        fetch('/api/proposal-accept?id=' + encodeURIComponent(id), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ typed_name: typed_name, email: email }),
+        })
+          .then(res => res.json().then(d => ({ ok: res.ok, d })))
+          .then(({ ok, d }) => {
+            if (!ok || !d.accepted) {
+              throw new Error((d && d.error) || 'Something went wrong.');
+            }
+            card.innerHTML = topHtml(p) + lineItemsHtml(p) + totalHtml(p) + confirmHtml() + footerHtml();
+          })
+          .catch(err => {
+            btn.disabled = false;
+            btn.textContent = 'Accept & Sign';
+            errEl.textContent = err.message || 'Something went wrong. Please try again.';
+            errEl.style.display = 'block';
+          });
+      });
+    }
+
+    fetch('/api/proposal-accept?id=' + encodeURIComponent(id))
+      .then(res => {
+        if (!res.ok) throw new Error('Not found');
+        return res.json();
+      })
+      .then(p => {
+        if (p.status === 'accepted' || p.status === 'won') {
+          renderAlreadyAccepted(p);
+        } else {
+          renderSignable(p);
+        }
+      })
+      .catch(() => renderError('Proposal not found', 'This proposal could not be found.'));
+  }
+
+  // -------- State router: unsigned -> sign, tiered -> choose+deposit, accepted -> banner --------
   if (!id) {
     renderError('No proposal ID provided.');
     return;
@@ -485,7 +584,15 @@ src="https://www.facebook.com/tr?id=3354624811351271&ev=PageView&noscript=1"
       if (!res.ok) throw new Error('Not found');
       return res.json();
     })
-    .then(data => renderProposal(data))
+    .then(p => {
+      if (p && p.build && Array.isArray(p.build.paths) && p.build.paths.length) {
+        renderBuild(p);
+      } else if (p.status === 'accepted' || p.status === 'won') {
+        renderProposal(p);
+      } else {
+        startSignFlow();
+      }
+    })
     .catch(() => renderError('This proposal could not be found.'));
 })();
 </script>
