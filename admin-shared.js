@@ -73,92 +73,118 @@ const TMIAdmin = (() => {
   // Single source of truth for both the desktop sidebar and the mobile "more"
   // sheet. Every surviving admin page is reachable from exactly one workspace
   // group; hub tabs link to their hub#hash destination.
+  // ── Workspaces ─────────────────────────────────────────────────────────────
+  // Each workspace is one sidebar entry that opens a tabbed shell
+  // (/admin-workspace?w=KEY). Every tab loads a real, still-standalone admin
+  // page in place with ?embed=1 (fully isolated - no script/DOM collisions).
+  // Nothing is deleted or merged into another file; pages keep their own URLs.
+  const WORKSPACES = {
+    home: { label: 'Home', tabs: [
+      { key:'dashboard', label:'Dashboard', src:'/admin-dashboard' },
+      { key:'brief',     label:'Brief',     src:'/admin-brief' },
+      { key:'worklist',  label:'Today',     src:'/admin-worklist' },
+      { key:'command',   label:'Command',   src:'/admin-command' },
+      { key:'flywheel',  label:'Flywheel',  src:'/admin-flywheel' },
+    ]},
+    sales: { label: 'Sales', tabs: [
+      { key:'sales',     label:'Pipeline',  src:'/admin-sales' },
+      { key:'leads',     label:'Leads',     src:'/admin-leads' },
+      { key:'proposals', label:'Proposals', src:'/admin-proposals' },
+      { key:'cockpit',   label:'Cockpit',   src:'/admin-cockpit' },
+      { key:'meetings',  label:'Meetings',  src:'/admin-meetings' },
+      { key:'campaign',  label:'Campaigns', src:'/admin-campaign' },
+    ]},
+    outbound: { label: 'Outbound', tabs: [
+      { key:'outbound',   label:'Sequences',   src:'/admin-outbound' },
+      { key:'prospect',   label:'Prospecting', src:'/admin-prospect' },
+      { key:'signals',    label:'Signals',     src:'/admin-signals' },
+      { key:'visitors',   label:'Visitors',    src:'/admin-visitors' },
+      { key:'call-tasks', label:'Call Queue',  src:'/admin-call-tasks' },
+      { key:'lifecycle',  label:'Lifecycle',   src:'/admin-lifecycle' },
+    ]},
+    inbox: { label: 'Inbox', tabs: [
+      { key:'inbox',      label:'Applications', src:'/admin-inbox' },
+      { key:'assessment', label:'Assessments',  src:'/admin-assessment' },
+    ]},
+    clients: { label: 'Clients', tabs: [
+      { key:'clients',        label:'Clients',     src:'/admin-clients' },
+      { key:'retention-plan', label:'Retention',   src:'/admin-retention-plan' },
+      { key:'account',        label:'Account 360', src:'/admin-account' },
+    ]},
+    delivery: { label: 'Delivery', tabs: [
+      { key:'work',       label:'Projects & Invoices', src:'/admin-work' },
+      { key:'documents',  label:'Documents',  src:'/admin-documents' },
+      { key:'os-clients', label:'Client OS',  src:'/admin-os-clients' },
+      { key:'payments',   label:'Payments',   src:'/admin-payments' },
+      { key:'onboarding', label:'Onboarding', src:'/admin-onboarding' },
+      { key:'university', label:'University',  src:'/admin-university' },
+    ]},
+    comms: { label: 'Comms', tabs: [
+      { key:'comms',         label:'Email & SMS', src:'/admin-comms' },
+      { key:'email-compose', label:'Compose',     src:'/admin-email-compose' },
+    ]},
+    content: { label: 'Content', tabs: [
+      { key:'content',         label:'Letters & Ideas', src:'/admin-content-hub' },
+      { key:'content-compose', label:'Compose',      src:'/admin-content-compose' },
+      { key:'newsletter',      label:'Newsletter',   src:'/admin-newsletter' },
+      { key:'brand-plan',      label:'Brand Plan',   src:'/admin-brand-plan' },
+      { key:'webinar',         label:'Weekly Class', src:'/admin-webinar' },
+    ]},
+    intelligence: { label: 'Intelligence', tabs: [
+      { key:'reports',              label:'Reports',         src:'/admin-reports' },
+      { key:'company-intelligence', label:'Company Intel',   src:'/admin-company-intelligence' },
+      { key:'financial-model',      label:'Financial Model', src:'/admin-financial-model' },
+      { key:'seo',                  label:'SEO',             src:'/admin-seo' },
+    ]},
+    cityleads: { label: 'City Leads', tabs: [
+      { key:'city-leads',     label:'Applications',   src:'/admin-city-leads' },
+      { key:'cityleads-team', label:'City Team',      src:'/admin-cityleads-team' },
+      { key:'city-sop',       label:'SOP Library',    src:'/admin-city-sop' },
+      { key:'venture',        label:'Venture Studio', src:'/admin-venture' },
+    ]},
+    automation: { label: 'Automation', tabs: [
+      { key:'agents', label:'Agent Builder', src:'/admin-agents' },
+      { key:'system', label:'System',        src:'/admin-system' },
+    ]},
+  };
+
+  // Reverse lookup: any page/tab key -> its workspace, so a page opened
+  // directly (not embedded) still highlights the right sidebar entry.
+  const WORKSPACE_OF = { people:'people', settings:'settings' };
+  for (const [wk, ws] of Object.entries(WORKSPACES)) {
+    WORKSPACE_OF[wk] = wk;
+    ws.tabs.forEach(t => { WORKSPACE_OF[t.key] = wk; });
+  }
+  // Legacy hub-internal tab keys pages still pass to initSidebar.
+  Object.assign(WORKSPACE_OF, {
+    pipeline:'sales', audits:'sales', bookings:'sales',
+    applications:'inbox', followups:'inbox',
+    'client-health':'clients', health:'clients',
+    projects:'delivery', invoices:'delivery',
+    contacts:'people', partners:'people', activity:'people',
+    email:'comms', sms:'comms',
+    revenue:'intelligence', analytics:'intelligence', level10:'intelligence',
+    'city-team':'cityleads',
+  });
+
   // item: { page, label, icon, href?, badge? }  (page also drives active state)
   const NAV_GROUPS = [
-    { label: 'Home', items: [
-      { page:'brief',     label:'Command Brief', icon:I.stageLetters },
-      { page:'dashboard', label:'Dashboard',     icon:I.dashboard },
-      { page:'worklist',  label:'Today',         icon:I.level10 },
-      { page:'command',   label:'Command Center', icon:I.command },
-      { page:'flywheel',  label:'Flywheel',      icon:I.flywheel },
+    { label: 'Workspaces', items: [
+      { page:'home',         label:'Home',         icon:I.dashboard,    href:'/admin-workspace?w=home' },
+      { page:'sales',        label:'Sales',        icon:I.pipeline,     href:'/admin-workspace?w=sales' },
+      { page:'outbound',     label:'Outbound',     icon:I.journey,      href:'/admin-workspace?w=outbound' },
+      { page:'inbox',        label:'Inbox',        icon:I.apps,         href:'/admin-workspace?w=inbox', badge:'inbox' },
+      { page:'clients',      label:'Clients',      icon:I.clients,      href:'/admin-workspace?w=clients' },
+      { page:'delivery',     label:'Delivery',     icon:I.projects,     href:'/admin-workspace?w=delivery' },
+      { page:'people',       label:'People',       icon:I.contacts,     href:'/admin-people' },
+      { page:'comms',        label:'Comms',        icon:I.email,        href:'/admin-workspace?w=comms' },
+      { page:'content',      label:'Content',      icon:I.stageLetters, href:'/admin-workspace?w=content' },
+      { page:'intelligence', label:'Intelligence', icon:I.analytics,    href:'/admin-workspace?w=intelligence' },
+      { page:'cityleads',    label:'City Leads',   icon:I.cityPin,      href:'/admin-workspace?w=cityleads' },
+      { page:'automation',   label:'Automation',   icon:I.recruiting,   href:'/admin-workspace?w=automation' },
     ]},
-    { label: 'Sales', items: [
-      { page:'pipeline',  label:'Pipeline',      icon:I.pipeline,  href:'/admin-sales#pipeline' },
-      { page:'audits',    label:'Audits',        icon:I.audits,    href:'/admin-sales#audits' },
-      { page:'bookings',  label:'Bookings',      icon:I.bookings,  href:'/admin-sales#bookings' },
-      { page:'leads',     label:'Leads',         icon:I.leads },
-      { page:'proposals', label:'Proposals',     icon:I.proposals },
-      { page:'cockpit',   label:'Sales Cockpit', icon:I.command },
-      { page:'meetings',  label:'Meetings',      icon:I.meetings },
-      { page:'campaign',  label:'Campaigns',     icon:I.growth_fotf },
-    ]},
-    { label: 'Outbound', items: [
-      { page:'outbound',   label:'Outbound',        icon:I.journey },
-      { page:'prospect',   label:'Prospecting',     icon:I.recruiting },
-      { page:'signals',    label:'Intent Signals',  icon:I.vision },
-      { page:'visitors',   label:'Site Visitors',   icon:I.analytics },
-      { page:'call-tasks', label:'Call Queue',      icon:I.followup },
-      { page:'lifecycle',  label:'Lifecycle Agents', icon:I.strategy },
-    ]},
-    { label: 'Inbox', items: [
-      { page:'applications', label:'Applications', icon:I.apps,     href:'/admin-inbox#apps', badge:'inbox' },
-      { page:'followups',    label:'Follow-ups',   icon:I.followup, href:'/admin-inbox#followups' },
-      { page:'assessment',   label:'Assessments',  icon:I.audits },
-    ]},
-    { label: 'Clients', items: [
-      { page:'clients',        label:'Clients',        icon:I.clients,     href:'/admin-clients' },
-      { page:'client-health',  label:'Client Health',  icon:I.clientHealth, href:'/admin-clients#health' },
-      { page:'retention-plan', label:'Retention Plan', icon:I.strategy },
-      { page:'account',        label:'Account',        icon:I.identity,    href:'/admin-account' },
-    ]},
-    { label: 'Delivery', items: [
-      { page:'projects',   label:'Projects',   icon:I.projects,  href:'/admin-work#projects' },
-      { page:'invoices',   label:'Invoices',   icon:I.invoices,  href:'/admin-work#invoices' },
-      { page:'documents',  label:'Documents',  icon:I.stageLetters },
-      { page:'os-clients', label:'Client OS',  icon:I.glassBox,  href:'/admin-os-clients' },
-      { page:'payments',   label:'Payments',   icon:I.cityMoney },
-      { page:'onboarding', label:'Onboarding', icon:I.onboarding },
-      { page:'university', label:'University', icon:I.library },
-    ]},
-    { label: 'People', items: [
-      { page:'contacts', label:'Contacts', icon:I.contacts, href:'/admin-people#contacts' },
-      { page:'partners', label:'Partners', icon:I.partners, href:'/admin-people#partners' },
-      { page:'activity', label:'Activity', icon:I.activity, href:'/admin-people#activity' },
-    ]},
-    { label: 'Comms', items: [
-      { page:'email',         label:'Email',         icon:I.email, href:'/admin-comms#email' },
-      { page:'sms',           label:'SMS',           icon:I.sms,   href:'/admin-comms#sms' },
-      { page:'email-compose', label:'Compose Email', icon:I.content, href:'/admin-email-compose' },
-    ]},
-    { label: 'Content', items: [
-      { page:'content',          label:'Letters',     icon:I.stageLetters, href:'/admin-content-hub#articles' },
-      { page:'content-ideas',    label:'Ideas',       icon:I.ideas,   href:'/admin-content-hub#ideas' },
-      { page:'content-calendar', label:'Calendar',    icon:I.rituals, href:'/admin-content-hub#calendar' },
-      { page:'content-compose',  label:'Compose',     icon:I.content },
-      { page:'newsletter',       label:'Newsletter',  icon:I.newsletter },
-      { page:'brand-plan',       label:'Brand Plan',  icon:I.identity },
-      { page:'webinar',          label:'Weekly Class', icon:I.meetings, href:'/admin-webinar' },
-    ]},
-    { label: 'Intelligence', items: [
-      { page:'revenue',              label:'Revenue',              icon:I.revenue,   href:'/admin-reports#revenue' },
-      { page:'analytics',            label:'Analytics',            icon:I.analytics, href:'/admin-reports#analytics' },
-      { page:'level10',              label:'Level 10',             icon:I.level10,   href:'/admin-reports#level10' },
-      { page:'company-intelligence', label:'Company Intelligence', icon:I.vision },
-      { page:'financial-model',      label:'Financial Model',      icon:I.revenue },
-      { page:'seo',                  label:'SEO',                  icon:I.growth_fotf },
-    ]},
-    { label: 'City Leads', items: [
-      { page:'city-leads', label:'City Leads',     icon:I.cityPin, href:'/admin-city-leads' },
-      { page:'city-team',  label:'City Team',      icon:I.team,    href:'/admin-cityleads-team' },
-      { page:'city-sop',   label:'City Lead SOP',  icon:I.stories, href:'/admin-city-sop' },
-      { page:'venture',    label:'Venture Studio', icon:I.command, href:'/admin-venture' },
-    ]},
-    { label: 'Automation', sep:true, items: [
-      { page:'agents', label:'Agent Builder', icon:I.recruiting },
-      { page:'system', label:'System',        icon:I.command },
-    ]},
-    { label: 'Settings', items: [
-      { page:'settings', label:'Settings', icon:I.settings },
+    { label: 'System', sep:true, items: [
+      { page:'settings', label:'Settings', icon:I.settings, href:'/admin-settings' },
     ]},
   ];
 
@@ -310,8 +336,17 @@ const TMIAdmin = (() => {
       }
     },
 
+    // True when this page is hosted inside a workspace tab (an iframe) or was
+    // opened with ?embed=1. Embedded pages render only their content - the
+    // workspace shell provides the sidebar and topbar.
+    _embedded() {
+      try { return window.self !== window.top || new URLSearchParams(location.search).get('embed') === '1'; }
+      catch (e) { return true; } // cross-origin frame access throws -> treat as embedded
+    },
+
     // ── Sidebar injection ──────────────────────────────────────────────────
     initSidebar(active) {
+      if (self._embedded()) { document.body.classList.add('admin-embedded'); return; }
       const root = document.getElementById('sidebar-root');
       if (!root) return;
       root.innerHTML = `
@@ -330,8 +365,9 @@ const TMIAdmin = (() => {
     <button class="sb-logout" onclick="TMIAdmin.logout()">${I.logout}Log out</button>
   </div>
 </aside>`;
-      // Mark active by key
-      root.querySelectorAll(`[data-page="${active}"]`).forEach(el => el.classList.add('active'));
+      // Mark active by key (map any page/tab key to its workspace entry).
+      const activeKey = WORKSPACE_OF[active] || active;
+      root.querySelectorAll(`[data-page="${activeKey}"]`).forEach(el => el.classList.add('active'));
       // Also mark items whose hashed href matches the current URL (so Ops Machine
       // tabs like #level10 / #journey / #success highlight correctly).
       const here = location.pathname.replace(/\/$/, '') + location.hash;
@@ -345,6 +381,40 @@ const TMIAdmin = (() => {
       self.initSearch();
       // Mobile bottom nav
       self.initMobileNav(active);
+    },
+
+    // ── Workspace tab shell ────────────────────────────────────────────────
+    // Renders a tab bar into #workspace-root and hosts each tab's page in a
+    // lazy iframe (loaded on first open). Fully isolated per tab.
+    initWorkspace(key) {
+      const ws = WORKSPACES[key];
+      const root = document.getElementById('workspace-root');
+      if (!ws || !root) return;
+      document.title = ws.label + ' — TMI Admin';
+      const wantTab = (location.hash || '').replace('#', '');
+      const active = ws.tabs.some(t => t.key === wantTab) ? wantTab : ws.tabs[0].key;
+      const withEmbed = src => src + (src.includes('?') ? '&' : '?') + 'embed=1';
+      root.innerHTML = `
+        <div class="ws-tabs">
+          ${ws.tabs.map(t => `<button class="ws-tab${t.key === active ? ' on' : ''}" data-wtab="${t.key}">${t.label}</button>`).join('')}
+        </div>
+        <div class="ws-frames">
+          ${ws.tabs.map(t => `<iframe class="ws-frame" data-wframe="${t.key}" title="${t.label}"${t.key === active ? ` src="${withEmbed(t.src)}"` : ''} style="${t.key === active ? '' : 'display:none'}"></iframe>`).join('')}
+        </div>`;
+      const crumb = document.querySelector('.topbar-crumb .page');
+      function show(k) {
+        const t = ws.tabs.find(x => x.key === k); if (!t) return;
+        root.querySelectorAll('.ws-tab').forEach(b => b.classList.toggle('on', b.dataset.wtab === k));
+        root.querySelectorAll('.ws-frame').forEach(f => {
+          const on = f.dataset.wframe === k;
+          f.style.display = on ? '' : 'none';
+          if (on && !f.getAttribute('src')) f.src = withEmbed(t.src); // lazy load
+        });
+        if (crumb) crumb.textContent = ws.label + ' · ' + t.label;
+        try { history.replaceState(null, '', '?w=' + key + '#' + k); } catch (e) {}
+      }
+      root.querySelectorAll('.ws-tab').forEach(b => b.addEventListener('click', () => show(b.dataset.wtab)));
+      if (crumb) { const t0 = ws.tabs.find(x => x.key === active); if (t0) crumb.textContent = ws.label + ' · ' + t0.label; }
     },
 
     // ── Mobile bottom nav ──────────────────────────────────────────────────

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Workspace — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Workspace</span></div>
+    </div>
+    <div class="content" style="padding:0;display:flex;flex-direction:column;min-height:0;">
+      <div id="workspace-root" style="flex:1;display:flex;flex-direction:column;min-height:0;"></div>
+    </div>
+  </div>
+</div>
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+const w = new URLSearchParams(location.search).get('w') || 'home';
+TMIAdmin.initSidebar(w);
+TMIAdmin.initWorkspace(w);
+</script>
+</body>
+</html>
