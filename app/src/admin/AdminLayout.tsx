@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useParams } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { workspaceByKey } from './workspaces';
+import { RecordFab } from './RecordFab';
 
 export function AdminLayout() {
   const { workspace } = useParams();
@@ -40,6 +41,7 @@ export function AdminLayout() {
         </div>
         <Outlet />
       </div>
+      <RecordFab />
     </div>
   );
 }
