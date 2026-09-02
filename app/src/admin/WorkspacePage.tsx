@@ -1,17 +1,16 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { workspaceByKey } from './workspaces';
+import { PAGE_COMPONENTS } from './pages/registry';
 
-// Foundation placeholder: renders the workspace's real tab bar, and a body that
-// each ported page will fill. During migration a tab's body is swapped from
-// this placeholder to a real React page component.
 export function WorkspacePage() {
   const { workspace } = useParams();
   const ws = workspace ? workspaceByKey(workspace) : null;
   const [active, setActive] = useState(ws?.tabs[0]?.key ?? '');
 
-  if (!ws) return <div className="content"><p>Unknown workspace.</p></div>;
+  if (!ws) return <div className="content"><p style={{ padding: 24 }}>Unknown workspace.</p></div>;
   const tab = ws.tabs.find((t) => t.key === active) ?? ws.tabs[0];
+  const Ported = PAGE_COMPONENTS[tab.page];
 
   return (
     <div className="content" style={{ padding: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
@@ -22,16 +21,17 @@ export function WorkspacePage() {
           ))}
         </div>
       )}
-      <div style={{ padding: '28px 32px' }}>
-        <div className="sec-head"><h1>{ws.label}{ws.tabs.length > 1 ? ` · ${tab.label}` : ''}</h1></div>
-        <div className="card" style={{ padding: 28, marginTop: 8 }}>
-          <p style={{ color: 'var(--muted)' }}>
-            React foundation is live. This page (<code>{tab.page}</code>) still needs porting from the
-            static <code>admin-{tab.page}.html</code>. The shared layer (auth, API client, recorder, layout,
-            routing) is ready, so porting it is now a focused component build.
-          </p>
+      {Ported ? <Ported /> : (
+        <div style={{ padding: '28px 22px' }}>
+          <div className="sec-head"><h1>{ws.label}{ws.tabs.length > 1 ? ` · ${tab.label}` : ''}</h1></div>
+          <div className="card" style={{ padding: 24, marginTop: 8 }}>
+            <p style={{ color: 'var(--muted)' }}>
+              This page (<code>{tab.page}</code>) is next to port from <code>admin-{tab.page}.html</code>.
+              The shell, auth, API client and mobile layout are ready, so it is a focused component build.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -2,10 +2,10 @@ import { NavLink } from 'react-router-dom';
 import { WORKSPACES } from './workspaces';
 import { useAuth } from '../lib/auth';
 
-export function Sidebar() {
+export function Sidebar({ open = false }: { open?: boolean }) {
   const { logout } = useAuth();
   return (
-    <aside className="sidebar">
+    <aside className={'sidebar' + (open ? ' open' : '')}>
       <div className="sb-brand">
         <img src="/logo.svg" alt="TMI" />
         <div><div className="sb-brand-label">TMI</div><div className="sb-brand-sub">Admin</div></div>

@@ -7,3 +7,47 @@
 .toast { background: var(--ink, #1a1a1a); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); opacity: 0; transform: translateY(8px); transition: opacity .2s, transform .2s; }
 .toast.visible { opacity: 1; transform: translateY(0); }
 .toast.error { background: #b91c1c; }
+
+/* ── Mobile shell (React) ─────────────────────────────────────────────────
+   admin.css hides .sidebar at <=768px; here we turn it into a slide-in drawer
+   with a mobile top bar, so the app is fully usable one-handed on a phone. */
+.mobile-topbar { display: none; }
+
+@media (max-width: 768px) {
+  .layout { display: block; height: auto; overflow: visible; }
+  .main { height: auto; overflow: visible; min-width: 0; }
+  .topbar { display: none; }            /* desktop crumb; replaced by mobile-topbar */
+  .content { height: auto; overflow: visible; -webkit-overflow-scrolling: touch; }
+
+  .mobile-topbar {
+    display: flex; align-items: center; gap: 12px; height: 54px; padding: 0 14px;
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 60;
+  }
+  .mobile-topbar .burger { background: none; border: none; padding: 4px; cursor: pointer; color: var(--ink); display: flex; }
+  .mobile-topbar .mt-title { font-weight: 700; font-size: 15px; }
+
+  /* Sidebar becomes an off-canvas drawer (override admin.css display:none). */
+  .sidebar {
+    display: flex !important; position: fixed; top: 0; left: 0; bottom: 0; width: 264px;
+    z-index: 200; transform: translateX(-100%); transition: transform .22s ease;
+    box-shadow: 0 0 48px rgba(0, 0, 0, 0.25);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sb-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 150; }
+
+  /* Bigger touch targets + sticky workspace tabs under the mobile bar. */
+  .sb-item { padding: 13px 16px; font-size: 15px; }
+  .ws-tabs { position: sticky; top: 54px; z-index: 40; }
+  .ws-tab { padding: 12px 14px; }
+  .btn { min-height: 42px; }
+  .form-input { min-height: 44px; font-size: 16px; } /* 16px stops iOS zoom-on-focus */
+}
+
+/* Responsive record list used by ported data pages (table -> cards on phone). */
+.rec-list { display: block; }
+.rec-cards { display: none; }
+@media (max-width: 768px) {
+  .rec-table-wrap { display: none; }
+  .rec-cards { display: flex; flex-direction: column; gap: 10px; }
+}
