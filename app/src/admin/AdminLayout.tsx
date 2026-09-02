@@ -1,47 +1,69 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation, useParams } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
+import { MobileTopBar } from './MobileTopBar';
+import { BottomNav } from './BottomNav';
+import { SearchOverlay } from './SearchOverlay';
+import { NotificationsPanel } from './NotificationsPanel';
+import { RecordModal } from './RecordModal';
 import { workspaceByKey } from './workspaces';
-import { RecordFab } from './RecordFab';
+import { useAlerts } from '../lib/useAlerts';
+import { Icons } from './icons';
 
 export function AdminLayout() {
   const { workspace } = useParams();
   const ws = workspace ? workspaceByKey(workspace) : null;
-  const [menuOpen, setMenuOpen] = useState(false);
+  const nav = useNavigate();
   const loc = useLocation();
+  const alerts = useAlerts();
 
-  // Close the mobile drawer whenever the route changes.
-  useEffect(() => { setMenuOpen(false); }, [loc.pathname]);
-  // Lock body scroll while the drawer is open.
+  const [drawer, setDrawer] = useState(false);
+  const [search, setSearch] = useState(false);
+  const [notif, setNotif] = useState(false);
+  const [record, setRecord] = useState(false);
+
+  useEffect(() => { setDrawer(false); }, [loc.pathname]);
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    const lock = drawer || search || notif || record;
+    document.body.style.overflow = lock ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
-  }, [menuOpen]);
+  }, [drawer, search, notif, record]);
+
+  const title = ws?.label ?? 'TMI Admin';
 
   return (
-    <div className={'layout' + (menuOpen ? ' menu-open' : '')}>
-      {/* Mobile top bar (hidden on desktop via CSS) */}
-      <div className="mobile-topbar">
-        <button className="burger" aria-label="Menu" onClick={() => setMenuOpen(true)}>
-          <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" d="M3 6h18M3 12h18M3 18h18" /></svg>
-        </button>
-        <span className="mt-title">{ws?.label ?? 'TMI Admin'}</span>
-      </div>
+    <div className={'layout' + (drawer ? ' menu-open' : '')}>
+      <MobileTopBar title={title} alertCount={alerts.length}
+        onSearch={() => setSearch(true)} onAlerts={() => setNotif(true)} onSettings={() => nav('/admin/settings')} />
 
-      <Sidebar open={menuOpen} />
-      {menuOpen && <div className="sb-backdrop" onClick={() => setMenuOpen(false)} />}
+      <Sidebar open={drawer} />
+      {drawer && <div className="sb-backdrop" onClick={() => setDrawer(false)} />}
 
       <div className="main">
         <div className="topbar">
           <div className="topbar-crumb">
             <span>TMI Admin</span>
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" strokeWidth={2} strokeLinecap="round" /></svg>
-            <span className="page">{ws?.label ?? 'Admin'}</span>
+            <span className="page">{title}</span>
+          </div>
+          <div className="topbar-actions">
+            <button className="mt-ic" aria-label="Search" onClick={() => setSearch(true)}>{Icons.search}</button>
+            <button className="mt-ic" aria-label="Alerts" onClick={() => setNotif(true)}>
+              {Icons.bell}{alerts.length > 0 && <span className="mt-badge">{alerts.length > 9 ? '9+' : alerts.length}</span>}
+            </button>
           </div>
         </div>
         <Outlet />
       </div>
-      <RecordFab />
+
+      {/* Desktop corner record button (hidden on mobile; bottom-nav center replaces it) */}
+      <div id="qa-fab"><button id="qa-btn" aria-label="Record" onClick={() => setRecord(true)}>＋</button></div>
+
+      <BottomNav onQuick={() => setRecord(true)} onMore={() => setDrawer(true)} />
+
+      {search && <SearchOverlay onClose={() => setSearch(false)} />}
+      {notif && <NotificationsPanel alerts={alerts} onClose={() => setNotif(false)} />}
+      {record && <RecordModal onClose={() => setRecord(false)} />}
     </div>
   );
 }

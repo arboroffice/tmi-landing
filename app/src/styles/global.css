@@ -51,3 +51,54 @@
   .rec-table-wrap { display: none; }
   .rec-cards { display: flex; flex-direction: column; gap: 10px; }
 }
+
+/* ── Top-bar action icons + alert badge (desktop + mobile) ────────────────── */
+.mt-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.mt-ic { position: relative; background: none; border: none; padding: 8px; border-radius: 10px; color: var(--ink-2); cursor: pointer; display: flex; }
+.mt-ic:hover { background: var(--bg-alt, #f5f5f7); color: var(--ink); }
+.mt-ic svg { width: 22px; height: 22px; }
+.mt-badge { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: var(--red, #ef4444); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.topbar-actions { display: flex; align-items: center; gap: 2px; }
+
+/* ── Overlays: search + notifications sheet ───────────────────────────────── */
+.ov { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.45); display: flex; justify-content: center; align-items: flex-start; padding: 8vh 16px; }
+.ov-panel { background: var(--surface, #fff); width: 100%; max-width: 560px; border-radius: 16px; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.3); max-height: 80vh; display: flex; flex-direction: column; }
+.ov-panel.sheet { max-width: 480px; }
+.ov-search { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.ov-search svg { width: 20px; height: 20px; color: var(--muted); flex: none; }
+.ov-search input { flex: 1; border: none; outline: none; font-size: 16px; background: transparent; color: var(--ink); font-family: inherit; }
+.ov-search button { border: none; background: none; color: var(--ink-2); font-size: 14px; cursor: pointer; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); font-size: 15px; }
+.sheet-head button { border: none; background: none; font-size: 16px; color: var(--muted); cursor: pointer; }
+.ov-results { overflow-y: auto; padding: 6px; }
+.ov-item { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; padding: 11px 14px; border: none; background: none; border-radius: 10px; cursor: pointer; }
+.ov-item:hover { background: var(--bg-alt, #f5f5f7); }
+.ov-item-main { font-size: 14px; font-weight: 600; color: var(--ink); }
+.ov-item-sub { font-size: 12px; color: var(--muted); }
+.ov-empty { padding: 24px 18px; text-align: center; color: var(--muted); font-size: 13px; }
+
+/* ── Bottom nav + center quick-action (mobile) ────────────────────────────── */
+.bottom-nav { display: none; }
+@media (max-width: 768px) {
+  #qa-fab { display: none; }               /* center bottom-nav button replaces the corner FAB */
+  .content { padding-bottom: 84px !important; }
+  .mt-actions .mt-ic svg { width: 23px; height: 23px; }
+
+  .bottom-nav {
+    display: flex; align-items: stretch; position: fixed; left: 0; right: 0; bottom: 0; height: 62px;
+    background: var(--surface, #fff); border-top: 1px solid var(--line); z-index: 90;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .bn-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    font-size: 10.5px; color: var(--muted); text-decoration: none; border: none; background: none; cursor: pointer; font-family: inherit;
+  }
+  .bn-item.active { color: var(--ink); }
+  .bn-item svg { width: 23px; height: 23px; }
+  .bn-center { flex: 0 0 66px; display: flex; align-items: flex-start; justify-content: center; }
+  .bn-plus {
+    width: 56px; height: 56px; border-radius: 50%; margin-top: -20px; border: 4px solid var(--surface, #fff);
+    background: var(--ink, #111); color: var(--chart, #E4FF97); font-size: 28px; line-height: 1; cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+  }
+}
