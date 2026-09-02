@@ -291,20 +291,17 @@ async function newAccount(){
   TMIAdmin.toast('Lead created');
 }
 
-// ---------- Recording (Web Speech API + MediaRecorder) ----------
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recog = null, recording = false, startTs = 0, timerInt = null, accumSec = 0;
-let mediaRec = null, mediaStream = null, audioChunks = [], audioMime = '';
-let wakeLock = null;
-async function acquireWake(){ try{ if('wakeLock' in navigator){ wakeLock = await navigator.wakeLock.request('screen'); } }catch(_){} }
-function releaseWake(){ try{ if(wakeLock){ wakeLock.release(); } }catch(_){} wakeLock = null; }
-document.addEventListener('visibilitychange', ()=>{ if(recording && document.visibilityState==='visible') acquireWake(); });
+// ---------- Recording (resilient, Deepgram, server-persisted) ----------
+// Uses the shared TMIAdmin.recorder: audio is rolled into short complete
+// segments, each uploaded to storage AND transcribed (Deepgram, server-side)
+// as it is captured. A phone dying mid-meeting loses at most the last few
+// seconds, and the session is recoverable from storage.
+let recording = false, timerInt = null, accumSec = 0, recStart = 0, currentSession = null;
 const tbox = document.getElementById('transcript-box');
-
-if(!SR){ document.getElementById('unsupported').style.display='block'; }
+if(!(window.MediaRecorder && navigator.mediaDevices)){ const u=document.getElementById('unsupported'); if(u) u.style.display='block'; }
 
 function setTimer(){
-  const total = accumSec + (recording ? Math.floor((Date.now()-startTs)/1000) : 0);
+  const total = accumSec + (recording ? Math.floor((Date.now()-recStart)/1000) : 0);
   const m = String(Math.floor(total/60)).padStart(2,'0');
   const s = String(total%60).padStart(2,'0');
   document.getElementById('rec-timer').textContent = `${m}:${s}`;
@@ -313,80 +310,38 @@ function renderTranscript(interim){
   tbox.innerHTML = esc(finalText) + (interim ? `<span class="interim"> ${esc(interim)}</span>` : '');
   tbox.scrollTop = tbox.scrollHeight;
 }
-function toggleRecord(){
-  if(recording){ stopRecord(); return; }
-  if(!SR){ TMIAdmin.toast('Recording not supported in this browser','error'); return; }
-  // Pull any manual edits into finalText before resuming
+async function toggleRecord(){
+  if(recording){ await stopRecord(); return; }
   if(tbox.isContentEditable){ finalText = tbox.innerText.trim(); }
-  recog = new SR();
-  recog.continuous = true; recog.interimResults = true; recog.lang = 'en-US';
-  recog.onresult = (e)=>{
-    let interim = '';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      const t = e.results[i][0].transcript;
-      if(e.results[i].isFinal){ finalText = (finalText + ' ' + t).trim(); }
-      else interim += t;
-    }
-    renderTranscript(interim);
-  };
-  recog.onerror = (e)=>{ if(e.error==='not-allowed') TMIAdmin.toast('Microphone blocked','error'); };
-  recog.onend = ()=>{ if(recording && recog){ try{ recog.start(); }catch(_){} } }; // auto-restart on silence
-  recording = true; startTs = Date.now();
+  const entity = chosen ? { type: chosen.type, id: chosen.id, company: chosen.company, label: chosen.label } : null;
+  const started = await TMIAdmin.recorder.start({
+    entity,
+    title: document.getElementById('m-title').value.trim() || null,
+    sales_stage: chosenStage || null,
+    onText: t => { finalText = t; renderTranscript(''); },
+  });
+  if(!started){ return; }
+  currentSession = started;
+  recording = true; recStart = Date.now(); accumSec = 0;
   tbox.contentEditable = 'false';
-  document.getElementById('btn-rec').innerHTML = '■ Stop';
-  document.getElementById('btn-rec').classList.remove('btn-primary');
-  document.getElementById('btn-rec').classList.add('btn-danger');
+  const b = document.getElementById('btn-rec'); b.innerHTML='■ Stop'; b.classList.remove('btn-primary'); b.classList.add('btn-danger');
   const dot = document.getElementById('rec-dot'); dot.style.visibility='visible'; dot.classList.add('live');
   timerInt = setInterval(setTimer, 500);
-  try{ recog.start(); }catch(_){}
-  startAudioCapture();
-  acquireWake();
 }
-
-// Capture the actual audio so the recording is saved to Firebase Storage
-// alongside the transcript. Best-effort: transcription works without it.
-async function startAudioCapture(){
-  if(!window.MediaRecorder || !navigator.mediaDevices) return;
-  try{
-    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    audioMime = ['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t)) || '';
-    mediaRec = audioMime ? new MediaRecorder(mediaStream, { mimeType: audioMime }) : new MediaRecorder(mediaStream);
-    audioMime = mediaRec.mimeType || audioMime || 'audio/webm';
-    mediaRec.ondataavailable = e => { if(e.data && e.data.size) audioChunks.push(e.data); };
-    mediaRec.start(1000);
-  }catch(_){ mediaRec = null; mediaStream = null; }
-}
-function stopAudioCapture(){
-  try{ if(mediaRec && mediaRec.state !== 'inactive') mediaRec.stop(); }catch(_){}
-  try{ if(mediaStream) mediaStream.getTracks().forEach(t=>t.stop()); }catch(_){}
-  mediaRec = null; mediaStream = null;
-}
-function stopRecord(){
+async function stopRecord(){
+  if(!recording) return;
   recording = false;
-  releaseWake();
-  // Detach the auto-restart handler BEFORE stopping, then abort so the engine
-  // cannot relaunch itself. Plain stop() races the onend->restart loop and the
-  // mic keeps going ("won't stop"); abort() kills it immediately.
-  if(recog){
-    try{ recog.onend = null; recog.onresult = null; recog.onerror = null; }catch(_){}
-    try{ recog.stop(); }catch(_){}
-    try{ recog.abort(); }catch(_){}
-    recog = null;
-  }
-  stopAudioCapture();
-  accumSec += Math.floor((Date.now()-startTs)/1000);
   clearInterval(timerInt);
-  document.getElementById('btn-rec').innerHTML = '● Record';
-  document.getElementById('btn-rec').classList.add('btn-primary');
-  document.getElementById('btn-rec').classList.remove('btn-danger');
+  const b = document.getElementById('btn-rec'); b.innerHTML='● Record'; b.classList.add('btn-primary'); b.classList.remove('btn-danger');
   document.getElementById('rec-dot').classList.remove('live');
+  const out = await TMIAdmin.recorder.stop();
+  if(out){ if(out.transcript) finalText = out.transcript; accumSec = out.duration_sec || accumSec; }
   tbox.contentEditable = 'true';
   renderTranscript('');
 }
 function clearAll(){
   if(recording) stopRecord();
-  audioChunks = [];
-  finalText=''; accumSec=0; currentMeeting=null;
+  finalText=''; accumSec=0; currentMeeting=null; currentSession=null;
   tbox.innerHTML=''; tbox.contentEditable='true';
   document.getElementById('rec-timer').textContent='00:00';
   document.getElementById('active-out').style.display='none';
@@ -411,6 +366,7 @@ async function saveMeeting(){
     sales_stage: chosenStage || null,
     transcript,
     duration_sec: accumSec || null,
+    rec_session_id: currentSession || null,
   };
   if (chosen.type === 'audit') { payload.audit_id = chosen.id; payload.prep_brief = chosen.prep_brief || null; }
   else if (chosen.type === 'client') { payload.client_id = chosen.id; }
@@ -420,25 +376,11 @@ async function saveMeeting(){
   currentMeeting = m;
   TMIAdmin.toast('Meeting saved');
 
-  // Upload the captured audio to Firebase Storage and attach it. Best-effort:
-  // the meeting is already saved, so a failed upload never blocks the digest.
-  if(audioChunks.length){
-    btn.textContent = 'Uploading audio...';
-    try{
-      const blob = new Blob(audioChunks, { type: audioMime || 'audio/webm' });
-      const ext = (audioMime||'').includes('mp4') ? 'm4a' : 'webm';
-      const t = await TMIAdmin.api('/api/storage','POST',{
-        action:'upload-url', folder:'meetings', filename:`${m.id}.${ext}`, content_type: blob.type
-      });
-      if(t && t.upload_url){
-        const up = await fetch(t.upload_url, { method:'PUT', headers:{'Content-Type': blob.type}, body: blob });
-        if(up.ok){
-          await TMIAdmin.api('/api/meetings','PUT',{ id: m.id, audio_path: t.path, audio_mime: blob.type, audio_size: blob.size });
-          currentMeeting.audio_path = t.path;
-          audioChunks = [];
-        }
-      }
-    }catch(_){ TMIAdmin.toast('Audio upload failed (transcript saved)','error'); }
+  // Audio is already persisted server-side as segments under recordings/<session>
+  // (uploaded live during recording), so there is no end-of-call blob upload to
+  // do here. Link the meeting to its recording session if there is one.
+  if(currentSession){
+    try{ await TMIAdmin.api('/api/meetings','PUT',{ id: m.id, rec_session_id: currentSession }); currentMeeting.rec_session_id = currentSession; }catch(_){}
   }
 
   btn.textContent = 'Analyzing...';
@@ -579,9 +521,24 @@ async function deleteMeeting(){
   loadHistory();
 }
 
+// ---------- Load a recording started elsewhere (e.g. the quick-action button) ----------
+async function loadFromSession(){
+  const sid = new URLSearchParams(location.search).get('session');
+  if(!sid) return;
+  const s = await TMIAdmin.api('/api/rec-session?session_id='+encodeURIComponent(sid));
+  if(!s) return;
+  currentSession = sid;
+  finalText = s.transcript || '';
+  accumSec = s.duration_sec || 0;
+  renderTranscript(''); setTimer();
+  if(s.title){ const t=document.getElementById('m-title'); if(t) t.value = s.title; }
+  TMIAdmin.toast('Loaded recording. Attach it to an account, then Save & build knowledge.');
+}
+
 // ---------- Init ----------
 loadAccounts();
 loadHistory();
+loadFromSession();
 </script>
 </body>
 </html>

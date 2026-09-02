@@ -381,6 +381,8 @@ const TMIAdmin = (() => {
       self.initSearch();
       // Mobile bottom nav
       self.initMobileNav(active);
+      // Floating quick actions (record interaction, new lead)
+      self.initQuickActions();
     },
 
     // ── Workspace tab shell ────────────────────────────────────────────────
@@ -415,6 +417,147 @@ const TMIAdmin = (() => {
       }
       root.querySelectorAll('.ws-tab').forEach(b => b.addEventListener('click', () => show(b.dataset.wtab)));
       if (crumb) { const t0 = ws.tabs.find(x => x.key === active); if (t0) crumb.textContent = ws.label + ' · ' + t0.label; }
+    },
+
+    // ── Resilient recorder ──────────────────────────────────────────────────
+    // Records any interaction so nothing is lost if the phone dies: audio is
+    // rolled into short complete segments, each uploaded to storage AND
+    // transcribed (Deepgram, server-side) as it is captured. A crash loses only
+    // the few seconds since the last segment; the session is recoverable.
+    recorder: {
+      active: false, sessionId: null, seq: 0, stream: null, rec: null, mime: 'audio/webm',
+      rollTimer: null, wakeLock: null, onText: null, onStatus: null, t0: 0, SEG_MS: 20000,
+
+      async start({ entity, title, sales_stage, onText, onStatus } = {}) {
+        if (this.active) return null;
+        this.onText = onText || null; this.onStatus = onStatus || null;
+        const s = await self.api('/api/rec-session', 'POST', { action: 'start', entity, title, sales_stage });
+        if (!s || !s.id) { self.toast('Could not start recording', 'error'); return null; }
+        this.sessionId = s.id; this.seq = 0; this.t0 = Date.now();
+        try { this.stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+        catch (e) { self.toast('Microphone blocked', 'error'); this.sessionId = null; return null; }
+        this.mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || 'audio/webm';
+        try { if ('wakeLock' in navigator) this.wakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
+        this.active = true;
+        if (this.onStatus) this.onStatus('recording');
+        this._startSegment();
+        this.rollTimer = setInterval(() => this._roll(), this.SEG_MS);
+        // Re-arm the screen wake lock if the OS dropped it when the tab was hidden.
+        if (!this._visBound) {
+          this._visBound = true;
+          document.addEventListener('visibilitychange', async () => {
+            if (this.active && document.visibilityState === 'visible' && 'wakeLock' in navigator) {
+              try { this.wakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
+            }
+          });
+        }
+        return this.sessionId;
+      },
+      _startSegment() {
+        if (!this.stream) return;
+        try {
+          this.rec = new MediaRecorder(this.stream, { mimeType: this.mime });
+          this.rec.ondataavailable = e => { if (e.data && e.data.size) this._flush(e.data); };
+          this.rec.start();
+        } catch (_) {}
+      },
+      _roll() {
+        if (this.rec && this.rec.state !== 'inactive') { try { this.rec.stop(); } catch (_) {} } // fires ondataavailable
+        this._startSegment(); // start the next complete segment immediately
+      },
+      async _flush(blob) {
+        const seq = this.seq++;
+        const ext = this.mime.includes('mp4') ? 'm4a' : 'webm';
+        const sid = this.sessionId;
+        try {
+          const up = await self.api('/api/storage', 'POST', { action: 'upload-url', filename: `seg-${String(seq).padStart(4, '0')}.${ext}`, content_type: this.mime, folder: `recordings/${sid}` });
+          if (!up || !up.upload_url) return;
+          await fetch(up.upload_url, { method: 'PUT', headers: { 'Content-Type': this.mime }, body: blob }); // persisted; survives a crash
+          const r = await self.api('/api/rec-session', 'POST', { action: 'segment', session_id: sid, seq, path: up.path, mime: this.mime, duration: Math.round(this.SEG_MS / 1000) });
+          if (r && r.transcript != null && this.onText) this.onText(r.transcript);
+        } catch (_) { /* best-effort; the audio may already be in storage for recovery */ }
+      },
+      async stop() {
+        if (!this.active) return null;
+        this.active = false;
+        clearInterval(this.rollTimer); this.rollTimer = null;
+        if (this.rec && this.rec.state !== 'inactive') { try { this.rec.stop(); } catch (_) {} } // final segment
+        try { if (this.stream) this.stream.getTracks().forEach(t => t.stop()); } catch (_) {}
+        try { if (this.wakeLock) { this.wakeLock.release(); this.wakeLock = null; } } catch (_) {}
+        const dur = Math.floor((Date.now() - this.t0) / 1000);
+        await new Promise(r => setTimeout(r, 1400)); // let the last segment upload + transcribe
+        const s = await self.api('/api/rec-session', 'POST', { action: 'stop', session_id: this.sessionId, duration_sec: dur });
+        if (this.onStatus) this.onStatus('done');
+        const out = { session_id: this.sessionId, transcript: (s && s.transcript) || '', duration_sec: dur };
+        this.sessionId = null; this.seq = 0;
+        return out;
+      },
+    },
+
+    // ── Floating quick actions (record / new lead) ──────────────────────────
+    initQuickActions() {
+      if (document.getElementById('qa-fab')) return;
+      const wrap = document.createElement('div');
+      wrap.id = 'qa-fab';
+      wrap.innerHTML = `
+        <div id="qa-menu" hidden>
+          <button class="qa-item" id="qa-record">● Record interaction</button>
+          <a class="qa-item" href="/admin-leads">＋ New lead</a>
+          <a class="qa-item" href="/admin-workspace?w=home">▤ Home</a>
+        </div>
+        <button id="qa-btn" title="Quick actions" aria-label="Quick actions">＋</button>
+        <div id="qa-rec" hidden>
+          <div class="qa-rec-card">
+            <div class="qa-rec-head"><span id="qa-rec-title">Record interaction</span><button id="qa-rec-x" aria-label="Close">✕</button></div>
+            <input id="qa-rec-name" class="form-input" placeholder="Who / company (optional)"/>
+            <div class="qa-rec-status"><span id="qa-rec-dot"></span><span id="qa-rec-timer">00:00</span><span id="qa-rec-saved"></span></div>
+            <div id="qa-rec-tx" class="qa-rec-tx">Tap Start. Every few seconds is saved, so nothing is lost if your phone dies.</div>
+            <div class="qa-rec-actions">
+              <button class="btn btn-primary" id="qa-rec-toggle">Start</button>
+              <a class="btn" id="qa-rec-open" href="/admin-meetings" style="display:none">Open in Meetings</a>
+            </div>
+          </div>
+        </div>`;
+      document.body.appendChild(wrap);
+      const menu = wrap.querySelector('#qa-menu');
+      const rec = wrap.querySelector('#qa-rec');
+      wrap.querySelector('#qa-btn').addEventListener('click', () => { menu.hidden = !menu.hidden; });
+      document.addEventListener('click', e => { if (!wrap.contains(e.target)) menu.hidden = true; });
+      wrap.querySelector('#qa-record').addEventListener('click', () => { menu.hidden = true; rec.hidden = false; });
+      wrap.querySelector('#qa-rec-x').addEventListener('click', () => { if (self.recorder.active) return self.toast('Stop the recording first', 'error'); rec.hidden = true; });
+
+      let timerInt = null;
+      const dot = wrap.querySelector('#qa-rec-dot');
+      const timerEl = wrap.querySelector('#qa-rec-timer');
+      const txEl = wrap.querySelector('#qa-rec-tx');
+      const toggle = wrap.querySelector('#qa-rec-toggle');
+      const savedEl = wrap.querySelector('#qa-rec-saved');
+      const openLink = wrap.querySelector('#qa-rec-open');
+      function fmt(s) { return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
+
+      toggle.addEventListener('click', async () => {
+        if (self.recorder.active) {
+          toggle.disabled = true; toggle.textContent = 'Saving…';
+          const out = await self.recorder.stop();
+          clearInterval(timerInt); dot.classList.remove('on');
+          toggle.disabled = false; toggle.textContent = 'Start';
+          savedEl.textContent = out ? 'Saved' : '';
+          if (out && out.session_id) { openLink.href = '/admin-meetings?session=' + out.session_id; openLink.style.display = ''; }
+          return;
+        }
+        const name = wrap.querySelector('#qa-rec-name').value.trim();
+        savedEl.textContent = ''; openLink.style.display = 'none';
+        txEl.textContent = 'Starting…';
+        const sid = await self.recorder.start({
+          entity: name ? { type: 'quick', label: name, company: name } : null,
+          title: name || 'Quick interaction',
+          onText: t => { txEl.textContent = t || '…'; txEl.scrollTop = txEl.scrollHeight; },
+        });
+        if (!sid) { txEl.textContent = 'Could not start. Check mic permission.'; return; }
+        toggle.textContent = '■ Stop'; dot.classList.add('on');
+        const t0 = Date.now();
+        timerInt = setInterval(() => { timerEl.textContent = fmt(Math.floor((Date.now() - t0) / 1000)); }, 500);
+      });
     },
 
     // ── Mobile bottom nav ──────────────────────────────────────────────────
