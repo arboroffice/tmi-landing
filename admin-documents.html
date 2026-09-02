@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Client Documents — TMI Admin</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="admin.css"/>
+<style>
+  .doc-tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--line);}
+  .doc-tab{padding:10px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
+  .doc-tab.on{color:var(--ink);border-bottom-color:var(--ink);}
+  .doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+  .doc-card{background:var(--card,#fff);border:1px solid var(--line);border-radius:var(--r-sm,8px);padding:16px;}
+  .doc-cat{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .doc-card h3{font-size:15px;margin:6px 0 6px;}
+  .doc-purpose{font-size:12.5px;color:var(--ink-2,#555);line-height:1.5;}
+  .doc-meta{font-size:11px;color:var(--muted);margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;}
+  .pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:999px;background:var(--bg,#f5f5f7);color:var(--ink-2,#555);}
+  .pill.warn{background:#fff3d6;color:#8a6d00;}
+  .pill.gate{background:#ffe0e0;color:#a11;}
+  .pill.ok{background:#e3f7e0;color:#176d11;}
+  .trigger-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);}
+  .trigger-row input{margin-top:3px;}
+  .trigger-row .t-help{font-size:11.5px;color:var(--muted);}
+  .field-line{font-size:12px;padding:3px 0;}
+  .gate-banner{background:#111;color:#fff;border-radius:8px;padding:12px 16px;font-size:12.5px;line-height:1.5;margin-bottom:16px;}
+  .gate-banner b{color:var(--chart,#E4FF97);}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-root"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">Client Documents</span></div>
+    </div>
+    <div class="content" style="max-width:1100px;">
+      <div class="sec-head"><h1>Client Documents</h1></div>
+
+      <div class="gate-banner">
+        Agents draft and prepare. Nothing reaches a client until you press <b>Approve &amp; Send</b>. That click is your explicit yes. Never-invent fields (entity names, bank, ROI, insurance) are flagged for you and counsel, never auto-filled.
+      </div>
+
+      <div class="doc-tabs">
+        <div class="doc-tab on" data-tab="library" onclick="tab('library')">Template Library</div>
+        <div class="doc-tab" data-tab="prepare" onclick="tab('prepare')">Prepare a Packet</div>
+        <div class="doc-tab" data-tab="queue" onclick="tab('queue')">Queue</div>
+      </div>
+
+      <!-- LIBRARY -->
+      <div id="pane-library">
+        <div class="doc-grid" id="lib-grid"><div style="color:var(--muted)">Loading library…</div></div>
+      </div>
+
+      <!-- PREPARE -->
+      <div id="pane-prepare" style="display:none;">
+        <div class="card" style="padding:20px;margin-bottom:18px;">
+          <div class="form-group">
+            <label class="form-label">Client / engagement</label>
+            <select class="form-input" id="p-client"><option value="">Loading clients…</option></select>
+            <div class="form-hint">Pick a client so fields can prefill from the record. Or type an engagement name below.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Engagement name (if no client record yet)</label>
+            <input class="form-input" id="p-engagement" placeholder="Company name, not a nickname"/>
+          </div>
+          <label class="form-label" style="margin-top:8px;">What does this job involve?</label>
+          <div id="p-triggers"></div>
+          <button class="btn btn-primary" style="margin-top:16px;" onclick="prepare()">Prepare drafts</button>
+        </div>
+        <div id="prepare-result"></div>
+      </div>
+
+      <!-- QUEUE -->
+      <div id="pane-queue" style="display:none;">
+        <div id="queue-list"><div style="color:var(--muted)">Loading…</div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="admin-shared.js"></script>
+<script>
+TMIAdmin.requireAuth();
+TMIAdmin.initSidebar('documents');
+
+let MANIFEST = null;
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function tab(name){
+  document.querySelectorAll('.doc-tab').forEach(t=>t.classList.toggle('on', t.dataset.tab===name));
+  ['library','prepare','queue'].forEach(p=>{ document.getElementById('pane-'+p).style.display = p===name?'':'none'; });
+  if(name==='queue') loadQueue();
+}
+
+async function loadManifest(){
+  MANIFEST = await TMIAdmin.api('/api/doc-agent', 'POST', { action:'manifest' });
+  if(!MANIFEST) return;
+  // library
+  const cats = {client:'Client', addenda:'Addenda', vendor:'Vendor'};
+  document.getElementById('lib-grid').innerHTML = MANIFEST.documents.map(d=>`
+    <div class="doc-card">
+      <div class="doc-cat">${esc(cats[d.category]||d.category)} · ${String(d.order).padStart(2,'0')}</div>
+      <h3>${esc(d.title)}</h3>
+      <div class="doc-purpose">${esc(d.purpose)}</div>
+      <div class="doc-meta">
+        <span class="pill">Drafts: ${esc(d.drafts)}</span>
+        <span class="pill gate">Sends: ${esc(d.sends)}</span>
+      </div>
+      <div class="doc-meta">${(d.fields||[]).map(f=>`<span class="pill ${(d.never||[]).includes(f)?'warn':''}">${esc(f)}</span>`).join('')}</div>
+    </div>`).join('');
+  // triggers
+  document.getElementById('p-triggers').innerHTML = MANIFEST.triggers.map(t=>`
+    <label class="trigger-row">
+      <input type="checkbox" data-trigger="${esc(t.key)}"/>
+      <div><div style="font-size:13px;font-weight:600;">${esc(t.label)}</div><div class="t-help">${esc(t.help)}</div></div>
+    </label>`).join('');
+  if(!MANIFEST.signnow_connected){
+    document.getElementById('prepare-result');
+  }
+}
+
+async function loadClients(){
+  const rows = await TMIAdmin.api('/api/clients');
+  const sel = document.getElementById('p-client');
+  const list = Array.isArray(rows)?rows:[];
+  sel.innerHTML = '<option value="">— no client record —</option>' + list.map(c=>`<option value="${esc(c.id)}">${esc(c.name||c.company||c.id)}</option>`).join('');
+}
+
+async function prepare(){
+  const answers = {};
+  document.querySelectorAll('[data-trigger]').forEach(cb=>{ if(cb.checked) answers[cb.dataset.trigger]=true; });
+  if(!Object.keys(answers).length){ TMIAdmin.toast('Check at least one trigger', 'error'); return; }
+  const res = await TMIAdmin.api('/api/doc-agent','POST',{ action:'prepare', client_id: document.getElementById('p-client').value||null, engagement_name: document.getElementById('p-engagement').value||null, answers });
+  if(!res || !res.packet){ TMIAdmin.toast((res&&res.error)||'Prepare failed','error'); return; }
+  renderPacket(res.packet, 'prepare-result', true);
+  TMIAdmin.toast('Prepared as DO NOT SEND');
+}
+
+function renderPacket(p, mountId, showSend){
+  const signnow = MANIFEST && MANIFEST.signnow_connected;
+  const items = (p.items||[]).map(it=>`
+    <div class="card" style="padding:16px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <div><b>${esc(it.title)}</b> <span class="pill">${esc(it.category)}</span></div>
+        <span class="pill ${it.status==='SIGNED'?'ok':it.status==='SENT'?'':'warn'}">${esc(it.status||'DO_NOT_SEND')}</span>
+      </div>
+      <div class="doc-purpose" style="margin-top:6px;">${esc(it.purpose)}</div>
+      ${Object.keys(it.filled||{}).length?`<div class="field-line" style="margin-top:8px;"><span class="pill ok">prefilled</span> ${Object.entries(it.filled).map(([k,v])=>esc(k)+': '+esc(v)).join(' · ')}</div>`:''}
+      ${(it.needs_hand||[]).length?`<div class="field-line"><span class="pill warn">by hand (you / counsel)</span> ${it.needs_hand.map(esc).join(', ')}</div>`:''}
+      ${(it.missing||[]).length?`<div class="field-line"><span class="pill">to fill</span> ${it.missing.map(esc).join(', ')}</div>`:''}
+    </div>`).join('');
+  document.getElementById(mountId).innerHTML = `
+    <div class="sec-head" style="margin-top:8px;"><h2 style="font-size:18px;">${esc(p.client_name)} — packet</h2></div>
+    ${items}
+    ${showSend?`
+    <div class="card" style="padding:16px;">
+      <div class="form-group">
+        <label class="form-label">Client signer email</label>
+        <input class="form-input" id="send-email" type="email" placeholder="owner@clientco.com"/>
+        <div class="form-hint">${signnow?'Pressing Approve &amp; Send creates the SignNow documents, prefills them, and emails the signer. Reminders are on.':'SignNow is not connected yet. Set SIGNNOW_ACCESS_TOKEN and seed templates to enable sending.'}</div>
+      </div>
+      <button class="btn btn-primary" ${signnow?'':'disabled'} onclick="approveSend('${esc(p.id)}')">Approve &amp; Send</button>
+    </div>`:''}`;
+}
+
+async function approveSend(packetId){
+  const email = document.getElementById('send-email').value.trim();
+  if(!email){ TMIAdmin.toast('Signer email required','error'); return; }
+  if(!confirm('This sends the approved documents to '+email+' for signature. Proceed?')) return;
+  const res = await TMIAdmin.api('/api/doc-agent','POST',{ action:'approve_send', packet_id: packetId, signer_email: email });
+  if(res && res.ok){ TMIAdmin.toast('Sent for signature'); loadQueue(); tab('queue'); }
+  else TMIAdmin.toast((res&&res.error)||'Send failed','error');
+}
+
+async function loadQueue(){
+  const rows = await TMIAdmin.api('/api/doc-agent','POST',{ action:'list' });
+  const list = Array.isArray(rows)?rows:[];
+  document.getElementById('queue-list').innerHTML = list.length ? list.map(p=>`
+    <div class="card" style="padding:14px;margin-bottom:10px;cursor:pointer;" onclick="openPacket('${esc(p.id)}')">
+      <div style="display:flex;justify-content:space-between;">
+        <b>${esc(p.client_name)}</b>
+        <span class="pill ${p.status==='signed'?'ok':p.status==='sent'?'':'warn'}">${esc(p.status)}</span>
+      </div>
+      <div class="doc-purpose" style="margin-top:4px;">${(p.items||[]).length} document(s) · ${esc((p.created_at||'').slice(0,10))}</div>
+    </div>`).join('') : '<div style="color:var(--muted)">No packets yet. Prepare one.</div>';
+}
+
+async function openPacket(id){
+  const p = await TMIAdmin.api('/api/doc-agent?packet_id='+encodeURIComponent(id));
+  if(!p){ return; }
+  tab('queue');
+  document.getElementById('queue-list').innerHTML = '<button class="btn" onclick="loadQueue()">← Back to queue</button>';
+  const mount = document.createElement('div'); mount.id='pkt-view'; document.getElementById('queue-list').appendChild(mount);
+  renderPacket(p, 'pkt-view', p.status==='prepared');
+}
+
+loadManifest();
+loadClients();
+</script>
+</body>
+</html>

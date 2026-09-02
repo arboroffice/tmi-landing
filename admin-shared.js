@@ -114,6 +114,7 @@ const TMIAdmin = (() => {
     { label: 'Delivery', items: [
       { page:'projects',   label:'Projects',   icon:I.projects,  href:'/admin-work#projects' },
       { page:'invoices',   label:'Invoices',   icon:I.invoices,  href:'/admin-work#invoices' },
+      { page:'documents',  label:'Documents',  icon:I.stageLetters },
       { page:'os-clients', label:'Client OS',  icon:I.glassBox,  href:'/admin-os-clients' },
       { page:'payments',   label:'Payments',   icon:I.cityMoney },
       { page:'onboarding', label:'Onboarding', icon:I.onboarding },
