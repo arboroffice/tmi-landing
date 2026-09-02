@@ -86,6 +86,15 @@ module.exports = async (req, res) => {
       return res.json({ ok: true, sent });
     }
 
+    // ---- PREVIEW (render without saving or sending) ----
+    if (body.action === 'preview') {
+      const html = renderIssue({
+        title: body.title, subject: body.subject, preheader: body.preheader,
+        format: body.format, body: body.body,
+      }, SITE + '/api/nl-unsubscribe');
+      return res.json({ html });
+    }
+
     // ---- CREATE / UPDATE ----
     const fields = {
       title: body.title || null, subject: body.subject || null, preheader: body.preheader || null,

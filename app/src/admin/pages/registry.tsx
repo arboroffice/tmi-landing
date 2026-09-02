@@ -4,6 +4,7 @@ import { ClientsPage } from './ClientsPage';
 import { ProposalsPage } from './ProposalsPage';
 import { MeetingsPage } from './MeetingsPage';
 import { DashboardPage } from './DashboardPage';
+import { NewsletterPage } from './NewsletterPage';
 
 // page id (workspaces.ts tab.page) -> ported React component.
 // Anything not listed still shows the migration placeholder.
@@ -13,4 +14,5 @@ export const PAGE_COMPONENTS: Record<string, ComponentType> = {
   clients: ClientsPage,
   proposals: ProposalsPage,
   meetings: MeetingsPage,
+  newsletter: NewsletterPage,
 };
