@@ -1,5 +1,8 @@
 // A rep's own leads, generated in the field. Scoped to the rep in the token.
-//   GET                         -> [ leads ]  (their leads, newest activity first)
+//   GET                         -> [ leads ]  (all their leads; untouched ones trimmed)
+//   GET ?id=<leadId>            -> one full lead
+//   GET ?today=1                -> today's stop list { date, town, lead_ids }
+//   POST { action:'replan' }    -> pick a new town for today's list
 //   POST { business_name, ... } -> create a lead / log a walk-in
 //   PATCH { id, ... }           -> update status/notes/location/next action
 //   DELETE { id }               -> remove
@@ -58,6 +61,80 @@ async function recordCommission(lead, up, repId, appId) {
   return db.insert('rep_commissions', Object.assign({ id, status: 'pending', created_at: now }, patch)).catch(() => null);
 }
 
+
+// ---- Today's stops ----------------------------------------------------------
+// Reps get thousands of seeded leads, and a territory pair (Zoey + Lauryn) works
+// the SAME list. Each day we hand each rep ~15 stops in one town, best first,
+// never a business their partner has already worked or has on today's list.
+const DAY_STOPS = 15;
+const CLOSED = ['won', 'lost', 'not_interested'];
+const laDate = (d = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(d);
+const nameKey = (l) => String(l.business_name || l.contact_name || '').toLowerCase().trim();
+function townOf(address) {
+  const parts = String(address || '').split(',').map((x) => x.trim()).filter(Boolean);
+  const la = parts.findIndex((x) => /^(LA|Louisiana)\b/i.test(x));
+  if (la > 0) return parts[la - 1];
+  return parts.length === 1 && !/\d/.test(parts[0]) ? parts[0] : (parts[1] || null);
+}
+function stopScore(l) {
+  return (l.priority === 'hot' ? 5 : l.priority === 'warm' ? 3 : 1) + (l.contact_name ? 2 : 0) + (l.phone ? 1 : 0) + (l.lat != null && !l.approx_location ? 0.5 : 0);
+}
+const dist = (a, b) => Math.hypot(a.lat - b.lat, (a.lng - b.lng) * 0.87);
+function routeOrder(stops) {
+  const pinned = stops.filter((l) => l.lat != null), rest = stops.filter((l) => l.lat == null);
+  const out = []; let cur = pinned.shift();
+  while (cur) { out.push(cur); if (!pinned.length) break; pinned.sort((a, b) => dist(cur, a) - dist(cur, b)); cur = pinned.shift(); }
+  return out.concat(rest);
+}
+async function buildPlan(repId, leads, { avoidTown } = {}) {
+  const today = laDate();
+  const endOfDay = new Date(`${today}T23:59:59-06:00`).toISOString(); // end of the Louisiana day
+  const [others, mine] = await Promise.all([
+    db.list('rep_day_plans', { where: [['date', '==', today]], limit: 500 }).catch(() => []),
+    db.list('rep_day_plans', { where: [['rep_id', '==', repId]], limit: 400 }).catch(() => []),
+  ]);
+  const takenToday = new Set(), partnerTowns = new Set();
+  (others || []).filter((p) => p.rep_id !== repId).forEach((p) => { (p.names || []).forEach((n) => takenToday.add(n)); if (p.town) partnerTowns.add(p.town); });
+  // Callbacks and follow-ups due today come first.
+  const due = leads.filter((l) => l.next_action_at && l.next_action_at <= endOfDay && !CLOSED.includes(l.status)).slice(0, 6);
+  const dueIds = new Set(due.map((l) => l.id));
+  const pool = leads.filter((l) => l.status === 'new' && !dueIds.has(l.id) && !(l.claimed_by_id && l.claimed_by_id !== repId) && !takenToday.has(nameKey(l)));
+  const byTown = {};
+  pool.forEach((l) => { const t = townOf(l.address) || 'Other'; (byTown[t] = byTown[t] || []).push(l); });
+  Object.values(byTown).forEach((list) => list.sort((a, b) => stopScore(b) - stopScore(a)));
+  const towns = Object.keys(byTown).filter((t) => t !== avoidTown);
+  if (!towns.length) return { date: today, town: null, lead_ids: due.map((l) => l.id), names: due.map(nameKey) };
+  // Stay in yesterday's town until it is mostly worked, so reps finish a cluster.
+  const last = (mine || []).filter((p) => p.date < today).sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+  let town = last && last.town && last.town !== avoidTown && (byTown[last.town] || []).length >= 8 ? last.town : null;
+  if (!town) {
+    const val = (t) => byTown[t].slice(0, DAY_STOPS).reduce((a, l) => a + stopScore(l), 0) * (partnerTowns.has(t) ? 0.6 : 1);
+    town = towns.sort((a, b) => val(b) - val(a))[0];
+  }
+  let picks = byTown[town].slice(0, DAY_STOPS);
+  // A small town runs out: fill from the nearest towns.
+  if (picks.length < DAY_STOPS) {
+    const center = (list) => { const p = list.filter((l) => l.lat != null); return p.length ? { lat: p.reduce((a, l) => a + l.lat, 0) / p.length, lng: p.reduce((a, l) => a + l.lng, 0) / p.length } : null; };
+    const c = center(byTown[town]);
+    const near = towns.filter((t) => t !== town).map((t) => ({ t, c: center(byTown[t]) })).filter((x) => c && x.c).sort((a, b) => dist(c, a.c) - dist(c, b.c));
+    for (const n of near) { if (picks.length >= DAY_STOPS) break; picks = picks.concat(byTown[n.t].slice(0, DAY_STOPS - picks.length)); }
+  }
+  const stops = due.concat(routeOrder(picks));
+  return { date: today, town, lead_ids: stops.map((l) => l.id), names: stops.map(nameKey) };
+}
+async function savePlan(repId, plan) {
+  await db.insert('rep_day_plans', Object.assign({ id: `${repId}_${plan.date}`, rep_id: repId, created_at: new Date().toISOString() }, plan));
+  return plan;
+}
+// Untouched seeded leads go to the phone without their long notes; the app loads
+// the full lead when it is opened. Keeps a 5,000-lead list fast and small.
+function slim(l) {
+  if (l.status !== 'new' || !l.notes) return l;
+  const o = Object.assign({}, l, { _slim: true }); delete o.notes;
+  if (o.context && o.context.length > 160) o.context = o.context.slice(0, 157) + '...';
+  return o;
+}
+
 module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -66,8 +143,26 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'GET') {
-      const rows = await db.list('rep_leads', { where: [['rep_id', '==', repId]], order: 'updated_at', ascending: false, limit: 1000 });
-      return res.json(rows || []);
+      if (req.query.id) {
+        const one = await db.getById('rep_leads', req.query.id);
+        if (!one || one.rep_id !== repId) return res.status(404).json({ error: 'Not found' });
+        return res.json(one);
+      }
+      const rows = await db.list('rep_leads', { where: [['rep_id', '==', repId]], order: 'updated_at', ascending: false, limit: 20000 });
+      if (req.query.today) {
+        const existing = await db.getById('rep_day_plans', `${repId}_${laDate()}`).catch(() => null);
+        if (existing) return res.json({ date: existing.date, town: existing.town, lead_ids: existing.lead_ids || [] });
+        const plan = await savePlan(repId, await buildPlan(repId, rows || []));
+        return res.json({ date: plan.date, town: plan.town, lead_ids: plan.lead_ids });
+      }
+      return res.json((rows || []).map(slim));
+    }
+
+    if (req.method === 'POST' && req.body && req.body.action === 'replan') {
+      const rows = await db.list('rep_leads', { where: [['rep_id', '==', repId]], limit: 20000 });
+      const cur = await db.getById('rep_day_plans', `${repId}_${laDate()}`).catch(() => null);
+      const plan = await savePlan(repId, await buildPlan(repId, rows || [], { avoidTown: cur && cur.town }));
+      return res.json({ date: plan.date, town: plan.town, lead_ids: plan.lead_ids });
     }
 
     if (req.method === 'POST') {
@@ -116,7 +211,18 @@ module.exports = async (req, res) => {
         try { await recordCommission(lead, up, repId, up.application_id); }
         catch (e) { console.error('rep-leads commission:', e.message); }
       }
+      const wasNew = lead.status === 'new';
       const out = await db.update('rep_leads', b.id, up);
+      // First real touch on a shared (pair) lead: mark the partner's copy as taken
+      // so the two reps never walk into the same business.
+      if (wasNew && up.status && up.status !== 'new' && lead.business_name) {
+        try {
+          const twins = await db.list('rep_leads', { where: [['business_name', '==', lead.business_name]], limit: 20 });
+          const who = (r.profile && r.profile.name) || r.name || 'your partner';
+          await Promise.all((twins || []).filter((t) => t.rep_id !== repId && t.status === 'new' && !t.claimed_by_id)
+            .map((t) => db.update('rep_leads', t.id, { claimed_by_id: repId, claimed_by: who, claimed_at: up.updated_at })));
+        } catch (e) { console.error('rep-leads claim:', e.message); }
+      }
       return res.json(out);
     }
 

@@ -384,6 +384,44 @@ async function boot(){
 
 async function loadLeads(){
   try{ LEADS = await api('/api/rep-leads'); }catch(ex){ LEADS=[]; toast(ex.message); }
+  try{ PLAN = await api('/api/rep-leads?today=1'); }catch(ex){ PLAN=null; }
+}
+
+/* ---- Today's stops: ~15 businesses in one town, picked fresh each day ---- */
+let PLAN = null;
+function planStops(){ return PLAN&&PLAN.lead_ids ? PLAN.lead_ids.map(id=>LEADS.find(l=>l.id===id)).filter(Boolean) : []; }
+function stopDone(l){ return l.status!=='new' || isToday(l.visited_at); }
+function renderStops(){
+  const box=$('#tStops'); if(!box) return;
+  const stops=planStops();
+  if(!stops.length){ box.innerHTML=''; return; }
+  const done=stops.filter(stopDone).length, pct=Math.round(done/stops.length*100);
+  const left=stops.filter(l=>!stopDone(l)&&l.lat!=null);
+  box.innerHTML=`<div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+      <div><div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted)">Today's stops</div>
+      <div style="font-size:17px;font-weight:800;letter-spacing:-.01em;margin-top:2px">${esc(PLAN.town||'Your list')}</div></div>
+      <div style="font-size:15px;font-weight:800">${done} <span style="color:var(--muted);font-weight:600;font-size:13px">of ${stops.length} done</span></div>
+    </div>
+    <div style="height:7px;background:var(--line);border-radius:4px;overflow:hidden;margin:10px 0 4px"><div style="height:100%;width:${pct}%;background:${done>=stops.length?'var(--green)':'var(--ink)'};border-radius:4px"></div></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Work them top to bottom. Tap one, then mark what happened.</div>
+    <div id="tStopList"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn sm" id="tRoute" style="flex:1" ${left.length?'':'disabled'}>Start route</button>
+      <button class="btn ghost sm" id="tReplan" style="flex:1">Different town</button>
+    </div></div>`;
+  const list=$('#tStopList');
+  stops.forEach((l,i)=>{ const row=leadRow(l); if(stopDone(l)) row.style.opacity='.45'; const n=el(`<div style="font-weight:800;font-size:12px;color:var(--muted);width:20px;flex:none;align-self:center">${stopDone(l)?'✓':(i+1)}</div>`); row.insertBefore(n,row.firstChild); list.appendChild(row); });
+  $('#tRoute').onclick=()=>{
+    // Google Maps takes the phone's location as the start and up to 9 stops plus a destination.
+    const pts=left.slice(0,10).map(l=>l.lat+','+l.lng);
+    const url='https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+pts[pts.length-1]+(pts.length>1?('&waypoints='+pts.slice(0,-1).join('%7C')):'');
+    window.open(url,'_blank');
+  };
+  $('#tReplan').onclick=async()=>{
+    if(!confirm('Swap today\'s list for a different town?')) return;
+    try{ PLAN=await api('/api/rep-leads',{method:'POST',body:JSON.stringify({action:'replan'})}); renderToday(); toast(PLAN.town?('New list: '+PLAN.town):'New list ready'); }catch(ex){ toast(ex.message); }
+  };
 }
 
 /* ---- tabs ---- */
@@ -406,12 +444,18 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>swit
 
 /* ---- Today ---- */
 function isToday(iso){ if(!iso) return false; const d=new Date(iso), n=new Date(); return d.toDateString()===n.toDateString(); }
+// When the rep actually worked a lead. A lead handed to them (source 'assigned')
+// only counts once they visit it or change its status, never when it was imported.
+function workAt(l){ return l.visited_at || (l.source!=='assigned' ? l.created_at : (l.status!=='new' ? l.updated_at : null)); }
+function workedToday(l){ return isToday(workAt(l)); }
+// Seeded territory leads are worked through the daily stop list, not the cold alerts.
+function goingCold(l){ return isWarm(l)&&l.status==='new'&&!l.territory&&!l.claimed_by_id&&l.created_at&&(Date.now()-new Date(l.created_at).getTime())>5*864e5; }
 function dueToday(l){ if(!l.next_action_at) return false; return new Date(l.next_action_at) <= new Date() && !['won','lost','not_interested'].includes(l.status); }
 // One signal, one action. The single highest-priority move right now, from this
 // rep's own leads. Mirrors the OS Pulse pattern in the field tool.
 function todayMove(){
   const nm=l=>l.contact_name||l.business_name||'this lead';
-  const cold=LEADS.filter(l=>isWarm(l)&&l.status==='new'&&l.created_at&&(Date.now()-new Date(l.created_at).getTime())>5*864e5);
+  const cold=LEADS.filter(goingCold);
   if(cold.length) return {t:'Save a warm lead going cold',d:nm(cold[0])+' has been untouched 5+ days. Reach out before it dies.',lead:cold[0].id};
   const due=LEADS.filter(dueToday).sort((a,b)=>new Date(a.next_action_at)-new Date(b.next_action_at));
   if(due.length){ const l=due[0]; return {t:'Follow-up due now',d:nm(l)+(l.business_name&&l.contact_name?(' at '+l.business_name):'')+' is due. Call or text.',lead:l.id}; }
@@ -419,24 +463,27 @@ function todayMove(){
   if(cb.length) return {t:'Chase a callback',d:nm(cb[0])+' asked for a callback. Close the loop.',lead:cb[0].id};
   const warm=LEADS.filter(l=>isWarm(l)&&l.status==='new');
   if(warm.length) return {t:'Work a warm lead',d:nm(warm[0])+' is warm and waiting. Go get the audit booked.',lead:warm[0].id};
-  if(!LEADS.filter(l=>isToday(l.created_at)).length) return {t:'Log your first door',d:'No doors logged yet today. Walk your cluster and log the first one.',go:'log'};
+  const next=planStops().find(l=>!stopDone(l));
+  if(next) return {t:'Next stop: '+(next.business_name||next.contact_name||'Lead'),d:(next.contact_name&&next.business_name?('Ask for '+next.contact_name+'. '):'')+'Stop '+(planStops().indexOf(next)+1)+' of '+planStops().length+' on today\'s list.',lead:next.id};
+  if(!LEADS.filter(workedToday).length) return {t:'Log your first door',d:'No doors logged yet today. Walk your cluster and log the first one.',go:'log'};
   return {t:'You are on track',d:'Nothing overdue. Keep walking your cluster and book an audit.',go:'plan'};
 }
 function renderToday(){
-  const loggedToday = LEADS.filter(l=>isToday(l.created_at)).length;
+  const loggedToday = LEADS.filter(workedToday).length;
   const booked = LEADS.filter(l=>l.status==='booked'||l.status==='won').length;
   const due = LEADS.filter(dueToday);
-  const rot = LEADS.filter(l=>isWarm(l)&&l.status==='new'&&l.created_at&&(Date.now()-new Date(l.created_at).getTime())>5*864e5);
+  const rot = LEADS.filter(goingCold);
   const mv = todayMove();
   const s=$('#s-today');
   s.innerHTML = `
+    <div id="tStops"></div>
     <div class="card" id="tMove" style="background:#E4FF97;color:#0a0b14;cursor:pointer;margin-bottom:12px">
       <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.7">Your move right now</div>
       <div style="font-size:16px;font-weight:800;letter-spacing:-.01em;margin-top:3px">${esc(mv.t)}</div>
       <div style="font-size:13px;font-weight:600;margin-top:3px;line-height:1.45">${esc(mv.d)}</div>
     </div>
     <div class="stat-grid">
-      <div class="stat"><div class="n">${loggedToday}</div><div class="l">Logged today</div></div>
+      <div class="stat"><div class="n">${loggedToday}</div><div class="l">Worked today</div></div>
       <div class="stat"><div class="n">${booked}</div><div class="l">Audits booked</div></div>
       <div class="stat"><div class="n">${due.length}</div><div class="l">Follow-ups due</div></div>
     </div>
@@ -459,6 +506,7 @@ function renderToday(){
   $('#tDebrief').onclick=runDebrief;
   paintPending();
   const rb=$('#tRot'); if(rb) rb.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
+  renderStops();
   const box=$('#tDue');
   if(!due.length){ box.innerHTML='<div class="empty">Nothing due. Go knock some doors.</div>'; }
   else due.sort((a,b)=>new Date(a.next_action_at)-new Date(b.next_action_at)).forEach(l=>box.appendChild(leadRow(l)));
@@ -484,7 +532,7 @@ async function runDebrief(){
 
 /* ---- Day Plan (oil & gas + industrial, Acadiana) ---- */
 function renderPlan(){
-  const todays = LEADS.filter(l=>isToday(l.created_at));
+  const todays = LEADS.filter(workedToday);
   const doors = todays.length;
   const convos = todays.filter(l=>['contacted','booked','callback','won'].includes(l.status)).length;
   const audits = todays.filter(l=>['booked','won'].includes(l.status)).length;
@@ -604,13 +652,14 @@ function renderGuides(){
 }
 
 /* ---- Leads ---- */
-function isWarm(l){ return l.priority==='hot' || l.priority==='warm' || l.source==='assigned'; }
+function isWarm(l){ return l.priority==='hot' || l.priority==='warm' || (l.source==='assigned' && !l.territory); }
 function leadRow(l){
   const dist=(l._dist!=null&&isFinite(l._dist))?l._dist.toFixed(1)+' mi':'';
   const owner=(l.contact_name&&l.business_name)?l.contact_name:'';
   const sub=[dist,l.context||l.industry,owner,l.phone].filter(Boolean).join(' · ')||'Tap to open';
   const warm = isWarm(l) ? `<span class="chip" style="background:#E4FF97;color:#0a0b14;font-weight:700;">${l.priority==='hot'?'HOT':'Warm'}</span>` : '';
-  const node = el(`<div class="lead"><div class="body"><div class="name">${esc(l.business_name||l.contact_name||'Untitled')}</div><div class="sub">${esc(sub)}</div></div>${warm}<span class="chip ${l.status}">${STATUS_LABEL[l.status]||l.status}</span></div>`);
+  const taken = (l.claimed_by && l.status==='new') ? `<span class="chip" style="background:#eee;color:#555;">${esc(l.claimed_by)} has it</span>` : '';
+  const node = el(`<div class="lead"><div class="body"><div class="name">${esc(l.business_name||l.contact_name||'Untitled')}</div><div class="sub">${esc(sub)}</div></div>${taken||warm}<span class="chip ${l.status}">${STATUS_LABEL[l.status]||l.status}</span></div>`);
   node.addEventListener('click',()=>openLead(l.id));
   return node;
 }
@@ -806,6 +855,7 @@ async function saveNewLead(){
 /* ---- Lead detail sheet ---- */
 function openLead(id){
   const l=LEADS.find(x=>x.id===id); if(!l) return;
+  if(l._slim){ api('/api/rep-leads?id='+encodeURIComponent(id)).then(full=>{ mergeLead(full); openLead(id); }).catch(()=>{ l._slim=false; openLead(id); }); return; }
   $('#sheetTitle').textContent = l.business_name||l.contact_name||'Lead';
   const b=$('#sheetBody');
   const tel=(l.phone||'').replace(/[^0-9+]/g,'');
@@ -1177,7 +1227,7 @@ function toggleHeatmap(){
 /* ---- Me ---- */
 function dayKey(d){ d=new Date(d); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
 function calcStreak(){
-  const days=new Set(LEADS.filter(l=>l.created_at).map(l=>dayKey(l.created_at)));
+  const days=new Set(LEADS.filter(l=>workAt(l)).map(l=>dayKey(workAt(l))));
   const d=new Date(); d.setHours(0,0,0,0);
   if(!days.has(dayKey(d))){ d.setDate(d.getDate()-1); if(!days.has(dayKey(d))) return 0; }
   let streak=0; while(days.has(dayKey(d))){ streak++; d.setDate(d.getDate()-1); }
@@ -1188,9 +1238,9 @@ function renderMe(){
   const total=LEADS.length;
   const booked=LEADS.filter(l=>l.status==='booked'||l.status==='won').length;
   const wonLeads=LEADS.filter(l=>l.status==='won');
-  const today=LEADS.filter(l=>isToday(l.created_at)).length;
+  const today=LEADS.filter(workedToday).length;
   const weekAgo=Date.now()-7*864e5;
-  const week=LEADS.filter(l=>l.created_at&&new Date(l.created_at).getTime()>=weekAgo).length;
+  const week=LEADS.filter(l=>workAt(l)&&new Date(workAt(l)).getTime()>=weekAgo).length;
   const warmLeft=LEADS.filter(l=>isWarm(l)&&l.status==='new').length;
   const conv=total?Math.round((booked/total)*100):0;
   const dealTotal=wonLeads.reduce((a,l)=>a+(Number(l.deal_value)||0),0);
@@ -1208,7 +1258,7 @@ function renderMe(){
   const dayNow=new Date().getDate(); const daysInMo=new Date(mStart.getFullYear(),mStart.getMonth()+1,0).getDate();
   const projected=Math.round(monthCommission/Math.max(dayNow,1)*daysInMo);
   // Badges
-  const dayCounts={}; LEADS.forEach(l=>{ if(l.created_at){ const k=dayKey(l.created_at); dayCounts[k]=(dayCounts[k]||0)+1; } });
+  const dayCounts={}; LEADS.forEach(l=>{ const w=workAt(l); if(w){ const k=dayKey(w); dayCounts[k]=(dayCounts[k]||0)+1; } });
   const bestDay=Object.values(dayCounts).reduce((m,v)=>Math.max(m,v),0);
   const BADGES=[
     {e:'🚪',label:'Door knocker',earned:total>=25,hint:'25 leads'},
