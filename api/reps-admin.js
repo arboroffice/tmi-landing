@@ -11,6 +11,44 @@ const { hashPassword } = require('./_rep-auth');
 const clean = (r) => ({ id: r.id, name: r.name, email: r.email, city: r.city, phone: r.phone, status: r.status || 'active', created_at: r.created_at });
 const isToday = (iso) => { if (!iso) return false; const d = new Date(iso), n = new Date(); return d.toDateString() === n.toDateString(); };
 const STATUSES = ['new', 'attempted', 'contacted', 'booked', 'callback', 'not_interested', 'won', 'lost'];
+const num = (v) => (v === '' || v == null || isNaN(Number(v)) ? null : Number(v));
+
+function csvLine(line) {
+  const out = []; let cur = '', q = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (q) { if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; } else if (ch === '"') q = false; else cur += ch; }
+    else if (ch === '"') q = true; else if (ch === ',') { out.push(cur); cur = ''; } else cur += ch;
+  }
+  out.push(cur); return out;
+}
+
+// Free US Census batch geocoder. rows: [{ id, street, city, zip }] -> { id: { lat, lng } }.
+// Best effort: any failure just means those leads use their fallback point.
+async function censusBatch(rows) {
+  if (!rows.length) return {};
+  const cell = (s) => `"${String(s || '').replace(/"/g, '""')}"`;
+  const csv = rows.map((r) => [r.id, r.street, r.city, 'LA', r.zip].map(cell).join(',')).join('\n');
+  const fd = new FormData();
+  fd.append('benchmark', 'Public_AR_Current');
+  fd.append('addressFile', new Blob([csv], { type: 'text/csv' }), 'addresses.csv');
+  try {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 35000);
+    const res = await fetch('https://geocoding.geo.census.gov/geocoder/locations/addressbatch', { method: 'POST', body: fd, signal: ctl.signal });
+    clearTimeout(t);
+    if (!res.ok) return {};
+    const out = {};
+    (await res.text()).split(/\r?\n/).forEach((line) => {
+      const c = csvLine(line);
+      if (c[2] === 'Match' && c[5]) {
+        const [lng, lat] = c[5].split(',').map(Number);
+        if (lat && lng) out[c[0]] = { lat, lng };
+      }
+    });
+    return out;
+  } catch { return {}; }
+}
 
 module.exports = async (req, res) => {
   cors(res);
@@ -19,6 +57,11 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'GET') {
+      // Lowercased business names already in a rep's queue, so an import can skip repeats.
+      if (req.query.names) {
+        const leads = await db.list('rep_leads', { where: [['rep_id', '==', req.query.names]], limit: 50000 }).catch(() => []);
+        return res.json((leads || []).map((l) => String(l.business_name || '').toLowerCase().trim()).filter(Boolean));
+      }
       if (req.query.leads) {
         const leads = await db.list('rep_leads', { where: [['rep_id', '==', req.query.leads]], order: 'updated_at', ascending: false, limit: 1000 });
         return res.json(leads || []);
@@ -127,6 +170,46 @@ module.exports = async (req, res) => {
           created++;
         }
         return res.status(201).json({ ok: true, created, reps: targets.length });
+      }
+
+      // Spreadsheet import: give the SAME leads to every rep in rep_ids (a territory
+      // pair works one shared list). Street addresses get exact pins from the free
+      // Census geocoder; the rest fall back to the town/parish point the admin page
+      // looked up, flagged approx_location.
+      //   { action:'import_leads', rep_ids:[...], leads:[{ business_name, street, city, zip, address,
+      //     fallback_lat, fallback_lng, ... }] }  (up to 300 per call; the page sends chunks)
+      if (body.action === 'import_leads') {
+        const repIds = Array.isArray(body.rep_ids) ? body.rep_ids.filter(Boolean) : [];
+        if (!repIds.length) return res.status(400).json({ error: 'Pick at least one rep' });
+        for (const id of repIds) if (!(await db.getById('reps', id))) return res.status(404).json({ error: 'Rep not found' });
+        const items = (Array.isArray(body.leads) ? body.leads : []).filter((x) => x && x.business_name).slice(0, 300);
+        if (!items.length) return res.status(400).json({ error: 'No leads in this chunk' });
+        const hits = await censusBatch(items.map((it, i) => ({ id: i, street: it.street, city: it.city, zip: it.zip })).filter((r) => r.street));
+        const now = new Date().toISOString();
+        let exact = 0, approx = 0;
+        const rows = items.map((it, i) => {
+          const h = hits[i];
+          const lat = h ? h.lat : num(it.fallback_lat), lng = h ? h.lng : num(it.fallback_lng);
+          if (h) exact++; else if (lat != null) approx++;
+          return {
+            business_name: it.business_name, contact_name: it.contact_name || null,
+            phone: it.phone || null, email: it.email || null, address: it.address || null,
+            industry: it.industry || null, lat, lng, approx_location: !h && lat != null,
+            status: STATUSES.includes(it.status) ? it.status : 'new', notes: it.notes || null,
+            next_action_at: null, priority: it.priority || null, context: it.context || null,
+            company_domain: it.domain || null, lead_id: null, territory: it.territory || null,
+            source: 'assigned', created_at: now, updated_at: now, visited_at: null,
+          };
+        });
+        const fs = db.db();
+        for (const rid of repIds) {
+          for (let i = 0; i < rows.length; i += 400) {
+            const batch = fs.batch();
+            rows.slice(i, i + 400).forEach((r) => batch.set(fs.collection('rep_leads').doc(), Object.assign({ rep_id: rid }, r)));
+            await batch.commit();
+          }
+        }
+        return res.status(201).json({ ok: true, created: rows.length * repIds.length, leads: rows.length, reps: repIds.length, exact, approx });
       }
 
       // Push warm, enriched leads from the GTM pool (leads collection) to a rep.

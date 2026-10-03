@@ -16,6 +16,7 @@
     <div class="topbar">
       <div class="topbar-crumb"><a href="/admin-dashboard">TMI Admin</a><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round"/></svg><span class="page">City Team</span></div>
       <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openImport()">Import spreadsheet</button>
         <button class="btn btn-ghost btn-sm" onclick="openBulk()">Bulk assign</button>
         <button class="btn btn-primary btn-sm" onclick="openCreate()">+ Add rep</button>
       </div>
@@ -59,6 +60,20 @@
         <div style="display:flex;gap:10px;margin-top:16px;">
           <button class="btn btn-primary btn-sm" onclick="createRep()">Create rep</button>
           <button class="btn btn-ghost btn-sm" onclick="closeCreate()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- spreadsheet import -->
+      <div class="card" id="import-card" style="display:none;margin-bottom:20px;">
+        <div class="panel-sec-label" style="margin-bottom:8px;">Import a lead spreadsheet</div>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 12px;">Upload an .xlsx or .csv. Each lead goes to a territory by its Parish column, and every rep in that territory gets the same list. Leads a rep already has are skipped. Street addresses get exact map pins; leads with only a town are pinned at the town.</p>
+        <input type="file" id="imp-file" accept=".xlsx,.xls,.csv" class="form-input" style="max-width:420px;"/>
+        <div id="imp-groups" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;"></div>
+        <div id="imp-preview" style="font-size:13px;margin-top:14px;color:var(--ink-2);"></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" id="imp-go" onclick="runImport()" disabled>Import leads</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeImport()">Close</button>
+          <span id="imp-status" style="font-size:12px;color:var(--muted);"></span>
         </div>
       </div>
 
@@ -296,6 +311,145 @@ async function submitBulk(){
     TMIAdmin.toast('Assigned '+r.created+' lead'+(r.created===1?'':'s')+(body.split?(' across '+r.reps+' reps'):''));
     closeBulk(); load();
   }catch(ex){ TMIAdmin.toast(ex.message); }
+}
+/* ---------- spreadsheet import ---------- */
+const IMP_GROUPS=[
+  { key:'br', label:'Baton Rouge + north of Acadiana', names:['zoey','lauryn','lauren'],
+    parishes:'East Baton Rouge, West Baton Rouge, Ascension, Livingston, Iberville, Pointe Coupee, St. Landry, Evangeline, Avoyelles' },
+  { key:'acad', label:'Acadiana', names:['ramie','jentci'],
+    parishes:'Lafayette, Iberia, Vermilion, St. Martin, St. Mary, Acadia, Jefferson Davis' },
+];
+let IMP_ROWS=[];
+function openImport(){ document.getElementById('import-card').style.display='block'; renderImpGroups(); }
+function closeImport(){ document.getElementById('import-card').style.display='none'; }
+const normParish=(p)=>String(p||'').toLowerCase().replace(/\./g,'').replace(/\bparish\b/,'').replace(/\bjeff davis\b/,'jefferson davis').replace(/\s+/g,' ').trim();
+function renderImpGroups(){
+  document.getElementById('imp-groups').innerHTML=IMP_GROUPS.map(g=>`
+    <div class="card" style="margin:0;padding:14px;">
+      <div style="font-weight:700;margin-bottom:8px;">${esc(g.label)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">${reps.filter(r=>r.status!=='disabled').map(r=>{
+        const first=String(r.name||'').trim().split(/\s+/)[0].toLowerCase();
+        return `<label style="font-size:13px;display:flex;gap:5px;align-items:center;"><input type="checkbox" class="imp-rep-${g.key}" value="${r.id}" ${g.names.includes(first)?'checked':''} onchange="previewImport()"/>${esc(r.name||r.email)}</label>`;}).join('')||'<span style="font-size:12px;color:var(--muted)">Add reps first</span>'}</div>
+      <label class="form-label">Parishes</label>
+      <textarea class="form-input" id="imp-par-${g.key}" rows="3" oninput="previewImport()">${esc(g.parishes)}</textarea>
+    </div>`).join('');
+  previewImport();
+}
+function loadXlsx(){ return window.XLSX?Promise.resolve():new Promise((ok,bad)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload=ok; s.onerror=()=>bad(new Error('Could not load the spreadsheet reader')); document.head.appendChild(s); }); }
+document.addEventListener('change',async(e)=>{
+  if(e.target.id!=='imp-file'||!e.target.files[0]) return;
+  try{
+    document.getElementById('imp-status').textContent='Reading file...';
+    await loadXlsx();
+    const wb=XLSX.read(await e.target.files[0].arrayBuffer(),{type:'array'});
+    const name=wb.SheetNames.find(n=>/rep-ready all/i.test(n))||wb.SheetNames[0];
+    IMP_ROWS=XLSX.utils.sheet_to_json(wb.Sheets[name],{defval:''});
+    document.getElementById('imp-status').textContent=`Sheet "${name}": ${IMP_ROWS.length} rows`;
+    previewImport();
+  }catch(ex){ TMIAdmin.toast(ex.message); }
+});
+function col(row,names){ for(const n of names){ for(const k of Object.keys(row)){ if(k.trim().toLowerCase()===n) return String(row[k]==null?'':row[k]).trim(); } } return ''; }
+function impGroupSetup(){
+  return IMP_GROUPS.map(g=>({ ...g,
+    repIds:[...document.querySelectorAll('.imp-rep-'+g.key+':checked')].map(x=>x.value),
+    parishSet:new Set(document.getElementById('imp-par-'+g.key).value.split(',').map(normParish).filter(Boolean)) }));
+}
+function routeRow(row,groups){
+  const par=normParish(col(row,['parish']));
+  if(par){ return groups.find(g=>g.parishSet.has(par))||null; }
+  const queue=col(row,['rep queue']).toLowerCase();
+  return groups.find(g=>g.names.some(n=>queue.includes(n)))||null;
+}
+function previewImport(){
+  const el=document.getElementById('imp-preview'); const go=document.getElementById('imp-go');
+  if(!IMP_ROWS.length){ el.textContent=''; go.disabled=true; return; }
+  const groups=impGroupSetup(); const counts={}; let skipped=0;
+  IMP_ROWS.forEach(r=>{ if(!col(r,['company','business','business name','company name'])) return; const g=routeRow(r,groups); if(g) counts[g.key]=(counts[g.key]||0)+1; else skipped++; });
+  el.innerHTML=groups.map(g=>`<b>${esc(g.label)}</b>: ${counts[g.key]||0} leads to each of ${g.repIds.length} rep${g.repIds.length===1?'':'s'}`).join('<br/>')+`<br/><span style="color:var(--muted)">${skipped} leads are outside these parishes and will be left out.</span>`;
+  go.disabled=!groups.some(g=>g.repIds.length&&counts[g.key]);
+}
+function rowToLead(r,g){
+  const street=col(r,['street address','address','street']), city=col(r,['city','town']), parish=col(r,['parish']);
+  const site=col(r,['website','domain']); const tier=col(r,['priority']).toUpperCase();
+  const contacted=col(r,['contacted?','contacted']);
+  const angle=col(r,['best tmi angle']), signal=col(r,['signal / why now','signal']);
+  const notes=[['Title',col(r,['title'])],['Size',col(r,['est. size','size'])],['Website',site],['Tier',tier],['Angle',angle],['Contacted',contacted],['TMI status',col(r,['tmi status'])]]
+    .filter(x=>x[1]).map(x=>x[0]+': '+x[1]).join('\n');
+  return {
+    business_name:col(r,['company','business','business name','company name']),
+    contact_name:col(r,['owner/decision-maker','owner','contact','contact name']),
+    phone:col(r,['phone']), email:col(r,['email']), industry:col(r,['industry']),
+    street:street?street.split(',')[0].trim():'', city, zip:(street.match(/\b\d{5}\b/)||[''])[0],
+    address:street||(city?city+', LA':''), parish,
+    priority:tier==='A'?'hot':(tier==='B'?'warm':null),
+    status:/^yes: active/i.test(contacted)?'contacted':(/^yes/i.test(contacted)?'attempted':'new'),
+    context:(signal||angle).slice(0,400), notes,
+    domain:site.replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0],
+    territory:col(r,['rep territory','territory'])||g.label,
+  };
+}
+// Town / parish points for leads without a street address (Google, cached per page).
+const GEO_CACHE={};
+function geocodePlace(q){
+  if(GEO_CACHE[q]!==undefined) return Promise.resolve(GEO_CACHE[q]);
+  if(!(window.google&&google.maps&&google.maps.Geocoder)) return Promise.resolve(null);
+  const gc=new google.maps.Geocoder();
+  const once=()=>new Promise(ok=>gc.geocode({address:q},(res,st)=>ok({res,st})));
+  return (async()=>{
+    for(let i=0;i<4;i++){
+      const {res,st}=await once();
+      if(st==='OK'&&res[0]){ const l=res[0].geometry.location; return GEO_CACHE[q]={lat:l.lat(),lng:l.lng()}; }
+      if(st!=='OVER_QUERY_LIMIT') return GEO_CACHE[q]=null;
+      await new Promise(r=>setTimeout(r,1200));
+    }
+    return GEO_CACHE[q]=null;
+  })();
+}
+async function runImport(){
+  const btn=document.getElementById('imp-go'), st=document.getElementById('imp-status');
+  const groups=impGroupSetup().filter(g=>g.repIds.length);
+  btn.disabled=true;
+  try{
+    const plan=groups.map(g=>({ g, leads:IMP_ROWS.filter(r=>col(r,['company','business','business name','company name'])&&routeRow(r,groups)===g).map(r=>rowToLead(r,g)) }));
+    // 1) town / parish fallback points
+    const places=new Set();
+    plan.forEach(p=>p.leads.forEach(l=>{ if(l.city) places.add(l.city+(l.parish?', '+l.parish.replace(/parish/i,'')+' Parish':'')+', LA'); if(l.parish) places.add(l.parish.replace(/parish/i,'').trim()+' Parish, LA'); }));
+    let n=0;
+    for(const q of places){ await geocodePlace(q); n++; if(n%10===0) st.textContent=`Finding towns on the map: ${n}/${places.size}`; await new Promise(r=>setTimeout(r,60)); }
+    plan.forEach(p=>p.leads.forEach(l=>{
+      const town=l.city?GEO_CACHE[l.city+(l.parish?', '+l.parish.replace(/parish/i,'')+' Parish':'')+', LA']:null;
+      const par=l.parish?GEO_CACHE[l.parish.replace(/parish/i,'').trim()+' Parish, LA']:null;
+      const pt=town||par; if(pt){ l.fallback_lat=pt.lat; l.fallback_lng=pt.lng; }
+    }));
+    // 2) send in chunks; reps that already have a lead are skipped for that lead
+    let made=0, exact=0, approx=0, skippedDup=0;
+    for(const p of plan){
+      const have={};
+      for(const id of p.g.repIds){ const names=await TMIAdmin.api('/api/reps-admin?names='+encodeURIComponent(id)); if(!names) throw new Error('Could not check existing leads'); have[id]=new Set(names); }
+      const buckets={};
+      p.leads.forEach(l=>{
+        const key=l.business_name.toLowerCase().trim();
+        const to=p.g.repIds.filter(id=>!have[id].has(key));
+        skippedDup+=p.g.repIds.length-to.length;
+        if(!to.length) return;
+        to.forEach(id=>have[id].add(key));
+        const k=to.join(','); (buckets[k]=buckets[k]||[]).push(l);
+      });
+      for(const k of Object.keys(buckets)){
+        const list=buckets[k];
+        for(let i=0;i<list.length;i+=250){
+          st.textContent=`${p.g.label}: sending ${Math.min(i+250,list.length)}/${list.length}`;
+          const r=await TMIAdmin.api('/api/reps-admin','POST',{action:'import_leads',rep_ids:k.split(','),leads:list.slice(i,i+250)});
+          if(!r) throw new Error('A chunk failed to save');
+          made+=r.created; exact+=r.exact*r.reps; approx+=r.approx*r.reps;
+        }
+      }
+    }
+    st.textContent=`Done. Added ${made} leads (${exact} exact pins, ${approx} town pins). Skipped ${skippedDup} already in a queue.`;
+    TMIAdmin.toast('Import done');
+    load();
+  }catch(ex){ st.textContent='Stopped: '+ex.message+'. You can run it again; leads already added are skipped.'; TMIAdmin.toast(ex.message); }
+  btn.disabled=false;
 }
 function openCreate(){ document.getElementById('create-card').style.display='block'; }
 function closeCreate(){ document.getElementById('create-card').style.display='none'; ['c-name','c-city','c-email','c-phone','c-pass'].forEach(i=>document.getElementById(i).value=''); }
