@@ -23,6 +23,24 @@ function csvLine(line) {
   out.push(cur); return out;
 }
 
+// Every rep lead, trimmed to the fields the oversight views need. Imports put
+// thousands of leads per rep in this collection, so never cap it at a few thousand.
+async function allLeadsLite() {
+  const snap = await db.db().collection('rep_leads')
+    .select('rep_id', 'status', 'created_at', 'updated_at', 'visited_at', 'source', 'deal_value', 'lat', 'lng', 'business_name', 'contact_name')
+    .get();
+  return snap.docs.map((d) => Object.assign({ id: d.id }, db.normalize(d.data())));
+}
+// When the rep last actually did something with a lead. An imported lead that
+// was never opened has no touch, so imports don't look like rep activity.
+function touchedAt(l) {
+  const imported = l.source === 'assigned';
+  const times = [l.visited_at];
+  if (l.updated_at && l.updated_at !== l.created_at) times.push(l.updated_at);
+  if (!imported) times.push(l.created_at);
+  return times.filter(Boolean).sort().pop() || null;
+}
+
 // Free US Census batch geocoder. rows: [{ id, street, city, zip }] -> { id: { lat, lng } }.
 // Best effort: any failure just means those leads use their fallback point.
 async function censusBatch(rows) {
@@ -82,7 +100,7 @@ module.exports = async (req, res) => {
       }
       // Team conversion funnel: counts by status + headline funnel stages.
       if (req.query.funnel) {
-        const all = await db.list('rep_leads', { limit: 5000 }).catch(() => []);
+        const all = await allLeadsLite().catch(() => []);
         const byStatus = {}; STATUSES.forEach((s) => { byStatus[s] = 0; });
         let revenue = 0;
         (all || []).forEach((l) => {
@@ -108,12 +126,14 @@ module.exports = async (req, res) => {
       if (req.query.map) {
         const [reps, all] = await Promise.all([
           db.list('reps', { limit: 200 }).catch(() => []),
-          db.list('rep_leads', { limit: 5000 }).catch(() => []),
+          allLeadsLite().catch(() => []),
         ]);
         const nameOf = {}; (reps || []).forEach((r) => { nameOf[r.id] = r.name || r.email || 'Rep'; });
+        // Worked leads first, then untouched ones, so the map always shows what reps are doing.
         const pins = (all || [])
           .filter((l) => l.lat != null && l.lng != null)
-          .slice(0, 2000)
+          .sort((a, b) => (a.status === 'new' ? 1 : 0) - (b.status === 'new' ? 1 : 0))
+          .slice(0, 4000)
           .map((l) => ({
             id: l.id, rep_id: l.rep_id, rep: nameOf[l.rep_id] || 'Rep',
             business_name: l.business_name || l.contact_name || 'Lead',
@@ -122,17 +142,22 @@ module.exports = async (req, res) => {
         return res.json({ pins, reps: (reps || []).filter((r) => r.status !== 'disabled').map((r) => ({ id: r.id, name: r.name || r.email })) });
       }
       const reps = await db.list('reps', { order: 'created_at', ascending: false, limit: 200 });
-      const all = await db.list('rep_leads', { limit: 5000 }).catch(() => []);
-      const counts = {}, booked = {}, today = {}, last = {};
+      const all = await allLeadsLite().catch(() => []);
+      const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
+      const counts = {}, booked = {}, today = {}, last = {}, worked = {}, week = {};
       (all || []).forEach((l) => {
-        counts[l.rep_id] = (counts[l.rep_id] || 0) + 1;
-        if (l.status === 'booked' || l.status === 'won') booked[l.rep_id] = (booked[l.rep_id] || 0) + 1;
-        if (isToday(l.created_at)) today[l.rep_id] = (today[l.rep_id] || 0) + 1;
-        const t = l.visited_at || l.updated_at || l.created_at;
-        if (t && (!last[l.rep_id] || t > last[l.rep_id])) last[l.rep_id] = t;
+        const r = l.rep_id;
+        counts[r] = (counts[r] || 0) + 1;
+        if (l.status && l.status !== 'new') worked[r] = (worked[r] || 0) + 1;
+        if (l.status === 'booked' || l.status === 'won') booked[r] = (booked[r] || 0) + 1;
+        const t = touchedAt(l);
+        if (t && isToday(t)) today[r] = (today[r] || 0) + 1;
+        if (t && t >= weekAgo) week[r] = (week[r] || 0) + 1;
+        if (t && (!last[r] || t > last[r])) last[r] = t;
       });
       return res.json((reps || []).map((r) => Object.assign(clean(r), {
         lead_count: counts[r.id] || 0, booked_count: booked[r.id] || 0, today_count: today[r.id] || 0,
+        worked_count: worked[r.id] || 0, week_count: week[r.id] || 0,
         last_active: last[r.id] || null,
       })));
     }

@@ -72,6 +72,7 @@
         <div id="imp-preview" style="font-size:13px;margin-top:14px;color:var(--ink-2);"></div>
         <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;">
           <button class="btn btn-primary btn-sm" id="imp-go" onclick="runImport()" disabled>Import leads</button>
+          <button class="btn btn-ghost btn-sm" id="imp-left" onclick="downloadLeftOut()" style="display:none;">Download left-out leads</button>
           <button class="btn btn-ghost btn-sm" onclick="closeImport()">Close</button>
           <span id="imp-status" style="font-size:12px;color:var(--muted);"></span>
         </div>
@@ -93,7 +94,7 @@
       <div class="card">
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Name</th><th>City</th><th>Email</th><th>Leads</th><th>Booked</th><th>Today</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Name</th><th>City</th><th>Email</th><th>Leads</th><th>Worked</th><th>This week</th><th>Booked</th><th>Today</th><th>Status</th><th></th></tr></thead>
             <tbody id="rep-tbody"></tbody>
           </table>
         </div>
@@ -275,13 +276,15 @@ async function load(){
   const stat=(n,l)=>`<div class="card" style="text-align:center;padding:16px 12px;margin:0;"><div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;line-height:1;">${n}</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;">${l}</div></div>`;
   document.getElementById('team-stats').innerHTML = stat(reps.length,'Reps')+stat(tl,'Total leads')+stat(tb2,'Booked / won')+stat(td,'Logged today');
   loadFeed(); loadFunnel(); loadTeamMap(); loadCommissions();
-  if(!reps.length){ tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
+  if(!reps.length){ tb.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
   tb.innerHTML = reps.map(r=>`
     <tr style="cursor:pointer" onclick="openRep('${r.id}')">
       <td><b>${esc(r.name||'—')}</b><div style="font-size:11px;color:var(--muted)">${r.last_active?('Active '+reltime(r.last_active)):'No activity yet'}</div></td>
       <td>${esc(r.city||'—')}</td>
       <td>${esc(r.email)}</td>
       <td>${r.lead_count||0}</td>
+      <td>${r.worked_count||0}</td>
+      <td>${r.week_count||0}</td>
       <td>${r.booked_count||0}</td>
       <td><span style="font-weight:700;color:${(r.today_count||0)>=TARGET?'#3f6d12':'inherit'}">${r.today_count||0}</span> <span style="color:var(--muted);font-size:12px">/ ${TARGET}</span></td>
       <td>${r.status==='disabled'
@@ -367,6 +370,20 @@ function previewImport(){
   IMP_ROWS.forEach(r=>{ if(!col(r,['company','business','business name','company name'])) return; const g=routeRow(r,groups); if(g) counts[g.key]=(counts[g.key]||0)+1; else skipped++; });
   el.innerHTML=groups.map(g=>`<b>${esc(g.label)}</b>: ${counts[g.key]||0} leads to each of ${g.repIds.length} rep${g.repIds.length===1?'':'s'}`).join('<br/>')+`<br/><span style="color:var(--muted)">${skipped} leads are outside these parishes and will be left out.</span>`;
   go.disabled=!groups.some(g=>g.repIds.length&&counts[g.key]);
+  document.getElementById('imp-left').style.display=skipped?'':'none';
+}
+// The leads outside every territory, as a spreadsheet with the same columns, so
+// they can go to a new rep later (or be imported once their parish is added).
+async function downloadLeftOut(){
+  const groups=impGroupSetup();
+  const left=IMP_ROWS.filter(r=>col(r,['company','business','business name','company name'])&&!routeRow(r,groups));
+  if(!left.length){ TMIAdmin.toast('Nothing left out'); return; }
+  await loadXlsx();
+  const ws=XLSX.utils.json_to_sheet(left);
+  const byParish={}; left.forEach(r=>{ const p=col(r,['parish'])||'(no parish)'; byParish[p]=(byParish[p]||0)+1; });
+  const sum=XLSX.utils.json_to_sheet(Object.keys(byParish).sort((a,b)=>byParish[b]-byParish[a]).map(p=>({Parish:p,Leads:byParish[p]})));
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,sum,'By parish'); XLSX.utils.book_append_sheet(wb,ws,'Left-out leads');
+  XLSX.writeFile(wb,'left-out-leads.xlsx');
 }
 function rowToLead(r,g){
   const street=col(r,['street address','address','street']), city=col(r,['city','town']), parish=col(r,['parish']);
@@ -478,7 +495,10 @@ async function openRep(id){
     <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">${esc(current.email)}</span></div>
     <div class="detail-item"><span class="detail-label">City</span><span class="detail-value">${esc(current.city||'—')}</span></div>
     <div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value">${esc(current.phone||'—')}</span></div>
-    <div class="detail-item"><span class="detail-label">Leads</span><span class="detail-value">${current.lead_count||0} (${current.booked_count||0} booked)</span></div>`;
+    <div class="detail-item"><span class="detail-label">Leads</span><span class="detail-value">${current.lead_count||0} (${current.booked_count||0} booked)</span></div>
+    <div class="detail-item"><span class="detail-label">Worked</span><span class="detail-value">${current.worked_count||0} of ${current.lead_count||0}</span></div>
+    <div class="detail-item"><span class="detail-label">Leads touched</span><span class="detail-value">${current.week_count||0} this week, ${current.today_count||0} today</span></div>
+    <div class="detail-item"><span class="detail-label">Last active</span><span class="detail-value">${current.last_active?reltime(current.last_active):'Not yet'}</span></div>`;
   document.getElementById('rp-toggle').textContent = current.status==='disabled' ? 'Enable' : 'Disable';
   document.getElementById('rp-leads').innerHTML = '<div style="color:var(--muted);font-size:13px;">Loading…</div>';
   TMIAdmin.openPanel('rep-panel');

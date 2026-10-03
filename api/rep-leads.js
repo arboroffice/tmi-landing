@@ -92,7 +92,10 @@ module.exports = async (req, res) => {
       if (!b.id) return res.status(400).json({ error: 'id required' });
       const lead = await db.getById('rep_leads', b.id);
       if (!lead || lead.rep_id !== repId) return res.status(404).json({ error: 'Not found' });
-      const up = { updated_at: new Date().toISOString() };
+      // A pin-only save (the app geocoding a lead for the map) is not rep activity,
+      // so it leaves updated_at alone and admin tracking stays honest.
+      const pinOnly = Object.keys(b).every((k) => ['id', 'lat', 'lng'].includes(k));
+      const up = pinOnly ? {} : { updated_at: new Date().toISOString() };
       FIELDS.forEach((k) => { if (b[k] !== undefined) up[k] = b[k]; });
       if (b.lat !== undefined) up.lat = num(b.lat);
       if (b.lng !== undefined) up.lng = num(b.lng);
