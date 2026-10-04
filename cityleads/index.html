@@ -911,6 +911,47 @@ function markPaySent(l){
   writeLead('PATCH',{id:l.id,audit_link_sent_at:l.audit_link_sent_at,status:l.status==='new'?'contacted':l.status}).catch(()=>{});
   if(l.status==='new') l.status='contacted';
 }
+/* ---- One-tap stop outcomes: log the stop and move on ---- */
+function nextStopAfter(l){ return planStops().find(x=>x.id!==l.id&&!stopDone(x)); }
+async function quickOutcome(l, kind, date){
+  const day=n=>{ const d=new Date(); d.setDate(d.getDate()+n); d.setHours(10,0,0,0); return d.toISOString(); };
+  const map={
+    not_there:{status:'attempted', next_action_at:day(2), label:'Not there. Back in 2 days'},
+    talked:{status:'contacted', label:'Talked to owner'},
+    comeback:{status:'callback', next_action_at:date?new Date(date+'T10:00:00').toISOString():day(3), label:'Come back '+(date?new Date(date+'T10:00:00').toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'}):'in 3 days')},
+    not_fit:{status:'not_interested', next_action_at:null, label:'Not a fit'},
+  }[kind]; if(!map) return;
+  const patch={id:l.id,status:map.status}; if(map.next_action_at!==undefined) patch.next_action_at=map.next_action_at;
+  try{
+    const opt=Object.assign({},l,patch,{updated_at:new Date().toISOString(),visited_at:l.visited_at||new Date().toISOString()});
+    const {lead}=await writeLead('PATCH',patch,opt); mergeLead(lead||opt);
+    const nx=nextStopAfter(l);
+    closeSheet(); toast(map.label+(nx?(' · Next: '+(nx.business_name||nx.contact_name)):''));
+  }catch(ex){ toast(ex.message); }
+}
+function wireOutcomes(l){
+  const di=$('#dOutDate');
+  document.querySelectorAll('#sheetBody [data-out]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.out;
+    if(k==='comeback' && di){ di.onchange=()=>quickOutcome(l,'comeback',di.value); try{ di.showPicker(); }catch(e){ const v=prompt('Come back on what date? (YYYY-MM-DD)'); if(v) quickOutcome(l,'comeback',v); } return; }
+    quickOutcome(l,k);
+  });
+}
+/* ---- QR code: the owner scans and pays on their own phone, credited to this rep ---- */
+function loadQR(){ return window.QRCode?Promise.resolve():new Promise((ok,bad)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'; s.onload=ok; s.onerror=()=>bad(new Error('Could not load the QR maker')); document.head.appendChild(s); }); }
+async function showPayQR(l){
+  try{ await loadQR(); }catch(ex){ toast(ex.message); return; }
+  const ov=el(`<div style="position:fixed;inset:0;z-index:999;background:rgba(10,11,20,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;color:#fff;text-align:center">
+    <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.7">TMI Intelligent Company Audit</div>
+    <div style="font-size:20px;font-weight:800;margin:6px 0 16px">Scan with your phone camera to start</div>
+    <div id="qrBox" style="background:#fff;padding:16px;border-radius:16px"></div>
+    <div style="font-size:13px;opacity:.75;margin-top:14px;max-width:300px">${esc(l.business_name||'')}</div>
+    <button class="btn" id="qrClose" style="margin-top:20px;max-width:260px;background:#E4FF97;color:#0a0b14">Done</button></div>`);
+  document.body.appendChild(ov);
+  new QRCode(ov.querySelector('#qrBox'),{text:auditPayLink(l),width:240,height:240,correctLevel:QRCode.CorrectLevel.M});
+  ov.querySelector('#qrClose').onclick=()=>{ ov.remove(); openLead(l.id); };
+  markPaySent(l);
+}
 function wirePayLink(l){
   const tel=(l.phone||'').replace(/[^0-9+]/g,'');
   const msg=auditPayMessage(l);
@@ -918,6 +959,17 @@ function wirePayLink(l){
   if(t){ if(tel){ t.href='sms:'+tel+'?&body='+encodeURIComponent(msg); t.onclick=()=>markPaySent(l); } else { t.style.opacity='.4'; t.style.pointerEvents='none'; } }
   if(e){ if(l.email){ e.href='mailto:'+l.email+'?subject='+encodeURIComponent('Your TMI Intelligent Company Audit')+'&body='+encodeURIComponent(msg); e.onclick=()=>markPaySent(l); } else { e.style.opacity='.4'; e.style.pointerEvents='none'; } }
   if(c) c.onclick=async()=>{ try{ await navigator.clipboard.writeText(auditPayLink(l)); toast('Link copied'); markPaySent(l); }catch(ex){ prompt('Copy this link',auditPayLink(l)); } };
+  const q=$('#dPayQR'); if(q) q.onclick=()=>showPayQR(l);
+  const nb=$('#dPayNudges');
+  if(nb){
+    const first=String(l.contact_name||'').trim().split(/\s+/)[0]||'there';
+    const me=String((ME&&ME.name)||'').trim().split(/\s+/)[0];
+    const msgs=[
+      ['Any questions?','Hey '+first+', checking in on the TMI audit. Any questions I can answer? Here is the link again: '+auditPayLink(l)+(me?' - '+me:'')],
+      ['Quick nudge','Hi '+first+', the audit is how we find where '+(l.business_name||'your company')+' is losing time and money. Want to get it started this week? '+auditPayLink(l)+(me?' - '+me:'')],
+    ];
+    nb.innerHTML=msgs.map((m,i)=>tel?`<a class="btn ghost sm" style="background:#fff" href="sms:${tel}?&body=${encodeURIComponent(m[1])}">${esc(m[0])}</a>`:'').join('')||'<span style="font-size:12px">Add a phone number to text them.</span>';
+  }
 }
 
 function openLead(id){
@@ -939,7 +991,9 @@ function openLead(id){
     <div class="card" style="margin:0 0 10px;padding:13px 14px;background:#E4FF97;color:#0a0b14;border:none">
       <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.75">Your goal here: sell the audit</div>
       <div style="font-size:15px;font-weight:800;margin-top:2px">${l.audit_paid_at?'Audit paid ✓ Credited to you':(l.audit_link_sent_at?('Link sent '+new Date(l.audit_link_sent_at).toLocaleDateString()+'. Follow up until it is paid.'):'Send the Intelligent Company Audit link')}</div>
-      ${l.audit_paid_at?'':`<div style="display:flex;gap:7px;margin-top:9px"><a class="btn sm" id="dPayText" style="flex:1;text-align:center" href="#">Text it</a><a class="btn ghost sm" id="dPayEmail" style="flex:1;text-align:center;background:#fff" href="#">Email it</a><button class="btn ghost sm" id="dPayCopy" style="flex:1;background:#fff">Copy</button></div>
+      ${l.audit_paid_at?'':`<button class="btn" id="dPayQR" style="margin-top:9px;background:#0a0b14;color:#fff">Show QR code: they scan and pay now</button>
+      <div style="display:flex;gap:7px;margin-top:7px"><a class="btn sm" id="dPayText" style="flex:1;text-align:center" href="#">Text it</a><a class="btn ghost sm" id="dPayEmail" style="flex:1;text-align:center;background:#fff" href="#">Email it</a><button class="btn ghost sm" id="dPayCopy" style="flex:1;background:#fff">Copy</button></div>
+      ${l.audit_link_sent_at?`<div style="font-size:12px;font-weight:700;margin-top:10px">Quick check-in texts</div><div style="display:flex;gap:7px;margin-top:5px;flex-wrap:wrap" id="dPayNudges"></div><div style="font-size:11.5px;margin-top:6px;opacity:.75">TMI also follows up for you by email and text after 1 day and 3 days, until they pay.</div>`:''}
       <details style="margin-top:10px"><summary style="font-size:13px;font-weight:700;cursor:pointer">The 30 second pitch</summary>
         <div style="font-size:13px;line-height:1.55;margin-top:8px;font-weight:500">
           <p style="margin:0 0 8px">"We're TMI. We help companies like yours find where time and money get lost between your people, your systems, and your paperwork.</p>
@@ -948,6 +1002,14 @@ function openLead(id){
           <p style="margin:0 0 8px"><b>Ask:</b> "Where does your team still copy, call, remind, or chase things by hand?"</p>
           <p style="margin:0"><b>Close:</b> "That's what the audit finds. Want me to text you the link right now?"</p>
         </div></details>`}
+    </div>
+    <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted);margin:2px 0 6px">What happened? One tap</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px">
+      <button class="btn ghost sm" data-out="not_there">Not there</button>
+      <button class="btn ghost sm" data-out="talked">Talked to owner</button>
+      <button class="btn ghost sm" data-out="comeback">Come back on...</button>
+      <button class="btn ghost sm" data-out="not_fit">Not a fit</button>
+      <input type="date" id="dOutDate" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px"/>
     </div>
     <button class="btn ghost" id="dCallback" style="margin-top:2px">Not ready? Mark for an audit callback &rarr;</button>
     <div id="dTemplates" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px"></div>
@@ -962,7 +1024,7 @@ function openLead(id){
     <div class="row" style="gap:10px"><div class="field" style="flex:1"><label>Next follow-up</label><input id="d_next" type="date" value="${l.next_action_at?String(l.next_action_at).slice(0,10):''}"/></div><div class="field" style="flex:1"><label>Deal value ($)</label><input id="d_deal" type="number" min="0" inputmode="numeric" value="${l.deal_value!=null?esc(l.deal_value):''}" placeholder="e.g. 12000"/></div></div>
     ${l.next_action_at?`<a id="dCal" href="#" style="font-size:12.5px;color:#1d4ed8;font-weight:600;display:inline-block;margin:-4px 0 8px">📅 Add follow-up to Google Calendar</a>`:''}
     <div class="field"><label>Notes</label><textarea id="d_notes" rows="5">${esc(l.notes||'')}</textarea></div>
-    <div class="recbar"><button class="btn ghost sm" id="dRec">Record interaction</button><span id="dRecState" style="font-size:12px;color:var(--muted)"></span></div>
+    <div class="recbar"><button class="btn ghost sm" id="dRec">🎙 Voice note (saves to notes)</button><span id="dRecState" style="font-size:12px;color:var(--muted)"></span></div>
     <div id="dTimeline"></div>
     <div class="recbar"><label class="btn ghost sm" style="cursor:pointer">Add photo<input type="file" accept="image/*" capture="environment" id="dPhotoInput" style="display:none"/></label></div>
     <div id="dPhotos" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:2px"></div>
@@ -986,8 +1048,8 @@ function openLead(id){
   wireRecorder($('#dRec'), $('#dRecState'), l.id, (r)=>{
     const n=$('#d_notes');
     const t=r.summary?('Recap: '+r.summary+(r.next_step?('\nNext: '+r.next_step):'')):(r.transcript||'');
-    if(t) n.value=(n.value?n.value+'\n\n':'')+t;
-    toast(r.outcome?('Logged · '+outcomeLabel(r.outcome)):'Interaction saved');
+    if(t){ n.value=(n.value?n.value+'\n\n':'')+t; l.notes=n.value; writeLead('PATCH',{id:l.id,notes:n.value}).catch(()=>{}); }
+    toast(r.outcome?('Logged · '+outcomeLabel(r.outcome)+' · saved to notes'):'Voice note saved to notes');
     loadInteractions(l.id);
   });
   loadInteractions(l.id);
@@ -1040,6 +1102,7 @@ function openLead(id){
   };
   const ci=$('#dCheckin'); if(ci) ci.onclick=(e)=>{ e.preventDefault(); checkIn(l); };
   wirePayLink(l);
+  wireOutcomes(l);
   const cal=$('#dCal'); if(cal) cal.onclick=(e)=>{ e.preventDefault(); addToCalendar(l); };
   const pin=$('#dPhotoInput'); if(pin) pin.onchange=()=>addPhoto(l.id,pin);
   loadPhotos(l.id);

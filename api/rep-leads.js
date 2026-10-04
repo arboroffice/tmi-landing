@@ -230,6 +230,17 @@ module.exports = async (req, res) => {
       }
       const wasNew = lead.status === 'new';
       const out = await db.update('rep_leads', b.id, up);
+      // First time the audit link goes out: TMI follows up for the rep on day 1
+      // and day 3 until it is paid (see audit-link-followup.js).
+      if (b.audit_link_sent_at && !lead.audit_link_sent_at && process.env.QSTASH_TOKEN) {
+        try {
+          const { Client } = require('@upstash/qstash');
+          const qs = new Client({ token: process.env.QSTASH_TOKEN });
+          const url = `https://www.tmi-technology.com/api/audit-link-followup?secret=${encodeURIComponent(process.env.GTM_RUN_SECRET || process.env.JWT_SECRET || '')}`;
+          await qs.publishJSON({ url, delay: 86400, body: { leadId: b.id, step: 'day1' } });
+          await qs.publishJSON({ url, delay: 3 * 86400, body: { leadId: b.id, step: 'day3' } });
+        } catch (e) { console.error('schedule link follow-up:', e.message); }
+      }
       // First real touch on a shared (pair) lead: mark the partner's copy as taken
       // so the two reps never walk into the same business.
       if (wasNew && up.status && up.status !== 'new' && lead.business_name) {
