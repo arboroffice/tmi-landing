@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
     (rows || []).forEach((c) => { const a = Number(c.commission) || 0; if (c.status === 'paid') paid += a; else pending += a; });
     const items = (rows || []).sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))).slice(0, 50).map((c) => ({
       business_name: c.business_name || null, kind_label: c.kind_label || 'Intelligent Company Audit',
-      deal_value: c.deal_value, rate: c.rate != null ? c.rate : 0.2, commission: Number(c.commission) || 0,
+      deal_value: c.deal_value, rate: c.rate != null ? c.rate : 0.1, commission: Number(c.commission) || 0,
       status: c.status === 'paid' ? 'paid' : 'pending', created_at: c.created_at || null,
     }));
     return res.json({ pending, paid, count: (rows || []).length, items });

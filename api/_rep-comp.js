@@ -4,7 +4,7 @@
 // a deploy. Each row keeps the rate it was earned at.
 const db = require('./_db');
 
-const DEFAULT_RATES = { audit: 0.20, upsell: 0.20 };
+const DEFAULT_RATES = { audit: 0.10, upsell: 0.10 }; // TMI pays reps 10%
 const KINDS = {
   audit: 'Intelligent Company Audit',
   implementation: 'Implementation fee',

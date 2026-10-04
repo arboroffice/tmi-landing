@@ -215,7 +215,7 @@ async function loadCommissions(){
   const box=document.getElementById('team-commissions'); if(!box) return;
   let d; try{ d=await TMIAdmin.api('/api/rep-commissions'); }catch(e){ box.innerHTML=''; return; }
   const items=(d&&d.items)||[]; const t=(d&&d.totals)||{pending:0,paid:0,count:0};
-  const rates=(d&&d.rates)||{audit:0.2,upsell:0.2}; const kinds=(d&&d.kinds)||{};
+  const rates=(d&&d.rates)||{audit:0.1,upsell:0.1}; const kinds=(d&&d.kinds)||{};
   const money=n=>'$'+Math.round(n||0).toLocaleString(); const pct=r=>Math.round((r||0)*100)+'%';
   const rows=items.slice(0,80).map(c=>`<tr>
     <td style="font-weight:600;">${esc(c.rep)}</td>

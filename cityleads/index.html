@@ -1289,7 +1289,7 @@ function renderMe(){
   const warmLeft=LEADS.filter(l=>isWarm(l)&&l.status==='new').length;
   const conv=total?Math.round((booked/total)*100):0;
   const dealTotal=wonLeads.reduce((a,l)=>a+(Number(l.deal_value)||0),0);
-  const commission=Math.round(dealTotal*0.20);
+  const commission=Math.round(dealTotal*0.10);
   const money=n=>'$'+Math.round(n||0).toLocaleString();
   const GOAL=20; const goalPct=Math.min(100,Math.round((today/GOAL)*100));
   const streak=calcStreak();
@@ -1297,7 +1297,7 @@ function renderMe(){
   const mStart=new Date(); mStart.setDate(1); mStart.setHours(0,0,0,0);
   const inMonth=(iso)=>iso&&new Date(iso).getTime()>=mStart.getTime();
   const monthDealTotal=wonLeads.filter(l=>inMonth(l.updated_at||l.visited_at||l.created_at)).reduce((a,l)=>a+(Number(l.deal_value)||0),0);
-  const monthCommission=Math.round(monthDealTotal*0.20);
+  const monthCommission=Math.round(monthDealTotal*0.10);
   let earnGoal=parseInt(localStorage.getItem('cl_earn_goal')||'',10); if(!Number.isFinite(earnGoal)||earnGoal<=0) earnGoal=2000;
   const earnPct=Math.min(100,Math.round(monthCommission/earnGoal*100));
   const dayNow=new Date().getDate(); const daysInMo=new Date(mStart.getFullYear(),mStart.getMonth()+1,0).getDate();

@@ -1,10 +1,10 @@
 // Admin commission ledger for city-lead reps. Rep-leads.js writes a rep_commissions
-// row for every won deal (20% of deal value). This is the admin read + payout view.
+// row for every won deal and upsell (10% by default, see _rep-comp.js). Admin read + payout view.
 //   GET                        -> { items, totals:{pending,paid,count}, byRep[] }
 //   PATCH { id, status }       -> mark a commission 'paid' or back to 'pending'
 //   POST { action:'add', rep_id, rep_lead_id?, business_name, kind, amount, rate? }
 //                              -> record an upsell (implementation fee, retainer, add-on)
-//   POST { action:'rates', audit, upsell }  -> set the commission rates (20 or 0.2 both work)
+//   POST { action:'rates', audit, upsell }  -> set the commission rates (10 or 0.1 both work)
 const db = require('./_db');
 const { cors, requireAuth } = require('./_auth');
 const comp = require('./_rep-comp');
@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
         return {
           id: c.id, rep_id: c.rep_id, rep: nameOf[c.rep_id] || 'Rep',
           business_name: c.business_name || null, deal_value: c.deal_value != null ? Number(c.deal_value) : null,
-          kind: c.kind || 'audit', kind_label: c.kind_label || comp.KINDS[c.kind || 'audit'], rate: c.rate != null ? c.rate : 0.2, note: c.note || null,
+          kind: c.kind || 'audit', kind_label: c.kind_label || comp.KINDS[c.kind || 'audit'], rate: c.rate != null ? c.rate : 0.1, note: c.note || null,
           commission: amt, status, verified, created_at: c.created_at, paid_at: c.paid_at || null,
           application_id: c.application_id || null, rep_lead_id: c.rep_lead_id || null,
         };
