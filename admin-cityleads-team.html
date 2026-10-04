@@ -30,6 +30,7 @@
         These are the field reps who log in to <b>cityleads.tmitechai.com</b> on their phone to work their walk-ins, map, and leads. Add a rep here to give them access. Each rep only sees their own leads.
       </p>
 
+      <div id="today-board" style="margin-bottom:20px;"></div>
       <div id="team-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
 
       <div id="team-funnel" style="margin-bottom:20px;"></div>
@@ -214,7 +215,7 @@ function whenMaps(cb,tries){ tries=tries||0; if(window.google&&google.maps){ cb(
 async function loadCommissions(){
   const box=document.getElementById('team-commissions'); if(!box) return;
   let d; try{ d=await TMIAdmin.api('/api/rep-commissions'); }catch(e){ box.innerHTML=''; return; }
-  const items=(d&&d.items)||[]; const t=(d&&d.totals)||{pending:0,paid:0,count:0};
+  const items=(d&&d.items)||[]; COMM_ITEMS=items; const t=(d&&d.totals)||{pending:0,paid:0,count:0};
   const rates=(d&&d.rates)||{audit:0.1,upsell:0.1}; const kinds=(d&&d.kinds)||{};
   const money=n=>'$'+Math.round(n||0).toLocaleString(); const pct=r=>Math.round((r||0)*100)+'%';
   const rows=items.slice(0,80).map(c=>`<tr>
@@ -238,6 +239,10 @@ async function loadCommissions(){
       <span>Rates: <b>${pct(rates.audit)}</b> on audits, <b>${pct(rates.upsell)}</b> on upsells</span>
       <button class="btn btn-ghost btn-sm" onclick="editRates(${rates.audit},${rates.upsell})">Change rates</button>
       <button class="btn btn-primary btn-sm" onclick="document.getElementById('up-form').style.display='flex'">+ Add an upsell</button>
+      <span style="flex:1"></span>
+      <select class="form-input" id="st-rep" style="max-width:170px">${repOpts}</select>
+      <input class="form-input" type="month" id="st-month" value="${new Date().toISOString().slice(0,7)}" style="max-width:150px"/>
+      <button class="btn btn-ghost btn-sm" onclick="openStatement()">Pay statement</button>
     </div>
     <div id="up-form" style="display:none;padding:14px 16px;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap;align-items:flex-end;">
       <div><label class="form-label">Rep</label><select class="form-input" id="up-rep">${repOpts}</select></div>
@@ -251,6 +256,44 @@ async function loadCommissions(){
     ${items.length?`<div style="overflow-x:auto;"><table class="data-table" style="width:100%;min-width:760px;"><thead><tr><th>Rep</th><th>Account</th><th>Type</th><th>Client paid</th><th>Commission</th><th>Payment</th><th>Payout</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p style="font-size:13px;color:var(--muted);margin:0;padding:14px 16px;">No commissions yet. They appear here when an audit is paid or an upsell is added.</p>'}
     <div style="padding:10px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);">Audits paid through a rep's link and build deposits paid in Stripe are added automatically. Add implementation fees, retainers, or add-ons paid any other way with "Add an upsell". Each line keeps the rate it was earned at.</div>
   </div>`;
+}
+let COMM_ITEMS=[];
+// Printable monthly pay statement for one rep, from the commission ledger.
+function openStatement(){
+  const repId=document.getElementById('st-rep').value, month=document.getElementById('st-month').value;
+  const r=reps.find(x=>x.id===repId); if(!r||!month){ TMIAdmin.toast('Pick a rep and a month'); return; }
+  const rows=COMM_ITEMS.filter(c=>c.rep_id===repId && String(c.created_at||'').slice(0,7)===month);
+  const money=n=>'$'+Math.round(n||0).toLocaleString();
+  const earned=rows.reduce((a,c)=>a+c.commission,0), paid=rows.filter(c=>c.status==='paid').reduce((a,c)=>a+c.commission,0);
+  const label=new Date(month+'-15').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const w=window.open('','_blank'); if(!w){ TMIAdmin.toast('Allow pop-ups to open the statement'); return; }
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(r.name||r.email)} statement ${esc(label)}</title>
+  <style>body{font-family:-apple-system,Helvetica,Arial,sans-serif;color:#1a1a1a;max-width:760px;margin:40px auto;padding:0 20px}h1{font-size:22px;margin:0}table{width:100%;border-collapse:collapse;margin-top:20px;font-size:14px}th,td{text-align:left;padding:9px 6px;border-bottom:1px solid #e6e6e6}th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#777}.tot{display:flex;gap:28px;margin-top:18px}.tot div{font-size:13px;color:#666}.tot b{display:block;font-size:22px;color:#1a1a1a}button{margin-top:24px;padding:10px 18px;border-radius:999px;border:1px solid #ccc;background:#fff;cursor:pointer}@media print{button{display:none}}</style></head><body>
+  <div style="font-weight:800;letter-spacing:-.02em">TMI</div>
+  <h1 style="margin-top:14px">Commission statement: ${esc(r.name||r.email)}</h1><div style="color:#777;margin-top:4px">${esc(label)}</div>
+  <div class="tot"><div>Earned<b>${money(earned)}</b></div><div>Paid<b>${money(paid)}</b></div><div>Still owed<b>${money(earned-paid)}</b></div></div>
+  <table><thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Client paid</th><th>Rate</th><th>Commission</th><th>Status</th></tr></thead><tbody>
+  ${rows.length?rows.map(c=>`<tr><td>${new Date(c.created_at).toLocaleDateString()}</td><td>${esc(c.business_name||'')}</td><td>${esc(c.kind_label||'')}</td><td>${c.deal_value!=null?money(c.deal_value):''}</td><td>${Math.round((c.rate||0)*100)}%</td><td><b>${money(c.commission)}</b></td><td>${c.status==='paid'?'Paid '+(c.paid_at?new Date(c.paid_at).toLocaleDateString():''):'Pending'}</td></tr>`).join(''):'<tr><td colspan="7" style="color:#777">No commissions this month.</td></tr>'}
+  </tbody></table><button onclick="print()">Print or save as PDF</button></body></html>`);
+  w.document.close();
+}
+// Today board: where each rep is working and how the day is going.
+async function loadTodayBoard(){
+  const box=document.getElementById('today-board'); if(!box) return;
+  let d; try{ d=await TMIAdmin.api('/api/reps-admin?today=1'); }catch(e){ box.innerHTML=''; return; }
+  const list=(d&&d.reps)||[]; if(!list.length){ box.innerHTML=''; return; }
+  const cell=(r)=>{
+    const pct=r.stops?Math.round(r.stops_done/r.stops*100):0;
+    const idle=!r.worked;
+    return `<div class="card" style="margin:0;padding:14px 15px;${idle?'border-color:#f0c9c4;':''}">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:15px">${esc(r.name)}</b><span style="font-size:11.5px;color:var(--muted)">${r.last_active?('Active '+reltime(r.last_active)):'No activity yet'}</span></div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px">${r.town?('Working '+esc(r.town)):'<span style="color:#b3402f;font-weight:600">No town picked yet</span>'}</div>
+      ${r.stops?`<div style="font-size:12px;margin-top:8px">${r.stops_done} of ${r.stops} stops</div><div style="height:6px;border-radius:4px;background:var(--bg-alt,#f0f0f2);overflow:hidden;margin-top:4px"><div style="height:100%;width:${pct}%;background:var(--ink,#0a0b14)"></div></div>`:''}
+      <div style="display:flex;gap:14px;margin-top:10px;font-size:12.5px"><span><b>${r.worked}</b> worked</span><span><b>${r.links}</b> links sent</span><span><b style="color:#186b1e">${r.sold}</b> sold</span></div>
+    </div>`;
+  };
+  box.innerHTML=`<div class="panel-sec-label" style="margin-bottom:10px;">Today in the field</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;">${list.map(cell).join('')}</div>`;
 }
 async function editRates(a,u){
   const na=prompt('Commission % on audits:', Math.round(a*100)); if(na==null) return;
@@ -306,7 +349,7 @@ async function load(){
   const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.sold_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
   const stat=(n,l)=>`<div class="card" style="text-align:center;padding:16px 12px;margin:0;"><div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;line-height:1;">${n}</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;">${l}</div></div>`;
   document.getElementById('team-stats').innerHTML = stat(reps.length,'Reps')+stat(tl,'Total leads')+stat(tb2,'Audits sold')+stat(td,'Logged today');
-  loadFeed(); loadFunnel(); loadTeamMap(); loadCommissions();
+  loadTodayBoard(); loadFeed(); loadFunnel(); loadTeamMap(); loadCommissions();
   if(!reps.length){ tb.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
   tb.innerHTML = reps.map(r=>`
     <tr style="cursor:pointer" onclick="openRep('${r.id}')">

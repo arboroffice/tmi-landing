@@ -75,6 +75,8 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'GET') {
+      // Today board: each rep's town, stop progress, links sent and audits sold today.
+      if (req.query.today) return res.json(await require('./_rep-activity').dayActivity());
       // Lowercased business names already in a rep's queue, so an import can skip repeats.
       if (req.query.names) {
         const leads = await db.list('rep_leads', { where: [['rep_id', '==', req.query.names]], limit: 50000 }).catch(() => []);

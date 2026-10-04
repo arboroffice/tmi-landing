@@ -20,7 +20,9 @@ module.exports = async (req, res) => {
     const endToday = new Date(); endToday.setHours(23, 59, 59, 999);
     const cutoff = endToday.getTime();
 
-    const leads = await db.list('rep_leads', { limit: 5000 }).catch(() => []);
+    // Reps carry thousands of seeded leads each, so read them all (trimmed fields).
+    const snap = await db.db().collection('rep_leads').select('rep_id', 'status', 'next_action_at', 'business_name', 'contact_name', 'priority', 'source', 'created_at', 'territory').get().catch(() => null);
+    const leads = snap ? snap.docs.map((d) => Object.assign({ id: d.id }, db.normalize(d.data()))) : [];
     const due = {}, warm = {};
     (leads || []).forEach((l) => {
       if (!l.rep_id || TERMINAL.has(l.status)) return;
@@ -28,7 +30,8 @@ module.exports = async (req, res) => {
         const t = new Date(l.next_action_at).getTime();
         if (Number.isFinite(t) && t <= cutoff) (due[l.rep_id] = due[l.rep_id] || []).push(l);
       }
-      const isWarm = l.priority === 'warm' || l.priority === 'hot' || l.source === 'assigned';
+      // Seeded territory leads are worked through the daily stop list, not this count.
+      const isWarm = (l.priority === 'warm' || l.priority === 'hot' || l.source === 'assigned') && !l.territory;
       if (isWarm && l.status === 'new') (warm[l.rep_id] = warm[l.rep_id] || []).push(l);
     });
 
