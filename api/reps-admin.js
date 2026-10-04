@@ -27,7 +27,7 @@ function csvLine(line) {
 // thousands of leads per rep in this collection, so never cap it at a few thousand.
 async function allLeadsLite() {
   const snap = await db.db().collection('rep_leads')
-    .select('rep_id', 'status', 'created_at', 'updated_at', 'visited_at', 'source', 'deal_value', 'lat', 'lng', 'business_name', 'contact_name')
+    .select('rep_id', 'status', 'created_at', 'updated_at', 'visited_at', 'source', 'deal_value', 'lat', 'lng', 'business_name', 'contact_name', 'audit_link_sent_at', 'audit_paid_at')
     .get();
   return snap.docs.map((d) => Object.assign({ id: d.id }, db.normalize(d.data())));
 }
@@ -113,12 +113,15 @@ module.exports = async (req, res) => {
         const contacted = (byStatus['contacted'] || 0) + (byStatus['booked'] || 0) + (byStatus['callback'] || 0) + (byStatus['won'] || 0);
         const booked = (byStatus['booked'] || 0) + (byStatus['won'] || 0);
         const won = byStatus['won'] || 0;
+        const linkSent = (all || []).filter((l) => l.audit_link_sent_at).length;
+        const sold = (all || []).filter((l) => l.audit_paid_at).length;
+        // The reps' job at every stop is to sell the Intelligent Company Audit.
         const stages = [
           { key: 'total', label: 'Leads', value: total },
           { key: 'worked', label: 'Worked', value: worked },
           { key: 'contacted', label: 'Conversations', value: contacted },
-          { key: 'booked', label: 'Audits booked', value: booked },
-          { key: 'won', label: 'Won', value: won },
+          { key: 'link', label: 'Audit link sent', value: linkSent },
+          { key: 'sold', label: 'Audits sold', value: sold },
         ];
         return res.json({ byStatus, stages, revenue, total });
       }
@@ -144,12 +147,14 @@ module.exports = async (req, res) => {
       const reps = await db.list('reps', { order: 'created_at', ascending: false, limit: 200 });
       const all = await allLeadsLite().catch(() => []);
       const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString();
-      const counts = {}, booked = {}, today = {}, last = {}, worked = {}, week = {};
+      const counts = {}, booked = {}, today = {}, last = {}, worked = {}, week = {}, links = {}, sold = {};
       (all || []).forEach((l) => {
         const r = l.rep_id;
         counts[r] = (counts[r] || 0) + 1;
         if (l.status && l.status !== 'new') worked[r] = (worked[r] || 0) + 1;
         if (l.status === 'booked' || l.status === 'won') booked[r] = (booked[r] || 0) + 1;
+        if (l.audit_link_sent_at) links[r] = (links[r] || 0) + 1;
+        if (l.audit_paid_at) sold[r] = (sold[r] || 0) + 1;
         const t = touchedAt(l);
         if (t && isToday(t)) today[r] = (today[r] || 0) + 1;
         if (t && t >= weekAgo) week[r] = (week[r] || 0) + 1;
@@ -158,6 +163,7 @@ module.exports = async (req, res) => {
       return res.json((reps || []).map((r) => Object.assign(clean(r), {
         lead_count: counts[r.id] || 0, booked_count: booked[r.id] || 0, today_count: today[r.id] || 0,
         worked_count: worked[r.id] || 0, week_count: week[r.id] || 0,
+        link_count: links[r.id] || 0, sold_count: sold[r.id] || 0,
         last_active: last[r.id] || null,
       })));
     }

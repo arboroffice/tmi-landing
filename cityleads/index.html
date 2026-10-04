@@ -446,6 +446,7 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>swit
 function isToday(iso){ if(!iso) return false; const d=new Date(iso), n=new Date(); return d.toDateString()===n.toDateString(); }
 // When the rep actually worked a lead. A lead handed to them (source 'assigned')
 // only counts once they visit it or change its status, never when it was imported.
+const CLOSED_ST=['won','lost','not_interested'];
 function workAt(l){ return l.visited_at || (l.source!=='assigned' ? l.created_at : (l.status!=='new' ? l.updated_at : null)); }
 function workedToday(l){ return isToday(workAt(l)); }
 // Seeded territory leads are worked through the daily stop list, not the cold alerts.
@@ -463,6 +464,10 @@ function todayMove(){
   if(cb.length) return {t:'Chase a callback',d:nm(cb[0])+' asked for a callback. Close the loop.',lead:cb[0].id};
   const warm=LEADS.filter(l=>isWarm(l)&&l.status==='new');
   if(warm.length) return {t:'Work a warm lead',d:nm(warm[0])+' is warm and waiting. Go get the audit booked.',lead:warm[0].id};
+  // An audit link that went out but has not been paid is the hottest lead they have.
+  const unpaid=LEADS.filter(l=>l.audit_link_sent_at&&!l.audit_paid_at&&!CLOSED_ST.includes(l.status)&&(Date.now()-new Date(l.audit_link_sent_at).getTime())>864e5)
+    .sort((a,b)=>new Date(a.audit_link_sent_at)-new Date(b.audit_link_sent_at));
+  if(unpaid.length){ const l=unpaid[0]; return {t:'Close an audit: '+(l.business_name||l.contact_name||'lead'),d:'They got the audit link '+Math.floor((Date.now()-new Date(l.audit_link_sent_at).getTime())/864e5)+' day(s) ago and have not paid. Call and ask what is holding them up.',lead:l.id}; }
   const next=planStops().find(l=>!stopDone(l));
   if(next) return {t:'Next stop: '+(next.business_name||next.contact_name||'Lead'),d:(next.contact_name&&next.business_name?('Ask for '+next.contact_name+'. '):'')+'Stop '+(planStops().indexOf(next)+1)+' of '+planStops().length+' on today\'s list.',lead:next.id};
   if(!LEADS.filter(workedToday).length) return {t:'Log your first door',d:'No doors logged yet today. Walk your cluster and log the first one.',go:'log'};
@@ -484,8 +489,8 @@ function renderToday(){
     </div>
     <div class="stat-grid">
       <div class="stat"><div class="n">${loggedToday}</div><div class="l">Worked today</div></div>
-      <div class="stat"><div class="n">${booked}</div><div class="l">Audits booked</div></div>
-      <div class="stat"><div class="n">${due.length}</div><div class="l">Follow-ups due</div></div>
+      <div class="stat"><div class="n">${LEADS.filter(l=>isToday(l.audit_link_sent_at)).length}</div><div class="l">Audit links sent today</div></div>
+      <div class="stat"><div class="n">${LEADS.filter(l=>l.audit_paid_at).length}</div><div class="l">Audits sold</div></div>
     </div>
     <div data-pending style="text-align:center;font-size:12px;font-weight:700;color:var(--amber);margin:-4px 0 10px"></div>
     <button class="btn" id="tLog">Log a walk-in</button>
@@ -544,8 +549,8 @@ function renderPlan(){
     <style>#s-plan summary::-webkit-details-marker{display:none}#s-plan details[open] summary>span:last-child{transform:rotate(45deg)}</style>
     <button class="btn ghost sm" id="pBack" style="width:auto;align-self:flex-start">← Today</button>
     <div class="h-eyebrow">Today's scoreboard</div>
-    <div style="display:flex;gap:9px">${goal(doors,15,'Doors walked')}${goal(convos,6,'Conversations')}${goal(audits,2,'Audits booked')}</div>
-    <div style="font-size:12px;color:var(--muted);margin-top:9px">Counts what you log today. One booked audit is a good day.</div>
+    <div style="display:flex;gap:9px">${goal(doors,15,'Doors walked')}${goal(convos,6,'Conversations')}${goal(LEADS.filter(l=>isToday(l.audit_link_sent_at)).length,2,'Audit links sent')}</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:9px">Every stop has one goal: sell the Intelligent Company Audit. Two links sent is a good day. A paid audit is a great one.</div>
 
     <div class="card" style="background:var(--ink);color:#fff;margin-top:16px;padding:15px 17px;border:none">
       <div style="font-size:13.5px;line-height:1.5">Your one job: get the owner interested and <b style="color:var(--chart)">book them onto the audit</b>, a call with Mia. You do not close. You do not quote price. You spark interest and book the call.</div>
@@ -895,12 +900,20 @@ function openLead(id){
       <a href="#" id="dCheckin">📍 Check in</a>
       <a href="#" id="dEnrich">Enrich</a>
     </div>
-    <button class="btn" id="dCallback" style="margin-top:2px">Mark for audit callback &rarr;</button>
-    <div class="card" style="margin:10px 0 0;padding:12px 14px">
-      <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted)">Intelligent Company Audit payment link</div>
-      <div style="font-size:12px;color:var(--muted);margin:3px 0 9px">${l.audit_link_sent_at?('Sent '+new Date(l.audit_link_sent_at).toLocaleDateString()+'. '):''}When they pay, this lead is marked won and credited to you.</div>
-      <div style="display:flex;gap:7px"><a class="btn sm" id="dPayText" style="flex:1;text-align:center" href="#">Text it</a><a class="btn ghost sm" id="dPayEmail" style="flex:1;text-align:center" href="#">Email it</a><button class="btn ghost sm" id="dPayCopy" style="flex:1">Copy</button></div>
+    <div class="card" style="margin:0 0 10px;padding:13px 14px;background:#E4FF97;color:#0a0b14;border:none">
+      <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.75">Your goal here: sell the audit</div>
+      <div style="font-size:15px;font-weight:800;margin-top:2px">${l.audit_paid_at?'Audit paid ✓ Credited to you':(l.audit_link_sent_at?('Link sent '+new Date(l.audit_link_sent_at).toLocaleDateString()+'. Follow up until it is paid.'):'Send the Intelligent Company Audit link')}</div>
+      ${l.audit_paid_at?'':`<div style="display:flex;gap:7px;margin-top:9px"><a class="btn sm" id="dPayText" style="flex:1;text-align:center" href="#">Text it</a><a class="btn ghost sm" id="dPayEmail" style="flex:1;text-align:center;background:#fff" href="#">Email it</a><button class="btn ghost sm" id="dPayCopy" style="flex:1;background:#fff">Copy</button></div>
+      <details style="margin-top:10px"><summary style="font-size:13px;font-weight:700;cursor:pointer">The 30 second pitch</summary>
+        <div style="font-size:13px;line-height:1.55;margin-top:8px;font-weight:500">
+          <p style="margin:0 0 8px">"We're TMI. We help companies like yours find where time and money get lost between your people, your systems, and your paperwork.</p>
+          <p style="margin:0 0 8px">The Intelligent Company Audit is how we start. We look at how work comes in, who touches it, what tools you use, and where things get stuck. You get a plan: what to fix first, what to automate, and what you can stop paying for.</p>
+          <p style="margin:0 0 8px">Most owners already have plenty of software. The problem is none of it works together. The audit shows you exactly where."</p>
+          <p style="margin:0 0 8px"><b>Ask:</b> "Where does your team still copy, call, remind, or chase things by hand?"</p>
+          <p style="margin:0"><b>Close:</b> "That's what the audit finds. Want me to text you the link right now?"</p>
+        </div></details>`}
     </div>
+    <button class="btn ghost" id="dCallback" style="margin-top:2px">Not ready? Mark for an audit callback &rarr;</button>
     <div id="dTemplates" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px"></div>
     <div style="display:flex;gap:7px;margin-top:8px"><button class="btn ghost sm" id="dAIText" style="flex:1">✨ Draft a text</button><button class="btn ghost sm" id="dAICall" style="flex:1">✨ Call opener</button></div>
     <div id="dAIOut"></div>

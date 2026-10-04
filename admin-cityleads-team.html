@@ -94,7 +94,7 @@
       <div class="card">
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Name</th><th>City</th><th>Email</th><th>Leads</th><th>Worked</th><th>This week</th><th>Booked</th><th>Today</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Name</th><th>City</th><th>Email</th><th>Leads</th><th>Worked</th><th>This week</th><th>Links sent</th><th>Audits sold</th><th>Today</th><th>Status</th><th></th></tr></thead>
             <tbody id="rep-tbody"></tbody>
           </table>
         </div>
@@ -267,16 +267,16 @@ async function loadTeamMap(){
 
 async function load(){
   reps = await TMIAdmin.api('/api/reps-admin').catch(()=>[]) || [];
-  reps.sort((a,b)=>(b.today_count||0)-(a.today_count||0)||(b.booked_count||0)-(a.booked_count||0)||(b.lead_count||0)-(a.lead_count||0));
+  reps.sort((a,b)=>(b.sold_count||0)-(a.sold_count||0)||(b.today_count||0)-(a.today_count||0)||(b.booked_count||0)-(a.booked_count||0)||(b.lead_count||0)-(a.lead_count||0));
   document.getElementById('rep-count').textContent = reps.length + (reps.length===1?' rep':' reps');
   const sel = document.getElementById('bulk-rep');
   if(sel) sel.innerHTML = '<option value="__split">Split across all reps</option>' + reps.map(r=>`<option value="${r.id}">${esc(r.name||r.email)}</option>`).join('');
   const tb = document.getElementById('rep-tbody');
-  const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.booked_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
+  const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.sold_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
   const stat=(n,l)=>`<div class="card" style="text-align:center;padding:16px 12px;margin:0;"><div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;line-height:1;">${n}</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;">${l}</div></div>`;
-  document.getElementById('team-stats').innerHTML = stat(reps.length,'Reps')+stat(tl,'Total leads')+stat(tb2,'Booked / won')+stat(td,'Logged today');
+  document.getElementById('team-stats').innerHTML = stat(reps.length,'Reps')+stat(tl,'Total leads')+stat(tb2,'Audits sold')+stat(td,'Logged today');
   loadFeed(); loadFunnel(); loadTeamMap(); loadCommissions();
-  if(!reps.length){ tb.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
+  if(!reps.length){ tb.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
   tb.innerHTML = reps.map(r=>`
     <tr style="cursor:pointer" onclick="openRep('${r.id}')">
       <td><b>${esc(r.name||'—')}</b><div style="font-size:11px;color:var(--muted)">${r.last_active?('Active '+reltime(r.last_active)):'No activity yet'}</div></td>
@@ -285,7 +285,8 @@ async function load(){
       <td>${r.lead_count||0}</td>
       <td>${r.worked_count||0}</td>
       <td>${r.week_count||0}</td>
-      <td>${r.booked_count||0}</td>
+      <td>${r.link_count||0}</td>
+      <td><b>${r.sold_count||0}</b></td>
       <td><span style="font-weight:700;color:${(r.today_count||0)>=TARGET?'#3f6d12':'inherit'}">${r.today_count||0}</span> <span style="color:var(--muted);font-size:12px">/ ${TARGET}</span></td>
       <td>${r.status==='disabled'
         ? '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#e6e6ea;color:#55576a;">Disabled</span>'
@@ -495,7 +496,8 @@ async function openRep(id){
     <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">${esc(current.email)}</span></div>
     <div class="detail-item"><span class="detail-label">City</span><span class="detail-value">${esc(current.city||'—')}</span></div>
     <div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value">${esc(current.phone||'—')}</span></div>
-    <div class="detail-item"><span class="detail-label">Leads</span><span class="detail-value">${current.lead_count||0} (${current.booked_count||0} booked)</span></div>
+    <div class="detail-item"><span class="detail-label">Leads</span><span class="detail-value">${current.lead_count||0}</span></div>
+    <div class="detail-item"><span class="detail-label">Audits</span><span class="detail-value">${current.link_count||0} links sent, ${current.sold_count||0} sold</span></div>
     <div class="detail-item"><span class="detail-label">Worked</span><span class="detail-value">${current.worked_count||0} of ${current.lead_count||0}</span></div>
     <div class="detail-item"><span class="detail-label">Leads touched</span><span class="detail-value">${current.week_count||0} this week, ${current.today_count||0} today</span></div>
     <div class="detail-item"><span class="detail-label">Last active</span><span class="detail-value">${current.last_active?reltime(current.last_active):'Not yet'}</span></div>`;
