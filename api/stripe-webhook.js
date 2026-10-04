@@ -74,15 +74,12 @@ async function creditRep(session, applicationId) {
     status: 'won', deal_value: deal, audit_paid_at: now, updated_at: now,
     visited_at: lead.visited_at || now, application_id: applicationId || lead.application_id || null,
   });
-  const cmId = 'cm_' + leadId;
-  const existing = await dbx.getById('rep_commissions', cmId).catch(() => null);
-  const row = {
-    rep_id: lead.rep_id, rep_lead_id: leadId, application_id: applicationId || null,
-    business_name: lead.business_name || lead.contact_name || null,
-    deal_value: deal, commission: deal != null ? Math.round(deal * 0.20) : 0, rate: 0.20, updated_at: now,
-  };
-  if (existing) await dbx.update('rep_commissions', cmId, row);
-  else await dbx.insert('rep_commissions', Object.assign({ id: cmId, status: 'pending', created_at: now }, row));
+  const comp = require('./_rep-comp');
+  const rates = await comp.getRates();
+  await comp.writeCommission({
+    id: 'cm_' + leadId, rep_id: lead.rep_id, rep_lead_id: leadId, application_id: applicationId || null,
+    business_name: lead.business_name || lead.contact_name || null, kind: 'audit', amount: deal, rate: rates.audit, source: 'stripe',
+  });
   if (applicationId) await dbx.update('applications', applicationId, { rep_id: lead.rep_id, rep_lead_id: leadId, source: 'rep_field' }).catch(() => {});
   const rep = await dbx.getById('reps', lead.rep_id).catch(() => null);
   return (rep && rep.name) || 'a rep';
@@ -148,7 +145,13 @@ async function markBuildDeposit(session) {
     status: 'accepted', accepted_path: path, accepted_at: new Date().toISOString(),
     deposit_paid: (session.amount_total || 0) / 100, stripe_session: session.id,
   });
-  alertTeam(`BUILD ACCEPTED (${path.toUpperCase()}): ${prop.company || prop.client_email || proposalId} - deposit $${((session.amount_total || 0) / 100).toLocaleString()}`);
+  // Upsell on an account a rep brought in: the rep earns their upsell % on the deposit.
+  const repName = await require('./_rep-comp').creditUpsell({
+    sourceId: session.id, email: prop.client_email || (session.customer_details && session.customer_details.email),
+    amount: (session.amount_total || 0) / 100, kind: 'implementation', business_name: prop.company || null,
+    note: `Build deposit (${path || 'build'})`,
+  }).catch((e) => { console.error('creditUpsell:', e.message); return null; });
+  alertTeam(`BUILD ACCEPTED (${path.toUpperCase()}): ${prop.company || prop.client_email || proposalId} - deposit $${((session.amount_total || 0) / 100).toLocaleString()}${repName ? ' | rep: ' + repName : ''}`);
   // Onboarding / welcome email to the client who just committed to the build.
   const clientEmail = prop.client_email || ((session.customer_details && session.customer_details.email) || null);
   if (clientEmail) {

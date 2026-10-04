@@ -215,25 +215,56 @@ async function loadCommissions(){
   const box=document.getElementById('team-commissions'); if(!box) return;
   let d; try{ d=await TMIAdmin.api('/api/rep-commissions'); }catch(e){ box.innerHTML=''; return; }
   const items=(d&&d.items)||[]; const t=(d&&d.totals)||{pending:0,paid:0,count:0};
-  const money=n=>'$'+Math.round(n||0).toLocaleString();
-  if(!items.length){ box.innerHTML='<div class="card"><div class="panel-sec-label" style="margin-bottom:6px;">Commissions</div><p style="font-size:13px;color:var(--muted);margin:0;">No commissions yet. They appear here when a rep marks a deal won.</p></div>'; return; }
-  const rows=items.slice(0,60).map(c=>`<tr>
+  const rates=(d&&d.rates)||{audit:0.2,upsell:0.2}; const kinds=(d&&d.kinds)||{};
+  const money=n=>'$'+Math.round(n||0).toLocaleString(); const pct=r=>Math.round((r||0)*100)+'%';
+  const rows=items.slice(0,80).map(c=>`<tr>
     <td style="font-weight:600;">${esc(c.rep)}</td>
-    <td>${esc(c.business_name||'—')}</td>
+    <td>${esc(c.business_name||'—')}${c.note?`<div style="font-size:11px;color:var(--muted)">${esc(c.note)}</div>`:''}</td>
+    <td><span class="badge" style="background:${c.kind==='audit'?'#eef3ff':'#f2fbe0'};color:${c.kind==='audit'?'#2f4fa8':'#4a6b12'};">${esc(c.kind_label||'Audit')}</span></td>
     <td>${c.deal_value!=null?money(c.deal_value):'—'}</td>
-    <td style="font-weight:700;">${money(c.commission)}</td>
+    <td style="font-weight:700;">${money(c.commission)} <span style="color:var(--muted);font-weight:500;font-size:11px">${pct(c.rate)}</span></td>
     <td>${c.verified?'<span class="badge" style="background:#e8f6e6;color:#3f8f57;">Verified paid</span>':'<span class="badge" style="background:#f3f3f3;color:#888;">Unverified</span>'}</td>
     <td>${c.status==='paid'?'<span class="badge" style="background:#e8f6e6;color:#3f8f57;">Paid out</span>':'<span class="badge" style="background:#fff5e0;color:#a06800;">Pending</span>'}</td>
     <td style="text-align:right;">${c.status==='paid'?`<button class="btn btn-ghost btn-sm" onclick="setCommission('${c.id}','pending',false)">Undo</button>`:`<button class="btn btn-primary btn-sm" onclick="setCommission('${c.id}','paid',${c.verified?'true':'false'})">Mark paid</button>`}</td>
   </tr>`).join('');
+  const repOpts=reps.map(r=>`<option value="${r.id}">${esc(r.name||r.email)}</option>`).join('');
+  const kindOpts=Object.keys(kinds).filter(k=>k!=='audit').map(k=>`<option value="${k}">${esc(kinds[k])}</option>`).join('');
   box.innerHTML=`<div class="card" style="padding:0;overflow:hidden;">
     <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
       <div class="panel-sec-label" style="margin:0;">Commissions</div>
       <div style="font-size:13px;font-weight:700;">${money(t.pendingVerified||0)} <span style="color:var(--muted);font-weight:500;">verified pending</span> &middot; ${money(t.pending)} <span style="color:var(--muted);font-weight:500;">total pending</span> &middot; ${money(t.paid)} <span style="color:var(--muted);font-weight:500;">paid</span></div>
     </div>
-    <div style="overflow-x:auto;"><table class="data-table" style="width:100%;min-width:640px;"><thead><tr><th>Rep</th><th>Deal</th><th>Deal value</th><th>Commission (20%)</th><th>Payment</th><th>Payout</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
-    <div style="padding:10px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);">Verified means the customer's audit payment is confirmed. Unverified is a rep-marked win with no confirmed payment yet.</div>
+    <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;">
+      <span>Rates: <b>${pct(rates.audit)}</b> on audits, <b>${pct(rates.upsell)}</b> on upsells</span>
+      <button class="btn btn-ghost btn-sm" onclick="editRates(${rates.audit},${rates.upsell})">Change rates</button>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('up-form').style.display='flex'">+ Add an upsell</button>
+    </div>
+    <div id="up-form" style="display:none;padding:14px 16px;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div><label class="form-label">Rep</label><select class="form-input" id="up-rep">${repOpts}</select></div>
+      <div><label class="form-label">Business</label><input class="form-input" id="up-biz" placeholder="ABC Roofing"/></div>
+      <div><label class="form-label">Type</label><select class="form-input" id="up-kind">${kindOpts}</select></div>
+      <div><label class="form-label">Amount client paid</label><input class="form-input" id="up-amt" placeholder="5000" inputmode="decimal" style="max-width:130px"/></div>
+      <div><label class="form-label">Rate (optional)</label><input class="form-input" id="up-rate" placeholder="${pct(rates.upsell)}" style="max-width:90px"/></div>
+      <div><label class="form-label">Note</label><input class="form-input" id="up-note" placeholder="Phase 1 build"/></div>
+      <button class="btn btn-primary btn-sm" onclick="addUpsell()">Save</button>
+    </div>
+    ${items.length?`<div style="overflow-x:auto;"><table class="data-table" style="width:100%;min-width:760px;"><thead><tr><th>Rep</th><th>Account</th><th>Type</th><th>Client paid</th><th>Commission</th><th>Payment</th><th>Payout</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p style="font-size:13px;color:var(--muted);margin:0;padding:14px 16px;">No commissions yet. They appear here when an audit is paid or an upsell is added.</p>'}
+    <div style="padding:10px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);">Audits paid through a rep's link and build deposits paid in Stripe are added automatically. Add implementation fees, retainers, or add-ons paid any other way with "Add an upsell". Each line keeps the rate it was earned at.</div>
   </div>`;
+}
+async function editRates(a,u){
+  const na=prompt('Commission % on audits:', Math.round(a*100)); if(na==null) return;
+  const nu=prompt('Commission % on upsells (implementation, retainers, add-ons):', Math.round(u*100)); if(nu==null) return;
+  const r=await TMIAdmin.api('/api/rep-commissions','POST',{action:'rates',audit:Number(na),upsell:Number(nu)});
+  if(r){ TMIAdmin.toast('Rates saved. New commissions use them.'); loadCommissions(); }
+}
+async function addUpsell(){
+  const v=id=>document.getElementById(id).value.trim();
+  const body={action:'add',rep_id:v('up-rep'),business_name:v('up-biz'),kind:v('up-kind'),amount:v('up-amt'),note:v('up-note')};
+  if(v('up-rate')) body.rate=Number(v('up-rate').replace('%',''));
+  if(!body.business_name||!body.amount){ TMIAdmin.toast('Add the business and the amount'); return; }
+  const r=await TMIAdmin.api('/api/rep-commissions','POST',body);
+  if(r){ TMIAdmin.toast('Upsell added: '+'$'+Math.round(r.commission||0).toLocaleString()+' commission'); loadCommissions(); }
 }
 async function setCommission(id,status,verified){
   if(status==='paid' && verified===false && !confirm('This commission is not verified against a confirmed payment yet. Pay it out anyway?')) return;

@@ -43,22 +43,18 @@ async function bridgeToPipeline(lead, up, repId, rep) {
   return app && app.id;
 }
 
-// Persist the rep's commission for a won deal (20% of deal value) as a real
+// Persist the rep's commission for a won deal (admin's audit rate) as a real
 // ledger row admin can pay out against, instead of a client-side number. One row
 // per won lead (doc id derived from the lead), refreshed if the deal value
 // changes; the payout status is preserved across refreshes.
 async function recordCommission(lead, up, repId, appId) {
   const deal = up.deal_value != null ? up.deal_value : (lead.deal_value != null ? lead.deal_value : null);
-  const id = 'cm_' + lead.id;
-  const now = new Date().toISOString();
-  const patch = {
-    rep_id: repId, rep_lead_id: lead.id, application_id: appId || lead.application_id || null,
-    business_name: lead.business_name || lead.contact_name || null,
-    deal_value: deal, commission: deal != null ? Math.round(deal * 0.20) : 0, rate: 0.20, updated_at: now,
-  };
-  const existing = await db.getById('rep_commissions', id).catch(() => null);
-  if (existing) return db.update('rep_commissions', id, patch).catch(() => null); // keep payout status
-  return db.insert('rep_commissions', Object.assign({ id, status: 'pending', created_at: now }, patch)).catch(() => null);
+  const comp = require('./_rep-comp');
+  const rates = await comp.getRates();
+  return comp.writeCommission({
+    id: 'cm_' + lead.id, rep_id: repId, rep_lead_id: lead.id, application_id: appId || lead.application_id || null,
+    business_name: lead.business_name || lead.contact_name || null, kind: 'audit', amount: deal, rate: rates.audit, source: 'rep',
+  }).catch(() => null);
 }
 
 

@@ -1333,10 +1333,11 @@ function renderMe(){
     </div>
     <div class="card" style="background:var(--ink);color:#fff">
       <div style="font-size:11px;opacity:.65;text-transform:uppercase;letter-spacing:.07em">Commission earned</div>
-      <div style="font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:2px">${money(commission)}</div>
-      <div style="font-size:12px;opacity:.65;margin-top:2px">20% of ${money(dealTotal)} won · ${wonLeads.length} deal${wonLeads.length===1?'':'s'}</div>
+      <div id="meEarned" style="font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:2px">${money(commission)}</div>
+      <div id="meEarnedSub" style="font-size:12px;opacity:.65;margin-top:2px">From audits you sold and every upsell on those accounts</div>
       <div id="mePay" style="font-size:12px;opacity:.85;margin-top:8px"></div>
     </div>
+    <div id="meLedger"></div>
     <div class="card" id="meEarn">
       <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700"><span>This month's goal</span><button id="meEarnEdit" style="font-size:12px;color:var(--blue);font-weight:700">${money(monthCommission)} / ${money(earnGoal)}</button></div>
       <div style="height:9px;border-radius:999px;background:var(--line);margin-top:8px;overflow:hidden"><div style="height:100%;width:${earnPct}%;background:var(--dark)"></div></div>
@@ -1392,6 +1393,16 @@ async function loadRepPay(){
   let d; try{ d=await api('/api/rep-me-commissions',{method:'POST',body:'{}'}); }catch(e){ return; }
   const money=n=>'$'+Math.round(n||0).toLocaleString();
   box.innerHTML='Paid out '+money(d.paid)+' · '+money(d.pending)+' pending';
+  // The ledger is the real number: audits plus implementation fees, retainers and add-ons.
+  const big=$('#meEarned'); if(big) big.textContent=money((d.paid||0)+(d.pending||0));
+  const items=d.items||[]; const lb=$('#meLedger'); if(!lb) return;
+  if(!items.length){ lb.innerHTML=''; return; }
+  lb.innerHTML='<div class="h-eyebrow">What you earned on</div>'+items.slice(0,15).map(c=>`<div class="lead" style="cursor:default">
+    <div class="body"><div class="name">${esc(c.business_name||'Account')}</div>
+    <div class="sub">${esc(c.kind_label)} · client paid ${money(c.deal_value)} · ${Math.round((c.rate||0)*100)}%</div></div>
+    <div style="text-align:right;flex:none"><div style="font-weight:800">${money(c.commission)}</div>
+    <span class="chip" style="${c.status==='paid'?'background:#e8f6e6;color:#2d6b3d':'background:#fff5e0;color:#8a5a00'}">${c.status==='paid'?'Paid':'Pending'}</span></div></div>`).join('')
+    +'<div style="font-size:12px;color:var(--muted);margin:4px 2px 12px">When a client you brought in buys more (implementation, retainer, add-ons), you earn on that too. It shows up here.</div>';
 }
 async function loadLeaderboard(){
   const box=$('#meBoard'); if(!box) return;
