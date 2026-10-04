@@ -391,8 +391,10 @@ async function loadLeads(){
 let PLAN = null;
 function planStops(){ return PLAN&&PLAN.lead_ids ? PLAN.lead_ids.map(id=>LEADS.find(l=>l.id===id)).filter(Boolean) : []; }
 function stopDone(l){ return l.status!=='new' || isToday(l.visited_at); }
+let PICKING=null; // town choices while the rep is choosing (or switching) a town
 function renderStops(){
   const box=$('#tStops'); if(!box) return;
+  if(PICKING || (PLAN&&PLAN.needs_pick)) return renderTownPicker(box, PICKING || (PLAN&&PLAN.towns) || []);
   const stops=planStops();
   if(!stops.length){ box.innerHTML=''; return; }
   const done=stops.filter(stopDone).length, pct=Math.round(done/stops.length*100);
@@ -408,7 +410,7 @@ function renderStops(){
     <div id="tStopList"></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="btn sm" id="tRoute" style="flex:1" ${left.length?'':'disabled'}>Start route</button>
-      <button class="btn ghost sm" id="tReplan" style="flex:1">Different town</button>
+      <button class="btn ghost sm" id="tReplan" style="flex:1">Change town</button>
     </div></div>`;
   const list=$('#tStopList');
   stops.forEach((l,i)=>{ const row=leadRow(l); if(stopDone(l)) row.style.opacity='.45'; const n=el(`<div style="font-weight:800;font-size:12px;color:var(--muted);width:20px;flex:none;align-self:center">${stopDone(l)?'✓':(i+1)}</div>`); row.insertBefore(n,row.firstChild); list.appendChild(row); });
@@ -419,9 +421,42 @@ function renderStops(){
     window.open(url,'_blank');
   };
   $('#tReplan').onclick=async()=>{
-    if(!confirm('Swap today\'s list for a different town?')) return;
-    try{ PLAN=await api('/api/rep-leads',{method:'POST',body:JSON.stringify({action:'replan'})}); renderToday(); toast(PLAN.town?('New list: '+PLAN.town):'New list ready'); }catch(ex){ toast(ex.message); }
+    try{ const d=await api('/api/rep-leads?towns=1'); PICKING=d.towns||[]; renderStops(); }catch(ex){ toast(ex.message); }
   };
+}
+// The rep chooses where to work. Towns show how many open businesses are left,
+// how many are hot, and whether a teammate already picked that town today.
+function renderTownPicker(box, towns){
+  const switching=!!PICKING && PLAN && !PLAN.needs_pick;
+  const due=(PLAN&&PLAN.needs_pick)?planStops():[];
+  box.innerHTML=`<div class="card" style="margin-bottom:12px">
+    <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted)">Today's stops</div>
+    <div style="font-size:17px;font-weight:800;letter-spacing:-.01em;margin:2px 0 4px">Where are you working today?</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">Pick a town and you get about 15 businesses there, best ones first, in driving order.</div>
+    <input id="tTownQ" placeholder="Search a town" style="margin-bottom:8px"/>
+    <div id="tTowns"></div>
+    ${switching?'<button class="btn ghost sm" id="tPickCancel" style="margin-top:8px">Keep my current list</button>':''}
+  </div>
+  ${due.length?'<div class="h-eyebrow">Callbacks due today</div><div id="tPickDue"></div>':''}`;
+  const draw=()=>{
+    const q=($('#tTownQ').value||'').toLowerCase().trim();
+    const rows=towns.filter(t=>!q||t.town.toLowerCase().includes(q)).slice(0,q?40:12);
+    $('#tTowns').innerHTML=rows.length?rows.map(t=>`<button class="lead" data-town="${esc(t.town)}" style="width:100%;text-align:left;font:inherit;color:inherit">
+      <div class="body"><div class="name">${esc(t.town)}${t.last?' <span class="chip" style="background:#eef3ff;color:#2f4fa8">Yesterday</span>':''}</div>
+      <div class="sub">${t.open} open${t.hot?(' · '+t.hot+' hot'):''}${t.named?(' · '+t.named+' with owner name'):''}${t.partners.length?(' · '+esc(t.partners.join(', '))+' is here today'):''}</div></div>
+      <span style="flex:none;font-weight:800;color:var(--muted)">→</span></button>`).join('')
+      :'<div class="empty">No towns match. Every open business may already be worked.</div>';
+    document.querySelectorAll('#tTowns [data-town]').forEach(b=>b.onclick=()=>pickTown(b.dataset.town));
+  };
+  $('#tTownQ').oninput=draw; draw();
+  const c=$('#tPickCancel'); if(c) c.onclick=()=>{ PICKING=null; renderStops(); };
+  const dbox=$('#tPickDue'); if(dbox) due.forEach(l=>dbox.appendChild(leadRow(l)));
+}
+async function pickTown(town){
+  try{
+    PLAN=await api('/api/rep-leads',{method:'POST',body:JSON.stringify({action:'plan',town})});
+    PICKING=null; renderToday(); toast('Your list for '+town+' is ready');
+  }catch(ex){ toast(ex.message); }
 }
 
 /* ---- tabs ---- */
@@ -468,6 +503,7 @@ function todayMove(){
   const unpaid=LEADS.filter(l=>l.audit_link_sent_at&&!l.audit_paid_at&&!CLOSED_ST.includes(l.status)&&(Date.now()-new Date(l.audit_link_sent_at).getTime())>864e5)
     .sort((a,b)=>new Date(a.audit_link_sent_at)-new Date(b.audit_link_sent_at));
   if(unpaid.length){ const l=unpaid[0]; return {t:'Close an audit: '+(l.business_name||l.contact_name||'lead'),d:'They got the audit link '+Math.floor((Date.now()-new Date(l.audit_link_sent_at).getTime())/864e5)+' day(s) ago and have not paid. Call and ask what is holding them up.',lead:l.id}; }
+  if(PLAN&&PLAN.needs_pick) return {t:'Pick your town for today',d:'Choose where you are working and get about 15 stops there, best ones first.',go:'today'};
   const next=planStops().find(l=>!stopDone(l));
   if(next) return {t:'Next stop: '+(next.business_name||next.contact_name||'Lead'),d:(next.contact_name&&next.business_name?('Ask for '+next.contact_name+'. '):'')+'Stop '+(planStops().indexOf(next)+1)+' of '+planStops().length+' on today\'s list.',lead:next.id};
   if(!LEADS.filter(workedToday).length) return {t:'Log your first door',d:'No doors logged yet today. Walk your cluster and log the first one.',go:'log'};
