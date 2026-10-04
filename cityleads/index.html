@@ -853,6 +853,32 @@ async function saveNewLead(){
 }
 
 /* ---- Lead detail sheet ---- */
+/* ---- Audit payment link: tagged with the lead so a payment credits this rep ---- */
+const AUDIT_PAY_URL='https://buy.stripe.com/9B600j7LQejf2pvdpYcV200';
+function auditPayLink(l){
+  let u=AUDIT_PAY_URL+'?client_reference_id='+encodeURIComponent('rl_'+l.id);
+  if(l.email) u+='&prefilled_email='+encodeURIComponent(l.email);
+  return u;
+}
+function auditPayMessage(l){
+  const first=String(l.contact_name||'').trim().split(/\s+/)[0];
+  const me=String((ME&&ME.name)||'').trim().split(/\s+/)[0];
+  return (first?('Hi '+first+', '):'Hi, ')+'here is the link for your TMI Intelligent Company Audit: '+auditPayLink(l)+' Once it is paid, you will get a short intake and we get to work.'+(me?(' - '+me):'');
+}
+function markPaySent(l){
+  l.audit_link_sent_at=new Date().toISOString();
+  writeLead('PATCH',{id:l.id,audit_link_sent_at:l.audit_link_sent_at,status:l.status==='new'?'contacted':l.status}).catch(()=>{});
+  if(l.status==='new') l.status='contacted';
+}
+function wirePayLink(l){
+  const tel=(l.phone||'').replace(/[^0-9+]/g,'');
+  const msg=auditPayMessage(l);
+  const t=$('#dPayText'), e=$('#dPayEmail'), c=$('#dPayCopy');
+  if(t){ if(tel){ t.href='sms:'+tel+'?&body='+encodeURIComponent(msg); t.onclick=()=>markPaySent(l); } else { t.style.opacity='.4'; t.style.pointerEvents='none'; } }
+  if(e){ if(l.email){ e.href='mailto:'+l.email+'?subject='+encodeURIComponent('Your TMI Intelligent Company Audit')+'&body='+encodeURIComponent(msg); e.onclick=()=>markPaySent(l); } else { e.style.opacity='.4'; e.style.pointerEvents='none'; } }
+  if(c) c.onclick=async()=>{ try{ await navigator.clipboard.writeText(auditPayLink(l)); toast('Link copied'); markPaySent(l); }catch(ex){ prompt('Copy this link',auditPayLink(l)); } };
+}
+
 function openLead(id){
   const l=LEADS.find(x=>x.id===id); if(!l) return;
   if(l._slim){ api('/api/rep-leads?id='+encodeURIComponent(id)).then(full=>{ mergeLead(full); openLead(id); }).catch(()=>{ l._slim=false; openLead(id); }); return; }
@@ -870,6 +896,11 @@ function openLead(id){
       <a href="#" id="dEnrich">Enrich</a>
     </div>
     <button class="btn" id="dCallback" style="margin-top:2px">Mark for audit callback &rarr;</button>
+    <div class="card" style="margin:10px 0 0;padding:12px 14px">
+      <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted)">Intelligent Company Audit payment link</div>
+      <div style="font-size:12px;color:var(--muted);margin:3px 0 9px">${l.audit_link_sent_at?('Sent '+new Date(l.audit_link_sent_at).toLocaleDateString()+'. '):''}When they pay, this lead is marked won and credited to you.</div>
+      <div style="display:flex;gap:7px"><a class="btn sm" id="dPayText" style="flex:1;text-align:center" href="#">Text it</a><a class="btn ghost sm" id="dPayEmail" style="flex:1;text-align:center" href="#">Email it</a><button class="btn ghost sm" id="dPayCopy" style="flex:1">Copy</button></div>
+    </div>
     <div id="dTemplates" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px"></div>
     <div style="display:flex;gap:7px;margin-top:8px"><button class="btn ghost sm" id="dAIText" style="flex:1">✨ Draft a text</button><button class="btn ghost sm" id="dAICall" style="flex:1">✨ Call opener</button></div>
     <div id="dAIOut"></div>
@@ -959,6 +990,7 @@ function openLead(id){
     }catch(ex){ toast(ex.message); cbk.disabled=false; }
   };
   const ci=$('#dCheckin'); if(ci) ci.onclick=(e)=>{ e.preventDefault(); checkIn(l); };
+  wirePayLink(l);
   const cal=$('#dCal'); if(cal) cal.onclick=(e)=>{ e.preventDefault(); addToCalendar(l); };
   const pin=$('#dPhotoInput'); if(pin) pin.onchange=()=>addPhoto(l.id,pin);
   loadPhotos(l.id);

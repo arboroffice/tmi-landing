@@ -57,6 +57,37 @@ async function linkPaidTenant(email, appId) {
   if (appId) await dbx.update('applications', appId, { tenant_id: user.tenant_id, os_claimed_at: new Date().toISOString() }).catch(() => {});
 }
 
+
+// A rep sent this payment link from City Leads (client_reference_id = "rl_<rep lead id>").
+// Credit them: the lead becomes won with the amount paid, the rep's commission
+// row is written the same way rep-leads.js does it, and the application is
+// tagged with the rep. Returns the rep's name for the team alert.
+async function creditRep(session, applicationId) {
+  const ref = String(session.client_reference_id || '');
+  if (!ref.startsWith('rl_')) return null;
+  const leadId = ref.slice(3);
+  const lead = await dbx.getById('rep_leads', leadId).catch(() => null);
+  if (!lead) return null;
+  const now = new Date().toISOString();
+  const deal = session.amount_total != null ? Math.round(session.amount_total / 100) : null;
+  await dbx.update('rep_leads', leadId, {
+    status: 'won', deal_value: deal, audit_paid_at: now, updated_at: now,
+    visited_at: lead.visited_at || now, application_id: applicationId || lead.application_id || null,
+  });
+  const cmId = 'cm_' + leadId;
+  const existing = await dbx.getById('rep_commissions', cmId).catch(() => null);
+  const row = {
+    rep_id: lead.rep_id, rep_lead_id: leadId, application_id: applicationId || null,
+    business_name: lead.business_name || lead.contact_name || null,
+    deal_value: deal, commission: deal != null ? Math.round(deal * 0.20) : 0, rate: 0.20, updated_at: now,
+  };
+  if (existing) await dbx.update('rep_commissions', cmId, row);
+  else await dbx.insert('rep_commissions', Object.assign({ id: cmId, status: 'pending', created_at: now }, row));
+  if (applicationId) await dbx.update('applications', applicationId, { rep_id: lead.rep_id, rep_lead_id: leadId, source: 'rep_field' }).catch(() => {});
+  const rep = await dbx.getById('reps', lead.rep_id).catch(() => null);
+  return (rep && rep.name) || 'a rep';
+}
+
 async function markPaid(session) {
   const email = (session.customer_details && session.customer_details.email) || session.customer_email || null;
   const applicationId = (session.metadata && session.metadata.application_id) || null;
@@ -68,7 +99,8 @@ async function markPaid(session) {
       status: 'paid', paid_at: new Date().toISOString(), stripe_session: session.id,
     });
     await linkPaidTenant(email, app.id).catch(() => {});
-    alertTeam(`PAID Intelligent Company Audit: ${app.name || company || email} | ${email || 'no email'}`);
+    const repName = await creditRep(session, app.id).catch((e) => { console.error('creditRep:', e.message); return null; });
+    alertTeam(`PAID Intelligent Company Audit: ${app.name || company || email} | ${email || 'no email'}${repName ? ' | via ' + repName : ''}`);
     // Immediate payment confirmation + next step to the customer (in case they
     // closed the tab before the intake page loaded).
     if (email) {
@@ -100,7 +132,8 @@ async function markPaid(session) {
       source: 'complete_audit', status: 'paid', paid_at: new Date().toISOString(), stripe_session: session.id,
     }).catch(() => null);
     await linkPaidTenant(email, created && created.id).catch(() => {});
-    alertTeam(`PAID Intelligent Company Audit (no prior capture): ${email || company || session.id}`);
+    const repName = await creditRep(session, created && created.id).catch((e) => { console.error('creditRep:', e.message); return null; });
+    alertTeam(`PAID Intelligent Company Audit (no prior capture): ${email || company || session.id}${repName ? ' | via ' + repName : ''}`);
   }
 }
 

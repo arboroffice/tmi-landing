@@ -12,7 +12,7 @@ const { requireRep } = require('./_rep-auth');
 
 const STATUSES = ['new', 'attempted', 'contacted', 'booked', 'callback', 'not_interested', 'won', 'lost'];
 const num = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : null; };
-const FIELDS = ['business_name', 'contact_name', 'phone', 'email', 'address', 'industry', 'notes', 'next_action_at', 'source'];
+const FIELDS = ['business_name', 'contact_name', 'phone', 'email', 'address', 'industry', 'notes', 'next_action_at', 'source', 'audit_link_sent_at'];
 
 // Bridge a rep-booked/won lead into the sales pipeline (applications), so admin,
 // payments, commissions, and OS provisioning all reconcile against one record.
