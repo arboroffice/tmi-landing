@@ -232,6 +232,7 @@ module.exports = async (req, res) => {
       const out = await db.update('rep_leads', b.id, up);
       // First time the audit link goes out: TMI follows up for the rep on day 1
       // and day 3 until it is paid (see audit-link-followup.js).
+      if (b.audit_link_sent_at && !lead.audit_link_sent_at) await db.update('rep_leads', b.id, { audit_link_first_at: b.audit_link_sent_at }).catch(() => {});
       if (b.audit_link_sent_at && !lead.audit_link_sent_at && process.env.QSTASH_TOKEN) {
         try {
           const { Client } = require('@upstash/qstash');

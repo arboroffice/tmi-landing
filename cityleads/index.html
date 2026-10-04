@@ -502,7 +502,8 @@ function todayMove(){
   // An audit link that went out but has not been paid is the hottest lead they have.
   const unpaid=LEADS.filter(l=>l.audit_link_sent_at&&!l.audit_paid_at&&!CLOSED_ST.includes(l.status)&&(Date.now()-new Date(l.audit_link_sent_at).getTime())>864e5)
     .sort((a,b)=>new Date(a.audit_link_sent_at)-new Date(b.audit_link_sent_at));
-  if(unpaid.length){ const l=unpaid[0]; return {t:'Close an audit: '+(l.business_name||l.contact_name||'lead'),d:'They got the audit link '+Math.floor((Date.now()-new Date(l.audit_link_sent_at).getTime())/864e5)+' day(s) ago and have not paid. Call and ask what is holding them up.',lead:l.id}; }
+  if(unpaid.length){ const l=unpaid[0]; const auto=(l.link_followups_log||[]).filter(x=>x.sent&&x.sent.length).length;
+    return {t:'Close an audit: '+(l.business_name||l.contact_name||'lead'),d:'They got the audit link '+Math.floor((Date.now()-new Date(l.audit_link_sent_at).getTime())/864e5)+' day(s) ago and have not paid.'+(auto?(' TMI already sent '+auto+' follow-up'+(auto>1?'s':'')+', so call instead of texting.'):'')+' Ask what is holding them up.',lead:l.id}; }
   if(PLAN&&PLAN.needs_pick) return {t:'Pick your town for today',d:'Choose where you are working and get about 15 stops there, best ones first.',go:'today'};
   const next=planStops().find(l=>!stopDone(l));
   if(next) return {t:'Next stop: '+(next.business_name||next.contact_name||'Lead'),d:(next.contact_name&&next.business_name?('Ask for '+next.contact_name+'. '):'')+'Stop '+(planStops().indexOf(next)+1)+' of '+planStops().length+' on today\'s list.',lead:next.id};
@@ -906,6 +907,22 @@ function auditPayMessage(l){
   const me=String((ME&&ME.name)||'').trim().split(/\s+/)[0];
   return (first?('Hi '+first+', '):'Hi, ')+'here is the link for your TMI Intelligent Company Audit: '+auditPayLink(l)+' Once it is paid, you will get a short intake and we get to work.'+(me?(' - '+me):'');
 }
+// What TMI's automatic follow-up has done (and will do) for this lead.
+function autoFollowupStatus(l){
+  if(!l.audit_link_sent_at) return '';
+  const log=l.link_followups_log||[], first=new Date(l.audit_link_first_at||l.audit_link_sent_at);
+  const d=(x)=>new Date(x).toLocaleDateString([], {month:'short',day:'numeric'});
+  const part=(step,days)=>{
+    const done=log.find(x=>x.step===step);
+    const nm=step==='day1'?'Day 1':'Day 3';
+    if(done) return done.sent&&done.sent.length?('✓ '+nm+' sent '+d(done.at)+' ('+done.sent.map(x=>x==='sms'?'text':'email').join(' + ')+')'):('⚠ '+nm+' not sent: no email or phone');
+    if(l.audit_paid_at||['won','lost','not_interested'].includes(l.status)) return nm+' not needed';
+    return nm+' coming '+d(first.getTime()+days*864e5);
+  };
+  return 'TMI auto follow-up: '+part('day1',1)+' · '+part('day3',3);
+}
+// Every way a rep sends the link also lands on the lead's timeline as "You".
+function logPayAction(l, channel, summary){ logInteraction(l.id, channel, {summary}).catch(()=>{}); }
 function markPaySent(l){
   l.audit_link_sent_at=new Date().toISOString();
   writeLead('PATCH',{id:l.id,audit_link_sent_at:l.audit_link_sent_at,status:l.status==='new'?'contacted':l.status}).catch(()=>{});
@@ -950,15 +967,15 @@ async function showPayQR(l){
   document.body.appendChild(ov);
   new QRCode(ov.querySelector('#qrBox'),{text:auditPayLink(l),width:240,height:240,correctLevel:QRCode.CorrectLevel.M});
   ov.querySelector('#qrClose').onclick=()=>{ ov.remove(); openLead(l.id); };
-  markPaySent(l);
+  markPaySent(l); logPayAction(l,'note','You showed the audit QR code in person.');
 }
 function wirePayLink(l){
   const tel=(l.phone||'').replace(/[^0-9+]/g,'');
   const msg=auditPayMessage(l);
   const t=$('#dPayText'), e=$('#dPayEmail'), c=$('#dPayCopy');
-  if(t){ if(tel){ t.href='sms:'+tel+'?&body='+encodeURIComponent(msg); t.onclick=()=>markPaySent(l); } else { t.style.opacity='.4'; t.style.pointerEvents='none'; } }
-  if(e){ if(l.email){ e.href='mailto:'+l.email+'?subject='+encodeURIComponent('Your TMI Intelligent Company Audit')+'&body='+encodeURIComponent(msg); e.onclick=()=>markPaySent(l); } else { e.style.opacity='.4'; e.style.pointerEvents='none'; } }
-  if(c) c.onclick=async()=>{ try{ await navigator.clipboard.writeText(auditPayLink(l)); toast('Link copied'); markPaySent(l); }catch(ex){ prompt('Copy this link',auditPayLink(l)); } };
+  if(t){ if(tel){ t.href='sms:'+tel+'?&body='+encodeURIComponent(msg); t.onclick=()=>{ markPaySent(l); logPayAction(l,'text','You texted the audit payment link.'); }; } else { t.style.opacity='.4'; t.style.pointerEvents='none'; } }
+  if(e){ if(l.email){ e.href='mailto:'+l.email+'?subject='+encodeURIComponent('Your TMI Intelligent Company Audit')+'&body='+encodeURIComponent(msg); e.onclick=()=>{ markPaySent(l); logPayAction(l,'email','You emailed the audit payment link.'); }; } else { e.style.opacity='.4'; e.style.pointerEvents='none'; } }
+  if(c) c.onclick=async()=>{ try{ await navigator.clipboard.writeText(auditPayLink(l)); toast('Link copied'); markPaySent(l); logPayAction(l,'note','You copied the audit payment link to send.'); }catch(ex){ prompt('Copy this link',auditPayLink(l)); } };
   const q=$('#dPayQR'); if(q) q.onclick=()=>showPayQR(l);
   const nb=$('#dPayNudges');
   if(nb){
@@ -968,7 +985,8 @@ function wirePayLink(l){
       ['Any questions?','Hey '+first+', checking in on the TMI audit. Any questions I can answer? Here is the link again: '+auditPayLink(l)+(me?' - '+me:'')],
       ['Quick nudge','Hi '+first+', the audit is how we find where '+(l.business_name||'your company')+' is losing time and money. Want to get it started this week? '+auditPayLink(l)+(me?' - '+me:'')],
     ];
-    nb.innerHTML=msgs.map((m,i)=>tel?`<a class="btn ghost sm" style="background:#fff" href="sms:${tel}?&body=${encodeURIComponent(m[1])}">${esc(m[0])}</a>`:'').join('')||'<span style="font-size:12px">Add a phone number to text them.</span>';
+    nb.innerHTML=msgs.map((m,i)=>tel?`<a class="btn ghost sm" style="background:#fff" data-nudge="${esc(m[0])}" href="sms:${tel}?&body=${encodeURIComponent(m[1])}">${esc(m[0])}</a>`:'').join('')||'<span style="font-size:12px">Add a phone number to text them.</span>';
+    nb.querySelectorAll('[data-nudge]').forEach(a=>a.addEventListener('click',()=>logPayAction(l,'text','You sent a check-in text ("'+a.dataset.nudge+'").')));
   }
 }
 
@@ -993,7 +1011,7 @@ function openLead(id){
       <div style="font-size:15px;font-weight:800;margin-top:2px">${l.audit_paid_at?'Audit paid ✓ Credited to you':(l.audit_link_sent_at?('Link sent '+new Date(l.audit_link_sent_at).toLocaleDateString()+'. Follow up until it is paid.'):'Send the Intelligent Company Audit link')}</div>
       ${l.audit_paid_at?'':`<button class="btn" id="dPayQR" style="margin-top:9px;background:#0a0b14;color:#fff">Show QR code: they scan and pay now</button>
       <div style="display:flex;gap:7px;margin-top:7px"><a class="btn sm" id="dPayText" style="flex:1;text-align:center" href="#">Text it</a><a class="btn ghost sm" id="dPayEmail" style="flex:1;text-align:center;background:#fff" href="#">Email it</a><button class="btn ghost sm" id="dPayCopy" style="flex:1;background:#fff">Copy</button></div>
-      ${l.audit_link_sent_at?`<div style="font-size:12px;font-weight:700;margin-top:10px">Quick check-in texts</div><div style="display:flex;gap:7px;margin-top:5px;flex-wrap:wrap" id="dPayNudges"></div><div style="font-size:11.5px;margin-top:6px;opacity:.75">TMI also follows up for you by email and text after 1 day and 3 days, until they pay.</div>`:''}
+      ${l.audit_link_sent_at?`<div style="font-size:12px;font-weight:700;margin-top:10px">Quick check-in texts</div><div style="display:flex;gap:7px;margin-top:5px;flex-wrap:wrap" id="dPayNudges"></div><div style="font-size:12px;margin-top:8px;font-weight:600">${autoFollowupStatus(l)}</div>`:''}
       <details style="margin-top:10px"><summary style="font-size:13px;font-weight:700;cursor:pointer">The 30 second pitch</summary>
         <div style="font-size:13px;line-height:1.55;margin-top:8px;font-weight:500">
           <p style="margin:0 0 8px">"We're TMI. We help companies like yours find where time and money get lost between your people, your systems, and your paperwork.</p>
@@ -1218,12 +1236,13 @@ async function loadInteractions(leadId){
   let rows=[];
   try{ rows=await api('/api/rep-interactions?lead_id='+encodeURIComponent(leadId)); }catch(e){ return; }
   if(!rows || !rows.length){ box.innerHTML=''; return; }
-  box.innerHTML='<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;">Interaction history</div>'+
+  box.innerHTML='<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;">History: what you and TMI already did</div>'+
     rows.slice(0,20).map(x=>{
       const when=x.created_at?new Date(x.created_at).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
       const oc=x.outcome?('<span style="font-weight:700">'+esc(outcomeLabel(x.outcome))+'</span> · '):'';
       const body=x.summary||x.transcript||'';
-      return '<div style="border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;background:var(--card)"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">'+oc+esc(when)+'</div><div style="font-size:13.5px;color:var(--ink);line-height:1.5">'+esc(body)+'</div>'+(x.next_step?('<div style="font-size:12.5px;color:var(--ink-2);margin-top:5px">Next: '+esc(x.next_step)+'</div>'):'')+'</div>';
+      const who=x.source==='auto'?'<span style="font-weight:700;color:#4a6b12">🤖 Sent by TMI automatically</span> · ':(x.source==='manual'?'<span style="font-weight:700">You</span> · ':'');
+      return '<div style="border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;background:'+(x.source==='auto'?'#f6fbea':'var(--card)')+'"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">'+who+oc+esc(when)+'</div><div style="font-size:13.5px;color:var(--ink);line-height:1.5">'+esc(body)+'</div>'+(x.next_step?('<div style="font-size:12.5px;color:var(--ink-2);margin-top:5px">Next: '+esc(x.next_step)+'</div>'):'')+'</div>';
     }).join('');
 }
 

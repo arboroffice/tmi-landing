@@ -86,6 +86,20 @@ module.exports = async function handler(req, res) {
       });
       sent.push('sms');
     }
+    // Put it on the lead's timeline and status so the rep sees TMI already did it.
+    const now = new Date().toISOString();
+    const label = step === 'day1' ? 'day 1' : 'day 3';
+    const what = sent.length ? sent.map((x) => (x === 'sms' ? 'text' : 'email')).join(' + ') : null;
+    await db.insert('rep_interactions', {
+      rep_id: lead.rep_id, lead_id: leadId, channel: sent.includes('sms') ? 'text' : 'email', source: 'auto',
+      summary: what
+        ? `TMI sent the ${label} audit follow-up for you (${what}) with the payment link.`
+        : `TMI could not send the ${label} follow-up: no email or phone on this lead. Add one so TMI can follow up.`,
+      transcript: null, outcome: null, next_step: null, sentiment: null, created_at: now,
+    }).catch((e) => console.error('log auto follow-up:', e.message));
+    await db.update('rep_leads', leadId, {
+      link_followups_log: (lead.link_followups_log || []).concat({ step, at: now, sent }),
+    }).catch(() => {});
     return res.json({ ok: true, step, sent });
   } catch (e) {
     console.error('audit-link-followup:', e.message);
