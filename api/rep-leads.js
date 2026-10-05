@@ -159,12 +159,15 @@ module.exports = async (req, res) => {
         if (!one || one.rep_id !== repId) return res.status(404).json({ error: 'Not found' });
         return res.json(one);
       }
-      const rows = await db.list('rep_leads', { where: [['rep_id', '==', repId]], order: 'updated_at', ascending: false, limit: 20000 });
       // Today's list. Nothing is picked for the rep: until they choose a town we
-      // send the town choices (plus any callbacks due today).
-      if (req.query.today || req.query.towns) {
-        const existing = req.query.towns ? null : await db.getById('rep_day_plans', `${repId}_${laDate()}`).catch(() => null);
+      // send the town choices (plus any callbacks due today). An existing list
+      // answers straight away without reading every lead.
+      if (req.query.today && !req.query.towns) {
+        const existing = await db.getById('rep_day_plans', `${repId}_${laDate()}`).catch(() => null);
         if (existing) return res.json({ date: existing.date, town: existing.town, lead_ids: existing.lead_ids || [] });
+      }
+      const rows = await db.list('rep_leads', { where: [['rep_id', '==', repId]], order: 'updated_at', ascending: false, limit: 20000 });
+      if (req.query.today || req.query.towns) {
         const pool = await planPool(repId, rows || []);
         return res.json({ date: pool.today, town: null, needs_pick: true, lead_ids: pool.due.map((l) => l.id), towns: townChoices(pool) });
       }

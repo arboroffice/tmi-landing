@@ -168,6 +168,7 @@
         <button class="btn ghost sm" id="addHereBtn">Log here</button>
       </div>
       <div id="map"></div>
+      <div id="mapNote" style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center"></div>
       <div id="routePanel"></div>
     </section>
     <section class="screen" id="s-log"></section>
@@ -376,15 +377,34 @@ async function boot(){
     if(!ME) ME = await api('/api/rep-me');
     $('#login').style.display='none'; $('#app').style.display='flex';
     $('#whoami').textContent = (ME.name||'').split(' ')[0] + (ME.city?(' · '+ME.city):'');
-    await loadLeads();
-    flushQueue();
-    switchTab('today');
+    const c=await cachedLeads();
+    if(c){
+      // Open on the saved copy right away, then swap in fresh data.
+      LEADS=c.leads; const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago'}).format(new Date());
+      PLAN=(c.plan&&c.plan.date===today)?c.plan:null;
+      switchTab('today');
+      loadLeads().then(()=>{ if(!$('#sheet').classList.contains('on')) refreshCurrent(); flushQueue(); });
+    } else {
+      await loadLeads();
+      flushQueue();
+      switchTab('today');
+    }
   }catch(ex){ logout(); }
 }
 
+// Leads and today's list load together. The last copy is kept on the phone so
+// the app opens instantly, then refreshes quietly in the background.
+// Stored in IndexedDB (room for thousands of leads; localStorage is ~5MB on iPhones).
+function idb(){ return new Promise((ok,bad)=>{ try{ const r=indexedDB.open('cityleads',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>bad(r.error); }catch(e){ bad(e); } }); }
+async function idbSet(k,v){ try{ const d=await idb(); await new Promise((ok,bad)=>{ const t=d.transaction('kv','readwrite'); t.objectStore('kv').put(v,k); t.oncomplete=ok; t.onerror=()=>bad(t.error); }); }catch(e){} }
+async function idbGet(k){ try{ const d=await idb(); return await new Promise((ok)=>{ const q=d.transaction('kv').objectStore('kv').get(k); q.onsuccess=()=>ok(q.result); q.onerror=()=>ok(null); }); }catch(e){ return null; } }
+function cacheLeads(){ idbSet('leads',{rep:ME&&ME.id, at:Date.now(), leads:LEADS, plan:PLAN}); }
+async function cachedLeads(){ const c=await idbGet('leads'); return (c&&ME&&c.rep===ME.id&&Array.isArray(c.leads))?c:null; }
 async function loadLeads(){
-  try{ LEADS = await api('/api/rep-leads'); }catch(ex){ LEADS=[]; toast(ex.message); }
-  try{ PLAN = await api('/api/rep-leads?today=1'); }catch(ex){ PLAN=null; }
+  const [ls,pl]=await Promise.allSettled([api('/api/rep-leads'), api('/api/rep-leads?today=1')]);
+  if(ls.status==='fulfilled') LEADS=ls.value; else { if(!LEADS.length) LEADS=[]; toast(ls.reason&&ls.reason.message||'Could not load leads'); }
+  PLAN = pl.status==='fulfilled' ? pl.value : PLAN;
+  if(ls.status==='fulfilled') cacheLeads();
 }
 
 /* ---- Today's stops: ~15 businesses in one town, picked fresh each day ---- */
@@ -800,7 +820,14 @@ function drawLeadList(){
     rows.sort((a,b)=>score(b)-score(a));
   }
   if(!rows.length){ box.innerHTML='<div class="empty">No leads here yet.</div>'; return; }
-  rows.forEach(l=>box.appendChild(leadRow(l)));
+  // Render 100 at a time; thousands of rows at once made the list crawl.
+  let shown=0;
+  const more=()=>{
+    const old=box.querySelector('.list-more'); if(old) old.remove();
+    rows.slice(shown,shown+100).forEach(l=>box.appendChild(leadRow(l))); shown+=100;
+    if(shown<rows.length){ const b=el(`<button class="btn ghost list-more" style="margin:6px 0 14px">Show more (${rows.length-shown} left)</button>`); b.onclick=more; box.appendChild(b); }
+  };
+  more();
 }
 
 /* ---- Log ---- */
@@ -1302,23 +1329,51 @@ function initMap(){
     dirRenderer=new google.maps.DirectionsRenderer({map,suppressMarkers:true,polylineOptions:{strokeColor:'#0a0b14',strokeWeight:5,strokeOpacity:.85}});
     geocoder=new google.maps.Geocoder();
     gInfo=new google.maps.InfoWindow();
+    map.addListener('idle',schedulePins);
     getPos().then(p=>{ lastPos=p; map.setCenter({lat:p.coords.latitude,lng:p.coords.longitude}); map.setZoom(13); drawMe(p); }).catch(()=>{});
     geocodeMissing();
   }
   drawPins();
 }
+// Reps carry thousands of leads. Drawing a pin for every one froze phones, so
+// the map only draws what is on screen (today's stops and worked leads first),
+// capped, and redraws when the map stops moving. Pins are reused, not rebuilt.
+const PIN_CAP=350; const pinById=new Map(); let pinsFitted=false;
+function pinPriority(l){
+  const stop=PLAN&&PLAN.lead_ids&&PLAN.lead_ids.includes(l.id);
+  return (stop?100:0)+(l.status!=='new'?20:0)+(l.priority==='hot'?5:l.priority==='warm'?2:0);
+}
 function drawPins(){
   if(!map) return;
-  markers.forEach(m=>m.setMap(null)); markers=[];
-  const bounds=new google.maps.LatLngBounds(); let n=0;
-  LEADS.filter(l=>l.lat!=null&&l.lng!=null).forEach(l=>{
-    const pos={lat:Number(l.lat),lng:Number(l.lng)};
-    const mk=new google.maps.Marker({position:pos,map,icon:dot(statusColor(l.status), isWarm(l)&&l.status==='new'?9:7),title:l.business_name||l.contact_name||'Lead'});
+  const located=LEADS.filter(l=>l.lat!=null&&l.lng!=null);
+  // First open: frame today's stops (or everything) once.
+  if(!pinsFitted && !lastPos){
+    const stops=planStops().filter(l=>l.lat!=null);
+    const frame=stops.length?stops:located.slice(0,500);
+    if(frame.length){ const bb=new google.maps.LatLngBounds(); frame.forEach(l=>bb.extend({lat:Number(l.lat),lng:Number(l.lng)})); try{ map.fitBounds(bb); }catch(e){} pinsFitted=true; return; }
+  }
+  const bounds=map.getBounds(); if(!bounds) return;
+  const zoom=map.getZoom()||11;
+  let show=located.filter(l=>bounds.contains({lat:Number(l.lat),lng:Number(l.lng)}));
+  // Zoomed far out: only what matters (stops, worked, hot) so it stays readable.
+  if(zoom<12) show=show.filter(l=>pinPriority(l)>=5);
+  show.sort((a,b)=>pinPriority(b)-pinPriority(a));
+  show=show.slice(0,PIN_CAP);
+  const keep=new Set(show.map(l=>l.id));
+  pinById.forEach((mk,id)=>{ if(!keep.has(id)){ mk.setMap(null); pinById.delete(id); } });
+  show.forEach(l=>{
+    const icon=dot(statusColor(l.status), (PLAN&&PLAN.lead_ids&&PLAN.lead_ids.includes(l.id))?10:(isWarm(l)&&l.status==='new'?8:6));
+    let mk=pinById.get(l.id);
+    if(mk){ mk.setIcon(icon); return; }
+    mk=new google.maps.Marker({position:{lat:Number(l.lat),lng:Number(l.lng)},map,icon,title:l.business_name||l.contact_name||'Lead',optimized:true});
     mk.addListener('click',()=>{ gInfo.setContent('<div style="font-weight:700;font-size:13px">'+esc(l.business_name||l.contact_name||'Lead')+'</div><div style="font-size:12px;color:#555">'+esc([l.industry,l.address].filter(Boolean).join(' · '))+'</div><a href="#" id="iwOpen" style="font-size:12px;color:#1d4ed8;font-weight:600">Open →</a>'); gInfo.open(map,mk); setTimeout(()=>{ const a=document.getElementById('iwOpen'); if(a) a.onclick=(e)=>{e.preventDefault();openLead(l.id);}; },50); });
-    markers.push(mk); bounds.extend(pos); n++;
+    pinById.set(l.id,mk);
   });
-  if(n && !lastPos){ try{ map.fitBounds(bounds); }catch(e){} }
+  markers=Array.from(pinById.values());
+  const note=$('#mapNote'); if(note){ const total=located.filter(l=>bounds.contains({lat:Number(l.lat),lng:Number(l.lng)})).length; note.textContent=total>show.length?('Showing '+show.length+' of '+total+' here. Zoom in to see more.'):''; }
 }
+let pinTimer=null;
+function schedulePins(){ clearTimeout(pinTimer); pinTimer=setTimeout(drawPins,120); }
 function drawMe(p){ const pos={lat:p.coords.latitude,lng:p.coords.longitude}; if(meMarker) meMarker.setMap(null); meMarker=new google.maps.Marker({position:pos,map,icon:dot('#2f6bd6',6),zIndex:999}); }
 
 // Geocode assigned leads that have an address but no coordinates, and persist.
