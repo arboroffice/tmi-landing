@@ -1512,6 +1512,15 @@ function renderMe(){
       <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em">${esc(ME.name||'')}</div>
       <div style="color:var(--muted);font-size:14px;margin-top:2px">${esc(ME.email||'')}${ME.city?(' · '+esc(ME.city)):''}</div>
     </div>
+    <div class="card" id="meInfo">
+      <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:800;font-size:15px">My info</div>${(ME.phone&&ME.cal_email)?'':'<span style="font-size:11px;font-weight:800;background:#E4FF97;color:#0a0b14;border-radius:999px;padding:3px 9px">Fill this in</span>'}</div>
+      <div style="font-size:12.5px;color:var(--muted);margin:2px 0 10px">Your name and phone go on texts and emails TMI sends for you. Invites for calls you book go to your email.</div>
+      <div class="field"><label>Name</label><input id="miName" value="${esc(ME.name||'')}"/></div>
+      <div class="field"><label>Cell phone</label><input id="miPhone" type="tel" value="${esc(ME.phone||'')}" placeholder="337-555-1234"/></div>
+      <div class="field"><label>Email for calendar invites</label><input id="miCal" type="email" value="${esc(ME.cal_email||ME.email||'')}" placeholder="you@gmail.com"/></div>
+      <div class="field"><label>Home base (town)</label><input id="miCity" value="${esc(ME.city||'')}"/></div>
+      <button class="btn sm" id="miSave">Save my info</button>
+    </div>
     <div class="card" id="meGuides" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px">
       <div><div style="font-weight:800;font-size:15px">Guides &amp; playbooks</div><div style="font-size:12.5px;color:var(--muted);margin-top:2px">Every rep guide and the Day Plan, one tap away.</div></div>
       <span style="flex:none;font-weight:800;font-size:18px;color:var(--muted)">→</span>
@@ -1560,6 +1569,13 @@ function renderMe(){
     <button class="btn ghost" id="meOut" style="color:var(--red)">Sign out</button>`;
   const w=$('#meWarm'); if(w) w.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
   const mg=$('#meGuides'); if(mg) mg.onclick=()=>switchTab('guides');
+  const ms=$('#miSave'); if(ms) ms.onclick=async()=>{
+    ms.disabled=true;
+    try{
+      const up=await api('/api/rep-me',{method:'PATCH',body:JSON.stringify({name:$('#miName').value,phone:$('#miPhone').value,cal_email:$('#miCal').value,city:$('#miCity').value})});
+      ME=Object.assign({},ME,up); toast('Saved'); renderMe();
+    }catch(ex){ toast(ex.message||'Could not save'); ms.disabled=false; }
+  };
   const ee=$('#meEarnEdit'); if(ee) ee.onclick=()=>{ const v=prompt('Set your monthly commission goal ($):', String(earnGoal)); if(v==null) return; const n=parseInt(String(v).replace(/[^0-9]/g,''),10); if(Number.isFinite(n)&&n>0){ localStorage.setItem('cl_earn_goal',String(n)); renderMe(); } };
   const pb=$('#mePushBtn'); if(pb){ pushState().then(st=>{
     if(st==='unsupported'){ pb.style.display='none'; $('#mePushState').textContent='Not supported on this device.'; }
@@ -1639,7 +1655,7 @@ function calBookUrl(l){
   if(l.contact_name) q.push('name='+encodeURIComponent(l.contact_name));
   if(l.email) q.push('email='+encodeURIComponent(l.email));
   // The rep rides along as a guest, so the invite lands in their own email and calendar.
-  if(ME&&ME.email) q.push('guests='+encodeURIComponent(ME.email));
+  if(ME&&(ME.cal_email||ME.email)) q.push('guests='+encodeURIComponent(ME.cal_email||ME.email));
   var rep=((ME&&ME.name)||'').split(' ')[0];
   q.push('notes='+encodeURIComponent((l.business_name||'')+(rep?(' · booked with '+rep+' (TMI Tech AI)'):'')));
   return CAL_URL+'?'+q.join('&');
