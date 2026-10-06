@@ -4,6 +4,10 @@ const twilio = require('twilio');
 
 const FROM_NUMBER = '+18557171044';
 const SITE = 'https://www.tmitechai.com';
+// This app (unsubscribe and other API links) is served here.
+const APP = 'https://admin.tmitechai.com';
+// The free Fit Call is booked on the live site's audit page.
+const FIT_CALL_URL = 'https://www.tmitechai.com/intelligent-company-audit.html#book';
 
 // Abandon-chaser steps fire while a lead has started the audit but not finished.
 // They stop the moment the audit is completed, the lead converts, or unsubscribes.
@@ -22,42 +26,42 @@ function emailWrap(inner, unsubUrl) {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f4f5ef;-webkit-font-smoothing:antialiased;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5ef;"><tr><td align="center" style="padding:28px 14px;"><table role="presentation" width="560" cellpadding="0" cellspacing="0" style="width:560px;max-width:100%;background:#ffffff;border:1px solid #e7e8e1;border-radius:16px;overflow:hidden;"><tr><td style="background:#0a0b14;padding:18px 30px;"><span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:19px;font-weight:800;letter-spacing:-0.02em;color:#ffffff;">TMI</span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#E4FF97;margin-left:5px;"></span></td></tr><tr><td style="padding:34px 30px 8px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1a1a1a;font-size:16px;line-height:1.7;">
 ${inner}
 <p style="margin:40px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsubUrl}" style="color:#bbb;">Unsubscribe</a></p>
-</td></tr><tr><td style="padding:6px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><div style="border-top:1px solid #eceee4;margin-top:8px;padding-top:16px;font-size:12px;line-height:1.6;color:#9a9ba5;">TMI Technology &middot; chaos control for growing companies<br><a href="https://www.tmitechai.com" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`;
+</td></tr><tr><td style="padding:6px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><div style="border-top:1px solid #eceee4;margin-top:8px;padding-top:16px;font-size:12px;line-height:1.6;color:#9a9ba5;">TMI Tech AI &middot; Lafayette, Louisiana<br><a href="https://www.tmitechai.com" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`;
 }
 
-// 10-minute nudge — finish the audit.
+// 10-minute nudge: finish booking the Fit Call.
 function resumeEmail(firstName, resumeLink, unsubUrl) {
   return emailWrap(`
-<p style="margin:0 0 6px;font-size:11px;color:#888;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;">TMI Intelligence Audit</p>
-<h1 style="margin:0 0 16px;font-size:28px;font-weight:800;line-height:1.1;letter-spacing:-0.02em;color:#0a0b14;">You're a few minutes from your results</h1>
-<p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName}, you started your TMI Intelligence Audit but didn't quite finish. It takes about 3 more minutes, and at the end you get your founder dependency score, your biggest operational bottleneck, and the first move to fix it.</p>
-<p style="margin:0 0 24px;font-size:15px;color:#444;line-height:1.65;">Pick up right where you left off. Your answers are pre-filled.</p>
-<a href="${resumeLink}" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">Finish my audit &rarr;</a>
-<p style="margin:28px 0 0;font-size:14px;color:#555;line-height:1.65;">It's free. Just a clear read on your operation.</p>
-<p style="margin:24px 0 0;font-size:14px;">Mia<br><span style="color:#888;font-size:13px;">TMI &mdash; Intelligent Infrastructure for Field Operations</span></p>`, unsubUrl);
+<p style="margin:0 0 6px;font-size:11px;color:#888;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;">TMI Tech AI</p>
+<h1 style="margin:0 0 16px;font-size:28px;font-weight:800;line-height:1.1;letter-spacing:-0.02em;color:#0a0b14;">You're one step from a time on the calendar</h1>
+<p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName}, you started with us but didn't finish. The next step is a Fit Call: free, 20 to 30 minutes, to work out whether TMI should come inside your company at all. If the answer is no, we will say so on the call.</p>
+<p style="margin:0 0 24px;font-size:15px;color:#444;line-height:1.65;">Fill in the short form and the calendar opens as soon as you submit.</p>
+<a href="${resumeLink}" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">Pick a time &rarr;</a>
+<p style="margin:28px 0 0;font-size:14px;color:#555;line-height:1.65;">If you would rather talk first, reply to this email or call (337) 450-9795.</p>
+<p style="margin:24px 0 0;font-size:14px;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>`, unsubUrl);
 }
 
-// Day 1 — lead with booking a call, keep the audit as the prep step.
+// Day 1: lead with booking the Fit Call.
 function bookOrFinishEmail(firstName, bookingLink, resumeLink, unsubUrl) {
   return emailWrap(`
-<p style="margin:0 0 6px;font-size:11px;color:#888;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;">TMI Intelligence Audit</p>
+<p style="margin:0 0 6px;font-size:11px;color:#888;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;">TMI Tech AI</p>
 <h1 style="margin:0 0 16px;font-size:26px;font-weight:800;line-height:1.12;letter-spacing:-0.02em;color:#0a0b14;">Want to just talk it through?</h1>
-<p style="margin:0 0 18px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName}, you started the audit yesterday and didn't finish. No problem. The fastest path is usually a quick call where we map your operation together.</p>
-<a href="${bookingLink}" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">Grab a time &rarr;</a>
-<p style="margin:26px 0 18px;font-size:15px;color:#444;line-height:1.65;">One ask: if you can, finish your 5-minute audit before the call. It means we walk in with your actual numbers and go deep from the first minute instead of spending the call on basics.</p>
-<a href="${resumeLink}" style="font-size:14px;color:#5a9e00;font-weight:600;">Finish my audit first &rarr;</a>
-<p style="margin:28px 0 0;font-size:14px;">Mia<br><span style="color:#888;font-size:13px;">TMI</span></p>`, unsubUrl);
+<p style="margin:0 0 18px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName}, you started with us yesterday and didn't finish. The simplest next step is the Fit Call: free, 20 to 30 minutes, with Mia and Tyler.</p>
+<a href="${bookingLink}" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">Book the Fit Call &rarr;</a>
+<p style="margin:26px 0 18px;font-size:15px;color:#444;line-height:1.65;">On the call we work out whether TMI should come inside your company at all. If it should, the next step is the Intelligent Company Audit, and we will explain what it covers. If it should not, we will tell you.</p>
+<a href="${resumeLink}" style="font-size:14px;color:#5a9e00;font-weight:600;">Back to the form &rarr;</a>
+<p style="margin:28px 0 0;font-size:14px;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>`, unsubUrl);
 }
 
-// Day 3 — final touch, both doors open.
+// Day 3: final touch.
 function lastCallEmail(firstName, bookingLink, resumeLink, unsubUrl) {
   return emailWrap(`
 <p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.65;">Last nudge on this, then I'll leave it.</p>
-<p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.65;">If you want a read on where your operation is stuck, you've got two doors. Finish the 5-minute audit and get it instantly, or book a call and we'll do it together.</p>
-<p style="margin:0 0 8px;font-size:15px;color:#444;"><a href="${resumeLink}" style="color:#5a9e00;font-weight:600;">Finish my audit &rarr;</a></p>
-<p style="margin:0 0 24px;font-size:15px;color:#444;"><a href="${bookingLink}" style="color:#5a9e00;font-weight:600;">Book a call &rarr;</a></p>
-<p style="margin:0;font-size:14px;">Mia<br><span style="color:#888;font-size:13px;">TMI</span></p>`, unsubUrl);
+<p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.65;">Last note on this, then I'll leave it.</p>
+<p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.65;">If you want to know whether TMI is right for your company, the Fit Call is the way in. It is free and takes 20 to 30 minutes. If it is not the right time, that is fine too.</p>
+<p style="margin:0 0 8px;font-size:15px;color:#444;"><a href="${bookingLink}" style="color:#5a9e00;font-weight:600;">Book the Fit Call &rarr;</a></p>
+<p style="margin:0 0 24px;font-size:15px;color:#444;"><a href="${resumeLink}" style="color:#5a9e00;font-weight:600;">Back to the form &rarr;</a></p>
+<p style="margin:0;font-size:14px;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>`, unsubUrl);
 }
 
 module.exports = async function handler(req, res) {
@@ -100,22 +104,22 @@ module.exports = async function handler(req, res) {
 
   const params = new URLSearchParams({ n: name || '', e: email, p: phone || '', c: company || '' });
   const resumeLink = `${SITE}/audit?resume=1&${params.toString()}`;
-  const bookingLink = `${SITE}/booking`;
+  const bookingLink = FIT_CALL_URL;
   const firstName = (name || 'there').split(' ')[0];
   const unsubUrl = leadId
-    ? `${SITE}/api/unsubscribe?id=${leadId}`
-    : `${SITE}/api/unsubscribe?email=${encodeURIComponent(email.toLowerCase().trim())}`;
+    ? `${APP}/api/unsubscribe?id=${leadId}`
+    : `${APP}/api/unsubscribe?email=${encodeURIComponent(email.toLowerCase().trim())}`;
 
   // Per-step content
   const EMAIL = {
-    abandon_10min: { subject: `${firstName}, your TMI audit is almost done`, html: resumeEmail(firstName, resumeLink, unsubUrl) },
+    abandon_10min: { subject: `${firstName}, you didn't finish`, html: resumeEmail(firstName, resumeLink, unsubUrl) },
     abandon_day1:  { subject: `${firstName}, want to just talk it through?`,  html: bookOrFinishEmail(firstName, bookingLink, resumeLink, unsubUrl) },
-    abandon_day3:  { subject: `Last nudge, ${firstName}`,                     html: lastCallEmail(firstName, bookingLink, resumeLink, unsubUrl) },
+    abandon_day3:  { subject: `Last note, ${firstName}`,                     html: lastCallEmail(firstName, bookingLink, resumeLink, unsubUrl) },
   };
   const SMS = {
-    abandon_10min: `Hey ${firstName} - looks like you didn't finish your TMI audit. Pick up where you left off: ${resumeLink}`,
-    abandon_day1:  `Hey ${firstName} - easiest next step is a quick call. Grab a time: ${bookingLink}  If you can, finish your 5-min audit first so we have your numbers going in: ${resumeLink}`,
-    abandon_day3:  `Hey ${firstName} - last nudge. Book a call: ${bookingLink}  or finish your audit: ${resumeLink}  Either works.`,
+    abandon_10min: `Hey ${firstName}, it's Mia at TMI Tech AI. Looks like you didn't finish. Easiest next step is a free 20 to 30 minute Fit Call. Pick a time: ${bookingLink}`,
+    abandon_day1:  `Hey ${firstName}, easiest next step is a free 20 to 30 minute Fit Call to see whether TMI is right for your company. Pick a time: ${bookingLink}`,
+    abandon_day3:  `Hey ${firstName}, last note from me. If you want to talk, the Fit Call is free and takes 20 to 30 minutes: ${bookingLink}`,
   };
 
   const emailContent = EMAIL[step] || EMAIL.abandon_10min;

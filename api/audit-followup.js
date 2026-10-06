@@ -7,7 +7,8 @@
 
 const db = require('./_db');
 
-const SITE = 'https://www.tmitechai.com';
+// This app (resume, unsubscribe and other API links) is served here.
+const APP = 'https://admin.tmitechai.com';
 const FROM_NUMBER = '+18557171044';
 
 function formatPhone(phone) {
@@ -21,7 +22,7 @@ function wrap(body, unsub, resumeUrl) {
 ${body}
 <p style="margin:28px 0 0;"><a href="${resumeUrl}" style="background:#E4FF97;color:#0a0b14;font-weight:700;padding:13px 26px;border-radius:999px;text-decoration:none;display:inline-block;">Complete your audit ($5,000)</a></p>
 <p style="margin:32px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsub}" style="color:#bbb;">Unsubscribe</a></p>
-</td></tr><tr><td style="padding:6px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><div style="border-top:1px solid #eceee4;margin-top:8px;padding-top:16px;font-size:12px;line-height:1.6;color:#9a9ba5;">TMI Technology &middot; chaos control for growing companies<br><a href="https://www.tmitechai.com" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`;
+</td></tr><tr><td style="padding:6px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><div style="border-top:1px solid #eceee4;margin-top:8px;padding-top:16px;font-size:12px;line-height:1.6;color:#9a9ba5;">TMI Tech AI &middot; Lafayette, Louisiana<br><a href="https://www.tmitechai.com" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`;
 }
 
 function copy(step, firstName, resumeUrl) {
@@ -30,33 +31,33 @@ function copy(step, firstName, resumeUrl) {
       return {
         subject: 'Finish your Intelligent Company Audit',
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">You started the Intelligent Company Audit but did not finish checkout. It is the one way in: a detailed map of where your business leaks time and money, your Intelligence Score, a 30-day plan, and a 30-minute call with the founder and a strategist where we pick your path.</p>
-<p style="margin:0 0 8px;">Takes two minutes to lock in.</p>`,
-        sms: `Hey ${firstName} - you started the Intelligent Company Audit but didn't finish. Lock it in here: ${resumeUrl}`,
+<p style="margin:0 0 16px;">You started the Intelligent Company Audit but did not finish checkout. The audit is 30 to 45 minutes, in person or by phone. We review how the company sells, operates, communicates, tracks information and makes decisions.</p>
+<p style="margin:0 0 8px;">You get a Business Intelligence Score out of 100 across ten areas, a five-page report, and the Intelligent Company Roadmap. The roadmap is yours outright, whatever you decide to do afterwards.</p>`,
+        sms: `Hey ${firstName}, it's Mia at TMI Tech AI. You started the Intelligent Company Audit but didn't finish checkout. You can pick it back up here: ${resumeUrl}`,
       };
     case 'day1':
       return {
         subject: 'What the audit actually shows you',
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">Most owners are surprised by what the audit surfaces: the software nobody uses, the work that gets done but never billed, the steps that quietly add days. We map all of it from your own answers, not a template.</p>
-<p style="margin:0 0 8px;">The 30-minute call with the founder is where it gets real. You leave with your three paths: do it yourself, do it with us, or have us build it for you.</p>`,
+<p style="margin:0 0 16px;">The audit looks at how the work actually moves through your company, not how it is supposed to. Where knowledge lives in one or two people. Where the software gets worked around. Where decisions wait on the owner.</p>
+<p style="margin:0 0 8px;">We say it back to you plainly, including the parts that are working and should be left alone. The roadmap is written so you could hand it to anyone to execute, us or another firm.</p>`,
         sms: '',
       };
     case 'day3':
       return {
-        subject: 'The bottleneck is usually one of three things',
+        subject: 'Why the audit has a price',
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">Almost every operation we audit is stuck on one of three things: the founder is the bottleneck, nobody can see what is happening in time, or things just take too long between steps. The audit tells you which one is costing you the most and what to build first.</p>
-<p style="margin:0 0 8px;">$5,000, and it applies toward whatever you build next.</p>`,
-        sms: `${firstName} - the Intelligent Company Audit pinpoints exactly where your business is stuck and what to fix first. $5,000, applies toward your build: ${resumeUrl}`,
+<p style="margin:0 0 16px;">The audit has a price because it is a fixed thing. Paying for it changes what it is: we go into the systems and the numbers rather than taking anyone's word for them, and you own a document you can hand to a partner, a banker or a buyer.</p>
+<p style="margin:0 0 8px;">$5,000, in person or by phone. Anything after it is scoped from what the audit found, in writing, before any work begins.</p>`,
+        sms: `${firstName}, the Intelligent Company Audit is $5,000: a Business Intelligence Score out of 100, a five-page report, and a roadmap you own. Pick it back up here: ${resumeUrl}`,
       };
     case 'day7':
     default:
       return {
-        subject: 'Last nudge on your audit',
+        subject: 'Last note on your audit',
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">I am not going to keep filling your inbox. If the timing is not right, that is fine.</p>
-<p style="margin:0 0 8px;">When you are ready to see exactly where the time and money are going and how to fix it, the audit is right here.</p>`,
+<p style="margin:0 0 8px;">When you are ready for a clear read on how your company runs and what to build first, the audit is right here. If you would rather talk it through first, reply to this email.</p>`,
         sms: '',
       };
   }
@@ -83,9 +84,9 @@ module.exports = async function handler(req, res) {
   }
 
   const firstName = (app.name || 'there').split(/\s+/)[0];
-  const resumeUrl = `${SITE}/api/audit-resume?id=${app.id}`;
+  const resumeUrl = `${APP}/api/audit-resume?id=${app.id}`;
   const c = copy(step, firstName, resumeUrl);
-  const unsub = `${SITE}/api/unsubscribe?id=${app.id}`;
+  const unsub = `${APP}/api/unsubscribe?id=${app.id}`;
 
   try {
     if (process.env.RESEND_API_KEY && app.email) {

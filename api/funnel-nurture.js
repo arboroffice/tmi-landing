@@ -9,8 +9,10 @@
 const db = require('./_db');
 
 const SITE = 'https://www.tmitechai.com';
-// No instant Cal.com booking. Leads request a callback via /book and we reach out.
-const BOOK_URL = SITE + '/book';
+// This app (unsubscribe, proposals and other app pages) is served here.
+const APP = 'https://admin.tmitechai.com';
+// The free Fit Call is booked on the live site's audit page.
+const BOOK_URL = SITE + '/intelligent-company-audit.html#book';
 const FROM_NUMBER = '+18557171044';
 
 function formatPhone(p) {
@@ -27,7 +29,7 @@ function email(to, subject, bodyHtml, unsub) {
     html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f4f5ef;-webkit-font-smoothing:antialiased;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5ef;"><tr><td align="center" style="padding:28px 14px;"><table role="presentation" width="560" cellpadding="0" cellspacing="0" style="width:560px;max-width:100%;background:#ffffff;border:1px solid #e7e8e1;border-radius:16px;overflow:hidden;"><tr><td style="background:#0a0b14;padding:18px 30px;"><span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:19px;font-weight:800;letter-spacing:-0.02em;color:#ffffff;">TMI</span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#E4FF97;margin-left:5px;"></span></td></tr><tr><td style="padding:34px 30px 8px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1a1a1a;font-size:16px;line-height:1.7;">
 ${bodyHtml}
 ${unsub ? `<p style="margin:32px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsub}" style="color:#bbb;">Unsubscribe</a></p>` : ''}
-</td></tr><tr><td style="padding:6px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><div style="border-top:1px solid #eceee4;margin-top:8px;padding-top:16px;font-size:12px;line-height:1.6;color:#9a9ba5;">TMI Technology &middot; chaos control for growing companies<br><a href="https://www.tmitechai.com" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`,
+</td></tr><tr><td style="padding:6px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><div style="border-top:1px solid #eceee4;margin-top:8px;padding-top:16px;font-size:12px;line-height:1.6;color:#9a9ba5;">TMI Tech AI &middot; Lafayette, Louisiana<br><a href="https://www.tmitechai.com" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`,
   });
 }
 
@@ -64,26 +66,27 @@ module.exports = async function handler(req, res) {
       if (stopped(app)) return res.json({ ok: true, skipped: 'opted out' });
       const name = (app && app.name || 'there').split(/\s+/)[0];
       const url = b.session_id ? `${SITE}/complete-audit-intake?session_id=${encodeURIComponent(b.session_id)}` : `${SITE}/complete-audit-intake`;
-      const unsub = app ? `${SITE}/api/unsubscribe?id=${app.id}` : null;
-      await email(b.email, 'One quick step to start your audit',
+      const unsub = app ? `${APP}/api/unsubscribe?id=${app.id}` : null;
+      await email(b.email, 'One quick step to schedule your audit',
         `<p style="margin:0 0 16px;">Hey ${name},</p>
-<p style="margin:0 0 16px;">Your Intelligent Company Audit is paid and ready to build. We just need your intake - about 10 to 15 minutes of detail on how your business runs. The more you give us, the sharper your audit and the more we get done on the call.</p>${cta(url, 'Finish my intake')}`, unsub);
-      if (b.touch === 'second') await sms(app && app.phone, `${name} - your Intelligent Company Audit is paid and waiting on your intake (10-15 min). Finish here: ${url}`);
+<p style="margin:0 0 16px;">Your Intelligent Company Audit is paid. Thank you. The next step is picking a time for the audit itself: 30 to 45 minutes, in person or by phone. Nothing needs to be prepared. If you can have rough numbers to hand, like monthly jobs, average job value and headcount, the report comes back sharper.</p>
+<p style="margin:0 0 16px;">Use the link below, or reply to this email with a few times that work.</p>${cta(url, 'Schedule my audit')}`, unsub);
+      if (b.touch === 'second') await sms(app && app.phone, `${name}, your Intelligent Company Audit is paid. Pick a time for the 30 to 45 minutes, in person or by phone: ${url} Or reply here with a few times that work.`);
       return ack();
     }
 
     if (stage === 'delivered_no_booking') {
-      // Audit delivered, no strategy call booked yet. This is the biggest leak.
+      // Audit delivered, no follow-up conversation booked yet.
       const app = await appByEmail(b.email);
       if (app && app.status === 'booked') return res.json({ ok: true, skipped: 'already booked' });
       if (stopped(app)) return res.json({ ok: true, skipped: 'opted out' });
       const name = (app && app.name || 'there').split(/\s+/)[0];
-      const url = b.session_id ? `${SITE}/booking?session_id=${encodeURIComponent(b.session_id)}` : BOOK_URL;
-      const unsub = app ? `${SITE}/api/unsubscribe?id=${app.id}` : null;
-      await email(b.email, 'Request your strategy call',
+      const url = BOOK_URL;
+      const unsub = app ? `${APP}/api/unsubscribe?id=${app.id}` : null;
+      await email(b.email, 'Questions on your roadmap?',
         `<p style="margin:0 0 16px;">Hey ${name},</p>
-<p style="margin:0 0 16px;">Your audit is the map. The 30-minute call with the founder and a strategist is where it gets real - we walk through it together and pick your path. It is free - request your call and we will lock in a time with you.</p>${cta(url, 'Request my strategy call')}`, unsub);
-      if (b.touch === 'second') await sms(app && app.phone, `${name} - your audit is done. Last step is your free 30-min strategy call. Request it here: ${url}`);
+<p style="margin:0 0 16px;">Your Intelligent Company Roadmap is yours to keep, whatever you decide to do with it. If you want to talk through what it says comes next, reply to this email or pick a time below and Mia and Tyler will walk through it with you.</p>${cta(url, 'Pick a time')}`, unsub);
+      if (b.touch === 'second') await sms(app && app.phone, `${name}, your roadmap is yours to keep. If you want to talk through what it says comes next, reply here or pick a time: ${url}`);
       return ack();
     }
 
@@ -91,11 +94,11 @@ module.exports = async function handler(req, res) {
       const p = b.proposalId ? await db.getById('proposals', b.proposalId).catch(() => null) : null;
       if (!p) return res.json({ ok: true, skipped: 'no proposal' });
       if (p.status === 'accepted') return res.json({ ok: true, skipped: 'accepted' });
-      const url = `${SITE}/build-proposal?id=${p.id}`;
+      const url = `${APP}/build-proposal?id=${p.id}`;
       const name = (p.company || 'there');
       await email(p.client_email, 'Your build proposal is ready when you are',
         `<p style="margin:0 0 16px;">Hi,</p>
-<p style="margin:0 0 16px;">Your build proposal for ${name} is ready: three ways to build it, scoped and priced from your audit. Whenever you are ready, pick the path that fits and we will kick it off.</p>${cta(url, 'View my proposal')}`,
+<p style="margin:0 0 16px;">Your build proposal for ${name} is ready: fixed scope and fixed price, scoped from your Intelligent Company Roadmap. Whenever you are ready, review it and reply with any questions.</p>${cta(url, 'View my proposal')}`,
         null);
       return ack();
     }
@@ -105,23 +108,23 @@ module.exports = async function handler(req, res) {
       if (stopped(app)) return res.json({ ok: true, skipped: 'opted out' });
       const name = (app && app.name || 'there').split(/\s+/)[0];
       const to = app && app.email;
-      const unsub = app ? `${SITE}/api/unsubscribe?id=${app.id}` : null;
+      const unsub = app ? `${APP}/api/unsubscribe?id=${app.id}` : null;
       if (stage === 'precall_24h') {
-        await email(to, 'Your TMI call is tomorrow',
+        await email(to, 'Your TMI Fit Call is tomorrow',
           `<p style="margin:0 0 16px;">Hey ${name},</p>
-<p style="margin:0 0 16px;">Quick reminder: your 30-minute call with the founder is tomorrow. Come with the one thing you most want off your plate, a rough sense of your numbers, and the tools you are paying for right now. Question before then? Just reply to this email. See you then.</p>`, unsub);
+<p style="margin:0 0 16px;">Quick reminder: your Fit Call with Mia and Tyler is tomorrow. It is 20 to 30 minutes to work out whether TMI should come inside your company at all. Come with the thing that most often still comes back to you and the software you are paying for right now. Question before then? Reply to this email. See you then.</p>`, unsub);
       } else if (stage === 'precall_1h') {
-        await email(to, 'Your TMI call is in about an hour',
+        await email(to, 'Your TMI Fit Call is in about an hour',
           `<p style="margin:0 0 16px;">Hey ${name},</p>
-<p style="margin:0 0 16px;">Heads up - we're on in about an hour. Your call link is in the calendar invite and confirmation email. Talk soon.</p>`, unsub);
-        await sms(app && app.phone, `${name} - your TMI strategy call is in about an hour. Link's in your calendar invite + confirmation email. Reply if you need it resent.`);
+<p style="margin:0 0 16px;">Heads up, we're on in about an hour. Your call link is in the calendar invite and confirmation email. Talk soon.</p>`, unsub);
+        await sms(app && app.phone, `${name}, your TMI Fit Call is in about an hour. The link is in your calendar invite and confirmation email. Reply if you need it resent.`);
       } else if (stage === 'precall_10m') {
         await email(to, "We're starting in about 10 minutes",
           `<p style="margin:0 0 16px;">Hey ${name},</p>
 <p style="margin:0 0 16px;">We're on in about 10 minutes. Grab the call link from your calendar invite or confirmation email and hop on when you're ready. Reply here if you need it and I'll sort it out.</p>`, unsub);
-        await sms(app && app.phone, `${name} - we're starting in about 10 min. Call link is in your calendar invite + confirmation email. Reply if you need it.`);
+        await sms(app && app.phone, `${name}, we're starting in about 10 min. The call link is in your calendar invite and confirmation email. Reply if you need it.`);
       } else {
-        await sms(app && app.phone, `${name} - your TMI strategy call is in about 2 hours. Talk soon.`);
+        await sms(app && app.phone, `${name}, your TMI Fit Call is in about 2 hours. Talk soon.`);
       }
       return ack();
     }
