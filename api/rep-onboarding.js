@@ -84,7 +84,7 @@ function status(rep, co) {
       countersign: !!d.countersign, countersigned_at: s ? s.countersigned_at || null : null };
   });
   const complete = !need.length && docs.every((d) => !d.required || (d.signed_at && !d.outdated));
-  return { company_ready: co.ready, require_packet: co.terms.require_packet, profile: safeProfile(k), missing: need, driver_missing: driverMissing(k), equipment: equip, docs, complete };
+  return { company_ready: co.ready, require_packet: co.terms.require_packet, profile: safeProfile(k), sig: k.sig_png ? { name: k.sig_name, png: k.sig_png } : null, missing: need, driver_missing: driverMissing(k), equipment: equip, docs, complete };
 }
 
 // True when this rep may work leads: packet done, or the gate is off / not set up yet.
@@ -169,41 +169,84 @@ async function upload(rep, b) {
 
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
 
+// One signed record per document; returns the rep with onboarding updated.
+async function signOne(rep, doc, sig, co) {
+  const body = D.render(doc.id, await ctxFor(rep, co, true));
+  const html = D.page(doc, body, { name: sig.name, png: sig.png, at: stampOf(), ip: sig.ip }, co.c);
+  const hash = crypto.createHash('sha256').update(html).digest('hex');
+  const now = new Date().toISOString();
+  const rec = await db.insert('rep_documents', {
+    rep_id: rep.id, doc: doc.id, title: doc.title, version: doc.version, html_enc: vault.seal(html), hash,
+    signed_name: sig.name, signed_at: now, ip: sig.ip, ua: sig.ua, batch: sig.batch || null, created_at: now,
+  });
+  const ob = Object.assign({ docs: {} }, rep.onboarding || {});
+  ob.docs = Object.assign({}, ob.docs, { [doc.id]: { record_id: rec.id, version: doc.version, signed_at: now, hash } });
+  return Object.assign({}, rep, { onboarding: ob });
+}
+
+function checkSig(rep, b, req) {
+  if (b.consent !== true) throw new Error('Check the box to agree to sign electronically');
+  const k = rep.contractor || {};
+  const name = clip(b.name || k.sig_name, 100);
+  if (norm(name) !== norm(k.legal_name)) throw new Error('Type your full legal name exactly as entered: ' + k.legal_name);
+  const png = String(b.png || k.sig_png || '');
+  if (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(png) || png.length > 200000) throw new Error('Draw your signature in the box');
+  return { name, png, ip: String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || null, ua: clip(req.headers['user-agent'], 300) };
+}
+
+async function finish(before, after, co) {
+  const out = status(after, co);
+  const ob = after.onboarding;
+  if (out.complete && !ob.completed_at) {
+    ob.completed_at = new Date().toISOString();
+    if (process.env.TWILIO_ACCOUNT_SID) {
+      require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN).messages.create({
+        body: `${before.name || (before.contractor || {}).legal_name} finished their City Lead packet. Countersign in Admin > Field Team.`, from: FROM_NUMBER, to: ALERT_NUMBER,
+      }).catch(() => {});
+    }
+  }
+  await db.update('reps', after.id, { onboarding: ob });
+  return out;
+}
+
+// Signs one document.
 async function sign(rep, b, req) {
   const co = await company();
   const doc = D.DOCS.find((d) => d.id === b.doc);
   if (!doc) throw new Error('Unknown document');
   const st = status(rep, co).docs.find((d) => d.id === doc.id);
   if (st.blocked) throw new Error(st.blocked === 'TMI is finishing this document' ? 'TMI has not finished setting up the paperwork yet. Check back soon.' : st.blocked);
-  if (b.consent !== true) throw new Error('Check the box to agree to sign electronically');
-  const k = rep.contractor || {};
+  const sig = checkSig(rep, b, req);
+  return finish(rep, await signOne(rep, doc, sig, co), co);
+}
+
+// Save the signature the rep drew once, so it goes on every page.
+async function adopt(rep, b) {
+  const k = Object.assign({}, rep.contractor || {});
   const name = clip(b.name, 100);
-  if (norm(name) !== norm(k.legal_name)) throw new Error('Type your full legal name exactly as entered: ' + k.legal_name);
+  if (norm(name) !== norm(k.legal_name)) throw new Error('Type your full legal name exactly as entered: ' + (k.legal_name || 'in Your info'));
   const png = String(b.png || '');
   if (!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(png) || png.length > 200000) throw new Error('Draw your signature in the box');
+  k.sig_name = name; k.sig_png = png; k.sig_adopted_at = new Date().toISOString();
+  await db.update('reps', rep.id, { contractor: k });
+  return Object.assign({}, rep, { contractor: k });
+}
 
-  const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || null;
-  const body = D.render(doc.id, await ctxFor(rep, co, true));
-  const html = D.page(doc, body, { name, png, at: stampOf(), ip }, co.c);
-  const hash = crypto.createHash('sha256').update(html).digest('hex');
-  const now = new Date().toISOString();
-  const rec = await db.insert('rep_documents', {
-    rep_id: rep.id, doc: doc.id, title: doc.title, version: doc.version, html_enc: vault.seal(html), hash,
-    signed_name: name, signed_at: now, ip, ua: clip(req.headers['user-agent'], 300), created_at: now,
-  });
-  const ob = Object.assign({ docs: {} }, rep.onboarding || {});
-  ob.docs = Object.assign({}, ob.docs, { [doc.id]: { record_id: rec.id, version: doc.version, signed_at: now, hash } });
-  const out = status(Object.assign({}, rep, { onboarding: ob }), co);
-  if (out.complete && !ob.completed_at) {
-    ob.completed_at = now;
-    if (process.env.TWILIO_ACCOUNT_SID) {
-      require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN).messages.create({
-        body: `${rep.name || k.legal_name} finished their City Lead packet. Countersign in Admin > Field Team.`, from: FROM_NUMBER, to: ALERT_NUMBER,
-      }).catch(() => {});
-    }
-  }
-  await db.update('reps', rep.id, { onboarding: ob });
-  return out;
+// The whole packet after review: every unsigned document, in order, with the
+// adopted signature. The final acknowledgment goes last so it lists the rest.
+async function signAll(rep, b, req) {
+  const co = await company();
+  if (!co.ready) throw new Error('TMI has not finished setting up the paperwork yet. Check back soon.');
+  const need = missing(rep.contractor);
+  if (need.length) throw new Error('Finish your info first: ' + need.join(', '));
+  const dm = driverMissing(rep.contractor);
+  if (dm.length) throw new Error('Add: ' + dm.join(', '));
+  const sig = Object.assign(checkSig(rep, b, req), { batch: crypto.randomBytes(6).toString('hex') });
+  let cur = rep;
+  const todo = status(rep, co).docs.filter((d) => d.required && !(d.signed_at && !d.outdated));
+  for (const d of todo.filter((x) => x.id !== 'final_ack')) cur = await signOne(cur, D.DOCS.find((x) => x.id === d.id), sig, co);
+  if (todo.some((x) => x.id === 'final_ack')) cur = await signOne(cur, D.DOCS.find((x) => x.id === 'final_ack'), sig, co);
+  return finish(rep, cur, co);
 }
 
 async function signedCopy(recordId) {
@@ -313,6 +356,15 @@ async function handler(req, res) {
       if (!co.ready) return res.json({ title: doc.title, html: '<p>TMI is finishing this document. Check back soon.</p>', ready: false });
       return res.json({ title: doc.n + ' ' + doc.title, version: doc.version, html: D.render(doc.id, await ctxFor(rep, co, false)), ready: true });
     }
+    // The whole packet for review before submitting, with the rep's info filled in.
+    if (req.method === 'GET' && q.preview_all) {
+      if (!co.ready) return res.json({ ready: false, docs: [] });
+      const ctx = await ctxFor(rep, co, false);
+      const st = status(rep, co);
+      const list = D.DOCS.filter((d) => st.docs.find((x) => x.id === d.id).required);
+      ctx.signedList = list.filter((d) => !d.last).map((d) => ({ title: d.n + ' ' + d.title, at: 'when you submit' }));
+      return res.json({ ready: true, docs: list.map((d) => ({ id: d.id, n: d.n, title: d.title, countersign: !!d.countersign, html: D.render(d.id, ctx) })) });
+    }
     if (req.method === 'GET' && q.copy) {
       const s = rep.onboarding && rep.onboarding.docs && rep.onboarding.docs[q.copy];
       if (!s) return res.status(404).json({ error: 'Not signed yet' });
@@ -324,6 +376,8 @@ async function handler(req, res) {
     if (req.method === 'POST' && b.action === 'profile') return res.json(status(await saveProfile(rep, b), co));
     if (req.method === 'POST' && b.action === 'upload') return res.json(status(await upload(rep, b), co));
     if (req.method === 'POST' && b.action === 'sign') return res.json(await sign(rep, b, req));
+    if (req.method === 'POST' && b.action === 'adopt') return res.json(status(await adopt(rep, b), co));
+    if (req.method === 'POST' && b.action === 'sign_all') return res.json(await signAll(rep, b, req));
     return res.status(400).json({ error: 'Unknown action' });
   } catch (e) {
     const known = /^(Pick|SSN|Routing|Account|Finish|Check|Type|Draw|Unknown|TMI has|Fill|Add:|Sign everything|That photo|Rep not)/.test(e.message);
