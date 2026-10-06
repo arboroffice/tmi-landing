@@ -1036,6 +1036,7 @@ function openLead(id){
       <a href="#" id="dCheckin">📍 Check in</a>
       <a href="#" id="dEnrich">Enrich</a>
     </div>
+    <div id="dBrief"></div>
     <div class="card" style="margin:0 0 10px;padding:13px 14px;background:#E4FF97;color:#0a0b14;border:none">
       <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.75">Your goal here: sell the audit</div>
       <div style="font-size:15px;font-weight:800;margin-top:2px">${l.audit_paid_at?'Audit paid ✓ Credited to you':(l.audit_link_sent_at?('Link sent '+new Date(l.audit_link_sent_at).toLocaleDateString()+'. Follow up until it is paid.'):'Send the Intelligent Company Audit link')}</div>
@@ -1155,6 +1156,7 @@ function openLead(id){
   const pin=$('#dPhotoInput'); if(pin) pin.onchange=()=>addPhoto(l.id,pin);
   loadPhotos(l.id);
   loadLeadHD(l);
+  loadBrief(l);
   $('#dSave').onclick=async()=>{
     const btn=$('#dSave'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
     try{
@@ -1621,6 +1623,73 @@ async function loadRepHD(){
   }
   box.innerHTML=head+hdChartTiles(d.chart)+'<button class="btn ghost sm" id="rhGuide" style="margin-top:10px;width:100%">✨ How you sell best</button><div id="rhGuideOut">'+(d.guide?('<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+hdProse(d.guide)+'</div>'):'')+'</div>';
   $('#rhGuide').onclick=async function(){ var o=$('#rhGuideOut'); $('#rhGuide').disabled=true; o.innerHTML='<div style="margin-top:8px;color:var(--muted);font-size:13px">'+HD_SPIN+' Reading your design…</div>'; try{ var g=await api('/api/rep-hd',{method:'POST',body:JSON.stringify({action:'guide_self'})}); o.innerHTML='<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+hdProse(g.guide)+'</div>'; }catch(ex){ o.innerHTML=''; toast(ex.message); } $('#rhGuide').disabled=false; };
+}
+// "Know before you walk in": industry cheat sheet right away (works offline),
+// plus a brief on this exact business built from their website (cached on the lead).
+var IND_TIPS=[
+  [/roof/i,'Roofing',['Bids, insurance claims and supplements tracked by memory or in one inbox','Storm season swamps the office and leads get lost','Crew schedules change daily and only the owner knows the full board'],'How do new leads and insurance jobs get tracked from the first call to the final check?'],
+  [/hvac|heat|air cond|a\/c|cooling|refrig/i,'HVAC',['Dispatch lives in one person\'s head or a whiteboard','Maintenance agreements renew late or not at all','Techs call the office for answers the system should already have'],'If your dispatcher was out for a week, what would break first?'],
+  [/plumb/i,'Plumbing',['Emergency calls jump the schedule and planned work slips','Parts and truck stock are tracked by memory','Invoices go out days after the job is done'],'How long after a job is done does the invoice go out?'],
+  [/electric/i,'Electrical',['Estimates take the owner\'s nights and weekends','Change orders get done in the field and never billed','Job costs are known only after the job is over'],'Who builds the estimates, and how long does a bid take?'],
+  [/construct|contractor|builder|concrete|paving|excavat|dirt|site work/i,'Construction',['Change orders and extra work are not captured in writing','Job costing is found out at the end, not during','Superintendents call the owner for every decision'],'How do you know if a job is making money while it is still running?'],
+  [/oil|gas|pipeline|petro|well|oilfield|frac|drill/i,'Oilfield services',['Tickets and field paperwork chase the office for days','Equipment and crews are tracked across spreadsheets and texts','Safety and compliance records live in folders and people'],'How long from a finished field ticket to an invoice the customer pays?'],
+  [/machine|fabricat|weld|manufactur|metal|shop/i,'Shop / fabrication',['Quotes depend on one or two people who know the numbers','Work orders and job status live on paper on the floor','Customers call to ask where their job is'],'When a customer calls asking where their job is, who has to go find out?'],
+  [/landscap|lawn|tree|irrigation/i,'Landscaping',['Routes and crews are planned by the owner every morning','Seasonal staff turn over and training starts from zero','Extra work on site never gets billed'],'Who plans the routes each morning?'],
+  [/truck|haul|freight|logistic|transport|towing/i,'Trucking / hauling',['Dispatch and driver updates run through calls and texts','Fuel, maintenance and load paperwork pile up','Billing waits on paperwork coming back from drivers'],'How does a load get from the call to an invoice?'],
+  [/auto|repair|collision|tire|diesel|mechanic/i,'Repair shop',['Customers call for status updates all day','Parts orders and job tickets are tracked by hand','The owner is the bottleneck for every quote'],'How many calls a day are just customers asking for updates?'],
+  [/marine|boat|vessel|offshore/i,'Marine',['Vessel schedules, crews and maintenance live in different places','Compliance paperwork depends on a few people','Billing lags behind the work'],'What depends on one or two people knowing the schedule?'],
+];
+function indTip(l){
+  var s=(l.industry||'')+' '+(l.business_name||'');
+  for(var i=0;i<IND_TIPS.length;i++) if(IND_TIPS[i][0].test(s)) return IND_TIPS[i];
+  return [null,'Established business',['Everything still comes back to the owner','Key knowledge lives in a few people\'s heads','The team copies, calls, reminds and chases things by hand'],'What still comes back to you every single day?'];
+}
+function briefList(arr){ return (arr&&arr.length)?'<ul style="margin:4px 0 0;padding-left:18px">'+arr.map(function(x){return '<li style="margin:3px 0">'+esc(x)+'</li>';}).join('')+'</ul>':''; }
+function briefHead(t){ return '<div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted);margin:12px 0 2px">'+t+'</div>'; }
+function renderBrief(l,box,b,at){
+  var tip=indTip(l);
+  var html='<div class="card" style="margin:0 0 10px;padding:13px 14px;border:2px solid #0a0b14">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800">Know before you walk in</div>'+
+    (b?'<button class="btn ghost sm" id="brRedo" style="flex:none;padding:4px 10px;font-size:11.5px">Refresh</button>':'')+'</div>';
+  if(b){
+    html+='<div style="font-size:14px;line-height:1.55;margin-top:6px">'+esc(b.who||'')+'</div>'+
+      (b.owner?briefHead('The owner')+'<div style="font-size:14px;line-height:1.5">'+esc(b.owner)+'</div>':'')+
+      ((b.facts&&b.facts.length)?briefHead('Good to know')+'<div style="font-size:13.5px;line-height:1.45">'+briefList(b.facts)+'</div>':'')+
+      '<div style="background:#E4FF97;border-radius:10px;padding:10px 12px;margin-top:12px"><div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.75">Say this walking in</div><div style="font-size:14.5px;line-height:1.5;font-weight:600;margin-top:3px">'+esc(b.opener||'')+'</div></div>'+
+      briefHead('What probably comes back to the owner')+'<div style="font-size:13.5px;line-height:1.45">'+briefList(b.pains)+'</div>'+
+      briefHead('What the audit would look at for them')+'<div style="font-size:13.5px;line-height:1.45">'+briefList(b.audit_fit)+'</div>'+
+      briefHead('Ask these, then listen')+'<div style="font-size:13.5px;line-height:1.45">'+briefList(b.questions)+'</div>';
+    if(b.objections&&b.objections.length){
+      html+=briefHead('If they say...');
+      b.objections.forEach(function(o){ html+='<div style="font-size:13.5px;line-height:1.45;margin-top:6px"><b>"'+esc(o.they_say||'')+'"</b><div style="color:var(--ink-2,#333)">'+esc(o.you_say||'')+'</div></div>'; });
+    }
+    html+=(b.ask?briefHead('The ask')+'<div style="font-size:14px;line-height:1.5;font-weight:600">'+esc(b.ask)+'</div>':'')+
+      '<div style="font-size:11px;color:var(--muted);margin-top:10px">'+(b.confidence?('How sure: '+esc(b.confidence)+' · '):'')+(at?('Built '+new Date(at).toLocaleDateString()):'')+
+      ((b.sources&&b.sources.length)?' · From: '+b.sources.slice(0,3).map(function(u){ var h=String(u).replace(/^https?:\/\/(www\.)?/,'').split('/')[0]; return '<a href="'+esc(u)+'" target="_blank" rel="noopener" style="color:#1d4ed8">'+esc(h)+'</a>'; }).join(', '):'')+'</div>';
+  }else{
+    html+='<div style="font-size:13px;color:var(--muted);margin-top:4px">'+esc(tip[1])+' cheat sheet. Listen for:</div>'+
+      '<div style="font-size:13.5px;line-height:1.45">'+briefList(tip[2])+'</div>'+
+      '<div style="font-size:13.5px;margin-top:8px"><b>Good first question:</b> "'+esc(tip[3])+'"</div>'+
+      '<button class="btn sm" id="brGo" style="margin-top:10px;width:100%">Build a brief on this business</button>'+
+      '<div style="font-size:11.5px;color:var(--muted);margin-top:5px">Reads their website and tells you who they are, the owner, what to say, and how to answer pushback. Takes about a minute.</div>';
+  }
+  box.innerHTML=html+'</div>';
+  var go=$('#brGo'); if(go) go.onclick=function(){ buildBrief(l,box,false); };
+  var redo=$('#brRedo'); if(redo) redo.onclick=function(){ buildBrief(l,box,true); };
+}
+async function buildBrief(l,box,refresh){
+  var btn=$('#brGo')||$('#brRedo'); if(btn){ btn.disabled=true; btn.innerHTML=HD_SPIN+' Reading up on '+esc(l.business_name||'them')+'...'; }
+  try{
+    var d=await api('/api/rep-brief',{method:'POST',body:JSON.stringify({lead_id:l.id,refresh:!!refresh})});
+    l.brief=d.brief; l.brief_at=d.brief_at; l.has_brief=true;
+    if(box.isConnected) renderBrief(l,box,d.brief,d.brief_at);
+  }catch(ex){ toast(ex.message||'Could not build the brief'); if(btn){ btn.disabled=false; btn.textContent=refresh?'Refresh':'Build a brief on this business'; } }
+}
+async function loadBrief(l){
+  var box=$('#dBrief'); if(!box) return;
+  if(l.brief){ renderBrief(l,box,l.brief,l.brief_at); return; }
+  renderBrief(l,box,null);
+  if(l.has_brief){ try{ var d=await api('/api/rep-brief',{method:'POST',body:JSON.stringify({lead_id:l.id})}); l.brief=d.brief; l.brief_at=d.brief_at; if(box.isConnected) renderBrief(l,box,d.brief,d.brief_at); }catch(e){} }
 }
 async function loadLeadHD(l){
   var box=$('#dHD'); if(!box) return;

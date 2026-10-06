@@ -140,6 +140,8 @@ async function savePlan(repId, plan) {
 // Untouched seeded leads go to the phone without their long notes; the app loads
 // the full lead when it is opened. Keeps a 5,000-lead list fast and small.
 function slim(l) {
+  // Sales briefs load when the lead is opened (rep-brief), never in the list.
+  if (l.brief) { l = Object.assign({}, l, { has_brief: true }); delete l.brief; }
   if (l.status !== 'new' || !l.notes) return l;
   const o = Object.assign({}, l, { _slim: true }); delete o.notes;
   if (o.context && o.context.length > 160) o.context = o.context.slice(0, 157) + '...';
