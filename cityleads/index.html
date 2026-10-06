@@ -1673,18 +1673,34 @@ async function openCalendar(){
       else html+='<div class="card" data-lead="'+esc(x.lead_id)+'" style="margin:0 0 6px;padding:10px 12px;cursor:pointer;border-left:4px solid var(--purple,#7c3aed)"><div style="font-size:14px;font-weight:700">Follow up: '+esc(x.business_name)+'</div><div style="font-size:12.5px;color:var(--muted)">'+esc(STATUS_LABEL[x.status]||x.status||'')+(x.phone?(' · '+esc(x.phone)):'')+'</div></div>';
     });
   });
-  // Mia's week (busy only).
-  html+=head('When Mia is busy (next 7 days)');
-  var m=d.mia||{};
-  if(!m.ok){
-    html+='<div class="card" style="font-size:13px;color:var(--muted)">'+(m.error==='not_linked'||m.error==='not_shared'?'Mia\'s Google Calendar is not linked yet. The booking page still only shows times she is free.':'Could not read Mia\'s calendar right now. The booking page still only shows times she is free.')+'</div>';
+  // Mia and Tyler's days from Cal.com: calls, audits and open times.
+  var t=d.team||{};
+  if(t.ok){
+    html+=head('Mia and Tyler\'s days (next 7 days)');
+    var byDay={}; (t.items||[]).forEach(function(x){ var k=calDayKey(x.start); (byDay[k]=byDay[k]||[]).push(x); });
+    var open=(t.open&&t.open.days)||{};
+    var rows2='';
+    for(var j=0;j<8;j++){ var k2=calDayKey(Date.now()+j*864e5), dw=new Date(k2+'T12:00:00').getDay();
+      var its=byDay[k2]||[], free=(open[k2]||[]).filter(function(x){ return new Date(x)>new Date(); });
+      if((dw===0||dw===6)&&!its.length&&!free.length) continue;
+      rows2+='<div style="padding:9px 0;border-bottom:1px solid var(--line)"><div style="font-size:13px;font-weight:800;margin-bottom:4px">'+esc(calDayName(k2))+'</div>'+
+        (its.length?its.map(function(x){ return '<div style="font-size:13px;line-height:1.5'+(x.mine?';font-weight:700':'')+'">'+esc(calTime(x.start))+' · '+esc(x.title||'Call')+(x.hosts&&x.hosts.length?' <span style="color:var(--muted)">('+esc(x.hosts.join(', '))+')</span>':'')+(x.mine?' <span style="color:var(--green)">· your lead'+(x.who?(': '+esc(x.who)):'')+'</span>':'')+'</div>'; }).join(''):'<div style="font-size:13px;color:var(--muted)">Nothing booked</div>')+
+        (free.length?'<div style="font-size:12px;color:var(--green);margin-top:4px;font-weight:600">Open for a '+esc((t.open&&t.open.title)||'call')+': '+free.slice(0,6).map(function(x){ return esc(calTime(x)); }).join(', ')+(free.length>6?(' +'+(free.length-6)+' more'):'')+'</div>':(open[k2]?'<div style="font-size:12px;color:var(--muted);margin-top:4px">No open times</div>':''))+
+        '</div>'; }
+    html+='<div class="card" style="padding:4px 12px">'+(rows2||'<div style="padding:8px 0;font-size:13px;color:var(--muted)">Nothing on the books this week.</div>')+'</div><div style="font-size:11.5px;color:var(--muted);margin-top:4px">Times are Central, straight from Cal.com. Offer an owner one of the open times, then book it from their lead page.</div>';
   }else{
-    var busyBy={}; (m.busy||[]).forEach(function(x){ var k=calDayKey(x.start); (busyBy[k]=busyBy[k]||[]).push(x); });
-    var rows='';
-    for(var i=0;i<7;i++){ var k=calDayKey(Date.now()+i*864e5), dow=new Date(k+'T12:00:00').getDay(); if(dow===0||dow===6) continue;
-      var list=busyBy[k]||[];
-      rows+='<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><div style="width:86px;flex:none;font-weight:700">'+esc(calDayName(k))+'</div><div style="color:'+(list.length?'var(--ink)':'var(--green)')+'">'+(list.length?list.map(function(x){ return 'Busy '+esc(calTime(x.start))+' - '+esc(calTime(x.end)); }).join('<br>'):'Wide open')+'</div></div>'; }
-    html+='<div class="card" style="padding:6px 12px">'+rows+'</div><div style="font-size:11.5px;color:var(--muted);margin-top:4px">Times are Central. You only see busy or free, never what is on her calendar.</div>';
+    var m=d.mia||{};
+    html+=head('When Mia is busy (next 7 days)');
+    if(!m.ok){
+      html+='<div class="card" style="font-size:13px;color:var(--muted)">Mia and Tyler\'s days are not linked yet. The booking page still only shows times they are free.</div>';
+    }else{
+      var busyBy={}; (m.busy||[]).forEach(function(x){ var k=calDayKey(x.start); (busyBy[k]=busyBy[k]||[]).push(x); });
+      var rows='';
+      for(var i=0;i<7;i++){ var k=calDayKey(Date.now()+i*864e5), dow=new Date(k+'T12:00:00').getDay(); if(dow===0||dow===6) continue;
+        var list=busyBy[k]||[];
+        rows+='<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><div style="width:86px;flex:none;font-weight:700">'+esc(calDayName(k))+'</div><div style="color:'+(list.length?'var(--ink)':'var(--green)')+'">'+(list.length?list.map(function(x){ return 'Busy '+esc(calTime(x.start))+' - '+esc(calTime(x.end)); }).join('<br>'):'Wide open')+'</div></div>'; }
+      html+='<div class="card" style="padding:6px 12px">'+rows+'</div><div style="font-size:11.5px;color:var(--muted);margin-top:4px">Times are Central. You only see busy or free, never what is on her calendar.</div>';
+    }
   }
   // Put it on the rep's own phone calendar.
   var feed=d.feed_url||'', webcal=feed.replace(/^https?:/,'webcal:');
