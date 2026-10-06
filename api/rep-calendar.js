@@ -43,7 +43,9 @@ async function teamDays(repId, myUids) {
       return { start: b.start, end: b.end, title: mine ? b.title : ((ty && ty.title) || 'Booked'), type: b.event_slug, hosts: b.hosts, mine: !!mine, who: mine ? (a.name || null) : null };
     });
     let open = null;
-    const fit = types.find((t) => t.slug === 'discovery-audit') || types[0];
+    // Open times for the call reps book: the Fit Call, else the discovery audit. Never Passem.
+    const fit = ['discovery-audit', 'in-person-audit'].map((sl) => types.find((t) => t.slug === sl)).find(Boolean)
+      || types.find((t) => !/passem/i.test(t.slug || ''));
     if (fit) {
       const d = new Date();
       const days = await cal.slots(fit.id, d.toISOString().slice(0, 10), new Date(d.getTime() + 7 * DAY).toISOString().slice(0, 10)).catch(() => null);
