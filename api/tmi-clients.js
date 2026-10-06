@@ -10,6 +10,10 @@
 //   'request-update' { id, status, tmi_note }     -> { request }
 //   'provision' { tenant_id, resource, data }     -> { item }   create an os_* doc for the client
 //   'build-log' { tenant_id, summary }            -> { ok }     note something in the client's feed
+//   'invite' { email, name, company, plan, send } -> { link, sent }   one-time sign-up link
+//   'invites'                                     -> { invites }       open and used invites
+//   'revoke-invite' { id }                        -> { ok }
+//   'view-as' { tenant_id }                       -> { token }  2-hour sign-in as the client's owner
 
 const db = require('./_db');
 const { requireAuth, cors } = require('./_auth');
@@ -192,6 +196,37 @@ module.exports = async function handler(req, res) {
       const item = await db.insert(spec.coll, Object.assign({ tenant_id: tid, sort, built_by: 'tmi' }, data, { created_at: new Date().toISOString() }));
       await db.insert('os_build_log', { tenant_id: tid, kind: 'build', summary: `TMI built ${data.name || data.label || data.title || 'an item'} in your OS.`, created_at: new Date().toISOString() }).catch(() => {});
       return res.status(200).json({ item });
+    }
+
+    if (action === 'invite') {
+      const email = String(b.email || '').toLowerCase().trim();
+      if (!email.includes('@')) return res.status(400).json({ error: 'Valid email required' });
+      if (await db.findOne('os_users', 'email', email).catch(() => null)) return res.status(409).json({ error: 'That email already has a TMI OS account' });
+      const plan = ['trial', 'audit_paid', 'active', 'build'].includes(b.plan) ? b.plan : 'trial';
+      const invites = require('./_os-invite');
+      const inv = await invites.create({ email, name: String(b.name || '').trim() || null, company: String(b.company || '').trim() || null, plan, source: 'admin' });
+      const sent = b.send === false ? false : await invites.send({ email, name: b.name, company: b.company, link: inv.link, paid: plan !== 'trial' });
+      return res.status(200).json({ link: inv.link, sent });
+    }
+    if (action === 'invites') {
+      const rows = await db.list('os_invites', { limit: 300 }).catch(() => []);
+      const invites = (rows || []).sort((a, z) => String(z.created_at).localeCompare(String(a.created_at))).slice(0, 100)
+        .map((r) => ({ id: r.id, email: r.email, name: r.name, company: r.company, plan: r.plan, source: r.source, created_at: r.created_at, expires_at: r.expires_at, used_at: r.used_at, revoked_at: r.revoked_at || null }));
+      return res.status(200).json({ invites });
+    }
+    if (action === 'revoke-invite') {
+      await db.update('os_invites', String(b.id || ''), { revoked_at: new Date().toISOString() });
+      return res.status(200).json({ ok: true });
+    }
+    if (action === 'view-as') {
+      const tid = String(b.tenant_id || '');
+      const users = await db.list('os_users', { where: [['tenant_id', '==', tid]], limit: 50 }).catch(() => []);
+      const owner = (users || []).find((u) => u.role === 'owner') || (users || [])[0];
+      if (!owner) return res.status(404).json({ error: 'No user on this account yet' });
+      const jwt = require('jsonwebtoken');
+      const token = jwt.sign({ sub: owner.id, email: owner.email, tenant_id: tid, role: owner.role || 'owner', kind: 'tenant', imp: true }, process.env.JWT_SECRET, { expiresIn: '2h' });
+      await db.insert('admin_audit', { action: 'os_view_as', tenant_id: tid, at: new Date().toISOString() }).catch(() => {});
+      return res.status(200).json({ token, url: 'https://os.tmitechai.com/' });
     }
 
     if (action === 'build-log') {

@@ -68,7 +68,7 @@
         <div><b>03</b> See your whole company on one screen</div>
       </div>
     </div>
-    <div class="bs-foot">TMI Technology</div>
+    <div class="bs-foot">TMI Tech AI</div>
   </aside>
 
   <main class="auth">
@@ -85,13 +85,13 @@
              who has not been provisioned; login stays available for owners. -->
         <div id="suGate" class="hide">
           <h2>Access by invitation</h2>
-          <p class="sub">Your OS is set up for you before it opens. Once your account is ready you can sign in here.</p>
+          <p class="sub">TMI OS opens with an invite from TMI Tech AI. Use the link in your invite email to set up your workspace. Not working with us yet? Start with a <a href="https://www.tmitechai.com/intelligent-company-audit.html#book" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">Fit Call</a>.</p>
           <p class="sub" style="margin-top:22px;text-align:center">Already have an account? <a href="#" onclick="tab('login');return false;" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">Sign in</a></p>
         </div>
 
         <div id="suReal">
         <h2>Build your intelligent company</h2>
-        <p class="sub">Start free. Set it up in minutes.</p>
+        <p class="sub" id="suSub">Set it up in minutes.</p>
 
         <!-- STEP 1: who you are (captures the lead before the password step) -->
         <form id="su-form1" onsubmit="return doSignupInfo(event)">
@@ -153,12 +153,21 @@ var TOKEN_KEY='tmios_token';
 // the post-booking link carries ?booked=1, which we persist here so the unlock
 // works cross-device from the confirmation email). Non-bookers see a "book
 // first" gate on the signup pane; returning owners can still sign in.
-var BOOKED=(function(){try{var u=new URLSearchParams(location.search);if(u.get('booked')==='1')localStorage.setItem('tmi_booked','1');return localStorage.getItem('tmi_booked')==='1';}catch(_){return false;}})();
+// Invitation only. A sign-up shows only with a valid ?invite= link (from an
+// invite email). Admin "View as client" arrives with #as=<token>.
+var INVITE=(function(){try{return new URLSearchParams(location.search).get('invite')||'';}catch(_){return '';}})();
+(function(){try{var m=/[#&]as=([^&]+)/.exec(location.hash||'');if(m){localStorage.setItem(TOKEN_KEY,decodeURIComponent(m[1]));history.replaceState(null,'',location.pathname);location.href='/os/app';}}catch(_){}})();
 function applyGate(){
-  if(BOOKED)return;
   var gate=document.getElementById('suGate'),real=document.getElementById('suReal');
-  if(gate)gate.classList.remove('hide');
-  if(real)real.classList.add('hide');
+  var lock=function(){ if(gate)gate.classList.remove('hide'); if(real)real.classList.add('hide'); };
+  if(!INVITE){ lock(); tab('login'); return; }
+  fetch('/api/os2-signup?invite='+encodeURIComponent(INVITE)).then(function(r){return r.json();}).then(function(j){
+    if(!j||!j.valid){ lock(); var g=document.querySelector('#suGate .sub'); if(g) g.textContent='This invite link has already been used or has expired. Sign in if you already set up your workspace, or reply to your invite email for a new link.'; return; }
+    tab('signup');
+    var set=function(id,v){var e=document.getElementById(id);if(e&&v&&!e.value)e.value=v;};
+    set('s-email',j.email); set('s-name',j.name); set('s-company',j.company);
+    var sub=document.getElementById('suSub'); if(sub&&j.company) sub.textContent='Your invite for '+j.company+'. Set it up in minutes.';
+  }).catch(lock);
 }
 function tab(which){
   document.getElementById('tabSignup').classList.toggle('on',which==='signup');
@@ -214,6 +223,7 @@ async function doSignup(e){
       email:document.getElementById('s-email').value.trim(),
       phone:document.getElementById('s-phone').value.trim(),
       password:document.getElementById('s-password').value,
+      invite:INVITE,
       event_id:eid
     });
     try{if(window.oaiq){oaiq("measure","registration_completed",{type:"customer_action",event_id:eid});}}catch(_e){}

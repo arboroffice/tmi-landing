@@ -1,10 +1,13 @@
-// TMI OS — company sign up. Creates a tenant and its owner user, returns a token.
-// Best-effort owner alert so we know when a company joins.
+// TMI OS company sign up. Invitation only: needs a valid invite link (sent
+// from admin, or automatically after a paid audit) or an email that already
+// paid for the Intelligent Company Audit. Creates the tenant and its owner.
 //
-// POST { name, email, password, company, business_type? } -> { token, user, tenant }
+// GET  ?invite=TOKEN -> { valid, email, name, company }
+// POST { invite, name, email, password, company, business_type? } -> { token, user, tenant }
 
 const db = require('./_db');
 const { hashPassword, signTenant, cors } = require('./_tenant-auth');
+const invites = require('./_os-invite');
 
 const FROM_NUMBER = '+18557171044';
 const ALERT_NUMBER = '+13373809059';
@@ -13,6 +16,10 @@ const OWNER_EMAIL = ['support@tmitechai.com', 'mia@tmitechai.com'];
 module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'GET') {
+    const inv = await invites.check(req.query && req.query.invite).catch(() => null);
+    return res.json(inv ? { valid: true, email: inv.email, name: inv.name, company: inv.company } : { valid: false });
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   const b = req.body || {};
@@ -29,6 +36,14 @@ module.exports = async function handler(req, res) {
   if (!company) return res.status(400).json({ error: 'Company required' });
 
   try {
+    // Invitation only. A paid audit buyer can join with the email they paid with.
+    const invite = await invites.check(b.invite).catch(() => null);
+    let paidByEmail = false;
+    if (!invite) {
+      const apps = await db.list('applications', { where: [['email', '==', email]], limit: 20 }).catch(() => []);
+      paidByEmail = (apps || []).some((a) => a.status === 'paid' || a.status === 'won');
+      if (!paidByEmail) return res.status(403).json({ error: 'TMI OS is by invitation. Use the link in your invite email, or book a Fit Call at tmitechai.com.' });
+    }
     if (await db.findOne('os_users', 'email', email)) {
       return res.status(409).json({ error: 'An account with this email already exists. Sign in instead.' });
     }
@@ -38,7 +53,8 @@ module.exports = async function handler(req, res) {
       business_type: businessType,
       profile: {},
       onboarded: false,
-      plan: 'trial',
+      plan: (invite && invite.plan) || 'trial',
+      invited_via: invite ? invites.hash(b.invite) : (paidByEmail ? 'paid_audit' : null),
       created_at: new Date().toISOString(),
     });
 
@@ -51,6 +67,7 @@ module.exports = async function handler(req, res) {
       password_hash: hashPassword(password),
       created_at: new Date().toISOString(),
     });
+    if (invite) await invites.use(b.invite, tenant.id).catch(() => {});
 
     // Honor a prior paid Intelligent Company Audit: if this email already paid,
     // stand up a paid tenant (not trial) and link the tenant back to the

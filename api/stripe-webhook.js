@@ -58,6 +58,21 @@ async function linkPaidTenant(email, appId) {
 }
 
 
+// A paid audit buyer with no OS account yet gets their TMI OS invite by email,
+// once. Signing up through it lands them straight on the paid plan.
+async function inviteBuyer(email, name, company, appId) {
+  if (!email) return;
+  if (await dbx.findOne('os_users', 'email', String(email).toLowerCase()).catch(() => null)) return;
+  if (appId) {
+    const app = await dbx.getById('applications', appId).catch(() => null);
+    if (app && app.os_invited_at) return;
+  }
+  const invites = require('./_os-invite');
+  const inv = await invites.create({ email, name, company, plan: 'audit_paid', source: 'paid_audit' });
+  await invites.send({ email, name, company, link: inv.link, paid: true });
+  if (appId) await dbx.update('applications', appId, { os_invited_at: new Date().toISOString() }).catch(() => {});
+}
+
 // A rep sent this payment link from City Leads (client_reference_id = "rl_<rep lead id>").
 // Credit them: the lead becomes won with the amount paid, the rep's commission
 // row is written the same way rep-leads.js does it, and the application is
@@ -96,6 +111,7 @@ async function markPaid(session) {
       status: 'paid', paid_at: new Date().toISOString(), stripe_session: session.id,
     });
     await linkPaidTenant(email, app.id).catch(() => {});
+    await inviteBuyer(email, app.name, app.company || company, app.id).catch((e) => console.error('inviteBuyer:', e.message));
     const repName = await creditRep(session, app.id).catch((e) => { console.error('creditRep:', e.message); return null; });
     alertTeam(`PAID Intelligent Company Audit: ${app.name || company || email} | ${email || 'no email'}${repName ? ' | via ' + repName : ''}`);
     // Immediate payment confirmation + next step to the customer (in case they
@@ -109,7 +125,7 @@ async function markPaid(session) {
 <p style="margin:0 0 16px;">The one thing we need from you now is a short intake so we build the audit around your actual operation. It takes about 10 to 15 minutes, and the more detail you give, the sharper it comes back.</p>
 <p style="margin:0 0 24px;"><a href="${intake}" style="color:#5a9e00;font-weight:600;">Start your intake &rarr;</a></p>
 <p style="margin:0 0 16px;">Once it's in, we build your written diagnosis and the plan, then you book a call to walk through it. Reply here anytime.</p>
-<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>`);
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI Tech AI</span></p>`);
     }
     // Nudge to complete the intake if they paid and bailed (stops once intake exists).
     try {
@@ -129,6 +145,7 @@ async function markPaid(session) {
       source: 'complete_audit', status: 'paid', paid_at: new Date().toISOString(), stripe_session: session.id,
     }).catch(() => null);
     await linkPaidTenant(email, created && created.id).catch(() => {});
+    await inviteBuyer(email, null, company, created && created.id).catch((e) => console.error('inviteBuyer:', e.message));
     const repName = await creditRep(session, created && created.id).catch((e) => { console.error('creditRep:', e.message); return null; });
     alertTeam(`PAID Intelligent Company Audit (no prior capture): ${email || company || session.id}${repName ? ' | via ' + repName : ''}`);
   }
@@ -161,7 +178,7 @@ async function markBuildDeposit(session) {
 <p style="margin:0 0 16px;">Your deposit came through and the build is a go. This is the fun part.</p>
 <p style="margin:0 0 16px;">Here's what happens next: we lock your kickoff, map your operation in detail, and start installing. You'll have a single point of contact the whole way, and we build in about 30 days.</p>
 <p style="margin:0 0 16px;">We'll reach out within one business day to schedule kickoff. If you want to get us anything ahead of time - logins, current tools, the one thing you most want fixed first - just reply here.</p>
-<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI</span></p>`);
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI Tech AI</span></p>`);
   }
 }
 

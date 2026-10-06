@@ -57,6 +57,20 @@
       </div>
       <p style="color:var(--muted);font-size:13.5px;margin:-8px 0 20px;max-width:70ch;">Every client's operating system. They lay out what they want and file build requests; you build the real backend here and provision straight into their OS. Marking a request live shows up in their portal.</p>
 
+      <div class="panel" id="invitePanel">
+        <h2>Invite a client</h2>
+        <p style="color:var(--muted);font-size:12.5px;margin:-4px 0 12px">TMI OS is invite only. They get an email with a one-time link (good for 30 days). People who pay for the Intelligent Company Audit get their invite automatically.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;align-items:end">
+          <input id="invEmail" type="email" placeholder="Email" class="note-in"/>
+          <input id="invName" placeholder="Their name" class="note-in"/>
+          <input id="invCo" placeholder="Company" class="note-in"/>
+          <select id="invPlan" class="note-in"><option value="trial">Trial</option><option value="audit_paid">Audit client</option><option value="build">Build client</option><option value="active">Active</option></select>
+          <button class="btn btn-sm" onclick="sendInvite()">Send invite</button>
+        </div>
+        <div id="invOut" style="margin-top:10px;font-size:13px"></div>
+        <details style="margin-top:12px"><summary style="cursor:pointer;font-size:13px;font-weight:700">Invites sent</summary><div id="invList" style="margin-top:8px;font-size:13px;color:var(--muted)">Loading...</div></details>
+      </div>
+
       <div class="oc-cols">
         <div class="clist" id="clist"><div class="oc-empty">Loading clients...</div></div>
         <div id="detail"><div class="panel"><div class="oc-empty">Select a client to see their OS and build queue.</div></div></div>
@@ -100,8 +114,8 @@ async function openClient(id){
   const closed=reqs.filter(x=>!['requested','building'].includes(x.status));
 
   let html = `<div class="panel">
-    <h2>${esc(t.name)}</h2>
-    <div class="stat-line"><span>Score <b>${sc.score||0}</b></span><span>Owner dependency <b>${sc.owner_dependency||0}%</b></span><span>Tier <b>${esc(sc.tier||'-')}</b></span><span>Plan <b>${esc(t.plan||'trial')}</b></span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${esc(t.name)}</h2><button class="btn btn-secondary btn-sm" onclick="viewAs('${t.id}')">View as client &rarr;</button></div>
+    <div class="stat-line"><span>Score <b>${sc.score||0}</b></span><span>Owner dependency <b>${sc.owner_dependency||0}%</b></span><span>Tier <b>${esc(sc.tier||'-')}</b></span><span>Plan <b>${esc(({trial:'Trial',audit_paid:'Audit client',build:'Build client',active:'Active',partner:'Partner'})[t.plan]||t.plan||'Trial')}</b></span></div>
     ${p.what_you_do?`<div style="font-size:13px;color:var(--ink-2);margin-top:8px;line-height:1.55">${esc(p.what_you_do)}</div>`:''}
     <div class="chips"><span class="chip">${r.workers.length} workers</span><span class="chip">${r.metrics.length} metrics</span><span class="chip">${r.workflows.length} workflows</span><span class="chip">${r.knowledge.length} knowledge</span></div>
   </div>`;
@@ -193,7 +207,38 @@ async function provision(resource){
   if(r&&r.item){ TMIAdmin.toast('Built in their OS'); openClient(CUR); loadClients(); }
 }
 
+async function sendInvite(){
+  const email=document.getElementById('invEmail').value.trim();
+  if(!email){ TMIAdmin.toast('Add their email','error'); return; }
+  const r=await TMIAdmin.api('/api/tmi-clients','POST',{action:'invite',email,name:document.getElementById('invName').value.trim(),company:document.getElementById('invCo').value.trim(),plan:document.getElementById('invPlan').value});
+  if(!r) return;
+  document.getElementById('invOut').innerHTML=(r.sent?'Invite emailed. ':'Email did not send, so share this link yourself. ')+'Link: <input readonly value="'+esc(r.link)+'" style="width:100%;max-width:520px;font-size:12px;padding:6px;border:1px solid var(--line);border-radius:6px" onclick="this.select()"/>';
+  ['invEmail','invName','invCo'].forEach(id=>document.getElementById(id).value='');
+  TMIAdmin.toast(r.sent?'Invite sent':'Invite made');
+  loadInvites();
+}
+async function loadInvites(){
+  const box=document.getElementById('invList'); if(!box) return;
+  const r=await TMIAdmin.api('/api/tmi-clients','POST',{action:'invites'}); if(!r){ box.textContent=''; return; }
+  if(!r.invites.length){ box.textContent='No invites yet.'; return; }
+  const st=(x)=>x.used_at?'<span style="color:#3f8f2a">Joined '+new Date(x.used_at).toLocaleDateString()+'</span>':x.revoked_at?'Cancelled':(new Date(x.expires_at)<new Date()?'Expired':'Waiting · <a href="#" data-revoke="'+esc(x.id)+'" style="color:#b42318">cancel</a>');
+  box.innerHTML='<table class="data-table" style="width:100%"><thead><tr><th>Email</th><th>Company</th><th>Sent</th><th>How</th><th>Status</th></tr></thead><tbody>'+r.invites.map(x=>'<tr><td>'+esc(x.email||'')+'</td><td>'+esc(x.company||'')+'</td><td>'+new Date(x.created_at).toLocaleDateString()+'</td><td>'+(x.source==='paid_audit'?'Paid audit':'You')+'</td><td>'+st(x)+'</td></tr>').join('')+'</tbody></table>';
+  box.querySelectorAll('[data-revoke]').forEach(a=>a.onclick=(e)=>{ e.preventDefault(); revokeInvite(a.dataset.revoke); });
+}
+async function revokeInvite(id){
+  if(!confirm('Cancel this invite? The link stops working.')) return;
+  const r=await TMIAdmin.api('/api/tmi-clients','POST',{action:'revoke-invite',id}); if(r){ TMIAdmin.toast('Invite cancelled'); loadInvites(); }
+}
+async function viewAs(id){
+  const w=window.open('about:blank','_blank');
+  const r=await TMIAdmin.api('/api/tmi-clients','POST',{action:'view-as',tenant_id:id});
+  if(!r){ if(w) w.close(); return; }
+  const url=r.url+'#as='+encodeURIComponent(r.token);
+  if(w) w.location=url; else location.href=url;
+}
+
 loadClients();
+loadInvites();
 </script>
 </body>
 </html>
