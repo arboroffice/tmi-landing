@@ -382,7 +382,7 @@ async function boot(){
     if(c){
       // Open on the saved copy right away, then swap in fresh data.
       LEADS=c.leads; const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago'}).format(new Date());
-      PLAN=(c.plan&&c.plan.date===today)?c.plan:null;
+      PLAN=c.plan&&c.plan.lead_ids?c.plan:null;
       switchTab('today');
       loadLeads().then(()=>{ if(!$('#sheet').classList.contains('on')) refreshCurrent(); flushQueue(); });
     } else {
@@ -393,7 +393,7 @@ async function boot(){
   }catch(ex){ logout(); }
 }
 
-// Leads and today's list load together. The last copy is kept on the phone so
+// Leads and the rep's list load together. The last copy is kept on the phone so
 // the app opens instantly, then refreshes quietly in the background.
 // Stored in IndexedDB (room for thousands of leads; localStorage is ~5MB on iPhones).
 function idb(){ return new Promise((ok,bad)=>{ try{ const r=indexedDB.open('cityleads',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>bad(r.error); }catch(e){ bad(e); } }); }
@@ -402,82 +402,137 @@ async function idbGet(k){ try{ const d=await idb(); return await new Promise((ok
 function cacheLeads(){ idbSet('leads',{rep:ME&&ME.id, at:Date.now(), leads:LEADS, plan:PLAN}); }
 async function cachedLeads(){ const c=await idbGet('leads'); return (c&&ME&&c.rep===ME.id&&Array.isArray(c.leads))?c:null; }
 async function loadLeads(){
-  const [ls,pl]=await Promise.allSettled([api('/api/rep-leads'), api('/api/rep-leads?today=1')]);
+  const [ls,pl]=await Promise.allSettled([api('/api/rep-leads'), api('/api/rep-leads?mylist=1')]);
   if(ls.status==='fulfilled') LEADS=ls.value; else { if(!LEADS.length) LEADS=[]; toast(ls.reason&&ls.reason.message||'Could not load leads'); }
   PLAN = pl.status==='fulfilled' ? pl.value : PLAN;
   if(ls.status==='fulfilled') cacheLeads();
 }
 
-/* ---- Today's stops: ~15 businesses in one town, picked fresh each day ---- */
-let PLAN = null;
+/* ---- My list: the rep builds it, keeps it as long as they want, no daily reset ---- */
+let PLAN = null; // { lead_ids, taken } from /api/rep-leads?mylist=1
 function planStops(){ return PLAN&&PLAN.lead_ids ? PLAN.lead_ids.map(id=>LEADS.find(l=>l.id===id)).filter(Boolean) : []; }
-function stopDone(l){ return l.status!=='new' || isToday(l.visited_at); }
-let PICKING=null; // town choices while the rep is choosing (or switching) a town
+function stopDone(l){ return l.status!=='new' || !!l.visited_at; }
+function onList(id){ return !!(PLAN&&PLAN.lead_ids&&PLAN.lead_ids.includes(id)); }
+async function saveList(ids, msg){
+  PLAN=Object.assign({},PLAN||{},{lead_ids:ids});
+  cacheLeads(); if($('#tStops')) renderStops();
+  try{ const d=await api('/api/rep-leads',{method:'POST',body:JSON.stringify({action:'mylist',lead_ids:ids})}); PLAN.lead_ids=d.lead_ids; cacheLeads(); if(msg) toast(msg); }
+  catch(ex){ toast(ex.message||'Could not save your list'); }
+}
+function addToList(ids){ const cur=(PLAN&&PLAN.lead_ids)||[]; const add=ids.filter(id=>!cur.includes(id)); if(!add.length){ toast('Already on your list'); return; } saveList(cur.concat(add), add.length===1?'Added to your list':('Added '+add.length+' to your list')); }
+function removeFromList(id){ saveList(((PLAN&&PLAN.lead_ids)||[]).filter(x=>x!==id),'Removed from your list'); }
+function moveInList(id,dir){ const ids=((PLAN&&PLAN.lead_ids)||[]).slice(); const i=ids.indexOf(id), j=i+dir; if(i<0||j<0||j>=ids.length) return; ids[i]=ids[j]; ids[j]=id; saveList(ids); }
+function milesBetween(a,b){ const R=3958.8, r=x=>x*Math.PI/180; const dLat=r(b.lat-a.lat), dLng=r(b.lng-a.lng); const h=Math.sin(dLat/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLng/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+function hereNow(){ return new Promise((ok,bad)=>{ if(!navigator.geolocation) return bad(new Error('Location is not available on this phone')); navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude}),()=>bad(new Error('Turn on location for this app, or type a city')),{enableHighAccuracy:false,timeout:10000,maximumAge:120000}); }); }
 function renderStops(){
   const box=$('#tStops'); if(!box) return;
-  if(PICKING || (PLAN&&PLAN.needs_pick)) return renderTownPicker(box, PICKING || (PLAN&&PLAN.towns) || []);
   const stops=planStops();
-  if(!stops.length){ box.innerHTML=''; return; }
-  const done=stops.filter(stopDone).length, pct=Math.round(done/stops.length*100);
+  const done=stops.filter(stopDone).length;
   const left=stops.filter(l=>!stopDone(l)&&l.lat!=null);
   box.innerHTML=`<div class="card" style="margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
-      <div><div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted)">Today's stops</div>
-      <div style="font-size:17px;font-weight:800;letter-spacing:-.01em;margin-top:2px">${esc(PLAN.town||'Your list')}</div></div>
-      <div style="font-size:15px;font-weight:800">${done} <span style="color:var(--muted);font-weight:600;font-size:13px">of ${stops.length} done</span></div>
+      <div><div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted)">My list</div>
+      <div style="font-size:17px;font-weight:800;letter-spacing:-.01em;margin-top:2px">${stops.length?(stops.length+' business'+(stops.length===1?'':'es')):'Build your list'}</div></div>
+      ${stops.length?`<div style="font-size:15px;font-weight:800">${done} <span style="color:var(--muted);font-weight:600;font-size:13px">worked</span></div>`:''}
     </div>
-    <div style="height:7px;background:var(--line);border-radius:4px;overflow:hidden;margin:10px 0 4px"><div style="height:100%;width:${pct}%;background:${done>=stops.length?'var(--green)':'var(--ink)'};border-radius:4px"></div></div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Work them top to bottom. Tap one, then mark what happened.</div>
-    <div id="tStopList"></div>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn sm" id="tRoute" style="flex:1" ${left.length?'':'disabled'}>Start route</button>
-      <button class="btn ghost sm" id="tReplan" style="flex:1">Change town</button>
-    </div></div>`;
+    ${stops.length?'':'<div style="font-size:13px;color:var(--muted);margin:6px 0 4px;line-height:1.5">Find businesses near you, anywhere you are, and add the ones you want. Your list stays until you change it.</div>'}
+    <div id="tStopList" style="margin-top:8px"></div>
+    <button class="btn" id="tFind" style="margin-top:10px">📍 Find businesses near me</button>
+    ${stops.length?`<div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn ghost sm" id="tRoute" style="flex:1" ${left.length?'':'disabled'}>Start route</button>
+      <button class="btn ghost sm" id="tSortNear" style="flex:1">Closest first</button>
+      ${done?'<button class="btn ghost sm" id="tClear" style="flex:1">Clear worked</button>':''}
+    </div>`:''}
+  </div>`;
   const list=$('#tStopList');
-  stops.forEach((l,i)=>{ const row=leadRow(l); if(stopDone(l)) row.style.opacity='.45'; const n=el(`<div style="font-weight:800;font-size:12px;color:var(--muted);width:20px;flex:none;align-self:center">${stopDone(l)?'✓':(i+1)}</div>`); row.insertBefore(n,row.firstChild); list.appendChild(row); });
-  $('#tRoute').onclick=()=>{
+  stops.forEach((l,i)=>{ const row=leadRow(l); if(stopDone(l)) row.style.opacity='.5';
+    const n=el(`<div style="font-weight:800;font-size:12px;color:var(--muted);width:20px;flex:none;align-self:center">${stopDone(l)?'✓':(i+1)}</div>`); row.insertBefore(n,row.firstChild);
+    const ctl=el(`<div style="display:flex;flex-direction:column;gap:2px;flex:none;align-self:center;margin-left:4px"><button data-up style="border:none;background:none;font-size:13px;color:var(--muted);padding:2px 6px">▲</button><button data-rm style="border:none;background:none;font-size:15px;color:var(--muted);padding:0 6px">✕</button><button data-dn style="border:none;background:none;font-size:13px;color:var(--muted);padding:2px 6px">▼</button></div>`);
+    ctl.querySelector('[data-up]').onclick=(e)=>{ e.stopPropagation(); moveInList(l.id,-1); };
+    ctl.querySelector('[data-dn]').onclick=(e)=>{ e.stopPropagation(); moveInList(l.id,1); };
+    ctl.querySelector('[data-rm]').onclick=(e)=>{ e.stopPropagation(); removeFromList(l.id); };
+    row.appendChild(ctl); list.appendChild(row); });
+  $('#tFind').onclick=openFinder;
+  const rt=$('#tRoute'); if(rt) rt.onclick=()=>{
     // Google Maps takes the phone's location as the start and up to 9 stops plus a destination.
     const pts=left.slice(0,10).map(l=>l.lat+','+l.lng);
-    const url='https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+pts[pts.length-1]+(pts.length>1?('&waypoints='+pts.slice(0,-1).join('%7C')):'');
-    window.open(url,'_blank');
+    window.open('https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+pts[pts.length-1]+(pts.length>1?('&waypoints='+pts.slice(0,-1).join('%7C')):''),'_blank');
   };
-  $('#tReplan').onclick=async()=>{
-    try{ const d=await api('/api/rep-leads?towns=1'); PICKING=d.towns||[]; renderStops(); }catch(ex){ toast(ex.message); }
+  const sn=$('#tSortNear'); if(sn) sn.onclick=async()=>{
+    try{ const me=await hereNow(); let cur=me; const pinned=stops.filter(l=>l.lat!=null), rest=stops.filter(l=>l.lat==null), out=[];
+      while(pinned.length){ pinned.sort((a,b)=>milesBetween(cur,a)-milesBetween(cur,b)); const n=pinned.shift(); out.push(n); cur=n; }
+      saveList(out.concat(rest).map(l=>l.id),'Sorted closest first'); }catch(ex){ toast(ex.message); }
   };
+  const cl=$('#tClear'); if(cl) cl.onclick=()=>saveList(stops.filter(l=>!stopDone(l)).map(l=>l.id),'Cleared worked businesses');
 }
-// The rep chooses where to work. Towns show how many open businesses are left,
-// how many are hot, and whether a teammate already picked that town today.
-function renderTownPicker(box, towns){
-  const switching=!!PICKING && PLAN && !PLAN.needs_pick;
-  const due=(PLAN&&PLAN.needs_pick)?planStops():[];
-  box.innerHTML=`<div class="card" style="margin-bottom:12px">
-    <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted)">Today's stops</div>
-    <div style="font-size:17px;font-weight:800;letter-spacing:-.01em;margin:2px 0 4px">Where are you working today?</div>
-    <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">Pick a town and you get about 15 businesses there, best ones first, in driving order.</div>
-    <input id="tTownQ" placeholder="Search a town" style="margin-bottom:8px"/>
-    <div id="tTowns"></div>
-    ${switching?'<button class="btn ghost sm" id="tPickCancel" style="margin-top:8px">Keep my current list</button>':''}
-  </div>
-  ${due.length?'<div class="h-eyebrow">Callbacks due today</div><div id="tPickDue"></div>':''}`;
-  const draw=()=>{
-    const q=($('#tTownQ').value||'').toLowerCase().trim();
-    const rows=towns.filter(t=>!q||t.town.toLowerCase().includes(q)).slice(0,q?40:12);
-    $('#tTowns').innerHTML=rows.length?rows.map(t=>`<button class="lead" data-town="${esc(t.town)}" style="width:100%;text-align:left;font:inherit;color:inherit">
-      <div class="body"><div class="name">${esc(t.town)}${t.last?' <span class="chip" style="background:#eef3ff;color:#2f4fa8">Yesterday</span>':''}</div>
-      <div class="sub">${t.open} open${t.hot?(' · '+t.hot+' hot'):''}${t.named?(' · '+t.named+' with owner name'):''}${t.partners.length?(' · '+esc(t.partners.join(', '))+' is here today'):''}</div></div>
-      <span style="flex:none;font-weight:800;color:var(--muted)">→</span></button>`).join('')
-      :'<div class="empty">No towns match. Every open business may already be worked.</div>';
-    document.querySelectorAll('#tTowns [data-town]').forEach(b=>b.onclick=()=>pickTown(b.dataset.town));
-  };
-  $('#tTownQ').oninput=draw; draw();
-  const c=$('#tPickCancel'); if(c) c.onclick=()=>{ PICKING=null; renderStops(); };
-  const dbox=$('#tPickDue'); if(dbox) due.forEach(l=>dbox.appendChild(leadRow(l)));
+
+/* ---- Find near me: their own leads within a radius, or new businesses anywhere ---- */
+let FIND={center:null,label:'',radius:10,kind:''};
+const FIND_KINDS=[['','Any business'],['contractor','Contractors'],['construction company','Construction'],['roofing contractor','Roofing'],['hvac','HVAC'],['plumber','Plumbing'],['electrician','Electrical'],['manufacturing','Manufacturing'],['machine shop','Machine shops'],['trucking company','Trucking'],['oilfield services','Oilfield'],['landscaping','Landscaping'],['auto repair','Auto repair'],['marine services','Marine'],['equipment rental','Equipment']];
+function openFinder(){
+  $('#sheetTitle').textContent='Find businesses';
+  const b=$('#sheetBody');
+  b.innerHTML=`<div style="font-size:13px;color:var(--muted);margin-bottom:10px">Use where you are, or type any city or zip, like "Dallas, TX". Then add the ones you want to your list.</div>
+    <button class="btn" id="fHere">📍 Use my location</button>
+    <div style="display:flex;gap:8px;margin-top:8px"><input id="fPlace" placeholder="City, address or zip" value="${esc(FIND.label&&FIND.label!=='Your location'?FIND.label:'')}" style="flex:1"/><button class="btn ghost sm" id="fGo" style="flex:none">Go</button></div>
+    <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px">How far</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap" id="fRad">${[5,10,25,50].map(r=>`<button class="btn ${FIND.radius===r?'':'ghost '}sm" data-r="${r}" style="flex:1">${r} mi</button>`).join('')}</div>
+    <div id="fOut" style="margin-top:12px"></div><div style="height:24px"></div>`;
+  $('#sheet').classList.add('on');
+  $('#fHere').onclick=async()=>{ try{ toast('Finding you…'); FIND.center=await hereNow(); FIND.label='Your location'; findRender(); }catch(ex){ toast(ex.message); } };
+  const go=()=>{ const q=$('#fPlace').value.trim(); if(!q) return; if(typeof google==='undefined'||!google.maps){ toast('Maps still loading, try again'); return; }
+    new google.maps.Geocoder().geocode({address:q},(r,st)=>{ if(st!=='OK'||!r||!r[0]){ toast('Could not find that place'); return; } const g=r[0].geometry.location; FIND.center={lat:g.lat(),lng:g.lng()}; FIND.label=r[0].formatted_address; findRender(); }); };
+  $('#fGo').onclick=go; $('#fPlace').onkeydown=(e)=>{ if(e.key==='Enter') go(); };
+  b.querySelectorAll('#fRad [data-r]').forEach(x=>x.onclick=()=>{ FIND.radius=Number(x.dataset.r); b.querySelectorAll('#fRad [data-r]').forEach(y=>y.classList.toggle('ghost',y!==x)); if(FIND.center) findRender(); });
+  if(FIND.center) findRender();
 }
-async function pickTown(town){
-  try{
-    PLAN=await api('/api/rep-leads',{method:'POST',body:JSON.stringify({action:'plan',town})});
-    PICKING=null; renderToday(); toast('Your list for '+town+' is ready');
-  }catch(ex){ toast(ex.message); }
+function findRender(){
+  const out=$('#fOut'); if(!out) return;
+  const c=FIND.center, taken=(PLAN&&PLAN.taken)||{};
+  const near=LEADS.filter(l=>l.lat!=null&&!CLOSED_ST.includes(l.status)).map(l=>Object.assign(l,{_dist:milesBetween(c,l)})).filter(l=>l._dist<=FIND.radius).sort((a,b)=>(stopDone(a)-stopDone(b))||(a._dist-b._dist));
+  const fresh=near.filter(l=>!onList(l.id));
+  out.innerHTML=`<div style="font-size:13px;margin-bottom:8px">Near <b>${esc(FIND.label||'here')}</b> within ${FIND.radius} miles</div>
+    <div class="card" style="padding:10px 12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-weight:800;font-size:14px">Your leads here: ${near.length}</div>${fresh.length?`<button class="btn sm" id="fAddAll" style="flex:none">Add ${Math.min(fresh.length,25)}</button>`:''}</div>
+    <div id="fMine" style="margin-top:6px"></div></div>
+    <div class="card" style="padding:10px 12px"><div style="font-weight:800;font-size:14px">Find new businesses here</div><div style="font-size:12.5px;color:var(--muted);margin:2px 0 8px">Searches Google for businesses in this area that are not in your leads yet.</div>
+    <select id="fKind" style="width:100%">${FIND_KINDS.map(k=>`<option value="${esc(k[0])}" ${k[0]===FIND.kind?'selected':''}>${esc(k[1])}</option>`).join('')}</select>
+    <button class="btn ghost sm" id="fSearch" style="margin-top:8px;width:100%">Search</button><div id="fNew" style="margin-top:8px"></div></div>`;
+  const mine=$('#fMine');
+  if(!near.length) mine.innerHTML='<div style="font-size:12.5px;color:var(--muted)">None of your leads are in this area. Search for new businesses below.</div>';
+  near.slice(0,60).forEach(l=>{ const row=leadRow(l); const who=taken[String(l.business_name||l.contact_name||'').toLowerCase().trim()];
+    const btn=el(onList(l.id)?'<span style="flex:none;font-size:12px;font-weight:700;color:var(--green);align-self:center">On list</span>':'<button class="btn sm" style="flex:none;align-self:center">Add</button>');
+    if(!onList(l.id)) btn.onclick=(e)=>{ e.stopPropagation(); addToList([l.id]); btn.outerHTML='<span style="flex:none;font-size:12px;font-weight:700;color:var(--green);align-self:center">On list</span>'; };
+    if(who){ const t=el('<div style="font-size:11px;color:#b45309;font-weight:700;flex:none;align-self:center;margin-right:6px">'+esc(who)+' has it</div>'); row.appendChild(t); }
+    row.appendChild(btn); mine.appendChild(row); });
+  if(near.length>60) mine.appendChild(el('<div style="font-size:12px;color:var(--muted);margin-top:6px">Showing the closest 60. Pick a smaller distance to narrow it.</div>'));
+  const aa=$('#fAddAll'); if(aa) aa.onclick=()=>{ addToList(fresh.slice(0,25).map(l=>l.id)); findRender(); };
+  $('#fSearch').onclick=findNew;
+}
+function findNew(){
+  const box=$('#fNew'); FIND.kind=$('#fKind').value;
+  if(typeof google==='undefined'||!google.maps||!google.maps.places){ toast('Maps still loading, try again'); return; }
+  box.innerHTML='<div style="font-size:13px;color:var(--muted)">Searching…</div>';
+  const svc=new google.maps.places.PlacesService(document.createElement('div'));
+  const req={location:new google.maps.LatLng(FIND.center.lat,FIND.center.lng),radius:Math.min(50000,Math.round(FIND.radius*1609))};
+  if(FIND.kind) req.keyword=FIND.kind; else req.type='establishment';
+  const have=new Set(LEADS.map(l=>String(l.business_name||'').toLowerCase().trim()));
+  svc.nearbySearch(req,(res,st)=>{
+    if(st!=='OK'||!res||!res.length){ box.innerHTML='<div style="font-size:13px;color:var(--muted)">Nothing found. Try another type or a bigger distance.</div>'; return; }
+    const skip=/(restaurant|cafe|bar|store|school|church|hospital|bank|lodging|gas_station|pharmacy|atm|park|hair_care|beauty_salon|gym|grocery)/;
+    const list=res.filter(p=>p.business_status!=='CLOSED_PERMANENTLY'&&!(p.types||[]).some(t=>skip.test(t)));
+    box.innerHTML=list.length?'':'<div style="font-size:13px;color:var(--muted)">Only shops and restaurants here. Try a business type.</div>';
+    list.forEach(p=>{ const nm=p.name||'Business', known=have.has(nm.toLowerCase().trim());
+      const d=p.geometry&&p.geometry.location?milesBetween(FIND.center,{lat:p.geometry.location.lat(),lng:p.geometry.location.lng()}):null;
+      const row=el(`<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">${esc(nm)}</div><div style="font-size:12px;color:var(--muted)">${esc([d!=null?d.toFixed(1)+' mi':'',p.vicinity].filter(Boolean).join(' · '))}</div></div></div>`);
+      const btn=el(known?'<span style="flex:none;font-size:12px;color:var(--muted)">In your leads</span>':'<button class="btn sm" style="flex:none">Add</button>');
+      if(!known) btn.onclick=async()=>{ btn.disabled=true;
+        try{
+          const lead=await api('/api/rep-leads',{method:'POST',body:JSON.stringify({business_name:nm,address:p.vicinity||null,industry:(FIND_KINDS.find(k=>k[0]===FIND.kind)||[])[1]||null,lat:p.geometry&&p.geometry.location?p.geometry.location.lat():null,lng:p.geometry&&p.geometry.location?p.geometry.location.lng():null,source:'found_nearby',notes:'Found near '+(FIND.label||'')+'. Google place: '+(p.place_id||'')})});
+          LEADS.unshift(lead); have.add(nm.toLowerCase().trim()); addToList([lead.id]); btn.outerHTML='<span style="flex:none;font-size:12px;font-weight:700;color:var(--green)">Added</span>';
+        }catch(ex){ toast(ex.message); btn.disabled=false; }
+      };
+      row.appendChild(btn); box.appendChild(row); });
+  });
 }
 
 /* ---- tabs ---- */
@@ -525,9 +580,9 @@ function todayMove(){
     .sort((a,b)=>new Date(a.audit_link_sent_at)-new Date(b.audit_link_sent_at));
   if(unpaid.length){ const l=unpaid[0]; const auto=(l.link_followups_log||[]).filter(x=>x.sent&&x.sent.length).length;
     return {t:'Close an audit: '+(l.business_name||l.contact_name||'lead'),d:'They got the audit link '+Math.floor((Date.now()-new Date(l.audit_link_sent_at).getTime())/864e5)+' day(s) ago and have not paid.'+(auto?(' TMI already sent '+auto+' follow-up'+(auto>1?'s':'')+', so call instead of texting.'):'')+' Ask what is holding them up.',lead:l.id}; }
-  if(PLAN&&PLAN.needs_pick) return {t:'Pick your town for today',d:'Choose where you are working and get about 15 stops there, best ones first.',go:'today'};
+  if(!planStops().length) return {t:'Build your list',d:'Find businesses near you, wherever you are, and add the ones you want to work.',find:true};
   const next=planStops().find(l=>!stopDone(l));
-  if(next) return {t:'Next stop: '+(next.business_name||next.contact_name||'Lead'),d:(next.contact_name&&next.business_name?('Ask for '+next.contact_name+'. '):'')+'Stop '+(planStops().indexOf(next)+1)+' of '+planStops().length+' on today\'s list.',lead:next.id};
+  if(next) return {t:'Next stop: '+(next.business_name||next.contact_name||'Lead'),d:(next.contact_name&&next.business_name?('Ask for '+next.contact_name+'. '):'')+'Stop '+(planStops().indexOf(next)+1)+' of '+planStops().length+' on your list.',lead:next.id};
   if(!LEADS.filter(workedToday).length) return {t:'Log your first door',d:'No doors logged yet today. Walk your cluster and log the first one.',go:'log'};
   return {t:'You are on track',d:'Nothing overdue. Keep walking your cluster and book an audit.',go:'plan'};
 }
@@ -570,7 +625,7 @@ function renderToday(){
   $('#tPlan').onclick=()=>switchTab('plan');
   $('#tCal').onclick=openCalendar;
   paperBanner();
-  const mvb=$('#tMove'); if(mvb) mvb.onclick=()=>{ if(mv.lead) openLead(mv.lead); else if(mv.go) switchTab(mv.go); };
+  const mvb=$('#tMove'); if(mvb) mvb.onclick=()=>{ if(mv.lead) openLead(mv.lead); else if(mv.find) openFinder(); else if(mv.go) switchTab(mv.go); };
   $('#tDebrief').onclick=runDebrief;
   paintPending();
   const rb=$('#tRot'); if(rb) rb.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
@@ -1042,6 +1097,7 @@ function openLead(id){
       <a href="#" id="dCheckin">📍 Check in</a>
       <a href="#" id="dEnrich">Enrich</a>
     </div>
+    <button class="btn ghost sm" id="dList" style="width:100%;margin:0 0 10px">${onList(l.id)?'✓ On my list · tap to remove':'+ Add to my list'}</button>
     <div id="dBrief"></div>
     <div class="card" style="margin:0 0 10px;padding:13px 14px;background:#E4FF97;color:#0a0b14;border:none">
       <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.75">Your goal here: sell the audit</div>
@@ -1167,6 +1223,7 @@ function openLead(id){
   loadPhotos(l.id);
   loadLeadHD(l);
   loadBrief(l);
+  const dl=$('#dList'); if(dl) dl.onclick=()=>{ if(onList(l.id)) removeFromList(l.id); else addToList([l.id]); dl.textContent=onList(l.id)?'✓ On my list · tap to remove':'+ Add to my list'; };
   $('#dSave').onclick=async()=>{
     const btn=$('#dSave'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
     try{

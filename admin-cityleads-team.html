@@ -406,8 +406,8 @@ async function loadTodayBoard(){
     const idle=!r.worked;
     return `<div class="card" style="margin:0;padding:14px 15px;${idle?'border-color:#f0c9c4;':''}">
       <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:15px">${esc(r.name)}</b><span style="font-size:11.5px;color:var(--muted)">${r.last_active?('Active '+reltime(r.last_active)):'No activity yet'}</span></div>
-      <div style="font-size:13px;color:var(--muted);margin-top:2px">${r.town?('Working '+esc(r.town)):'<span style="color:#b3402f;font-weight:600">No town picked yet</span>'}</div>
-      ${r.stops?`<div style="font-size:12px;margin-top:8px">${r.stops_done} of ${r.stops} stops</div><div style="height:6px;border-radius:4px;background:var(--bg-alt,#f0f0f2);overflow:hidden;margin-top:4px"><div style="height:100%;width:${pct}%;background:var(--ink,#0a0b14)"></div></div>`:''}
+      <div style="font-size:13px;color:var(--muted);margin-top:2px">${r.stops?(r.stops+' on their list'):'<span style="color:#b3402f;font-weight:600">Nothing on their list yet</span>'}</div>
+      ${r.stops?`<div style="font-size:12px;margin-top:8px">${r.stops_done} of ${r.stops} worked</div><div style="height:6px;border-radius:4px;background:var(--bg-alt,#f0f0f2);overflow:hidden;margin-top:4px"><div style="height:100%;width:${pct}%;background:var(--ink,#0a0b14)"></div></div>`:''}
       <div style="display:flex;gap:14px;margin-top:10px;font-size:12.5px"><span><b>${r.worked}</b> worked</span><span><b>${r.links}</b> links sent</span><span><b style="color:#186b1e">${r.sold}</b> sold</span></div>
     </div>`;
   };

@@ -60,82 +60,27 @@ async function recordCommission(lead, up, repId, appId) {
 }
 
 
-// ---- Today's stops ----------------------------------------------------------
-// Reps get thousands of seeded leads, and a territory pair (Zoey + Lauryn) works
-// the SAME list. Each day we hand each rep ~15 stops in one town, best first,
-// never a business their partner has already worked or has on today's list.
-const DAY_STOPS = 15;
-const CLOSED = ['won', 'lost', 'not_interested'];
-const laDate = (d = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(d);
+// ---- My list ---------------------------------------------------------------
+// Each rep keeps one working list they build themselves (from Find near me, the
+// map or any lead), as long as they like, in the order they like. It never
+// resets and is never refilled for them. Saved per rep in rep_lists/<repId>.
+const MAX_LIST = 500;
 const nameKey = (l) => String(l.business_name || l.contact_name || '').toLowerCase().trim();
-function townOf(address) {
-  const parts = String(address || '').split(',').map((x) => x.trim()).filter(Boolean);
-  const la = parts.findIndex((x) => /^(LA|Louisiana)\b/i.test(x));
-  if (la > 0) return parts[la - 1];
-  return parts.length === 1 && !/\d/.test(parts[0]) ? parts[0] : (parts[1] || null);
+async function getList(repId) {
+  const doc = await db.getById('rep_lists', repId).catch(() => null);
+  return { lead_ids: (doc && doc.lead_ids) || [], updated_at: (doc && doc.updated_at) || null };
 }
-function stopScore(l) {
-  return (l.priority === 'hot' ? 5 : l.priority === 'warm' ? 3 : 1) + (l.contact_name ? 2 : 0) + (l.phone ? 1 : 0) + (l.lat != null && !l.approx_location ? 0.5 : 0);
-}
-const dist = (a, b) => Math.hypot(a.lat - b.lat, (a.lng - b.lng) * 0.87);
-function routeOrder(stops) {
-  const pinned = stops.filter((l) => l.lat != null), rest = stops.filter((l) => l.lat == null);
-  const out = []; let cur = pinned.shift();
-  while (cur) { out.push(cur); if (!pinned.length) break; pinned.sort((a, b) => dist(cur, a) - dist(cur, b)); cur = pinned.shift(); }
-  return out.concat(rest);
-}
-// Everything a rep could work today, grouped by town, minus what their partner
-// already worked or has on today's list. Callbacks due today are kept apart.
-async function planPool(repId, leads) {
-  const today = laDate();
-  const endOfDay = new Date(`${today}T23:59:59-06:00`).toISOString(); // end of the Louisiana day
-  const [others, mine, reps] = await Promise.all([
-    db.list('rep_day_plans', { where: [['date', '==', today]], limit: 500 }).catch(() => []),
-    db.list('rep_day_plans', { where: [['rep_id', '==', repId]], limit: 400 }).catch(() => []),
+// Businesses on a teammate's list (same names show up for reps who share a
+// territory), so a rep can see who is already working a place.
+async function teammateNames(repId) {
+  const [lists, reps] = await Promise.all([
+    db.list('rep_lists', { limit: 300 }).catch(() => []),
     db.list('reps', { limit: 300 }).catch(() => []),
   ]);
-  const nameOf = {}; (reps || []).forEach((r) => { nameOf[r.id] = String(r.name || r.email || 'Teammate').split(' ')[0]; });
-  const takenToday = new Set(), partnerTowns = {};
-  (others || []).filter((p) => p.rep_id !== repId).forEach((p) => {
-    (p.names || []).forEach((n) => takenToday.add(n));
-    if (p.town) (partnerTowns[p.town] = partnerTowns[p.town] || []).push(nameOf[p.rep_id] || 'Teammate');
-  });
-  const due = leads.filter((l) => l.next_action_at && l.next_action_at <= endOfDay && !CLOSED.includes(l.status)).slice(0, 6);
-  const dueIds = new Set(due.map((l) => l.id));
-  const pool = leads.filter((l) => l.status === 'new' && !dueIds.has(l.id) && !(l.claimed_by_id && l.claimed_by_id !== repId) && !takenToday.has(nameKey(l)));
-  const byTown = {};
-  pool.forEach((l) => { const t = townOf(l.address) || 'Other'; (byTown[t] = byTown[t] || []).push(l); });
-  Object.values(byTown).forEach((list) => list.sort((a, b) => stopScore(b) - stopScore(a)));
-  const last = (mine || []).filter((p) => p.date < today).sort((a, b) => (a.date < b.date ? 1 : -1))[0];
-  return { today, due, byTown, partnerTowns, lastTown: last && last.town };
-}
-// The towns a rep can pick from, most open businesses first (yesterday's town on top).
-function townChoices(pool) {
-  return Object.keys(pool.byTown).map((t) => {
-    const list = pool.byTown[t];
-    return { town: t, open: list.length, hot: list.filter((l) => l.priority === 'hot').length, named: list.filter((l) => l.contact_name).length,
-      partners: pool.partnerTowns[t] || [], last: t === pool.lastTown };
-  }).sort((a, b) => (b.last - a.last) || (b.open - a.open));
-}
-// Build today's list in the town the rep picked. A small town is topped up
-// from the nearest towns so there are always ~15 stops.
-function buildPlan(pool, town) {
-  const { today, due, byTown } = pool;
-  const towns = Object.keys(byTown);
-  if (!byTown[town]) return { date: today, town: town || null, lead_ids: due.map((l) => l.id), names: due.map(nameKey) };
-  let picks = byTown[town].slice(0, DAY_STOPS);
-  if (picks.length < DAY_STOPS) {
-    const center = (list) => { const p = list.filter((l) => l.lat != null); return p.length ? { lat: p.reduce((a, l) => a + l.lat, 0) / p.length, lng: p.reduce((a, l) => a + l.lng, 0) / p.length } : null; };
-    const c = center(byTown[town]);
-    const near = towns.filter((t) => t !== town).map((t) => ({ t, c: center(byTown[t]) })).filter((x) => c && x.c).sort((a, b) => dist(c, a.c) - dist(c, b.c));
-    for (const n of near) { if (picks.length >= DAY_STOPS) break; picks = picks.concat(byTown[n.t].slice(0, DAY_STOPS - picks.length)); }
-  }
-  const stops = due.concat(routeOrder(picks));
-  return { date: today, town, lead_ids: stops.map((l) => l.id), names: stops.map(nameKey) };
-}
-async function savePlan(repId, plan) {
-  await db.insert('rep_day_plans', Object.assign({ id: `${repId}_${plan.date}`, rep_id: repId, created_at: new Date().toISOString() }, plan));
-  return plan;
+  const first = {}; (reps || []).forEach((r) => { first[r.id] = String(r.name || r.email || 'Teammate').split(' ')[0]; });
+  const out = {};
+  (lists || []).filter((x) => x.id !== repId).forEach((x) => (x.names || []).forEach((n) => { if (n && !out[n]) out[n] = first[x.id] || 'Teammate'; }));
+  return out;
 }
 // Untouched seeded leads go to the phone without their long notes; the app loads
 // the full lead when it is opened. Keeps a 5,000-lead list fast and small.
@@ -165,30 +110,23 @@ module.exports = async (req, res) => {
         if (!one || one.rep_id !== repId) return res.status(404).json({ error: 'Not found' });
         return res.json(one);
       }
-      // Today's list. Nothing is picked for the rep: until they choose a town we
-      // send the town choices (plus any callbacks due today). An existing list
-      // answers straight away without reading every lead.
-      if (req.query.today && !req.query.towns) {
-        const existing = await db.getById('rep_day_plans', `${repId}_${laDate()}`).catch(() => null);
-        if (existing) return res.json({ date: existing.date, town: existing.town, lead_ids: existing.lead_ids || [] });
+      // My list (the old ?today=1 asks for the same thing).
+      if (req.query.mylist || req.query.today) {
+        const [list, taken] = await Promise.all([getList(repId), teammateNames(repId)]);
+        return res.json({ lead_ids: list.lead_ids, updated_at: list.updated_at, taken });
       }
       const rows = await db.list('rep_leads', { where: [['rep_id', '==', repId]], order: 'updated_at', ascending: false, limit: 20000 });
-      if (req.query.today || req.query.towns) {
-        const pool = await planPool(repId, rows || []);
-        return res.json({ date: pool.today, town: null, needs_pick: true, lead_ids: pool.due.map((l) => l.id), towns: townChoices(pool) });
-      }
       return res.json((rows || []).map(slim));
     }
 
-    // The rep picked a town for today.
-    if (req.method === 'POST' && req.body && req.body.action === 'plan') {
-      if (!req.body.town) return res.status(400).json({ error: 'Pick a town' });
-      const rows = await db.list('rep_leads', { where: [['rep_id', '==', repId]], limit: 20000 });
-      const pool = await planPool(repId, rows || []);
-      const town = String(req.body.town);
-      if (!pool.byTown[town]) return res.status(409).json({ error: `Nothing left to work in ${town} today. Pick another town.` });
-      const plan = await savePlan(repId, buildPlan(pool, town));
-      return res.json({ date: plan.date, town: plan.town, lead_ids: plan.lead_ids });
+    // Save the rep's list exactly as they arranged it.
+    if (req.method === 'POST' && req.body && req.body.action === 'mylist') {
+      const ids = [...new Set((Array.isArray(req.body.lead_ids) ? req.body.lead_ids : []).map(String))].slice(0, MAX_LIST);
+      const rows = await Promise.all(ids.map((id) => db.getById('rep_leads', id).catch(() => null)));
+      const mine = rows.filter((l) => l && l.rep_id === repId);
+      const now = new Date().toISOString();
+      await db.update('rep_lists', repId, { rep_id: repId, lead_ids: mine.map((l) => l.id), names: mine.map(nameKey), updated_at: now });
+      return res.json({ lead_ids: mine.map((l) => l.id), updated_at: now });
     }
 
     if (req.method === 'POST') {

@@ -1,5 +1,5 @@
 // What each rep actually did on a given Louisiana day: stops worked, audit links
-// sent, audits sold, and their chosen town / stop list. Shared by the admin
+// sent, audits sold, and the businesses on their own list. Shared by the admin
 // Today board and the morning / noon texts to the owner.
 const db = require('./_db');
 
@@ -26,10 +26,10 @@ async function dayActivity(day = laDate()) {
   const [reps, leads, plans] = await Promise.all([
     db.list('reps', { limit: 300 }).catch(() => []),
     allLeads().catch(() => []),
-    db.list('rep_day_plans', { where: [['date', '==', day]], limit: 500 }).catch(() => []),
+    db.list('rep_lists', { limit: 500 }).catch(() => []),
   ]);
   const byId = {}; leads.forEach((l) => { byId[l.id] = l; });
-  const planOf = {}; (plans || []).forEach((p) => { planOf[p.rep_id] = p; });
+  const planOf = {}; (plans || []).forEach((p) => { planOf[p.rep_id || p.id] = p; });
   const out = (reps || []).filter((r) => r.status !== 'disabled').map((r) => {
     const mine = leads.filter((l) => l.rep_id === r.id);
     const last = mine.map(touchedAt).filter(Boolean).sort().pop() || null;
@@ -37,8 +37,8 @@ async function dayActivity(day = laDate()) {
     const stops = plan ? (plan.lead_ids || []).map((id) => byId[id]).filter(Boolean) : [];
     return {
       id: r.id, name: r.name || r.email || 'Rep', first: String(r.name || r.email || 'Rep').split(' ')[0],
-      town: plan ? plan.town : null, stops: stops.length,
-      stops_done: stops.filter((l) => l.status !== 'new' || onDay(l.visited_at, day)).length,
+      town: null, stops: stops.length,
+      stops_done: stops.filter((l) => l.status !== 'new' || !!l.visited_at).length,
       worked: mine.filter((l) => onDay(touchedAt(l), day)).length,
       links: mine.filter((l) => onDay(l.audit_link_sent_at, day)).length,
       sold: mine.filter((l) => onDay(l.audit_paid_at, day)).length,
