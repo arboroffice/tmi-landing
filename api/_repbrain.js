@@ -1,242 +1,258 @@
-// TMI rep objection + FAQ knowledge, extracted from sop/city-rep-master-guide.html.
-// Grounds api/rep-ask.js so the field copilot answers with TMI's real lines,
-// not invented ones. Regenerate by re-running the extraction if the guide changes.
+// TMI rep objection + FAQ knowledge. Grounds api/rep-ask.js so the field copilot
+// answers with TMI's real lines, not invented ones.
+// Source of truth: the live site, tmitechai.com (intelligent-company-audit.html,
+// pricing.html, faq.html, llms.txt). Rewritten Oct 2026 to match it:
+//   - The rep's goal is the $5,000 Intelligent Company Audit, paid by link (text,
+//     email or QR). If the owner is not ready: the free Fit Call with Mia and Tyler,
+//     https://www.tmitechai.com/intelligent-company-audit.html#book, or a dated follow-up.
+//   - Only published starting prices, framed as floors. No totals, ranges, timelines,
+//     discounts, invented numbers or client stories.
+// Shape: array of { q, a }. Keep it that way, rep-ask.js reads e.q and e.a.
 
 module.exports = [
- {
-  "q": "\"I already pay for ServiceTitan, I do not need another system.\"",
-  "a": "You are right that you do not need another subscription, and we are not one. ServiceTitan tracks your jobs. It does not dispatch autonomously, catch the jobs that never got billed, or cut your invoice cycle to same day. We build that layer, you own it outright, no monthly license, and it sits on top of what you already have. The free call shows you exactly what ServiceTitan is not catching. Book it at tmitechai.com/book and we run the numbers on your operation live."
- },
- {
-  "q": "\"My project managers already know their numbers, this is overkill.\"",
-  "a": "Your best PM knows their numbers because they carry them in their head, which means when they are on vacation or they leave, the number leaves with them. And even a great PM finds the overrun at the end, not while it is forming. We are not replacing their judgment. We put every job's live budget on one screen so the overrun shows up in week two, not at closeout. Spend 30 minutes on a free call at tmitechai.com/book and we will pull one of your recent jobs apart to show you where it slipped."
- },
- {
-  "q": "\"I already use EagleView for measurements, that is good enough.\"",
-  "a": "EagleView gives you an accurate report, and it still takes your estimator time to turn that into a quote the homeowner can say yes to. Good enough on measurement is not the same as first with a price. Our system delivers a real price from an address text in under 90 seconds and ties it straight to your job costing, so speed does not cost you accuracy. Book the free call at tmitechai.com/book and we will run one of your real addresses through it live."
- },
- {
-  "q": "\"We run Maximo and SAP already, we are not tearing out our systems.\"",
-  "a": "Good, do not tear them out. Maximo and SAP are your systems of record and they stay. The problem is your data is siloed across them and the plant historian, and no one can predict a failure or query the whole operation in plain language. We connect what you have into one layer and build the predictive maintenance and query systems on top of it. Nothing gets ripped out. The audit at tmitechai.com/book shows you which failures you could be catching early right now."
- },
- {
-  "q": "\"We have a preventive maintenance schedule already.\"",
-  "a": "A preventive schedule services things on a calendar whether they need it or not, and it still lets the surprise failures through, which are the ones that stop the line. Predictive is different. It reads the machine and flags the specific asset about to fail before it does. That is the 30 to 50% downtime cut. Your calendar cannot do that. The free call at tmitechai.com/book pulls your maintenance history and shows you which failures a predictive layer would have caught."
- },
- {
-  "q": "\"Samsara already gives me all the tracking and reports I need.\"",
-  "a": "Samsara gives you the data, and that is exactly the point. It reports what happened. It does not reroute your fleet to cut miles or pull a truck in before it fails on the road. You are paying for the firehose and drinking from a cup. We build the system that turns that data into fewer miles and fewer breakdowns, and you own it. Book the free call at tmitechai.com/book and we will look at one week of your telematics and show you what it is missing."
- },
- {
-  "q": "\"Our equipment is too specialized and our conditions are too harsh for software to predict anything.\"",
-  "a": "The harsh conditions are the argument for predictive, not against it. Machines running hard in brutal conditions fail more, and every one of those failures leaves a signature in the hours, load, and sensor data your equipment already produces. We read that to flag the specific machine before it strands your crew. It is not generic software, it is a system built on your fleet's actual data. The audit at tmitechai.com/book shows you what your equipment data is already telling you that nobody is reading."
- },
- {
-  "q": "\"We are a small shop, this sounds like enterprise stuff we cannot afford.\"",
-  "a": "It is the opposite. A small shop feels every missed emergency call and every late invoice harder than a big one does, because you do not have the volume to absorb it. A digital employee starts at $5,000 and takes the intake and scheduling off your plate so you stop being the bottleneck, and you own it outright with no monthly bill. The audit credits toward your build and it gives you the real number for your shop, not a guess. Book it at tmitechai.com/book."
- },
- {
-  "q": "\"My crews already photograph everything for the insurance claims.\"",
-  "a": "Photos in a tech's phone are not the same as documentation that survives a carrier audit, and the gap between the two is exactly where claims get discounted. When every hour, every air mover, and every line item is captured in a structured record automatically, the carrier pays the full claim instead of clawing it back. That is revenue you already earned. The free call at tmitechai.com/book pulls a recent claim apart and shows you what documentation gaps cost you."
- },
- {
-  "q": "\"My routes are fine, my guys know the area better than any software.\"",
-  "a": "Knowing the area is exactly why the habit route feels fine, and it is also why nobody notices the backtracking that costs you two or three stops a day. That is not a knock on your techs, it is math no person solves in their head across a full board. Closing that gap moves utilization from the high 50s toward the mid 80s, which is another route's worth of revenue on the trucks you already run. Book the free call at tmitechai.com/book and we will run a day of your actual stops through it and show you the difference."
- },
- {
-  "q": "\"My front desk staff handle the phones fine.\"",
-  "a": "They handle the calls they catch. The ones they miss during check-in, at lunch, and after five o'clock are invisible to you, so it feels fine. The system answers all of them and books them, and your staff stops apologizing for being on the other line. Let us pull your actual missed-call number live on a free call, then you decide. Book it at tmitechai.com/book."
- },
- {
-  "q": "\"My aesthetic touch is personal, a bot will feel cold.\"",
-  "a": "The bot does not do the aesthetics. It answers the 9pm text, quotes the package, and gets her on your calendar so you can do the personal part in the room. Right now the personal touch never happens because you never got the message in time. Come see it on a free call and judge the tone yourself at tmitechai.com/book."
- },
- {
-  "q": "\"I am a small shop, I cannot afford another salary.\"",
-  "a": "You are not hiring a salary. A digital employee starts at $5,000, you own it, and there is no monthly license. Compare that to one front desk hire at $40,000 a year who still goes to lunch and cannot answer two lines. The system covers the phone every hour you are with a patient. Let us do the math on a free call at tmitechai.com/book."
- },
- {
-  "q": "\"An answering service already picks up my calls.\"",
-  "a": "An answering service takes a message. It does not qualify the job, check your dispatch calendar, and book the slot, and it does not text back the caller who hangs up before a human answers. This does all of that in seconds and drops the job straight onto the schedule. Bring your call logs to a free call and we will show you what the service is missing at tmitechai.com/book."
- },
- {
-  "q": "\"I already run Klaviyo and a Shopify stack.\"",
-  "a": "Good, keep what works. We delete the dead tools you pay for and do not use, connect the ones you keep so they share one source of truth, and build the retention and support employees the stack cannot. You end up owning the system instead of renting a dozen apps that do not talk to each other. Let us audit your stack live at tmitechai.com/book."
- },
- {
-  "q": "\"We sell custom work, our process cannot be automated.\"",
-  "a": "The strategy stays yours. What gets automated is the repeatable part around it, the intake, the follow-up, the reporting, the renewals, all the admin that steals the hours you should spend on the custom work. We build it in about 30 days and you own it. See exactly what we would wire up first on a free call at tmitechai.com/book."
- },
- {
-  "q": "\"Client confidentiality means I cannot hand this to software.\"",
-  "a": "You are not handing over the case. The system handles intake, scheduling, and billing follow-up, the front-door work, on infrastructure you own with one source of truth, not a chatbot bolted to the public internet. The privileged work stays with your attorneys. Let us walk the exact data path on a free call so your standard is met before anything is built. tmitechai.com/book."
- },
- {
-  "q": "\"My brand is personal, automated replies will kill it.\"",
-  "a": "Your brand is the coaching and the content, and both stay 100 percent you. The system just makes sure the person who applies at midnight gets a real, fast reply and lands on your calendar instead of forgetting you by morning. It protects the personal relationship by making sure it actually starts. See the tone and the flow on a free call at tmitechai.com/book."
- },
- {
-  "q": "\"I do not want to look like a sellout to my followers.\"",
-  "a": "Ignoring the DM from a fan who wanted to buy is not authenticity, it is just a missed sale that helped nobody. We build the machine that answers everyone fast and offers the right thing at the right moment, so the audience gets served and you get paid. That is more respect for them, not less. Come map it out on a free call at tmitechai.com/book."
- },
- {
-  "q": "\"I am not a tech person, this sounds like too much.\"",
-  "a": "That is exactly who this is for. You do not build anything or manage anything, we delete the dead tools, connect what is left, and build the system, done in about 30 days, and then you own it with no monthly license. You keep running your shop. Let us show you where you stand online on a free call at tmitechai.com/book."
- },
- {
-  "q": "\"It's too expensive.\"",
-  "a": "Fair, and I would not spend it either if it were just a cost. But look at it against what the leak is costing you. If you are losing even 7 percent of revenue to slow billing and missed calls, on a $2M business that is $140,000 a year, every year. The build is a one-time number that starts at $5,000 for one system. Expensive is bleeding six figures a year and calling it normal. Let's do the free call and put the real numbers side by side, then you decide."
- },
- {
-  "q": "\"I don't have the budget right now.\"",
-  "a": "Understood, and that is exactly why we start with the one system fixing the biggest leak instead of the whole thing. That first digital employee is built to pay for itself fast and fund the next one, so it comes out of money you are currently losing, not money you have to find. The audit shows you the number. If the math does not work, you spend nothing."
- },
- {
-  "q": "\"I already have software. We use ServiceTitan / Jobber / whatever.\"",
-  "a": "Good, keep it. We are not here to rip out your CRM. That software stores your data and runs your workflows, but it still needs a human to answer the phone, chase the invoice, and follow up on the lead. We build the digital employees that actually do those jobs and we plug them into what you already have. Your software is the filing cabinet. We build the workers. The call shows you where the gaps between them are costing you."
- },
- {
-  "q": "\"Is this just a chatbot?\"",
-  "a": "No. A chatbot answers questions on a website. What we build does the work: it books the job on the calendar, routes the crew, sends the invoice, chases the past-due balance, and reactivates old customers. It is a digital employee that completes real tasks in your operation, not a pop-up that deflects support tickets. On the call I will show you exactly what one does end to end."
- },
- {
-  "q": "\"Is this going to replace my staff?\"",
-  "a": "It replaces the work nobody wants to do, not the people. Your team stops spending 5 hours a day on the scheduling board and chasing invoices, and spends it on customers and the jobs that need a human. Most owners do not cut people, they stop needing to hire the next three as they grow, and the people they have get more done. It takes the grunt work off their plate so they do the work you actually hired them for."
- },
- {
-  "q": "\"My team won't use it.\"",
-  "a": "That is the most common reason software fails, and it is exactly why we build it differently. It runs the work in the background instead of asking your crew to log into another app and change how they do their job. The receptionist answers whether or not anyone touches it. On the done-with-you path we train your people so it is theirs, not something imposed on them. Low adoption effort is the point."
- },
- {
-  "q": "\"I don't have time for this.\"",
-  "a": "I hear that, and it is the reason you need it. Being too busy to fix the thing making you busy is the trap. That is what the done-for-you path is for: we build and install the whole thing, you do not lift a wrench. The only time you spend up front is one free call, and the whole point of what we install is to give you your time back. Thirty minutes now to stop losing hours every week."
- },
- {
-  "q": "\"My business is too niche. You don't understand my industry.\"",
-  "a": "Could be, and that is a fair worry. But the jobs underneath every business are the same. You answer calls, book work, quote, dispatch, invoice, and follow up, whether you pour concrete or run a med spa. We build the systems around your specific workflow, not a template, and the audit is where you tell me what makes yours different so we build for it. If it genuinely does not fit, I will tell you on the call and we both save time."
- },
- {
-  "q": "\"How is this different from every other AI company right now?\"",
-  "a": "Most of them sell you a tool and a login and leave you to figure it out, and you are renting it forever. We build an actual operating system and a digital workforce, install it, and hand you ownership. No monthly license on the build. Built in about 30 days. And it is not one gadget, it is the whole operation connected on one screen. The audit credits toward your build, so you can compare us against anyone with real numbers in hand."
- },
- {
-  "q": "\"Do I have to replace everything I'm running?\"",
-  "a": "No. We start with one system, the one fixing your biggest leak, and it works alongside everything you already have. You do not tear anything out and you do not rebuild your whole operation on day one. Prove it on one job that costs you the most, then expand as it pays for itself. Nobody flips a switch on your whole business at once."
- },
- {
-  "q": "\"What's the catch? Why is the call free?\"",
-  "a": "The call is free because the audit is genuinely useful on its own, and honestly it is our best sales tool. When we show an owner exactly where they are losing money and what it is worth to fix, a lot of them want us to build it. Some take the map and go do it themselves, and that is fine too. We would rather earn it by showing you the real numbers than talk you into anything. Worst case, you leave knowing where you bleed."
- },
- {
-  "q": "\"Now's not a good time. Circle back next quarter.\"",
-  "a": "That works, and I will. One thing though: the leak does not wait for next quarter. If you are losing $10,000 a month to missed calls and slow billing, waiting three months is $30,000 gone that you do not get back. The call is free and it is 30 minutes. Doing the audit now does not commit you to building now, it just tells you what the delay is actually costing so you can decide with real numbers."
- },
- {
-  "q": "\"I need to talk to my partner / spouse / the other owner first.\"",
-  "a": "Absolutely, this is a decision you make together. The best thing you can bring them is not my pitch, it is the audit, because it lays out in your own numbers where the money is going and what it is worth to fix. Let's get both of you on the call, or do it now and I will send you the map to walk them through. Either way you are deciding on facts, not my say-so."
- },
- {
-  "q": "\"I tried AI before and it didn't work.\"",
-  "a": "I believe you, and most of what got sold as AI the last couple years was a chatbot with a coat of paint. That is not this. We build systems that do complete jobs and we install them into your operation instead of handing you a login and wishing you luck. On the call I will show you a specific one working end to end, so you are judging what we actually build, not what burned you last time."
- },
- {
-  "q": "\"Just send me some info.\"",
-  "a": "I can, but honestly a PDF will not tell you what you actually want to know, which is what this is worth for your business specifically. That number only comes from looking at your operation, and that is the audit. It is 30 minutes, you get the map. That is a far better use of your time than reading a brochure. What does your Thursday look like?"
- },
- {
-  "q": "\"Is my data safe? I'm not comfortable handing over my business info.\"",
-  "a": "Good instinct, you should ask that of anyone. You own what we build, including the data in it, and it lives in your business, not rented back to you. We are not selling your information or holding it hostage behind a subscription. On the call we walk through exactly how it is set up and what stays in your control, which is all of it. Ownership is the whole model here."
- },
- {
-  "q": "\"How do I know it'll actually work for me?\"",
-  "a": "You do not have to take my word for it, and you should not. That is what the audit is for. We look at your real operation and show you the specific leak, the specific system that fixes it, and the number it is worth, before you spend a dollar. Then we start with one system on the job costing you the most, so you see it work on something real before you go further. The free call is where you find out, with your own numbers, whether this is for you."
- },
+ // ---------- Core: what TMI is and what the rep sells ----------
  {
   "q": "What is TMI, in one line?",
-  "a": "TMI is an AI department and growth partner. We build intelligent companies by installing intelligence, an operating system, and a digital workforce, and the client owns it."
+  "a": "TMI is a Lafayette, Louisiana firm that installs the operating system of an intelligent company so industrial and family businesses can run, transfer, or sell without living in one person's head. Say it that way, word for word. In public always say TMI Tech AI, not TMI alone."
  },
  {
-  "q": "What is the method?",
-  "a": "Delete, connect, build. We delete what wastes time, connect what is disconnected, and build the system the business should have had. That order matters. We fix the operation before we add anything new."
+  "q": "Give me the thirty-second pitch.",
+  "a": "TMI helps owners of established companies build a business that runs better without depending on them for everything. We go inside the operation, find where time, knowledge, visibility and opportunity are being lost, then build the systems, tools, brand and growth infrastructure around what already works. It starts with the Intelligent Company Audit. Then stop talking and ask them where everything still comes back to them."
+ },
+ {
+  "q": "What am I actually selling at the door?",
+  "a": "The Intelligent Company Audit, $5,000. It is 30 to 45 minutes, in person or by phone, and it looks at how the company sells, operates, communicates, tracks information and makes decisions. They get a Business Intelligence Score out of 100 across ten areas, a five-page report, and the Intelligent Company Roadmap, which they own outright. When they say yes, send the payment link by text or email, or let them scan the QR."
+ },
+ {
+  "q": "What if the owner is interested but not ready to pay today?",
+  "a": "Offer the Fit Call with Mia and Tyler. It is free, 20 to 30 minutes, and it decides whether TMI should come inside the company at all. Book it with them at tmitechai.com/intelligent-company-audit.html#book. If they will not book that either, set a dated follow-up. Never leave without a person, an action and a date."
+ },
+ {
+  "q": "What is the one way in? Where do I send people?",
+  "a": "One page: tmitechai.com/intelligent-company-audit.html. Ready to buy, send the audit payment link or show the QR. Not ready, book the free Fit Call from the #book section of that page. Everything else on the site, including pricing, hangs off tmitechai.com."
  },
  {
   "q": "What are we not?",
-  "a": "We are not SaaS, not an agency, not consulting, and not a chatbot. We do not rent you software or hand you a deck. We build a system you own."
+  "a": "TMI is not an AI agency, not an IT company, not a marketing agency and not a consultant. It is a company-building company. AI is one tool, and often not the first thing a company needs."
  },
  {
-  "q": "What does a build cost, across all tiers?",
-  "a": "A digital employee starts at $5,000. An intelligent operating system starts at $25,000. Ongoing retainers run $3,000 to $15,000 and up per month. There is no monthly license on what we build. The client owns it."
+  "q": "Is TMI an AI company?",
+  "a": "No, and do not call it one. TMI works on the company itself: operations, intelligence, brand, attention and growth. AI is one tool inside that, and a lot of companies need their records connected and their knowledge written down long before AI does anything useful for them."
  },
  {
-  "q": "How long does a build take and who owns it?",
-  "a": "About 30 days, and the client owns it outright. No monthly license fee to keep it running."
+  "q": "What is the method?",
+  "a": "Assess, design, build, integrate, evolve. The audit is the assess step. The principle under all of it is preserve what works, modernize what does not. We do not replace your best people, we multiply them."
  },
  {
-  "q": "What is the one way in?",
-  "a": "The free discovery call at tmitechai.com/book. There is one door. Every prospect goes to that call, and the intelligent audit is done live on the call. You are not closing the deal on the street. You are booking the call."
+  "q": "Who is TMI built for? Which industries should I focus on?",
+  "a": "Established industrial and family businesses with a real operation: manufacturers, machine shops, oil and gas, construction, logistics and fleet, field service, marine and equipment. Talk to the owner, and to the son or daughter taking it over. Outside industrial is fine when it is a genuine fit, but lead with industrial."
  },
  {
-  "q": "What is a digital employee, and how is it different from a chatbot?",
-  "a": "A digital employee does real work end to end. It builds and sends invoices, answers and books leads, chases follow-up, runs a process the way a person would. A chatbot answers a question and stops. A digital employee finishes the job."
+  "q": "How do I qualify a prospect?",
+  "a": "An established company with employees, customers and more than one system, where the owner is still the answer to every question. Listen for knowledge living in two or three people's heads, software the team works around, and a handover coming. If someone there can say yes to $5,000, they are a fit for the audit."
  },
  {
-  "q": "Why now?",
-  "a": "About 80% of the workforce is deskless and almost no software was built for them. Most businesses run on people instead of systems. The ones that install real systems now pull ahead, and the gap does not close later."
+  "q": "What openers actually land?",
+  "a": "Owners recognise problems, not services. Try: Everything still comes back to you. You bought software and the team works around it. Your best knowledge lives in two or three people, and one of them is talking about retiring. You could not disappear for thirty days without being called. Then let them talk, about seventy of every hundred words should be theirs."
  },
  {
-  "q": "Why do most AI tools fail to deliver, and why is TMI different?",
-  "a": "Fewer than 20% of businesses buying off-the-shelf AI tools see real ROI within twelve months, because they buy a tool before fixing the operation. TMI builds the system first, not another tool to bolt onto a broken process."
+  "q": "What do we look for inside a company?",
+  "a": "Where time, knowledge, visibility and opportunity are being lost. Usually that is an owner who is the bottleneck, knowledge in a few heads, software nobody uses the way it was sold, the same information typed twice, and reports nobody trusts. Ask the owner which one they felt this week."
  },
  {
-  "q": "What are the universal leaks you look for?",
-  "a": "Billing that goes out late or not at all, dispatch and scheduling run out of one person's head, second trips that should have been one, reactive maintenance instead of predictive, and an owner who is the bottleneck. Almost every business has at least one."
- },
- {
-  "q": "How do you qualify a prospect?",
-  "a": "An established local business with real revenue, real people, and a real operation, run on people and paper instead of systems, with an owner who feels the pain. If they have those leaks and someone who can say yes, they are a fit. The audit finds the rest."
- },
- {
-  "q": "Objection: I already bought an AI tool.",
-  "a": "Good, then you already know a tool alone does not fix the operation. Fewer than 20% of businesses see ROI from those tools because they bought the tool before fixing the system. We build the system your tool was supposed to plug into. The call is free and the audit will show you the gap."
- },
- {
-  "q": "Objection: that is expensive.",
-  "a": "Compared to what you are losing right now, it is not. A build starts at $5,000, you own it, and there is no monthly license. The audit puts a real number on what the leaks cost you today. Most owners find the leak is bigger than the build. Let the free call show you."
- },
- {
-  "q": "Objection: I do not have time for this.",
-  "a": "That is the reason to do it. You do not have time because you are the system. The whole point is to take the work off your plate and put it into something that runs without you. The call is free and it is the only thing I am asking for today."
- },
- {
-  "q": "What is your scorecard as a rep?",
-  "a": "Booked discovery calls at tmitechai.com/book. That is the job. You open the door in your market and get qualified owners onto the free call where the live audit happens. You are measured on booked, qualified calls, not on closing the build yourself."
- },
- {
-  "q": "What are the two links you need memorized?",
-  "a": "The book link, tmitechai.com/book, for the free discovery call, and the same site for everything else. When in doubt, send them to book the call. One door, every time."
+  "q": "How do I get paid?",
+  "a": "When the audit link you send is paid, you are credited. Commission is 10% of what the client pays, on the audit and on every upsell on that account after it, including implementation, retainers and add-ons. Your manager sets your targets."
  },
  {
   "q": "Do I need to know the tech to sell this?",
-  "a": "No. You need the leaks (06), what we build (07), the pricing (09), and how to qualify (14). The build team owns the how. You own the problem and the booked call."
+  "a": "No. You need the owner's problem, the audit, the price, and the next step. Mia, Tyler and the build team own the how. Your job is the paid audit, or a booked Fit Call, or a dated follow-up."
  },
  {
   "q": "What if a prospect asks something I don't know?",
-  "a": "\"Great question for the call, the team goes deep on that.\" Never make something up, especially on price, compliance, or guarantees. Booking the call is always the right next step."
+  "a": "Say: good question, that is one for Mia and Tyler, and they will answer it straight. Never make something up, especially on price, timelines, compliance or results. Then offer the audit or the Fit Call."
+ },
+
+ // ---------- Price ----------
+ {
+  "q": "\"Why isn't the audit free?\"",
+  "a": "Because a free audit is a sales call wearing a costume, and you would see through it. The audit has a price because it is a fixed thing: a score out of 100, a five-page report and a roadmap. The roadmap is yours whether or not you ever hire TMI. If you only want a conversation about fit first, that is the Fit Call, and that part has never cost anything."
  },
  {
-  "q": "Which industries should I focus on?",
-  "a": "Whatever is dense in your city and drowning in the leaks. Trades and home service are always strong. Healthcare and wellness convert well. But any established, owner-dependent business is a fit. Go where the pain is loudest."
+  "q": "\"What's the catch?\"",
+  "a": "It costs $5,000 and it is worth exactly what it says. You get a score, a report and the Intelligent Company Roadmap, and you own it. The roadmap is written so another firm could carry it out, so you are not locked into us."
  },
  {
-  "q": "How do I get paid / what's my target?",
-  "a": "Your scorecard is booked discovery calls that turn into clients. Your manager sets your specific targets and comp. This guide is about making you good enough that the calls book themselves."
+  "q": "\"It's too expensive.\"",
+  "a": "Fair question to ask. Let me ask you one back: how many hours a week do you spend answering questions only you can answer? What does that hour cost you? The audit is a fixed $5,000 and you keep the roadmap either way. If you want to talk fit before spending anything, I can set you up with the free 20 to 30 minute Fit Call with Mia and Tyler."
  },
  {
-  "q": "What makes TMI different from every other 'AI' company?",
-  "a": "We build and install the actual system and stay in to run it. Not a tool to configure, not a deck of advice, not a chatbot. The client owns it, it is built in 30 days, and there is no monthly license. That is the whole pitch."
+  "q": "\"I don't have the budget right now.\"",
+  "a": "Understood. When does your budget turn over? Let me put a date on it and come back then. In the meantime the Fit Call with Mia and Tyler costs nothing and tells you whether the audit is even what you need yet."
  },
  {
-  "q": "Where do I send someone who wants to see it themselves?",
-  "a": "tmitechai.com for the story and tmitechai.com/book to book the call. That is the whole toolkit."
+  "q": "What does a build cost?",
+  "a": "Builds start around fifteen thousand. What it actually costs depends on how many departments it touches, how much has to be built versus connected, and how much knowledge has to come out of people's heads. You would get a real number in writing after the audit, not before."
+ },
+ {
+  "q": "What are the published starting prices?",
+  "a": "These are floors, not quotes. Audit $5,000. Intelligent Company Builds and Company Operating Systems from $15,000. Business Intelligence and Custom Software from $10,000. Automation from $3,500. Digital Employees, Human Performance and Company Brain from $5,000. Embedded Company Partner from $3,500 a month, six month minimum. Brand and Website from $7,500. Never quote a total or a range for their size. Point them to tmitechai.com/pricing.html."
+ },
+ {
+  "q": "\"So what would the whole thing cost for a company my size?\"",
+  "a": "I honestly cannot tell you, and anyone who quotes you at the door is guessing. Builds start around fifteen thousand, and the real number depends on how much it touches and how much has to come out of people's heads. You get that number in writing after the audit, fixed scope, fixed price, before any work starts."
+ },
+ {
+  "q": "\"Can you do a discount or a trial?\"",
+  "a": "No. The price is fixed because the audit is a fixed thing, and everyone pays the same. If you want to check fit before paying, the Fit Call with Mia and Tyler is free."
+ },
+ {
+  "q": "\"How long does a build take?\"",
+  "a": "That depends on what the audit finds, so I will not promise you a date at the door. Everything after the audit is fixed scope, fixed price, in writing before work begins, and the timeline is set in that document."
+ },
+ {
+  "q": "\"Is there a monthly fee after you build it?\"",
+  "a": "That depends on what gets built and what it runs on. Some clients want ongoing support, which is optional, and third-party software costs are separate. You will see all of it in writing before you agree to anything."
+ },
+
+ // ---------- Owner and people ----------
+ {
+  "q": "\"I don't have time for this.\"",
+  "a": "That is usually the problem itself. If everything still comes back to you, there is no time left to fix the thing that sends it back to you. The audit is 30 to 45 minutes, by phone if that is easier. When could you give it 45 minutes this week?"
+ },
+ {
+  "q": "\"Everything runs fine, we're doing well.\"",
+  "a": "Good, then there is a lot worth protecting. Can I ask, what happens if you are gone for a month? Who answers the questions you answer today? If the answer is nobody, that is what the audit looks at."
+ },
+ {
+  "q": "\"My guys know how everything works.\"",
+  "a": "That is the asset and the risk at the same time. If your best knowledge lives in two or three people, what happens when one of them retires or leaves? We get what is in their heads into the company, so it stays when they go, and we do it without changing how good they are at the work."
+ },
+ {
+  "q": "\"Is this going to replace my staff?\"",
+  "a": "No. Our line is: do not replace your best people, multiply them. We take the repeat work and the retyping off their plate and put the knowledge they carry into the company, so they spend their day on the work you hired them for."
+ },
+ {
+  "q": "\"My son (or daughter) is taking over soon.\"",
+  "a": "Then this is the right time. They inherit a business that works and almost none of the reasons why. The audit and the roadmap get what lives in your head into the company, so they can run it without being the one who broke something that was fine. It is worth having them on the call."
+ },
+ {
+  "q": "\"I'm thinking about selling in a few years.\"",
+  "a": "Then the question is whether a buyer sees a company or equipment plus your memory. The audit shows how much of the business runs on you, and the roadmap is a document you can hand to a banker or a buyer. Want to start there?"
+ },
+ {
+  "q": "\"My team won't use it.\"",
+  "a": "Most software fails for operations reasons, not because people are unwilling. The team works around it because it was never built around how they actually work. We walk the floor, follow a job from quote to invoice, build with the crew who will use it, and stay until it is in use. Which system does your team work around today?"
+ },
+ {
+  "q": "\"My business is too niche. You don't understand my industry.\"",
+  "a": "Fair worry. That is why TMI goes on site, walks the floor and follows a real job from quote to invoice before suggesting anything. And if TMI is wrong for you, Mia and Tyler will tell you on the Fit Call. Want me to set that up?"
+ },
+
+ // ---------- Software and systems they already have ----------
+ {
+  "q": "\"I already have software. We use an ERP / ServiceTitan / QuickBooks / whatever.\"",
+  "a": "Good, keep it. We are not here to rip it out. The question is whether it talks to everything else and whether your people actually use it. Is anything typed twice, or kept in a spreadsheet next to it? That gap is what the audit maps."
+ },
+ {
+  "q": "\"We run SAP / Maximo already, we are not tearing out our systems.\"",
+  "a": "Do not tear them out. Preserve what works, modernize what does not. The audit looks at how those systems connect to the rest of the operation and where people fill the gaps by hand. Where does information still get re-entered or carried around on paper?"
+ },
+ {
+  "q": "\"We have a preventive maintenance schedule already.\"",
+  "a": "Good. How many breakdowns last year were on equipment that was on schedule? And where does the maintenance history live, in the system or in a mechanic's head? Those two answers tell you whether there is something to fix."
+ },
+ {
+  "q": "\"Our fleet tracking already gives me all the reports I need.\"",
+  "a": "Then you have the data, which is a good start. Who reads those reports, and what decision changed because of one last month? If the answer is not much, the gap is between the data and the decision, and that is what we look at."
+ },
+ {
+  "q": "\"My project managers already know their numbers.\"",
+  "a": "They know them because they carry them in their head. What happens to those numbers when a PM is on vacation or leaves? And when do you find out a job went over, while it is happening or at closeout? The audit looks at exactly that."
+ },
+ {
+  "q": "\"We tried software before and nobody used it.\"",
+  "a": "That happens to almost every company we see, and it is usually not the software's fault or the crew's. It was bought before anyone mapped how the work actually moves. The audit does that mapping first, so anything built after it fits the work."
+ },
+ {
+  "q": "\"I tried AI before and it didn't work.\"",
+  "a": "I believe you. A lot of companies bought a tool before their records were connected or their knowledge was written down, so there was nothing for it to work with. TMI is not an AI company. We start with the operation, and AI comes in only where it actually fits."
+ },
+ {
+  "q": "\"Is this just a chatbot?\"",
+  "a": "No. TMI works on the company itself: how work moves, where knowledge lives, what the owner can see, and how the company shows up to buyers. Sometimes that includes a digital employee or automation, but only where the audit says it fits."
+ },
+ {
+  "q": "\"Do I have to replace everything I'm running?\"",
+  "a": "No. Preserve what works, modernize what does not. The audit works out which two or three things matter most, and nothing is built until you have a fixed scope and fixed price in writing."
+ },
+
+ // ---------- Trust, timing, decision makers ----------
+ {
+  "q": "\"How is this different from every other AI or software company?\"",
+  "a": "Most of them sell you a tool and leave. TMI goes on site, walks the floor, builds with the crew who will use it and stays until it is in use, with no offshore handoff. And it starts with the audit, so nothing gets sold before anyone understands the operation."
+ },
+ {
+  "q": "\"How do I know it'll actually work for me?\"",
+  "a": "You should not take my word for it. That is what the audit is for: a score, a report and a roadmap built from your own operation. And on the Fit Call Mia and Tyler will tell you straight if TMI is wrong for you."
+ },
+ {
+  "q": "\"Do you have case studies or results from other clients?\"",
+  "a": "TMI does not publish client results or name clients, and I will not make up a number for you. What I can do is get you your own number. How many quotes went out last month, and how many never got a follow-up?"
+ },
+ {
+  "q": "\"Is my data safe? I'm not comfortable handing over my business info.\"",
+  "a": "Good instinct. What you tell TMI stays with TMI and never moves between clients. If you want a mutual NDA before the call, say so and it gets signed first."
+ },
+ {
+  "q": "\"Now's not a good time. Circle back next quarter.\"",
+  "a": "That works. What date should I put down? And if it helps, the Fit Call is free and 20 to 30 minutes, so you can find out now whether the audit is even the right next step and plan around it."
+ },
+ {
+  "q": "\"I need to talk to my partner / spouse / the other owner first.\"",
+  "a": "Of course. The best way is to have them on the Fit Call with Mia and Tyler, so you both hear it at once. When are you both around? If you would rather decide between you, I will follow up on a date you pick."
+ },
+ {
+  "q": "\"Just send me some info.\"",
+  "a": "Happy to. I will text you the audit page so you can see exactly what you get and what it costs. Can I follow up Thursday to see if you want to book it or start with the Fit Call?"
+ },
+ {
+  "q": "\"We are a small shop, this sounds like it's for bigger companies.\"",
+  "a": "If you have employees, customers and more than one system, there is something to look at. The audit is built for established operations, and if you are outside that, Mia and Tyler will tell you on the Fit Call rather than after you pay."
+ },
+ {
+  "q": "\"Our website is fine, we get work from word of mouth.\"",
+  "a": "Word of mouth is a good sign about the work. The question is what a new customer or a new hire finds when they look you up, and more of them ask an AI assistant first now. Is your company better than your website makes it look?"
+ },
+
+ // ---------- Other fits (not the core audience) ----------
+ {
+  "q": "\"I run a clinic / med spa / office, not an industrial company. Is this for me?\"",
+  "a": "Maybe. TMI is built around industrial and family businesses, but it works outside that when the company is a real fit: employees, customers, more than one system, and an owner everything comes back to. The Fit Call with Mia and Tyler is the honest way to find out."
+ },
+ {
+  "q": "\"Our front desk handles the phones fine.\"",
+  "a": "Maybe they do. Do you know how many calls go unanswered after five or at lunch? If you do not have that number, that is worth knowing before deciding anything. The audit looks at how work comes in and where it gets dropped."
+ },
+ {
+  "q": "\"Client confidentiality means I cannot hand this to anyone.\"",
+  "a": "Understood. What you tell TMI stays with TMI and never moves between clients, and a mutual NDA can be signed before anyone speaks. Your confidential work stays with your people. The audit looks at how the business runs around it."
+ },
+
+ // ---------- Rep rules ----------
+ {
+  "q": "Can I promise results, timelines or savings?",
+  "a": "No. Never promise a result, a percentage, a savings number, a start date or a timeline, and never offer a discount or a trial. TMI publishes no case studies or outcome numbers. If you need a number, ask the owner for theirs."
+ },
+ {
+  "q": "Can I quote a price for the build?",
+  "a": "Only the published starting prices, as floors. The safe line is: builds start around fifteen thousand, and you would get a real number in writing after the audit, not before. Never give a total, a range, or a guess for their size."
+ },
+ {
+  "q": "Is the Intelligent Company Audit the same as the Intelligent Company Assessment?",
+  "a": "No. The audit is the $5,000, 30 to 45 minute entry offer you sell. The Assessment is a different, deeper on-site product that starts at $15,000. Do not mix them up, and only ever call the audit the Intelligent Company Audit."
+ },
+ {
+  "q": "Can I take photos inside their shop?",
+  "a": "Not without asking first. Never post about a visit or photograph inside a facility without the owner's permission."
  }
 ];

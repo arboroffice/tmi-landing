@@ -14,11 +14,11 @@ async function coach(stats, lines) {
     tomorrow: [
       stats.due ? `Clear your ${stats.due} due follow-up${stats.due === 1 ? '' : 's'} first thing.` : 'Pick one cluster and pull 12-15 targets before you leave.',
       'Catch owners at the yard between 6:30 and 8:00 before crews roll out.',
-      'Book at least one audit onto Mia\'s calendar.',
+      'Ask every interested owner for the paid audit, and book a Fit Call or a dated follow-up for the rest.',
     ],
   };
   if (!apiKey || !lines.length) return fallback;
-  const prompt = `You are a sales coach for a field rep who door-knocks industrial and trades business owners for TMI. Their job is to spark interest and book a 15-minute audit call, not to close. Here is today's activity.
+  const prompt = `You are a sales coach for a field rep who door-knocks industrial and trades business owners for TMI. Their main goal at every stop is to sell the $5,000 Intelligent Company Audit (paid by a link sent by text or email, or a QR code). If the owner is not ready, the next step is the free 20 to 30 minute Fit Call with Mia and Tyler, or a dated follow-up. They should never leave a stop without a person, an action and a date. TMI serves established industrial and family businesses and is not an AI company. Coach toward the owner talking most of the time, and never suggest promising prices beyond published starting prices, timelines, discounts, or invented results. Here is today's activity.
 
 Stats: ${stats.doors} doors logged, ${stats.conversations} conversations, ${stats.booked} audits booked, ${stats.due} follow-ups still due.
 
@@ -26,7 +26,7 @@ Today's notes and recaps:
 ${lines.slice(0, 25).map((l, i) => `${i + 1}. ${l}`).join('\n')}
 
 Return STRICT JSON only, no prose, with keys:
-"summary" (2-3 blunt sentences recapping the day in a direct, no-hype voice — plain dashes, never em dashes),
+"summary" (2-3 blunt sentences recapping the day in a calm, plain, direct voice, plain dashes, never em dashes),
 "tomorrow" (array of exactly 3 short, specific, imperative moves for tomorrow based on what happened today).`;
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
