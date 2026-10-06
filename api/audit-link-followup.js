@@ -19,14 +19,14 @@ function copy(step, l, rep) {
   const co = l.business_name || 'your company';
   const link = payLink(l);
   if (step === 'day1') return {
-    subject: `Your TMI Intelligent Company Audit`,
+    subject: `Your Intelligent Company Audit with TMI Tech AI`,
     email: [`Hey ${name},`,
       `Following up on the Intelligent Company Audit for ${co}.`,
-      `Quick reminder of what it is: we look at how work actually moves through the business, from how it comes in to who touches it, what systems you use, and where things get stuck. You get a clear plan for what to fix first, what to automate, and what you can stop paying for.`,
+      `Quick reminder of what it is: 30 to 45 minutes, in person or by phone, looking at how the company sells, operates, communicates, tracks information and makes decisions. You get a Business Intelligence Score out of 100 across ten areas, a five-page report, and the Intelligent Company Roadmap, which is yours to keep whether or not you ever work with us.`,
       `Here is the link to get it started: ${link}`,
       `Any questions, just reply to this email.`,
-      `${rep}\nTMI`],
-    sms: `Hey ${name}, it's ${rep} with TMI. Following up on the audit for ${co}. Here's the link to get it started: ${link} Any questions, just reply. Reply STOP to opt out.`,
+      `${rep}\nTMI Tech AI`],
+    sms: `Hey ${name}, it's ${rep} with TMI Tech AI. Following up on the Intelligent Company Audit for ${co}. Here's the link to get it started: ${link} Any questions, just reply. Reply STOP to opt out.`,
   };
   return {
     subject: `Still want us to look at ${co}?`,
@@ -35,8 +35,8 @@ function copy(step, l, rep) {
       `Most owners we talk to already have plenty of software. The problem is none of it works together, and the cost hides in a hundred small manual steps nobody tracks. The audit finds those.`,
       `If now is the right time, here is the link: ${link}`,
       `If it is not, no problem. Just reply and tell me when to check back.`,
-      `${rep}\nTMI`],
-    sms: `Hi ${name}, ${rep} with TMI one more time. If you want us to find where ${co} is losing time and money, the audit link is here: ${link} If now's not the time, just reply "later".`,
+      `${rep}\nTMI Tech AI`],
+    sms: `Hi ${name}, ${rep} with TMI Tech AI one more time. If you want us to find where ${co} is losing time and money, the audit link is here: ${link} If now's not the time, just reply "later".`,
   };
 }
 
@@ -68,13 +68,13 @@ module.exports = async function handler(req, res) {
     if (!lead) return res.json({ ok: true, skipped: true });
 
     const repDoc = await db.getById('reps', lead.rep_id).catch(() => null);
-    const rep = first(repDoc && repDoc.name) || 'The TMI team';
+    const rep = first(repDoc && repDoc.name) || 'The TMI Tech AI team';
     const c = copy(step, lead, rep);
     const sent = [];
     if (lead.email && process.env.RESEND_API_KEY) {
       const { Resend } = require('resend');
       await new Resend(process.env.RESEND_API_KEY).emails.send({
-        from: `${rep} at TMI <support@tmitechai.com>`, to: lead.email, reply_to: 'support@tmitechai.com',
+        from: `${rep} at TMI Tech AI <support@tmitechai.com>`, to: lead.email, reply_to: 'support@tmitechai.com',
         subject: c.subject, html: html(c.email),
       });
       sent.push('email');

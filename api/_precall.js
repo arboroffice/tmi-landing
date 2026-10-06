@@ -23,15 +23,15 @@ const FROM_EMAIL = 'Mia at TMI <support@tmitechai.com>';
 const TZ = 'America/Chicago';
 const MAX_DELAY_S = 6 * 86400; // QStash delay ceiling we stay under; later steps relay
 
-const SIGN_BOTH = 'Mia + Tyler\nTMI Services\nWe build Intelligent Companies.';
-const SIGN_MIA = 'Mia\nTMI Services';
+const SIGN_BOTH = 'Mia + Tyler\nTMI Tech AI\nWe build intelligent companies.';
+const SIGN_MIA = 'Mia\nTMI Tech AI';
 
 // ---- copy ------------------------------------------------------------------
 // Light markup: blank line = new paragraph, single newline = line break,
 // lines starting with "* " = bullet list. {{first_name}}, {{time}}, {{link}}.
 const EMAILS = {
   e1_booked: {
-    subject: 'Before your TMI Intelligence Audit',
+    subject: 'Before our call',
     body: `Hey {{first_name}},
 
 Looking forward to talking with you.
@@ -58,7 +58,7 @@ You may have:
 
 That is what we are looking for.
 
-By the end of the audit, we should have a much clearer picture of what your company could automate, connect, measure, and improve.
+By the end of our time together, we should have a much clearer picture of what your company could automate, connect, measure, and improve.
 
 Talk soon,
 
@@ -87,7 +87,7 @@ What information are you already collecting but not using?
 
 Sometimes the smartest technology project starts by deleting technology.
 
-That’s part of what we’ll look at on your audit.
+That’s part of what we’ll look at when we talk.
 
 ${SIGN_MIA}`,
   },
@@ -95,7 +95,7 @@ ${SIGN_MIA}`,
     subject: 'We’re looking for your company’s “hidden employees”',
     body: `{{first_name}},
 
-During your audit, we’re going to look for something we call hidden employees.
+When we talk, we’re going to look for something we call hidden employees.
 
 These aren’t actual people.
 
@@ -120,7 +120,7 @@ The goal isn’t to replace your people.
 
 It’s to find the work your people should never have had to do manually in the first place.
 
-That’s one thing we’ll be hunting for during your audit.
+That’s one thing we’ll be hunting for on our call.
 
 See you soon.
 
@@ -130,7 +130,7 @@ ${SIGN_MIA}`,
     subject: 'What happens when you’re not there?',
     body: `{{first_name}},
 
-One question we ask owners during these audits:
+One question we ask every owner we sit down with:
 
 What stops working, slows down, or needs approval when you aren’t there?
 
@@ -161,7 +161,7 @@ We aren’t just adding AI.
 
 We are helping build a company that can think, report, trigger actions, and operate with much less friction.
 
-We’ll dig into where that could apply inside your business during the audit.
+We’ll dig into where that could apply inside your business when we talk.
 
 ${SIGN_MIA}`,
   },
@@ -204,7 +204,7 @@ finding patterns in company data
 warning you before something becomes a problem
 and giving your team the right information at the right time.
 
-That is what we are trying to uncover on the audit.
+That is what we are trying to uncover.
 
 Not “Where can we shove AI?”
 
@@ -242,7 +242,7 @@ One of those things might not matter much.
 
 Hundreds of them happening every month absolutely do.
 
-The goal of your TMI audit is to find those small leaks and figure out which ones are actually worth fixing.
+Our job is to find those small leaks and figure out which ones are actually worth fixing.
 
 We care much more about business impact than putting AI everywhere.
 
@@ -254,7 +254,7 @@ ${SIGN_MIA}`,
     subject: 'Worst case after our call',
     body: `{{first_name}},
 
-You might be wondering what happens if we do the audit and you decide not to work with TMI.
+You might be wondering what happens if we talk and you decide TMI is not the right fit.
 
 That’s completely fine.
 
@@ -322,7 +322,7 @@ ${SIGN_MIA}`,
 };
 
 const SMS = {
-  s1_booked: `Hey {{first_name}}, it’s Mia with TMI. Saw you booked your Intelligence Audit.
+  s1_booked: `Hey {{first_name}}, it’s Mia with TMI. Saw you booked a call with us.
 
 Quick heads up: this isn’t a software pitch. We’re going to look at how the business actually runs and find where your systems, data, people, or processes are costing you time or money.
 
@@ -333,7 +333,7 @@ Where does your team still copy, type, call, check, remind, follow up, or move i
 
 Those little tasks are usually where we start finding the biggest opportunities.
 
-No need to send me an answer now. Just keep it in mind for the audit.`,
+No need to send me an answer now. Just keep it in mind for our call.`,
   s3_ai: `Also, don’t worry if you already use AI or have a bunch of software.
 
 We’re not checking whether you “have AI.”
@@ -341,7 +341,7 @@ We’re not checking whether you “have AI.”
 We’re looking at whether your company’s data + systems + people actually work together intelligently.
 
 Big difference.`,
-  s4_daybefore: `Hey {{first_name}}, quick reminder about our TMI Intelligence Audit tomorrow.
+  s4_daybefore: `Hey {{first_name}}, quick reminder about our call tomorrow.
 
 You don’t need to prepare a presentation or gather a bunch of documents.
 
