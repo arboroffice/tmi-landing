@@ -129,7 +129,7 @@ async function handler(req, res) {
 
   if (step === 'day1_sms' && lead.phone) {
     await sms.messages.create({
-      body: `Hey ${firstName}, did you get a chance to look at what we sent? If you want to talk it through, the Fit Call is free and takes 20 to 30 minutes: ${FIT_CALL_URL}`,
+      body: `Hey ${firstName}, did you get a chance to look at what we sent? If you want to talk it through, the Fit Call is free and takes 15 minutes: ${FIT_CALL_URL}`,
       from: FROM_NUMBER,
       to: formatPhone(lead.phone),
     });
@@ -146,7 +146,7 @@ async function handler(req, res) {
 <p style="margin:0 0 16px;">I spend a lot of time inside established companies.</p>
 <p style="margin:0 0 16px;">The ones that are stuck usually aren't doing anything wrong. They're running on people instead of systems. Every schedule change, every job update, every quote that needs a decision, someone has to catch it or it falls through.</p>
 <p style="margin:0 0 16px;">Here's what it looks like when that is fixed: <a href="${INSIGHT_INTELLIGENT_COMPANY}" style="color:#5a9e00;">What Is an Intelligent Company?</a></p>
-<p style="margin:0 0 24px;">If that sounds like your company, the Fit Call is free and takes 20 to 30 minutes: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
+<p style="margin:0 0 24px;">If that sounds like your company, the Fit Call is free and takes 15 minutes: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
 <p style="margin:0;">Tyler<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>
 `, unsubUrl),
     });
@@ -207,7 +207,7 @@ async function handler(req, res) {
 
   if (step === 'visitor_day0_email') {
     const sig = `<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>`;
-    const cta = `<p style="margin:0 0 24px;">If that's worth 20 to 30 minutes, the free Fit Call is here: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a>.</p>`;
+    const cta = `<p style="margin:0 0 24px;">If that's worth 15 minutes, the free Fit Call is here: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a>.</p>`;
     const bodyHtml = visitorNotes.intro
       ? `<p style="margin:0 0 20px;">Hey ${firstName},</p>\n${introToParas(visitorNotes.intro)}\n${cta}\n${sig}`
       : `<p style="margin:0 0 20px;">Hey ${firstName},</p>
@@ -232,7 +232,7 @@ ${sig}`;
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">The companies that are stuck usually aren't doing anything wrong. They're running on people instead of systems. Every schedule change, every job update, every quote that needs a decision, someone has to catch it or it falls through.</p>
 <p style="margin:0 0 16px;">Here's what it looks like when that is fixed: <a href="${INSIGHT_INTELLIGENT_COMPANY}" style="color:#5a9e00;">What Is an Intelligent Company?</a></p>
-<p style="margin:0 0 24px;">If that sounds like your company, the Fit Call is free and takes 20 to 30 minutes: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
+<p style="margin:0 0 24px;">If that sounds like your company, the Fit Call is free and takes 15 minutes: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
 <p style="margin:0;">Tyler<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>
 `, unsubUrl),
     });
@@ -246,7 +246,7 @@ ${sig}`;
       html: emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">Last note from me. I don't want to be another email you're ignoring.</p>
-<p style="margin:0 0 16px;">If the company's in a good place, genuinely good. If it's not and the timing just hasn't been right, the Fit Call is 20 to 30 minutes to work out whether TMI should come inside the company at all. If we are wrong for it, we will say so.</p>
+<p style="margin:0 0 16px;">If the company's in a good place, genuinely good. If it's not and the timing just hasn't been right, the Fit Call is 15 minutes to work out whether TMI should come inside the company at all. If we are wrong for it, we will say so.</p>
 <p style="margin:0 0 24px;">Whenever it's useful: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI Tech AI</span></p>
 `, unsubUrl),
@@ -260,7 +260,7 @@ ${sig}`;
 
   if (step === 'ia_day1_sms' && lead.phone) {
     await sms.messages.create({
-      body: `Hey ${firstName}, it's Mia at TMI Tech AI. From what you told us, ${worstLine}. Worth 20 to 30 minutes on a free Fit Call to see if the Intelligent Company Audit fits your company? ${FIT_CALL_URL}`,
+      body: `Hey ${firstName}, it's Mia at TMI Tech AI. From what you told us, ${worstLine}. Worth 15 minutes on a free Fit Call to see if the Intelligent Company Audit fits your company? ${FIT_CALL_URL}`,
       from: FROM_NUMBER,
       to: formatPhone(lead.phone),
     });
@@ -277,7 +277,7 @@ ${sig}`;
 <p style="margin:0 0 16px;">Thanks for filling in the form. Here's the pattern we look for underneath answers like yours.</p>
 <p style="margin:0 0 16px;">A company that grew by being good at the work tends to get stuck in one of three places. The founder, where every decision waits on one person. The information, where job status and numbers live in people's heads and texts instead of somewhere you can see. And the latency, the lag in every handoff, where margin quietly leaks out.</p>
 <p style="margin:0 0 16px;">From what you told us about ${industryLine}, the one that sounds loudest is this: ${worstLine}.</p>
-<p style="margin:0 0 24px;">An intelligent company runs those three on systems instead of on you. The Intelligent Company Audit is how we measure it properly: 30 to 45 minutes, in person or by phone, a Business Intelligence Score out of 100 across ten areas, a five-page report, and a roadmap you own. It starts with a free 20 to 30 minute Fit Call: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
+<p style="margin:0 0 24px;">An intelligent company runs those three on systems instead of on you. The Intelligent Company Audit is how we measure it properly: 30 to 45 minutes, in person or by phone, a Business Intelligence Score out of 100 across ten areas, a five-page report, and a roadmap you own. It starts with a free 15 minute Fit Call: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>
 `, unsubUrl),
     });
@@ -334,7 +334,7 @@ ${sig}`;
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">It's been about a month since you filled in the form, so I'm checking back in.</p>
 <p style="margin:0 0 16px;">The thing about a bottleneck is it doesn't fix itself. If anything, a busy month makes it louder, because the more work comes through, the more of it routes through you. If ${worstLine} is still true, it's still costing you.</p>
-<p style="margin:0 0 16px;">If the company's in a genuinely good place, ignore this and good on you. If it's not and the timing just hasn't lined up, the Fit Call is 20 to 30 minutes, free, to work out whether TMI should come inside the company at all.</p>
+<p style="margin:0 0 16px;">If the company's in a genuinely good place, ignore this and good on you. If it's not and the timing just hasn't lined up, the Fit Call is 15 minutes, free, to work out whether TMI should come inside the company at all.</p>
 <p style="margin:0 0 24px;">Whenever you're ready: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>
 `, unsubUrl),
@@ -342,7 +342,7 @@ ${sig}`;
   }
 
   // --- BOOKED SEQUENCE (pre-call reminders) ---
-  // The booked call is the free Fit Call (20 to 30 minutes). These just confirm,
+  // The booked call is the free Fit Call (15 minutes). These just confirm,
   // prep the prospect, and make sure they hop on. No self-serve audit link.
   const TEXT_LINE = "Question before then? Just reply to this email.";
 
@@ -354,7 +354,7 @@ ${sig}`;
       html: emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">We're on tomorrow. Looking forward to it.</p>
-<p style="margin:0 0 8px;">It's the Fit Call: 20 to 30 minutes to work out whether TMI should come inside your company at all. If the answer is no, we will say so on the call. It helps to come with:</p>
+<p style="margin:0 0 8px;">It's the Fit Call: 15 minutes to work out whether TMI should come inside your company at all. If the answer is no, we will say so on the call. It helps to come with:</p>
 <p style="margin:0 0 16px;color:#444;">1. The thing that most often still comes back to you.<br>2. A rough sense of the company: what you do, how many people, and where work tends to get stuck.<br>3. The software and tools you are paying for right now.</p>
 <p style="margin:0 0 16px;">${TEXT_LINE}</p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>
@@ -362,7 +362,7 @@ ${sig}`;
     });
     if (lead.phone) {
       await sms.messages.create({
-        body: `Hey ${firstName}, it's Mia at TMI Tech AI. Our Fit Call is tomorrow, 20 to 30 minutes. Come with the thing that most often still comes back to you. ${TEXT_LINE}`,
+        body: `Hey ${firstName}, it's Mia at TMI Tech AI. Our Fit Call is tomorrow, 15 minutes. Come with the thing that most often still comes back to you. ${TEXT_LINE}`,
         from: FROM_NUMBER, to: formatPhone(lead.phone),
       });
     }

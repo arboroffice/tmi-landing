@@ -27,7 +27,7 @@ function buildInitialEmail(firstName, unsubUrl) {
   return emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">Got your details. If you already picked a time, you're set. A separate confirmation with the call link is on its way. If you did not finish picking a time, do it here: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
-<p style="margin:0 0 8px;">The Fit Call is free and takes 20 to 30 minutes. It is there to work out whether TMI should come inside your company at all, and if the answer is no, we will say so on the call. It helps to come with:</p>
+<p style="margin:0 0 8px;">The Fit Call is free and takes 15 minutes. It is there to work out whether TMI should come inside your company at all, and if the answer is no, we will say so on the call. It helps to come with:</p>
 <p style="margin:0 0 16px;color:#444;">1. The thing that most often still comes back to you.<br>2. A rough sense of the company: what you do, how many people, and where work tends to get stuck.<br>3. The software and tools you are paying for right now.</p>
 <p style="margin:0 0 24px;">Question before then, or want to talk sooner? Reply to this email and Mia or Tyler will get back to you.</p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>
@@ -40,7 +40,7 @@ function buildDay3Email(firstName, unsubUrl) {
 <p style="margin:0 0 16px;">A thought while you are deciding on a time.</p>
 <p style="margin:0 0 16px;">The companies we sit down with are usually good at the work. Where they get stuck is that the company runs on what is in two or three people's heads, the software they bought gets worked around, and every real decision still waits on the owner.</p>
 <p style="margin:0 0 16px;">We wrote about what that looks like when it is fixed: <a href="${INSIGHT_INTELLIGENT_COMPANY}" style="color:#5a9e00;">What Is an Intelligent Company?</a></p>
-<p style="margin:0 0 24px;">If any of that sounds familiar, the Fit Call is free and takes 20 to 30 minutes: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">pick a time</a></p>
+<p style="margin:0 0 24px;">If any of that sounds familiar, the Fit Call is free and takes 15 minutes: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">pick a time</a></p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI Tech AI</span></p>
 `, unsubUrl);
 }
@@ -50,7 +50,7 @@ function buildDay7Email(firstName, unsubUrl) {
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">I know you are running a company. You do not have time to chase things down.</p>
 <p style="margin:0 0 16px;">So I will keep this short. Most software bought to fix an operation gives you another screen to look at. What we do is go inside the company, keep what already works, and build the systems around it.</p>
-<p style="margin:0 0 16px;">Whether that fits your business is what the Fit Call is for. It is free, 20 to 30 minutes, and we will tell you if TMI is wrong for this.</p>
+<p style="margin:0 0 16px;">Whether that fits your business is what the Fit Call is for. It is free, 15 minutes, and we will tell you if TMI is wrong for this.</p>
 <p style="margin:0 0 24px;"><a href="${FIT_CALL_URL}" style="color:#5a9e00;">Pick a time here.</a></p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">TMI Tech AI</span></p>
 `, unsubUrl);
@@ -122,7 +122,7 @@ module.exports = async function handler(req, res) {
   // SMS to lead
   if (phone) {
     sms.messages.create({
-      body: `Hey ${firstName}, it's Mia at TMI Tech AI. Got your application. Next step is a free 20 to 30 minute Fit Call to see whether TMI should come inside your company at all. If you have not picked a time yet: ${FIT_CALL_URL} Questions before then? Reply here.`,
+      body: `Hey ${firstName}, it's Mia at TMI Tech AI. Got your application. Next step is a free 15 minute Fit Call to see whether TMI should come inside your company at all. If you have not picked a time yet: ${FIT_CALL_URL} Questions before then? Reply here.`,
       from: FROM_NUMBER,
       to: formatPhone(phone),
     }).catch(e => console.error('Lead SMS error:', e));

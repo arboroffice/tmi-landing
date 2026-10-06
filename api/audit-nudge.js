@@ -34,7 +34,7 @@ function resumeEmail(firstName, resumeLink, unsubUrl) {
   return emailWrap(`
 <p style="margin:0 0 6px;font-size:11px;color:#888;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;">TMI Tech AI</p>
 <h1 style="margin:0 0 16px;font-size:28px;font-weight:800;line-height:1.1;letter-spacing:-0.02em;color:#0a0b14;">You're one step from a time on the calendar</h1>
-<p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName}, you started with us but didn't finish. The next step is a Fit Call: free, 20 to 30 minutes, to work out whether TMI should come inside your company at all. If the answer is no, we will say so on the call.</p>
+<p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName}, you started with us but didn't finish. The next step is a Fit Call: free, 15 minutes, to work out whether TMI should come inside your company at all. If the answer is no, we will say so on the call.</p>
 <p style="margin:0 0 24px;font-size:15px;color:#444;line-height:1.65;">Fill in the short form and the calendar opens as soon as you submit.</p>
 <a href="${resumeLink}" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">Pick a time &rarr;</a>
 <p style="margin:28px 0 0;font-size:14px;color:#555;line-height:1.65;">If you would rather talk first, reply to this email or call (337) 450-9795.</p>
@@ -46,7 +46,7 @@ function bookOrFinishEmail(firstName, bookingLink, resumeLink, unsubUrl) {
   return emailWrap(`
 <p style="margin:0 0 6px;font-size:11px;color:#888;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;">TMI Tech AI</p>
 <h1 style="margin:0 0 16px;font-size:26px;font-weight:800;line-height:1.12;letter-spacing:-0.02em;color:#0a0b14;">Want to just talk it through?</h1>
-<p style="margin:0 0 18px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName}, you started with us yesterday and didn't finish. The simplest next step is the Fit Call: free, 20 to 30 minutes, with Mia and Tyler.</p>
+<p style="margin:0 0 18px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName}, you started with us yesterday and didn't finish. The simplest next step is the Fit Call: free, 15 minutes, with Mia and Tyler.</p>
 <a href="${bookingLink}" style="display:inline-block;background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px;padding:14px 32px;border-radius:999px;text-decoration:none;">Book the Fit Call &rarr;</a>
 <p style="margin:26px 0 18px;font-size:15px;color:#444;line-height:1.65;">On the call we work out whether TMI should come inside your company at all. If it should, the next step is the Intelligent Company Audit, and we will explain what it covers. If it should not, we will tell you.</p>
 <a href="${resumeLink}" style="font-size:14px;color:#5a9e00;font-weight:600;">Back to the form &rarr;</a>
@@ -58,7 +58,7 @@ function lastCallEmail(firstName, bookingLink, resumeLink, unsubUrl) {
   return emailWrap(`
 <p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.65;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.65;">Last note on this, then I'll leave it.</p>
-<p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.65;">If you want to know whether TMI is right for your company, the Fit Call is the way in. It is free and takes 20 to 30 minutes. If it is not the right time, that is fine too.</p>
+<p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.65;">If you want to know whether TMI is right for your company, the Fit Call is the way in. It is free and takes 15 minutes. If it is not the right time, that is fine too.</p>
 <p style="margin:0 0 8px;font-size:15px;color:#444;"><a href="${bookingLink}" style="color:#5a9e00;font-weight:600;">Book the Fit Call &rarr;</a></p>
 <p style="margin:0 0 24px;font-size:15px;color:#444;"><a href="${resumeLink}" style="color:#5a9e00;font-weight:600;">Back to the form &rarr;</a></p>
 <p style="margin:0;font-size:14px;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>`, unsubUrl);
@@ -117,9 +117,9 @@ module.exports = async function handler(req, res) {
     abandon_day3:  { subject: `Last note, ${firstName}`,                     html: lastCallEmail(firstName, bookingLink, resumeLink, unsubUrl) },
   };
   const SMS = {
-    abandon_10min: `Hey ${firstName}, it's Mia at TMI Tech AI. Looks like you didn't finish. Easiest next step is a free 20 to 30 minute Fit Call. Pick a time: ${bookingLink}`,
-    abandon_day1:  `Hey ${firstName}, easiest next step is a free 20 to 30 minute Fit Call to see whether TMI is right for your company. Pick a time: ${bookingLink}`,
-    abandon_day3:  `Hey ${firstName}, last note from me. If you want to talk, the Fit Call is free and takes 20 to 30 minutes: ${bookingLink}`,
+    abandon_10min: `Hey ${firstName}, it's Mia at TMI Tech AI. Looks like you didn't finish. Easiest next step is a free 15 minute Fit Call. Pick a time: ${bookingLink}`,
+    abandon_day1:  `Hey ${firstName}, easiest next step is a free 15 minute Fit Call to see whether TMI is right for your company. Pick a time: ${bookingLink}`,
+    abandon_day3:  `Hey ${firstName}, last note from me. If you want to talk, the Fit Call is free and takes 15 minutes: ${bookingLink}`,
   };
 
   const emailContent = EMAIL[step] || EMAIL.abandon_10min;

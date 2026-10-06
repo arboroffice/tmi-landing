@@ -112,7 +112,7 @@ module.exports = async function handler(req, res) {
       if (stage === 'precall_24h') {
         await email(to, 'Your TMI Fit Call is tomorrow',
           `<p style="margin:0 0 16px;">Hey ${name},</p>
-<p style="margin:0 0 16px;">Quick reminder: your Fit Call with Mia and Tyler is tomorrow. It is 20 to 30 minutes to work out whether TMI should come inside your company at all. Come with the thing that most often still comes back to you and the software you are paying for right now. Question before then? Reply to this email. See you then.</p>`, unsub);
+<p style="margin:0 0 16px;">Quick reminder: your Fit Call with Mia and Tyler is tomorrow. It is 15 minutes to work out whether TMI should come inside your company at all. Come with the thing that most often still comes back to you and the software you are paying for right now. Question before then? Reply to this email. See you then.</p>`, unsub);
       } else if (stage === 'precall_1h') {
         await email(to, 'Your TMI Fit Call is in about an hour',
           `<p style="margin:0 0 16px;">Hey ${name},</p>

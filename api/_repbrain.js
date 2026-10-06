@@ -25,7 +25,7 @@ module.exports = [
  },
  {
   "q": "What if the owner is interested but not ready to pay today?",
-  "a": "Offer the Fit Call with Mia and Tyler. It is free, 20 to 30 minutes, and it decides whether TMI should come inside the company at all. Book it with them at tmitechai.com/intelligent-company-audit.html#book. If they will not book that either, set a dated follow-up. Never leave without a person, an action and a date."
+  "a": "Offer the Fit Call with Mia and Tyler. It is free, 15 minutes, and it decides whether TMI should come inside the company at all. Book it with them at tmitechai.com/intelligent-company-audit.html#book. If they will not book that either, set a dated follow-up. Never leave without a person, an action and a date."
  },
  {
   "q": "What is the one way in? Where do I send people?",
@@ -83,7 +83,7 @@ module.exports = [
  },
  {
   "q": "\"It's too expensive.\"",
-  "a": "Fair question to ask. Let me ask you one back: how many hours a week do you spend answering questions only you can answer? What does that hour cost you? The audit is a fixed $5,000 and you keep the roadmap either way. If you want to talk fit before spending anything, I can set you up with the free 20 to 30 minute Fit Call with Mia and Tyler."
+  "a": "Fair question to ask. Let me ask you one back: how many hours a week do you spend answering questions only you can answer? What does that hour cost you? The audit is a fixed $5,000 and you keep the roadmap either way. If you want to talk fit before spending anything, I can set you up with the free 15 minute Fit Call with Mia and Tyler."
  },
  {
   "q": "\"I don't have the budget right now.\"",
@@ -205,7 +205,7 @@ module.exports = [
  },
  {
   "q": "\"Now's not a good time. Circle back next quarter.\"",
-  "a": "That works. What date should I put down? And if it helps, the Fit Call is free and 20 to 30 minutes, so you can find out now whether the audit is even the right next step and plan around it."
+  "a": "That works. What date should I put down? And if it helps, the Fit Call is free and 15 minutes, so you can find out now whether the audit is even the right next step and plan around it."
  },
  {
   "q": "\"I need to talk to my partner / spouse / the other owner first.\"",

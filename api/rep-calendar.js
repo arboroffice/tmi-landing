@@ -12,7 +12,7 @@ const { verifyRep } = require('./_rep-auth');
 const gcal = require('./_gcal');
 const cal = require('./_cal');
 
-const CAL_URL = 'https://cal.com/miaeliana/discovery-audit';
+const CAL_URL = 'https://cal.com/miaeliana/tmi-fit-call';
 const SITE = 'https://admin.tmitechai.com';
 const DAY = 864e5;
 
@@ -44,7 +44,7 @@ async function teamDays(repId, myUids) {
     });
     let open = null;
     // Open times for the call reps book: the Fit Call, else the discovery audit. Never Passem.
-    const fit = ['discovery-audit', 'in-person-audit'].map((sl) => types.find((t) => t.slug === sl)).find(Boolean)
+    const fit = ['tmi-fit-call', 'discovery-audit', 'in-person-audit'].map((sl) => types.find((t) => t.slug === sl)).find(Boolean)
       || types.find((t) => !/passem/i.test(t.slug || ''));
     if (fit) {
       const d = new Date();
