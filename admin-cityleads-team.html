@@ -221,39 +221,54 @@ async function loadPaperwork(){
   const d=await TMIAdmin.api('/api/rep-onboarding?admin=1'); if(!d){ box.innerHTML=''; return; }
   const c=d.company||{};
   const q=(v)=>esc(v==null?'':v).replace(/"/g,'&quot;');
-  const DOCS=(d.reps[0]&&d.reps[0].docs)||[];
-  const short={contractor_agreement:'Agreement',confidentiality:'Confidentiality',w9:'W-9',payment:'Payment',conduct:'Field rules'};
-  const rows=d.reps.map(r=>{
-    const cells=r.docs.map(x=>{
-      if(!x.signed_at) return '<td style="color:var(--muted)">Not signed</td>';
-      const cs=x.countersign?(x.countersigned_at?' · TMI signed':` · <button class="btn-link" data-cs="${q(x.record_id)}" style="color:#1d4ed8;font-weight:700;background:none;border:none;cursor:pointer;padding:0">Countersign</button>`):'';
-      return `<td><button data-view="${q(x.record_id)}" style="color:#3f8f2a;font-weight:700;background:none;border:none;cursor:pointer;padding:0">✓ ${new Date(x.signed_at).toLocaleDateString()}</button>${x.outdated?' (old version)':''}${cs}</td>`;
+  const inp=(id,label,val,ph,type)=>`<label>${label}<input id="${id}" ${type?'type="'+type+'"':''} value="${q(val)}" placeholder="${q(ph||'')}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>`;
+  const link=(attrs,text,color)=>`<button ${attrs} style="color:${color||'#1d4ed8'};font-weight:700;background:none;border:none;cursor:pointer;padding:0;font-size:13px">${text}</button>`;
+  const cards=d.reps.map(r=>{
+    const req=r.docs.filter(x=>x.required), done=req.filter(x=>x.signed_at&&!x.outdated).length;
+    const pr=r.profile||{};
+    const info=r.missing.length?`<span style="color:#b45309">Info still needed: ${esc(r.missing.join(', '))}</span>`
+      :`${esc(pr.legal_name||'')} · ${esc(pr.city||'')}${pr.state?', '+esc(pr.state):''} · TIN …${esc(pr.tin_last4||'')} · ${esc(({direct_deposit:'Direct deposit',zelle:'Zelle',check:'Check'})[pr.payout_method]||'')}${pr.account_last4?' …'+esc(pr.account_last4):''}`;
+    const docs=r.docs.map(x=>{
+      const done2=x.signed_at&&!x.outdated;
+      const right=!x.required&&!done2?'<span style="color:var(--muted)">Not needed</span>'
+        :done2?`${link(`data-view="${q(x.record_id)}"`,'✓ Signed '+new Date(x.signed_at).toLocaleDateString(),'#3f8f2a')}${x.countersign?(x.countersigned_at?' · TMI signed':' · '+link(`data-cs="${q(x.record_id)}"`,'Countersign')):''}`
+        :`<span style="color:var(--muted)">${x.outdated?'Old version signed':'Not signed'}</span>`;
+      return `<div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px"><span>${esc(x.n)} ${esc(x.title)}</span><span style="text-align:right">${right}</span></div>`;
     }).join('');
-    const info=r.missing.length?`<span style="color:#b45309">Needs: ${esc(r.missing.join(', '))}</span>`:`${esc(r.profile.legal_name||'')}${r.profile.tin_last4?' · TIN …'+esc(r.profile.tin_last4):''} · ${esc(({direct_deposit:'Direct deposit',zelle:'Zelle',check:'Check'})[r.profile.payout_method]||'')}${r.profile.account_last4?' …'+esc(r.profile.account_last4):''}`;
-    return `<tr><td><b>${esc(r.name||r.email)}</b>${r.complete?' <span style="color:#3f8f2a">· Done</span>':''}<div style="font-size:12px;color:var(--muted)">${info}</div></td>${cells}</tr>`;
+    const eq=(r.equipment||[]).map(x=>`${x.qty} × ${x.item}${x.return_required?' (return)':''}`).join(', ');
+    return `<details style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+      <summary style="cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center"><span><b>${esc(r.name||r.email)}</b> <span style="font-size:12px;color:${r.complete?'#3f8f2a':'var(--muted)'}">${r.complete?'· Packet complete':'· '+done+' of '+req.length+' signed'}${r.waived?' · leads unlocked by you':''}</span></span></summary>
+      <div style="font-size:12.5px;margin:8px 0">${info}</div>
+      ${docs}
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:13px">
+        ${pr.dl_on_file?link(`data-file="${q(r.id)}:dl"`,'View license'):'<span style="color:var(--muted)">No license photo</span>'}
+        ${pr.ins_on_file?link(`data-file="${q(r.id)}:ins"`,'View insurance card'):'<span style="color:var(--muted)">No insurance photo</span>'}
+        ${link(`data-eq="${q(r.id)}"`,'Equipment'+(eq?': '+esc(eq):' (none issued)'))}
+        ${r.complete?'':link(`data-waive="${q(r.id)}" data-on="${r.waived?0:1}"`,r.waived?'Lock leads until signed':'Unlock leads now anyway','#b45309')}
+      </div></details>`;
   }).join('');
   box.innerHTML=`<div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><div class="panel-sec-label">Rep paperwork (1099 contractors)</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><div class="panel-sec-label">City Lead onboarding packet (1099 contractors)</div>
       <div style="display:flex;gap:8px;align-items:center"><select id="pw1099Year" style="padding:7px;border:1px solid var(--line);border-radius:8px">${[0,1].map(i=>{const y=new Date().getFullYear()-i;return `<option>${y}</option>`;}).join('')}</select><button class="btn" id="pw1099">Download 1099 info</button></div></div>
-    ${d.company_ready?'':'<p style="background:#fff7e0;padding:10px 12px;border-radius:8px;font-size:13px;margin:0 0 12px">Reps cannot sign until you fill in the company info below.</p>'}
-    <div style="overflow-x:auto"><table class="data-table" style="width:100%;min-width:760px"><thead><tr><th>Rep</th>${DOCS.map(x=>`<th>${esc(short[x.id]||x.title)}</th>`).join('')}</tr></thead><tbody>${rows||'<tr><td colspan="6">No reps yet.</td></tr>'}</tbody></table></div>
-    <details style="margin-top:14px" ${d.company_ready?'':'open'}><summary style="font-size:13px;font-weight:700;cursor:pointer">Company info and pay terms used in the documents</summary>
+    ${d.company_ready?(c.require_packet?'<p style="font-size:12.5px;color:var(--muted);margin:0 0 10px">Leads stay locked for each rep until their packet is signed.</p>':'<p style="font-size:12.5px;color:#b45309;margin:0 0 10px">Leads are NOT locked. Reps can work before signing.</p>'):'<p style="background:#fff7e0;padding:10px 12px;border-radius:8px;font-size:13px;margin:0 0 12px">Reps can fill in their info, but nobody can sign (and leads are not locked) until you fill in the company info below.</p>'}
+    ${cards||'<p style="font-size:13px;color:var(--muted)">No reps yet.</p>'}
+    <details style="margin-top:14px" ${d.company_ready?'':'open'}><summary style="font-size:13px;font-weight:700;cursor:pointer">Company info and commission terms used in the packet</summary>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px;font-size:13px">
-        <label>Company legal name<input id="pwLegal" value="${q(c.legal_name)}" placeholder="TMI Technology LLC" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
-        <label>Company address<input id="pwAddr" value="${q(c.address)}" placeholder="Street, Lafayette, LA 70501" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
-        <label>Who signs for the company<input id="pwSigner" value="${q(c.signer_name)}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
-        <label>Their title<input id="pwTitle" value="${q(c.signer_title)}" placeholder="Founder" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
-        <label>Commissions paid by day of month<input id="pwPayDay" type="number" value="${q(c.pay_day)}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
-        <label>Upsell commission window (months after audit)<input id="pwWindow" type="number" value="${q(c.upsell_window_months)}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
-        <label>Paid after they leave (days)<input id="pwPost" type="number" value="${q(c.post_term_days)}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
-        <label>Court parish<input id="pwParish" value="${q(c.venue_parish)}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
+        ${inp('pwLegal','Company legal name',c.legal_name,'TMI Technology LLC')}
+        ${inp('pwAddr','Company address',c.address,'Street, Lafayette, LA 70501')}
+        ${inp('pwSigner','Who signs for the company',c.signer_name,'')}
+        ${inp('pwTitle','Their title',c.signer_title,'Founder')}
+        ${inp('pwPayDay','Commissions paid by day of month',c.pay_day,'','number')}
+        ${inp('pwAttr','Credit window: days from logged owner talk to first payment',c.attribution_days,'','number')}
+        ${inp('pwParish','Court parish',c.venue_parish,'Lafayette')}
+        <label style="display:flex;gap:8px;align-items:center;margin-top:18px"><input type="checkbox" id="pwLock" ${c.require_packet?'checked':''}/> Lock leads until the packet is signed</label>
       </div>
       <button class="btn" id="pwSave" style="margin-top:10px">Save company info</button>
-      <p style="font-size:12px;color:var(--muted);margin:8px 0 0">Commission rates come from the commissions card. Changing these after reps sign does not change what they already signed.</p>
+      <p style="font-size:12px;color:var(--muted);margin:8px 0 0">The commission rate comes from the commissions card (10%). Changes here only affect documents signed after you save.</p>
     </details></div>`;
   document.getElementById('pwSave').onclick=async()=>{
     const v=(id)=>document.getElementById(id).value;
-    const r=await TMIAdmin.api('/api/rep-onboarding?admin=1','POST',{admin:1,action:'company',legal_name:v('pwLegal'),address:v('pwAddr'),signer_name:v('pwSigner'),signer_title:v('pwTitle'),pay_day:v('pwPayDay'),upsell_window_months:v('pwWindow'),post_term_days:v('pwPost'),venue_parish:v('pwParish')});
+    const r=await TMIAdmin.api('/api/rep-onboarding?admin=1','POST',{admin:1,action:'company',legal_name:v('pwLegal'),address:v('pwAddr'),signer_name:v('pwSigner'),signer_title:v('pwTitle'),pay_day:v('pwPayDay'),attribution_days:v('pwAttr'),venue_parish:v('pwParish'),require_packet:document.getElementById('pwLock').checked});
     if(r){ TMIAdmin.toast(r.company_ready?'Saved. Reps can sign now.':'Saved. Fill in name, address and signer so reps can sign.'); loadPaperwork(); }
   };
   document.getElementById('pw1099').onclick=async()=>{
@@ -262,15 +277,32 @@ async function loadPaperwork(){
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([r.csv],{type:'text/csv'})); a.download='tmi-rep-1099-'+r.year+'.csv'; a.click();
     TMIAdmin.toast('Downloaded. It has full tax IDs, so keep it private.');
   };
+  const openWin=(html)=>{ const w=window.open('','_blank'); if(!w) return TMIAdmin.toast('Allow pop-ups to view','error'); w.document.open(); w.document.write(html); w.document.close(); };
   box.querySelectorAll('[data-view]').forEach(b=>b.onclick=async()=>{
-    const w=window.open('','_blank');
     const r=await TMIAdmin.api('/api/rep-onboarding?admin=1&record='+encodeURIComponent(b.dataset.view));
-    if(r&&w){ w.document.open(); w.document.write(r.html.replace('</body>','<div style="margin:24px 0;font-family:Helvetica,Arial,sans-serif"><button onclick="window.print()" style="padding:10px 18px;font-size:15px">Print or save as PDF</button></div></body>')); w.document.close(); } else if(w) w.close();
+    if(r) openWin(r.html.replace('</body>','<div style="margin:24px 0;font-family:Helvetica,Arial,sans-serif"><button onclick="window.print()" style="padding:10px 18px;font-size:15px">Print or save as PDF</button></div></body>'));
+  });
+  box.querySelectorAll('[data-file]').forEach(b=>b.onclick=async()=>{
+    const r=await TMIAdmin.api('/api/rep-onboarding?admin=1&file='+encodeURIComponent(b.dataset.file));
+    if(r) openWin('<title>Rep document</title><img src="'+r.data+'" style="max-width:100%">');
   });
   box.querySelectorAll('[data-cs]').forEach(b=>b.onclick=async()=>{
     if(!confirm('Sign this for '+(c.legal_name||'the company')+' as '+(c.signer_name||'')+'?')) return;
     const r=await TMIAdmin.api('/api/rep-onboarding?admin=1','POST',{admin:1,action:'countersign',record_id:b.dataset.cs});
     if(r){ TMIAdmin.toast('Countersigned'); loadPaperwork(); }
+  });
+  box.querySelectorAll('[data-waive]').forEach(b=>b.onclick=async()=>{
+    const r=await TMIAdmin.api('/api/rep-onboarding?admin=1','POST',{admin:1,action:'waive',rep_id:b.dataset.waive,waived:b.dataset.on==='1'});
+    if(r){ TMIAdmin.toast(b.dataset.on==='1'?'Leads unlocked for this rep':'Leads locked until signed'); loadPaperwork(); }
+  });
+  box.querySelectorAll('[data-eq]').forEach(b=>b.onclick=async()=>{
+    const rep=d.reps.find(x=>x.id===b.dataset.eq);
+    const cur=(rep.equipment||[]).map(x=>`${x.qty} | ${x.item} | ${x.return_required?'return':'keep'}`).join('\n');
+    const txt=prompt('One item per line: quantity | item | return or keep\nExample: 2 | TMI shirts | keep\nLeave empty if nothing was issued.',cur);
+    if(txt===null) return;
+    const items=txt.split('\n').map(l=>l.split('|').map(x=>x.trim())).filter(x=>x[1]||x[0]).map(x=>x.length===1?{qty:1,item:x[0]}:{qty:parseInt(x[0],10)||1,item:x[1],return_required:/return/i.test(x[2]||'')});
+    const r=await TMIAdmin.api('/api/rep-onboarding?admin=1','POST',{admin:1,action:'equipment',rep_id:rep.id,items});
+    if(r){ TMIAdmin.toast(items.length?'Saved. The rep will sign a receipt.':'Saved. No receipt needed.'); loadPaperwork(); }
   });
 }
 // Calls reps booked on Mia's Cal.com, and linking Mia's Google Calendar so reps

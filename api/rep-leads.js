@@ -153,6 +153,10 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   const r = await requireRep(req, res); if (!r) return;
   const repId = r.sub;
+  // Leads stay locked until the City Lead onboarding packet is signed.
+  try {
+    if (!(await require('./rep-onboarding').cleared(repId))) return res.status(403).json({ error: 'Finish your paperwork to unlock your leads', paperwork: true });
+  } catch (e) { console.error('rep-leads paperwork check:', e.message); }
 
   try {
     if (req.method === 'GET') {

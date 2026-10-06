@@ -238,6 +238,7 @@ async function api(path, opts={}){
   const res = await fetch(API+path, Object.assign({}, opts, {headers:h}));
   if(res.status===401){ logout(); throw new Error('Session expired, sign in again'); }
   const data = await res.json().catch(()=>({}));
+  if(res.status===403 && data.paperwork && !PAPER_SHOWN){ PAPER_SHOWN=true; setTimeout(()=>{ toast('Finish your paperwork to unlock your leads'); openPaperwork(); },0); }
   if(!res.ok) throw new Error(data.error || ('Error '+res.status));
   return data;
 }
@@ -1656,7 +1657,7 @@ async function loadRepHD(){
 }
 // Contractor paperwork: fill in info once, every document pre-fills from it,
 // read and sign each one in the app. Signed copies can be printed or saved as PDF.
-var PAPER=null;
+var PAPER=null, PAPER_SHOWN=false;
 async function loadPaper(){ try{ PAPER=await api('/api/rep-onboarding'); }catch(e){} return PAPER; }
 async function paperBanner(){
   var box=$('#tPaper'); if(!box) return;
@@ -1675,17 +1676,23 @@ async function openPaperwork(){
   var step=function(n,done,title,sub,btn,id){ return '<div class="card" style="display:flex;gap:12px;align-items:center;margin:0 0 8px"><div style="flex:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;background:'+(done?'var(--green)':'var(--line)')+';color:'+(done?'#fff':'var(--ink)')+'">'+(done?'✓':n)+'</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14.5px">'+esc(title)+'</div><div style="font-size:12.5px;color:var(--muted)">'+sub+'</div></div>'+btn+'</div>'; };
   var html='<div style="font-size:13.5px;line-height:1.5;margin-bottom:12px">You work with TMI Tech AI as an independent contractor (1099). Fill in your info once and every form fills itself in. Then read and sign each one right here. It is free and takes about 10 minutes.</div>';
   if(!p.company_ready) html+='<div class="card" style="background:#fff7e0;font-size:13px;margin-bottom:10px">TMI is finishing the documents. You can fill in your info now and sign once they are ready.</div>';
-  html+=step(1,!p.missing.length,'Your info',p.missing.length?('Still needed: '+esc(p.missing.join(', '))):'Done. Tap to update.','<button class="btn sm" id="pInfo" style="flex:none">'+(p.missing.length?'Fill in':'Edit')+'</button>');
-  p.docs.forEach(function(d,i){
+  html+=step('•',!p.missing.length,'Your info',p.missing.length?('Still needed: '+esc(p.missing.join(', '))):'Done. Tap to update.','<button class="btn sm" id="pInfo" style="flex:none">'+(p.missing.length?'Fill in':'Edit')+'</button>');
+  p.docs.forEach(function(d){
     var done=d.signed_at&&!d.outdated;
-    var sub=done?('Signed '+new Date(d.signed_at).toLocaleDateString()+(d.countersign?(d.countersigned_at?' · TMI signed too':' · waiting on TMI to sign'):'')):(d.outdated?'Updated. Please sign the new version.':'Not signed yet');
-    var btn=done?'<button class="btn ghost sm" data-copy="'+d.id+'" style="flex:none">View</button>':'<button class="btn sm" data-sign="'+d.id+'" style="flex:none" '+((p.missing.length||!p.company_ready)?'disabled':'')+'>Read &amp; sign</button>';
-    html+=step(i+2,done,d.title,sub,btn);
+    if(!d.required&&!done){ html+=step(d.n,true,d.title,'Not needed. Nothing has been issued to you.',''); return; }
+    var sub=done?('Signed '+new Date(d.signed_at).toLocaleDateString()+(d.countersign?(d.countersigned_at?' · TMI signed too':' · waiting on TMI to sign'):'')):(d.outdated?'Updated. Please sign the new version.':(d.blocked?esc(d.blocked):'Ready to sign'));
+    var btn;
+    if(done) btn='<button class="btn ghost sm" data-copy="'+d.id+'" style="flex:none">View</button>';
+    else if(d.id==='driver'&&p.driver_missing&&p.driver_missing.length&&!p.missing.length) btn='<button class="btn sm" id="pDriver" style="flex:none">Add</button>';
+    else btn='<button class="btn sm" data-sign="'+d.id+'" style="flex:none" '+(d.blocked?'disabled':'')+'>Read &amp; sign</button>';
+    html+=step(d.n,done,d.title,sub,btn);
   });
   if(p.complete) html+='<div class="card" style="background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px">All done. You are set up to get paid.</div>';
+  else if(p.require_packet&&p.company_ready) html+='<div style="font-size:12.5px;color:var(--muted);margin:2px 0 8px">Your leads unlock as soon as every step is done.</div>';
   html+='<div style="font-size:11.5px;color:var(--muted);margin:8px 0 20px">Your SSN or EIN and bank numbers are encrypted. TMI only sees the last 4 digits, except when filing your 1099.</div>';
   b.innerHTML=html;
   $('#pInfo').onclick=function(){ paperInfo(p); };
+  var pd=$('#pDriver'); if(pd) pd.onclick=function(){ paperDriver(p); };
   b.querySelectorAll('[data-sign]').forEach(function(x){ x.onclick=function(){ paperSign(x.dataset.sign); }; });
   b.querySelectorAll('[data-copy]').forEach(function(x){ x.onclick=function(){ paperCopy(x.dataset.copy); }; });
 }
@@ -1710,6 +1717,7 @@ function paperInfo(p){
       paperField('pRouting','Routing number (9 digits)','','inputmode="numeric" autocomplete="off" placeholder="'+(pr.routing_last4?('On file, ending '+esc(pr.routing_last4)):'')+'"')+
       paperField('pAcct','Account number','','inputmode="numeric" autocomplete="off" placeholder="'+(pr.account_last4?('On file, ending '+esc(pr.account_last4)):'')+'"')+'</div>'+
     '<div id="pZelleRow" style="display:none">'+paperField('pZelle','Zelle phone or email',pr.zelle_handle)+'</div>'+
+    '<div style="font-size:12.5px;color:var(--muted);margin:-2px 0 12px">Territory: <b style="color:var(--ink)">'+esc(pr.territory||(ME&&ME.city)||'set by TMI')+'</b>'+(pr.start_date?(' · Start date: <b style="color:var(--ink)">'+esc(pr.start_date)+'</b>'):'')+'</div>'+
     paperField('pEmName','Emergency contact name (optional)',pr.emergency_name)+paperField('pEmPhone','Emergency contact phone (optional)',pr.emergency_phone,'type="tel"')+
     '<button class="btn" id="pSave">Save my info</button><div style="height:8px"></div><button class="btn ghost" id="pBack">Back</button><div style="height:20px"></div>';
   var sync=function(){ var pm=$('#pPay').value; $('#pBank').style.display=pm==='direct_deposit'?'':'none'; $('#pZelleRow').style.display=pm==='zelle'?'':'none'; $('#pLlcRow').style.display=$('#pTax').value==='llc'?'':'none'; };
@@ -1721,6 +1729,28 @@ function paperInfo(p){
     var body={action:'profile',legal_name:v('#pLegal'),business_name:v('#pBiz'),tax_class:v('#pTax')||undefined,llc_code:v('#pLlc'),address1:v('#pA1'),address2:v('#pA2'),city:v('#pCity'),state:v('#pState'),zip:v('#pZip'),phone:v('#pPhone'),personal_email:v('#pEmail'),tin_type:v('#pTinType'),tin:v('#pTin'),backup_withholding:$('#pBackup').checked,payout_method:v('#pPay')||undefined,bank_name:v('#pBankName'),account_type:v('#pAcctType'),routing:v('#pRouting'),account:v('#pAcct'),zelle_handle:v('#pZelle'),emergency_name:v('#pEmName'),emergency_phone:v('#pEmPhone')};
     try{ PAPER=await api('/api/rep-onboarding',{method:'POST',body:JSON.stringify(body)}); toast(PAPER.missing.length?('Saved. Still needed: '+PAPER.missing.join(', ')):'Saved. Now sign your documents.'); openPaperwork(); }
     catch(ex){ toast(ex.message||'Could not save'); btn.disabled=false; btn.textContent='Save my info'; }
+  };
+}
+function shrinkPhoto(file){ return new Promise(function(res,rej){ var img=new Image(); img.onload=function(){ var m=1400, k=Math.min(1,m/Math.max(img.width,img.height)); var c=document.createElement('canvas'); c.width=Math.round(img.width*k); c.height=Math.round(img.height*k); c.getContext('2d').drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(img.src); res(c.toDataURL('image/jpeg',0.72)); }; img.onerror=function(){ rej(new Error('Could not read that photo')); }; img.src=URL.createObjectURL(file); }); }
+function paperDriver(p){
+  var pr=p.profile||{}, b=$('#sheetBody');
+  $('#sheetTitle').textContent='Driver and insurance';
+  var photo=function(kind,label,on){ return '<div class="field"><label>'+label+'</label><label class="btn ghost sm" style="cursor:pointer;display:block;text-align:center;text-transform:none;letter-spacing:0">'+(on?'✓ On file. Tap to replace':'Take or choose a photo')+'<input type="file" accept="image/*" capture="environment" data-up="'+kind+'" style="display:none"/></label></div>'; };
+  b.innerHTML='<div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">City Lead work means driving, so TMI keeps a copy of your license and insurance card. Photos are encrypted.</div>'+
+    '<div class="row" style="gap:8px"><div style="flex:1">'+paperField('dState','License state',pr.dl_state||'LA','maxlength="2"')+'</div><div style="flex:1.6">'+paperField('dExp','License expires',pr.dl_expires,'type="date"')+'</div></div>'+
+    photo('dl','Driver\'s license photo (front)',pr.dl_on_file)+
+    paperField('iCar','Auto insurance company',pr.ins_carrier)+paperField('iExp','Policy expires',pr.ins_expires,'type="date"')+
+    photo('ins','Insurance card photo',pr.ins_on_file)+
+    '<button class="btn" id="dSaveDrv">Save</button><div style="height:8px"></div><button class="btn ghost" id="dBackDrv">Back</button><div style="height:20px"></div>';
+  b.querySelectorAll('[data-up]').forEach(function(inp){ inp.onchange=async function(){
+    var f=inp.files&&inp.files[0]; if(!f) return;
+    try{ toast('Uploading…'); var data=await shrinkPhoto(f); PAPER=await api('/api/rep-onboarding',{method:'POST',body:JSON.stringify({action:'upload',kind:inp.dataset.up,data:data})}); toast('Photo saved'); paperDriver(PAPER); }
+    catch(ex){ toast(ex.message||'Could not upload'); }
+  }; });
+  $('#dBackDrv').onclick=openPaperwork;
+  $('#dSaveDrv').onclick=async function(){
+    try{ PAPER=await api('/api/rep-onboarding',{method:'POST',body:JSON.stringify({action:'profile',dl_state:$('#dState').value,dl_expires:$('#dExp').value,ins_carrier:$('#iCar').value,ins_expires:$('#iExp').value})}); toast(PAPER.driver_missing.length?('Still needed: '+PAPER.driver_missing.join(', ')):'Saved'); if(PAPER.driver_missing.length) paperDriver(PAPER); else openPaperwork(); }
+    catch(ex){ toast(ex.message||'Could not save'); }
   };
 }
 async function paperSign(docId){
