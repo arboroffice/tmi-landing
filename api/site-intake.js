@@ -23,13 +23,20 @@ function cors(req, res) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
   }
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
 
 module.exports = async (req, res) => {
   cors(req, res);
   if (req.method === 'OPTIONS') return res.status(200).end();
+  // Admin: the latest website submissions, for the dashboard.
+  if (req.method === 'GET') {
+    const { verifyToken } = require('./_auth');
+    if (!verifyToken(req)) return res.status(401).json({ error: 'Unauthorized' });
+    const rows = await db.list('site_submissions', { order: 'created_at', ascending: false, limit: 25 }).catch(() => []);
+    return res.json((rows || []).map((r) => ({ id: r.id, intent: r.intent, label: LABEL[r.intent] || r.intent, name: r.name, email: r.email, phone: r.phone, company: r.company, message: r.message, source: (r.attribution && (r.attribution.utm_source || r.attribution.first_source || r.attribution.first_referrer)) || null, created_at: r.created_at })));
+  }
   if (req.method !== 'POST') return res.status(405).end();
 
   let b = req.body || {};

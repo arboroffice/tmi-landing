@@ -77,6 +77,15 @@
         <div class="stat-box"><div class="stat-label">Emails Sent</div><div class="stat-val" id="stat-emails">—</div><div class="stat-delta" id="stat-emails-d"></div></div>
       </div>
 
+      <!-- tmitechai.com: traffic and form submissions (first-party, from the website) -->
+      <div class="card" id="site-card" style="margin-bottom:20px;">
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span class="card-title">Website · tmitechai.com</span>
+          <select class="form-input" id="site-days" style="max-width:130px;padding:4px 8px;font-size:12px;" onchange="loadSite()"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
+        </div>
+        <div id="site-body" style="padding:14px 18px;font-size:13px;color:var(--muted);">Loading...</div>
+      </div>
+
       <!-- Ops Machine: Command Center -->
       <div class="cmd-wrap">
         <div class="cmd-head">
@@ -464,6 +473,28 @@ async function loadActivityFeed() {
 }
 
 // ── Main dashboard loader ──────────────────────────────────────────────────────
+
+// Website (tmitechai.com) traffic and submissions, collected first-party by the site.
+async function loadSite(){
+  const box=document.getElementById('site-body'); if(!box) return;
+  const days=document.getElementById('site-days').value;
+  const [a,subs]=await Promise.all([
+    TMIAdmin.api('/api/site-track?days='+days).catch(()=>null),
+    TMIAdmin.api('/api/site-intake').catch(()=>null),
+  ]);
+  if(!a){ box.innerHTML='Website data is not available yet.'; return; }
+  const t=a.totals||{};
+  const stat=(n,l)=>`<div style="flex:1;min-width:110px"><div style="font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-.02em">${(n||0).toLocaleString()}</div><div style="font-size:11px;font-weight:600">${l}</div></div>`;
+  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const list=(title,rows)=>`<div style="flex:1;min-width:220px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">${title}</div>${rows.length?rows.map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid var(--line);color:var(--ink)"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(k)}</span><b>${v}</b></div>`).join(''):'<div>None yet</div>'}</div>`;
+  const subRows=(subs||[]).slice(0,8).map(x=>`<div style="padding:6px 0;border-bottom:1px solid var(--line);color:var(--ink)"><b>${esc(x.name||x.email)}</b>${x.company?' · '+esc(x.company):''} <span style="color:var(--muted)">· ${esc(x.label)} · ${new Date(x.created_at).toLocaleDateString()}${x.source?' · from '+esc(x.source):''}</span>${x.message?`<div style="color:var(--muted);font-size:12px">${esc(x.message).slice(0,140)}</div>`:''}</div>`).join('')||'<div>No website submissions yet.</div>';
+  box.innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px">${stat(t.views,'Page views')}${stat(t.visitors,'Visitors')}${stat(t.form_starts,'Forms started')}${stat(t.form_submits,'Forms sent')}</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">${list('Where they came from',(a.sources||[]).slice(0,6))}${list('Top pages',(a.topPages||[]).slice(0,6))}${list('Where they are',(a.places||[]).slice(0,6))}</div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Latest website submissions</div>${subRows}
+    <div style="margin-top:8px"><a href="/admin-inbox#apps" style="font-size:12px;font-weight:700;color:var(--ink)">Open Applications &rarr;</a></div>`;
+}
+loadSite();
+
 async function loadDashboard() {
   const [leads, clients, contacts, campaigns, apps, followups] = await Promise.all([
     TMIAdmin.api('/api/leads'),
