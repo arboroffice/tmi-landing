@@ -6,14 +6,15 @@
 <title>TMI OS</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
 <meta name="robots" content="noindex"/>
-<link rel="preconnect" href="https://api.fontshare.com"/>
-<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <style>
   :root{
     --bg:#ffffff;--bg-alt:#f6f6f4;--ink:#0a0b14;--ink-2:#55576a;--ink-3:#8a8c9e;
     --line:rgba(10,11,20,0.09);--line-2:rgba(10,11,20,0.14);
-    --chart:#E4FF97;--chart-dark:#cdee72;--good:#3a7d33;--warn:#8a6d00;--warn-bg:#fff4d6;--bad:#c0261f;
+    --chart:#c9ff19;--chart-dark:#b4e60f;--good:#3a7d33;--warn:#8a6d00;--warn-bg:#fff4d6;--bad:#c0261f;
     --sans:"General Sans",system-ui,-apple-system,sans-serif;
     --mono:"Neue Haas Grotesk Display",ui-monospace,"SF Mono",Menlo,monospace;
     --nav:250px;
@@ -488,6 +489,7 @@
   .df .mic{margin-right:4px;}
 </style>
 <!-- OpenAI Ads pixel --><script>!function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");oaiq("init",{pixelId:"1SVHHxEVsMKxiFJd8MnXZm",debug:false});</script>
+<link rel="stylesheet" href="/os/brand.css"/>
 </head>
 <body>
 <svg style="display:none" aria-hidden="true"><defs>
@@ -572,7 +574,7 @@
     <button class="burger" aria-label="Menu" onclick="toggleNav()"><svg class="icon"><use href="#i-grid"/></svg></button>
     <span class="co" id="co"></span>
     <span class="plan" id="plan"></span>
-    <div class="right"><button class="bookbtn" onclick="bookAudit()" title="Book a free Fit Call with TMI Tech AI"><svg class="icon"><use href="#i-spark"/></svg><span>Book your audit</span></button><button class="cmdkbtn" onclick="openPalette()" title="Commands (Cmd-K)"><svg class="icon"><use href="#i-grid"/></svg><span>&#8984;K</span></button><button class="askbtn" onclick="openAsk()"><svg class="icon"><use href="#i-coo"/></svg> Ask your COO</button></div>
+    <div class="right"><button class="bookbtn" onclick="bookAudit()" title="Book a free Fit Call with TMI Tech AI"><svg class="icon"><use href="#i-spark"/></svg><span>Book a Fit Call</span></button><button class="cmdkbtn" onclick="openPalette()" title="Commands (Cmd-K)"><svg class="icon"><use href="#i-grid"/></svg><span>&#8984;K</span></button><button class="askbtn" onclick="openAsk()"><svg class="icon"><use href="#i-coo"/></svg> Ask your COO</button></div>
   </div>
 
   <div id="loading" class="loading">Loading your OS...</div>
@@ -612,7 +614,7 @@
 
   <section class="view" data-view="plans">
     <div class="h">Plans &amp; offers</div>
-    <p class="sub">How to work with TMI Tech AI. You are on the self-serve OS today. Go deeper whenever you want our team to build with you, from a custom install to founder-level partnership.</p>
+    <p class="sub">How to work with TMI Tech AI. It starts with a free Fit Call and the Intelligent Company Audit. Everything after that is scoped from your roadmap and quoted in writing first.</p>
     <div id="plansBox" style="margin-top:26px"></div>
   </section>
 
@@ -795,7 +797,7 @@ var tok;try{tok=localStorage.getItem(TOKEN_KEY);}catch(_){}
 if(!tok) location.href='/os/';
 var STATE=null, VIEW='command', briefingLoaded=false, askedIntro=false;
 // Admin "View as client": show a bar so TMI never forgets it is in a client's OS.
-(function(){try{var pl=JSON.parse(atob(tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));if(pl&&pl.imp){document.addEventListener('DOMContentLoaded',function(){var d=document.createElement('div');d.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#E4FF97;color:#0a0b14;font:700 13px/1.4 system-ui,sans-serif;padding:9px 14px;text-align:center;box-shadow:0 -2px 10px rgba(0,0,0,.15)';d.innerHTML='You are viewing this client\'s OS as TMI Tech AI. Anything you change is real. <a href="#" style="color:#0a0b14;text-decoration:underline;margin-left:8px" onclick="signout();return false;">Leave</a>';document.body.appendChild(d);});}}catch(_){}})();
+(function(){try{var pl=JSON.parse(atob(tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));if(pl&&pl.imp){document.addEventListener('DOMContentLoaded',function(){var d=document.createElement('div');d.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#c9ff19;color:#0a0b14;font:700 13px/1.4 system-ui,sans-serif;padding:9px 14px;text-align:center;box-shadow:0 -2px 10px rgba(0,0,0,.15)';d.innerHTML='You are viewing this client\'s OS as TMI Tech AI. Anything you change is real. <a href="#" style="color:#0a0b14;text-decoration:underline;margin-left:8px" onclick="signout();return false;">Leave</a>';document.body.appendChild(d);});}}catch(_){}})();
 
 function signout(){try{localStorage.removeItem(TOKEN_KEY);}catch(_){}location.href='/os/';}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -1071,7 +1073,7 @@ function renderOverview(){
     }).join('')+'</div>';
   }
   if(conns.length){
-    html+='<div class="lbl" style="margin-top:32px">Connected to your business</div><div class="ovchips" style="margin-top:12px">'+conns.map(function(c){return '<span class="chip2" style="'+(c.status==='live'?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72':'')+'">'+(c.status==='live'?'&#10003; ':'')+esc(c.name)+'</span>';}).join('')+'</div>';
+    html+='<div class="lbl" style="margin-top:32px">Connected to your business</div><div class="ovchips" style="margin-top:12px">'+conns.map(function(c){return '<span class="chip2" style="'+(c.status==='live'?'background:#c9ff19;color:#0a0b14;border-color:#d0ee72':'')+'">'+(c.status==='live'?'&#10003; ':'')+esc(c.name)+'</span>';}).join('')+'</div>';
   }
   html+='<div class="ovcta"><div><div style="font-size:18px;font-weight:700;color:var(--ink)">This is your intelligent company.</div><p style="font-size:14px;color:var(--ink-2);margin-top:6px">Design more of it yourself, or book your audit and have TMI Tech AI build the rest for you.</p></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="bookAudit()">Book your audit &rarr;</button><button class="btn ghost" onclick="show(\'blueprint\')">Design more</button></div></div>';
   host.innerHTML=html;
@@ -1085,7 +1087,7 @@ function renderScore(){
     '<div class="gauge"><svg width="132" height="132" viewBox="0 0 132 132" style="transform:rotate(-90deg)">'+
       '<circle cx="66" cy="66" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="9"/>'+
       '<circle class="arc" cx="66" cy="66" r="'+r+'" fill="none" stroke="url(#gg)" stroke-width="9" stroke-linecap="round" style="--c:'+C.toFixed(1)+';--off:'+off.toFixed(1)+'"/>'+
-      '<defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4FF97"/><stop offset="1" stop-color="#cdee72"/></linearGradient></defs>'+
+      '<defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9ff19"/><stop offset="1" stop-color="#b4e60f"/></linearGradient></defs>'+
     '</svg><div class="gv"><b>'+score+'</b><span>Intelligence</span></div></div>'+
     '<div class="cmdhero-stats">'+
       (runs!=null?'<div class="chstat"><div class="n lime">'+runs+'%</div><div class="l">Runs without you</div></div>':'')+
@@ -2275,7 +2277,7 @@ function renderToolCatalog(host){
       var on=connectedNames.indexOf(t[0].toLowerCase())>=0||st.on;
       var click=on?'':(st.instant?st.fn:'requestTool(\''+esc(t[0])+'\',\''+esc(cat)+'\')');
       var icon=on?'&#10003;':(st.instant?'&#9889;':toolLogo(t[2]));
-      var style='gap:7px;'+(on?'background:#E4FF97;color:#0a0b14;border-color:#d0ee72;cursor:default':(st.instant?'border-color:#c7d98a;cursor:pointer':'cursor:pointer'));
+      var style='gap:7px;'+(on?'background:#c9ff19;color:#0a0b14;border-color:#d0ee72;cursor:default':(st.instant?'border-color:#c7d98a;cursor:pointer':'cursor:pointer'));
       var title=on?'Connected':(st.instant?'Connect instantly':'Request this integration');
       return '<button class="chip2 tchip" data-tool="'+esc(t[0].toLowerCase())+'" data-cat="'+esc(cat.toLowerCase())+'" title="'+title+'" style="'+style+'" onclick="'+click+'">'+icon+' '+esc(t[0])+'</button>';
     }).join('');
@@ -2924,7 +2926,7 @@ async function loadTP(){
   tpRender();
   var badge=document.getElementById('tgTP');if(badge)badge.textContent=(TP.data.members&&TP.data.members.length)||'';
 }
-function tpPips(stage){var s='';for(var i=0;i<5;i++){s+='<span style="width:22px;height:6px;border-radius:3px;background:'+(i<=stage?'var(--chart-dark,#cdee72)':'var(--bg-alt)')+';display:inline-block"></span>';}return '<span style="display:inline-flex;gap:4px;align-items:center">'+s+'</span>';}
+function tpPips(stage){var s='';for(var i=0;i<5;i++){s+='<span style="width:22px;height:6px;border-radius:3px;background:'+(i<=stage?'var(--chart-dark,#b4e60f)':'var(--bg-alt)')+';display:inline-block"></span>';}return '<span style="display:inline-flex;gap:4px;align-items:center">'+s+'</span>';}
 function tpMemberRow(m){
   var tools=(m.tools&&m.tools.length)?m.tools.map(function(x){return '<span class="badge" style="background:var(--bg-alt);color:var(--ink-2)">'+esc(x)+'</span>';}).join(''):'';
   var hd=m.hd_type?'<span class="badge k" title="Human Design">'+esc(m.hd_type)+'</span>':'';
