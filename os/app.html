@@ -799,6 +799,7 @@ function signout(){try{localStorage.removeItem(TOKEN_KEY);}catch(_){}location.hr
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on');},2200);}
 function cap(s){return String(s||'').replace(/^\w/,function(c){return c.toUpperCase();});}
+function planName(p){ return ({trial:'Trial',audit_paid:'Audit client',active:'Active',partner:'Partner',build:'Build client'})[p]||cap(String(p||'').replace(/_/g,' ')); }
 function fmt(iso){try{var d=new Date(iso);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});}catch(e){return '';}}
 function slug(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40);}
 function ago(iso){try{var s=(Date.now()-Date.parse(iso))/1000;if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}catch(e){return '';}}
@@ -929,7 +930,7 @@ function openApply(){ window.open('https://www.tmitechai.com/intelligence-assess
 function bookAudit(){ window.open('https://www.tmitechai.com/book','_blank','noopener'); }
 function renderPlans(){
   var host=document.getElementById('plansBox'); if(!host) return;
-  var plan=cap((STATE.tenant&&STATE.tenant.plan)||'trial');
+  var plan=planName((STATE.tenant&&STATE.tenant.plan)||'trial');
   var rungs=[
     {tag:'Self-serve OS · your plan',cur:true,price:plan,h:'Build it yourself in the OS',p:'You design your intelligent company right here: departments, AI workers, the numbers to watch, and the workflows behind them.',cta:null},
     {tag:'Done with you',price:'From $25,000',h:'Our engineers build it for you',p:'The TMI development team builds and installs your OS: bespoke workers, real integrations wired to your tools, and custom software and code built for your operation.',cta:['Book your audit','bookAudit()']},
@@ -1004,9 +1005,9 @@ function boot(s){
   document.getElementById('loading').style.display='none';
   var name=s.tenant&&s.tenant.name||'Your company';
   document.getElementById('co').textContent=name;
-  document.getElementById('who').innerHTML=esc(name)+'<small>'+cap(s.tenant&&s.tenant.plan||'trial')+' plan</small>';
+  document.getElementById('who').innerHTML=esc(name)+'<small>'+planName(s.tenant&&s.tenant.plan||'trial')+' plan</small>';
   document.getElementById('av').textContent=(name.trim()[0]||'·').toUpperCase();
-  document.getElementById('plan').textContent=cap(s.tenant&&s.tenant.plan||'trial');
+  document.getElementById('plan').textContent=planName(s.tenant&&s.tenant.plan||'trial');
   document.getElementById('summary').textContent=s.tenant&&s.tenant.summary||'Your company on one screen.';
   var role=(s.me&&s.me.role)||'owner';
   document.body.classList.remove('role-owner','role-manager','role-viewer');
@@ -1842,7 +1843,7 @@ function renderSettings(){
       (r[2]==='textarea'?'<textarea id="'+r[0]+'">'+esc(r[3])+'</textarea>':'<input id="'+r[0]+'" value="'+esc(r[3])+'"/>')+'</div>';
   });
   html+='<div class="field"><label>Weekly digest email</label><div style="display:flex;align-items:center;gap:12px"><div class="tog'+(t.digest!==false?' on':'')+'" id="sDigest" onclick="this.classList.toggle(\'on\')"></div><span style="font-size:13px;color:var(--ink-2)">Email your owners and managers what needs them, every Monday.</span></div></div>';
-  html+='<div class="mfoot" style="justify-content:flex-start;flex-wrap:wrap;gap:10px"><button class="btn" id="sSave" onclick="saveSettings()">Save settings</button><button class="btn ghost" id="sPrev" onclick="previewDigest()"><svg class="icon"><use href="#i-inbox"/></svg> Send me a preview</button><span class="cad" style="align-self:center">Plan: '+cap(t.plan||'trial')+'</span></div></div>';
+  html+='<div class="mfoot" style="justify-content:flex-start;flex-wrap:wrap;gap:10px"><button class="btn" id="sSave" onclick="saveSettings()">Save settings</button><button class="btn ghost" id="sPrev" onclick="previewDigest()"><svg class="icon"><use href="#i-inbox"/></svg> Send me a preview</button><span class="cad" style="align-self:center">Plan: '+planName(t.plan||'trial')+'</span></div></div>';
 
   var isOwner=(STATE.me&&STATE.me.role||'owner')==='owner';
   var ch=t.channels||{};var em=ch.email||{};var sm=ch.sms||{};

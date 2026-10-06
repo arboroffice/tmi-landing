@@ -181,7 +181,9 @@ module.exports = async function handler(req, res) {
       const tid = String(b.tenant_id || '');
       const tenant = await db.getById('os_tenants', tid);
       if (!tenant) return res.status(404).json({ error: 'Client not found' });
-      const spec = PROVISION[String(b.resource || '')];
+      // The admin buttons send singular names (worker, metric...); accept both.
+      const rk = String(b.resource || '');
+      const spec = PROVISION[rk] || PROVISION[rk + 's'];
       if (!spec) return res.status(400).json({ error: 'Unknown resource' });
       const data = pick(spec.fields, b.data);
       if (!Object.keys(data).length) return res.status(400).json({ error: 'Nothing to provision' });
