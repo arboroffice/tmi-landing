@@ -554,6 +554,8 @@ function renderToday(){
     <div style="height:10px"></div>
     <button class="btn ghost" id="tMap">Open the map</button>
     <div style="height:10px"></div>
+    <button class="btn ghost" id="tCal">📅 My calendar · book a call with Mia</button>
+    <div style="height:10px"></div>
     <button class="btn ghost" id="tPlan">📋 Today's game plan</button>
     <div style="height:10px"></div>
     <button class="btn ghost" id="tDebrief">✨ End-of-day debrief</button>
@@ -564,6 +566,7 @@ function renderToday(){
   $('#tLog').onclick=()=>switchTab('log');
   $('#tMap').onclick=()=>switchTab('map');
   $('#tPlan').onclick=()=>switchTab('plan');
+  $('#tCal').onclick=openCalendar;
   const mvb=$('#tMove'); if(mvb) mvb.onclick=()=>{ if(mv.lead) openLead(mv.lead); else if(mv.go) switchTab(mv.go); };
   $('#tDebrief').onclick=runDebrief;
   paintPending();
@@ -1060,6 +1063,9 @@ function openLead(id){
       <button class="btn ghost sm" data-out="not_fit">Not a fit</button>
       <input type="date" id="dOutDate" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px"/>
     </div>
+    ${(l.booked_call_at&&new Date(l.booked_call_at)>new Date())?`<div class="card" style="margin:0 0 8px;padding:10px 12px;font-size:13.5px;font-weight:700">📅 Fit Call with Mia: ${esc(calWhen(l.booked_call_at))}</div>`:''}
+    <button class="btn ghost" id="dBookMia" style="margin-top:2px">📅 Book a call with Mia (pick a time together)</button>
+    <div style="height:8px"></div>
     <button class="btn ghost" id="dCallback" style="margin-top:2px">Not ready? Mark for an audit callback &rarr;</button>
     <div id="dTemplates" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px"></div>
     <div style="display:flex;gap:7px;margin-top:8px"><button class="btn ghost sm" id="dAIText" style="flex:1">✨ Draft a text</button><button class="btn ghost sm" id="dAICall" style="flex:1">✨ Call opener</button></div>
@@ -1149,6 +1155,7 @@ function openLead(id){
       toast(queued?'Marked Callback, offline':'Marked Callback · follow-up set');
     }catch(ex){ toast(ex.message); cbk.disabled=false; }
   };
+  const bm=$('#dBookMia'); if(bm) bm.onclick=()=>{ logInteraction(l.id,'note',{summary:'Opened Mia\'s calendar to book a Fit Call'}).catch(()=>{}); window.open(calBookUrl(l),'_blank'); };
   const ci=$('#dCheckin'); if(ci) ci.onclick=(e)=>{ e.preventDefault(); checkIn(l); };
   wirePayLink(l);
   wireOutcomes(l);
@@ -1623,6 +1630,71 @@ async function loadRepHD(){
   }
   box.innerHTML=head+hdChartTiles(d.chart)+'<button class="btn ghost sm" id="rhGuide" style="margin-top:10px;width:100%">✨ How you sell best</button><div id="rhGuideOut">'+(d.guide?('<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+hdProse(d.guide)+'</div>'):'')+'</div>';
   $('#rhGuide').onclick=async function(){ var o=$('#rhGuideOut'); $('#rhGuide').disabled=true; o.innerHTML='<div style="margin-top:8px;color:var(--muted);font-size:13px">'+HD_SPIN+' Reading your design…</div>'; try{ var g=await api('/api/rep-hd',{method:'POST',body:JSON.stringify({action:'guide_self'})}); o.innerHTML='<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+hdProse(g.guide)+'</div>'; }catch(ex){ o.innerHTML=''; toast(ex.message); } $('#rhGuide').disabled=false; };
+}
+// Calendar: calls booked on Mia's Cal.com, follow-ups, Mia's busy times, and a
+// feed the rep can add to their own Google or iPhone calendar.
+var CAL_URL='https://cal.com/miaeliana/discovery-audit';
+function calBookUrl(l){
+  var q=['metadata[lead_id]='+encodeURIComponent(l.id)];
+  if(l.contact_name) q.push('name='+encodeURIComponent(l.contact_name));
+  if(l.email) q.push('email='+encodeURIComponent(l.email));
+  var rep=((ME&&ME.name)||'').split(' ')[0];
+  q.push('notes='+encodeURIComponent((l.business_name||'')+(rep?(' · booked with '+rep+' (TMI Tech AI)'):'')));
+  return CAL_URL+'?'+q.join('&');
+}
+function calWhen(iso){ try{ return new Date(iso).toLocaleString('en-US',{timeZone:'America/Chicago',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){ return iso; } }
+function calTime(iso){ return new Date(iso).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'}); }
+function calDayKey(d){ return new Date(d).toLocaleDateString('en-CA',{timeZone:'America/Chicago'}); }
+function calDayName(key){ var t=calDayKey(Date.now()), tm=calDayKey(Date.now()+864e5); if(key===t) return 'Today'; if(key===tm) return 'Tomorrow'; return new Date(key+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}); }
+async function openCalendar(){
+  $('#sheetTitle').textContent='My calendar';
+  var b=$('#sheetBody');
+  b.innerHTML='<div class="card" style="color:var(--muted);font-size:13px">'+HD_SPIN+' Loading your calendar…</div>';
+  $('#sheet').classList.add('on');
+  var d; try{ d=await api('/api/rep-calendar'); }catch(ex){ b.innerHTML='<div class="card">'+esc(ex.message||'Could not load the calendar')+'</div>'; return; }
+  var head=function(t){ return '<div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted);margin:16px 0 6px">'+t+'</div>'; };
+  var html='<button class="btn" id="cBook">📅 Book a call with Mia</button>'+
+    '<div style="font-size:12px;color:var(--muted);margin-top:5px">Best from a lead\'s page: tap "Book a call with Mia" there so it is tied to that lead and shows up here.</div>';
+  // Coming up: booked calls + follow-ups, by day.
+  var days={};
+  (d.bookings||[]).forEach(function(x){ var k=calDayKey(x.start); (days[k]=days[k]||[]).push({t:x.start,kind:'call',x:x}); });
+  (d.followups||[]).forEach(function(x){ (days[x.date]=days[x.date]||[]).push({t:x.date,kind:'fu',x:x}); });
+  var keys=Object.keys(days).sort(), today=calDayKey(Date.now());
+  html+=head('Coming up');
+  if(!keys.length) html+='<div class="card" style="font-size:13.5px;color:var(--muted)">Nothing booked yet. Set a follow-up date on a lead, or book a call with Mia.</div>';
+  keys.forEach(function(k){
+    var late=k<today;
+    html+='<div style="font-size:13px;font-weight:800;margin:10px 0 5px;'+(late?'color:var(--red)':'')+'">'+(late?'Overdue · ':'')+esc(calDayName(k))+'</div>';
+    days[k].sort(function(a,z){ return a.kind===z.kind?String(a.t).localeCompare(String(z.t)):(a.kind==='call'?-1:1); }).forEach(function(e){
+      var x=e.x;
+      if(e.kind==='call') html+='<div class="card" data-lead="'+esc(x.lead_id)+'" style="margin:0 0 6px;padding:10px 12px;cursor:pointer;'+(x.status==='cancelled'?'opacity:.5;text-decoration:line-through':'border-left:4px solid var(--green)')+'"><div style="font-size:14px;font-weight:800">'+esc(calTime(x.start))+' · Fit Call with Mia</div><div style="font-size:13px;color:var(--muted)">'+esc(x.business_name||x.attendee_name||'')+(x.status==='cancelled'?' · cancelled':'')+'</div></div>';
+      else html+='<div class="card" data-lead="'+esc(x.lead_id)+'" style="margin:0 0 6px;padding:10px 12px;cursor:pointer;border-left:4px solid var(--purple,#7c3aed)"><div style="font-size:14px;font-weight:700">Follow up: '+esc(x.business_name)+'</div><div style="font-size:12.5px;color:var(--muted)">'+esc(STATUS_LABEL[x.status]||x.status||'')+(x.phone?(' · '+esc(x.phone)):'')+'</div></div>';
+    });
+  });
+  // Mia's week (busy only).
+  html+=head('When Mia is busy (next 7 days)');
+  var m=d.mia||{};
+  if(!m.ok){
+    html+='<div class="card" style="font-size:13px;color:var(--muted)">'+(m.error==='not_linked'||m.error==='not_shared'?'Mia\'s Google Calendar is not linked yet. The booking page still only shows times she is free.':'Could not read Mia\'s calendar right now. The booking page still only shows times she is free.')+'</div>';
+  }else{
+    var busyBy={}; (m.busy||[]).forEach(function(x){ var k=calDayKey(x.start); (busyBy[k]=busyBy[k]||[]).push(x); });
+    var rows='';
+    for(var i=0;i<7;i++){ var k=calDayKey(Date.now()+i*864e5), dow=new Date(k+'T12:00:00').getDay(); if(dow===0||dow===6) continue;
+      var list=busyBy[k]||[];
+      rows+='<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><div style="width:86px;flex:none;font-weight:700">'+esc(calDayName(k))+'</div><div style="color:'+(list.length?'var(--ink)':'var(--green)')+'">'+(list.length?list.map(function(x){ return 'Busy '+esc(calTime(x.start))+' - '+esc(calTime(x.end)); }).join('<br>'):'Wide open')+'</div></div>'; }
+    html+='<div class="card" style="padding:6px 12px">'+rows+'</div><div style="font-size:11.5px;color:var(--muted);margin-top:4px">Times are Central. You only see busy or free, never what is on her calendar.</div>';
+  }
+  // Put it on the rep's own phone calendar.
+  var feed=d.feed_url||'', webcal=feed.replace(/^https?:/,'webcal:');
+  html+=head('Put this on your phone calendar')+
+    '<div style="font-size:13px;color:var(--muted);margin-bottom:8px">Your follow-ups and booked calls show up in your own calendar and stay up to date.</div>'+
+    '<div style="display:flex;gap:7px;flex-wrap:wrap"><a class="btn sm" style="flex:1;text-align:center" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/render?cid='+encodeURIComponent(webcal)+'">Google Calendar</a><a class="btn ghost sm" style="flex:1;text-align:center" href="'+esc(webcal)+'">iPhone calendar</a><button class="btn ghost sm" id="cCopy" style="flex:1">Copy link</button></div>'+
+    '<div style="font-size:11.5px;color:var(--muted);margin-top:6px">Google on a phone: open the Google Calendar button in Chrome, or paste the link at calendar.google.com > Other calendars > From URL. Keep this link private.</div>'+
+    '<div style="height:20px"></div>';
+  b.innerHTML=html;
+  $('#cBook').onclick=function(){ window.open(CAL_URL,'_blank'); };
+  $('#cCopy').onclick=function(){ try{ navigator.clipboard.writeText(feed); toast('Link copied'); }catch(e){ toast('Select and copy'); } };
+  b.querySelectorAll('[data-lead]').forEach(function(c){ c.onclick=function(){ if(LEADS.find(function(x){return x.id===c.dataset.lead;})) openLead(c.dataset.lead); else toast('That lead is not on your list'); }; });
 }
 // "Know before you walk in": industry cheat sheet right away (works offline),
 // plus a brief on this exact business built from their website (cached on the lead).

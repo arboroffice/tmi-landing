@@ -43,6 +43,7 @@
         <div id="team-map" style="height:440px;width:100%;background:#e7e8e2;"></div>
       </div>
 
+      <div id="team-calendar" style="margin-bottom:22px;"></div>
       <div id="team-commissions" style="margin-bottom:22px;"></div>
 
       <div id="team-feed" style="margin-bottom:22px;"></div>
@@ -212,6 +213,32 @@ async function loadFunnel(){
 let teamMap=null, teamMarkers=[];
 const REP_COLORS=['#2f6bd6','#d1483a','#3f8f2a','#7a5bd0','#c98a12','#0891b2','#be185d','#4d7c0f','#b45309','#6d28d9'];
 function whenMaps(cb,tries){ tries=tries||0; if(window.google&&google.maps){ cb(); } else if(tries<40){ setTimeout(()=>whenMaps(cb,tries+1),150); } }
+// Calls reps booked on Mia's Cal.com, and linking Mia's Google Calendar so reps
+// can see when she is busy (free/busy only).
+async function loadCalSetup(){
+  const box=document.getElementById('team-calendar'); if(!box) return;
+  let d; try{ d=await TMIAdmin.api('/api/rep-calendar?setup=1'); }catch(e){ d=null; }
+  if(!d){ box.innerHTML=''; return; }
+  const when=(iso)=>new Date(iso).toLocaleString('en-US',{timeZone:'America/Chicago',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const m=d.mia||{};
+  const status=m.ok?`<span style="color:#3f8f2a;font-weight:700;">Linked. Reps can see when you are busy.</span>`
+    :(m.error==='not_linked'?'Not linked yet.':(m.error==='not_shared'?'Not shared yet: finish step 1 below.':('Not working yet: '+esc(m.error||''))));
+  const rows=(d.bookings||[]).map(b=>`<tr style="${b.status==='cancelled'?'opacity:.5;text-decoration:line-through;':''}"><td>${esc(when(b.start))}</td><td>${esc(b.business_name||b.attendee_name||'')}</td><td>${esc(b.rep||'')}</td><td>${b.status==='cancelled'?'Cancelled':'Booked'}</td></tr>`).join('');
+  box.innerHTML=`<div class="card">
+    <div class="panel-sec-label" style="margin-bottom:10px;">Calls reps booked with you</div>
+    ${rows?`<div style="overflow-x:auto;"><table class="data-table" style="width:100%;"><thead><tr><th>When (CT)</th><th>Business</th><th>Rep</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p style="font-size:13px;color:var(--muted);margin:0;">None yet. When a rep books a lead on your Cal.com from the app, it shows here and on their calendar.</p>'}
+    <details style="margin-top:14px;" ${m.ok?'':'open'}><summary style="font-size:13px;font-weight:700;cursor:pointer;">Your Google Calendar for the reps: ${status}</summary>
+      <div style="font-size:13px;line-height:1.6;margin-top:8px;">
+        <p style="margin:0 0 6px;">1. In Google Calendar on a computer, open Settings, pick your calendar, then "Share with specific people". Add <b>${esc(d.service_email||'(service account not found)')}</b> and choose "See only free/busy (hide details)".</p>
+        <p style="margin:0 0 6px;">2. Put your calendar's id here (for your main calendar it is your Gmail address) and save.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;"><input id="calGcalId" value="${esc(d.gcal_id||'').replace(/"/g,'&quot;')}" placeholder="you@gmail.com" style="flex:1;min-width:220px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;"/><button class="btn" id="calGcalSave">Save</button></div>
+        <p style="margin:6px 0 0;color:var(--muted);font-size:12px;">Reps only ever see busy or free times, never what the event is.</p>
+      </div></details></div>`;
+  document.getElementById('calGcalSave').onclick=async()=>{
+    const r=await TMIAdmin.api('/api/rep-calendar','POST',{gcal_id:document.getElementById('calGcalId').value.trim()});
+    if(r){ TMIAdmin.toast(r.mia&&r.mia.ok?'Linked. Reps can see when you are busy.':'Saved. Finish the sharing step, then save again to check.'); loadCalSetup(); }
+  };
+}
 async function loadCommissions(){
   const box=document.getElementById('team-commissions'); if(!box) return;
   let d; try{ d=await TMIAdmin.api('/api/rep-commissions'); }catch(e){ box.innerHTML=''; return; }
@@ -349,7 +376,7 @@ async function load(){
   const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.sold_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
   const stat=(n,l)=>`<div class="card" style="text-align:center;padding:16px 12px;margin:0;"><div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;line-height:1;">${n}</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;">${l}</div></div>`;
   document.getElementById('team-stats').innerHTML = stat(reps.length,'Reps')+stat(tl,'Total leads')+stat(tb2,'Audits sold')+stat(td,'Logged today');
-  loadTodayBoard(); loadFeed(); loadFunnel(); loadTeamMap(); loadCommissions();
+  loadTodayBoard(); loadFeed(); loadFunnel(); loadTeamMap(); loadCommissions(); loadCalSetup();
   if(!reps.length){ tb.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
   tb.innerHTML = reps.map(r=>`
     <tr style="cursor:pointer" onclick="openRep('${r.id}')">

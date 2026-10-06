@@ -26,6 +26,8 @@ module.exports = async function handler(req, res) {
   // every booking on the Cal link, known lead or not. Cancels stop it;
   // reschedules move it to the new time.
   const info = precall.fromCal(body);
+  // Calls a field rep booked for one of their leads show on the rep's calendar.
+  try { await require('./_rep-bookings').record(body); } catch (e) { console.error('rep booking:', e.message); }
   if (info.trigger === 'BOOKING_CANCELLED') {
     await precall.cancel(info.email);
     return res.status(200).json({ ok: true, note: 'cancelled' });
