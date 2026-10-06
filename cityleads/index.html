@@ -538,6 +538,7 @@ function renderToday(){
   const mv = todayMove();
   const s=$('#s-today');
   s.innerHTML = `
+    <div id="tPaper"></div>
     <div id="tStops"></div>
     <div class="card" id="tMove" style="background:#E4FF97;color:#0a0b14;cursor:pointer;margin-bottom:12px">
       <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.7">Your move right now</div>
@@ -567,6 +568,7 @@ function renderToday(){
   $('#tMap').onclick=()=>switchTab('map');
   $('#tPlan').onclick=()=>switchTab('plan');
   $('#tCal').onclick=openCalendar;
+  paperBanner();
   const mvb=$('#tMove'); if(mvb) mvb.onclick=()=>{ if(mv.lead) openLead(mv.lead); else if(mv.go) switchTab(mv.go); };
   $('#tDebrief').onclick=runDebrief;
   paintPending();
@@ -1512,6 +1514,10 @@ function renderMe(){
       <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em">${esc(ME.name||'')}</div>
       <div style="color:var(--muted);font-size:14px;margin-top:2px">${esc(ME.email||'')}${ME.city?(' · '+esc(ME.city)):''}</div>
     </div>
+    <div class="card" id="mePaper" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><div style="font-weight:800;font-size:15px">My paperwork</div><div style="font-size:12.5px;color:var(--muted);margin-top:2px" id="mePaperSub">Contractor agreement, W-9 and payment info. Sign in the app.</div></div>
+      <span style="flex:none;font-weight:800;font-size:18px;color:var(--muted)">→</span>
+    </div>
     <div class="card" id="meInfo">
       <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:800;font-size:15px">My info</div>${(ME.phone&&ME.cal_email)?'':'<span style="font-size:11px;font-weight:800;background:#E4FF97;color:#0a0b14;border-radius:999px;padding:3px 9px">Fill this in</span>'}</div>
       <div style="font-size:12.5px;color:var(--muted);margin:2px 0 10px">Your name and phone go on texts and emails TMI sends for you. Invites for calls you book go to your email.</div>
@@ -1569,6 +1575,7 @@ function renderMe(){
     <button class="btn ghost" id="meOut" style="color:var(--red)">Sign out</button>`;
   const w=$('#meWarm'); if(w) w.onclick=()=>{ FILTER='warm'; switchTab('leads'); renderLeads(); };
   const mg=$('#meGuides'); if(mg) mg.onclick=()=>switchTab('guides');
+  const mp=$('#mePaper'); if(mp){ mp.onclick=openPaperwork; if(PAPER){ const n=PAPER.docs.filter(d=>d.signed_at&&!d.outdated).length; $('#mePaperSub').textContent=PAPER.complete?'All signed. Tap to see your copies.':(n+' of '+PAPER.docs.length+' signed. Tap to finish.'); } }
   const ms=$('#miSave'); if(ms) ms.onclick=async()=>{
     ms.disabled=true;
     try{
@@ -1646,6 +1653,114 @@ async function loadRepHD(){
   }
   box.innerHTML=head+hdChartTiles(d.chart)+'<button class="btn ghost sm" id="rhGuide" style="margin-top:10px;width:100%">✨ How you sell best</button><div id="rhGuideOut">'+(d.guide?('<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+hdProse(d.guide)+'</div>'):'')+'</div>';
   $('#rhGuide').onclick=async function(){ var o=$('#rhGuideOut'); $('#rhGuide').disabled=true; o.innerHTML='<div style="margin-top:8px;color:var(--muted);font-size:13px">'+HD_SPIN+' Reading your design…</div>'; try{ var g=await api('/api/rep-hd',{method:'POST',body:JSON.stringify({action:'guide_self'})}); o.innerHTML='<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+hdProse(g.guide)+'</div>'; }catch(ex){ o.innerHTML=''; toast(ex.message); } $('#rhGuide').disabled=false; };
+}
+// Contractor paperwork: fill in info once, every document pre-fills from it,
+// read and sign each one in the app. Signed copies can be printed or saved as PDF.
+var PAPER=null;
+async function loadPaper(){ try{ PAPER=await api('/api/rep-onboarding'); }catch(e){} return PAPER; }
+async function paperBanner(){
+  var box=$('#tPaper'); if(!box) return;
+  var p=PAPER||await loadPaper(); if(!p||p.complete||!$('#tPaper')) { if(box) box.innerHTML=''; return; }
+  var n=p.docs.filter(function(d){ return d.signed_at&&!d.outdated; }).length;
+  box.innerHTML='<div class="card" id="tPaperGo" style="cursor:pointer;border:2px solid #0a0b14;margin-bottom:12px"><div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--muted)">Before you get paid</div><div style="font-size:16px;font-weight:800;margin-top:2px">Finish your paperwork</div><div style="font-size:13px;margin-top:3px">'+(p.missing.length?'Start with your info, then sign. ':'')+n+' of '+p.docs.length+' signed. Takes about 10 minutes.</div></div>';
+  $('#tPaperGo').onclick=openPaperwork;
+}
+function paperField(id,label,val,extra){ return '<div class="field"><label>'+label+'</label><input id="'+id+'" value="'+esc(val||'')+'" '+(extra||'')+'/></div>'; }
+async function openPaperwork(){
+  $('#sheetTitle').textContent='My paperwork';
+  var b=$('#sheetBody'); b.innerHTML='<div class="card" style="color:var(--muted);font-size:13px">'+HD_SPIN+' Loading…</div>';
+  $('#sheet').classList.add('on');
+  var p=await loadPaper(); if(!p){ b.innerHTML='<div class="card">Could not load your paperwork. Try again.</div>'; return; }
+  var pr=p.profile||{};
+  var step=function(n,done,title,sub,btn,id){ return '<div class="card" style="display:flex;gap:12px;align-items:center;margin:0 0 8px"><div style="flex:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;background:'+(done?'var(--green)':'var(--line)')+';color:'+(done?'#fff':'var(--ink)')+'">'+(done?'✓':n)+'</div><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14.5px">'+esc(title)+'</div><div style="font-size:12.5px;color:var(--muted)">'+sub+'</div></div>'+btn+'</div>'; };
+  var html='<div style="font-size:13.5px;line-height:1.5;margin-bottom:12px">You work with TMI Tech AI as an independent contractor (1099). Fill in your info once and every form fills itself in. Then read and sign each one right here. It is free and takes about 10 minutes.</div>';
+  if(!p.company_ready) html+='<div class="card" style="background:#fff7e0;font-size:13px;margin-bottom:10px">TMI is finishing the documents. You can fill in your info now and sign once they are ready.</div>';
+  html+=step(1,!p.missing.length,'Your info',p.missing.length?('Still needed: '+esc(p.missing.join(', '))):'Done. Tap to update.','<button class="btn sm" id="pInfo" style="flex:none">'+(p.missing.length?'Fill in':'Edit')+'</button>');
+  p.docs.forEach(function(d,i){
+    var done=d.signed_at&&!d.outdated;
+    var sub=done?('Signed '+new Date(d.signed_at).toLocaleDateString()+(d.countersign?(d.countersigned_at?' · TMI signed too':' · waiting on TMI to sign'):'')):(d.outdated?'Updated. Please sign the new version.':'Not signed yet');
+    var btn=done?'<button class="btn ghost sm" data-copy="'+d.id+'" style="flex:none">View</button>':'<button class="btn sm" data-sign="'+d.id+'" style="flex:none" '+((p.missing.length||!p.company_ready)?'disabled':'')+'>Read &amp; sign</button>';
+    html+=step(i+2,done,d.title,sub,btn);
+  });
+  if(p.complete) html+='<div class="card" style="background:#E4FF97;color:#0a0b14;font-weight:700;font-size:14px">All done. You are set up to get paid.</div>';
+  html+='<div style="font-size:11.5px;color:var(--muted);margin:8px 0 20px">Your SSN or EIN and bank numbers are encrypted. TMI only sees the last 4 digits, except when filing your 1099.</div>';
+  b.innerHTML=html;
+  $('#pInfo').onclick=function(){ paperInfo(p); };
+  b.querySelectorAll('[data-sign]').forEach(function(x){ x.onclick=function(){ paperSign(x.dataset.sign); }; });
+  b.querySelectorAll('[data-copy]').forEach(function(x){ x.onclick=function(){ paperCopy(x.dataset.copy); }; });
+}
+function paperInfo(p){
+  var pr=p.profile||{}, b=$('#sheetBody');
+  $('#sheetTitle').textContent='Your info';
+  var sel=function(id,opts,val){ return '<select id="'+id+'" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff">'+opts.map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===val?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('')+'</select>'; };
+  b.innerHTML='<div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">Use your legal name and the address you file taxes with.</div>'+
+    paperField('pLegal','Full legal name',pr.legal_name||((ME&&ME.name)||''),'autocomplete="name"')+
+    paperField('pBiz','Business name (only if you have one)',pr.business_name)+
+    '<div class="field"><label>Tax type</label>'+sel('pTax',[['','Pick one'],['individual','Individual / sole proprietor (most reps)'],['llc','LLC'],['s_corp','S corporation'],['c_corp','C corporation'],['partnership','Partnership'],['other','Other']],pr.tax_class||'')+'</div>'+
+    '<div class="field" id="pLlcRow" style="display:none"><label>LLC tax code (C, S or P)</label><input id="pLlc" maxlength="1" value="'+esc(pr.llc_code||'')+'"/></div>'+
+    paperField('pA1','Street address',pr.address1,'autocomplete="address-line1"')+paperField('pA2','Apt / suite',pr.address2)+
+    '<div class="row" style="gap:8px"><div style="flex:2">'+paperField('pCity','City',pr.city)+'</div><div style="flex:1">'+paperField('pState','State',pr.state||'LA','maxlength="2"')+'</div><div style="flex:1.3">'+paperField('pZip','ZIP',pr.zip,'inputmode="numeric"')+'</div></div>'+
+    paperField('pPhone','Cell phone',pr.phone||(ME&&ME.phone)||'','type="tel"')+paperField('pEmail','Personal email',pr.personal_email||(ME&&(ME.cal_email||ME.email))||'','type="email"')+
+    '<div class="field"><label>Tax ID</label>'+sel('pTinType',[['ssn','Social Security number (SSN)'],['ein','Employer ID number (EIN)']],pr.tin_type||'ssn')+'</div>'+
+    paperField('pTin','SSN or EIN (9 digits)','','inputmode="numeric" autocomplete="off" placeholder="'+(pr.tin_last4?('On file, ending '+esc(pr.tin_last4)+'. Leave blank to keep.'):'123-45-6789')+'"')+
+    '<label style="display:flex;gap:8px;font-size:13px;margin:-4px 0 12px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink)"><input type="checkbox" id="pBackup" style="flex:none;width:18px;height:18px;min-height:0;padding:0;margin:1px 0 0" '+(pr.backup_withholding?'checked':'')+'/> The IRS told me I am subject to backup withholding (most people leave this unchecked)</label>'+
+    '<div class="field"><label>How do you want to be paid?</label>'+sel('pPay',[['','Pick one'],['direct_deposit','Direct deposit'],['zelle','Zelle'],['check','Paper check']],pr.payout_method||'')+'</div>'+
+    '<div id="pBank" style="display:none">'+paperField('pBankName','Bank name',pr.bank_name)+
+      '<div class="field"><label>Account type</label>'+sel('pAcctType',[['checking','Checking'],['savings','Savings']],pr.account_type||'checking')+'</div>'+
+      paperField('pRouting','Routing number (9 digits)','','inputmode="numeric" autocomplete="off" placeholder="'+(pr.routing_last4?('On file, ending '+esc(pr.routing_last4)):'')+'"')+
+      paperField('pAcct','Account number','','inputmode="numeric" autocomplete="off" placeholder="'+(pr.account_last4?('On file, ending '+esc(pr.account_last4)):'')+'"')+'</div>'+
+    '<div id="pZelleRow" style="display:none">'+paperField('pZelle','Zelle phone or email',pr.zelle_handle)+'</div>'+
+    paperField('pEmName','Emergency contact name (optional)',pr.emergency_name)+paperField('pEmPhone','Emergency contact phone (optional)',pr.emergency_phone,'type="tel"')+
+    '<button class="btn" id="pSave">Save my info</button><div style="height:8px"></div><button class="btn ghost" id="pBack">Back</button><div style="height:20px"></div>';
+  var sync=function(){ var pm=$('#pPay').value; $('#pBank').style.display=pm==='direct_deposit'?'':'none'; $('#pZelleRow').style.display=pm==='zelle'?'':'none'; $('#pLlcRow').style.display=$('#pTax').value==='llc'?'':'none'; };
+  $('#pPay').onchange=sync; $('#pTax').onchange=sync; sync();
+  $('#pBack').onclick=openPaperwork;
+  $('#pSave').onclick=async function(){
+    var btn=$('#pSave'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+    var v=function(id){ return $(id)?$(id).value:''; };
+    var body={action:'profile',legal_name:v('#pLegal'),business_name:v('#pBiz'),tax_class:v('#pTax')||undefined,llc_code:v('#pLlc'),address1:v('#pA1'),address2:v('#pA2'),city:v('#pCity'),state:v('#pState'),zip:v('#pZip'),phone:v('#pPhone'),personal_email:v('#pEmail'),tin_type:v('#pTinType'),tin:v('#pTin'),backup_withholding:$('#pBackup').checked,payout_method:v('#pPay')||undefined,bank_name:v('#pBankName'),account_type:v('#pAcctType'),routing:v('#pRouting'),account:v('#pAcct'),zelle_handle:v('#pZelle'),emergency_name:v('#pEmName'),emergency_phone:v('#pEmPhone')};
+    try{ PAPER=await api('/api/rep-onboarding',{method:'POST',body:JSON.stringify(body)}); toast(PAPER.missing.length?('Saved. Still needed: '+PAPER.missing.join(', ')):'Saved. Now sign your documents.'); openPaperwork(); }
+    catch(ex){ toast(ex.message||'Could not save'); btn.disabled=false; btn.textContent='Save my info'; }
+  };
+}
+async function paperSign(docId){
+  var b=$('#sheetBody'); b.innerHTML='<div class="card" style="color:var(--muted);font-size:13px">'+HD_SPIN+' Loading…</div>';
+  var d; try{ d=await api('/api/rep-onboarding?preview='+encodeURIComponent(docId)); }catch(ex){ toast(ex.message); openPaperwork(); return; }
+  $('#sheetTitle').textContent=d.title;
+  var legal=(PAPER&&PAPER.profile&&PAPER.profile.legal_name)||'';
+  b.innerHTML='<div class="card" style="max-height:52vh;overflow-y:auto;font-family:Georgia,serif;font-size:14.5px;line-height:1.55" id="sDoc">'+d.html+'</div>'+
+    '<div style="font-size:12px;color:var(--muted);margin:-4px 0 10px">Scroll to read it all. Your full tax and bank numbers go on the signed copy.</div>'+
+    '<div class="field"><label>Type your full legal name to sign</label><input id="sName" placeholder="'+esc(legal)+'" autocomplete="off"/></div>'+
+    '<div style="font-size:13px;font-weight:700;margin-bottom:4px">Draw your signature</div>'+
+    '<canvas id="sPad" style="width:100%;height:150px;border:1.5px dashed var(--line);border-radius:10px;background:#fff;touch-action:none;display:block"></canvas>'+
+    '<button class="btn ghost sm" id="sClear" style="margin-top:6px">Clear</button>'+
+    '<label style="display:flex;gap:9px;font-size:13px;line-height:1.45;margin:12px 0;text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink)"><input type="checkbox" id="sOk" style="flex:none;width:20px;height:20px;min-height:0;padding:0;margin:2px 0 0"/> I have read this document. I agree to use electronic records and signatures, and I intend my typed name and drawn signature to be my legal signature.</label>'+
+    '<button class="btn" id="sGo">Sign</button><div style="height:8px"></div><button class="btn ghost" id="sBack">Back</button><div style="height:24px"></div>';
+  var c=$('#sPad'), ctx=c.getContext('2d'), drew=false, down=false;
+  var fit=function(){ var r=c.getBoundingClientRect(), k=window.devicePixelRatio||1; c.width=r.width*k; c.height=r.height*k; ctx.setTransform(k,0,0,k,0,0); ctx.lineWidth=2.4; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#0a0b14'; };
+  fit();
+  var pt=function(e){ var r=c.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; };
+  c.addEventListener('pointerdown',function(e){ down=true; c.setPointerCapture(e.pointerId); var q=pt(e); ctx.beginPath(); ctx.moveTo(q[0],q[1]); });
+  c.addEventListener('pointermove',function(e){ if(!down) return; var q=pt(e); ctx.lineTo(q[0],q[1]); ctx.stroke(); drew=true; });
+  c.addEventListener('pointerup',function(){ down=false; }); c.addEventListener('pointercancel',function(){ down=false; });
+  $('#sClear').onclick=function(){ ctx.clearRect(0,0,c.width,c.height); drew=false; };
+  $('#sBack').onclick=openPaperwork;
+  $('#sGo').onclick=async function(){
+    if(!drew){ toast('Draw your signature in the box'); return; }
+    if(!$('#sOk').checked){ toast('Check the box to agree'); return; }
+    var btn=$('#sGo'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+    // Shrink the drawing so the stored copy stays small.
+    var out=document.createElement('canvas'); out.width=360; out.height=Math.round(360*c.height/c.width); out.getContext('2d').drawImage(c,0,0,out.width,out.height);
+    try{
+      PAPER=await api('/api/rep-onboarding',{method:'POST',body:JSON.stringify({action:'sign',doc:docId,name:$('#sName').value,png:out.toDataURL('image/png'),consent:true})});
+      toast('Signed'); openPaperwork();
+    }catch(ex){ toast(ex.message||'Could not sign'); btn.disabled=false; btn.textContent='Sign'; }
+  };
+}
+async function paperCopy(docId){
+  var w=window.open('','_blank');
+  try{ var d=await api('/api/rep-onboarding?copy='+encodeURIComponent(docId)); if(w){ w.document.open(); w.document.write(d.html.replace('</body>','<div style="margin:24px 0;font-family:Helvetica,Arial,sans-serif"><button onclick="window.print()" style="padding:10px 18px;font-size:15px">Print or save as PDF</button></div></body>')); w.document.close(); } else toast('Allow pop-ups to view your copy'); }
+  catch(ex){ if(w) w.close(); toast(ex.message||'Could not open'); }
 }
 // Calendar: calls booked on Mia's Cal.com, follow-ups, Mia's busy times, and a
 // feed the rep can add to their own Google or iPhone calendar.

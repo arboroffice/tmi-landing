@@ -43,6 +43,7 @@
         <div id="team-map" style="height:440px;width:100%;background:#e7e8e2;"></div>
       </div>
 
+      <div id="team-paperwork" style="margin-bottom:22px;"></div>
       <div id="team-calendar" style="margin-bottom:22px;"></div>
       <div id="team-commissions" style="margin-bottom:22px;"></div>
 
@@ -213,6 +214,65 @@ async function loadFunnel(){
 let teamMap=null, teamMarkers=[];
 const REP_COLORS=['#2f6bd6','#d1483a','#3f8f2a','#7a5bd0','#c98a12','#0891b2','#be185d','#4d7c0f','#b45309','#6d28d9'];
 function whenMaps(cb,tries){ tries=tries||0; if(window.google&&google.maps){ cb(); } else if(tries<40){ setTimeout(()=>whenMaps(cb,tries+1),150); } }
+// Contractor paperwork: company details the documents use, who has signed what,
+// countersigning, signed copies, and the 1099 export.
+async function loadPaperwork(){
+  const box=document.getElementById('team-paperwork'); if(!box) return;
+  const d=await TMIAdmin.api('/api/rep-onboarding?admin=1'); if(!d){ box.innerHTML=''; return; }
+  const c=d.company||{};
+  const q=(v)=>esc(v==null?'':v).replace(/"/g,'&quot;');
+  const DOCS=(d.reps[0]&&d.reps[0].docs)||[];
+  const short={contractor_agreement:'Agreement',confidentiality:'Confidentiality',w9:'W-9',payment:'Payment',conduct:'Field rules'};
+  const rows=d.reps.map(r=>{
+    const cells=r.docs.map(x=>{
+      if(!x.signed_at) return '<td style="color:var(--muted)">Not signed</td>';
+      const cs=x.countersign?(x.countersigned_at?' · TMI signed':` · <button class="btn-link" data-cs="${q(x.record_id)}" style="color:#1d4ed8;font-weight:700;background:none;border:none;cursor:pointer;padding:0">Countersign</button>`):'';
+      return `<td><button data-view="${q(x.record_id)}" style="color:#3f8f2a;font-weight:700;background:none;border:none;cursor:pointer;padding:0">✓ ${new Date(x.signed_at).toLocaleDateString()}</button>${x.outdated?' (old version)':''}${cs}</td>`;
+    }).join('');
+    const info=r.missing.length?`<span style="color:#b45309">Needs: ${esc(r.missing.join(', '))}</span>`:`${esc(r.profile.legal_name||'')}${r.profile.tin_last4?' · TIN …'+esc(r.profile.tin_last4):''} · ${esc(({direct_deposit:'Direct deposit',zelle:'Zelle',check:'Check'})[r.profile.payout_method]||'')}${r.profile.account_last4?' …'+esc(r.profile.account_last4):''}`;
+    return `<tr><td><b>${esc(r.name||r.email)}</b>${r.complete?' <span style="color:#3f8f2a">· Done</span>':''}<div style="font-size:12px;color:var(--muted)">${info}</div></td>${cells}</tr>`;
+  }).join('');
+  box.innerHTML=`<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><div class="panel-sec-label">Rep paperwork (1099 contractors)</div>
+      <div style="display:flex;gap:8px;align-items:center"><select id="pw1099Year" style="padding:7px;border:1px solid var(--line);border-radius:8px">${[0,1].map(i=>{const y=new Date().getFullYear()-i;return `<option>${y}</option>`;}).join('')}</select><button class="btn" id="pw1099">Download 1099 info</button></div></div>
+    ${d.company_ready?'':'<p style="background:#fff7e0;padding:10px 12px;border-radius:8px;font-size:13px;margin:0 0 12px">Reps cannot sign until you fill in the company info below.</p>'}
+    <div style="overflow-x:auto"><table class="data-table" style="width:100%;min-width:760px"><thead><tr><th>Rep</th>${DOCS.map(x=>`<th>${esc(short[x.id]||x.title)}</th>`).join('')}</tr></thead><tbody>${rows||'<tr><td colspan="6">No reps yet.</td></tr>'}</tbody></table></div>
+    <details style="margin-top:14px" ${d.company_ready?'':'open'}><summary style="font-size:13px;font-weight:700;cursor:pointer">Company info and pay terms used in the documents</summary>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px;font-size:13px">
+        <label>Company legal name<input id="pwLegal" value="${q(c.legal_name)}" placeholder="TMI Technology LLC" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
+        <label>Company address<input id="pwAddr" value="${q(c.address)}" placeholder="Street, Lafayette, LA 70501" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
+        <label>Who signs for the company<input id="pwSigner" value="${q(c.signer_name)}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
+        <label>Their title<input id="pwTitle" value="${q(c.signer_title)}" placeholder="Founder" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
+        <label>Commissions paid by day of month<input id="pwPayDay" type="number" value="${q(c.pay_day)}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
+        <label>Upsell commission window (months after audit)<input id="pwWindow" type="number" value="${q(c.upsell_window_months)}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
+        <label>Paid after they leave (days)<input id="pwPost" type="number" value="${q(c.post_term_days)}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
+        <label>Court parish<input id="pwParish" value="${q(c.venue_parish)}" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px"/></label>
+      </div>
+      <button class="btn" id="pwSave" style="margin-top:10px">Save company info</button>
+      <p style="font-size:12px;color:var(--muted);margin:8px 0 0">Commission rates come from the commissions card. Changing these after reps sign does not change what they already signed.</p>
+    </details></div>`;
+  document.getElementById('pwSave').onclick=async()=>{
+    const v=(id)=>document.getElementById(id).value;
+    const r=await TMIAdmin.api('/api/rep-onboarding?admin=1','POST',{admin:1,action:'company',legal_name:v('pwLegal'),address:v('pwAddr'),signer_name:v('pwSigner'),signer_title:v('pwTitle'),pay_day:v('pwPayDay'),upsell_window_months:v('pwWindow'),post_term_days:v('pwPost'),venue_parish:v('pwParish')});
+    if(r){ TMIAdmin.toast(r.company_ready?'Saved. Reps can sign now.':'Saved. Fill in name, address and signer so reps can sign.'); loadPaperwork(); }
+  };
+  document.getElementById('pw1099').onclick=async()=>{
+    const y=document.getElementById('pw1099Year').value;
+    const r=await TMIAdmin.api('/api/rep-onboarding?admin=1&export=1099&year='+encodeURIComponent(y)); if(!r) return;
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([r.csv],{type:'text/csv'})); a.download='tmi-rep-1099-'+r.year+'.csv'; a.click();
+    TMIAdmin.toast('Downloaded. It has full tax IDs, so keep it private.');
+  };
+  box.querySelectorAll('[data-view]').forEach(b=>b.onclick=async()=>{
+    const w=window.open('','_blank');
+    const r=await TMIAdmin.api('/api/rep-onboarding?admin=1&record='+encodeURIComponent(b.dataset.view));
+    if(r&&w){ w.document.open(); w.document.write(r.html.replace('</body>','<div style="margin:24px 0;font-family:Helvetica,Arial,sans-serif"><button onclick="window.print()" style="padding:10px 18px;font-size:15px">Print or save as PDF</button></div></body>')); w.document.close(); } else if(w) w.close();
+  });
+  box.querySelectorAll('[data-cs]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('Sign this for '+(c.legal_name||'the company')+' as '+(c.signer_name||'')+'?')) return;
+    const r=await TMIAdmin.api('/api/rep-onboarding?admin=1','POST',{admin:1,action:'countersign',record_id:b.dataset.cs});
+    if(r){ TMIAdmin.toast('Countersigned'); loadPaperwork(); }
+  });
+}
 // Calls reps booked on Mia's Cal.com, and linking Mia's Google Calendar so reps
 // can see when she is busy (free/busy only).
 async function loadCalSetup(){
@@ -376,7 +436,7 @@ async function load(){
   const tl=reps.reduce((a,r)=>a+(r.lead_count||0),0), tb2=reps.reduce((a,r)=>a+(r.sold_count||0),0), td=reps.reduce((a,r)=>a+(r.today_count||0),0);
   const stat=(n,l)=>`<div class="card" style="text-align:center;padding:16px 12px;margin:0;"><div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;line-height:1;">${n}</div><div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;">${l}</div></div>`;
   document.getElementById('team-stats').innerHTML = stat(reps.length,'Reps')+stat(tl,'Total leads')+stat(tb2,'Audits sold')+stat(td,'Logged today');
-  loadTodayBoard(); loadFeed(); loadFunnel(); loadTeamMap(); loadCommissions(); loadCalSetup();
+  loadTodayBoard(); loadFeed(); loadFunnel(); loadTeamMap(); loadCommissions(); loadCalSetup(); loadPaperwork();
   if(!reps.length){ tb.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📍</div><h3>No reps yet</h3><p>Add your first city-lead rep to give them portal access.</p></div></td></tr>'; return; }
   tb.innerHTML = reps.map(r=>`
     <tr style="cursor:pointer" onclick="openRep('${r.id}')">
