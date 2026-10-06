@@ -81,7 +81,7 @@ const dateStr = (d) => d.toLocaleDateString('en-US', { month: 'long', day: 'nume
 // Assemble the full article HTML from structured fields (the CLAUDE.md template).
 function buildArticleHTML(f, filename, now) {
   const photo = pexelsUrl(f.photo_id);
-  const url = `https://tmi-technology.com/${filename}`;
+  const url = `https://admin.tmitechai.com/${filename}`;
   const date = dateStr(now || new Date());
 
   const bodyHtml = f.sections.map((s, i) => {

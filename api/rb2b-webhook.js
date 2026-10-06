@@ -39,7 +39,7 @@ async function sendHotAlert(v) {
 //
 // RB2B resolves anonymous US site visitors to a person and POSTs the profile
 // here. Configure the destination URL in the RB2B dashboard as:
-//   https://www.tmi-technology.com/api/rb2b-webhook?secret=<RB2B_WEBHOOK_SECRET>
+//   https://admin.tmitechai.com/api/rb2b-webhook?secret=<RB2B_WEBHOOK_SECRET>
 // (or send the secret in an x-rb2b-secret header). Each record is upserted into
 // site_visitors, deduped on identity_key (LinkedIn URL, else lowercased email),
 // bumping visit_count / last_seen on repeat visits. When an email is present we

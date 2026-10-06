@@ -57,7 +57,7 @@ module.exports = async function handler(req, res) {
       const updated = A.insertCard(news.content, card);
       await gh.putFile('news.html', updated, `Add story card: ${fields.title}`, news.sha);
 
-      const url = `https://tmi-technology.com/${name}`;
+      const url = `https://admin.tmitechai.com/${name}`;
       const content = await db.update('tmi_content', item.id, {
         status: 'published', published_url: url, published_file: name, published_at: now.toISOString(), category: fields.category,
       });

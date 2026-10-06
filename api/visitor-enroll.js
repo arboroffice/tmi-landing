@@ -3,7 +3,7 @@ const { requireAuth, cors } = require('./_auth');
 const { addEmailsToAudience } = require('./_meta-audience');
 const { Client: QStashClient } = require('@upstash/qstash');
 
-const SITE = 'https://www.tmi-technology.com';
+const SITE = 'https://admin.tmitechai.com';
 
 // Admin "approve & enroll" for an identified visitor.
 //   POST { id }  (or { ids: [...] })

@@ -33,7 +33,7 @@ function buildEmailHtml({ title, deck, category, readTime, articleUrl, photoUrl,
 
       <!-- Header -->
       <tr><td style="padding:28px 0 20px;text-align:center;">
-        <a href="https://tmi-technology.com/news.html" style="text-decoration:none;display:inline-flex;align-items:center;gap:10px;">
+        <a href="https://admin.tmitechai.com/news.html" style="text-decoration:none;display:inline-flex;align-items:center;gap:10px;">
           <span style="font-size:20px;font-weight:700;color:#E4FF97;letter-spacing:0.04em;">TMI</span>
           <span style="font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,0.35);">Founders of the Future Letters</span>
         </a>
@@ -118,7 +118,7 @@ async function main() {
   const words = html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
   const readTime = Math.max(4, Math.ceil(words / 200));
 
-  const articleUrl = `https://tmi-technology.com/${filename}`;
+  const articleUrl = `https://admin.tmitechai.com/${filename}`;
 
   // Fetch subscribers (subscribed contacts with a valid email).
   let subscribers;
@@ -163,7 +163,7 @@ async function main() {
     const batch = subscribers.slice(i, i + BATCH);
 
     await Promise.all(batch.map(async (contact) => {
-      const unsubscribeUrl = `https://tmi-technology.com/api/unsubscribe?id=${contact.id || encodeURIComponent(contact.email)}`;
+      const unsubscribeUrl = `https://admin.tmitechai.com/api/unsubscribe?id=${contact.id || encodeURIComponent(contact.email)}`;
       const emailHtml = buildEmailHtml({ title, deck, category, readTime, articleUrl, photoUrl, unsubscribeUrl });
 
       try {

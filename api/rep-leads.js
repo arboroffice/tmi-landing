@@ -240,7 +240,7 @@ module.exports = async (req, res) => {
         try {
           const { Client } = require('@upstash/qstash');
           const qs = new Client({ token: process.env.QSTASH_TOKEN });
-          const url = `https://www.tmi-technology.com/api/audit-link-followup?secret=${encodeURIComponent(process.env.GTM_RUN_SECRET || process.env.JWT_SECRET || '')}`;
+          const url = `https://admin.tmitechai.com/api/audit-link-followup?secret=${encodeURIComponent(process.env.GTM_RUN_SECRET || process.env.JWT_SECRET || '')}`;
           await qs.publishJSON({ url, delay: 86400, body: { leadId: b.id, step: 'day1' } });
           await qs.publishJSON({ url, delay: 3 * 86400, body: { leadId: b.id, step: 'day3' } });
         } catch (e) { console.error('schedule link follow-up:', e.message); }

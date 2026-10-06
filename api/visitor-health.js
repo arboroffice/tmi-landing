@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
     integrations,
     automation_ready: automationReady,
     outbound_ready: outboundReady,
-    webhook_url: 'https://www.tmi-technology.com/api/rb2b-webhook',
+    webhook_url: 'https://admin.tmitechai.com/api/rb2b-webhook',
     settings,
     pipeline,
   });

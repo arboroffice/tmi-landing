@@ -1,5 +1,5 @@
 // Twilio inbound-SMS webhook. Point your Twilio number's "A message comes in"
-// webhook (Messaging) at https://www.tmi-technology.com/api/sms-inbound (POST).
+// webhook (Messaging) at https://admin.tmitechai.com/api/sms-inbound (POST).
 // Logs the reply to the timeline and alerts the team. Returns empty TwiML.
 
 const { logSms } = require('./_comms');

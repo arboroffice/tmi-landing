@@ -19,6 +19,6 @@ module.exports = async (req, res) => {
 <body style="background:#0a0b14;color:#fff;font-family:Arial,sans-serif;max-width:420px;margin:80px auto;padding:24px;text-align:center;">
 <p style="font-size:18px;margin-bottom:12px;">You're unsubscribed.</p>
 <p style="color:rgba(255,255,255,0.45);font-size:14px;line-height:1.6;">You won't get any more issues of Founders of the Future Letters. No hard feelings - you can resubscribe anytime.</p>
-<p style="margin-top:32px;"><a href="https://www.tmi-technology.com" style="color:#E4FF97;font-size:14px;text-decoration:none;">tmi-technology.com</a></p>
+<p style="margin-top:32px;"><a href="https://admin.tmitechai.com" style="color:#E4FF97;font-size:14px;text-decoration:none;">tmi-technology.com</a></p>
 </body></html>`);
 };

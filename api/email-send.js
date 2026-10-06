@@ -81,7 +81,7 @@ module.exports = async (req, res) => {
   await db.update('email_campaigns', campaign_id, { status: 'sending' });
 
   const resend = new Resend(resendKey);
-  const unsubUrl = `https://tmi-technology.com/api/unsubscribe?id=`;
+  const unsubUrl = `https://admin.tmitechai.com/api/unsubscribe?id=`;
   let sent = 0;
   let failed = 0;
   const errors = [];

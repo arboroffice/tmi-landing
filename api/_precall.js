@@ -17,7 +17,7 @@
 const crypto = require('crypto');
 const db = require('./_db');
 
-const SITE = 'https://www.tmi-technology.com';
+const SITE = 'https://admin.tmitechai.com';
 const FROM_NUMBER = '+18557171044';
 const FROM_EMAIL = 'Mia at TMI <support@tmitechai.com>';
 const TZ = 'America/Chicago';

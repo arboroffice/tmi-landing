@@ -8,7 +8,7 @@ const { scoreVisitor } = require('./_visitor-score');
 // Triggered by Vercel Cron (Mondays) or manually with an admin JWT / ?secret=CRON_SECRET.
 
 const OWNER_EMAIL = 'support@tmitechai.com';
-const SITE = 'https://www.tmi-technology.com';
+const SITE = 'https://admin.tmitechai.com';
 const ADMIN = 'https://admin.tmitechai.com/admin-visitors';
 
 module.exports = async (req, res) => {

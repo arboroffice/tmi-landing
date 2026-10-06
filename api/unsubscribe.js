@@ -17,6 +17,6 @@ module.exports = async function handler(req, res) {
 <body style="background:#0a0b14;color:#fff;font-family:Arial,sans-serif;max-width:400px;margin:80px auto;padding:24px;text-align:center;">
 <p style="font-size:18px;margin-bottom:12px;">You're unsubscribed.</p>
 <p style="color:rgba(255,255,255,0.45);font-size:14px;line-height:1.6;">We won't send you anything else. If you ever want to reconnect, you know where to find us.</p>
-<p style="margin-top:32px;"><a href="https://tmi-technology.com" style="color:#E4FF97;font-size:14px;text-decoration:none;">tmi-technology.com</a></p>
+<p style="margin-top:32px;"><a href="https://admin.tmitechai.com" style="color:#E4FF97;font-size:14px;text-decoration:none;">tmi-technology.com</a></p>
 </body></html>`);
 };

@@ -214,7 +214,7 @@ export async function handleInboundLead({ messages, routeTag, prospectEmail }) {
         `Score reason: ${scoring.scoreReason}`,
         '',
         'Follow-up email sent automatically.',
-        'View at: https://tmi-technology.com/admin',
+        'View at: https://admin.tmitechai.com/admin',
       ].join('\n'),
     }).catch(() => {});
   }
