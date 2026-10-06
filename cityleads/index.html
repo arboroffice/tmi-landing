@@ -1638,6 +1638,8 @@ function calBookUrl(l){
   var q=['metadata[lead_id]='+encodeURIComponent(l.id)];
   if(l.contact_name) q.push('name='+encodeURIComponent(l.contact_name));
   if(l.email) q.push('email='+encodeURIComponent(l.email));
+  // The rep rides along as a guest, so the invite lands in their own email and calendar.
+  if(ME&&ME.email) q.push('guests='+encodeURIComponent(ME.email));
   var rep=((ME&&ME.name)||'').split(' ')[0];
   q.push('notes='+encodeURIComponent((l.business_name||'')+(rep?(' · booked with '+rep+' (TMI Tech AI)'):'')));
   return CAL_URL+'?'+q.join('&');
