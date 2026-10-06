@@ -76,88 +76,82 @@ const TMIAdmin = (() => {
   // item: { page, label, icon, href?, badge? }  (page also drives active state)
   const NAV_GROUPS = [
     { label: 'Home', items: [
-      { page:'brief',     label:'Command Brief', icon:I.stageLetters },
-      { page:'dashboard', label:'Dashboard',     icon:I.dashboard },
-      { page:'worklist',  label:'Today',         icon:I.level10 },
-      { page:'command',   label:'Command Center', icon:I.command },
-      { page:'flywheel',  label:'Flywheel',      icon:I.flywheel },
+      { page:'dashboard', label:'Dashboard', icon:I.dashboard },
+      { page:'worklist',  label:'Today',     icon:I.level10 },
     ]},
     { label: 'Sales', items: [
-      { page:'pipeline',  label:'Pipeline',      icon:I.pipeline,  href:'/admin-sales#pipeline' },
-      { page:'audits',    label:'Audits',        icon:I.audits,    href:'/admin-sales#audits' },
-      { page:'bookings',  label:'Bookings',      icon:I.bookings,  href:'/admin-sales#bookings' },
-      { page:'leads',     label:'Leads',         icon:I.leads },
-      { page:'proposals', label:'Proposals',     icon:I.proposals },
-      { page:'cockpit',   label:'Sales Cockpit', icon:I.command },
-      { page:'meetings',  label:'Meetings',      icon:I.meetings },
-      { page:'campaign',  label:'Campaigns',     icon:I.growth_fotf },
+      { page:'pipeline',     label:'Pipeline',  icon:I.pipeline, href:'/admin-sales#pipeline' },
+      { page:'applications', label:'Inbox',     icon:I.apps,     href:'/admin-inbox#apps', badge:'inbox' },
+      { page:'leads',        label:'Leads',     icon:I.leads },
+      { page:'meetings',     label:'Meetings',  icon:I.meetings },
+      { page:'proposals',    label:'Proposals', icon:I.proposals },
+    ]},
+    { label: 'Field Team', items: [
+      { page:'city-team',  label:'City Team', icon:I.team,    href:'/admin-cityleads-team' },
+      { page:'city-leads', label:'Partners',  icon:I.cityPin, href:'/admin-city-leads' },
     ]},
     { label: 'Outbound', items: [
-      { page:'outbound',   label:'Outbound',        icon:I.journey },
-      { page:'prospect',   label:'Prospecting',     icon:I.recruiting },
-      { page:'signals',    label:'Intent Signals',  icon:I.vision },
-      { page:'visitors',   label:'Site Visitors',   icon:I.analytics },
-      { page:'call-tasks', label:'Call Queue',      icon:I.followup },
-      { page:'lifecycle',  label:'Lifecycle Agents', icon:I.strategy },
-    ]},
-    { label: 'Inbox', items: [
-      { page:'applications', label:'Applications', icon:I.apps,     href:'/admin-inbox#apps', badge:'inbox' },
-      { page:'followups',    label:'Follow-ups',   icon:I.followup, href:'/admin-inbox#followups' },
-      { page:'assessment',   label:'Assessments',  icon:I.audits },
+      { page:'outbound', label:'Outbound',      icon:I.journey },
+      { page:'prospect', label:'Prospecting',   icon:I.recruiting },
+      { page:'visitors', label:'Site Visitors', icon:I.analytics },
     ]},
     { label: 'Clients', items: [
-      { page:'clients',        label:'Clients',        icon:I.clients,     href:'/admin-clients' },
-      { page:'client-health',  label:'Client Health',  icon:I.clientHealth, href:'/admin-clients#health' },
-      { page:'retention-plan', label:'Retention Plan', icon:I.strategy },
-      { page:'account',        label:'Account',        icon:I.identity,    href:'/admin-account' },
+      { page:'clients',  label:'Clients',             icon:I.clients,  href:'/admin-clients' },
+      { page:'projects', label:'Projects & Invoices', icon:I.projects, href:'/admin-work#projects' },
+      { page:'payments', label:'Payments',            icon:I.cityMoney },
     ]},
-    { label: 'Delivery', items: [
-      { page:'projects',   label:'Projects',   icon:I.projects,  href:'/admin-work#projects' },
-      { page:'invoices',   label:'Invoices',   icon:I.invoices,  href:'/admin-work#invoices' },
-      { page:'os-clients', label:'Client OS',  icon:I.glassBox,  href:'/admin-os-clients' },
-      { page:'payments',   label:'Payments',   icon:I.cityMoney },
-      { page:'onboarding', label:'Onboarding', icon:I.onboarding },
-      { page:'university', label:'University', icon:I.library },
+    { label: 'Marketing', items: [
+      { page:'content',    label:'Content',     icon:I.stageLetters, href:'/admin-content-hub#articles' },
+      { page:'email',      label:'Email & SMS', icon:I.email,        href:'/admin-comms#email' },
+      { page:'newsletter', label:'Newsletter',  icon:I.newsletter },
     ]},
-    { label: 'People', items: [
-      { page:'contacts', label:'Contacts', icon:I.contacts, href:'/admin-people#contacts' },
-      { page:'partners', label:'Partners', icon:I.partners, href:'/admin-people#partners' },
-      { page:'activity', label:'Activity', icon:I.activity, href:'/admin-people#activity' },
-    ]},
-    { label: 'Comms', items: [
-      { page:'email',         label:'Email',         icon:I.email, href:'/admin-comms#email' },
-      { page:'sms',           label:'SMS',           icon:I.sms,   href:'/admin-comms#sms' },
-      { page:'email-compose', label:'Compose Email', icon:I.content, href:'/admin-email-compose' },
-    ]},
-    { label: 'Content', items: [
-      { page:'content',          label:'Letters',     icon:I.stageLetters, href:'/admin-content-hub#articles' },
-      { page:'content-ideas',    label:'Ideas',       icon:I.ideas,   href:'/admin-content-hub#ideas' },
-      { page:'content-calendar', label:'Calendar',    icon:I.rituals, href:'/admin-content-hub#calendar' },
-      { page:'content-compose',  label:'Compose',     icon:I.content },
-      { page:'newsletter',       label:'Newsletter',  icon:I.newsletter },
-      { page:'brand-plan',       label:'Brand Plan',  icon:I.identity },
-      { page:'webinar',          label:'Weekly Class', icon:I.meetings, href:'/admin-webinar' },
-    ]},
-    { label: 'Intelligence', items: [
-      { page:'revenue',              label:'Revenue',              icon:I.revenue,   href:'/admin-reports#revenue' },
-      { page:'analytics',            label:'Analytics',            icon:I.analytics, href:'/admin-reports#analytics' },
-      { page:'level10',              label:'Level 10',             icon:I.level10,   href:'/admin-reports#level10' },
-      { page:'company-intelligence', label:'Company Intelligence', icon:I.vision },
-      { page:'financial-model',      label:'Financial Model',      icon:I.revenue },
-      { page:'seo',                  label:'SEO',                  icon:I.growth_fotf },
-    ]},
-    { label: 'City Leads', items: [
-      { page:'city-leads', label:'City Leads',     icon:I.cityPin, href:'/admin-city-leads' },
-      { page:'city-team',  label:'City Team',      icon:I.team,    href:'/admin-cityleads-team' },
-      { page:'city-sop',   label:'City Lead SOP',  icon:I.stories, href:'/admin-city-sop' },
-      { page:'venture',    label:'Venture Studio', icon:I.command, href:'/admin-venture' },
-    ]},
-    { label: 'Automation', sep:true, items: [
-      { page:'agents', label:'Agent Builder', icon:I.recruiting },
-      { page:'system', label:'System',        icon:I.command },
+    { label: 'Reports', items: [
+      { page:'revenue',   label:'Revenue',   icon:I.revenue,   href:'/admin-reports#revenue' },
+      { page:'analytics', label:'Analytics', icon:I.analytics, href:'/admin-reports#analytics' },
     ]},
     { label: 'Settings', items: [
       { page:'settings', label:'Settings', icon:I.settings },
+    ]},
+    // Everything else stays one click away, folded up so the sidebar stays short.
+    // It opens on its own when the current page lives in here.
+    { label: 'More', collapsed: true, sep: true, items: [
+      { page:'brief',                label:'Command Brief',        icon:I.stageLetters },
+      { page:'command',              label:'Command Center',       icon:I.command },
+      { page:'flywheel',             label:'Flywheel',             icon:I.flywheel },
+      { page:'audits',               label:'Audits',               icon:I.audits,       href:'/admin-sales#audits' },
+      { page:'bookings',             label:'Bookings',             icon:I.bookings,     href:'/admin-sales#bookings' },
+      { page:'cockpit',              label:'Sales Cockpit',        icon:I.command },
+      { page:'campaign',             label:'Campaigns',            icon:I.growth_fotf },
+      { page:'followups',            label:'Follow-ups',           icon:I.followup,     href:'/admin-inbox#followups' },
+      { page:'assessment',           label:'Assessments',          icon:I.audits },
+      { page:'signals',              label:'Intent Signals',       icon:I.vision },
+      { page:'call-tasks',           label:'Call Queue',           icon:I.followup },
+      { page:'lifecycle',            label:'Lifecycle Agents',     icon:I.strategy },
+      { page:'city-sop',             label:'City Lead SOP',        icon:I.stories,      href:'/admin-city-sop' },
+      { page:'venture',              label:'Venture Studio',       icon:I.command,      href:'/admin-venture' },
+      { page:'client-health',        label:'Client Health',        icon:I.clientHealth, href:'/admin-clients#health' },
+      { page:'retention-plan',       label:'Retention Plan',       icon:I.strategy },
+      { page:'account',              label:'Account 360',          icon:I.identity,     href:'/admin-account' },
+      { page:'invoices',             label:'Invoices',             icon:I.invoices,     href:'/admin-work#invoices' },
+      { page:'os-clients',           label:'Client OS',            icon:I.glassBox,     href:'/admin-os-clients' },
+      { page:'onboarding',           label:'Onboarding',           icon:I.onboarding },
+      { page:'university',           label:'University',           icon:I.library },
+      { page:'contacts',             label:'Contacts',             icon:I.contacts,     href:'/admin-people#contacts' },
+      { page:'partners',             label:'Partner Contacts',     icon:I.partners,     href:'/admin-people#partners' },
+      { page:'activity',             label:'Activity',             icon:I.activity,     href:'/admin-people#activity' },
+      { page:'sms',                  label:'SMS',                  icon:I.sms,          href:'/admin-comms#sms' },
+      { page:'email-compose',        label:'Compose Email',        icon:I.content,      href:'/admin-email-compose' },
+      { page:'content-ideas',        label:'Content Ideas',        icon:I.ideas,        href:'/admin-content-hub#ideas' },
+      { page:'content-calendar',     label:'Content Calendar',     icon:I.rituals,      href:'/admin-content-hub#calendar' },
+      { page:'content-compose',      label:'Compose Post',         icon:I.content },
+      { page:'brand-plan',           label:'Brand Plan',           icon:I.identity },
+      { page:'webinar',              label:'Weekly Class',         icon:I.meetings,     href:'/admin-webinar' },
+      { page:'level10',              label:'Level 10',             icon:I.level10,      href:'/admin-reports#level10' },
+      { page:'company-intelligence', label:'Company Intelligence', icon:I.vision },
+      { page:'financial-model',      label:'Financial Model',      icon:I.revenue },
+      { page:'seo',                  label:'SEO',                  icon:I.growth_fotf },
+      { page:'agents',               label:'Agent Builder',        icon:I.recruiting },
+      { page:'system',               label:'System',               icon:I.command },
     ]},
   ];
 
@@ -320,10 +314,12 @@ const TMIAdmin = (() => {
     <div><div class="sb-brand-label">TMI</div><div class="sb-brand-sub">Admin</div></div>
   </div>
   <nav class="sb-nav">
-    ${NAV_GROUPS.map(g =>
-      `${g.sep ? '<div class="sb-sep"></div>' : ''}<div class="sb-group-label">${g.label}</div>
-    ${g.items.map(it => navItem(it.page, it.label, it.icon, it.badge, it.href)).join('\n    ')}`
-    ).join('\n    ')}
+    ${NAV_GROUPS.map(g => {
+      const items = g.items.map(it => navItem(it.page, it.label, it.icon, it.badge, it.href)).join('\n    ');
+      const sep = g.sep ? '<div class="sb-sep"></div>' : '';
+      if (!g.collapsed) return `${sep}<div class="sb-group-label">${g.label}</div>\n    ${items}`;
+      return `${sep}<details class="sb-more"><summary class="sb-group-label" style="cursor:pointer;list-style:none">${g.label} &#9662;</summary>\n    ${items}</details>`;
+    }).join('\n    ')}
   </nav>
   <div class="sb-foot">
     <button class="sb-logout" onclick="TMIAdmin.logout()">${I.logout}Log out</button>
@@ -338,6 +334,8 @@ const TMIAdmin = (() => {
         const href = (el.getAttribute('href') || '').replace(/\/$/, '');
         if (href && href === here) el.classList.add('active');
       });
+      // Open the folded "More" group when the current page lives in it.
+      root.querySelectorAll('details.sb-more').forEach(d => { if (d.querySelector('.sb-item.active')) d.open = true; });
       // Load badge counts async
       self._loadBadges();
       // Init global search
