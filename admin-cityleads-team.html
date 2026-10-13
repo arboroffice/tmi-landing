@@ -71,6 +71,7 @@
         <div class="panel-sec-label" style="margin-bottom:8px;">Import a lead spreadsheet</div>
         <p style="font-size:12.5px;color:var(--muted);margin:0 0 12px;">Upload an .xlsx or .csv. Each lead goes to a territory by its Parish column, and every rep in that territory gets the same list. Leads a rep already has are skipped. Street addresses get exact map pins; leads with only a town are pinned at the town.</p>
         <input type="file" id="imp-file" accept=".xlsx,.xls,.csv" class="form-input" style="max-width:420px;"/>
+        <div style="margin-top:14px;font-size:13px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Send the whole file to one rep</b> (for trips or out-of-state lists, skips parishes):<select id="imp-one" class="form-input" style="max-width:240px" onchange="renderImpGroups()"><option value="">No, sort by parish</option></select></div>
         <div id="imp-groups" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;"></div>
         <div id="imp-preview" style="font-size:13px;margin-top:14px;color:var(--ink-2);"></div>
         <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;">
@@ -521,6 +522,9 @@ function openImport(){ document.getElementById('import-card').style.display='blo
 function closeImport(){ document.getElementById('import-card').style.display='none'; }
 const normParish=(p)=>String(p||'').toLowerCase().replace(/\./g,'').replace(/\bparish\b/,'').replace(/\bjeff davis\b/,'jefferson davis').replace(/\s+/g,' ').trim();
 function renderImpGroups(){
+  const one=document.getElementById('imp-one');
+  if(one&&one.options.length<=1) reps.filter(r=>r.status!=='disabled').forEach(r=>{ const o=document.createElement('option'); o.value=r.id; o.textContent=r.name||r.email; one.appendChild(o); });
+  document.getElementById('imp-groups').style.display=(one&&one.value)?'none':'grid';
   document.getElementById('imp-groups').innerHTML=IMP_GROUPS.map(g=>`
     <div class="card" style="margin:0;padding:14px;">
       <div style="font-weight:700;margin-bottom:8px;">${esc(g.label)}</div>
@@ -547,11 +551,14 @@ document.addEventListener('change',async(e)=>{
 });
 function col(row,names){ for(const n of names){ for(const k of Object.keys(row)){ if(k.trim().toLowerCase()===n) return String(row[k]==null?'':row[k]).trim(); } } return ''; }
 function impGroupSetup(){
+  const one=document.getElementById('imp-one'), oneId=one&&one.value;
+  if(oneId){ const r=reps.find(x=>x.id===oneId)||{}; return [{ key:'one', label:'Whole file to '+(r.name||r.email||'rep'), names:[], repIds:[oneId], parishSet:new Set(), all:true }]; }
   return IMP_GROUPS.map(g=>({ ...g,
     repIds:[...document.querySelectorAll('.imp-rep-'+g.key+':checked')].map(x=>x.value),
     parishSet:new Set(document.getElementById('imp-par-'+g.key).value.split(',').map(normParish).filter(Boolean)) }));
 }
 function routeRow(row,groups){
+  if(groups.length===1&&groups[0].all) return groups[0];
   const par=normParish(col(row,['parish']));
   if(par){ return groups.find(g=>g.parishSet.has(par))||null; }
   const queue=col(row,['rep queue']).toLowerCase();
@@ -581,6 +588,8 @@ async function downloadLeftOut(){
 }
 function rowToLead(r,g){
   const street=col(r,['street address','address','street']), city=col(r,['city','town']), parish=col(r,['parish']);
+  const state=(col(r,['state'])||'LA').toUpperCase().slice(0,2);
+  const lat=parseFloat(col(r,['latitude','lat'])), lng=parseFloat(col(r,['longitude','lng','lon']));
   const site=col(r,['website','domain']); const tier=col(r,['priority']).toUpperCase();
   const contacted=col(r,['contacted?','contacted']);
   const angle=col(r,['best tmi angle']), signal=col(r,['signal / why now','signal']);
@@ -591,7 +600,8 @@ function rowToLead(r,g){
     contact_name:col(r,['owner/decision-maker','owner','contact','contact name']),
     phone:col(r,['phone']), email:col(r,['email']), industry:col(r,['industry']),
     street:street?street.split(',')[0].trim():'', city, zip:(street.match(/\b\d{5}\b/)||[''])[0],
-    address:street||(city?city+', LA':''), parish,
+    address:street||(city?city+', '+state:''), parish, state,
+    lat:isFinite(lat)?lat:null, lng:isFinite(lng)?lng:null,
     priority:tier==='A'?'hot':(tier==='B'?'warm':null),
     status:/^yes: active/i.test(contacted)?'contacted':(/^yes/i.test(contacted)?'attempted':'new'),
     context:(signal||angle).slice(0,400), notes,
@@ -624,10 +634,12 @@ async function runImport(){
     const plan=groups.map(g=>({ g, leads:IMP_ROWS.filter(r=>col(r,['company','business','business name','company name'])&&routeRow(r,groups)===g).map(r=>rowToLead(r,g)) }));
     // 1) town / parish fallback points
     const places=new Set();
-    plan.forEach(p=>p.leads.forEach(l=>{ if(l.city) places.add(l.city+(l.parish?', '+l.parish.replace(/parish/i,'')+' Parish':'')+', LA'); if(l.parish) places.add(l.parish.replace(/parish/i,'').trim()+' Parish, LA'); }));
+    plan.forEach(p=>p.leads.forEach(l=>{ if(l.lat!=null) return; if(l.state&&l.state!=='LA'){ if(l.city) places.add(l.city+', '+l.state); return; } if(l.city) places.add(l.city+(l.parish?', '+l.parish.replace(/parish/i,'')+' Parish':'')+', LA'); if(l.parish) places.add(l.parish.replace(/parish/i,'').trim()+' Parish, LA'); }));
     let n=0;
     for(const q of places){ await geocodePlace(q); n++; if(n%10===0) st.textContent=`Finding towns on the map: ${n}/${places.size}`; await new Promise(r=>setTimeout(r,60)); }
     plan.forEach(p=>p.leads.forEach(l=>{
+      if(l.lat!=null) return;
+      if(l.state&&l.state!=='LA'){ const pt=l.city?GEO_CACHE[l.city+', '+l.state]:null; if(pt){ l.fallback_lat=pt.lat; l.fallback_lng=pt.lng; } return; }
       const town=l.city?GEO_CACHE[l.city+(l.parish?', '+l.parish.replace(/parish/i,'')+' Parish':'')+', LA']:null;
       const par=l.parish?GEO_CACHE[l.parish.replace(/parish/i,'').trim()+' Parish, LA']:null;
       const pt=town||par; if(pt){ l.fallback_lat=pt.lat; l.fallback_lng=pt.lng; }

@@ -46,7 +46,7 @@ function touchedAt(l) {
 async function censusBatch(rows) {
   if (!rows.length) return {};
   const cell = (s) => `"${String(s || '').replace(/"/g, '""')}"`;
-  const csv = rows.map((r) => [r.id, r.street, r.city, 'LA', r.zip].map(cell).join(',')).join('\n');
+  const csv = rows.map((r) => [r.id, r.street, r.city, r.state || 'LA', r.zip].map(cell).join(',')).join('\n');
   const fd = new FormData();
   fd.append('benchmark', 'Public_AR_Current');
   fd.append('addressFile', new Blob([csv], { type: 'text/csv' }), 'addresses.csv');
@@ -217,11 +217,12 @@ module.exports = async (req, res) => {
         for (const id of repIds) if (!(await db.getById('reps', id))) return res.status(404).json({ error: 'Rep not found' });
         const items = (Array.isArray(body.leads) ? body.leads : []).filter((x) => x && x.business_name).slice(0, 300);
         if (!items.length) return res.status(400).json({ error: 'No leads in this chunk' });
-        const hits = await censusBatch(items.map((it, i) => ({ id: i, street: it.street, city: it.city, zip: it.zip })).filter((r) => r.street));
+        // Leads that already carry a map point (e.g. pulled from Google Maps) skip geocoding.
+        const hits = await censusBatch(items.map((it, i) => ({ id: i, street: it.street, city: it.city, state: it.state, zip: it.zip })).filter((r, i) => r.street && num(items[i].lat) == null));
         const now = new Date().toISOString();
         let exact = 0, approx = 0;
         const rows = items.map((it, i) => {
-          const h = hits[i];
+          const h = num(it.lat) != null && num(it.lng) != null ? { lat: num(it.lat), lng: num(it.lng) } : hits[i];
           const lat = h ? h.lat : num(it.fallback_lat), lng = h ? h.lng : num(it.fallback_lng);
           if (h) exact++; else if (lat != null) approx++;
           return {
