@@ -467,8 +467,9 @@ function renderStops(){
 }
 
 /* ---- Find near me: their own leads within a radius, or new businesses anywhere ---- */
-let FIND={center:null,label:'',radius:10,kind:''};
-const FIND_KINDS=[['','Any business'],['contractor','Contractors'],['construction company','Construction'],['roofing contractor','Roofing'],['hvac','HVAC'],['plumber','Plumbing'],['electrician','Electrical'],['manufacturing','Manufacturing'],['machine shop','Machine shops'],['trucking company','Trucking'],['oilfield services','Oilfield'],['landscaping','Landscaping'],['auto repair','Auto repair'],['marine services','Marine'],['equipment rental','Equipment']];
+let FIND={center:null,label:'',radius:10,kind:'all',key:null,timer:null};
+// Industrial only. The keys match api/rep-find.js; the words are what Google gets as a fallback.
+const FIND_KINDS=[['all','All industrial','machine shop'],['fab','Machine shops & fab','machine shop'],['oil','Oil & gas service','oilfield services'],['supply','Industrial supply','industrial supply'],['haul','Trucking & heavy haul','heavy haul trucking'],['build','Industrial contractors','industrial contractor'],['rental','Equipment rental & repair','equipment rental'],['mfg','Manufacturing','manufacturer'],['repair','Industrial repair','industrial repair']];
 function openFinder(){
   $('#sheetTitle').textContent='Find businesses';
   const b=$('#sheetBody');
@@ -494,9 +495,9 @@ function findRender(){
   out.innerHTML=`<div style="font-size:13px;margin-bottom:8px">Near <b>${esc(FIND.label||'here')}</b> within ${FIND.radius} miles</div>
     <div class="card" style="padding:10px 12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-weight:800;font-size:14px">Your leads here: ${near.length}</div>${fresh.length?`<button class="btn sm" id="fAddAll" style="flex:none">Add ${Math.min(fresh.length,25)}</button>`:''}</div>
     <div id="fMine" style="margin-top:6px"></div></div>
-    <div class="card" style="padding:10px 12px"><div style="font-weight:800;font-size:14px">Find new businesses here</div><div style="font-size:12.5px;color:var(--muted);margin:2px 0 8px">Searches Google for businesses in this area that are not in your leads yet.</div>
+    <div class="card" style="padding:10px 12px"><div style="font-weight:800;font-size:14px">Find new businesses and owners here</div><div style="font-size:12.5px;color:var(--muted);margin:2px 0 8px">Industrial only. Pulls shops, plants and service companies from Google Maps, with the owner or boss when we can find them. Takes 1 to 3 minutes.</div>
     <select id="fKind" style="width:100%">${FIND_KINDS.map(k=>`<option value="${esc(k[0])}" ${k[0]===FIND.kind?'selected':''}>${esc(k[1])}</option>`).join('')}</select>
-    <button class="btn ghost sm" id="fSearch" style="margin-top:8px;width:100%">Search</button><div id="fNew" style="margin-top:8px"></div></div>`;
+    <button class="btn sm" id="fSearch" style="margin-top:8px;width:100%">Search this area</button><div id="fNew" style="margin-top:8px"></div></div>`;
   const mine=$('#fMine');
   if(!near.length) mine.innerHTML='<div style="font-size:12.5px;color:var(--muted)">None of your leads are in this area. Search for new businesses below.</div>';
   near.slice(0,60).forEach(l=>{ const row=leadRow(l); const who=taken[String(l.business_name||l.contact_name||'').toLowerCase().trim()];
@@ -507,31 +508,75 @@ function findRender(){
   if(near.length>60) mine.appendChild(el('<div style="font-size:12px;color:var(--muted);margin-top:6px">Showing the closest 60. Pick a smaller distance to narrow it.</div>'));
   const aa=$('#fAddAll'); if(aa) aa.onclick=()=>{ addToList(fresh.slice(0,25).map(l=>l.id)); findRender(); };
   $('#fSearch').onclick=findNew;
+  // Coming back to the same area picks up the search that was running.
+  if(FIND.key && FIND.keyFor===[c.lat,c.lng,FIND.radius,FIND.kind].join('|')) api('/api/rep-find?key='+encodeURIComponent(FIND.key)).then(findShow).catch(()=>{});
 }
 function findNew(){
-  const box=$('#fNew'); FIND.kind=$('#fKind').value;
+  FIND.kind=$('#fKind').value;
+  const box=$('#fNew'); box.innerHTML='<div style="font-size:13px;color:var(--muted)">Starting the search…</div>';
+  api('/api/rep-find',{method:'POST',body:JSON.stringify({lat:FIND.center.lat,lng:FIND.center.lng,radius:FIND.radius,kind:FIND.kind,label:FIND.label})})
+    .then(findShow).catch(ex=>{ if(/not_linked/.test(ex.message)) return findGoogle(); box.innerHTML='<div style="font-size:13px;color:#b42318">'+esc(ex.message)+'</div>'; });
+}
+function findPoll(){
+  clearTimeout(FIND.timer);
+  FIND.timer=setTimeout(()=>{ if(!$('#fNew')||!FIND.key) return; api('/api/rep-find?key='+encodeURIComponent(FIND.key)).then(findShow).catch(ex=>{ const b=$('#fNew'); if(b) b.innerHTML='<div style="font-size:13px;color:#b42318">'+esc(ex.message)+'</div>'; }); },6000);
+}
+function findShow(r){
+  const box=$('#fNew'); if(!box) return;
+  FIND.key=r.key; FIND.keyFor=[FIND.center.lat,FIND.center.lng,FIND.radius,FIND.kind].join('|');
+  if(r.status==='running'){
+    const sec=r.started_at?Math.max(0,Math.round((Date.now()-new Date(r.started_at).getTime())/1000)):0;
+    box.innerHTML='<div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--muted)"><div class="spin" style="width:16px;height:16px;border:2px solid var(--line);border-top-color:#0a0b14;border-radius:50%;animation:fspin 1s linear infinite"></div>Searching Google Maps and looking up owners… '+sec+'s. You can close this and come back.</div><style>@keyframes fspin{to{transform:rotate(360deg)}}</style>';
+    return findPoll();
+  }
+  if(r.status==='failed'){ box.innerHTML='<div style="font-size:13px;color:#b42318">That search did not finish. Tap Search again.</div>'; FIND.key=null; return; }
+  const have=new Set(LEADS.map(l=>String(l.business_name||'').toLowerCase().trim()));
+  const list=(r.results||[]);
+  const withP=list.filter(p=>p.people&&p.people.length&&!have.has(p.name.toLowerCase().trim()));
+  box.innerHTML=list.length?`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px"><div style="font-size:13px"><b>${list.length}</b> found · <b>${list.filter(p=>p.people&&p.people.length).length}</b> with a name</div>${withP.length?`<button class="btn sm" id="fAddP" style="flex:none">Add ${Math.min(withP.length,25)} with names</button>`:''}</div>`:'<div style="font-size:13px;color:var(--muted)">No industrial businesses found here. Try All industrial or a bigger distance.</div>';
+  const rows=[];
+  list.slice(0,150).forEach(p=>{
+    const known=have.has(p.name.toLowerCase().trim()), who=(p.people||[])[0];
+    const row=el(`<div style="display:flex;gap:8px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0">
+      <div style="font-weight:700;font-size:14px">${esc(p.name)}</div>
+      <div style="font-size:12px;color:var(--muted)">${esc([p.miles!=null?p.miles+' mi':'',p.category,p.city].filter(Boolean).join(' · '))}</div>
+      ${who?`<div style="font-size:12.5px;margin-top:3px">👤 <b>${esc(who.name)}</b>${who.title?' · '+esc(who.title):''}${p.people.length>1?' <span style="color:var(--muted)">+'+(p.people.length-1)+' more</span>':''}</div>`:''}
+      ${p.phone?`<a href="tel:${esc(p.phone)}" style="font-size:12.5px;color:#2f6bd6;text-decoration:none">${esc(p.phone)}</a>`:''}
+    </div></div>`);
+    const btn=el(known?'<span style="flex:none;font-size:12px;color:var(--muted);align-self:center">In your leads</span>':'<button class="btn sm" style="flex:none;align-self:center">Add</button>');
+    if(!known) btn.onclick=()=>findAdd(p,btn,have);
+    rows.push({p,btn}); row.appendChild(btn); box.appendChild(row);
+  });
+  if(list.length>150) box.appendChild(el('<div style="font-size:12px;color:var(--muted);margin-top:6px">Showing the first 150. Pick a type or a smaller distance to narrow it.</div>'));
+  const ap=$('#fAddP'); if(ap) ap.onclick=async()=>{ ap.disabled=true; const pick=rows.filter(x=>x.p.people&&x.p.people.length&&x.btn.tagName==='BUTTON').slice(0,25);
+    for(const x of pick) await findAdd(x.p,x.btn,have,true);
+    if(PEND_ADD.length) addToList(PEND_ADD.splice(0));
+    toast('Added '+pick.length+' to your leads and your list'); ap.remove(); };
+}
+async function findAdd(p,btn,have,quiet){
+  btn.disabled=true;
+  const who=(p.people||[])[0]||{};
+  const notes=[p.category&&('Type: '+p.category), p.website&&('Website: '+p.website),
+    ...(p.people||[]).map(x=>'Person: '+[x.name,x.title,x.email,x.phone,x.linkedin].filter(Boolean).join(' · ')),
+    p.rating!=null&&('Google: '+p.rating+' stars, '+(p.reviews||0)+' reviews'), p.maps&&('Map: '+p.maps), 'Found near '+(FIND.label||'')].filter(Boolean).join('\n');
+  try{
+    const lead=await api('/api/rep-leads',{method:'POST',body:JSON.stringify({business_name:p.name,contact_name:who.name||null,phone:p.phone||who.phone||null,email:who.email||null,address:p.address||null,industry:p.category||null,lat:p.lat,lng:p.lng,source:'found_nearby',notes})});
+    LEADS.unshift(lead); have.add(p.name.toLowerCase().trim()); if(!quiet) addToList([lead.id]); else PEND_ADD.push(lead.id);
+    btn.outerHTML='<span style="flex:none;font-size:12px;font-weight:700;color:var(--green);align-self:center">Added</span>';
+  }catch(ex){ toast(ex.message); btn.disabled=false; }
+}
+let PEND_ADD=[];
+// Fallback when Apify is not linked: Google's own nearby search (20 results, no owners).
+function findGoogle(){
+  const box=$('#fNew');
   if(typeof google==='undefined'||!google.maps||!google.maps.places){ toast('Maps still loading, try again'); return; }
   box.innerHTML='<div style="font-size:13px;color:var(--muted)">Searching…</div>';
   const svc=new google.maps.places.PlacesService(document.createElement('div'));
-  const req={location:new google.maps.LatLng(FIND.center.lat,FIND.center.lng),radius:Math.min(50000,Math.round(FIND.radius*1609))};
-  if(FIND.kind) req.keyword=FIND.kind; else req.type='establishment';
-  const have=new Set(LEADS.map(l=>String(l.business_name||'').toLowerCase().trim()));
-  svc.nearbySearch(req,(res,st)=>{
+  const kw=(FIND_KINDS.find(k=>k[0]===FIND.kind)||FIND_KINDS[0])[2];
+  svc.nearbySearch({location:new google.maps.LatLng(FIND.center.lat,FIND.center.lng),radius:Math.min(50000,Math.round(FIND.radius*1609)),keyword:kw},(res,st)=>{
     if(st!=='OK'||!res||!res.length){ box.innerHTML='<div style="font-size:13px;color:var(--muted)">Nothing found. Try another type or a bigger distance.</div>'; return; }
-    const skip=/(restaurant|cafe|bar|store|school|church|hospital|bank|lodging|gas_station|pharmacy|atm|park|hair_care|beauty_salon|gym|grocery)/;
-    const list=res.filter(p=>p.business_status!=='CLOSED_PERMANENTLY'&&!(p.types||[]).some(t=>skip.test(t)));
-    box.innerHTML=list.length?'':'<div style="font-size:13px;color:var(--muted)">Only shops and restaurants here. Try a business type.</div>';
-    list.forEach(p=>{ const nm=p.name||'Business', known=have.has(nm.toLowerCase().trim());
-      const d=p.geometry&&p.geometry.location?milesBetween(FIND.center,{lat:p.geometry.location.lat(),lng:p.geometry.location.lng()}):null;
-      const row=el(`<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">${esc(nm)}</div><div style="font-size:12px;color:var(--muted)">${esc([d!=null?d.toFixed(1)+' mi':'',p.vicinity].filter(Boolean).join(' · '))}</div></div></div>`);
-      const btn=el(known?'<span style="flex:none;font-size:12px;color:var(--muted)">In your leads</span>':'<button class="btn sm" style="flex:none">Add</button>');
-      if(!known) btn.onclick=async()=>{ btn.disabled=true;
-        try{
-          const lead=await api('/api/rep-leads',{method:'POST',body:JSON.stringify({business_name:nm,address:p.vicinity||null,industry:(FIND_KINDS.find(k=>k[0]===FIND.kind)||[])[1]||null,lat:p.geometry&&p.geometry.location?p.geometry.location.lat():null,lng:p.geometry&&p.geometry.location?p.geometry.location.lng():null,source:'found_nearby',notes:'Found near '+(FIND.label||'')+'. Google place: '+(p.place_id||'')})});
-          LEADS.unshift(lead); have.add(nm.toLowerCase().trim()); addToList([lead.id]); btn.outerHTML='<span style="flex:none;font-size:12px;font-weight:700;color:var(--green)">Added</span>';
-        }catch(ex){ toast(ex.message); btn.disabled=false; }
-      };
-      row.appendChild(btn); box.appendChild(row); });
+    findShow({key:null,status:'done',results:res.filter(p=>p.business_status!=='CLOSED_PERMANENTLY').map(p=>{ const g=p.geometry&&p.geometry.location; const lat=g?g.lat():null,lng=g?g.lng():null;
+      return {name:p.name||'Business',category:(FIND_KINDS.find(k=>k[0]===FIND.kind)||[])[1]||null,address:p.vicinity||null,lat,lng,miles:lat!=null?Math.round(milesBetween(FIND.center,{lat,lng})*10)/10:null,people:[],maps:p.place_id?('https://www.google.com/maps/place/?q=place_id:'+p.place_id):null}; })});
   });
 }
 
