@@ -470,7 +470,8 @@ function renderStops(){
 let FIND={center:null,label:'',radius:10,kind:'all',key:null,timer:null};
 // Industrial only. The keys match api/rep-find.js; the words are what Google gets as a fallback.
 const FIND_KINDS=[['all','All industrial','machine shop'],['fab','Machine shops & fab','machine shop'],['oil','Oil & gas service','oilfield services'],['supply','Industrial supply','industrial supply'],['haul','Trucking & heavy haul','heavy haul trucking'],['build','Industrial contractors','industrial contractor'],['rental','Equipment rental & repair','equipment rental'],['mfg','Manufacturing','manufacturer'],['repair','Industrial repair','industrial repair']];
-function openFinder(){
+function openFinder(auto){
+  if(!FIND.center){ try{ const sv=JSON.parse(localStorage.getItem('tmi_find')||'null'); if(sv&&sv.center){ FIND.center=sv.center; FIND.label=sv.label; FIND.radius=sv.radius||10; } }catch(e){} }
   $('#sheetTitle').textContent='Find businesses';
   const b=$('#sheetBody');
   b.innerHTML=`<div style="font-size:13px;color:var(--muted);margin-bottom:10px">Use where you are, or type any city or zip, like "Dallas, TX". Then add the ones you want to your list.</div>
@@ -485,10 +486,12 @@ function openFinder(){
     new google.maps.Geocoder().geocode({address:q},(r,st)=>{ if(st!=='OK'||!r||!r[0]){ toast('Could not find that place'); return; } const g=r[0].geometry.location; FIND.center={lat:g.lat(),lng:g.lng()}; FIND.label=r[0].formatted_address; findRender(); }); };
   $('#fGo').onclick=go; $('#fPlace').onkeydown=(e)=>{ if(e.key==='Enter') go(); };
   b.querySelectorAll('#fRad [data-r]').forEach(x=>x.onclick=()=>{ FIND.radius=Number(x.dataset.r); b.querySelectorAll('#fRad [data-r]').forEach(y=>y.classList.toggle('ghost',y!==x)); if(FIND.center) findRender(); });
+  if(auto===true){ toast('Finding you…'); hereNow().then(c=>{ FIND.center=c; FIND.label='Your location'; findRender(); findNew(); }).catch(ex=>{ toast(ex.message); if(FIND.center) findRender(); }); return; }
   if(FIND.center) findRender();
 }
 function findRender(){
   const out=$('#fOut'); if(!out) return;
+  try{ localStorage.setItem('tmi_find',JSON.stringify({center:FIND.center,label:FIND.label,radius:FIND.radius})); }catch(e){}
   const c=FIND.center, taken=(PLAN&&PLAN.taken)||{};
   const near=LEADS.filter(l=>l.lat!=null&&!CLOSED_ST.includes(l.status)).map(l=>Object.assign(l,{_dist:milesBetween(c,l)})).filter(l=>l._dist<=FIND.radius).sort((a,b)=>(stopDone(a)-stopDone(b))||(a._dist-b._dist));
   const fresh=near.filter(l=>!onList(l.id));
@@ -839,6 +842,7 @@ function renderLeads(){
   const boardMode = LEADVIEW==='board';
   s.innerHTML = `
     <input class="search" id="leadSearch" type="search" placeholder="Search leads" value="${esc(SEARCH)}"/>
+    <button class="btn" id="leadFind" style="margin:0 0 10px">📍 Find new businesses near me</button>
     <div class="filters" style="padding-bottom:4px">
       <button id="vwList" class="${!boardMode?'on':''}">List</button>
       <button id="vwBoard" class="${boardMode?'on':''}">Board</button>
@@ -853,6 +857,7 @@ function renderLeads(){
   fils.forEach(f=>{ const label=f==='all'?'All':(f==='warm'?'★ Warm':(STATUS_LABEL[f]||f)); const b=el(`<button class="${f===FILTER?'on':''}">${label}</button>`); b.onclick=()=>{FILTER=f; renderLeads();}; fbox.appendChild(b); });
   $('#vwList').onclick=()=>{ LEADVIEW='list'; renderLeads(); };
   $('#vwBoard').onclick=()=>{ LEADVIEW='board'; renderLeads(); };
+  $('#leadFind').onclick=()=>openFinder(true);
   $('#srtR').onclick=()=>{ SORT='recent'; renderLeads(); };
   $('#srtN').onclick=async()=>{ if(!lastPos){ try{ lastPos=await getPos(); }catch(e){ toast('Turn on location to sort by nearest'); return; } } SORT='near'; renderLeads(); };
   $('#leadSearch').addEventListener('input',(e)=>{ SEARCH=e.target.value; boardMode?drawBoard():drawLeadList(); });
@@ -929,6 +934,10 @@ function drawLeadList(){
     rows.sort((a,b)=>score(b)-score(a));
   }
   if(!rows.length){ box.innerHTML='<div class="empty">No leads here yet.</div>'; return; }
+  if(SORT==='near' && lastPos && rows[0]._dist>20 && rows[0]._dist!==Infinity){
+    const far=el(`<div class="card" style="background:#E4FF97;color:#0a0b14;margin-bottom:10px;cursor:pointer"><div style="font-weight:800;font-size:15px">Your closest lead is ${Math.round(rows[0]._dist)} miles away</div><div style="font-size:13px;font-weight:600;margin-top:3px;line-height:1.45">These leads are in another area. Tap here to find industrial businesses and owners right around you.</div></div>`);
+    far.onclick=()=>openFinder(true); box.appendChild(far);
+  }
   // Render 100 at a time; thousands of rows at once made the list crawl.
   let shown=0;
   const more=()=>{
