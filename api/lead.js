@@ -1,5 +1,6 @@
 const db = require('./_db');
 const offers = require('./_offers');
+const leadResponse = require('./_lead-response');
 const { Resend } = require('resend');
 const twilio = require('twilio');
 const { Client: QStashClient } = require('@upstash/qstash');
@@ -144,26 +145,18 @@ module.exports = async function handler(req, res) {
   }).catch(e => console.error('Alert SMS 2 error:', e));
 
   // Chase until they book. api/followup.js already holds these four steps and
-  // suppresses every one of them the moment the lead's status becomes booked,
-  // won, lost or unsubscribed, so this cannot talk over a conversation that is
-  // already happening. Scheduling was lost when this handler replaced
-  // _archive/api/audit-submit.js, which left the sequence written but dark:
-  // anyone who did not finish picking a time got one email and one text, then
-  // silence.
-  if (process.env.QSTASH_TOKEN && app.id) {
-    const qstash = new QStashClient({ token: process.env.QSTASH_TOKEN });
-    const followupUrl = `${SITE}/api/followup`;
-    const DAY = 86400;
-    for (const { delay, step } of [
-      { delay: 1 * DAY, step: 'day1_sms' },
-      { delay: 3 * DAY, step: 'day3_email' },
-      { delay: 7 * DAY, step: 'day7_email_sms' },
-      { delay: 14 * DAY, step: 'day14_email' },
-    ]) {
-      qstash.publishJSON({ url: followupUrl, delay, body: { leadId: app.id, step } })
-        .catch((e) => console.error(`QStash ${step}:`, e.message));
-    }
-  }
+  // suppresses every one the moment the lead becomes booked, won, lost or
+  // unsubscribed, so this cannot talk over a live conversation. It was written
+  // and then left dark: scheduling was lost when this handler replaced
+  // _archive/api/audit-submit.js, so anyone who did not finish picking a time
+  // got one email and one text and then silence.
+  //
+  // It has to run against a `leads` row, not this `applications` row —
+  // followup.js reads db.getById('leads', leadId) — which is what _lead-response
+  // enrols. Scheduling with the application id looks fine and quietly no-ops.
+  leadResponse.enrol({ email, name, phone, company, source: source || 'funnel' })
+    .then((lead) => leadResponse.scheduleChase(lead))
+    .catch((e) => console.error('lead chase:', e.message));
 
   res.status(200).json({ ok: true });
 };
