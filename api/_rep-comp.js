@@ -6,7 +6,7 @@ const db = require('./_db');
 
 const DEFAULT_RATES = { audit: 0.10, upsell: 0.10 }; // TMI pays reps 10%
 const KINDS = {
-  audit: 'Intelligent Company Audit',
+  audit: 'Executive Discovery Session',
   implementation: 'Implementation fee',
   retainer: 'Monthly retainer',
   addon: 'Add-on',

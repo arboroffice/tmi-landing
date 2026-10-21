@@ -230,7 +230,26 @@ module.exports = async function handler(req, res) {
       if (!(s.metadata && s.metadata.product === 'build_deposit')) {
         const em = (s.customer_details && s.customer_details.email) || s.customer_email || null;
         const co = (s.metadata && s.metadata.company) || '';
-        if (em || co) alertTeam(`Abandoned Intelligent Company Audit checkout: ${co || em || s.id}${em ? ' | ' + em : ''} - follow up`);
+        if (em || co) alertTeam(`Abandoned Executive Discovery Session checkout: ${co || em || s.id}${em ? ' | ' + em : ''} - follow up`);
+
+        // Nudge them, not just us. api/audit-followup.js holds this chain and
+        // stops the moment the application's status is paid or unsubscribed; it
+        // was left unscheduled when _archive/api/audit-capture.js, the handler
+        // that used to set it, was retired. Telling the team to "follow up" was
+        // all that happened to somebody who got as far as the payment page.
+        // hour1 is skipped: Stripe only expires a session a day later, so the
+        // first touch here is day1.
+        const applicationId = (s.metadata && s.metadata.application_id) || null;
+        if (applicationId && process.env.QSTASH_TOKEN) {
+          const { Client: QStashClient } = require('@upstash/qstash');
+          const q = new QStashClient({ token: process.env.QSTASH_TOKEN });
+          const secret = process.env.GTM_RUN_SECRET ? `?secret=${encodeURIComponent(process.env.GTM_RUN_SECRET)}` : '';
+          const url = `https://admin.tmitechai.com/api/audit-followup${secret}`;
+          for (const [delay, step] of [[0, 'day1'], [172800, 'day3'], [518400, 'day7']]) {
+            q.publishJSON({ url, delay, body: { applicationId, step } })
+              .catch((e) => console.error(`audit-followup ${step}:`, e.message));
+          }
+        }
       }
     } else if (event.type === 'charge.refunded' || event.type === 'refund.created' || event.type === 'charge.dispute.created') {
       await markRefunded(event);

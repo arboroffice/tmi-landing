@@ -39,7 +39,7 @@ async function send({ email, name, company, link, paid }) {
   if (!email || !process.env.RESEND_API_KEY) return false;
   const first = String(name || '').trim().split(/\s+/)[0] || 'there';
   const intro = paid
-    ? `Your Intelligent Company Audit is paid, so your ${esc(company || 'company')} workspace in TMI OS is ready for you.`
+    ? `Your Executive Discovery Session is paid, so your ${esc(company || 'company')} workspace in TMI OS is ready for you.`
     : `You're invited to TMI OS, the workspace where TMI Tech AI builds and runs the operating system for ${esc(company || 'your company')}.`;
   const html = `<!DOCTYPE html><html><body style="margin:0;background:#f0efe9;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f0efe9;"><tr><td align="center" style="padding:28px 14px;">
 <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="width:560px;max-width:100%;background:#fff;border:1px solid #e7e8e1;border-radius:16px;overflow:hidden;">

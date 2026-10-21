@@ -1,5 +1,5 @@
-// Payment nurture for captured-but-unpaid Intelligent Company Audit leads.
-// Called by QStash on a schedule set in api/audit-capture.js. Each step nudges
+// Payment nurture for captured-but-unpaid Executive Discovery Session leads.
+// Scheduled by api/stripe-webhook.js when a checkout session expires. Each step nudges
 // the lead to complete the $5,000 session. The chain stops as soon as the lead's
 // status flips to 'paid' (set by api/audit-intake.js after payment).
 //
@@ -29,11 +29,11 @@ function copy(step, firstName, resumeUrl) {
   switch (step) {
     case 'hour1':
       return {
-        subject: 'Finish your Intelligent Company Audit',
+        subject: 'Finish booking your Executive Discovery Session',
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">You started the Intelligent Company Audit but did not finish checkout. The audit is 30 to 45 minutes, in person or by phone. We review how the company sells, operates, communicates, tracks information and makes decisions.</p>
+<p style="margin:0 0 16px;">You started the Executive Discovery Session but did not finish checkout. It is a working session with TMI leadership: operations, people, software, data, workflows, how much still runs through you, reporting and bottlenecks. You leave knowing what is broken, what it is costing and what to fix first.</p>
 <p style="margin:0 0 8px;">You get a Business Intelligence Score out of 100 across ten areas, a five-page report, and the Intelligent Company Roadmap. The roadmap is yours outright, whatever you decide to do afterwards.</p>`,
-        sms: `Hey ${firstName}, it's Mia at TMI Tech AI. You started the Intelligent Company Audit but didn't finish checkout. You can pick it back up here: ${resumeUrl}`,
+        sms: `Hey ${firstName}, it's Mia at TMI Tech AI. You started the Executive Discovery Session but didn't finish checkout. You can pick it back up here: ${resumeUrl}`,
       };
     case 'day1':
       return {
@@ -57,7 +57,7 @@ function copy(step, firstName, resumeUrl) {
         subject: 'Last note on your audit',
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">I am not going to keep filling your inbox. If the timing is not right, that is fine.</p>
-<p style="margin:0 0 8px;">When you are ready for a clear read on how your company runs and what to build first, the audit is right here. If you would rather talk it through first, reply to this email.</p>`,
+<p style="margin:0 0 8px;">When you are ready for a clear read on how your company runs and what to build first, the session is right here. If you would rather talk it through first, reply to this email.</p>`,
         sms: '',
       };
   }
