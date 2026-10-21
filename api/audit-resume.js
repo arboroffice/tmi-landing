@@ -6,7 +6,7 @@
 const dbx = require('./_db');
 
 const SITE = 'https://www.tmitechai.com';
-const PRICE_CENTS = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 500000); // $5,000
+const PRICE_CENTS = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 2500000); // $25,000
 
 function redirect(res, url) {
   res.statusCode = 302;

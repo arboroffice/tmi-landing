@@ -230,7 +230,7 @@ module.exports = async function handler(req, res) {
       if (!(s.metadata && s.metadata.product === 'build_deposit')) {
         const em = (s.customer_details && s.customer_details.email) || s.customer_email || null;
         const co = (s.metadata && s.metadata.company) || '';
-        if (em || co) alertTeam(`Abandoned Executive Discovery Session checkout: ${co || em || s.id}${em ? ' | ' + em : ''} - follow up`);
+        if (em || co) alertTeam(`Abandoned Intelligent Company Audit checkout: ${co || em || s.id}${em ? ' | ' + em : ''} - follow up`);
 
         // Nudge them, not just us. api/audit-followup.js holds this chain and
         // stops the moment the application's status is paid or unsubscribed; it

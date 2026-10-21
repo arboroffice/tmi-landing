@@ -1,5 +1,5 @@
 // Admin - Payments & OS. Every Intelligent Company Audit lead, whether they
-// paid the $5,000 or not, joined to their OS (tenant) if they have one. This is
+// paid the $25,000 or not, joined to their OS (tenant) if they have one. This is
 // how the team tracks who paid, when, and whether that customer is now running
 // on the OS. Admin-only.
 //
@@ -8,7 +8,7 @@
 const db = require('./_db');
 const { cors, requireAuth } = require('./_auth');
 
-const AUDIT_PRICE = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 500000) / 100; // $5,000
+const AUDIT_PRICE = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 2500000) / 100; // $25,000
 
 module.exports = async function handler(req, res) {
   cors(res);

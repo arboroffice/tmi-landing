@@ -1,7 +1,10 @@
-// Stripe Checkout for the $5,000 Executive Discovery Session.
-// The line item said "TMI Intelligent Company Audit" against a $5,000 charge,
-// which is the name tmitechai.com puts on the $25,000 thirty-day engagement.
-// The amount is unchanged; only what the customer reads on the receipt is.
+// Stripe Checkout for the $25,000 Intelligent Company Audit, which is how an
+// engagement with TMI starts. The $5,000 Executive Discovery Session that used
+// to sit in front of it is withdrawn.
+//
+// The amount charged comes from COMPLETE_AUDIT_PRICE_CENTS, so the default
+// below is only what applies when that variable is unset. It has to be changed
+// in the environment as well, or this still charges whatever it charged before.
 //   POST { email?, company? } -> { url }        (used by the app / fetch flows)
 //   GET  ?email=&company=      -> 303 redirect   (a shareable pay link: opening
 //                                 it sends the visitor straight to Stripe)
@@ -9,7 +12,7 @@
 const { cors } = require('./_auth');
 
 const SITE = 'https://www.tmitechai.com';
-const PRICE_CENTS = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 500000); // $5,000
+const PRICE_CENTS = Number(process.env.COMPLETE_AUDIT_PRICE_CENTS || 2500000); // $25,000
 
 async function createSession(email, company) {
   const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -20,7 +23,7 @@ async function createSession(email, company) {
       price_data: {
         currency: 'usd',
         product_data: {
-          name: 'TMI Executive Discovery Session',
+          name: 'TMI Intelligent Company Audit',
           description: 'A working session with TMI leadership on operations, people, software, data, workflows, owner dependency, reporting and bottlenecks. You leave knowing what is broken, what it is costing and what to fix first.',
         },
         unit_amount: PRICE_CENTS,
