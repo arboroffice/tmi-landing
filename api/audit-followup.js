@@ -32,7 +32,7 @@ function copy(step, firstName, resumeUrl) {
         subject: 'Finish booking your Intelligent Company Audit',
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">You started the Intelligent Company Audit but did not finish checkout. It is a working session with TMI leadership: operations, people, software, data, workflows, how much still runs through you, reporting and bottlenecks. You leave knowing what is broken, what it is costing and what to fix first.</p>
-<p style="margin:0 0 8px;">You get a Business Intelligence Score out of 100 across ten areas, a five-page report, and the Intelligent Company Roadmap. The roadmap is yours outright, whatever you decide to do afterwards.</p>`,
+<p style="margin:0 0 8px;">You get a Business Intelligence Score out of 100 across ten areas, fourteen deliverables, and the Intelligent Company Roadmap. The roadmap is yours outright, whatever you decide to do afterwards.</p>`,
         sms: `Hey ${firstName}, it's Mia at TMI Tech AI. You started the Intelligent Company Audit but didn't finish checkout. You can pick it back up here: ${resumeUrl}`,
       };
     case 'day1':
@@ -49,7 +49,7 @@ function copy(step, firstName, resumeUrl) {
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">The audit has a price because it is a fixed thing. Paying for it changes what it is: we go into the systems and the numbers rather than taking anyone's word for them, and you own a document you can hand to a partner, a banker or a buyer.</p>
 <p style="margin:0 0 8px;">$25,000, in person or by phone. Anything after it is scoped from what the audit found, in writing, before any work begins.</p>`,
-        sms: `${firstName}, the Intelligent Company Audit is $25,000: a Business Intelligence Score out of 100, a five-page report, and a roadmap you own. Pick it back up here: ${resumeUrl}`,
+        sms: `${firstName}, the Intelligent Company Audit is $25,000: a Business Intelligence Score out of 100, fourteen deliverables, and a roadmap you own. Pick it back up here: ${resumeUrl}`,
       };
     case 'day7':
     default:

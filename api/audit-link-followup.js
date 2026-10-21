@@ -22,7 +22,7 @@ function copy(step, l, rep) {
     subject: `Your Intelligent Company Audit with TMI Tech AI`,
     email: [`Hey ${name},`,
       `Following up on the Intelligent Company Audit for ${co}.`,
-      `Quick reminder of what it is: 30 to 45 minutes, in person or by phone, looking at how the company sells, operates, communicates, tracks information and makes decisions. You get a Business Intelligence Score out of 100 across ten areas, a five-page report, and the Intelligent Company Roadmap, which is yours to keep whether or not you ever work with us.`,
+      `Quick reminder of what it is: thirty days inside the business, looking at how the company sells, operates, communicates, tracks information and makes decisions. You get a Business Intelligence Score out of 100 across ten areas, fourteen deliverables, and the Intelligent Company Roadmap, which is yours to keep whether or not you ever work with us.`,
       `Here is the link to get it started: ${link}`,
       `Any questions, just reply to this email.`,
       `${rep}\nTMI Tech AI`],

@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
           currency: 'usd',
           product_data: {
             name: 'TMI Intelligent Company Audit',
-            description: 'Intelligent Company Audit: 30 to 45 minutes in person or by phone, a Business Intelligence Score out of 100 across ten areas, a five-page report, and the Intelligent Company Roadmap, which is yours to keep.',
+            description: 'Intelligent Company Audit: thirty days inside the business, a Business Intelligence Score out of 100 across ten areas, fourteen deliverables, and the Intelligent Company Roadmap, which is yours to keep.',
           },
           unit_amount: PRICE_CENTS,
         },

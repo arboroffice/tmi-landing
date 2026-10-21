@@ -21,11 +21,39 @@ module.exports = [
  },
  {
   "q": "Give me the thirty-second pitch.",
-  "a": "TMI helps owners of established companies build a business that runs better without depending on them for everything. We go inside the operation, find where time, knowledge, visibility and opportunity are being lost, then build the systems, tools, brand and growth infrastructure around what already works. It starts with the Intelligent Company Audit. Then stop talking and ask them where everything still comes back to them."
+  "a": "You have been running this company for years, and the whole time it has been writing things down. Quotes, job files, maintenance logs, what your best guy knows about that machine. Most of that is sitting in filing cabinets, in software nobody opens, and in two or three people's heads. We spend thirty days finding out what is in there, what it is costing you to leave it there, and what it would be worth to put it to work. You get the whole thing in writing whether you hire us afterwards or not. Then stop talking and ask them where everything still comes back to them."
  },
  {
   "q": "What am I actually selling at the door?",
-  "a": "The Intelligent Company Audit, $25,000. A working session with TMI leadership that goes through operations, people, software, data, workflows, how much still runs through the owner, reporting, bottlenecks, and what only lives in heads. They leave knowing what is broken, what it is costing, what to fix first and what not to touch yet. If there is not enough value to justify going deeper, we tell them so. When they say yes, send the payment link by text or email, or let them scan the QR. Do not call it the audit: the Intelligent Company Audit is the $25,000, thirty-day engagement that may come after."
+  "a": "The Intelligent Company Audit, $25,000, thirty days inside the business. We review five areas: operations, data, systems, people and opportunities. They end up with fourteen deliverables and the Intelligent Company Roadmap, which is a ranked plan saying what they already have, what is being wasted, the biggest opportunities we found, what each could be worth, what acting on it would take and what to do first. They own all of it outright. Be honest about the shape of the sale: $25,000 is not a counter close. Your win on a first visit is a booked Fit Call with Mia and Tyler, which is free and fifteen minutes. The audit gets agreed on that call, not at the door."
+ },
+ {
+  "q": "What is my actual win on a first visit?",
+  "a": "A booked Fit Call, with a name, a date and a time. That is the sale at this price. $25,000 does not get agreed by a stranger at a counter, and trying makes you look like you do not know what you are selling. Get the owner talking, find the one thing that is costing them, and book fifteen minutes with Mia and Tyler. Never leave without a person, an action and a date."
+ },
+ {
+  "q": "How do I open on backend operations? The time and money angle.",
+  "a": "Go at the office, not the floor. They are usually proud of the floor. Say: most of the companies we walk into are good at the work and losing money in the office, and ask what the last job that went sideways cost them. Then listen for these, because they are what we find every time. The same information typed into three places. A quote nobody followed up. An invoice that went out two weeks after the job finished. A report somebody rebuilds by hand every Monday. One person who has to be asked before anything is approved. Every one of those is hours a week, and hours a week is a number the owner can work out in their head while you are standing there. Do not work it out for them and do not put a figure on it yourself."
+ },
+ {
+  "q": "How do I open on the data angle? The making money side.",
+  "a": "Owners do not think of their records as an asset, so give them the picture. Twenty years of quotes tells you what you should be charging and which customers are worth keeping. Twenty years of maintenance logs tells you which machine is about to cost you a week. What your best machinist knows about that machine is not written down anywhere, and when he retires it leaves with him. That is the pitch: you already paid for all of it, and right now it is doing nothing for you. The audit is how you find out which parts are useful, which are a risk, and which are worth real money."
+ },
+ {
+  "q": "Can I tell them their data is worth money? What can I promise about licensing?",
+  "a": "You can say it might be, and you must say it carefully. AI companies do need real industrial knowledge, and some companies hold records that could be licensed. That is a genuine path and it is one of four, and most companies get told it does not apply to them. So: never name a buyer, never name a figure, never say a dataset is worth anything specific, and never suggest they could sell data they may not have the rights to. The honest line is that the audit tells you whether there is a lawful opportunity here, what it would take to prepare it, and whether anyone is actually buying. Anything beyond that is you writing a cheque the company has to cash."
+ },
+ {
+  "q": "How do I justify $25,000 without inventing numbers?",
+  "a": "By making the owner do the arithmetic. One person doing ten unnecessary hours a week. One invoicing delay on every job. One employee holding years of knowledge nobody else has. Ask what any one of those costs over a year and let the silence do the work. Then: you are not paying $25,000 for a document, you are paying to find out what is actually in there before you spend real money fixing the wrong thing. Automating a bad process just makes the bad process run faster. Never give them a savings figure, a payback period or a percentage. We do not have one for their company yet, and that is exactly what the audit is for."
+ },
+ {
+  "q": "They are interested but it is a big number. What do I say next?",
+  "a": "Do not discount and do not shrink the offer, there is nothing smaller to sell. Say: I am not going to ask you to decide on $25,000 standing here. Fifteen minutes with Mia and Tyler, free, and they will tell you straight whether this is worth doing for a company like yours. Some of those calls end with them saying no. Then book it in front of them."
+ },
+ {
+  "q": "What if they ask what they get for the money, specifically?",
+  "a": "Fourteen documents over thirty days, and name the ones that land for their business. A map of how work actually moves from the first call to the final payment. Every system they pay for, marked connected, disconnected or duplicate. Where the important information lives and who controls it. What only exists in somebody's head. Where the company depends on one person. What is being wasted. Where AI would genuinely help and where it would not. And the roadmap, ranked, with what each move would take. All of it theirs, written so another firm could execute it."
  },
  {
   "q": "What if the owner is interested but not ready to pay today?",
@@ -65,7 +93,7 @@ module.exports = [
  },
  {
   "q": "How do I get paid?",
-  "a": "When the audit link you send is paid, you are credited. Commission is 10% of what the client pays, on the audit and on every upsell on that account after it, including implementation, retainers and add-ons. Your manager sets your targets."
+  "a": "When the audit link you send is paid, you are credited. Commission is a percentage of what the client actually pays, on the audit and on every upsell on that account after it, including implementation, retainers and add-ons. Your current rate is set in the admin, not in this answer, because it changes without a deploy. Ask your manager for your rate and your targets."
  },
  {
   "q": "Do I need to know the tech to sell this?",
@@ -79,7 +107,7 @@ module.exports = [
  // ---------- Price ----------
  {
   "q": "\"Why isn't the audit free?\"",
-  "a": "Because a free audit is a sales call wearing a costume, and you would see through it. The audit has a price because it is a fixed thing: a score out of 100, a five-page report and a roadmap. The roadmap is yours whether or not you ever hire TMI. If you only want a conversation about fit first, that is the Fit Call, and that part has never cost anything."
+  "a": "Because a free audit is a sales call wearing a costume, and you would see through it. The audit has a price because it is a fixed thing: thirty days, fourteen deliverables, a score out of 100 across ten areas, and the roadmap. All of it is yours whether or not you ever hire TMI, and it is written so another firm could carry it out. If you only want a conversation about fit first, that is the Fit Call, and that part has never cost anything."
  },
  {
   "q": "\"What's the catch?\"",
@@ -87,7 +115,7 @@ module.exports = [
  },
  {
   "q": "\"It's too expensive.\"",
-  "a": "Fair question to ask. Let me ask you one back: how many hours a week do you spend answering questions only you can answer? What does that hour cost you? The session is a fixed $25,000 and what you learn in it is yours either way. If you want to talk fit before spending anything, I can set you up with the free 15 minute Fit Call with Mia and Tyler."
+  "a": "It is real money and you should push back on it. Two questions back. How many hours a week do you spend answering questions only you can answer, and what is that hour worth? And if you had to hand this company to somebody next year, how much of it could you actually hand over? The audit is a fixed $25,000, it runs thirty days, and everything it produces is yours even if you never hire us again. We do not put a savings number on it before we look, because anyone who does is guessing. If you want to test the fit before spending anything, the Fit Call with Mia and Tyler is free and fifteen minutes."
  },
  {
   "q": "\"I don't have the budget right now.\"",
@@ -99,7 +127,7 @@ module.exports = [
  },
  {
   "q": "What are the published starting prices?",
-  "a": "Two published numbers, and only two. The Intelligent Company Audit is $25,000. The Intelligent Company Audit is $25,000 over thirty days. Everything built after that is scoped from what the audit found, fixed scope and fixed price, in writing before any work starts. There is an AI Department at $10,000 a month for companies that want us inside the office, and it is its own agreement, usually after the roadmap. Never quote a build total, a range, or a starting-from figure for their size. The old floors, builds from $15,000 and the rest, are retired: do not use them. Point them to tmitechai.com/pricing.html."
+  "a": "One published number. The Intelligent Company Audit is $25,000 over thirty days, and it is how working with TMI starts. The Fit Call before it is free. Everything built afterwards is scoped from what the audit found, fixed scope and fixed price, in writing before any work starts. There is an AI Department at $10,000 a month for companies that want us inside the office; it is its own agreement, usually after the roadmap, and it is not on the public site. Never quote a build total, a range, or a starting-from figure for their size. Two things are retired and must not be used: the $5,000 Executive Discovery Session, and the old price floors like builds from $15,000. Point them to tmitechai.com/pricing.html."
  },
  {
   "q": "\"So what would the whole thing cost for a company my size?\"",
@@ -121,7 +149,7 @@ module.exports = [
  // ---------- Owner and people ----------
  {
   "q": "\"I don't have time for this.\"",
-  "a": "That is usually the problem itself. If everything still comes back to you, there is no time left to fix the thing that sends it back to you. The audit is 30 to 45 minutes, by phone if that is easier. When could you give it 45 minutes this week?"
+  "a": "That is usually the problem itself. If everything still comes back to you, there is no time left to fix the thing that sends it back to you. The audit is thirty days, by phone if that is easier. When could you give it 45 minutes this week?"
  },
  {
   "q": "\"Everything runs fine, we're doing well.\"",
@@ -252,8 +280,8 @@ module.exports = [
   "a": "Only the published starting prices, as floors. The safe line is: builds start around fifteen thousand, and you would get a real number in writing after the audit, not before. Never give a total, a range, or a guess for their size."
  },
  {
-  "q": "Is the Intelligent Company Audit the same as the Intelligent Company Assessment?",
-  "a": "No. What you sell is the Intelligent Company Audit, $25,000, a working session with TMI leadership. The Intelligent Company Audit is the thirty-day, $25,000 engagement that can follow it, with fourteen deliverables and the roadmap. Two different products, two different prices, and they must never be called by the same name in front of an owner."
+  "q": "Is there anything cheaper I can sell instead?",
+  "a": "No, and do not invent one. There is the free Fit Call and there is the $25,000 Intelligent Company Audit. The $5,000 Executive Discovery Session that used to sit between them is withdrawn, so if an owner mentions it, or you find it in an old deck, tell them it no longer exists. Shrinking the offer to close someone is how a company ends up doing $25,000 of work for $5,000."
  },
  {
   "q": "Can I take photos inside their shop?",
