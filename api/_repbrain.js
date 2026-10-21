@@ -2,11 +2,15 @@
 // answers with TMI's real lines, not invented ones.
 // Source of truth: the live site, tmitechai.com (intelligent-company-audit.html,
 // pricing.html, faq.html, llms.txt). Rewritten Oct 2026 to match it:
-//   - The rep's goal is the $5,000 Intelligent Company Audit, paid by link (text,
+//   - The rep's goal is the $5,000 Executive Discovery Session, paid by link (text,
 //     email or QR). If the owner is not ready: the free Fit Call with Mia and Tyler,
 //     https://www.tmitechai.com/intelligent-company-audit.html#book, or a dated follow-up.
-//   - Only published starting prices, framed as floors. No totals, ranges, timelines,
-//     discounts, invented numbers or client stories.
+//   - The Intelligent Company Audit is the $25,000, thirty-day engagement that comes
+//     after. It is NOT the thing a rep closes at the door, and the two must never be
+//     called by the same name. That confusion was live in this file until Oct 2026,
+//     when reps were quoting $5,000 for a product the site prices at $25,000.
+//   - Only the two published prices, $5,000 and $25,000. No totals, ranges, timelines,
+//     discounts, invented numbers, retired price floors or client stories.
 // Shape: array of { q, a }. Keep it that way, rep-ask.js reads e.q and e.a.
 
 module.exports = [
@@ -21,7 +25,7 @@ module.exports = [
  },
  {
   "q": "What am I actually selling at the door?",
-  "a": "The Intelligent Company Audit, $5,000. It is 30 to 45 minutes, in person or by phone, and it looks at how the company sells, operates, communicates, tracks information and makes decisions. They get a Business Intelligence Score out of 100 across ten areas, a five-page report, and the Intelligent Company Roadmap, which they own outright. When they say yes, send the payment link by text or email, or let them scan the QR."
+  "a": "The Executive Discovery Session, $5,000. A working session with TMI leadership that goes through operations, people, software, data, workflows, how much still runs through the owner, reporting, bottlenecks, and what only lives in heads. They leave knowing what is broken, what it is costing, what to fix first and what not to touch yet. If there is not enough value to justify going deeper, we tell them so. When they say yes, send the payment link by text or email, or let them scan the QR. Do not call it the audit: the Intelligent Company Audit is the $25,000, thirty-day engagement that may come after."
  },
  {
   "q": "What if the owner is interested but not ready to pay today?",
@@ -49,7 +53,7 @@ module.exports = [
  },
  {
   "q": "How do I qualify a prospect?",
-  "a": "An established company with employees, customers and more than one system, where the owner is still the answer to every question. Listen for knowledge living in two or three people's heads, software the team works around, and a handover coming. If someone there can say yes to $5,000, they are a fit for the audit."
+  "a": "An established company with employees, customers and more than one system, where the owner is still the answer to every question. Listen for knowledge living in two or three people's heads, software the team works around, and a handover coming. If someone there can say yes to $5,000, they are a fit for the Discovery Session."
  },
  {
   "q": "What openers actually land?",
@@ -79,11 +83,11 @@ module.exports = [
  },
  {
   "q": "\"What's the catch?\"",
-  "a": "It costs $5,000 and it is worth exactly what it says. You get a score, a report and the Intelligent Company Roadmap, and you own it. The roadmap is written so another firm could carry it out, so you are not locked into us."
+  "a": "The session is $5,000 and it is fixed. You leave knowing what is broken, what it is costing and what to fix first, and that is yours whatever you decide next. If it turns into the thirty-day audit, that is $25,000 and fourteen deliverables including the Intelligent Company Roadmap, which you own outright. The roadmap is written so another firm could carry it out, so you are not locked into us."
  },
  {
   "q": "\"It's too expensive.\"",
-  "a": "Fair question to ask. Let me ask you one back: how many hours a week do you spend answering questions only you can answer? What does that hour cost you? The audit is a fixed $5,000 and you keep the roadmap either way. If you want to talk fit before spending anything, I can set you up with the free 15 minute Fit Call with Mia and Tyler."
+  "a": "Fair question to ask. Let me ask you one back: how many hours a week do you spend answering questions only you can answer? What does that hour cost you? The session is a fixed $5,000 and what you learn in it is yours either way. If you want to talk fit before spending anything, I can set you up with the free 15 minute Fit Call with Mia and Tyler."
  },
  {
   "q": "\"I don't have the budget right now.\"",
@@ -95,7 +99,7 @@ module.exports = [
  },
  {
   "q": "What are the published starting prices?",
-  "a": "These are floors, not quotes. Audit $5,000. Intelligent Company Builds and Company Operating Systems from $15,000. Business Intelligence and Custom Software from $10,000. Automation from $3,500. Digital Employees, Human Performance and Company Brain from $5,000. Embedded Company Partner from $3,500 a month, six month minimum. Brand and Website from $7,500. Never quote a total or a range for their size. Point them to tmitechai.com/pricing.html."
+  "a": "Two published numbers, and only two. The Executive Discovery Session is $5,000. The Intelligent Company Audit is $25,000 over thirty days. Everything built after that is scoped from what the audit found, fixed scope and fixed price, in writing before any work starts. There is an AI Department at $10,000 a month for companies that want us inside the office, and it is its own agreement, usually after the roadmap. Never quote a build total, a range, or a starting-from figure for their size. The old floors, builds from $15,000 and the rest, are retired: do not use them. Point them to tmitechai.com/pricing.html."
  },
  {
   "q": "\"So what would the whole thing cost for a company my size?\"",
@@ -249,7 +253,7 @@ module.exports = [
  },
  {
   "q": "Is the Intelligent Company Audit the same as the Intelligent Company Assessment?",
-  "a": "No. The audit is the $5,000, 30 to 45 minute entry offer you sell. The Assessment is a different, deeper on-site product that starts at $15,000. Do not mix them up, and only ever call the audit the Intelligent Company Audit."
+  "a": "No. What you sell is the Executive Discovery Session, $5,000, a working session with TMI leadership. The Intelligent Company Audit is the thirty-day, $25,000 engagement that can follow it, with fourteen deliverables and the roadmap. Two different products, two different prices, and they must never be called by the same name in front of an owner."
  },
  {
   "q": "Can I take photos inside their shop?",

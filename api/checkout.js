@@ -1,4 +1,7 @@
-// Stripe Checkout for the $5,000 Intelligent Company Audit.
+// Stripe Checkout for the $5,000 Executive Discovery Session.
+// The line item said "TMI Intelligent Company Audit" against a $5,000 charge,
+// which is the name tmitechai.com puts on the $25,000 thirty-day engagement.
+// The amount is unchanged; only what the customer reads on the receipt is.
 //   POST { email?, company? } -> { url }        (used by the app / fetch flows)
 //   GET  ?email=&company=      -> 303 redirect   (a shareable pay link: opening
 //                                 it sends the visitor straight to Stripe)
@@ -17,8 +20,8 @@ async function createSession(email, company) {
       price_data: {
         currency: 'usd',
         product_data: {
-          name: 'TMI Intelligent Company Audit',
-          description: 'Detailed operational audit, Intelligence Score, 30-day plan, and a 30-minute strategy call with the founder and a strategist. Credits toward your build.',
+          name: 'TMI Executive Discovery Session',
+          description: 'A working session with TMI leadership on operations, people, software, data, workflows, owner dependency, reporting and bottlenecks. You leave knowing what is broken, what it is costing and what to fix first.',
         },
         unit_amount: PRICE_CENTS,
       },

@@ -1,4 +1,4 @@
-// Revenue the funnel actually collects: paid $5,000 Intelligent Company Audits + accepted
+// Revenue the funnel actually collects: paid $5,000 Executive Discovery Sessions + accepted
 // build-proposal deposits (real Stripe charges). Admin-only.
 
 const { cors, requireAuth } = require('./_auth');

@@ -1,4 +1,5 @@
 const db = require('./_db');
+const offers = require('./_offers');
 const { Resend } = require('resend');
 const twilio = require('twilio');
 const { Client: QStashClient } = require('@upstash/qstash');
@@ -30,7 +31,7 @@ function buildInitialEmail(firstName, unsubUrl) {
 <p style="margin:0 0 8px;">The Fit Call is free and takes 15 minutes. It is there to work out whether TMI should come inside your company at all, and if the answer is no, we will say so on the call. It helps to come with:</p>
 <p style="margin:0 0 16px;color:#444;">1. The thing that most often still comes back to you.<br>2. A rough sense of the company: what you do, how many people, and where work tends to get stuck.<br>3. The software and tools you are paying for right now.</p>
 <p style="margin:0 0 24px;">Question before then, or want to talk sooner? Reply to this email and Mia or Tyler will get back to you.</p>
-<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI Tech AI</span></p>
 `, unsubUrl);
 }
 
@@ -137,15 +138,32 @@ module.exports = async function handler(req, res) {
   }).catch(e => console.error('Alert SMS 1 error:', e));
 
   sms.messages.create({
-    body: `PITCH: Free Fit Call (20-30 min) -> $5,000 Intelligent Company Audit (BI Score out of 100, five-page report, roadmap they own) -> build scoped from the roadmap, fixed scope and fixed price. TMI Partner is optional after.\n\nOpen on problems: everything still comes back to the owner, software the team works around, knowledge in two or three heads. Never quote a build total.\n\nFit Call: ${FIT_CALL_URL}`,
+    body: `PITCH: ${offers.pitch()}\n\nOpen on problems: everything still comes back to the owner, software the team works around, knowledge in two or three heads.\n\nFit Call: ${FIT_CALL_URL}`,
     from: FROM_NUMBER,
     to: ALERT_NUMBER,
   }).catch(e => console.error('Alert SMS 2 error:', e));
 
-  // No drip is scheduled here. People book a call immediately after this form, so
-  // the booking confirmation and pre-call reminders (api/booking-confirmed ->
-  // api/funnel-nurture) own the rest of the conversation. The email/SMS above
-  // already nudge anyone who did not finish picking a time back to the Fit Call.
+  // Chase until they book. api/followup.js already holds these four steps and
+  // suppresses every one of them the moment the lead's status becomes booked,
+  // won, lost or unsubscribed, so this cannot talk over a conversation that is
+  // already happening. Scheduling was lost when this handler replaced
+  // _archive/api/audit-submit.js, which left the sequence written but dark:
+  // anyone who did not finish picking a time got one email and one text, then
+  // silence.
+  if (process.env.QSTASH_TOKEN && app.id) {
+    const qstash = new QStashClient({ token: process.env.QSTASH_TOKEN });
+    const followupUrl = `${SITE}/api/followup`;
+    const DAY = 86400;
+    for (const { delay, step } of [
+      { delay: 1 * DAY, step: 'day1_sms' },
+      { delay: 3 * DAY, step: 'day3_email' },
+      { delay: 7 * DAY, step: 'day7_email_sms' },
+      { delay: 14 * DAY, step: 'day14_email' },
+    ]) {
+      qstash.publishJSON({ url: followupUrl, delay, body: { leadId: app.id, step } })
+        .catch((e) => console.error(`QStash ${step}:`, e.message));
+    }
+  }
 
   res.status(200).json({ ok: true });
 };

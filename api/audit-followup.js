@@ -1,6 +1,6 @@
 // Payment nurture for captured-but-unpaid Intelligent Company Audit leads.
 // Called by QStash on a schedule set in api/audit-capture.js. Each step nudges
-// the lead to complete the $5,000 audit. The chain stops as soon as the lead's
+// the lead to complete the $5,000 session. The chain stops as soon as the lead's
 // status flips to 'paid' (set by api/audit-intake.js after payment).
 //
 // POST { applicationId, step }
@@ -49,7 +49,7 @@ function copy(step, firstName, resumeUrl) {
         html: `<p style="margin:0 0 16px;">Hey ${firstName},</p>
 <p style="margin:0 0 16px;">The audit has a price because it is a fixed thing. Paying for it changes what it is: we go into the systems and the numbers rather than taking anyone's word for them, and you own a document you can hand to a partner, a banker or a buyer.</p>
 <p style="margin:0 0 8px;">$5,000, in person or by phone. Anything after it is scoped from what the audit found, in writing, before any work begins.</p>`,
-        sms: `${firstName}, the Intelligent Company Audit is $5,000: a Business Intelligence Score out of 100, a five-page report, and a roadmap you own. Pick it back up here: ${resumeUrl}`,
+        sms: `${firstName}, the Executive Discovery Session is $5,000: a Business Intelligence Score out of 100, a five-page report, and a roadmap you own. Pick it back up here: ${resumeUrl}`,
       };
     case 'day7':
     default:
