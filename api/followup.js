@@ -277,7 +277,7 @@ ${sig}`;
 <p style="margin:0 0 16px;">Thanks for filling in the form. Here's the pattern we look for underneath answers like yours.</p>
 <p style="margin:0 0 16px;">A company that grew by being good at the work tends to get stuck in one of three places. The founder, where every decision waits on one person. The information, where job status and numbers live in people's heads and texts instead of somewhere you can see. And the latency, the lag in every handoff, where margin quietly leaks out.</p>
 <p style="margin:0 0 16px;">From what you told us about ${industryLine}, the one that sounds loudest is this: ${worstLine}.</p>
-<p style="margin:0 0 24px;">An intelligent company runs those three on systems instead of on you. The Intelligent Company Audit is how we measure it properly: 30 to 45 minutes, in person or by phone, a Business Intelligence Score out of 100 across ten areas, a five-page report, and a roadmap you own. It starts with a free 15 minute Fit Call: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
+<p style="margin:0 0 24px;">An intelligent company runs those three on systems instead of on you. The Intelligent Company Audit is how we measure it properly: thirty days inside the business, a Business Intelligence Score out of 100 across ten areas, fourteen deliverables, and a roadmap you own. It starts with a free 15 minute Fit Call: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">book the Fit Call</a></p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Co-founder, TMI Tech AI</span></p>
 `, unsubUrl),
     });

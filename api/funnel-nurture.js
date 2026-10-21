@@ -69,9 +69,9 @@ module.exports = async function handler(req, res) {
       const unsub = app ? `${APP}/api/unsubscribe?id=${app.id}` : null;
       await email(b.email, 'One quick step to schedule your audit',
         `<p style="margin:0 0 16px;">Hey ${name},</p>
-<p style="margin:0 0 16px;">Your Intelligent Company Audit is paid. Thank you. The next step is picking a time for the audit itself: 30 to 45 minutes, in person or by phone. Nothing needs to be prepared. If you can have rough numbers to hand, like monthly jobs, average job value and headcount, the report comes back sharper.</p>
+<p style="margin:0 0 16px;">Your Intelligent Company Audit is paid. Thank you. The next step is picking a time for the audit itself: thirty days inside the business. Nothing needs to be prepared. If you can have rough numbers to hand, like monthly jobs, average job value and headcount, the report comes back sharper.</p>
 <p style="margin:0 0 16px;">Use the link below, or reply to this email with a few times that work.</p>${cta(url, 'Schedule my audit')}`, unsub);
-      if (b.touch === 'second') await sms(app && app.phone, `${name}, your Intelligent Company Audit is paid. Pick a time for the 30 to 45 minutes, in person or by phone: ${url} Or reply here with a few times that work.`);
+      if (b.touch === 'second') await sms(app && app.phone, `${name}, your Intelligent Company Audit is paid. Pick a time for the thirty days inside the business: ${url} Or reply here with a few times that work.`);
       return ack();
     }
 

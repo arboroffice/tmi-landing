@@ -8,11 +8,16 @@
 //   (Inbox > Applications). venture_studio -> venture_applications (Venture Studio).
 // Every submission is also kept raw in site_submissions.
 const db = require('./_db');
+const leadResponse = require('./_lead-response');
 
 const ALLOWED = ['https://www.tmitechai.com', 'https://tmitechai.com'];
 const FROM_NUMBER = '+18557171044';
 const ALERT_NUMBER = '+13373809059';
 const AUDIENCE = { owner_audit: 'owner', embedded_partner: 'embedded_partner', exit_readiness: 'exit_readiness', fotf_application: 'founder' };
+// Owner-side intents get the instant reply and the chase. Founders of the
+// Future and Venture Studio applicants are a different conversation and have
+// their own handling, so they are left alone here.
+const RESPOND_TO = ['owner_audit', 'embedded_partner', 'exit_readiness'];
 const LABEL = { owner_audit: 'Audit / Fit Call', embedded_partner: 'Embedded Partner', exit_readiness: 'Exit Readiness', fotf_application: 'Founders of the Future', venture_studio: 'Venture Studio' };
 
 const clip = (v, n = 2000) => (v == null ? null : String(v).trim().slice(0, n) || null);
@@ -80,6 +85,17 @@ module.exports = async (req, res) => {
       };
       if (existing) await db.update('applications', existing.id, patch);
       else await db.insert('applications', Object.assign({ email, status: 'captured', captured_at: now, created_at: now }, patch));
+    }
+
+    // Reply to the person, within seconds, and start the chase. Until this was
+    // added the website never answered anybody: the row was saved, the team got
+    // a text, and the visitor heard nothing from TMI unless they went on to book
+    // a time themselves. Fire-and-forget on purpose — the browser's flow depends
+    // on FormSubmit, not on this, so a slow Resend or Twilio must not hold up the
+    // response or fail the save.
+    if (RESPOND_TO.includes(intent)) {
+      leadResponse.respondToInbound({ name, email, phone, company, source: 'tmitechai.com' })
+        .catch((e) => console.error('site-intake respond:', e.message));
     }
 
     // Team text for anything an owner sent.
