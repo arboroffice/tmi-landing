@@ -23,8 +23,10 @@ const db = require('./_db');
 
 const APP = 'https://admin.tmitechai.com';
 const SITE = 'https://www.tmitechai.com';
+const SITE_WWW = 'https://www.tmitechai.com';
 const FROM_NUMBER = '+18557171044';
 const FIT_CALL_URL = 'https://cal.com/miaeliana/tmi-fit-call';
+const SHEET_URL = SITE_WWW + '/assets/the-seventeen-questions.pdf';
 const DAY = 86400;
 
 // Day 1 is a text, so the first chase lands while they still remember us.
@@ -46,6 +48,16 @@ function emailWrap(body, unsubUrl) {
 ${body}
 ${unsubUrl ? `<p style="margin:40px 0 0;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;"><a href="${unsubUrl}" style="color:#bbb;">Unsubscribe</a></p>` : ''}
 </td></tr><tr><td style="padding:6px 30px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><div style="border-top:1px solid #eceee4;margin-top:8px;padding-top:16px;font-size:12px;line-height:1.6;color:#9a9ba5;">TMI Tech AI &middot; Lafayette, Louisiana<br><a href="${SITE}" style="color:#6f8f2a;text-decoration:none;">tmitechai.com</a></div></td></tr></table></td></tr></table></body></html>`;
+}
+
+function sheetEmail(firstName, unsubUrl) {
+  return emailWrap(`
+<p style="margin:0 0 20px;">Hey ${firstName},</p>
+<p style="margin:0 0 16px;">Here is the sheet: <a href="${SHEET_URL}" style="color:#5a9e00;">the seventeen questions, one page</a>. Print it and put it in front of whoever would have to go and find the answers.</p>
+<p style="margin:0 0 16px;">There is nothing to add up at the end, and we do not want your answers. If you had to ask somebody for one of them, that is the finding on its own: the data exists and nothing is reading it together.</p>
+<p style="margin:0 0 24px;">If you want to talk about what is behind that, the Fit Call is free and fifteen minutes: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">pick a time here</a>. If not, keep the sheet and we will leave you alone.</p>
+<p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI Tech AI</span></p>
+`, unsubUrl);
 }
 
 function greetingEmail(firstName, unsubUrl) {
@@ -112,18 +124,19 @@ async function scheduleChase(lead) {
 }
 
 // The reply the person gets within seconds. Sent once per lead.
-async function greet(lead, { name, email, phone }) {
+async function greet(lead, { name, email, phone, kind }) {
   if (!lead || lead.greeted_at) return false;
   const firstName = String(name || '').trim().split(/\s+/)[0] || 'there';
   const unsubUrl = `${APP}/api/unsubscribe?id=${lead.id}`;
+  const sheet = kind === 'seventeen_questions';
 
   if (process.env.RESEND_API_KEY) {
     const { Resend } = require('resend');
     new Resend(process.env.RESEND_API_KEY).emails.send({
       from: 'TMI <support@tmitechai.com>',
       to: email,
-      subject: 'Got it. Here is the next step.',
-      html: greetingEmail(firstName, unsubUrl),
+      subject: sheet ? 'The seventeen questions, one page.' : 'Got it. Here is the next step.',
+      html: sheet ? sheetEmail(firstName, unsubUrl) : greetingEmail(firstName, unsubUrl),
     }).catch((e) => console.error('lead-response email:', e.message));
   }
 
@@ -131,7 +144,9 @@ async function greet(lead, { name, email, phone }) {
   if (to && process.env.TWILIO_ACCOUNT_SID) {
     require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
       .messages.create({
-        body: `Hey ${firstName}, it's Mia at TMI Tech AI. Got your form. Next step is a free 15 minute Fit Call to work out whether we should be inside your company at all: ${FIT_CALL_URL} Reply here with questions.`,
+        body: sheet
+          ? `Hey ${firstName}, it's Mia at TMI Tech AI. The seventeen questions, one page: ${SHEET_URL} Nothing to add up. If you want to talk about what is behind it, the Fit Call is free: ${FIT_CALL_URL}`
+          : `Hey ${firstName}, it's Mia at TMI Tech AI. Got your form. Next step is a free 15 minute Fit Call to work out whether we should be inside your company at all: ${FIT_CALL_URL} Reply here with questions.`,
         from: FROM_NUMBER,
         to,
       }).catch((e) => console.error('lead-response sms:', e.message));
@@ -142,10 +157,10 @@ async function greet(lead, { name, email, phone }) {
 }
 
 // One call for an inbound form: enrol, reply, and start the chase.
-async function respondToInbound({ name, email, phone, company, source }) {
+async function respondToInbound({ name, email, phone, company, source, kind }) {
   const lead = await enrol({ email, name, phone, company, source });
   if (!lead) return { ok: false, reason: 'suppressed or invalid' };
-  const greeted = await greet(lead, { name, email, phone });
+  const greeted = await greet(lead, { name, email, phone, kind });
   const scheduled = await scheduleChase(lead);
   return { ok: true, leadId: lead.id, greeted, scheduled };
 }

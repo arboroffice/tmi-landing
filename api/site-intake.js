@@ -6,6 +6,8 @@
 //
 // owner_audit / embedded_partner / exit_readiness / fotf_application -> applications
 //   (Inbox > Applications). venture_studio -> venture_applications (Venture Studio).
+// seventeen_questions is the lead magnet: it answers and starts the chase like
+// an owner intent, but it is not an application and does not go to Applications.
 // Every submission is also kept raw in site_submissions.
 const db = require('./_db');
 const leadResponse = require('./_lead-response');
@@ -17,8 +19,8 @@ const AUDIENCE = { owner_audit: 'owner', embedded_partner: 'embedded_partner', e
 // Owner-side intents get the instant reply and the chase. Founders of the
 // Future and Venture Studio applicants are a different conversation and have
 // their own handling, so they are left alone here.
-const RESPOND_TO = ['owner_audit', 'embedded_partner', 'exit_readiness'];
-const LABEL = { owner_audit: 'Audit / Fit Call', embedded_partner: 'Embedded Partner', exit_readiness: 'Exit Readiness', fotf_application: 'Founders of the Future', venture_studio: 'Venture Studio' };
+const RESPOND_TO = ['owner_audit', 'embedded_partner', 'exit_readiness', 'seventeen_questions'];
+const LABEL = { owner_audit: 'Audit / Fit Call', embedded_partner: 'Embedded Partner', exit_readiness: 'Exit Readiness', fotf_application: 'Founders of the Future', venture_studio: 'Venture Studio', seventeen_questions: 'Seventeen Questions (sheet)' };
 
 const clip = (v, n = 2000) => (v == null ? null : String(v).trim().slice(0, n) || null);
 
@@ -94,7 +96,7 @@ module.exports = async (req, res) => {
     // on FormSubmit, not on this, so a slow Resend or Twilio must not hold up the
     // response or fail the save.
     if (RESPOND_TO.includes(intent)) {
-      leadResponse.respondToInbound({ name, email, phone, company, source: 'tmitechai.com' })
+      leadResponse.respondToInbound({ name, email, phone, company, source: 'tmitechai.com', kind: intent })
         .catch((e) => console.error('site-intake respond:', e.message));
     }
 
