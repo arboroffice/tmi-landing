@@ -6,8 +6,9 @@
 //
 // owner_audit / embedded_partner / exit_readiness / fotf_application -> applications
 //   (Inbox > Applications). venture_studio -> venture_applications (Venture Studio).
-// seventeen_questions is the lead magnet: it answers and starts the chase like
-// an owner intent, but it is not an application and does not go to Applications.
+// roadmap_example is the lead magnet: it answers and starts the chase like an
+// owner intent, but it is not an application and does not go to Applications.
+// seventeen_questions is gone -- that page is ungated now and has no form.
 // Every submission is also kept raw in site_submissions.
 const db = require('./_db');
 const leadResponse = require('./_lead-response');
@@ -19,8 +20,8 @@ const AUDIENCE = { owner_audit: 'owner', embedded_partner: 'embedded_partner', e
 // Owner-side intents get the instant reply and the chase. Founders of the
 // Future and Venture Studio applicants are a different conversation and have
 // their own handling, so they are left alone here.
-const RESPOND_TO = ['owner_audit', 'embedded_partner', 'exit_readiness', 'seventeen_questions'];
-const LABEL = { owner_audit: 'Audit / Fit Call', embedded_partner: 'Embedded Partner', exit_readiness: 'Exit Readiness', fotf_application: 'Founders of the Future', venture_studio: 'Venture Studio', seventeen_questions: 'Seventeen Questions (sheet)' };
+const RESPOND_TO = ['owner_audit', 'embedded_partner', 'exit_readiness', 'roadmap_example'];
+const LABEL = { owner_audit: 'Audit / Fit Call', embedded_partner: 'Embedded Partner', exit_readiness: 'Exit Readiness', fotf_application: 'Founders of the Future', venture_studio: 'Venture Studio', roadmap_example: 'Sample Roadmap' };
 
 const clip = (v, n = 2000) => (v == null ? null : String(v).trim().slice(0, n) || null);
 

@@ -26,7 +26,7 @@ const SITE = 'https://www.tmitechai.com';
 const SITE_WWW = 'https://www.tmitechai.com';
 const FROM_NUMBER = '+18557171044';
 const FIT_CALL_URL = 'https://cal.com/miaeliana/tmi-fit-call';
-const SHEET_URL = SITE_WWW + '/assets/the-seventeen-questions.pdf';
+const ROADMAP_URL = SITE_WWW + '/assets/intelligent-company-roadmap-example.pdf';
 const DAY = 86400;
 
 // Day 1 is a text, so the first chase lands while they still remember us.
@@ -53,9 +53,9 @@ ${unsubUrl ? `<p style="margin:40px 0 0;font-size:11px;color:#bbb;border-top:1px
 function sheetEmail(firstName, unsubUrl) {
   return emailWrap(`
 <p style="margin:0 0 20px;">Hey ${firstName},</p>
-<p style="margin:0 0 16px;">Here is the sheet: <a href="${SHEET_URL}" style="color:#5a9e00;">the seventeen questions, one page</a>. Print it and put it in front of whoever would have to go and find the answers.</p>
-<p style="margin:0 0 16px;">There is nothing to add up at the end, and we do not want your answers. If you had to ask somebody for one of them, that is the finding on its own: the data exists and nothing is reading it together.</p>
-<p style="margin:0 0 24px;">If you want to talk about what is behind that, the Fit Call is free and fifteen minutes: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">pick a time here</a>. If not, keep the sheet and we will leave you alone.</p>
+<p style="margin:0 0 16px;">Here it is: <a href="${ROADMAP_URL}" style="color:#5a9e00;">the Intelligent Company Roadmap, all ten pages</a>. It is the real deliverable in the real format, written on a company we invented so none of it had to be held back.</p>
+<p style="margin:0 0 16px;">Page six is the one most owners stop on: six opportunities in order, with what each would take. The first three need nobody from outside the business.</p>
+<p style="margin:0 0 24px;">If your own version of that page would be worth having, that is the conversation, and it is free and fifteen minutes: <a href="${FIT_CALL_URL}" style="color:#5a9e00;">pick a time here</a>. If not, keep the roadmap and we will leave you alone.</p>
 <p style="margin:0;">Mia<br><span style="color:#888;font-size:13px;">Founder, TMI Tech AI</span></p>
 `, unsubUrl);
 }
@@ -128,14 +128,14 @@ async function greet(lead, { name, email, phone, kind }) {
   if (!lead || lead.greeted_at) return false;
   const firstName = String(name || '').trim().split(/\s+/)[0] || 'there';
   const unsubUrl = `${APP}/api/unsubscribe?id=${lead.id}`;
-  const sheet = kind === 'seventeen_questions';
+  const sheet = kind === 'roadmap_example';
 
   if (process.env.RESEND_API_KEY) {
     const { Resend } = require('resend');
     new Resend(process.env.RESEND_API_KEY).emails.send({
       from: 'TMI <support@tmitechai.com>',
       to: email,
-      subject: sheet ? 'The seventeen questions, one page.' : 'Got it. Here is the next step.',
+      subject: sheet ? 'The roadmap, all ten pages.' : 'Got it. Here is the next step.',
       html: sheet ? sheetEmail(firstName, unsubUrl) : greetingEmail(firstName, unsubUrl),
     }).catch((e) => console.error('lead-response email:', e.message));
   }
@@ -145,7 +145,7 @@ async function greet(lead, { name, email, phone, kind }) {
     require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
       .messages.create({
         body: sheet
-          ? `Hey ${firstName}, it's Mia at TMI Tech AI. The seventeen questions, one page: ${SHEET_URL} Nothing to add up. If you want to talk about what is behind it, the Fit Call is free: ${FIT_CALL_URL}`
+          ? `Hey ${firstName}, it's Mia at TMI Tech AI. The full roadmap, ten pages: ${ROADMAP_URL} Page six is the one to read. If your own version would be worth having, the Fit Call is free: ${FIT_CALL_URL}`
           : `Hey ${firstName}, it's Mia at TMI Tech AI. Got your form. Next step is a free 15 minute Fit Call to work out whether we should be inside your company at all: ${FIT_CALL_URL} Reply here with questions.`,
         from: FROM_NUMBER,
         to,
