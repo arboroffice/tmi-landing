@@ -81,7 +81,7 @@ module.exports = [
  },
  {
   "q": "How do I qualify a prospect?",
-  "a": "An established company with employees, customers and more than one system, where the owner is still the answer to every question. Listen for knowledge living in two or three people's heads, software the team works around, and a handover coming. If someone there can say yes to $25,000, they are a fit for the Discovery Session."
+  "a": "An established company with employees, customers and more than one system, where the owner is still the answer to every question. Listen for knowledge living in two or three people's heads, software the team works around, and a handover coming. If someone there can say yes to $25,000, they are a fit for the Intelligent Company Audit."
  },
  {
   "q": "What openers actually land?",
