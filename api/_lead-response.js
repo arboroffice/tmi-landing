@@ -24,7 +24,7 @@ const db = require('./_db');
 const APP = 'https://admin.tmitechai.com';
 const SITE = 'https://www.tmitechai.com';
 const FROM_NUMBER = '+18557171044';
-const FIT_CALL_URL = SITE + '/intelligent-company-audit.html#book';
+const FIT_CALL_URL = 'https://cal.com/miaeliana/tmi-fit-call';
 const DAY = 86400;
 
 // Day 1 is a text, so the first chase lands while they still remember us.

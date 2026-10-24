@@ -7,7 +7,7 @@ const SITE = 'https://www.tmitechai.com';
 // This app (unsubscribe and other API links) is served here.
 const APP = 'https://admin.tmitechai.com';
 // The free Fit Call is booked on the live site's audit page.
-const FIT_CALL_URL = 'https://www.tmitechai.com/intelligent-company-audit.html#book';
+const FIT_CALL_URL = 'https://cal.com/miaeliana/tmi-fit-call';
 
 // Abandon-chaser steps fire while a lead has started the audit but not finished.
 // They stop the moment the audit is completed, the lead converts, or unsubscribes.

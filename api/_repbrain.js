@@ -4,7 +4,7 @@
 // pricing.html, faq.html, llms.txt). Rewritten Oct 2026 to match it:
 //   - The rep's goal is the $25,000 Intelligent Company Audit, paid by link (text,
 //     email or QR). If the owner is not ready: the free Fit Call with Mia and Tyler,
-//     https://www.tmitechai.com/intelligent-company-audit.html#book, or a dated follow-up.
+//     https://cal.com/miaeliana/tmi-fit-call, or a dated follow-up.
 //   - The Intelligent Company Audit is the $25,000, thirty-day engagement that comes
 //     after. It is NOT the thing a rep closes at the door, and the two must never be
 //     called by the same name. That confusion was live in this file until Oct 2026,
@@ -57,7 +57,7 @@ module.exports = [
  },
  {
   "q": "What if the owner is interested but not ready to pay today?",
-  "a": "Offer the Fit Call with Mia and Tyler. It is free, 15 minutes, and it decides whether TMI should come inside the company at all. Book it with them at tmitechai.com/intelligent-company-audit.html#book. If they will not book that either, set a dated follow-up. Never leave without a person, an action and a date."
+  "a": "Offer the Fit Call with Mia and Tyler. It is free, 15 minutes, and it decides whether TMI should come inside the company at all. Book it with them at https://cal.com/miaeliana/tmi-fit-call. If they will not book that either, set a dated follow-up. Never leave without a person, an action and a date."
  },
  {
   "q": "What is the one way in? Where do I send people?",

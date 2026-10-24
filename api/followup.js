@@ -7,7 +7,7 @@ const FROM_NUMBER = '+18557171044';
 const ALERT_NUMBER = '+13373809059';
 const SITE = 'https://admin.tmitechai.com';
 // The free Fit Call is booked on the live site's audit page.
-const FIT_CALL_URL = 'https://www.tmitechai.com/intelligent-company-audit.html#book';
+const FIT_CALL_URL = 'https://cal.com/miaeliana/tmi-fit-call';
 const INSIGHT_INTELLIGENT_COMPANY = 'https://www.tmitechai.com/insights-what-is-an-intelligent-company.html';
 const INSIGHT_AUDIT_FINDS = 'https://www.tmitechai.com/insights-what-an-audit-should-find.html';
 

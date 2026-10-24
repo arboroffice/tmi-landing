@@ -39,7 +39,7 @@ const LADDER = [
       'A short conversation at no cost. Some of these end with us saying TMI is not what ' +
       'you need yet, and that is a good outcome, better reached in fifteen minutes than ' +
       'after an invoice. It is the only free thing TMI offers.',
-    book: 'https://www.tmitechai.com/intelligent-company-audit.html#book',
+    book: 'https://cal.com/miaeliana/tmi-fit-call',
   },
   {
     step: '01',

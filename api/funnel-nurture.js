@@ -12,7 +12,7 @@ const SITE = 'https://www.tmitechai.com';
 // This app (unsubscribe, proposals and other app pages) is served here.
 const APP = 'https://admin.tmitechai.com';
 // The free Fit Call is booked on the live site's audit page.
-const BOOK_URL = SITE + '/intelligent-company-audit.html#book';
+const BOOK_URL = 'https://cal.com/miaeliana/tmi-fit-call';
 const FROM_NUMBER = '+18557171044';
 
 function formatPhone(p) {
