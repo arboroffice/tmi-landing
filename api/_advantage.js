@@ -82,6 +82,8 @@ function factory({db, stripe, queue, mail, env = process.env}) {
     const l=await db.getById('advantage_leads',s.metadata.lead_id),o=l&&OFFERS[l.offer];
     if(!o||s.metadata.offer!==l.offer||s.amount_total!==o.amount||s.currency!=='usd')throw new Error('Payment verification mismatch');
     await db.update('advantage_leads',l.id,{status:'paid',session:s.id,payment_intent:s.payment_intent,paid_at:l.paid_at||now()});
+    const legacyCall=await db.findOne('precall_bookings','email',l.email);
+    if(legacyCall)await db.update('precall_bookings',legacyCall.id,{stopped:true});
     // Queued transactional messages are retryable if the webhook is delivered again.
     await schedule(l.id,'paid',0);await schedule(l.id,'onboarding',86400);return true;
   }

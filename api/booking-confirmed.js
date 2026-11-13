@@ -22,6 +22,12 @@ module.exports = async function handler(req, res) {
 
   if (!email) return res.status(400).json({ error: 'No email in payload' });
 
+  // A paid AI Advantage customer is arranging delivery, not entering the
+  // legacy audit sales sequence. Cal still sends its calendar confirmation.
+  const advantageRows = await db.list('advantage_leads', { where: [['email', '==', email.toLowerCase()]] }).catch(() => []);
+  const paidAdvantage = advantageRows.find(r => r.status === 'paid');
+  if (paidAdvantage) await db.update('advantage_leads', paidAdvantage.id, { onboarding_at: new Date().toISOString() });
+
   // Pre-call sequence (emails + texts from booking until the call). Runs for
   // every booking on the Cal link, known lead or not. Cancels stop it;
   // reschedules move it to the new time.
@@ -33,7 +39,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: true, note: 'cancelled' });
   }
   try {
-    if (process.env.QSTASH_TOKEN) await precall.schedule(info, { qs: new QStashClient({ token: process.env.QSTASH_TOKEN }) });
+    if (!paidAdvantage && process.env.QSTASH_TOKEN) await precall.schedule(info, { qs: new QStashClient({ token: process.env.QSTASH_TOKEN }) });
   } catch (e) { console.error('precall schedule:', e.message); }
   const callStr = startTime
     ? new Date(startTime).toLocaleString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
