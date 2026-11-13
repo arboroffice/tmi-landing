@@ -217,6 +217,9 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // AI Advantage uses its own scope validation, receipt and onboarding flow.
+    // Never classify those purchases as audits or provision audit OS access.
+    if (event.data?.object?.metadata?.funnel === 'ai_advantage') return res.json({ received: true });
     if (event.type === 'checkout.session.completed') {
       const s = event.data.object;
       if (s.payment_status === 'paid') {
