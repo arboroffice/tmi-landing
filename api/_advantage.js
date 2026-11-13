@@ -39,6 +39,11 @@ function factory({db, stripe, queue, mail, env = process.env}) {
   async function initialize(){
     await ensureWebhook();
     const config=await db.getById('advantage_config','health');if(config?.initialized_at)return;
+    // Exercise the real Checkout API without a customer or a charge, then close
+    // the session immediately. No lead, promotional email or payment is created.
+    const probe=await stripe.checkout.sessions.create({mode:'payment',payment_method_types:['card'],line_items:[{price_data:{currency:'usd',unit_amount:OFFERS.workforce.amount,product_data:{name:'TMI AI Workforce Advantage'}},quantity:1}],success_url:SITE+'/',cancel_url:SITE+'/',metadata:{funnel:'ai_advantage_setup'}},{idempotencyKey:'tmi-advantage-checkout-readiness-v1'});
+    const current=await stripe.checkout.sessions.retrieve(probe.id);if(current.status==='open')await stripe.checkout.sessions.expire(probe.id);
+    await db.update('advantage_config','health',{checkout_verified_at:now()});
     await queue.schedules.create({destination:APP+'/api/advantage-events',scheduleId:'tmi-ai-advantage-outbox',cron:'*/15 * * * *',body:JSON.stringify({id:'__outbox__',step:'drain'}),headers:{'Content-Type':'application/json'}});
     await queue.publishJSON({url:APP+'/api/advantage-events',body:{id:'__probe__',step:'probe'},retries:2});
     await db.update('advantage_config','health',{initialized_at:now()});
@@ -83,6 +88,8 @@ function factory({db, stripe, queue, mail, env = process.env}) {
   async function stopped(l) {
     if(STOP.has(l.status)||l.followups_paused||!l.consent)return true;
     if(await db.findOne('suppression','email',l.email))return true;
+    const booking=await db.findOne('precall_bookings','email',l.email);
+    if(booking&&!booking.cancelled&&booking.booked_at>=l.created_at)return true;
     const purchases=await db.list('advantage_leads',{where:[['email','==',l.email]]});
     if(purchases.some(p=>STOP.has(p.status)))return true;
     for(const coll of ['leads','applications']){const a=await db.findOne(coll,'email',l.email);if(a&&(STOP.has(a.status)||a.unsubscribed))return true;}
@@ -104,7 +111,7 @@ function factory({db, stripe, queue, mail, env = process.env}) {
     if(!transaction&&await stopped(l))return;
     if(['paid','onboarding'].includes(step)&&l.status!=='paid')return;
     if(step==='onboarding'&&(l.onboarding_at||l.followups_paused))return;
-    if(step==='onboarding'){const a=await db.findOne('applications','email',l.email);if(a&&['booked','replied'].includes(a.status))return;}
+    if(step==='onboarding'){const a=await db.findOne('applications','email',l.email),b=await db.findOne('precall_bookings','email',l.email);if((a&&['booked','replied'].includes(a.status))||(b&&!b.cancelled&&b.booked_at>=l.created_at))return;}
     if(step==='details'&&l.status==='paid')return;
     const delivery=transaction?id+':'+step:hash(l.email)+':'+step+':'+l.created_at.slice(0,10),existing=await db.getById('advantage_deliveries',hash(delivery));if(existing?.sent_at)return;
     if(!await claim('send:'+delivery))throw new Error('Email delivery is already processing');
@@ -125,7 +132,7 @@ function factory({db, stripe, queue, mail, env = process.env}) {
     else if(e.type==='checkout.session.expired'){const l=await db.getById('advantage_leads',s.metadata.lead_id);if(l&&l.status!=='paid')await db.update('advantage_leads',l.id,{expired_at:now()});}
     else if(['charge.refunded','charge.dispute.created'].includes(e.type)){const pi=s.payment_intent;if(!pi)return;const l=await db.findOne('advantage_leads','payment_intent',pi);if(l)await db.update('advantage_leads',l.id,{status:e.type==='charge.refunded'?'refunded':'disputed'});}
   }
-  async function health(){const c=await db.getById('advantage_config','stripe'),h=await db.getById('advantage_config','health'),b=await stripe.balance.retrieve();const domains=await mail.domains.list();const sender=domains.data?.data?.some(d=>d.name==='tmitechai.com'&&d.status==='verified')||false;return {ok:true,live:b.livemode===true,payments:true,email:sender,queue:!!env.QSTASH_TOKEN,queue_verified_at:h?.queue_verified_at||null,webhook:!!c?.endpoint};}
+  async function health(){const c=await db.getById('advantage_config','stripe'),h=await db.getById('advantage_config','health'),b=await stripe.balance.retrieve();const domains=await mail.domains.list();const sender=domains.data?.data?.some(d=>d.name==='tmitechai.com'&&d.status==='verified')||false;return {ok:true,live:b.livemode===true,payments:true,checkout_verified_at:h?.checkout_verified_at||null,email:sender,queue:!!env.QSTASH_TOKEN,queue_verified_at:h?.queue_verified_at||null,webhook:!!c?.endpoint};}
   return {OFFERS,rate,capture,checkout,qualify,settle,work,event,ensureWebhook,initialize,health,unseal,signature,unsubscribe,db,stripe};
 }
 let instance;

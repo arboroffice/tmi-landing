@@ -12,9 +12,10 @@ function harness(){
   };
   db.db=()=>({collection:c=>({doc:id=>({c,id})}),runTransaction:async cb=>cb({get:async r=>({exists:rows.has(k(r.c,r.id)),data:()=>rows.get(k(r.c,r.id))}),set:(r,d)=>rows.set(k(r.c,r.id),d)})});
   const stripe={webhookEndpoints:{create:async()=>({id:'we_fake',secret:'fake_webhook_signing_value'})},checkout:{sessions:{create:async(p,options)=>{const id='cs_'+options.idempotencyKey;let s=sessions.get(id);if(!s){s={id,url:'https://checkout.stripe.com/c/pay/fake',status:'open',payment_status:'unpaid',amount_total:p.line_items[0].price_data.unit_amount,currency:'usd',metadata:p.metadata,params:p};sessions.set(id,s);}return s;},retrieve:async id=>{if(!sessions.has(id))throw new Error('Unknown session');return sessions.get(id);}}}};
-  const app=factory({db,stripe,queue:{publishJSON:async j=>jobs.push(j)},mail:{emails:{send:async(m,options)=>{emails.push({m,options});return {data:{id:'mail_fake'}};}}},env:{JWT_SECRET:'fixture_only_not_a_real_key'}});
+  const queue={publishJSON:async j=>jobs.push(j)};
+  const app=factory({db,stripe,queue,mail:{emails:{send:async(m,options)=>{emails.push({m,options});return {data:{id:'mail_fake'}};}}},env:{JWT_SECRET:'fixture_only_not_a_real_key'}});
   const capture=(consent=false,offer='workforce')=>app.capture({email:'owner@example.test',name:'Test Owner',company:'Test Company',offer,consent});
-  return {app,db,jobs,emails,sessions,capture};
+  return {app,db,jobs,emails,sessions,capture,queue};
 }
 test('server owns all three amounts and enforces authority and capability',async()=>{
   const h=harness(),l=await h.capture();assert.equal(h.jobs.length,1);assert.equal(h.jobs[0].body.step,'details');
@@ -32,11 +33,12 @@ test('only paid Stripe sessions with matching scope amount and currency settle',
   await h.app.work(l.id,'hour1');assert.equal(h.emails.length,0);await h.app.work(l.id,'paid');await h.app.work(l.id,'paid');assert.equal(h.emails.length,1);assert.match(h.emails[0].m.subject,/confirmed/);
 });
 test('opt-in controls follow-ups; unsubscribe, suppression, bookings and replies stop them',async()=>{
-  for(const stop of ['no_consent','unsubscribe','suppression','booked','reply']){
+  for(const stop of ['no_consent','unsubscribe','suppression','booked','calendar','reply']){
     const h=harness(),l=await h.capture(stop!=='no_consent');
     if(stop==='unsubscribe')await h.app.unsubscribe(l.id,h.app.signature(l.id));
     if(stop==='suppression')await h.db.insert('suppression',{email:'owner@example.test'});
     if(stop==='booked')await h.db.insert('applications',{email:'owner@example.test',status:'booked'});
+    if(stop==='calendar')await h.db.insert('precall_bookings',{email:'owner@example.test',cancelled:false,booked_at:new Date(Date.now()+1000).toISOString()});
     if(stop==='reply')await h.db.insert('activities',{type:'email',title:'Reply: Question',body:'From owner@example.test',created_at:new Date(Date.now()+1000).toISOString()});
     await h.app.work(l.id,'day1');assert.equal(h.emails.length,0,stop);
   }
@@ -51,4 +53,13 @@ test('refund/dispute events stop this funnel without affecting unrelated purchas
   await h.app.event({type:'charge.refunded',data:{object:{payment_intent:'pi_1'}}});assert.equal((await h.db.getById('advantage_leads',l.id)).status,'refunded');
   await h.app.event({type:'checkout.session.completed',data:{object:{metadata:{product:'build_deposit'},payment_status:'paid'}}});
   await h.app.work(l.id,'day3');assert.equal(h.emails.length,0);
+});
+
+test('queue outage preserves capture and the outbox can deliver it later',async()=>{
+  const h=harness();h.queue.publishJSON=async()=>{throw new Error('fixture outage');};
+  const l=await h.capture();assert.ok(l.token);assert.equal((await h.db.list('advantage_jobs')).length,1);
+  await h.app.work('__outbox__','drain');assert.equal(h.emails.length,1);assert.equal((await h.db.list('advantage_jobs'))[0].done,true);
+});
+test('a purchase under the same email prevents duplicate abandoned follow-ups',async()=>{
+  const h=harness(),first=await h.capture(true),second=await h.capture(true);await h.db.update('advantage_leads',second.id,{status:'paid'});await h.app.work(first.id,'day1');assert.equal(h.emails.length,0);
 });
