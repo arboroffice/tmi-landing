@@ -4,7 +4,7 @@ const SITE = 'https://www.tmitechai.com/ai-advantage';
 const APP = 'https://admin.tmitechai.com';
 const CALL = 'https://cal.com/miaeliana/tmi-fit-call';
 const OFFERS = Object.freeze({
-  executive: { name: 'Executive AI Advantage', amount: 750000, scope: 'Private hands-on AI training for one executive, personal AI assistant setup, and workflows built around daily work.' },
+  executive: { name: 'Executive AI Advantage', amount: 500000, scope: 'Private hands-on AI training for one executive, personal AI assistant setup, and workflows built around daily work.' },
   workforce: { name: 'AI Workforce Advantage', amount: 1500000, scope: 'Hands-on training for up to 10 employees, role-specific AI tools, and ready-to-use workflows built around actual jobs.' },
   audit: { name: 'Intelligent Company Audit', amount: 2500000, scope: 'Review of operations, people, systems and data, with prioritized opportunities for automation, cost savings and custom technology.' },
 });
@@ -69,21 +69,22 @@ function factory({db, stripe, queue, mail, env = process.env}) {
     const l=await authorized(b.id,b.token);if(b.authority!=='authorized'||b.agreed!==true)throw Object.assign(new Error('An authorized company representative must approve this purchase.'),{status:400});
     if(l.status==='paid')return {url:SITE+'/?success=1&session_id='+encodeURIComponent(l.session)};
     await ensureWebhook();
-    if(l.session){const prev=await stripe.checkout.sessions.retrieve(l.session);if(prev.status==='open')return {url:prev.url};if(prev.payment_status==='paid'){await settle(prev);return {url:SITE+'/?success=1&session_id='+encodeURIComponent(prev.id)};}}
     const o=OFFERS[l.offer];
+    if(l.session){const prev=await stripe.checkout.sessions.retrieve(l.session);if(prev.payment_status==='paid'){await settle(prev);return {url:SITE+'/?success=1&session_id='+encodeURIComponent(prev.id)};}if(prev.status==='open'){if(prev.amount_total===o.amount)return {url:prev.url};await stripe.checkout.sessions.expire(prev.id);}}
     const s=await stripe.checkout.sessions.create({mode:'payment',payment_method_types:['card'],customer_email:l.email,client_reference_id:l.id,
       line_items:[{price_data:{currency:'usd',unit_amount:o.amount,product_data:{name:'TMI '+o.name,description:o.scope}},quantity:1}],
       success_url:SITE+'/?success=1&session_id={CHECKOUT_SESSION_ID}',cancel_url:SITE+'/?checkout=cancelled#enroll',
       expires_at:Math.floor(Date.now()/1000)+3600,after_expiration:{recovery:{enabled:true}},
       metadata:{funnel:'ai_advantage',lead_id:l.id,offer:l.offer,company:l.company},
-    },{idempotencyKey:'advantage:v2:'+l.id+':'+(l.session||'first')});
-    await db.update('advantage_leads',l.id,{session:s.id,authority:'authorized',agreed_at:now(),status:'checkout',checkout_at:now()});return {url:s.url};
+    },{idempotencyKey:'advantage:v3:'+o.amount+':'+l.id+':'+(l.session||'first')});
+    await db.update('advantage_leads',l.id,{session:s.id,checkout_amount:o.amount,authority:'authorized',agreed_at:now(),status:'checkout',checkout_at:now()});return {url:s.url};
   }
   async function qualify(b) {const l=await authorized(b.id,b.token);const authority=['authorized','sponsor','exploring'].includes(b.authority)?b.authority:'exploring';const patch={authority};if(Number.isInteger(Number(b.team_size))&&Number(b.team_size)>0&&Number(b.team_size)<=100000)patch.team_size=Number(b.team_size);if(b.problem)patch.problem=String(b.problem).slice(0,600);await db.update('advantage_leads',l.id,patch);if(authority==='authorized')await sales.qualified({...l,...patch});return {call:CALL,brief:SITE+'/brief.html'};}
   async function settle(s) {
     if(s.metadata?.funnel!=='ai_advantage'||s.payment_status!=='paid')return false;
     const l=await db.getById('advantage_leads',s.metadata.lead_id),o=l&&OFFERS[l.offer];
-    if(!o||s.metadata.offer!==l.offer||s.amount_total!==o.amount||s.currency!=='usd')throw new Error('Payment verification mismatch');
+    const expected=o&&(l.checkout_amount||(l.offer==='executive'&&l.session===s.id&&l.checkout_at&&Date.parse(l.checkout_at)<Date.parse('2026-11-14T23:25:00Z')?750000:o.amount));
+    if(!o||s.metadata.offer!==l.offer||s.amount_total!==expected||s.currency!=='usd')throw new Error('Payment verification mismatch');
     await db.update('advantage_leads',l.id,{status:'paid',session:s.id,payment_intent:s.payment_intent,paid_at:l.paid_at||now()});
     const legacyCall=await db.findOne('precall_bookings','email',l.email);
     if(legacyCall)await db.update('precall_bookings',legacyCall.id,{stopped:true});
