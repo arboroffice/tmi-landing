@@ -83,7 +83,7 @@ function factory({db, stripe, queue, mail, env = process.env}) {
   async function settle(s) {
     if(s.metadata?.funnel!=='ai_advantage'||s.payment_status!=='paid')return false;
     const l=await db.getById('advantage_leads',s.metadata.lead_id),o=l&&OFFERS[l.offer];
-    const expected=o&&(l.checkout_amount||(l.offer==='executive'&&l.session===s.id&&l.checkout_at&&Date.parse(l.checkout_at)<Date.parse('2026-11-14T23:25:00Z')?750000:o.amount));
+    const expected=o&&(l.checkout_amount||(l.offer==='executive'&&l.session===s.id&&l.checkout_at?750000:o.amount));
     if(!o||s.metadata.offer!==l.offer||s.amount_total!==expected||s.currency!=='usd')throw new Error('Payment verification mismatch');
     await db.update('advantage_leads',l.id,{status:'paid',session:s.id,payment_intent:s.payment_intent,paid_at:l.paid_at||now()});
     const legacyCall=await db.findOne('precall_bookings','email',l.email);
