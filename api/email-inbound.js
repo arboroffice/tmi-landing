@@ -30,6 +30,7 @@ module.exports = async (req, res) => {
 
   if (fromEmail) {
     try {
+      await require('./_tmi-db').insert('activities', { type: 'email', title: 'Reply: ' + subject, body: `From ${fromEmail}\n\n${String(text).slice(0,1500)}` });
       await logEmail(null, { direction: 'inbound', address: fromEmail, subject, body: text });
     } catch (e) { console.error('[email-inbound] log:', e.message); }
   } else {

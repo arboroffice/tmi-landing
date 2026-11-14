@@ -3,7 +3,7 @@
 // can see traffic without a third-party analytics account.
 //   POST (sendBeacon, text/plain JSON) { name, path, ref, vid, sid, utm..., first_*, detail }
 //   GET  ?days=30 (admin) -> { totals, byDay, topPages, sources, events, recent }
-const db = require('./_db');
+const db = require('./_tmi-db');
 const { verifyToken } = require('./_auth');
 
 const ALLOWED = ['https://www.tmitechai.com', 'https://tmitechai.com'];

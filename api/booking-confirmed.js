@@ -24,9 +24,16 @@ module.exports = async function handler(req, res) {
 
   // A paid AI Advantage customer is arranging delivery, not entering the
   // legacy audit sales sequence. Cal still sends its calendar confirmation.
-  const advantageRows = await db.list('advantage_leads', { where: [['email', '==', email.toLowerCase()]] }).catch(() => []);
+  const tmiDb = require('./_tmi-db');
+  const advantageRows = await tmiDb.list('advantage_leads', { where: [['email', '==', email.toLowerCase()]] });
   const paidAdvantage = advantageRows.find(r => r.status === 'paid');
-  if (paidAdvantage) await db.update('advantage_leads', paidAdvantage.id, { onboarding_at: new Date().toISOString() });
+  if (advantageRows.length) {
+    const cancelled = body.triggerEvent === 'BOOKING_CANCELLED';
+    const stamp = new Date().toISOString();
+    await tmiDb.insert('precall_bookings', { id: require('crypto').createHash('sha256').update(email.toLowerCase()).digest('hex'), email: email.toLowerCase(), cancelled, booked_at: stamp, call_at: startTime || null });
+    if (!cancelled) for (const lead of advantageRows) await tmiDb.update('advantage_leads', lead.id, { ...(lead.status === 'paid' ? { onboarding_at: stamp } : { status: 'booked' }), booked_at: stamp });
+    return res.status(200).json({ ok: true, note: 'AI Advantage booking recorded' });
+  }
 
   // Pre-call sequence (emails + texts from booking until the call). Runs for
   // every booking on the Cal link, known lead or not. Cancels stop it;

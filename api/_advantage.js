@@ -18,6 +18,7 @@ function factory({db, stripe, queue, mail, env = process.env}) {
   function seal(secret) { const iv=crypto.randomBytes(12), c=crypto.createCipheriv('aes-256-gcm',key(),iv); const b=Buffer.concat([c.update(secret,'utf8'),c.final()]); return [iv,c.getAuthTag(),b].map(x=>x.toString('base64')).join('.'); }
   function unseal(value) { const [iv,tag,b]=value.split('.').map(x=>Buffer.from(x,'base64'));const d=crypto.createDecipheriv('aes-256-gcm',key(),iv);d.setAuthTag(tag);return Buffer.concat([d.update(b),d.final()]).toString(); }
   async function claim(id, seconds=90) {
+    if(db.claim)return db.claim(hash(id),seconds);
     return fs().runTransaction(async tx => { const ref=fs().collection('advantage_locks').doc(hash(id)), s=await tx.get(ref), d=s.exists?s.data():{};
       if(d.until>Date.now())return false;tx.set(ref,{until:Date.now()+seconds*1000});return true; });
   }
@@ -138,5 +139,5 @@ function factory({db, stripe, queue, mail, env = process.env}) {
   return {OFFERS,rate,capture,checkout,qualify,settle,work,event,ensureWebhook,initialize,health,unseal,signature,unsubscribe,db,stripe};
 }
 let instance;
-function production(){if(instance)return instance;const db=require('./_db'),stripe=require('stripe')(process.env.STRIPE_SECRET_KEY),{Client}=require('@upstash/qstash'),{Resend}=require('resend');instance=factory({db,stripe,queue:new Client({token:process.env.QSTASH_TOKEN}),mail:new Resend(process.env.RESEND_API_KEY)});return instance;}
+function production(){if(instance)return instance;const db=require('./_tmi-db'),stripe=require('stripe')(process.env.STRIPE_SECRET_KEY),{Client}=require('@upstash/qstash'),{Resend}=require('resend');instance=factory({db,stripe,queue:new Client({token:process.env.QSTASH_TOKEN}),mail:new Resend(process.env.RESEND_API_KEY)});return instance;}
 module.exports={factory,production,OFFERS,SITE,APP,CALL};
