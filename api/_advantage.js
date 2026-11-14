@@ -75,8 +75,8 @@ function factory({db, stripe, queue, mail, env = process.env}) {
       line_items:[{price_data:{currency:'usd',unit_amount:o.amount,product_data:{name:'TMI '+o.name,description:o.scope}},quantity:1}],
       success_url:SITE+'/?success=1&session_id={CHECKOUT_SESSION_ID}',cancel_url:SITE+'/?checkout=cancelled#enroll',
       expires_at:Math.floor(Date.now()/1000)+3600,after_expiration:{recovery:{enabled:true}},
-      consent_collection:{promotions:'auto'},metadata:{funnel:'ai_advantage',lead_id:l.id,offer:l.offer,company:l.company},
-    },{idempotencyKey:'advantage:'+l.id+':'+(l.session||'first')});
+      metadata:{funnel:'ai_advantage',lead_id:l.id,offer:l.offer,company:l.company},
+    },{idempotencyKey:'advantage:v2:'+l.id+':'+(l.session||'first')});
     await db.update('advantage_leads',l.id,{session:s.id,authority:'authorized',agreed_at:now(),status:'checkout',checkout_at:now()});return {url:s.url};
   }
   async function qualify(b) {const l=await authorized(b.id,b.token);const authority=['authorized','sponsor','exploring'].includes(b.authority)?b.authority:'exploring';const patch={authority};if(Number.isInteger(Number(b.team_size))&&Number(b.team_size)>0&&Number(b.team_size)<=100000)patch.team_size=Number(b.team_size);if(b.problem)patch.problem=String(b.problem).slice(0,600);await db.update('advantage_leads',l.id,patch);if(authority==='authorized')await sales.qualified({...l,...patch});return {call:CALL,brief:SITE+'/brief.html'};}
