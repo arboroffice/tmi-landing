@@ -19,12 +19,12 @@ module.exports=function createSales({db,mail,env,claim,schedule,isStopped}){
  }
  async function taskFor(l,reason,priority='normal'){
    const id='sales_'+l.id,previous=await db.getById('funnel_tasks',id);
-   const reps=(await db.list('funnel_reps',{where:[['active','==',true]],limit:100})).filter(r=>r.email);
+   const reps=(await db.list('funnel_reps',{where:[['active','==',true]],limit:100})).filter(r=>r.email&&!r.invitation_pending);
    const chosen=previous?.assigned_to?null:reps.length?reps[parseInt(crypto.createHash('sha256').update(l.id).digest('hex').slice(0,8),16)%reps.length]:null;
    const assigned=previous?.assigned_to||chosen?.id||'owner';
    const item={id,lead_id:l.id,assigned_to:assigned,assigned_email:previous?.assigned_email||chosen?.email||owner,
      reason,priority:previous?.priority==='high'?'high':priority,status:priority==='high'?'open':previous?.status||'open',
-     next_action_at:previous?.next_action_at||new Date(Date.now()+(priority==='high'?2:24)*3600000).toISOString(),
+     next_action_at:priority==='high'&&previous?.priority!=='high'?new Date(Date.now()+2*3600000).toISOString():previous?.next_action_at||new Date(Date.now()+(priority==='high'?2:24)*3600000).toISOString(),
      created_at:previous?.created_at||stamp(),updated_at:stamp()};
    await db.insert('funnel_tasks',item);
    if(!previous)await schedule(l.id,'handoff',0);
@@ -93,6 +93,7 @@ module.exports=function createSales({db,mail,env,claim,schedule,isStopped}){
    if(a.admin===true)return {id:'owner',name:'TMI team',admin:true};
    if(a.kind!=='funnel_rep')throw Object.assign(new Error('Sales access required.'),{status:403});
    const r=await db.getById('funnel_reps',a.sub);if(!r?.active||r.version!==a.version)throw Object.assign(new Error('Invitation expired or revoked.'),{status:403});
+   if(r.invitation_pending)await db.update('funnel_reps',r.id,{invitation_pending:false,last_seen_at:stamp()});
    return {id:r.id,name:r.name,email:r.email,admin:false};
  }
  async function leadFor(a,id){const l=await db.getById('advantage_leads',id),t=await db.getById('funnel_tasks','sales_'+id);if(!l||(!a.admin&&t?.assigned_to!==a.id))throw Object.assign(new Error('Lead not available.'),{status:403});return {l,t};}
@@ -105,12 +106,12 @@ module.exports=function createSales({db,mail,env,claim,schedule,isStopped}){
    if(b.action==='invite'){
      if(!a.admin)throw Object.assign(new Error('Admin required.'),{status:403});
      const email=String(b.email||'').trim().toLowerCase(),name=String(b.name||'').trim().slice(0,100);if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!name)throw Object.assign(new Error('Enter a name and email.'),{status:400});
-     const prev=await db.findOne('funnel_reps','email',email),r=await db.insert('funnel_reps',{id:prev?.id||crypto.randomUUID(),name,email,active:true,version:(prev?.version||0)+1,created_at:prev?.created_at||stamp()});
+     const prev=await db.findOne('funnel_reps','email',email),r=await db.insert('funnel_reps',{id:prev?.id||crypto.randomUUID(),name,email,active:true,invitation_pending:true,version:(prev?.version||0)+1,created_at:prev?.created_at||stamp()});
      const token=jwt().sign({sub:r.id,kind:'funnel_rep',version:r.version},env.JWT_SECRET,{expiresIn:'7d'});
      await send(email,'Your TMI sales workspace invitation','Hi '+name+',\n\nUse this private link to open your assigned TMI lead queue. It expires in 7 days. Do not forward it.\n\n'+app+'/funnel-sales#invite='+encodeURIComponent(token)+'\n\nTMI',r.id+'_'+r.version);
      return {ok:true};
    }
-   if(b.action==='revoke'){if(!a.admin)throw Object.assign(new Error('Admin required.'),{status:403});await db.update('funnel_reps',String(b.rep_id),{active:false});return {ok:true};}
+   if(b.action==='revoke'){if(!a.admin)throw Object.assign(new Error('Admin required.'),{status:403});const id=String(b.rep_id);await db.update('funnel_reps',id,{active:false});const tasks=await db.list('funnel_tasks',{where:[['assigned_to','==',id]],limit:1000});for(const t of tasks)await db.update('funnel_tasks',t.id,{assigned_to:'owner',assigned_email:owner,updated_at:stamp()});if(tasks.length)await send(owner,'TMI sales leads returned to the owner',tasks.length+' lead tasks are back in your queue after rep access was revoked.\n\n'+app+'/funnel-sales','revoke_'+id+'_'+stamp().slice(0,10));return {ok:true};}
    const {l,t}=await leadFor(a,String(b.id||''));
    if(b.action==='conversation')return {messages:await db.list('funnel_messages',{where:[['lead_id','==',l.id]],order:'created_at',ascending:true,limit:100})};
    if(b.action==='draft'){
@@ -132,7 +133,7 @@ module.exports=function createSales({db,mail,env,claim,schedule,isStopped}){
      if(b.next_action_at&&Number.isFinite(Date.parse(b.next_action_at)))patch.next_action_at=new Date(b.next_action_at).toISOString();
      if(b.assigned_to&&a.admin){const r=b.assigned_to==='owner'?{id:'owner',email:owner}:await db.getById('funnel_reps',String(b.assigned_to));if(!r||r.active===false)throw Object.assign(new Error('Choose an active rep.'),{status:400});patch.assigned_to=r.id;patch.assigned_email=r.email;}
      await db.update('funnel_tasks',t.id,patch);
-     if(b.status==='contacted'||b.status==='closed')await db.update('advantage_leads',l.id,{followups_paused:true});
+     if(b.status==='contacted'||b.status==='closed')await db.update('advantage_leads',l.id,{followups_paused:true,human_active:true});
      return {ok:true};
    }
    throw Object.assign(new Error('Unknown sales action.'),{status:400});
@@ -161,7 +162,7 @@ module.exports=function createSales({db,mail,env,claim,schedule,isStopped}){
    if(!text)return;
    if(/^(auto-replied|auto-generated)$/i.test(String(b.headers?.['auto-submitted']||'')))return;
    if(/\b(?:unsubscribe me|stop emailing|stop sending me|remove me from|please unsubscribe)\b|^\s*unsubscribe[.!]?\s*$/i.test(text)){await db.update('advantage_leads',l.id,{status:'unsubscribed',consent:false,unsubscribed_at:stamp()});await db.insert('funnel_events',{id:'in_'+eid,type:'unsubscribed',lead_id:l.id});return;}
-   if(l.human_active||l.status==='paid'){
+   if(l.human_active||l.human_requested_at||l.status==='paid'){
      await db.insert('funnel_messages',{lead_id:l.id,role:'user',channel:'email',text,created_at:stamp()});await taskFor(l,'Customer replied by email','high');
      await schedule(l.id,'handoff_hot',0);
    }else{
