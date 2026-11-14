@@ -14,6 +14,7 @@ const esc = v => String(v || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 function factory({db, stripe, queue, mail, env = process.env}) {
   const fs = () => db.db();
   const now = () => new Date().toISOString();
+  const sales=require('./_funnel-sales')({db,mail,env,claim,schedule,isStopped:stopped});
   const key = () => crypto.createHash('sha256').update(env.OS_SECRETS_KEY || env.JWT_SECRET || '').digest();
   function seal(secret) { const iv=crypto.randomBytes(12), c=crypto.createCipheriv('aes-256-gcm',key(),iv); const b=Buffer.concat([c.update(secret,'utf8'),c.final()]); return [iv,c.getAuthTag(),b].map(x=>x.toString('base64')).join('.'); }
   function unseal(value) { const [iv,tag,b]=value.split('.').map(x=>Buffer.from(x,'base64'));const d=crypto.createDecipheriv('aes-256-gcm',key(),iv);d.setAuthTag(tag);return Buffer.concat([d.update(b),d.final()]).toString(); }
@@ -60,9 +61,10 @@ function factory({db, stripe, queue, mail, env = process.env}) {
     // Confirmation is requested by this submission; promotion requires opt-in.
     await schedule(id,'details',0);
     if(lead.consent){await schedule(id,'hour1',3600);await schedule(id,'day1',86400);await schedule(id,'day3',259200);}
+    await sales.captured(lead);
     return {id,token};
   }
-  async function authorized(id,token) {const l=await db.getById('advantage_leads',String(id||''));if(!l||!token||l.token_hash!==hash(token))throw Object.assign(new Error('Please start again from the signup form.'),{status:403});return l;}
+  async function authorized(id,token) {const l=await db.getById('advantage_leads',String(id||''));if(!l||!token||(l.token_hash!==hash(token)&&!sales.validTicket(token,l.id)))throw Object.assign(new Error('Please start again from the signup form.'),{status:403});return l;}
   async function checkout(b) {
     const l=await authorized(b.id,b.token);if(b.authority!=='authorized'||b.agreed!==true)throw Object.assign(new Error('An authorized company representative must approve this purchase.'),{status:400});
     if(l.status==='paid')return {url:SITE+'/?success=1&session_id='+encodeURIComponent(l.session)};
@@ -77,7 +79,7 @@ function factory({db, stripe, queue, mail, env = process.env}) {
     },{idempotencyKey:'advantage:'+l.id+':'+(l.session||'first')});
     await db.update('advantage_leads',l.id,{session:s.id,authority:'authorized',agreed_at:now(),status:'checkout',checkout_at:now()});return {url:s.url};
   }
-  async function qualify(b) {const l=await authorized(b.id,b.token);const authority=['authorized','sponsor','exploring'].includes(b.authority)?b.authority:'exploring';await db.update('advantage_leads',l.id,{authority});return {call:CALL,brief:SITE+'/brief.html'};}
+  async function qualify(b) {const l=await authorized(b.id,b.token);const authority=['authorized','sponsor','exploring'].includes(b.authority)?b.authority:'exploring';const patch={authority};if(Number.isInteger(Number(b.team_size))&&Number(b.team_size)>0&&Number(b.team_size)<=100000)patch.team_size=Number(b.team_size);if(b.problem)patch.problem=String(b.problem).slice(0,600);await db.update('advantage_leads',l.id,patch);if(authority==='authorized')await sales.qualified({...l,...patch});return {call:CALL,brief:SITE+'/brief.html'};}
   async function settle(s) {
     if(s.metadata?.funnel!=='ai_advantage'||s.payment_status!=='paid')return false;
     const l=await db.getById('advantage_leads',s.metadata.lead_id),o=l&&OFFERS[l.offer];
@@ -85,6 +87,7 @@ function factory({db, stripe, queue, mail, env = process.env}) {
     await db.update('advantage_leads',l.id,{status:'paid',session:s.id,payment_intent:s.payment_intent,paid_at:l.paid_at||now()});
     const legacyCall=await db.findOne('precall_bookings','email',l.email);
     if(legacyCall)await db.update('precall_bookings',legacyCall.id,{stopped:true});
+    const task=await db.getById('funnel_tasks','sales_'+l.id);if(task)await db.update('funnel_tasks',task.id,{status:'done',updated_at:now()});
     // Queued transactional messages are retryable if the webhook is delivered again.
     await schedule(l.id,'paid',0);await schedule(l.id,'onboarding',86400);return true;
   }
@@ -106,8 +109,9 @@ function factory({db, stripe, queue, mail, env = process.env}) {
     if(id==='__outbox__'){
       const jobs=await db.list('advantage_jobs',{where:[['done','==',false]],order:'due',ascending:true});
       for(const j of jobs.filter(j=>j.due<=Date.now()).slice(0,20)){await work(j.lead_id,j.step);await db.update('advantage_jobs',j.id,{done:true,completed_at:now()});}
-      await db.update('advantage_config','health',{queue_verified_at:now()});return;
+      await sales.sweep();await db.update('advantage_config','health',{queue_verified_at:now()});return;
     }
+    if(['handoff','handoff_hot','rep_due','day7'].includes(step))return sales.work(id,step);
     const l=await db.getById('advantage_leads',id);if(!l||!['details','hour1','day1','day3','paid','onboarding'].includes(step))return;
     if(l.session){const s=await stripe.checkout.sessions.retrieve(l.session);if(s.payment_status==='paid'&&l.status!=='paid'){await settle(s);l.status='paid';}}
     const transaction=['details','paid','onboarding'].includes(step);
@@ -118,14 +122,15 @@ function factory({db, stripe, queue, mail, env = process.env}) {
     if(step==='details'&&l.status==='paid')return;
     const delivery=transaction?id+':'+step:hash(l.email)+':'+step+':'+l.created_at.slice(0,10),existing=await db.getById('advantage_deliveries',hash(delivery));if(existing?.sent_at)return;
     if(!await claim('send:'+delivery))throw new Error('Email delivery is already processing');
+    const returnUrl=sales.resume(l.id);
     const o=OFFERS[l.offer],unsub=APP+'/api/advantage?action=unsubscribe&id='+encodeURIComponent(id)+'&sig='+signature(id);
     let subject,body;
     const cta=(url,text)=>`<p><a style="display:inline-block;background:#E4FF97;color:#111;padding:15px 20px;text-decoration:none;font-weight:700" href="${url}">${text}</a></p>`;
     if(step==='paid'||step==='onboarding'){subject=step==='paid'?'Your TMI purchase is confirmed':'Let’s plan your TMI engagement';body=`<p>Your ${esc(o.name)} purchase${step==='paid'?' is confirmed.':' is ready for the next step.'}</p><p>${esc(o.scope)}</p><p>Book a kickoff conversation with TMI to confirm priorities and arrange delivery. Please include the company leader responsible for this engagement.</p>${cta(SITE+'/?onboarding=1&id='+encodeURIComponent(id)+'&token='+signature(id),'Arrange your kickoff')}<p>Reply to this email with questions. Your payment is a one-time purchase, not a subscription.</p>`;}
-    else if(step==='details'){subject='Your TMI AI Advantage program';body=`<p>Here are the details you requested for ${esc(l.company)}.</p><h2>${esc(o.name)}</h2><p>${esc(o.scope)}</p><p>One-time company investment: $${(o.amount/100).toLocaleString('en-US')}.</p>${cta(SITE+'/#programs','Review the program')}<p>Evaluating this for your company? Share <a href="${SITE}/brief.html">this leadership brief</a>. For a fit call, include the person who approves the investment.</p>`;}
-    else {const copy={hour1:['A useful place to start with AI','Choose one repeated task your people do every week: reporting, meeting follow-up, searching for information or drafting routine documents. That is where a practical AI conversation begins.'],day1:['What your team should leave with','The goal is a team that can use the tools in its actual work. TMI combines hands-on education, workflow setup and a way to measure the change. Bring your current work, not a list of AI buzzwords.'],day3:['Is this a priority for your company?','If improving capacity is a priority, review the program or book a fit call with the leader who can approve it. If the timing is wrong, you can keep the brief and come back when it is useful.']}[step];subject=copy[0];body=`<p>${copy[1]}</p>${cta(SITE+'/#enroll','Continue with TMI')}<p><a href="${CALL}">Book a fit call</a> with your decision maker, or reply with a question.</p>`;}
+    else if(step==='details'){subject='Your TMI AI Advantage program';body=`<p>Here are the details you requested for ${esc(l.company)}.</p><h2>${esc(o.name)}</h2><p>${esc(o.scope)}</p><p>One-time company investment: $${(o.amount/100).toLocaleString('en-US')}.</p>${cta(returnUrl,'Review your next step')}<p>Evaluating this for your company? Share <a href="${SITE}/brief.html">this leadership brief</a>. For a fit call, include the person who approves the investment.</p>`;}
+    else {const copy={hour1:['A useful place to start with AI','Choose one repeated task your people do every week: reporting, meeting follow-up, searching for information or drafting routine documents. That is where a practical AI conversation begins.'],day1:['What your team should leave with','The goal is a team that can use the tools in its actual work. TMI combines hands-on education, workflow setup and a way to measure the change. Bring your current work, not a list of AI buzzwords.'],day3:['Is this a priority for your company?','If improving capacity is a priority, review the program or book a fit call with the leader who can approve it. If the timing is wrong, you can keep the brief and come back when it is useful.']}[step];subject=copy[0];body=`<p>${copy[1]}</p>${cta(returnUrl,'Continue with TMI')}<p><a href="${CALL}">Book a fit call</a> with your decision maker, or reply with a question.</p>`;}
     const html=`<html><body style="margin:0;background:#f5f5f7;color:#1a1a1a;font:16px/1.7 Arial,sans-serif"><div style="max-width:560px;margin:24px auto;background:white;padding:32px"><b style="font-size:24px">TMI<span style="color:#85a840">.</span></b><p>Hi ${esc(l.name.split(/\s+/)[0])},</p>${body}<p>TMI<br>Lafayette, Louisiana<br><a href="https://www.tmitechai.com">tmitechai.com</a></p>${!transaction?`<p style="font-size:12px"><a href="${unsub}">Unsubscribe from these follow-ups</a></p>`:''}</div></body></html>`;
-    const result=await mail.emails.send({from:'TMI <support@tmitechai.com>',replyTo:'support@tmitechai.com',to:l.email,subject,html,...(!transaction?{headers:{'List-Unsubscribe':`<${unsub}>`,'List-Unsubscribe-Post':'List-Unsubscribe=One-Click'}}:{})},{idempotencyKey:'advantage/'+hash(delivery)});
+    const result=await mail.emails.send({from:await sales.sender(),replyTo:sales.replyAddress(l.id),to:l.email,subject,html,...(!transaction?{headers:{'List-Unsubscribe':`<${unsub}>`,'List-Unsubscribe-Post':'List-Unsubscribe=One-Click'}}:{})},{idempotencyKey:'advantage/'+hash(delivery)});
     if(result.error)throw new Error('Email delivery failed');await db.insert('advantage_deliveries',{id:hash(delivery),lead_id:id,step,sent_at:now(),provider_id:result.data?.id||null});
   }
   async function event(e) {
@@ -135,8 +140,8 @@ function factory({db, stripe, queue, mail, env = process.env}) {
     else if(e.type==='checkout.session.expired'){const l=await db.getById('advantage_leads',s.metadata.lead_id);if(l&&l.status!=='paid')await db.update('advantage_leads',l.id,{expired_at:now()});}
     else if(['charge.refunded','charge.dispute.created'].includes(e.type)){const pi=s.payment_intent;if(!pi)return;const l=await db.findOne('advantage_leads','payment_intent',pi);if(l)await db.update('advantage_leads',l.id,{status:e.type==='charge.refunded'?'refunded':'disputed'});}
   }
-  async function health(){const c=await db.getById('advantage_config','stripe'),h=await db.getById('advantage_config','health'),b=await stripe.balance.retrieve();const domains=await mail.domains.list();const sender=domains.data?.data?.some(d=>d.name==='tmitechai.com'&&d.status==='verified')||false;return {ok:true,live:b.livemode===true,payments:true,checkout_verified_at:h?.checkout_verified_at||null,email:sender,queue:!!env.QSTASH_TOKEN,queue_verified_at:h?.queue_verified_at||null,webhook:!!c?.endpoint};}
-  return {OFFERS,rate,capture,checkout,qualify,settle,work,event,ensureWebhook,initialize,health,unseal,signature,unsubscribe,db,stripe};
+  async function health(){const c=await db.getById('advantage_config','stripe'),h=await db.getById('advantage_config','health'),b=await stripe.balance.retrieve();const domains=await mail.domains.list(),sender=await db.getById('advantage_config','email_sender'),probe=await db.getById('advantage_config','email_probe');const domain=(String(sender?.from||'').match(/@([^>]+)>/)||[])[1];const ready=!!sender?.verified&&probe?.accepted===true&&probe?.delivered===true&&(domains.data?.data||[]).some(d=>d.name===domain&&d.status==='verified');return {ok:true,live:b.livemode===true,payments:true,checkout_verified_at:h?.checkout_verified_at||null,email:ready,email_webhook:!!(await db.getById('advantage_config','email_webhook'))?.id,queue:!!env.QSTASH_TOKEN,queue_verified_at:h?.queue_verified_at||null,webhook:!!c?.endpoint,agents:await sales.health()};}
+  return {sales,authorized,seal,OFFERS,rate,capture,checkout,qualify,settle,work,event,ensureWebhook,initialize,health,unseal,signature,unsubscribe,db,stripe};
 }
 let instance;
 function production(){if(instance)return instance;const db=require('./_tmi-db'),stripe=require('stripe')(process.env.STRIPE_SECRET_KEY),{Client}=require('@upstash/qstash'),{Resend}=require('resend');instance=factory({db,stripe,queue:new Client({token:process.env.QSTASH_TOKEN}),mail:new Resend(process.env.RESEND_API_KEY)});return instance;}

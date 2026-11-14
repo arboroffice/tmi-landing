@@ -18,7 +18,7 @@ function harness(){
   return {app,db,jobs,emails,sessions,capture,queue};
 }
 test('server owns all three amounts and enforces authority and capability',async()=>{
-  const h=harness(),l=await h.capture();assert.equal(h.jobs.length,1);assert.equal(h.jobs[0].body.step,'details');
+  const h=harness(),l=await h.capture();assert.equal(h.jobs.filter(j=>j.body.step==='details').length,1);assert.equal(h.jobs[0].body.step,'details');
   await assert.rejects(h.app.checkout({...l,authority:'sponsor',agreed:true}),/authorized/);
   await assert.rejects(h.app.checkout({...l,token:'invalid',authority:'authorized',agreed:true}),/start again/);
   await h.app.checkout({...l,authority:'authorized',agreed:true,amount:1,offer:'executive'});
@@ -42,7 +42,7 @@ test('opt-in controls follow-ups; unsubscribe, suppression, bookings and replies
     if(stop==='reply')await h.db.insert('activities',{type:'email',title:'Reply: Question',body:'From owner@example.test',created_at:new Date(Date.now()+1000).toISOString()});
     await h.app.work(l.id,'day1');assert.equal(h.emails.length,0,stop);
   }
-  const h=harness(),l=await h.capture(true);assert.equal(h.jobs.length,4);await h.app.work(l.id,'hour1');assert.equal(h.emails.length,1);assert.match(h.emails[0].m.html,/Unsubscribe/);assert.ok(h.emails[0].m.headers['List-Unsubscribe']);
+  const h=harness(),l=await h.capture(true);assert.equal(h.jobs.filter(j=>['details','hour1','day1','day3'].includes(j.body.step)).length,4);await h.app.work(l.id,'hour1');assert.equal(h.emails.length,1);assert.match(h.emails[0].m.html,/Unsubscribe/);assert.ok(h.emails[0].m.headers['List-Unsubscribe']);
   await assert.rejects(h.app.unsubscribe(l.id,'bad'),/Invalid/);
 });
 test('payment reconciliation stops a queued nudge even before webhook delivery',async()=>{
@@ -57,8 +57,8 @@ test('refund/dispute events stop this funnel without affecting unrelated purchas
 
 test('queue outage preserves capture and the outbox can deliver it later',async()=>{
   const h=harness();h.queue.publishJSON=async()=>{throw new Error('fixture outage');};
-  const l=await h.capture();assert.ok(l.token);assert.equal((await h.db.list('advantage_jobs')).length,1);
-  await h.app.work('__outbox__','drain');assert.equal(h.emails.length,1);assert.equal((await h.db.list('advantage_jobs'))[0].done,true);
+  const l=await h.capture();assert.ok(l.token);assert.equal((await h.db.list('advantage_jobs')).filter(j=>j.step==='details').length,1);
+  await h.app.work('__outbox__','drain');assert.equal(h.emails.filter(e=>e.m.to==='owner@example.test').length,1);assert.equal((await h.db.list('advantage_jobs')).find(j=>j.step==='details').done,true);
 });
 test('a purchase under the same email prevents duplicate abandoned follow-ups',async()=>{
   const h=harness(),first=await h.capture(true),second=await h.capture(true);await h.db.update('advantage_leads',second.id,{status:'paid'});await h.app.work(first.id,'day1');assert.equal(h.emails.length,0);

@@ -5,12 +5,28 @@ module.exports=async(req,res)=>{
   if(req.method!=='GET')return res.status(405).end();
   try{
     const {Resend}=require('resend'),mail=new Resend(process.env.RESEND_API_KEY);
-    const listed=await mail.domains.list();
+    let listed=await mail.domains.list();
+    const setup=await db.getById('advantage_config','email_setup');
+    if(setup?.requested&&await db.claim('email-setup-check',30)){
+      let domain=(listed.data?.data||[]).find(d=>d.name==='connect.tmitechai.com');
+      if(!domain){const x=await fetch('https://api.resend.com/domains',{method:'POST',headers:{Authorization:'Bearer '+process.env.RESEND_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({name:'connect.tmitechai.com',region:'us-east-1',capabilities:{sending:'enabled',receiving:'enabled'}})});const b=await x.json();if(!x.ok)throw new Error('Email domain setup failed');domain=b;}
+      await fetch('https://api.resend.com/domains/'+domain.id+'/verify',{method:'POST',headers:{Authorization:'Bearer '+process.env.RESEND_API_KEY}});
+      const details=await fetch('https://api.resend.com/domains/'+domain.id,{headers:{Authorization:'Bearer '+process.env.RESEND_API_KEY}}).then(r=>r.json());
+      await db.update('advantage_config','email_setup',{domain_id:domain.id,domain:details.name,status:details.status,records:details.records||[],updated_at:new Date().toISOString()});
+      if(details.status==='verified')await db.update('advantage_config','email_sender',{from:'TMI <team@connect.tmitechai.com>',reply_to:'support@tmitechai.com',verified:true,domain_id:domain.id});
+      listed=await mail.domains.list();
+      if(!await db.getById('advantage_config','email_webhook')){
+        const wr=await fetch('https://api.resend.com/webhooks',{method:'POST',headers:{Authorization:'Bearer '+process.env.RESEND_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({endpoint:'https://admin.tmitechai.com/api/funnel-email',events:['email.received','email.delivered','email.bounced','email.complained','email.failed','email.suppressed']})});
+        const wb=await wr.json();if(!wr.ok||!wb.signing_secret)throw new Error('Email webhook setup failed');
+        await db.update('advantage_config','email_webhook',{id:wb.id,secret:require('./_advantage').production().seal(wb.signing_secret),created_at:new Date().toISOString()});
+      }
+    }
     const domains=(listed.data?.data||[]).filter(d=>/(^|\.)tmitechai\.com$/.test(d.name)).map(d=>({id:d.id,name:d.name,status:d.status}));
     let delivery=await db.getById('advantage_config','email_probe');
-    if(!delivery&&await db.claim('funnel-email-readiness-v1',120)){
-      const result=await mail.emails.send({from:'TMI <support@tmitechai.com>',to:'delivered@resend.dev',subject:'TMI funnel delivery verification',text:'Provider delivery verification. This simulated recipient does not deliver to a customer.'},{idempotencyKey:'tmi-funnel-email-readiness-v1'});
-      delivery={accepted:!!result.data?.id,provider_id:result.data?.id||null,error_code:result.error?.name||null,error_message:result.error?.message||null,checked_at:new Date().toISOString()};
+    if((!delivery||setup?.requested)&&await db.claim('funnel-email-readiness-v1',120)){
+      const from=(await db.getById('advantage_config','email_sender'))?.from||'TMI <support@tmitechai.com>';
+      const result=await mail.emails.send({from,to:'delivered@resend.dev',subject:'TMI funnel delivery verification',text:'Provider delivery verification. This simulated recipient does not deliver to a customer.'},{idempotencyKey:'tmi-funnel-email-readiness-'+require('crypto').createHash('sha256').update(from).digest('hex').slice(0,12)+'-'+new Date().toISOString().slice(0,10)});
+      const previousDelivery=delivery;delivery={delivered:!!result.data?.id&&previousDelivery?.provider_id===result.data.id&&previousDelivery?.delivered===true,accepted:!!result.data?.id,provider_id:result.data?.id||null,error_code:result.error?.name||null,error_message:result.error?.message||null,checked_at:new Date().toISOString()};
       await db.update('advantage_config','email_probe',delivery);
     }
     let model={configured:!!process.env.ANTHROPIC_API_KEY,available:false};

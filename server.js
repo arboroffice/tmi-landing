@@ -21,6 +21,9 @@ const stripeWebhook = require('./api/stripe-webhook');
 app.post('/api/stripe-webhook', express.raw({ type: '*/*' }), (req, res) => stripeWebhook(req, res));
 app.post('/api/advantage-events', express.raw({ type: '*/*' }), (req, res) => require('./api/advantage-events')(req, res));
 
+app.post('/api/funnel-email', express.raw({type:'*/*'}), (req,res)=>require('./api/funnel-email')(req,res));
+app.get('/funnel-sales',(req,res)=>res.sendFile(path.join(ROOT,'funnel-sales.html')));
+
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
