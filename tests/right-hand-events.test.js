@@ -1,0 +1,7 @@
+const test=require('node:test'),assert=require('node:assert/strict'),Stripe=require('stripe');
+const core=require('../api/_right-hand'),adv=require('../api/_advantage');const original=[core.production,adv.production];let received=[];
+const stripe=new Stripe('sk_test_fixture_not_a_real_key');
+core.production=()=>({event:async e=>received.push(e),drain:async()=>{throw new Error('unsigned queue must not run');}});adv.production=()=>({db:{getById:async()=>({secret:'whsec_fixture_only'})},stripe,unseal:v=>v});
+const handler=require('../api/right-hand-events');
+function response(){return {code:200,status(n){this.code=n;return this;},end(){return this;},json(b){this.body=b;return this;}};}
+test('webhook rejects unsigned and invalid signatures and accepts signed original bytes',async()=>{const raw=Buffer.from(JSON.stringify({id:'evt_fixture',type:'checkout.session.completed',data:{object:{metadata:{funnel:'right_hand_course'}}}}));let res=response();await handler({method:'POST',body:raw,headers:{}},res);assert.equal(res.code,401);res=response();await handler({method:'POST',body:raw,headers:{'stripe-signature':'invalid'}},res);assert.equal(res.code,400);assert.equal(received.length,0);const signature=stripe.webhooks.generateTestHeaderString({payload:raw.toString(),secret:'whsec_fixture_only'});res=response();await handler({method:'POST',body:raw,headers:{'stripe-signature':signature}},res);assert.equal(res.code,200);assert.equal(received.length,1);assert.equal(received[0].id,'evt_fixture');core.production=original[0];adv.production=original[1];});
