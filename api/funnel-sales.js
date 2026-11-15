@@ -10,7 +10,7 @@ module.exports=async(req,res)=>{
   if(req.method==='GET'&&q.action==='health')return res.json(await app.sales.health());
   if((req.method==='GET'&&q.action==='resume')||(req.method==='POST'&&b.action==='resume')){
     let p;try{p=require('jsonwebtoken').verify(String(q.ticket||b.ticket||''),process.env.JWT_SECRET);}catch{return res.status(403).json({error:'This link has expired. Please contact TMI.'});}
-    if(p.kind!=='funnel_resume')return res.status(403).end();const l=await app.authorized(p.sub,q.ticket||b.ticket);return res.json({id:l.id,token:q.ticket||b.ticket,offer:l.offer,authority:l.authority||''});
+    if(p.kind!=='funnel_resume')return res.status(403).end();const l=await app.authorized(p.sub,q.ticket||b.ticket);return res.json({id:l.id,token:q.ticket||b.ticket,offer:l.offer,authority:l.authority||'',name:l.name,email:l.email,company:l.company});
   }
   if(req.method==='POST'&&['chat','handoff','history'].includes(b.action)){
     const l=await app.authorized(b.id,b.token);

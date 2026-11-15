@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {factory,OFFERS}=require('../api/_advantage');
 function harness(){
-  const rows=new Map(),jobs=[],emails=[],sessions=new Map();let seq=0;
+  const rows=new Map(),jobs=[],emails=[],ownerEmails=[],sessions=new Map();let seq=0;
   const k=(c,id)=>c+':'+id;
   const db={
     getById:async(c,id)=>rows.get(k(c,id))||null,
@@ -13,23 +13,23 @@ function harness(){
   db.db=()=>({collection:c=>({doc:id=>({c,id})}),runTransaction:async cb=>cb({get:async r=>({exists:rows.has(k(r.c,r.id)),data:()=>rows.get(k(r.c,r.id))}),set:(r,d)=>rows.set(k(r.c,r.id),d)})});
   const stripe={webhookEndpoints:{create:async()=>({id:'we_fake',secret:'fake_webhook_signing_value'})},checkout:{sessions:{create:async(p,options)=>{const id='cs_'+options.idempotencyKey;let s=sessions.get(id);if(!s){s={id,url:'https://checkout.stripe.com/c/pay/fake',status:'open',payment_status:'unpaid',amount_total:p.line_items[0].price_data.unit_amount,currency:'usd',metadata:p.metadata,params:p};sessions.set(id,s);}return s;},expire:async id=>{sessions.get(id).status='expired';return sessions.get(id);},retrieve:async id=>{if(!sessions.has(id))throw new Error('Unknown session');return sessions.get(id);}}}};
   const queue={publishJSON:async j=>jobs.push(j)};
-  const app=factory({db,stripe,queue,mail:{emails:{send:async(m,options)=>{emails.push({m,options});return {data:{id:'mail_fake'}};}}},env:{JWT_SECRET:'fixture_only_not_a_real_key'}});
-  const capture=(consent=false,offer='workforce')=>app.capture({email:'owner@example.test',name:'Test Owner',company:'Test Company',offer,consent});
-  return {app,db,jobs,emails,sessions,capture,queue};
+  const app=factory({db,stripe,queue,mail:{emails:{send:async(m,options)=>{(m.to==='mia@tmitechai.com'?ownerEmails:emails).push({m,options});return {data:{id:'mail_fake'}};}}},env:{JWT_SECRET:'fixture_only_not_a_real_key'}});
+  const capture=(consent=false,offer='executive')=>app.capture({email:'owner@example.test',name:'Test Owner',company:'Test Company',offer,consent});
+  return {app,db,jobs,emails,ownerEmails,sessions,capture,queue};
 }
-test('server owns all three amounts and enforces authority and capability',async()=>{
+test('server owns the active price and historical amounts and enforces authority and capability',async()=>{
   const h=harness(),l=await h.capture();assert.equal(h.jobs.filter(j=>j.body.step==='details').length,1);assert.equal(h.jobs[0].body.step,'details');
-  await assert.rejects(h.app.checkout({...l,authority:'sponsor',agreed:true}),/authorized/);
-  await assert.rejects(h.app.checkout({...l,token:'invalid',authority:'authorized',agreed:true}),/start again/);
-  await h.app.checkout({...l,authority:'authorized',agreed:true,amount:1,offer:'executive'});
-  const s=[...h.sessions.values()][0];assert.equal(s.amount_total,1500000);assert.equal(s.metadata.offer,'workforce');assert.equal(s.params.after_expiration.recovery.enabled,true);
+  await assert.rejects(h.app.checkout({...l,authority:'sponsor',agreed:true,plan_agreed:true}),/authorized/);
+  await assert.rejects(h.app.checkout({...l,token:'invalid',authority:'authorized',agreed:true,plan_agreed:true}),/start again/);
+  await h.app.checkout({...l,authority:'authorized',agreed:true,plan_agreed:true,amount:1,offer:'workforce'});
+  const s=[...h.sessions.values()][0];assert.equal(s.amount_total,750000);assert.equal(s.metadata.offer,'executive');assert.equal(s.params.after_expiration.recovery.enabled,true);
   const config=await h.db.getById('advantage_config','stripe');assert.ok(!config.secret.includes('fake_webhook'));assert.equal(h.app.unseal(config.secret),'fake_webhook_signing_value');
-  await h.app.checkout({...l,authority:'authorized',agreed:true});assert.equal(h.sessions.size,1);
-  assert.deepEqual(Object.values(OFFERS).map(o=>o.amount),[500000,1500000,2500000]);
+  await h.app.checkout({...l,authority:'authorized',agreed:true,plan_agreed:true});assert.equal(h.sessions.size,1);
+  assert.deepEqual(Object.values(OFFERS).map(o=>o.amount),[750000,1500000,2500000]);
 });
 test('only paid Stripe sessions with matching scope amount and currency settle',async()=>{
-  const h=harness(),l=await h.capture(true);await h.app.checkout({...l,authority:'authorized',agreed:true});const s=[...h.sessions.values()][0];
-  assert.equal(await h.app.settle(s),false);s.payment_status='paid';s.amount_total=1;await assert.rejects(h.app.settle(s),/mismatch/);s.amount_total=1500000;s.currency='eur';await assert.rejects(h.app.settle(s),/mismatch/);s.currency='usd';s.payment_intent='pi_fake';assert.equal(await h.app.settle(s),true);assert.equal((await h.db.getById('advantage_leads',l.id)).status,'paid');
+  const h=harness(),l=await h.capture(true);await h.app.checkout({...l,authority:'authorized',agreed:true,plan_agreed:true});const s=[...h.sessions.values()][0];
+  assert.equal(await h.app.settle(s),false);s.payment_status='paid';s.amount_total=1;await assert.rejects(h.app.settle(s),/mismatch/);s.amount_total=750000;s.currency='eur';await assert.rejects(h.app.settle(s),/mismatch/);s.currency='usd';s.payment_intent='pi_fake';assert.equal(await h.app.settle(s),true);assert.equal((await h.db.getById('advantage_leads',l.id)).status,'paid');
   await h.app.work(l.id,'hour1');assert.equal(h.emails.length,0);await h.app.work(l.id,'paid');await h.app.work(l.id,'paid');assert.equal(h.emails.length,1);assert.match(h.emails[0].m.subject,/confirmed/);
 });
 test('opt-in controls follow-ups; unsubscribe, suppression, bookings and replies stop them',async()=>{
@@ -46,7 +46,7 @@ test('opt-in controls follow-ups; unsubscribe, suppression, bookings and replies
   await assert.rejects(h.app.unsubscribe(l.id,'bad'),/Invalid/);
 });
 test('payment reconciliation stops a queued nudge even before webhook delivery',async()=>{
-  const h=harness(),l=await h.capture(true);await h.app.checkout({...l,authority:'authorized',agreed:true});const s=[...h.sessions.values()][0];s.payment_status='paid';await h.app.work(l.id,'day1');assert.equal(h.emails.length,0);assert.equal((await h.db.getById('advantage_leads',l.id)).status,'paid');
+  const h=harness(),l=await h.capture(true);await h.app.checkout({...l,authority:'authorized',agreed:true,plan_agreed:true});const s=[...h.sessions.values()][0];s.payment_status='paid';await h.app.work(l.id,'day1');assert.equal(h.emails.length,0);assert.equal((await h.db.getById('advantage_leads',l.id)).status,'paid');
 });
 test('refund/dispute events stop this funnel without affecting unrelated purchases',async()=>{
   const h=harness(),l=await h.capture(true);await h.db.update('advantage_leads',l.id,{payment_intent:'pi_1',status:'paid'});
@@ -64,13 +64,13 @@ test('a purchase under the same email prevents duplicate abandoned follow-ups',a
   const h=harness(),first=await h.capture(true),second=await h.capture(true);await h.db.update('advantage_leads',second.id,{status:'paid'});await h.app.work(first.id,'day1');assert.equal(h.emails.length,0);
 });
 
-test('executive checkout charges 5000 and replaces an unpaid old-price session',async()=>{
+test('executive checkout charges 7500 and replaces an unpaid old-price session',async()=>{
  const h=harness(),l=await h.capture(true,'executive');
- const old={id:'cs_legacy',status:'open',payment_status:'unpaid',amount_total:750000,currency:'usd',url:'https://checkout.stripe.com/c/pay/old',metadata:{funnel:'ai_advantage',lead_id:l.id,offer:'executive'}};
+ const old={id:'cs_legacy',status:'open',payment_status:'unpaid',amount_total:500000,currency:'usd',url:'https://checkout.stripe.com/c/pay/old',metadata:{funnel:'ai_advantage',lead_id:l.id,offer:'executive'}};
  h.sessions.set(old.id,old);await h.db.update('advantage_leads',l.id,{session:old.id,checkout_at:'2026-11-14T22:00:00Z'});
- await h.app.checkout({...l,authority:'authorized',agreed:true});
+ await h.app.checkout({...l,authority:'authorized',agreed:true,plan_agreed:true});
  assert.equal(old.status,'expired');const current=[...h.sessions.values()].find(s=>s.id!==old.id);
- assert.equal(current.amount_total,500000);assert.equal((await h.db.getById('advantage_leads',l.id)).checkout_amount,500000);
+ assert.equal(current.amount_total,750000);assert.equal((await h.db.getById('advantage_leads',l.id)).checkout_amount,750000);
  current.payment_status='paid';assert.equal(await h.app.settle(current),true);
 });
 test('completed historical executive payments reconcile at their recorded price',async()=>{
@@ -79,3 +79,8 @@ test('completed historical executive payments reconcile at their recorded price'
  await h.db.update('advantage_leads',l.id,{session:paid.id,checkout_at:'2026-11-14T22:00:00Z'});
  assert.equal(await h.app.settle(paid),true);
 });
+
+
+test('new requests notify Mia via Resend and callback retry is idempotent',async()=>{const h=harness();const l=await h.app.capture({name:'Owner',company:'Company',email:'owner@example.test',offer:'executive',callback:true,message:'Help with reporting'});assert.equal(l.notified,true);assert.equal(h.ownerEmails.length,1);assert.equal(h.ownerEmails[0].m.to,'mia@tmitechai.com');assert.equal(h.ownerEmails[0].m.replyTo,'owner@example.test');assert.match(h.ownerEmails[0].m.text,/reporting/);assert.equal(h.jobs.filter(j=>j.body.step==='details').length,0);await h.app.callback(l);await h.app.callback(l);assert.equal(h.ownerEmails.length,1);assert.equal((await h.db.getById('advantage_leads',l.id)).followups_paused,true);});
+test('retired packages cannot create new leads and payment needs written agreement',async()=>{const h=harness();await assert.rejects(h.capture(false,'workforce'),e=>e.status===400);const l=await h.capture();await assert.rejects(h.app.checkout({...l,authority:'authorized',agreed:true}),/written plan/);assert.equal(h.sessions.size,0);});
+test('recorded historical 5000 payments still reconcile without repricing',async()=>{const h=harness(),l=await h.capture();const paid={id:'cs_old_5000',payment_status:'paid',amount_total:500000,currency:'usd',metadata:{funnel:'ai_advantage',lead_id:l.id,offer:'executive'}};await h.db.update('advantage_leads',l.id,{checkout_amount:500000,session:paid.id});assert.equal(await h.app.settle(paid),true);});
