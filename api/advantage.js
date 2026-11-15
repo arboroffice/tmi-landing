@@ -26,7 +26,7 @@ module.exports=async function(req,res){
       if(q.action==='onboarding'){
         const id=String(q.id||'');if(q.token!==app.signature(id))return res.status(403).json({error:'Invalid link'});
         const l=await app.db.getById('advantage_leads',id);if(l?.status!=='paid')return res.status(403).json({error:'Purchase not confirmed'});
-        await app.db.update('advantage_leads',id,{onboarding_at:new Date().toISOString()});return res.json({url:CALL});
+        await app.db.update('advantage_leads',id,{onboarding_at:new Date().toISOString()});await app.sales.notifyOwner(l,'paid');return res.json({ok:true,message:'TMI will contact you about your setup.'});
       }
       // Read-only readiness check: no payment sessions or test leads are created.
       return res.json(await app.health());
@@ -41,7 +41,9 @@ module.exports=async function(req,res){
     if(b.action!=='qualify')await app.rate((req.headers['x-forwarded-for']?.split(',')[0]||req.socket?.remoteAddress||'unknown')+':'+String(b.action));
     if(b.action==='capture')return res.status(201).json(await app.capture(b));
     if(b.action==='checkout')return res.json(await app.checkout(b));
+    if(b.action==='callback')return res.json(await app.callback(b));
     if(b.action==='qualify')return res.json(await app.qualify(b));
     return res.status(400).json({error:'Unknown action'});
   }catch(e){console.error('AI Advantage:',e.message);return res.status(e.status||503).json({error:e.status?e.message:'We could not complete that step. Please try again or email support@tmitechai.com.'});}
 };
+
