@@ -1,6 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {factory,OFFERS}=require('../api/_advantage');
-function harness(){
+function harness(calendar){
   const rows=new Map(),jobs=[],emails=[],ownerEmails=[],sessions=new Map();let seq=0,mailFailure=false;
   const k=(c,id)=>c+':'+id;
   const db={
@@ -13,7 +13,7 @@ function harness(){
   db.db=()=>({collection:c=>({doc:id=>({c,id})}),runTransaction:async cb=>cb({get:async r=>({exists:rows.has(k(r.c,r.id)),data:()=>rows.get(k(r.c,r.id))}),set:(r,d)=>rows.set(k(r.c,r.id),d)})});
   const stripe={webhookEndpoints:{create:async()=>({id:'we_fake',secret:'fake_webhook_signing_value'})},checkout:{sessions:{create:async(p,options)=>{const id='cs_'+options.idempotencyKey;let s=sessions.get(id);if(!s){s={id,url:'https://checkout.stripe.com/c/pay/fake',status:'open',mode:p.mode,payment_status:'unpaid',amount_total:p.line_items[0].price_data.unit_amount,currency:'usd',metadata:p.metadata,params:p};sessions.set(id,s);}return s;},expire:async id=>{sessions.get(id).status='expired';return sessions.get(id);},retrieve:async id=>{if(!sessions.has(id))throw new Error('Unknown session');return sessions.get(id);}}}};
   const queue={publishJSON:async j=>jobs.push(j)};
-  const app=factory({db,stripe,queue,mail:{emails:{send:async(m,options)=>{if(mailFailure)return {error:{message:'fixture email outage'}};(m.to==='mia@tmitechai.com'?ownerEmails:emails).push({m,options});return {data:{id:'mail_fake'}};}}},env:{JWT_SECRET:'fixture_only_not_a_real_key'}});
+  const app=factory({db,stripe,queue,calendar,mail:{emails:{send:async(m,options)=>{if(mailFailure)return {error:{message:'fixture email outage'}};(m.to==='mia@tmitechai.com'?ownerEmails:emails).push({m,options});return {data:{id:'mail_fake'}};}}},env:{JWT_SECRET:'fixture_only_not_a_real_key'}});
   const capture=(consent=false,offer='executive')=>app.capture({email:'owner@example.test',name:'Test Owner',company:'Test Company',offer,consent});
   return {app,db,jobs,emails,ownerEmails,sessions,capture,queue,failMail:value=>{mailFailure=value;},clearLocks:()=>{for(const key of rows.keys())if(key.startsWith('advantage_locks:'))rows.delete(key);}};
 }
@@ -94,7 +94,7 @@ test('roadmap purchase requires the recorded complete session, buyer, amount and
  const h=harness(),l=await h.capture(false,'roadmap');await h.app.checkout({...l,authority:'authorized',agreed:true});const s=[...h.sessions.values()][0];Object.assign(s,{status:'complete',payment_status:'paid',customer_email:'owner@example.test',payment_intent:'pi_roadmap'});for(const override of [{id:'cs_other'},{status:'open'},{customer_email:'another@example.test'},{amount_total:750000},{currency:'eur'},{payment_intent:null}])await assert.rejects(h.app.settle({...s,...override}),/mismatch/);assert.equal((await h.db.getById('advantage_leads',l.id)).status,'checkout');
 });
 test('paid roadmap intake saves drafts, submits once and notifies Mia with the answers',async()=>{
- const h=harness(),{l}=await roadmapPaid(h);await h.app.work(l.id,'paid');const receipt=h.emails.at(-1).m;assert.match(receipt.html,/Complete my roadmap intake/);assert.match(receipt.html,/No preparation call/);assert.doesNotMatch(receipt.html,/guaranteed 5|3 business days/);
+ const h=harness(),{l}=await roadmapPaid(h);await h.app.work(l.id,'paid');const receipt=h.emails.at(-1).m;assert.match(receipt.html,/Complete my roadmap intake/);assert.match(receipt.html,/Book my roadmap session/);assert.doesNotMatch(receipt.html,/guaranteed 5|3 business days/);
  await assert.rejects(h.app.opportunityIntake({...l,token:'wrong',action:'opportunity_intake_get'}),e=>e.status===403);
  await h.app.opportunityIntake({...l,action:'opportunity_intake_save',step:1,intake:{role:'Operations manager'}});assert.equal((await h.app.opportunityIntake({...l,action:'opportunity_intake_get'})).step,1);
  await assert.rejects(h.app.opportunityIntake({...l,action:'opportunity_intake_save',submit:true,intake:{}}),e=>e.status===400);
@@ -124,7 +124,7 @@ test('roadmap reminders stop after verified payment including a delayed webhook'
  const h=harness(),l=await h.capture(true,'roadmap');await h.app.checkout({...l,authority:'authorized',agreed:true,reminder_consent:true});await h.db.update('advantage_leads',l.id,{checkout_at:new Date(Date.now()-86400000).toISOString()});const s=[...h.sessions.values()][0];Object.assign(s,{status:'complete',payment_status:'paid',customer_email:'owner@example.test',payment_intent:'pi_paid'});await h.app.work(l.id,'day1');assert.equal(h.emails.length,0);assert.equal((await h.db.getById('advantage_leads',l.id)).status,'paid');
 });
 test('paid intake reminders stop for submitted, paused, replied and suppressed buyers',async()=>{
- for(const reason of ['submitted','paused','human','suppression']){const h=harness(),{l}=await roadmapPaid(h);await h.db.update('advantage_leads',l.id,{paid_at:new Date(Date.now()-86400000).toISOString(),...(reason==='submitted'?{opportunity_submitted_at:new Date().toISOString()}:reason==='paused'?{followups_paused:true}:reason==='human'?{human_active:true}:{})});if(reason==='suppression')await h.db.insert('suppression',{email:'owner@example.test'});await h.app.work(l.id,'onboarding');assert.equal(h.emails.length,0,reason);}
+ for(const reason of ['paused','human','suppression']){const h=harness(),{l}=await roadmapPaid(h);await h.db.update('advantage_leads',l.id,{paid_at:new Date(Date.now()-86400000).toISOString(),...(reason==='submitted'?{opportunity_submitted_at:new Date().toISOString()}:reason==='paused'?{followups_paused:true}:reason==='human'?{human_active:true}:{})});if(reason==='suppression')await h.db.insert('suppression',{email:'owner@example.test'});await h.app.work(l.id,'onboarding');assert.equal(h.emails.length,0,reason);}
 });
 test('paid intake reminders are limited, link to the saved intake and can be unsubscribed without losing access',async()=>{
  const h=harness(),{l}=await roadmapPaid(h);assert.deepEqual(h.jobs.filter(j=>j.body.step.startsWith('onboarding')).map(j=>j.body.step),['onboarding','onboarding3','onboarding7']);for(const [step,delay] of [['onboarding',86400],['onboarding3',259200],['onboarding7',604800]]){await h.db.update('advantage_leads',l.id,{paid_at:new Date(Date.now()-delay*1000).toISOString()});await h.app.work(l.id,step);}assert.equal(h.emails.length,3);assert.match(h.emails[2].m.subject,/last/i);for(const {m} of h.emails){assert.match(m.html,/opportunity-intake.html#request=/);assert.ok(m.headers['List-Unsubscribe']);}await h.app.unsubscribe(l.id,h.app.signature(l.id));assert.equal((await h.db.getById('advantage_leads',l.id)).status,'paid');assert.equal((await h.app.opportunityIntake({...l,action:'opportunity_intake_get'})).ok,true);
@@ -133,3 +133,19 @@ test('late outbox catchup does not send stale reminders in a burst',async()=>{co
 test('refunds cannot be resurrected by replayed purchase or queued follow-up',async()=>{const h=harness(),{l,s}=await roadmapPaid(h);await h.app.event({type:'charge.refunded',data:{object:{payment_intent:'pi_roadmap'}}});assert.equal(await h.app.settle(s),false);await h.app.work(l.id,'paid');assert.equal((await h.db.getById('advantage_leads',l.id)).status,'refunded');assert.equal(h.emails.length,0);});
 test('a failed intake reminder remains retryable and is recorded only once after provider acceptance',async()=>{const h=harness(),{l}=await roadmapPaid(h);await h.db.update('advantage_leads',l.id,{paid_at:new Date(Date.now()-86400000).toISOString()});h.failMail(true);await assert.rejects(h.app.work(l.id,'onboarding'),/delivery failed/);h.failMail(false);h.clearLocks();await h.app.work(l.id,'onboarding');await h.app.work(l.id,'onboarding');assert.equal(h.emails.length,1);});
 test('roadmap live-readiness probe checks 997 USD and closes its uncharged session without messaging anyone',async()=>{const h=harness();await h.app.verifyRoadmapCheckout();const s=[...h.sessions.values()][0];assert.equal(s.amount_total,99700);assert.equal(s.mode,'payment');assert.equal(s.status,'expired');assert.equal(s.metadata.funnel,'ai_advantage_setup');assert.equal(h.emails.length+h.ownerEmails.length,0);assert.ok((await h.db.getById('advantage_config','health')).roadmap_checkout_verified_at);await h.app.verifyRoadmapCheckout();assert.equal(h.sessions.size,1);});
+
+test('booking link is paid-only and booking never completes the intake',async()=>{
+ const h=harness({lookup:async()=>({available:true,booking:{status:'accepted',start:'2026-12-01T12:00:00Z'}})}),l=await h.capture(false,'roadmap');
+ await assert.rejects(h.app.opportunityIntake({...l,action:'opportunity_intake_get'}),e=>e.status===403);
+ const paid=await roadmapPaid(h),d=await h.app.opportunityIntake({...paid.l,action:'opportunity_intake_get'});
+ assert.equal(d.booking_url,'https://cal.com/miaeliana/ai-opportunity-roadmap');assert.equal(d.booking.status,'accepted');assert.equal(d.submitted,false);
+ assert.equal((await h.db.getById('advantage_leads',paid.l.id)).onboarding_at,undefined);
+});
+test('paid reminders distinguish booked, brief submitted, both done, and calendar outage',async()=>{
+ for(const [booked,submitted,available] of [[true,false,true],[false,true,true],[true,true,true],[false,true,false]]){
+ const h=harness({lookup:async()=>({available,booking:booked?{status:'accepted'}:null})}),{l}=await roadmapPaid(h);
+ await h.db.update('advantage_leads',l.id,{paid_at:new Date(Date.now()-86400000).toISOString(),...(submitted?{opportunity_submitted_at:new Date().toISOString(),onboarding_at:new Date().toISOString()}:{})});
+ await h.app.work(l.id,'onboarding');if(booked&&submitted){assert.equal(h.emails.length,0);continue;}
+ const html=h.emails.at(-1).m.html;assert.equal(html.includes('Book my roadmap session'),!booked);assert.equal(html.includes('Continue my saved intake'),!submitted);if(!available)assert.match(html,/no need to book again/);
+ }
+});

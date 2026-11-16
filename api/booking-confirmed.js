@@ -26,12 +26,26 @@ module.exports = async function handler(req, res) {
   // legacy audit sales sequence. Cal still sends its calendar confirmation.
   const tmiDb = require('./_tmi-db');
   const advantageRows = await tmiDb.list('advantage_leads', { where: [['email', '==', email.toLowerCase()]] });
+  // Never trust webhook attendee details as booking proof. Verify the specific
+  // paid roadmap event against Cal's authenticated API; booking is not intake.
+  const payload=body.payload||{};
+  const roadmapEvent=Number(payload.eventTypeId||payload.eventType?.id)===7939176||[payload.type,payload.eventTypeSlug,payload.eventType?.slug].includes('ai-opportunity-roadmap');
+  const roadmapRows=advantageRows.filter(r=>r.offer==='roadmap');
+  if(roadmapEvent){
+    const app=require('./_advantage').production();
+    for(const lead of roadmapRows.filter(r=>r.status==='paid'))await app.syncOpportunityBooking(lead,{refresh:true});
+    return res.status(200).json({ok:true,note:'Roadmap calendar checked'});
+  }
+  // An unrelated booking must not mark roadmap preparation complete or start
+  // the legacy sales sequence for an existing roadmap buyer.
+  const otherAdvantage=advantageRows.filter(r=>r.offer!=='roadmap');
+  if(roadmapRows.length&&!otherAdvantage.length)return res.status(200).json({ok:true,note:'Unrelated event ignored for roadmap'});
   const paidAdvantage = advantageRows.find(r => r.status === 'paid');
-  if (advantageRows.length) {
+  if (otherAdvantage.length) {
     const cancelled = body.triggerEvent === 'BOOKING_CANCELLED';
     const stamp = new Date().toISOString();
     await tmiDb.insert('precall_bookings', { id: require('crypto').createHash('sha256').update(email.toLowerCase()).digest('hex'), email: email.toLowerCase(), cancelled, booked_at: stamp, call_at: startTime || null });
-    if (!cancelled) for (const lead of advantageRows) await tmiDb.update('advantage_leads', lead.id, { ...(lead.status === 'paid' ? { onboarding_at: stamp } : { status: 'booked' }), booked_at: stamp });
+    if (!cancelled) for (const lead of otherAdvantage) await tmiDb.update('advantage_leads', lead.id, { ...(lead.status === 'paid' ? { onboarding_at: stamp } : { status: 'booked' }), booked_at: stamp });
     return res.status(200).json({ ok: true, note: 'AI Advantage booking recorded' });
   }
 

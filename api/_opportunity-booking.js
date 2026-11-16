@@ -1,0 +1,18 @@
+// Read-only Cal.com integration for the owner-authorized, post-payment roadmap session.
+const BOOKING_URL='https://cal.com/miaeliana/ai-opportunity-roadmap';
+const USERNAME='miaeliana',SLUG='ai-opportunity-roadmap',BASE='https://api.cal.com/v2';
+function create({env=process.env,fetcher=fetch,clock=()=>Date.now()}={}){
+ const cache=new Map(),key=()=>env.CAL_API_KEY||env.CALCOM_API_KEY||'';
+ async function get(path,version,authenticated=true){if(authenticated&&!key())throw Error('Calendar connection unavailable');const r=await fetcher(BASE+path,{headers:{'cal-api-version':version,...(authenticated?{Authorization:'Bearer '+key()}:{})},signal:AbortSignal.timeout(4500)});if(!r.ok)throw Error('Calendar verification unavailable');const d=await r.json();if(d.status&&d.status!=='success')throw Error('Calendar verification unavailable');return d;}
+ async function event(){const old=cache.get('event');if(old&&clock()-old.at<300000)return old.value;const query=new URLSearchParams({username:USERNAME,eventSlug:SLUG});const d=await get('/event-types?'+query,'2026-06-12',false);const found=(Array.isArray(d.data)?d.data:[]).find(e=>e.slug===SLUG&&Number.isInteger(e.id));if(!found||Number(found.price||0)!==0)throw Error('Post-payment calendar must be available without another charge');const value={id:found.id,minutes:found.lengthInMinutes||null};cache.set('event',{at:clock(),value});return value;}
+ async function lookup(lead,{refresh=false}={}){
+  if(lead.offer!=='roadmap'||lead.status!=='paid')return {available:false,booking:null};const cacheKey=lead.id+':'+lead.paid_at,old=cache.get(cacheKey);if(!refresh&&old&&clock()-old.at<60000)return old.value;
+  try{const target=await event();const query=new URLSearchParams({eventTypeId:String(target.id),attendeeEmail:lead.email,afterCreatedAt:lead.paid_at,take:'100'});let cursor=null,rows=[];for(let i=0;i<3;i++){if(cursor)query.set('cursor',cursor);const d=await get('/bookings?'+query,'2026-05-01');rows.push(...(Array.isArray(d.data)?d.data:[]));cursor=d.pagination?.hasMore?d.pagination.nextCursor:null;if(!cursor)break;}
+   const paid=Date.parse(lead.paid_at);const matching=rows.filter(b=>{const type=b.eventTypeId??b.eventType?.id;const created=Date.parse(b.createdAt||b.created_at||'');return Number(type)===target.id&&Number.isFinite(created)&&created>=paid-60000&&Array.isArray(b.attendees)&&b.attendees.some(a=>String(a.email||'').toLowerCase()===lead.email)&&typeof b.uid==='string';}).sort((a,b)=>Date.parse(b.createdAt||b.created_at)-Date.parse(a.createdAt||a.created_at));
+   const b=matching[0],status=String(b?.status||'').toLowerCase();const booking=b?{uid:b.uid,status:['accepted','confirmed','pending','cancelled','rejected'].includes(status)?status:'unknown',start:b.start||b.startTime||null,end:b.end||b.endTime||null,source:'cal_api'}:null;const value={available:true,booking};if(cache.size>500)cache.delete(cache.keys().next().value);cache.set(cacheKey,{at:clock(),value});return value;
+  }catch{return {available:false,booking:null};}
+ }
+ async function health(){try{const target=await event();if(!key())return {event_found:true,no_second_charge:true,booking_read:false};const old=cache.get('health');if(old&&clock()-old.at<60000)return old.value;await get('/bookings?'+new URLSearchParams({eventTypeId:String(target.id),attendeeEmail:'tmi-calendar-readiness@example.invalid',take:'1'}),'2026-05-01');const value={event_found:true,no_second_charge:true,booking_read:true};cache.set('health',{at:clock(),value});return value;}catch{return {event_found:false,no_second_charge:false,booking_read:false};}}
+ return {lookup,health};
+}
+module.exports={create,BOOKING_URL,SLUG};
