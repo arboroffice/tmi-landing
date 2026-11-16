@@ -7,7 +7,7 @@ const ROADMAP = 'https://www.tmitechai.com/ai-advantage/opportunity.html';
 const INTAKE = 'https://www.tmitechai.com/ai-advantage/opportunity-intake.html';
 const OFFERS = Object.freeze({
   roadmap: { name: 'AI Opportunity & Roadmap', amount: 99700, scope: 'A focused review of your recurring work, prioritized AI opportunities, recommended tools and inputs, and a written 90-day action roadmap and a paid opportunity session. Implementation is separate. No fixed delivery deadline or hours-saved guarantee.' },
-  executive: { name: 'TMI Admin Relief Setup', amount: 750000, scope: 'AI setup, agreed workflows, guided handoff, workflow guide, and measured time-savings guarantee under the written plan agreed before payment.' },
+  executive: { name: 'Your AI Right Hand', amount: 750000, scope: 'Custom AI agents and executive assistants built around your tasks, tools and preferences. Includes workload assessment, agreed workflows, a real-task demonstration, hands-on training, a workflow guide and results scorecard. TMI schedules implementation directly with you. The measured time-savings guarantee follows the written plan agreed before payment; software subscriptions and additional work are separate.' },
   workforce: { name: 'AI Workforce Advantage', amount: 1500000, scope: 'Hands-on training for up to 10 employees, role-specific AI tools, and ready-to-use workflows built around actual jobs.' },
   audit: { name: 'Intelligent Company Audit', amount: 2500000, scope: 'Review of operations, people, systems and data, with prioritized opportunities for automation, cost savings and custom technology.' },
 });
@@ -54,7 +54,7 @@ function factory({db, stripe, queue, mail, env = process.env, calendar = {lookup
     const config=await db.getById('advantage_config','health');if(config?.initialized_at)return;
     // Exercise the real Checkout API without a customer or a charge, then close
     // the session immediately. No lead, promotional email or payment is created.
-    const probe=await stripe.checkout.sessions.create({mode:'payment',payment_method_types:['card'],line_items:[{price_data:{currency:'usd',unit_amount:OFFERS.executive.amount,product_data:{name:'TMI Admin Relief Setup'}},quantity:1}],success_url:SITE+'/',cancel_url:SITE+'/',metadata:{funnel:'ai_advantage_setup'}},{idempotencyKey:'tmi-advantage-checkout-readiness-v1'});
+    const probe=await stripe.checkout.sessions.create({mode:'payment',payment_method_types:['card'],line_items:[{price_data:{currency:'usd',unit_amount:OFFERS.executive.amount,product_data:{name:'Your AI Right Hand'}},quantity:1}],success_url:SITE+'/',cancel_url:SITE+'/',metadata:{funnel:'ai_advantage_setup'}},{idempotencyKey:'tmi-advantage-checkout-readiness-v1'});
     const current=await stripe.checkout.sessions.retrieve(probe.id);if(current.status==='open')await stripe.checkout.sessions.expire(probe.id);
     await db.update('advantage_config','health',{checkout_verified_at:now()});
     await queue.schedules.create({destination:APP+'/api/advantage-events',scheduleId:'tmi-ai-advantage-outbox',cron:'*/15 * * * *',body:JSON.stringify({id:'__outbox__',step:'drain'}),headers:{'Content-Type':'application/json'}});
@@ -92,7 +92,7 @@ function factory({db, stripe, queue, mail, env = process.env, calendar = {lookup
     const o=OFFERS[l.offer];
     if(l.session){const prev=await stripe.checkout.sessions.retrieve(l.session);if(prev.payment_status==='paid'){await settle(prev);return {url:destination+'?success=1&session_id='+encodeURIComponent(prev.id)};}if(prev.status==='open'){if(prev.amount_total===o.amount)return {url:prev.url};await stripe.checkout.sessions.expire(prev.id);}}
     const s=await stripe.checkout.sessions.create({mode:'payment',payment_method_types:['card'],customer_email:l.email,client_reference_id:l.id,
-      line_items:[{price_data:{currency:'usd',unit_amount:o.amount,product_data:{name:l.offer==='roadmap'?'TMI AI Opportunity & Roadmap':'TMI '+o.name,description:o.scope}},quantity:1}],
+      line_items:[{price_data:{currency:'usd',unit_amount:o.amount,product_data:{name:l.offer==='roadmap'?'TMI AI Opportunity & Roadmap':(l.offer==='executive'?o.name:'TMI '+o.name),description:o.scope}},quantity:1}],
       success_url:destination+'?success=1&session_id={CHECKOUT_SESSION_ID}',cancel_url:(l.offer==='roadmap'?ROADMAP:SITE+'/')+'?checkout=cancelled#enroll',
       expires_at:Math.floor(Date.now()/1000)+3600,after_expiration:{recovery:{enabled:true}},
       metadata:{funnel:'ai_advantage',lead_id:l.id,offer:l.offer,company:l.company},
