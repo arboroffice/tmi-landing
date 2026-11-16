@@ -38,7 +38,7 @@ module.exports=async function(req,res){
       await app.db.update('advantage_leads',String(b.id),{followups_paused:true});return res.json({ok:true});
     }
     if(b.website)return res.json({ok:true});
-    if(b.action!=='qualify')await app.rate((req.headers['x-forwarded-for']?.split(',')[0]||req.socket?.remoteAddress||'unknown')+':'+String(b.action));
+    if(b.action!=='qualify')await app.rate((req.headers['x-forwarded-for']?.split(',')[0]||req.socket?.remoteAddress||'unknown')+':'+String(b.action),['opportunity_intake_get','opportunity_intake_save'].includes(b.action)?1:10);
     if(['opportunity_intake_get','opportunity_intake_save'].includes(b.action))return res.json(await app.opportunityIntake(b));
     if(b.action==='capture')return res.status(201).json(await app.capture(b));
     if(b.action==='checkout')return res.json(await app.checkout(b));

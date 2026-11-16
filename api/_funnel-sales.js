@@ -39,7 +39,7 @@ module.exports=function createSales({db,mail,env,claim,schedule,isStopped}){
    if(result.error||!result.data?.id)throw new Error('Owner notification not accepted');
    await db.insert('advantage_deliveries',{id,lead_id:l.id,step:'owner_'+kind,sent_at:stamp(),provider_id:result.data.id});return true;
  }
- async function captured(l){await taskFor(l,l.offer==='roadmap'?'New AI Opportunity & Roadmap request':'New TMI AI Advantage inquiry');if(l.consent)await schedule(l.id,'day7',604800);}
+ async function captured(l){await taskFor(l,l.offer==='roadmap'?'New AI Opportunity & Roadmap request':'New TMI AI Advantage inquiry');if(l.consent&&l.offer!=='roadmap')await schedule(l.id,'day7',604800);}
  async function qualified(l){return taskFor(l,'Decision maker evaluating TMI AI Advantage','high');}
  async function handoff(l,reason){await db.update('advantage_leads',l.id,{human_requested_at:stamp(),followups_paused:true});await taskFor(l,reason,'high');return {message:'Your question is with the TMI team. A person can continue with you by email.'};}
  async function model(messages,extra=''){
@@ -70,7 +70,7 @@ module.exports=function createSales({db,mail,env,claim,schedule,isStopped}){
    catch{answer={reply:'A person at TMI can help with that. I’ve saved your question so you can continue with the team.',handoff:true,intent:'question',summary:'AI unavailable; human response required',authority:'unknown',problem:''};}
    await db.insert('funnel_messages',{lead_id:l.id,role:'assistant',text:answer.reply,created_at:stamp()});
    await db.update('advantage_leads',l.id,{ai_summary:answer.summary,ai_authority:answer.authority,ai_intent:answer.intent,problem:answer.problem||l.problem||null,last_message_at:stamp()});
-   if(answer.intent==='unsubscribe'||/\b(?:unsubscribe me|stop emailing|stop sending me|remove me from|please unsubscribe)\b|^\s*unsubscribe[.!]?\s*$/i.test(text)){await db.update('advantage_leads',l.id,{status:'unsubscribed',consent:false});answer.reply='You are unsubscribed from program follow-ups.';answer.handoff=false;}
+   if(answer.intent==='unsubscribe'||/\b(?:unsubscribe me|stop emailing|stop sending me|remove me from|please unsubscribe)\b|^\s*unsubscribe[.!]?\s*$/i.test(text)){await db.update('advantage_leads',l.id,{...(['paid','refunded','disputed'].includes(l.status)?{}:{status:'unsubscribed'}),consent:false,followups_paused:true});answer.reply='You are unsubscribed from program follow-ups.';answer.handoff=false;}
    else if(answer.intent==='not_interested'){await db.update('advantage_leads',l.id,{status:'lost',followups_paused:true});}
    else if(answer.handoff||answer.intent==='ready'){await handoff(l,answer.intent==='ready'?'Buyer is ready to discuss the investment':answer.summary||'Visitor requested a person');}
    return {reply:answer.reply,handoff:answer.handoff||answer.intent==='ready',next:answer.authority==='champion'?'brief':'checkout'};
@@ -169,8 +169,9 @@ module.exports=function createSales({db,mail,env,claim,schedule,isStopped}){
    const text=String(b.text||String(b.html||'').replace(/<[^>]*>/g,' ')).split(/\nOn .{0,200}wrote:\s*\n|\nFrom:|\n[-_]{3,}|\n> /i)[0].trim().slice(0,1800);
    if(!text)return;
    if(/^(auto-replied|auto-generated)$/i.test(String(b.headers?.['auto-submitted']||'')))return;
-   if(/\b(?:unsubscribe me|stop emailing|stop sending me|remove me from|please unsubscribe)\b|^\s*unsubscribe[.!]?\s*$/i.test(text)){await db.update('advantage_leads',l.id,{status:'unsubscribed',consent:false,unsubscribed_at:stamp()});await db.insert('funnel_events',{id:'in_'+eid,type:'unsubscribed',lead_id:l.id});return;}
-   if(l.human_active||l.human_requested_at||l.status==='paid'){
+   if(/\b(?:unsubscribe me|stop emailing|stop sending me|remove me from|please unsubscribe)\b|^\s*unsubscribe[.!]?\s*$/i.test(text)){await db.update('advantage_leads',l.id,{...(['paid','refunded','disputed'].includes(l.status)?{}:{status:'unsubscribed'}),consent:false,followups_paused:true,unsubscribed_at:stamp()});await db.insert('funnel_events',{id:'in_'+eid,type:'unsubscribed',lead_id:l.id});return;}
+   if(l.offer==='roadmap'||l.human_active||l.human_requested_at||l.status==='paid'){
+     if(l.offer==='roadmap')await db.update('advantage_leads',l.id,{followups_paused:true,human_active:true});
      await db.insert('funnel_messages',{lead_id:l.id,role:'user',channel:'email',text,created_at:stamp()});await taskFor(l,'Customer replied by email','high');
      await schedule(l.id,'handoff_hot',0);
    }else{

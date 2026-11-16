@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {factory,OFFERS}=require('../api/_advantage');
 function harness(){
-  const rows=new Map(),jobs=[],emails=[],ownerEmails=[],sessions=new Map();let seq=0;
+  const rows=new Map(),jobs=[],emails=[],ownerEmails=[],sessions=new Map();let seq=0,mailFailure=false;
   const k=(c,id)=>c+':'+id;
   const db={
     getById:async(c,id)=>rows.get(k(c,id))||null,
@@ -11,11 +11,11 @@ function harness(){
     findOne:async(c,f,v)=>(await db.list(c,{where:[[f,'==',v]]}))[0]||null,
   };
   db.db=()=>({collection:c=>({doc:id=>({c,id})}),runTransaction:async cb=>cb({get:async r=>({exists:rows.has(k(r.c,r.id)),data:()=>rows.get(k(r.c,r.id))}),set:(r,d)=>rows.set(k(r.c,r.id),d)})});
-  const stripe={webhookEndpoints:{create:async()=>({id:'we_fake',secret:'fake_webhook_signing_value'})},checkout:{sessions:{create:async(p,options)=>{const id='cs_'+options.idempotencyKey;let s=sessions.get(id);if(!s){s={id,url:'https://checkout.stripe.com/c/pay/fake',status:'open',payment_status:'unpaid',amount_total:p.line_items[0].price_data.unit_amount,currency:'usd',metadata:p.metadata,params:p};sessions.set(id,s);}return s;},expire:async id=>{sessions.get(id).status='expired';return sessions.get(id);},retrieve:async id=>{if(!sessions.has(id))throw new Error('Unknown session');return sessions.get(id);}}}};
+  const stripe={webhookEndpoints:{create:async()=>({id:'we_fake',secret:'fake_webhook_signing_value'})},checkout:{sessions:{create:async(p,options)=>{const id='cs_'+options.idempotencyKey;let s=sessions.get(id);if(!s){s={id,url:'https://checkout.stripe.com/c/pay/fake',status:'open',mode:p.mode,payment_status:'unpaid',amount_total:p.line_items[0].price_data.unit_amount,currency:'usd',metadata:p.metadata,params:p};sessions.set(id,s);}return s;},expire:async id=>{sessions.get(id).status='expired';return sessions.get(id);},retrieve:async id=>{if(!sessions.has(id))throw new Error('Unknown session');return sessions.get(id);}}}};
   const queue={publishJSON:async j=>jobs.push(j)};
-  const app=factory({db,stripe,queue,mail:{emails:{send:async(m,options)=>{(m.to==='mia@tmitechai.com'?ownerEmails:emails).push({m,options});return {data:{id:'mail_fake'}};}}},env:{JWT_SECRET:'fixture_only_not_a_real_key'}});
+  const app=factory({db,stripe,queue,mail:{emails:{send:async(m,options)=>{if(mailFailure)return {error:{message:'fixture email outage'}};(m.to==='mia@tmitechai.com'?ownerEmails:emails).push({m,options});return {data:{id:'mail_fake'}};}}},env:{JWT_SECRET:'fixture_only_not_a_real_key'}});
   const capture=(consent=false,offer='executive')=>app.capture({email:'owner@example.test',name:'Test Owner',company:'Test Company',offer,consent});
-  return {app,db,jobs,emails,ownerEmails,sessions,capture,queue};
+  return {app,db,jobs,emails,ownerEmails,sessions,capture,queue,failMail:value=>{mailFailure=value;},clearLocks:()=>{for(const key of rows.keys())if(key.startsWith('advantage_locks:'))rows.delete(key);}};
 }
 test('server owns the active price and historical amounts and enforces authority and capability',async()=>{
   const h=harness(),l=await h.capture();assert.equal(h.jobs.filter(j=>j.body.step==='details').length,1);assert.equal(h.jobs[0].body.step,'details');
@@ -66,7 +66,7 @@ test('a purchase under the same email prevents duplicate abandoned follow-ups',a
 
 test('executive checkout charges 7500 and replaces an unpaid old-price session',async()=>{
  const h=harness(),l=await h.capture(true,'executive');
- const old={id:'cs_legacy',status:'open',payment_status:'unpaid',amount_total:500000,currency:'usd',url:'https://checkout.stripe.com/c/pay/old',metadata:{funnel:'ai_advantage',lead_id:l.id,offer:'executive'}};
+ const old={id:'cs_legacy',status:'open',mode:'payment',payment_status:'unpaid',amount_total:500000,currency:'usd',url:'https://checkout.stripe.com/c/pay/old',metadata:{funnel:'ai_advantage',lead_id:l.id,offer:'executive'}};
  h.sessions.set(old.id,old);await h.db.update('advantage_leads',l.id,{session:old.id,checkout_at:'2026-11-14T22:00:00Z'});
  await h.app.checkout({...l,authority:'authorized',agreed:true,plan_agreed:true});
  assert.equal(old.status,'expired');const current=[...h.sessions.values()].find(s=>s.id!==old.id);
@@ -108,3 +108,28 @@ test('paid roadmap intake saves drafts, submits once and notifies Mia with the a
 test('a Stripe-recovered roadmap session reconciles through its original checkout',async()=>{const h=harness(),l=await h.capture(false,'roadmap');await h.app.checkout({...l,authority:'authorized',agreed:true});const original=[...h.sessions.values()][0];const recovered={...original,id:'cs_recovered',recovered_from:original.id,status:'complete',payment_status:'paid',customer_email:'owner@example.test',payment_intent:'pi_recovered'};assert.equal(await h.app.settle(recovered),true);assert.equal((await h.db.getById('advantage_leads',l.id)).session,'cs_recovered');});
 
 test('roadmap email access rejects expired and wrong-purpose signed tokens',async()=>{const h=harness(),{l}=await roadmapPaid(h),jwt=require('jsonwebtoken');for(const payload of [{sub:l.id,kind:'funnel_resume'},{sub:l.id,kind:'opportunity_intake',exp:1}]){const token=jwt.sign(payload,'fixture_only_not_a_real_key');await assert.rejects(h.app.opportunityIntake({id:l.id,token,action:'opportunity_intake_get'}),e=>e.status===403);}});
+
+test('private intake rate limit supports normal step-to-step progress and still throttles duplicates',async()=>{const h=harness();await h.app.rate('intake-fixture',1);await assert.rejects(h.app.rate('intake-fixture',1),e=>e.status===429);await h.app.rate('checkout-fixture');await assert.rejects(h.app.rate('checkout-fixture'),e=>e.status===429);});
+
+
+test('roadmap checkout reminder consent is optional and can be withdrawn on retry',async()=>{
+ const h=harness(),l=await h.capture(false,'roadmap');await h.app.checkout({...l,authority:'authorized',agreed:true,reminder_consent:false});assert.equal(h.jobs.filter(j=>['hour1','day1','day3','day7'].includes(j.body.step)).length,0);
+ await h.app.checkout({...l,authority:'authorized',agreed:true,reminder_consent:true});assert.deepEqual(h.jobs.filter(j=>['hour1','day1','day3','day7'].includes(j.body.step)).map(j=>j.body.step),['hour1','day1','day3']);
+ await h.app.checkout({...l,authority:'authorized',agreed:true,reminder_consent:false});await h.db.update('advantage_leads',l.id,{checkout_at:new Date(Date.now()-3600000).toISOString()});await h.app.work(l.id,'hour1');assert.equal(h.emails.length,0);
+});
+test('roadmap reminders have signed saved-checkout links, truthful copy and duplicate protection',async()=>{
+ const h=harness(),l=await h.capture(true,'roadmap');await h.app.checkout({...l,authority:'authorized',agreed:true,reminder_consent:true});for(const [step,delay] of [['hour1',3600],['day1',86400],['day3',259200]]){await h.db.update('advantage_leads',l.id,{checkout_at:new Date(Date.now()-delay*1000).toISOString()});await h.app.work(l.id,step);await h.app.work(l.id,step);}assert.equal(h.emails.length,3);for(const {m} of h.emails){assert.match(m.html,/opportunity.html#resume=/);assert.match(m.html,/997/);assert.doesNotMatch(m.html,/3 business days|5 hours|free fit/i);assert.ok(m.headers['List-Unsubscribe']);const url=m.html.match(/href="([^"]*#resume=[^"]+)"/)[1];const token=decodeURIComponent(new URL(url).hash.slice('#resume='.length));assert.equal(h.app.sales.validTicket(token,l.id),true);}assert.match(h.emails[2].m.subject,/last/i);
+});
+test('roadmap reminders stop after verified payment including a delayed webhook',async()=>{
+ const h=harness(),l=await h.capture(true,'roadmap');await h.app.checkout({...l,authority:'authorized',agreed:true,reminder_consent:true});await h.db.update('advantage_leads',l.id,{checkout_at:new Date(Date.now()-86400000).toISOString()});const s=[...h.sessions.values()][0];Object.assign(s,{status:'complete',payment_status:'paid',customer_email:'owner@example.test',payment_intent:'pi_paid'});await h.app.work(l.id,'day1');assert.equal(h.emails.length,0);assert.equal((await h.db.getById('advantage_leads',l.id)).status,'paid');
+});
+test('paid intake reminders stop for submitted, paused, replied and suppressed buyers',async()=>{
+ for(const reason of ['submitted','paused','human','suppression']){const h=harness(),{l}=await roadmapPaid(h);await h.db.update('advantage_leads',l.id,{paid_at:new Date(Date.now()-86400000).toISOString(),...(reason==='submitted'?{opportunity_submitted_at:new Date().toISOString()}:reason==='paused'?{followups_paused:true}:reason==='human'?{human_active:true}:{})});if(reason==='suppression')await h.db.insert('suppression',{email:'owner@example.test'});await h.app.work(l.id,'onboarding');assert.equal(h.emails.length,0,reason);}
+});
+test('paid intake reminders are limited, link to the saved intake and can be unsubscribed without losing access',async()=>{
+ const h=harness(),{l}=await roadmapPaid(h);assert.deepEqual(h.jobs.filter(j=>j.body.step.startsWith('onboarding')).map(j=>j.body.step),['onboarding','onboarding3','onboarding7']);for(const [step,delay] of [['onboarding',86400],['onboarding3',259200],['onboarding7',604800]]){await h.db.update('advantage_leads',l.id,{paid_at:new Date(Date.now()-delay*1000).toISOString()});await h.app.work(l.id,step);}assert.equal(h.emails.length,3);assert.match(h.emails[2].m.subject,/last/i);for(const {m} of h.emails){assert.match(m.html,/opportunity-intake.html#request=/);assert.ok(m.headers['List-Unsubscribe']);}await h.app.unsubscribe(l.id,h.app.signature(l.id));assert.equal((await h.db.getById('advantage_leads',l.id)).status,'paid');assert.equal((await h.app.opportunityIntake({...l,action:'opportunity_intake_get'})).ok,true);
+});
+test('late outbox catchup does not send stale reminders in a burst',async()=>{const h=harness(),{l}=await roadmapPaid(h);await h.db.update('advantage_leads',l.id,{paid_at:new Date(Date.now()-10*86400000).toISOString()});for(const step of ['onboarding','onboarding3','onboarding7'])await h.app.work(l.id,step);assert.equal(h.emails.length,0);});
+test('refunds cannot be resurrected by replayed purchase or queued follow-up',async()=>{const h=harness(),{l,s}=await roadmapPaid(h);await h.app.event({type:'charge.refunded',data:{object:{payment_intent:'pi_roadmap'}}});assert.equal(await h.app.settle(s),false);await h.app.work(l.id,'paid');assert.equal((await h.db.getById('advantage_leads',l.id)).status,'refunded');assert.equal(h.emails.length,0);});
+test('a failed intake reminder remains retryable and is recorded only once after provider acceptance',async()=>{const h=harness(),{l}=await roadmapPaid(h);await h.db.update('advantage_leads',l.id,{paid_at:new Date(Date.now()-86400000).toISOString()});h.failMail(true);await assert.rejects(h.app.work(l.id,'onboarding'),/delivery failed/);h.failMail(false);h.clearLocks();await h.app.work(l.id,'onboarding');await h.app.work(l.id,'onboarding');assert.equal(h.emails.length,1);});
+test('roadmap live-readiness probe checks 997 USD and closes its uncharged session without messaging anyone',async()=>{const h=harness();await h.app.verifyRoadmapCheckout();const s=[...h.sessions.values()][0];assert.equal(s.amount_total,99700);assert.equal(s.mode,'payment');assert.equal(s.status,'expired');assert.equal(s.metadata.funnel,'ai_advantage_setup');assert.equal(h.emails.length+h.ownerEmails.length,0);assert.ok((await h.db.getById('advantage_config','health')).roadmap_checkout_verified_at);await h.app.verifyRoadmapCheckout();assert.equal(h.sessions.size,1);});
