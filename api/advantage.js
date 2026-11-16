@@ -32,13 +32,14 @@ module.exports=async function(req,res){
       return res.json(await app.health());
     }
     if(req.method!=='POST')return res.status(405).end();
-    let b=req.body||{};if(typeof b==='string')b=JSON.parse(b);
+    let b=req.body||{};if(Buffer.byteLength(typeof b==='string'?b:JSON.stringify(b))>16000)return res.status(413).json({error:'Please keep your answers under 16KB.'});if(typeof b==='string')b=JSON.parse(b);
     if(b.action==='pause'){
       if(require('./_auth').verifyToken(req)?.admin!==true)return res.status(401).json({error:'Unauthorized'});
       await app.db.update('advantage_leads',String(b.id),{followups_paused:true});return res.json({ok:true});
     }
     if(b.website)return res.json({ok:true});
     if(b.action!=='qualify')await app.rate((req.headers['x-forwarded-for']?.split(',')[0]||req.socket?.remoteAddress||'unknown')+':'+String(b.action));
+    if(['opportunity_intake_get','opportunity_intake_save'].includes(b.action))return res.json(await app.opportunityIntake(b));
     if(b.action==='capture')return res.status(201).json(await app.capture(b));
     if(b.action==='checkout')return res.json(await app.checkout(b));
     if(b.action==='callback')return res.json(await app.callback(b));
