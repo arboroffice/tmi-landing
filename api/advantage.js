@@ -21,12 +21,12 @@ module.exports=async function(req,res){
       if(q.action==='status'){
         const s=await app.stripe.checkout.sessions.retrieve(String(q.session_id||''));
         if(s.metadata?.funnel!=='ai_advantage')return res.status(404).json({error:'Purchase not found'});
-        const paid=await app.settle(s);return res.json({paid,program:OFFERS[s.metadata.offer]?.name||null});
+        const paid=await app.settle(s);const l=paid&&s.metadata.offer==='executive'?await app.db.getById('advantage_leads',s.metadata.lead_id):null;return res.json({paid,program:OFFERS[s.metadata.offer]?.name||null,...(l?{setup_url:app.cosLink(l)}:{})});
       }
       if(q.action==='onboarding'){
         const id=String(q.id||'');if(q.token!==app.signature(id))return res.status(403).json({error:'Invalid link'});
         const l=await app.db.getById('advantage_leads',id);if(l?.status!=='paid')return res.status(403).json({error:'Purchase not confirmed'});
-        await app.db.update('advantage_leads',id,{onboarding_at:new Date().toISOString()});await app.sales.notifyOwner(l,'paid');return res.json({ok:true,message:'TMI will contact you about your setup.'});
+        return res.json({ok:true,message:'Complete your private setup intake. TMI will arrange implementation directly.',...(l.offer==='executive'?{setup_url:app.cosLink(l)}:{})});
       }
       // Read-only readiness check: no payment sessions or test leads are created.
       return res.json(await app.health());
