@@ -62,6 +62,7 @@ function factory({db, stripe, queue, mail, env = process.env, calendar = {lookup
     await db.update('advantage_config','health',{initialized_at:now()});
   }
   async function capture(b) {
+    if(b.offer==='roadmap')throw Object.assign(new Error('New roadmap purchases are paused while the self-guided edition is completed. Existing purchases keep their original delivery.'),{status:503});
     const email=String(b.email||'').trim().toLowerCase(),name=String(b.name||'').trim().slice(0,120),company=String(b.company||'').trim().slice(0,180);
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>200||!name||!company||!['executive','roadmap'].includes(b.offer))throw Object.assign(new Error('Please enter your name, company and a valid email.'),{status:400});
     const id=crypto.randomUUID(),token=crypto.randomBytes(32).toString('hex');
@@ -81,6 +82,7 @@ function factory({db, stripe, queue, mail, env = process.env, calendar = {lookup
     const l=await authorized(b.id,b.token);if(b.authority!=='authorized'||b.agreed!==true)throw Object.assign(new Error('An authorized company representative must approve this purchase.'),{status:400});
     const destination=l.offer==='roadmap'?INTAKE:SITE+'/';
     if(l.status==='paid')return {url:destination+'?success=1&session_id='+encodeURIComponent(l.session)};
+    if(l.offer==='roadmap')throw Object.assign(new Error('New roadmap checkout is paused. Existing paid customers retain their booking and delivery access.'),{status:503});
     if(!['executive','roadmap'].includes(l.offer))throw Object.assign(new Error('This package is no longer available. Contact TMI for help.'),{status:400});
     if(l.offer==='executive'&&b.plan_agreed!==true)throw Object.assign(new Error('Please confirm your written plan and guarantee terms before checkout.'),{status:400});
     if(l.offer==='roadmap'){
@@ -169,6 +171,7 @@ function factory({db, stripe, queue, mail, env = process.env, calendar = {lookup
     if(l.session){const s=await stripe.checkout.sessions.retrieve(l.session);if(s.payment_status==='paid'&&l.status!=='paid'){await settle(s);l.status='paid';}}
     const intakeReminder=['onboarding','onboarding3','onboarding7'].includes(step);
     if(l.offer==='roadmap'){
+      if(l.status!=='paid')return; // No recovery sales for the retired call-based edition.
       if(intakeReminder&&(l.status!=='paid'||l.followups_paused||l.human_active||l.human_requested_at))return;
       if(intakeReminder){const state=await syncOpportunityBooking(l,{refresh:true});l.opportunity_booking=state.booking;l.calendar_sync_available=state.available;if(['accepted','confirmed','pending'].includes(state.booking?.status))return;}
       const delays={hour1:3600,day1:86400,day3:259200,onboarding:86400,onboarding3:259200,onboarding7:604800};
