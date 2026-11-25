@@ -11,7 +11,7 @@ async function handler(req,res){
     if(req.headers['stripe-signature']){
       const config=await app.db.getById('advantage_config','stripe');if(!config?.secret)return res.status(400).end();
       let event;try{event=app.stripe.webhooks.constructEvent(raw,req.headers['stripe-signature'],app.unseal(config.secret));}catch{return res.status(400).send('Invalid signature');}
-      await app.event(event);return res.json({received:true});
+      await app.event(event);await require('./_launch').production().event(event);return res.json({received:true});
     }
     if(!req.headers['upstash-signature'])return res.status(401).end();
     const {Receiver}=require('@upstash/qstash');const receiver=new Receiver({currentSigningKey:process.env.QSTASH_CURRENT_SIGNING_KEY,nextSigningKey:process.env.QSTASH_NEXT_SIGNING_KEY});
@@ -23,3 +23,4 @@ async function handler(req,res){
 }
 module.exports=handler;
 module.exports.config={api:{bodyParser:false}};
+

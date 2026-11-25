@@ -14,7 +14,7 @@ const OFFERS = Object.freeze({
 const STOP = new Set(['paid','booked','won','lost','unsubscribed','refunded','replied','disputed']);
 const hash = v => crypto.createHash('sha256').update(String(v)).digest('hex');
 const esc = v => String(v || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function factory({db, stripe, queue, mail, env = process.env, calendar = {lookup:async()=>({available:false,booking:null}),health:async()=>({booking_read:false})}}) {
+function factory({db, stripe, queue, mail, env = process.env, launchDrain=async()=>{}, calendar = {lookup:async()=>({available:false,booking:null}),health:async()=>({booking_read:false})}}) {
   const fs = () => db.db();
   const now = () => new Date().toISOString();
   const sales=require('./_funnel-sales')({db,mail,env,claim,schedule,isStopped:stopped});
@@ -158,6 +158,7 @@ function factory({db, stripe, queue, mail, env = process.env, calendar = {lookup
   async function work(id,step) {
     if(id==='__probe__'){await db.update('advantage_config','health',{queue_verified_at:now()});return;}
     if(id==='__outbox__'){
+      try{await launchDrain();}catch(e){console.error('Launch outbox pending:',e.message);}
       const jobs=await db.list('advantage_jobs',{where:[['done','==',false]],order:'due',ascending:true});
       for(const j of jobs.filter(j=>j.due<=Date.now()).slice(0,20)){await work(j.lead_id,j.step);await db.update('advantage_jobs',j.id,{done:true,completed_at:now()});}
       await sales.sweep();await db.update('advantage_config','health',{queue_verified_at:now()});return;
@@ -214,6 +215,6 @@ function factory({db, stripe, queue, mail, env = process.env, calendar = {lookup
   return {schedule,cosLink,syncOpportunityBooking,sales,verifyRoadmapCheckout,opportunityIntake,opportunityLink,authorized,seal,OFFERS,rate,capture,checkout,callback,qualify,settle,work,event,ensureWebhook,initialize,health,unseal,signature,unsubscribe,db,stripe};
 }
 let instance;
-function production(){if(instance)return instance;const db=require('./_tmi-db'),stripe=require('stripe')(process.env.STRIPE_SECRET_KEY),{Client}=require('@upstash/qstash'),{Resend}=require('resend');instance=factory({db,stripe,queue:new Client({token:process.env.QSTASH_TOKEN}),mail:new Resend(process.env.RESEND_API_KEY),calendar:require('./_opportunity-booking').create()});return instance;}
+function production(){if(instance)return instance;const db=require('./_tmi-db'),stripe=require('stripe')(process.env.STRIPE_SECRET_KEY),{Client}=require('@upstash/qstash'),{Resend}=require('resend');instance=factory({db,stripe,queue:new Client({token:process.env.QSTASH_TOKEN}),mail:new Resend(process.env.RESEND_API_KEY),launchDrain:()=>require('./_launch').production().drain(),calendar:require('./_opportunity-booking').create()});return instance;}
 module.exports={factory,production,OFFERS,SITE,APP,CALL};
 
