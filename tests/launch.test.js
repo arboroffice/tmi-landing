@@ -51,3 +51,60 @@ test('work pack exports only explicitly selected passed work, never all uploads 
 test('expired paid openings are hidden until a fresh staff check',async()=>{const f=fixture(),{token}=await f.enroll();await f.db.insert('launch_opportunities',{id:'stale',verified:true,closed:false,nextCheck:f.clock()-1,email:'private@example.test'});assert.equal((await f.call('view',{token})).opportunities.length,0);});
 test('rubric feedback blocks critical failures and records evidenced criteria plus review time',async()=>{const f=fixture(),{p,token}=await f.enroll();await f.call('submit_review',{token,cycle:1,title:'Practice',work:'Fictional source and result'});const r=(await f.db.getById('launch_people',p.id)).reviews[0];await assert.rejects(()=>f.call('review_feedback',{id:p.id,reviewId:r.id,rubric:[2,2,2,2,2,2],criticalFailure:true,passed:true,feedback:'Unsafe output',nextStep:'Fix'},f.admin),/no critical/);await f.call('review_feedback',{id:p.id,reviewId:r.id,rubricType:'AI builds',rubric:[2,2,2,2,1,1],passed:true,feedback:'Source and errors checked',nextStep:'Add a screenshot',minutesSpent:18},f.admin);const saved=(await f.db.getById('launch_people',p.id)).reviews[0];assert.equal(saved.feedback.rubric.total,10);assert.equal(saved.feedback.minutesSpent,18);});
 test('weekly activity separates settled tuition and reported outcomes from actual work conversations',async()=>{const f=fixture(),{token}=await f.enroll();await f.call('outcome_record',{token,kind:'contract_signed',at:M.iso(f.clock()),evidence:'Fictional contract reference'});const report=await f.call('weekly_report',{},f.admin);assert.equal(report.enrollments,1);assert.equal(report.settledTuitionCents,179900);assert.equal(report.heldCalls,1);assert.equal(report.heldVerifiedConversations,0);assert.equal(report.selfReportedOutcomes[0].verified,false);await assert.rejects(()=>f.call('weekly_report',{token}),e=>e.status===403);});
+
+test('a written curriculum import is private, validated, idempotent and preserves lesson progress', async () => {
+ const f=fixture(), {token,p}=await f.enroll();
+ const lessons=Array.from({length:12}, (_, i)=>({
+  id:'launch-week-'+(i+1), week:i+1, version:'written-2', title:'Written lesson '+(i+1),
+  lesson:'## The method\n\nCheck the supplied evidence.', task:'Try the written exercise.',
+  example:'An example with fictional data.', check:'What should you check?',
+  options:['The source','A guess'], correct:0, finish:'Save the reviewed result.'
+ }));
+ await f.db.insert('launch_content',{...lessons[0],version:'written-1',published:true,required:true});
+ await f.db.insert('launch_content',{id:'optional',kind:'template',published:true,title:'Worksheet'});
+ await f.call('lesson_check',{token,lessonId:lessons[0].id,answer:0,practice:'My original work'});
+ const before=await f.db.getById('launch_people',p.id);
+ await assert.rejects(()=>f.call('curriculum_publish',{lessons}), e=>e.status===401);
+ await assert.rejects(()=>f.call('curriculum_publish',{token,lessons}), /Unknown member action/);
+ await assert.rejects(()=>f.call('curriculum_publish',{lessons:lessons.slice(1)},f.admin), /twelve/);
+ assert.equal(await f.db.getById('launch_config','written-curriculum'),null);
+ await f.call('curriculum_publish',{lessons},f.admin);
+ await f.call('curriculum_publish',{lessons},f.admin);
+ assert.equal((await f.db.list('launch_audit')).filter(row=>row.action==='curriculum_publish').length,1);
+ const view=await f.call('view',{token});
+ const lesson=view.lessons.find(row=>row.id===lessons[0].id);
+ assert.equal(lesson.version,'written-2');
+ assert.equal(lesson.correct,undefined);
+ assert.equal(view.lessons.filter(row=>row.id.startsWith('launch-week-')).length,12);
+ assert.ok(view.resources.some(row=>row.id==='optional'));
+ assert.deepEqual(view.person.progress[lesson.id],before.progress[lesson.id]);
+ await assert.rejects(()=>f.call('lesson_check',{token,lessonId:lesson.id,lessonVersion:'written-1',answer:0}), e=>e.status===409);
+ await assert.rejects(()=>f.call('lesson_check',{token,lessonId:lesson.id,answer:''}), /knowledge check/);
+ await assert.rejects(()=>f.call('lesson_check',{token,lessonId:'optional',answer:0}), e=>e.status===404);
+ await f.call('lesson_check',{token,lessonId:lesson.id,lessonVersion:lesson.version,answer:'0'});
+ assert.deepEqual((await f.db.getById('launch_people',p.id)).progress[lesson.id],before.progress[lesson.id]);
+
+ const focusTracks=['sales','building'].flatMap(track=>lessons.map(row=>({
+  ...row,id:'launch-'+track+'-'+row.week,track
+ })));
+ const fullEdition=[...lessons,...focusTracks];
+ await assert.rejects(()=>f.call('curriculum_publish',{lessons:fullEdition.slice(1)},f.admin), /complete focus tracks/);
+ await f.call('curriculum_publish',{lessons:fullEdition},f.admin);
+ const published=(await f.call('view',{token})).lessons.filter(row=>row.track);
+ assert.equal(published.length,36);
+ assert.equal(published.filter(row=>row.required).length,12);
+ assert.ok(published.every(row=>row.correct===undefined));
+ await f.call('lesson_check',{token,lessonId:'launch-building-1',answer:0});
+ await assert.rejects(()=>f.call('curriculum_publish',{lessons},f.admin), /all 36/);
+
+ await f.call('submit_review',{token,cycle:1,title:'Written practice',work:'Fictional work sample'});
+ const review=(await f.db.getById('launch_people',p.id)).reviews[0];
+ const feedback={id:p.id,reviewId:review.id,scorecard:'building',passed:true,feedback:'Feedback',nextStep:'Next step'};
+ await assert.rejects(()=>f.call('review_feedback',{...feedback,scorecard:undefined,score:5},f.admin), /scorecard/);
+ await assert.rejects(()=>f.call('review_feedback',{...feedback,rubric:[2,2,1,1,1]},f.admin), /80\/100/);
+ await assert.rejects(()=>f.call('review_feedback',{...feedback,rubric:[2,2,2,2,2],criticalFailure:true},f.admin), /key fixes/);
+ await f.call('review_feedback',{...feedback,rubric:[2,2,2,1,1]},f.admin);
+ const passed=(await f.db.getById('launch_people',p.id)).reviews[0];
+ assert.equal(passed.status,'passed');
+ assert.equal(passed.feedback.rubric.total,80);
+});
