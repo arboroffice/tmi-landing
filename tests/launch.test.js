@@ -4,10 +4,10 @@ function fixture(){let time=Date.UTC(2027,0,4,12),records=new Map(),locks=new Ma
  const app={db,stripe,ensureWebhook:async()=>{},seal:s=>'sealed:'+s,unseal:s=>s.slice(7)};const service=create({app,clock:()=>time,env:{JWT_SECRET:'test-only-not-a-real-secret'},adminCheck:req=>req?.testAdmin===true,mail:{emails:{send:async(m,o)=>{sent.push({...m,key:o.idempotencyKey});return{data:{id:'mail_'+sent.length}};}}},sender:async()=>'TMI <test@example.test>'});const admin={testAdmin:true},call=(action,b={},req={})=>service.handle(req,{action,...b});
  const answers={goal:'employment',focus:'building',tried:'A few fictional tasks',stuck:'Need a clear plan',time:'6–8 hours',workNeeds:'Daytime work, base pay',computer:'Yes',start:'Next available class',budget:'Need final details',location:'Fixture town',timezone:'UTC'};
  async function application(email='one@example.test'){await call('apply',{name:'Fixture Member',email,answers,consent:true,feeAcknowledged:true});return(await db.list('launch_people')).find(p=>p.email===email);}
- async function setup(capacity=3){await call('staff_provision',{email:'coach@example.test',name:'Coach',role:'coach'},admin);for(let i=1;i<=12;i++)await db.insert('launch_content',{id:'lesson-'+i,title:'Fixture lesson',published:true,required:true,correct:0,options:['Correct','Wrong']});const text='Final fixture policy with specific work steps, make-up options, pauses and clear purchase terms. '.repeat(2);const c={...M.draft,deliveryModel:'legacy_course',guidedWeeks:12,supportWeeks:12,extensionWeeks:8,accessMonths:12,planningCredits:2,firstWorkCredits:2,privateMinutes:25,reviewCycles:4,revisionAttempts:2,reviewBusinessDays:5,version:'fixture-v1',status:'approved',enrollmentOpen:true,contentVerified:true,weeklyRequirements:text,makeupRules:text,pausePolicy:text,refundPolicy:text,promiseTerms:text,termsText:text,cohort:{id:'fixture-class',start:M.iso(time+7*M.DAY),timezone:'UTC',schedule:'Fixture schedule, weekly sessions',capacity,coach:'coach@example.test',reviewOwner:'coach@example.test',supportOwner:'coach@example.test',tools:'No mandatory paid tool in this fixture',toolsConfirmed:true}};await call('program_save',{program:c},admin);return c;}
+ async function setup(capacity=3,deliveryModel='legacy_course'){await call('staff_provision',{email:'coach@example.test',name:'Coach',role:'coach'},admin);for(let i=1;i<=12;i++)await db.insert('launch_content',{id:'lesson-'+i,title:'Fixture lesson',published:true,required:true,correct:0,options:['Correct','Wrong']});const text='Final fixture policy with specific work steps, make-up options, pauses and clear purchase terms. '.repeat(2);const c={...M.draft,deliveryModel:'legacy_course',guidedWeeks:12,supportWeeks:12,extensionWeeks:8,accessMonths:12,planningCredits:2,firstWorkCredits:2,privateMinutes:25,reviewCycles:4,revisionAttempts:2,reviewBusinessDays:5,version:'fixture-v1',deliveryModel,status:'approved',enrollmentOpen:true,contentVerified:true,weeklyRequirements:text,makeupRules:text,pausePolicy:text,refundPolicy:text,promiseTerms:text,termsText:text,cohort:{id:'fixture-class',start:M.iso(time+7*M.DAY),timezone:'UTC',schedule:'Fixture schedule, weekly sessions',capacity,coach:'coach@example.test',reviewOwner:'coach@example.test',supportOwner:'coach@example.test',tools:'No mandatory paid tool in this fixture',toolsConfirmed:true}};await call('program_save',{program:c},admin);return c;}
  async function accept(p){await call('application_review',{id:p.id,status:'booked',callAt:M.iso(time-3600000),nextAction:'Write offer',owner:'coach@example.test'},admin);await call('application_review',{id:p.id,status:'accepted',callHeld:true,nextAction:'Review the written offer',owner:'coach@example.test'},admin);return db.getById('launch_people',p.id);}
  async function login(email){await call('login_request',{email});await service.flush();const mail=sent.filter(m=>m.to===email&&m.subject.includes('sign-in')).at(-1),code=mail.text.match(/#login=([a-f0-9]+)/)[1];return(await call('login_exchange',{code})).token;}
- async function enroll(plan='three'){const c=await setup(),p=await accept(await application()),token=await login(p.email);const checkout=await call('checkout',{token,version:c.version,acceptTerms:true,authorizeInstallments:true,plan});const s=[...sessions.values()].find(s=>s.url===checkout.url);s.status='complete';s.payment_status='paid';await service.settle(clone(s));return{p:await db.getById('launch_people',p.id),token,s,c};}
+ async function enroll(plan='three',deliveryModel='legacy_course'){const c=await setup(3,deliveryModel),p=await accept(await application()),token=await login(p.email);const checkout=await call('checkout',{token,version:c.version,acceptTerms:true,authorizeInstallments:true,plan});const s=[...sessions.values()].find(s=>s.url===checkout.url);s.status='complete';s.payment_status='paid';await service.settle(clone(s));return{p:await db.getById('launch_people',p.id),token,s,c};}
  return{db,stripe,service,call,admin,sent,sessions,charges,refunds,application,setup,accept,login,enroll,answers,clock:()=>time,setTime:n=>time=n,advance:n=>time+=n};}
  test('draft configuration is closed and readiness has real launch blockers',async()=>{const f=fixture(),c=await f.call('config');assert.equal(c.enrollmentOpen,false);assert.equal(c.priceFull,499700);assert.ok(M.readiness(M.draft).length>=8);await assert.rejects(()=>f.call('staff_list',{role:'admin'}),e=>e.status===401);});
  test('applications preserve independent goal/focus, consent and no duplicate application',async()=>{const f=fixture();await assert.rejects(()=>f.call('apply',{email:'a@b.test',name:'A',answers:f.answers,feeAcknowledged:true}),/agree/);const p=await f.application();await f.application();assert.equal((await f.db.list('launch_people')).length,1);assert.equal(p.application.goal,'employment');assert.equal(p.application.focus,'building');await f.service.flush();assert.equal(f.sent.length,2);assert.equal(f.sent[0].to,'mia@tmitechai.com');});
@@ -111,4 +111,33 @@ test('a written curriculum import is private, validated, idempotent and preserve
  const passed=(await f.db.getById('launch_people',p.id)).reviews[0];
  assert.equal(passed.status,'passed');
  assert.equal(passed.feedback.rubric.total,80);
+});
+
+
+test('Inner Circle includes optional resources and starts work support after the coaching wrap-up',async()=>{
+ const f=fixture(),config=await f.call('config');
+ assert.equal(config.name,'TMI Launch Inner Circle');
+ assert.equal(config.guidedWeeks,12);
+ assert.equal(config.enrollmentOpen,false);
+ await assert.rejects(()=>f.setup(3,'inner_circle'),/36-lesson library/);
+ const lessons=['week','sales','building'].flatMap(track=>Array.from({length:12},(_,index)=>({
+  id:'launch-'+track+'-'+(index+1),week:index+1,version:'fixture',title:'Resource',
+  lesson:'Method',task:'Task',example:'Example',check:'Check',options:['First','Second'],correct:0,finish:'Finish'
+ })));
+ await f.call('curriculum_publish',{lessons},f.admin);
+ const {p,token}=await f.enroll('full','inner_circle');
+ await f.call('plan_save',{id:p.id,goal:'client_projects',focus:'both',weeklyHours:7,coach:'coach@example.test',milestone:'Deliver a tested client pilot'},f.admin);
+ const view=await f.call('view',{token});
+ assert.equal(view.lessons.filter(x=>x.track).length,36);
+ assert.ok(view.lessons.every(x=>x.required===false&&x.correct===undefined));
+ const wrapUp={id:p.id,evidence:'Member scoped, tested and demonstrated the pilot. Next step is a buyer review.'};
+ await assert.rejects(()=>f.call('graduate',wrapUp,f.admin),/end of the 12-week/);
+ assert.equal(p.enrollment.innerCircleEnd,p.enrollment.firstClass+84*M.DAY);
+ f.setTime(p.enrollment.innerCircleEnd);
+ await f.call('graduate',wrapUp,f.admin);
+ const member=(await f.call('view',{token:await f.login(p.email)})).person;
+ assert.equal(member.status,'graduated');
+ assert.equal(member.enrollment.supportEnd,f.clock()+84*M.DAY);
+ assert.deepEqual(member.progress||{},{});
+ assert.deepEqual(member.reviews,[]);
 });
