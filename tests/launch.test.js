@@ -1,7 +1,10 @@
 const{test}=require('node:test'),assert=require('node:assert/strict'),crypto=require('crypto'),{create}=require('../api/_launch'),M=require('../api/_launch-model');
 function fixture(){let time=Date.UTC(2027,0,4,12),records=new Map(),locks=new Map(),sent=[],sessions=new Map(),sessionKeys=new Map(),charges=[],refunds=[];const clone=x=>x===undefined?null:JSON.parse(JSON.stringify(x));const db={getById:async(n,id)=>clone(records.get(n+':'+id)),insert:async(n,r)=>{records.set(n+':'+r.id,clone(r));return r;},update:async(n,id,p)=>{records.set(n+':'+id,{...records.get(n+':'+id),...clone(p)});},remove:async(n,id)=>{if(n==='advantage_locks')locks.delete(id);else records.delete(n+':'+id);},claim:async(id,sec)=>{if((locks.get(id)||0)>time)return false;locks.set(id,time+sec*1000);return true;},list:async(n,o={})=>[...records.entries()].filter(([k])=>k.startsWith(n+':')).map(([,v])=>clone(v)).filter(v=>(o.where||[]).every(([k,op,value])=>op==='=='?v[k]===value:true)).slice(0,o.limit||500),findOne:async(n,k,v)=>(await db.list(n)).find(r=>r[k]===v)||null};
- const priceMap=new Map();const stripe={products:{retrieve:async()=>({id:'tmi_launch'}),create:async b=>({id:b.id})},prices:{create:async b=>{const id='price_'+b.unit_amount;priceMap.set(id,b.unit_amount);return{id};}},checkout:{sessions:{create:async(body,opts)=>{if(sessionKeys.has(opts.idempotencyKey))return clone(sessions.get(sessionKeys.get(opts.idempotencyKey)));const id='cs_'+sessions.size,s={id,url:'https://checkout.stripe.com/'+id,status:'open',payment_status:'unpaid',amount_total:body.line_items[0].price_data?.unit_amount||priceMap.get(body.line_items[0].price),currency:'usd',metadata:body.metadata,customer:'cus_fixture',payment_intent:'pi_'+id,body};sessions.set(id,s);sessionKeys.set(opts.idempotencyKey,id);return clone(s);},retrieve:async id=>clone(sessions.get(id)),expire:async id=>{sessions.get(id).status='expired';}}},paymentIntents:{retrieve:async id=>({id,payment_method:'pm_fixture'}),create:async(b,o)=>{let old=charges.find(c=>c.key===o.idempotencyKey);if(old)return old.intent;const intent={id:'pi_next_'+charges.length,status:'succeeded'};charges.push({body:b,key:o.idempotencyKey,intent});return intent;}},refunds:{create:async(b,o)=>{let old=refunds.find(x=>x.key===o.idempotencyKey);if(old)return old;const r={id:'re_'+refunds.length,status:'succeeded',key:o.idempotencyKey};refunds.push(r);return r;}}};
- const app={db,stripe,ensureWebhook:async()=>{},seal:s=>'sealed:'+s,unseal:s=>s.slice(7)};const service=create({app,clock:()=>time,env:{JWT_SECRET:'test-only-not-a-real-secret'},adminCheck:req=>req?.testAdmin===true,mail:{emails:{send:async(m,o)=>{sent.push({...m,key:o.idempotencyKey});return{data:{id:'mail_'+sent.length}};}}},sender:async()=>'TMI <test@example.test>'});const admin={testAdmin:true},call=(action,b={},req={})=>service.handle(req,{action,...b});
+ const priceMap=new Map();const stripe={balance:{retrieve:async()=>({livemode:true})},webhookEndpoints:{retrieve:async()=>({
+ status:'enabled',livemode:true,url:'https://admin.tmitechai.com/api/advantage-events',
+ enabled_events:['checkout.session.completed','checkout.session.async_payment_succeeded','charge.refunded','charge.dispute.created']
+ })},products:{retrieve:async()=>({id:'tmi_launch'}),create:async b=>({id:b.id})},prices:{retrieve:async id=>({id,active:true,livemode:true,type:'one_time',product:'tmi_launch',currency:'usd',unit_amount:priceMap.get(id)}),create:async b=>{const id='price_'+b.unit_amount;priceMap.set(id,b.unit_amount);return{id};}},checkout:{sessions:{create:async(body,opts)=>{if(sessionKeys.has(opts.idempotencyKey))return clone(sessions.get(sessionKeys.get(opts.idempotencyKey)));const id='cs_'+sessions.size,s={id,url:'https://checkout.stripe.com/'+id,status:'open',payment_status:'unpaid',livemode:true,mode:body.mode,amount_total:body.line_items[0].price_data?.unit_amount||priceMap.get(body.line_items[0].price),currency:'usd',metadata:body.metadata,customer:'cus_fixture',payment_intent:'pi_'+id,body};sessions.set(id,s);sessionKeys.set(opts.idempotencyKey,id);return clone(s);},retrieve:async id=>clone(sessions.get(id)),expire:async id=>{sessions.get(id).status='expired';}}},paymentIntents:{retrieve:async id=>({id,payment_method:'pm_fixture'}),create:async(b,o)=>{let old=charges.find(c=>c.key===o.idempotencyKey);if(old)return old.intent;const intent={id:'pi_next_'+charges.length,status:'succeeded'};charges.push({body:b,key:o.idempotencyKey,intent});return intent;}},refunds:{create:async(b,o)=>{let old=refunds.find(x=>x.key===o.idempotencyKey);if(old)return old;const r={id:'re_'+refunds.length,status:'succeeded',key:o.idempotencyKey};refunds.push(r);return r;}}};
+ const app={db,stripe,ensureWebhook:async()=>({endpoint:'we_fixture'}),seal:s=>'sealed:'+s,unseal:s=>s.slice(7)};const service=create({app,clock:()=>time,env:{JWT_SECRET:'test-only-not-a-real-secret'},adminCheck:req=>req?.testAdmin===true,mail:{emails:{send:async(m,o)=>{sent.push({...m,key:o.idempotencyKey});return{data:{id:'mail_'+sent.length}};}}},sender:async()=>'TMI <test@example.test>'});const admin={testAdmin:true},call=(action,b={},req={})=>service.handle(req,{action,...b});
  const answers={goal:'employment',focus:'building',tried:'A few fictional tasks',stuck:'Need a clear plan',time:'6–8 hours',workNeeds:'Daytime work, base pay',computer:'Yes',start:'Next available class',budget:'Need final details',location:'Fixture town',timezone:'UTC'};
  async function application(email='one@example.test'){await call('apply',{name:'Fixture Member',email,answers,consent:true,feeAcknowledged:true});return(await db.list('launch_people')).find(p=>p.email===email);}
  async function setup(capacity=3,deliveryModel='legacy_course'){await call('staff_provision',{email:'coach@example.test',name:'Coach',role:'coach'},admin);for(let i=1;i<=12;i++)await db.insert('launch_content',{id:'lesson-'+i,title:'Fixture lesson',published:true,required:true,correct:0,options:['Correct','Wrong']});const text='Final fixture policy with specific work steps, make-up options, pauses and clear purchase terms. '.repeat(2);const c={...M.draft,deliveryModel:'legacy_course',guidedWeeks:12,supportWeeks:12,extensionWeeks:8,accessMonths:12,planningCredits:2,firstWorkCredits:2,privateMinutes:25,reviewCycles:4,revisionAttempts:2,reviewBusinessDays:5,version:'fixture-v1',deliveryModel,status:'approved',enrollmentOpen:true,contentVerified:true,weeklyRequirements:text,makeupRules:text,pausePolicy:text,refundPolicy:text,promiseTerms:text,termsText:text,cohort:{id:'fixture-class',start:M.iso(time+7*M.DAY),timezone:'UTC',schedule:'Fixture schedule, weekly sessions',capacity,coach:'coach@example.test',reviewOwner:'coach@example.test',supportOwner:'coach@example.test',tools:'No mandatory paid tool in this fixture',toolsConfirmed:true}};await call('program_save',{program:c},admin);return c;}
@@ -140,4 +143,40 @@ test('Inner Circle includes optional resources and starts work support after the
  assert.equal(member.enrollment.supportEnd,f.clock()+84*M.DAY);
  assert.deepEqual(member.progress||{},{});
  assert.deepEqual(member.reviews,[]);
+});
+
+
+test('Stripe setup verifies both amounts and expires the probe sessions without unlocking paid enrollment',async()=>{
+ const f=fixture();
+ await assert.rejects(()=>f.call('payment_setup'),e=>e.status===401);
+ await f.service.drain();
+ const check=await f.call('payment_setup',{},f.admin);
+ assert.equal(check.live,true);
+ assert.equal(check.queueReady,true);
+ assert.equal((await f.call('config')).enrollmentOpen,false);
+ const sessions=[...f.sessions.values()];
+ assert.deepEqual(sessions.map(s=>s.amount_total),[499700,179900]);
+ assert.equal(sessions[1].body.payment_intent_data.setup_future_usage,'off_session');
+ assert.ok(sessions.every(s=>s.metadata.funnel==='tmi_launch_setup'&&s.status==='expired'));
+ assert.equal(f.charges.length,0);
+ assert.deepEqual(await f.db.list('launch_people'),[]);
+ f.stripe.webhookEndpoints.retrieve=async()=>({status:'disabled'});
+ await assert.rejects(()=>f.call('payment_setup',{},f.admin),/Verify the enabled Stripe webhook/);
+});
+
+test('checkout webhook retry repairs a failed installment schedule write without rescheduling existing payments',async()=>{
+ const f=fixture(),original=f.db.insert;
+ let rejectJob=true;
+ f.db.insert=async(namespace,record)=>{
+  if(rejectJob&&namespace==='launch_jobs'&&record.number===3){rejectJob=false;throw Error('Schedule write failed');}
+  return original(namespace,record);
+ };
+ await assert.rejects(()=>f.enroll(),/Schedule write failed/);
+ const session=[...f.sessions.values()][0];
+ const [second]=await f.db.list('launch_jobs');
+ await f.service.settle(session);
+ const jobs=await f.db.list('launch_jobs');
+ assert.deepEqual(jobs.map(j=>j.number),[2,3]);
+ assert.deepEqual(jobs[0],second);
+ assert.equal((await f.db.list('launch_people'))[0].payments.length,1);
 });
